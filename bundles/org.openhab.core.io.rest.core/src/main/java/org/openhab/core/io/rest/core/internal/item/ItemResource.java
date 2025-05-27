@@ -87,8 +87,10 @@ import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.semantics.ItemSemanticsProblem;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticsPredicates;
+import org.openhab.core.semantics.SemanticsService;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
@@ -185,6 +187,7 @@ public class ItemResource implements RESTResource {
     private final MetadataRegistry metadataRegistry;
     private final MetadataSelectorMatcher metadataSelectorMatcher;
     private final SemanticTagRegistry semanticTagRegistry;
+    private final SemanticsService semanticsService;
     private final TimeZoneProvider timeZoneProvider;
 
     private final RegistryChangedRunnableListener<Item> resetLastModifiedItemChangeListener = new RegistryChangedRunnableListener<>(
@@ -205,7 +208,7 @@ public class ItemResource implements RESTResource {
             final @Reference MetadataRegistry metadataRegistry,
             final @Reference MetadataSelectorMatcher metadataSelectorMatcher,
             final @Reference SemanticTagRegistry semanticTagRegistry,
-            final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference SemanticsService semanticsService, final @Reference TimeZoneProvider timeZoneProvider) {
         this.dtoMapper = dtoMapper;
         this.eventPublisher = eventPublisher;
         this.itemBuilderFactory = itemBuilderFactory;
@@ -215,6 +218,7 @@ public class ItemResource implements RESTResource {
         this.metadataRegistry = metadataRegistry;
         this.metadataSelectorMatcher = metadataSelectorMatcher;
         this.semanticTagRegistry = semanticTagRegistry;
+        this.semanticsService = semanticsService;
         this.timeZoneProvider = timeZoneProvider;
 
         this.itemRegistry.addRegistryChangeListener(resetLastModifiedItemChangeListener);
@@ -907,7 +911,7 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemName: \\w+}/semantic/{semanticClass: \\w+}")
     @Operation(operationId = "getSemanticItem", summary = "Gets the item which defines the requested semantics of an item.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
     public Response getSemanticItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -931,6 +935,21 @@ public class ItemResource implements RESTResource {
                 locale, zoneId);
         dto.editable = isEditable(dto.name);
         return JSONResponse.createResponse(Status.OK, dto, null);
+    }
+
+    @GET
+    @RolesAllowed({ Role.ADMIN })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("semanticshealth")
+    @Operation(operationId = "getSemanticsHealth", summary = "Gets configuration problems with item semantics.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ItemSemanticsProblem.class)))),
+                    @ApiResponse(responseCode = "404", description = "Item not found.") })
+    public Response getSemanticsHealth(@Context HttpHeaders headers) {
+        List<ItemSemanticsProblem> semanticsProblems = this.itemRegistry.stream().flatMap(item -> {
+            return semanticsService.getItemSemanticProblems(item).stream();
+        }).toList();
+        return JSONResponse.createResponse(Status.OK, semanticsProblems, null);
     }
 
     private JsonObject buildStatusObject(String itemName, String status, @Nullable String message) {

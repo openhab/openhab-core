@@ -36,6 +36,7 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.semantics.Equipment;
+import org.openhab.core.semantics.ItemSemanticsProblem;
 import org.openhab.core.semantics.Location;
 import org.openhab.core.semantics.Point;
 import org.openhab.core.semantics.Property;
@@ -56,6 +57,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Few methods moved from class SemanticTags in order to use the semantic tag registry
  * @author Jimmy Tanagra - Add Item semantic tag validation
+ * @author Mark Herwege - Refactor validation for REST endpoint
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -178,23 +180,48 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
 
     /**
      * Validates the semantic tags of an item.
-     * 
+     *
      * It returns true only if one of the following is true:
      * - No semantic tags at all
      * - Only one Semantic tag of any kind.
      * - Note: having only one Property tag is allowed. It implies that the item is a Point.
      * - One Point tag and one Property tag
-     * 
+     *
      * It returns false if two Semantic tags are found, but they don't consist of one Point and one Property.
      * It would also return false if more than two Semantic tags are found.
-     * 
+     *
      * @param item
      * @param semanticTag the determined semantic tag of the item
      * @return true if the item contains no semantic tags, or a valid combination of semantic tags, otherwise false
      */
     boolean validateTags(Item item, @Nullable Class<? extends Tag> semanticTag) {
+        return getItemTagProblems(item, semanticTag, true) == null ? true : false;
+    }
+
+    /**
+     * Validates the semantic tags of an item.
+     *
+     * It returns null if one of the following is true:
+     * - No semantic tags at all
+     * - Only one Semantic tag of any kind.
+     * - Note: having only one Property tag is allowed. It implies that the item is a Point.
+     * - One Point tag and one Property tag
+     *
+     * It returns a {@link ItemSemanticProblem} if two Semantic tags are found, but they don't consist of one Point and
+     * one Property.
+     * It would also return a {@link ItemSemanticProblem} if more than two Semantic tags are found.
+     *
+     * @param item
+     * @param semanticTag the determined semantic tag of the item
+     * @param logWarnings log a warning for the problem
+     * @return null if the item contains no semantic tags, or a valid combination of semantic tags, otherwise a a
+     *         {@link ItemSemanticProblem}
+     */
+    @Nullable
+    ItemSemanticsProblem getItemTagProblems(Item item, @Nullable Class<? extends Tag> semanticTag,
+            boolean logWarnings) {
         if (semanticTag == null) {
-            return true;
+            return null;
         }
         String semanticType = SemanticTags.getSemanticRootName(semanticTag);
         // We're using Collectors here instead of Stream.toList() to resolve Java's wildcard capture conversion issue
@@ -203,65 +230,86 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
         switch (tags.size()) {
             case 0:
             case 1:
-                return true;
+                return null;
             case 2:
                 Class<? extends Tag> firstTag = tags.getFirst();
                 Class<? extends Tag> lastTag = tags.getLast();
                 if ((Point.class.isAssignableFrom(firstTag) && Property.class.isAssignableFrom(lastTag))
                         || (Point.class.isAssignableFrom(lastTag) && Property.class.isAssignableFrom(firstTag))) {
-                    return true;
+                    return null;
                 }
                 String firstType = SemanticTags.getSemanticRootName(firstTag);
                 String lastType = SemanticTags.getSemanticRootName(lastTag);
                 if (firstType.equals(lastType)) {
                     if (Point.class.isAssignableFrom(firstTag) || Property.class.isAssignableFrom(firstTag)) {
-                        logger.warn(
-                                "Item '{}' ({}) has an invalid combination of semantic tags: {} ({}) and {} ({}). Only one Point and optionally one Property tag may be assigned.",
-                                item.getName(), semanticType, firstTag.getSimpleName(), firstType,
-                                lastTag.getSimpleName(), lastType);
+                        String reason = String.format("Invalid combination of semantic tags: %s (%s) and %s (%s).",
+                                firstTag.getSimpleName(), firstType, lastTag.getSimpleName(), lastType);
+                        String explanation = "Only one Point and optionally one Property tag may be assigned.";
+                        if (logWarnings) {
+                            logger.warn("Item '{}' ({}): {} {}", item.getName(), semanticType, reason, explanation);
+                        }
+                        return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation);
                     } else {
-                        logger.warn(
-                                "Item '{}' ({}) has an invalid combination of semantic tags: {} ({}) and {} ({}). Only one {} tag may be assigned.",
-                                item.getName(), semanticType, firstTag.getSimpleName(), firstType,
-                                lastTag.getSimpleName(), lastType, firstType);
+                        String reason = String.format("Invalid combination of semantic tags: %s (%s) and %s (%s).",
+                                firstTag.getSimpleName(), firstType, lastTag.getSimpleName(), lastType);
+                        String explanation = String.format("Only one %s tag may be assigned.", firstType);
+                        if (logWarnings) {
+                            logger.warn("Item '{}' ({}): {} {}", item.getName(), semanticType, reason, explanation);
+                        }
+                        return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation);
                     }
                 } else {
-                    logger.warn(
-                            "Item '{}' ({}) has an invalid combination of semantic tags: {} ({}) and {} ({}). {} and {} tags cannot be assigned at the same time.",
-                            item.getName(), semanticType, firstTag.getSimpleName(), firstType, lastTag.getSimpleName(),
-                            lastType, firstType, lastType);
+                    String reason = String.format("Invalid combination of semantic tags: %s (%s) and %s (%s).",
+                            firstTag.getSimpleName(), firstType, lastTag.getSimpleName(), lastType);
+                    String explanation = String.format("%s and %s tags cannot be assigned at the same time.", firstType,
+                            lastType);
+                    if (logWarnings) {
+                        logger.warn("Item '{}' ({}): {} {}", item.getName(), semanticType, reason, explanation);
+                    }
+                    return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation);
                 }
-                return false;
             default:
                 List<String> allTags = tags.stream().map(tag -> {
                     String tagType = SemanticTags.getSemanticRootName(tag);
                     return String.format("%s (%s)", tag.getSimpleName(), tagType);
                 }).toList();
-                logger.warn(
-                        "Item '{}' ({}) has an invalid combination of semantic tags: {}. An item may only have one tag of Location, Equipment, or Point type. A Property tag may be assigned in conjunction with a Point tag.",
-                        item.getName(), semanticType, allTags);
-                return false;
+                String reason = String.format("Invalid combination of semantic tags: %s.", allTags);
+                String explanation = "An Item may only have one tag of Location, Equipment, or Point type. A Property tag may be assigned in conjunction with a Point tag.";
+                if (logWarnings) {
+                    logger.warn("Item '{}' ({}): {} {}", item.getName(), semanticType, reason, explanation);
+                }
+                return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation);
         }
     }
 
     /**
      * Verifies the semantics of an item and logs warnings if the semantics are invalid
-     * 
+     *
      * @param item
      * @return true if the semantics are valid, false otherwise
      */
     boolean checkSemantics(Item item) {
+        return getItemSemanticProblems(item, true).size() == 0 ? true : false;
+    }
+
+    @Override
+    public List<ItemSemanticsProblem> getItemSemanticProblems(Item item) {
+        return getItemSemanticProblems(item, false);
+    }
+
+    List<ItemSemanticsProblem> getItemSemanticProblems(Item item, boolean logWarnings) {
         String itemName = item.getName();
         Class<? extends Tag> semanticTag = SemanticTags.getSemanticType(item);
         if (semanticTag == null) {
-            return true;
+            return List.of();
         }
 
-        if (!validateTags(item, semanticTag)) {
-            return false;
+        ItemSemanticsProblem tagProblem = getItemTagProblems(item, semanticTag, logWarnings);
+        if (tagProblem != null) {
+            return List.of(tagProblem);
         }
 
-        List<String> warnings = new ArrayList<>();
+        List<String[]> warnings = new ArrayList<>();
         List<String> parentLocations = new ArrayList<>();
         List<String> parentEquipments = new ArrayList<>();
 
@@ -282,6 +330,7 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
             }
         }
 
+        String semanticType = SemanticTags.getSemanticRootName(semanticTag);
         if (Point.class.isAssignableFrom(semanticTag)) {
             if (parentLocations.size() == 1 && parentEquipments.size() == 1) {
                 // This case is allowed: a Point can belong to an Equipment and a Location
@@ -297,61 +346,67 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
                 // Case 2:
                 // When a central Equipment e.g. a HVAC contains Points located in multiple locations,
                 // e.g. room controls and sensors
-                String semanticType = SemanticTags.getSemanticRootName(semanticTag);
-                logger.info("Item '{}' ({}) belongs to location {} and equipment {}.", itemName, semanticType,
-                        parentLocations, parentEquipments);
+                if (logWarnings) {
+                    logger.info("Item '{}' ({}): Belongs to Location {} and Equipment {}.", itemName, semanticType,
+                            parentLocations, parentEquipments);
+                }
             } else {
                 if (parentLocations.size() > 1) {
-                    warnings.add(String.format(
-                            "It belongs to multiple locations %s. It should only belong to one Equipment or one location, preferably not both at the same time.",
-                            parentLocations.toString()));
+                    String[] warning = { String.format("Belongs to multiple Locations %s.", parentLocations.toString()),
+                            "It should only belong to one Equipment or one Location, preferably not both at the same time." };
+                    warnings.add(warning);
                 }
                 if (parentEquipments.size() > 1) {
-                    warnings.add(String.format(
-                            "It belongs to multiple equipments %s. A Point can only belong to at most one Equipment.",
-                            parentEquipments.toString()));
+                    String[] warning = {
+                            String.format("Belongs to multiple Equipment %s.", parentEquipments.toString()),
+                            "A Point can only belong to at most one Equipment." };
+                    warnings.add(warning);
                 }
             }
         } else if (Equipment.class.isAssignableFrom(semanticTag)) {
             if (!parentLocations.isEmpty() && !parentEquipments.isEmpty()) {
-                warnings.add(String.format(
-                        "It belongs to location(s) %s and equipment(s) %s. An Equipment can only belong to one Location or another Equipment, but not both.",
-                        parentLocations.toString(), parentEquipments.toString()));
+                String[] warning = {
+                        String.format("Belongs to Location(s) %s and Equipment %s.", parentLocations.toString(),
+                                parentEquipments.toString()),
+                        "An Equipment can only belong to one Location or another Equipment, but not both." };
+                warnings.add(warning);
             }
             if (parentLocations.size() > 1) {
-                warnings.add(String.format(
-                        "It belongs to multiple locations %s. An Equipment can only belong to one Location or another Equipment.",
-                        parentLocations.toString()));
+                String[] warning = { String.format("Belongs to multiple Locations %s.", parentLocations.toString()),
+                        "An Equipment can only belong to one Location or another Equipment." };
+                warnings.add(warning);
             }
             if (parentEquipments.size() > 1) {
-                warnings.add(String.format(
-                        "It belongs to multiple equipments %s. An Equipment can only belong to at most one Equipment.",
-                        parentEquipments.toString()));
+                String[] warning = { String.format("Belongs to multiple Equipment %s.", parentEquipments.toString()),
+                        "An Equipment can only belong to at most one Equipment." };
+                warnings.add(warning);
             }
         } else if (Location.class.isAssignableFrom(semanticTag)) {
             if (!(item instanceof GroupItem)) {
-                warnings.add(String.format("It is a %s item, not a group. A location should be a Group Item.",
-                        item.getType()));
+                String[] warning = { String.format("Is a %s Item, not a Group Item.", item.getType()),
+                        "A Location should be a Group Item." };
+                warnings.add(warning);
             }
             if (!parentEquipments.isEmpty()) {
-                warnings.add(String.format(
-                        "It belongs to equipment(s) %s. A Location can only belong to another Location, not Equipment.",
-                        parentEquipments.toString()));
+                String[] warning = { String.format("Belongs to Equipment %s.", parentEquipments.toString()),
+                        "A Location can only belong to another Location, not Equipment." };
+                warnings.add(warning);
             }
             if (parentLocations.size() > 1) {
-                warnings.add(
-                        String.format("It belongs to multiple locations %s. It should only belong to one location.",
-                                parentLocations.toString()));
+                String[] warning = { String.format("Belongs to multiple Locations %s.", parentLocations.toString()),
+                        "It should only belong to one Location." };
+                warnings.add(warning);
             }
         }
 
         if (!warnings.isEmpty()) {
-            String semanticType = SemanticTags.getSemanticRootName(semanticTag);
-            logger.warn("Item '{}' ({}) has invalid semantic structure: {}", itemName, semanticType,
-                    String.join("\n", warnings));
-            return false;
+            if (logWarnings) {
+                logger.warn("Item '{}' ({}): Invalid semantic structure:{}", itemName, semanticType, warnings.stream()
+                        .map((w) -> w[0] + " " + w[1]).reduce("", (result, w) -> result + "\n        " + w));
+            }
+            return warnings.stream().map((w) -> new ItemSemanticsProblem(itemName, semanticType, w[0], w[1])).toList();
         }
-        return true;
+        return List.of();
     }
 
     @Override

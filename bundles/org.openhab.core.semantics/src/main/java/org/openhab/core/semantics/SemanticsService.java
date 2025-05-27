@@ -78,4 +78,14 @@ public interface SemanticsService {
      * @return the list containing the label and all synonyms of a semantic tag
      */
     List<String> getLabelAndSynonyms(Class<? extends Tag> tagClass, Locale locale);
+
+    /**
+     * Verifies the semantics of an item
+     *
+     * @param item
+     * @return list of semantics configuration problems
+     */
+    default List<ItemSemanticsProblem> getItemSemanticProblems(Item item) {
+        return List.of();
+    };
 }
