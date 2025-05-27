@@ -89,7 +89,7 @@ class ModelConstructor extends Constructor {
             String value = (String) constructScalar(scalarNode);
 
             // don't interpolate single quoted strings
-            if (scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.SINGLE_QUOTED) {
+            if (scalarNode == null || scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.SINGLE_QUOTED) {
                 return value;
             }
 
@@ -196,11 +196,12 @@ class ModelConstructor extends Constructor {
                     return Map.of();
                 }
 
+                @SuppressWarnings("unchecked")
                 Map<String, String> vars = Optional.ofNullable(includeOptions.get("vars")).filter(Map.class::isInstance)
                         .map(Map.class::cast).orElse(Map.of());
                 return new IncludeObject(fileName, vars);
             } else {
-                logger.warn("Invalid !include argument type: {}", node.getClass().getName());
+                logger.warn("Invalid !include argument type: {}", node == null ? null : node.getClass().getName());
             }
             return Map.of();
         }
