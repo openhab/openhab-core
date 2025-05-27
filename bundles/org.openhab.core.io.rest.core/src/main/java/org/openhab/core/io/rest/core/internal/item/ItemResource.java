@@ -940,7 +940,7 @@ public class ItemResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Path("semanticshealth")
+    @Path("semantics/health")
     @Operation(operationId = "getSemanticsHealth", summary = "Gets configuration problems with item semantics.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ItemSemanticsProblem.class)))),
