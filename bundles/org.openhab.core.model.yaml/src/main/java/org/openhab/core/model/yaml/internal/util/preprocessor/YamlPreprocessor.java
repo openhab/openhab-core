@@ -151,7 +151,7 @@ public class YamlPreprocessor {
         }
         variables.put("__FILE_NAME__", fileName);
         variables.put("__FILE_EXT__", fileExtension);
-        variables.put("__PATH__", absolutePath.getParent().toString());
+        variables.put("__DIRECTORY__", absolutePath.getParent().toString());
     }
 
     /*
