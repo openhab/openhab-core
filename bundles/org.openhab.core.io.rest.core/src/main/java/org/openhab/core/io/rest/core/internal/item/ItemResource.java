@@ -947,7 +947,8 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "Item not found.") })
     public Response getSemanticsHealth(@Context HttpHeaders headers) {
         List<ItemSemanticsProblem> semanticsProblems = this.itemRegistry.stream().flatMap(item -> {
-            return semanticsService.getItemSemanticProblems(item).stream();
+            return semanticsService.getItemSemanticsProblems(item).stream()
+                    .map(p -> p.setEditable(isEditable(p.item())));
         }).toList();
         return JSONResponse.createResponse(Status.OK, semanticsProblems, null);
     }

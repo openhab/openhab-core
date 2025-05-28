@@ -85,7 +85,7 @@ public interface SemanticsService {
      * @param item
      * @return list of semantics configuration problems
      */
-    default List<ItemSemanticsProblem> getItemSemanticProblems(Item item) {
+    default List<ItemSemanticsProblem> getItemSemanticsProblems(Item item) {
         return List.of();
     };
 }

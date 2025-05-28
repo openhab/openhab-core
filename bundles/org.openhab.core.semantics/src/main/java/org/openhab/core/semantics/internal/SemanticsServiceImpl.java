@@ -248,7 +248,7 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
                         if (logWarnings) {
                             logger.warn("Item '{}' ({}): {} {}", item.getName(), semanticType, reason, explanation);
                         }
-                        return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation);
+                        return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation, null);
                     } else {
                         String reason = String.format("Invalid combination of semantic tags: %s (%s) and %s (%s).",
                                 firstTag.getSimpleName(), firstType, lastTag.getSimpleName(), lastType);
@@ -256,7 +256,7 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
                         if (logWarnings) {
                             logger.warn("Item '{}' ({}): {} {}", item.getName(), semanticType, reason, explanation);
                         }
-                        return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation);
+                        return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation, null);
                     }
                 } else {
                     String reason = String.format("Invalid combination of semantic tags: %s (%s) and %s (%s).",
@@ -266,7 +266,7 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
                     if (logWarnings) {
                         logger.warn("Item '{}' ({}): {} {}", item.getName(), semanticType, reason, explanation);
                     }
-                    return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation);
+                    return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation, null);
                 }
             default:
                 List<String> allTags = tags.stream().map(tag -> {
@@ -278,7 +278,7 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
                 if (logWarnings) {
                     logger.warn("Item '{}' ({}): {} {}", item.getName(), semanticType, reason, explanation);
                 }
-                return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation);
+                return new ItemSemanticsProblem(item.getName(), semanticType, reason, explanation, null);
         }
     }
 
@@ -289,15 +289,15 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
      * @return true if the semantics are valid, false otherwise
      */
     boolean checkSemantics(Item item) {
-        return getItemSemanticProblems(item, true).size() == 0 ? true : false;
+        return getItemSemanticsProblems(item, true).size() == 0 ? true : false;
     }
 
     @Override
-    public List<ItemSemanticsProblem> getItemSemanticProblems(Item item) {
-        return getItemSemanticProblems(item, false);
+    public List<ItemSemanticsProblem> getItemSemanticsProblems(Item item) {
+        return getItemSemanticsProblems(item, false);
     }
 
-    List<ItemSemanticsProblem> getItemSemanticProblems(Item item, boolean logWarnings) {
+    List<ItemSemanticsProblem> getItemSemanticsProblems(Item item, boolean logWarnings) {
         String itemName = item.getName();
         Class<? extends Tag> semanticTag = SemanticTags.getSemanticType(item);
         if (semanticTag == null) {
@@ -404,7 +404,8 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
                 logger.warn("Item '{}' ({}): Invalid semantic structure:{}", itemName, semanticType, warnings.stream()
                         .map((w) -> w[0] + " " + w[1]).reduce("", (result, w) -> result + "\n        " + w));
             }
-            return warnings.stream().map((w) -> new ItemSemanticsProblem(itemName, semanticType, w[0], w[1])).toList();
+            return warnings.stream().map((w) -> new ItemSemanticsProblem(itemName, semanticType, w[0], w[1], false))
+                    .toList();
         }
         return List.of();
     }
