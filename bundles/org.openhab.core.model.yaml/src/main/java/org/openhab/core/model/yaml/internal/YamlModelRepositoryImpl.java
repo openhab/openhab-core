@@ -81,7 +81,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Laurent Garnier - Added basic version management
  * @author Laurent Garnier - Added method generateSyntaxFromElements + new parameters
  *         for method isValid
- * @author Jimmy Tanagra - Added Yaml preprocessor to support !include, !secret, variable substitutions, and packages
+ * @author Jimmy Tanagra - Added Yaml preprocessor to support !include, variable substitutions, and packages
  */
 @NonNullByDefault
 @Component(immediate = true)
