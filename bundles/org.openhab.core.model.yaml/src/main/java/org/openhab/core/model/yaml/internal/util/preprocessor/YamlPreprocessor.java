@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,12 +58,13 @@ public class YamlPreprocessor {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(YamlPreprocessor.class);
 
-    public static Object load(Path file) throws IOException {
-        return load(file, new HashMap<>(), new HashSet<>());
+    public static Object load(Path file, Consumer<Path> includeCallback) throws IOException {
+        return load(file, new HashMap<>(), new HashSet<>(), includeCallback);
     }
 
     @SuppressWarnings("unchecked")
-    static Object load(Path file, Map<String, String> variables, Set<Path> includeStack) throws IOException {
+    static Object load(Path file, Map<String, String> variables, Set<Path> includeStack, Consumer<Path> includeCallback)
+            throws IOException {
         LOGGER.debug("Loading file({}): {} with given vars {}", includeStack.size(), file, variables);
 
         Set<Path> includeStackBranch = new HashSet<>(includeStack);
@@ -94,7 +96,8 @@ public class YamlPreprocessor {
         dataMap.remove(VARIABLES_KEY); // we've already extracted the variables in the first pass
         LOGGER.trace("Loaded data from {}: {}", file, dataMap);
 
-        dataMap = (Map<String, Object>) processIncludes(file, dataMap, combinedVars, includeStackBranch);
+        dataMap = (Map<String, Object>) processIncludes(file, dataMap, combinedVars, includeStackBranch,
+                includeCallback);
         LOGGER.trace("Loaded includes from {}: {}", file, dataMap);
         Map<String, Object> packages = (Map<String, Object>) dataMap.remove(PACKAGES_KEY);
         dataMap = mergePackages(dataMap, packages);
@@ -161,30 +164,33 @@ public class YamlPreprocessor {
      * This method is called recursively for nested objects.
      */
     @SuppressWarnings("unchecked")
-    private static Object processIncludes(Path file, Object data, Map<String, String> variables,
-            Set<Path> includeStack) {
+    private static Object processIncludes(Path file, Object data, Map<String, String> variables, Set<Path> includeStack,
+            Consumer<Path> includeCallback) {
         if (data instanceof IncludeObject includeObject) {
-            return loadIncludeFile(file, includeObject, variables, includeStack);
+            return loadIncludeFile(file, includeObject, variables, includeStack, includeCallback);
         } else if (data instanceof Map) {
             Map<String, Object> dataMap = (Map<String, Object>) data;
             return dataMap.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey,
-                            entry -> processIncludes(file, entry.getValue(), variables, includeStack),
+                            entry -> processIncludes(file, entry.getValue(), variables, includeStack, includeCallback),
                             (existing, replacement) -> replacement, LinkedHashMap::new));
         } else if (data instanceof List) {
             List<Object> dataList = (List<Object>) data;
-            return dataList.stream().map(value -> processIncludes(file, value, variables, includeStack)).toList();
+            return dataList.stream()
+                    .map(value -> processIncludes(file, value, variables, includeStack, includeCallback)).toList();
         }
         return data;
     }
 
     private static Object loadIncludeFile(Path file, IncludeObject includeObject, Map<String, String> variables,
-            Set<Path> includeStack) {
+            Set<Path> includeStack, Consumer<Path> includeCallback) {
         Path includeFile = file.resolveSibling(includeObject.fileName());
         Map<String, String> includeVars = new HashMap<>(variables);
         includeVars.putAll(includeObject.vars());
         try {
-            return load(includeFile, includeVars, includeStack);
+            Object loadedFile = load(includeFile, includeVars, includeStack, includeCallback);
+            includeCallback.accept(includeFile);
+            return loadedFile;
         } catch (IOException e) {
             LOGGER.warn("Error loading include file {}", e.getMessage());
             return Map.of();
