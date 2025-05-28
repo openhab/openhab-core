@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.BidiSetBag;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
@@ -110,6 +111,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     // all model nodes, ordered by model name (full path as string) and type
     private final Map<String, YamlModelWrapper> modelCache = new ConcurrentHashMap<>();
 
+    // keep track of include files so we can reload the main model when they change
+    // Bidirectional Map of modelName <-> include path by this model
+    private final BidiSetBag<String, Path> modelIncludes = new BidiSetBag<>();
+
     @Activate
     public YamlModelRepositoryImpl(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
         YAMLFactory yamlFactory = YAMLFactory.builder() //
@@ -175,6 +180,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @Deactivate
     public void deactivate() {
         watchService.unregisterListener(this);
+        modelIncludes.clear();
     }
 
     // The method is "synchronized" to avoid concurrent files processing
@@ -183,9 +189,19 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     public synchronized void processWatchEvent(Kind kind, Path fullPath) {
         Path relativePath = mainWatchPath.relativize(fullPath);
         String modelName = relativePath.toString();
+
+        // always clear the list of includes if it's a model
+        // if it loads correctly, it will be re-populated
+        modelIncludes.removeKey(modelName);
+
+        // check here because include files can have any extension
+        if (processIncludeFile(kind, fullPath)) {
+            return;
+        }
+
         if ((!modelName.endsWith(".yaml") && !modelName.endsWith(".yml")) || modelName.endsWith(".inc.yaml") ||
                 modelName.endsWith(".inc.yml")) {
-            logger.trace("Ignored {}", fullPath);
+                                logger.trace("Ignored {}", fullPath);
             return;
         }
 
@@ -193,7 +209,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             if (kind == WatchService.Kind.DELETE) {
                 removeModel(modelName);
             } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
-                JsonNode fileContent = objectMapper.valueToTree(YamlPreprocessor.load(fullPath));
+                Object yamlObject = YamlPreprocessor.load(fullPath, includePath -> {
+                    modelIncludes.put(modelName, includePath);
+                });
+                JsonNode fileContent = objectMapper.valueToTree(yamlObject);
 
                 // check version
                 JsonNode versionNode = fileContent.get(VERSION);
@@ -321,6 +340,35 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
     }
 
+    private boolean processIncludeFile(Kind kind, Path fullPath) {
+        boolean logged = false;
+
+        Set<String> dependingModels = modelIncludes.getKeys(fullPath);
+
+        if (dependingModels.isEmpty()) {
+            return false;
+        }
+
+        logger.info("An include file '{}' was {}", fullPath, switch (kind) {
+            case WatchService.Kind.CREATE -> "created";
+            case WatchService.Kind.DELETE -> "deleted";
+            case WatchService.Kind.MODIFY -> "modified";
+            default -> "unknown";
+        });
+
+        dependingModels.forEach(modelName -> {
+            Path modelPath = watchPath.resolve(modelName);
+            try {
+                // reprocess the model that depends on this include file
+                processWatchEvent(WatchService.Kind.MODIFY, modelPath);
+            } catch (Exception e) {
+                logger.warn("Failed to reprocess model {} after include file change: {}", modelName, e.getMessage());
+            }
+        });
+
+        return true;
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void removeModel(String modelName) {
         YamlModelWrapper removedModel = modelCache.remove(modelName);
@@ -328,6 +376,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return;
         }
         logger.info("Removing YAML model {}", modelName);
+        modelIncludes.removeKey(modelName);
+
         int version = removedModel.getVersion();
         for (Map.Entry<String, @Nullable JsonNode> modelEntry : removedModel.getNodes().entrySet()) {
             String elementName = modelEntry.getKey();
