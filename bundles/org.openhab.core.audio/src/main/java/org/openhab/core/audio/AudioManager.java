@@ -19,6 +19,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.PercentType;
 
+import io.reactivex.annotations.NonNull;
+
 /**
  * This service provides functionality around audio services and is the central service to be used directly by others.
  *
@@ -27,6 +29,7 @@ import org.openhab.core.library.types.PercentType;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Added methods for getting all sinks and sources
  * @author Miguel Álvarez - Add record method
+ * @author Karel Goderis - Add multisink support
  */
 @NonNullByDefault
 public interface AudioManager {
@@ -52,6 +55,14 @@ public interface AudioManager {
     void play(@Nullable AudioStream audioStream, @Nullable String sinkId);
 
     /**
+     * Plays the passed audio stream on the given set of sinks.
+     *
+     * @param audioStream The audio stream to play or null if streaming should be stopped
+     * @param sinkIds The set of the audio sink ids to use
+     */
+    void play(@Nullable AudioStream audioStream, @NonNull Set<String> sinkIds);
+
+    /**
      * Plays the passed audio stream on the given sink.
      *
      * @param audioStream The audio stream to play or null if streaming should be stopped
@@ -59,6 +70,15 @@ public interface AudioManager {
      * @param volume The volume to be used or null if the default notification volume should be used
      */
     void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume);
+
+    /**
+     * Plays the passed audio stream on the given set of sinks.
+     *
+     * @param audioStream The audio stream to play or null if streaming should be stopped
+     * @param sinkIds The set of the audio sink ids to use
+     * @param volume The volume to be used or null if the default notification volume should be used
+     */
+    void play(@Nullable AudioStream audioStream, Set<String> sinkIds, @Nullable PercentType volume);
 
     /**
      * Plays an audio file from the "sounds" folder using the default audio sink.
@@ -87,6 +107,15 @@ public interface AudioManager {
     void playFile(String fileName, @Nullable String sinkId) throws AudioException;
 
     /**
+     * Plays an audio file from the "sounds" folder using the given audio sink.
+     *
+     * @param fileName The file from the "sounds" folder
+     * @param sinkIds The set of the audio sink ids to use
+     * @throws AudioException in case the file does not exist or cannot be opened
+     */
+    void playFile(String fileName, @NonNull Set<String> sinkIds) throws AudioException;
+
+    /**
      * Plays an audio file with the given volume from the "sounds" folder using the given audio sink.
      *
      * @param fileName The file from the "sounds" folder
@@ -95,6 +124,16 @@ public interface AudioManager {
      * @throws AudioException in case the file does not exist or cannot be opened
      */
     void playFile(String fileName, @Nullable String sinkId, @Nullable PercentType volume) throws AudioException;
+
+    /**
+     * Plays an audio file with the given volume from the "sounds" folder using the given audio sink.
+     *
+     * @param fileName The file from the "sounds" folder
+     * @param sinkIds The set of the audio sink ids to use
+     * @param volume The volume to be used or null if the default notification volume should be used
+     * @throws AudioException in case the file does not exist or cannot be opened
+     */
+    void playFile(String fileName, @NonNull Set<String> sinkIds, @Nullable PercentType volume) throws AudioException;
 
     /**
      * Stream audio from the passed url using the default audio sink.
@@ -112,6 +151,15 @@ public interface AudioManager {
      * @throws AudioException in case the url stream cannot be opened
      */
     void stream(@Nullable String url, @Nullable String sinkId) throws AudioException;
+
+    /**
+     * Stream audio from the passed url to the given set of sinks
+     *
+     * @param url The url to stream from or null if streaming should be stopped
+     * @param sinkIds The set of the audio sink ids to use
+     * @throws AudioException in case the url stream cannot be opened
+     */
+    void stream(@Nullable String url, @NonNull Set<String> sinkIds) throws AudioException;
 
     /**
      * Parse and synthesize a melody and play it into the default sink.
@@ -139,6 +187,19 @@ public interface AudioManager {
     void playMelody(String melody, @Nullable String sinkId);
 
     /**
+     * Parse and synthesize a melody and play it into the given sink.
+     *
+     * The melody should be a spaced separated list of note names or silences (character 0 or O).
+     * You can optionally add the character "'" to increase the note one octave.
+     * You can optionally add ":ms" where ms is an int value to customize the note/silence milliseconds duration
+     * (defaults to 200ms).
+     *
+     * @param melody The url to stream from or null if streaming should be stopped.
+     * @param sinkIds The set of the audio sink ids to use
+     */
+    void playMelody(String melody, @NonNull Set<String> sinkIds);
+
+    /**
      * Parse and synthesize a melody and play it into the given sink at the desired volume.
      *
      * The melody should be a spaced separated list of note names or silences (character 0 or O).
@@ -151,6 +212,20 @@ public interface AudioManager {
      * @param volume The volume to be used or null if the default notification volume should be used
      */
     void playMelody(String melody, @Nullable String sinkId, @Nullable PercentType volume);
+
+    /**
+     * Parse and synthesize a melody and play it into the given sink at the desired volume.
+     *
+     * The melody should be a spaced separated list of note names or silences (character 0 or O).
+     * You can optionally add the character "'" to increase the note one octave.
+     * You can optionally add ":ms" where ms is an int value to customize the note/silence milliseconds duration
+     * (defaults to 200ms).
+     *
+     * @param melody The url to stream from or null if streaming should be stopped.
+     * @param sinkIds The set of the audio sink ids to use
+     * @param volume The volume to be used or null if the default notification volume should be used
+     */
+    void playMelody(String melody, @NonNull Set<String> sinkIds, @Nullable PercentType volume);
 
     /**
      * Record audio as a WAV file of the specified length to the sounds folder.
@@ -256,9 +331,10 @@ public interface AudioManager {
     AudioSink getSink(@Nullable String sinkId);
 
     /**
-     * Get a list of sink ids that match a given pattern
+     * Get a list of sink ids that match a given set of patterns
      *
-     * @param pattern pattern to search, can include {@code *} and {@code ?} placeholders
+     * @param pattern patterns to search; patterns is a comma-separated list, whereby each can include {@code *} and
+     *            {@code ?} placeholders, or can be literal string to designate a single sink
      * @return ids of matching sinks
      */
     Set<String> getSinkIds(String pattern);
