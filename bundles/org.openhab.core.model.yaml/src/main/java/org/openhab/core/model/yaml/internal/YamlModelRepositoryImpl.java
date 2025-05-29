@@ -121,6 +121,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     // keep track of include files so we can reload the main model when they change
     // Bidirectional Map of modelName <-> include path by this model
     private final BidiSetBag<String, Path> modelIncludes = new BidiSetBag<>();
+    private boolean initializing = true;
 
     @Activate
     public YamlModelRepositoryImpl(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
@@ -181,6 +182,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 logger.warn("Could not list YAML files in '{}', models might be missing: {}", watchPath,
                         e.getMessage());
             }
+        initializing = false;
         });
     }
 
@@ -201,7 +203,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         modelIncludes.removeKey(modelName);
 
         // check here because include files can have any extension
-        if (processIncludeFile(kind, fullPath)) {
+        if (!initializing && processIncludeFile(kind, fullPath)) {
             return;
         }
 
