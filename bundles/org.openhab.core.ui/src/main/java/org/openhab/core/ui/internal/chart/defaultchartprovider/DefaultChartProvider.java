@@ -209,7 +209,8 @@ public class DefaultChartProvider implements ChartProvider {
         // avoid overlapping labels on x-axis;
         // Font.getSize() is related to font height, but will also give an indication of the width;
         // pattern is not the actual label, but also gives a rough estimation of the width of the label
-        int xAxisSpacing = Math.max(width / 15, chartTheme.getAxisTickLabelsFont(dpi).getSize() * pattern.length());
+        int xAxisSpacing = Math.max(width / 15,
+                chartTheme.getAxisTickLabelsFont(dpi).getSize() * pattern.length() * 4 / 3);
         styler.setXAxisTickMarkSpacingHint(xAxisSpacing);
         // chart
         styler.setChartBackgroundColor(chartTheme.getChartBackgroundColor());
