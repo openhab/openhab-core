@@ -206,6 +206,28 @@ public class CacheScriptExtensionTest {
         cache.put(KEY2, VALUE2);
         assertThat(cache.get(KEY1), is(VALUE1));
         assertThat(cache.get(KEY2), is(VALUE2));
+
+        // computed value is returned
+        assertThat(cache.compute(KEY1, (k, v) -> VALUE1), is(VALUE1));
+        assertThat(cache.get(KEY1), is(VALUE1));
+        assertThat(cache.compute(KEY1, (k, v) -> VALUE2), is(VALUE2));
+        assertThat(cache.get(KEY1), is(VALUE2));
+        assertThat(cache.compute(KEY1, (k, v) -> null), nullValue());
+        assertThat(cache.get(KEY1), nullValue());
+
+        // remappingFunction is called with key and old value
+        cache.remove(KEY1);
+        cache.compute(KEY1, (k, v) -> {
+            assertThat(k, is(KEY1));
+            assertThat(v, nullValue());
+            return VALUE2;
+        });
+        cache.put(KEY1, VALUE1);
+        cache.compute(KEY1, (k, v) -> {
+            assertThat(k, is(KEY1));
+            assertThat(v, is(VALUE1));
+            return VALUE2;
+        });
     }
 
     private ValueCache getCache(CacheScriptExtension se, String scriptIdentifier, String type) {
