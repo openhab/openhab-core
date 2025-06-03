@@ -30,5 +30,10 @@
       <artifactId>org.openhab.core.thing</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.automation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
