@@ -1,7 +1,7 @@
 #set( $dt = $package.getClass().forName("java.util.Date").newInstance() )
 #set( $year = $dt.getYear() + 1900 )
 #set( $copyright = "Contributors to the ${vendorName} project" )
-/**
+/*
  * Copyright (c) ${startYear}-${year} ${copyright}
  *
  * See the NOTICE file(s) distributed with this work for additional
