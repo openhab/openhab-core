@@ -223,7 +223,7 @@ public class RuleResource implements RESTResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "createRule", summary = "Creates a rule.", responses = {
-            @ApiResponse(responseCode = "201", description = "Created", headers = @Header(name = "Location", description = "Newly created Rule", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "201", description = "Created", headers = @Header(description = "Newly created Rule", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "409", description = "Creation of the rule is refused. Rule with the same UID already exists."),
             @ApiResponse(responseCode = "400", description = "Creation of the rule is refused. Missing required parameter.") })
     public Response create(@Parameter(description = "rule data", required = true) RuleDTO rule) throws IOException {
