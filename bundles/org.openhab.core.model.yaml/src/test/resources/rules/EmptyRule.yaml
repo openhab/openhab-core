@@ -1,0 +1,7 @@
+version: 1
+rules:
+  basic:emptyyamlrule: 
+    label: Empty YAML Rule
+    triggers:
+    conditions:
+    actions:
