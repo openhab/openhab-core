@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.shared;
 
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -62,4 +63,17 @@ public interface ValueCache {
      * @return the value associated with the key
      */
     Object get(String key, Supplier<Object> supplier);
+
+    /**
+     * Attempts to compute a mapping for the specified key and its current mapped value
+     * (or null if there is no current mapping).
+     * 
+     * See {@code java.util.Map.compute()} for details.
+     * 
+     * @param key the key of the requested value.
+     * @param remappingFunction the remapping function to compute a value.
+     * @return the new value associated with the specified key, or null if none
+     */
+    @Nullable
+    Object compute(String key, BiFunction<String, @Nullable Object, @Nullable Object> remappingFunction);
 }
