@@ -72,7 +72,7 @@
             <artifactId>antlr-runtime</artifactId>
             <version>3.2</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../antlr-generator-3.2.0-patch.jar</systemPath>
+            <systemPath>${project.basedir}/../.antlr-generator-3.2.0-patch.jar</systemPath>
           </dependency>
         </dependencies>
         <executions>
