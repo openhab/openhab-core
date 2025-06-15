@@ -461,6 +461,16 @@ public class DefaultSemanticTags {
                 "Power", //
                 "", //
                 "");
+        public static final SemanticTag PRECIPITATION = new SemanticTagImpl( //
+                "Property_Precipitation", //
+                "Precipitation", //
+                "", //
+                "");
+        public static final SemanticTag RAIN = new SemanticTagImpl( //
+                "Property_Precipitation_Rain", //
+                "Rain", //
+                "", //
+                "");
         public static final SemanticTag PRESENCE = new SemanticTagImpl( //
                 "Property_Presence", //
                 "Presence", //
@@ -479,11 +489,6 @@ public class DefaultSemanticTags {
         public static final SemanticTag QUALITY_OF_SERVICE = new SemanticTagImpl( //
                 "Property_QualityOfService", //
                 "Quality of Service", //
-                "", //
-                "");
-        public static final SemanticTag RAIN = new SemanticTagImpl( //
-                "Property_Rain", //
-                "Rain", //
                 "", //
                 "");
         public static final SemanticTag SIGNAL_STRENGTH = new SemanticTagImpl( //
