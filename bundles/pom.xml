@@ -317,6 +317,29 @@
         </pluginManagement>
         <plugins>
           <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-antlr-generator-patch</id>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <phase>generate-sources</phase>
+                <configuration>
+                  <outputDirectory>${basedir}/</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${basedirRoot}/bundles</directory>
+                      <includes>
+                        <include>.antlr-generator-3.2.0-patch.jar</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
             <executions>
