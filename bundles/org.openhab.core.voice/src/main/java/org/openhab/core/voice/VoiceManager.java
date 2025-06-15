@@ -173,8 +173,10 @@ public interface VoiceManager {
      * @param context with the configured services and options for the dialog
      * @throws IllegalStateException if required services are not compatible or the provided locale is not supported
      *             by all these services or a dialog is already started for this audio source
+     * @return a {@link DTServiceHandle} implementation if the dialog was started correctly.
      */
-    void startDialog(DialogContext context) throws IllegalStateException;
+    @Nullable
+    DTServiceHandle startDialog(DialogContext context) throws IllegalStateException;
 
     /**
      * Stop the dialog associated to an audio source
