@@ -17,13 +17,13 @@
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.config.discovery.usbserial</artifactId>
+      <artifactId>org.openhab.core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>net.java.dev.jna</groupId>
-      <artifactId>jna-platform</artifactId>
-      <version>5.16.0</version>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.config.discovery.usbserial</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 

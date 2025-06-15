@@ -24,6 +24,11 @@
       <artifactId>org.openhab.core.io.transport.serial.rxtx</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.transport.serial</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>

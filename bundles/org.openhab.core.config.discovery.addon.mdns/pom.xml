@@ -17,7 +17,12 @@
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.config.discovery.mdns</artifactId>
+      <artifactId>org.openhab.core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.transport.mdns</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
