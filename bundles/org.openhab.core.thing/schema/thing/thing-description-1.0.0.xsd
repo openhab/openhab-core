@@ -314,6 +314,7 @@
 			<xs:enumeration value="Pollen"/>
 			<xs:enumeration value="Position"/>
 			<xs:enumeration value="Power"/>
+			<xs:enumeration value="Precipitation"/>
 			<xs:enumeration value="Presence"/>
 			<xs:enumeration value="Pressure"/>
 			<xs:enumeration value="Progress"/>
