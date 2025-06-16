@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = { ScriptedItemProvider.class, ItemProvider.class })
+@Component(immediate = true, service = { ItemProvider.class, ScriptedItemProvider.class })
 public class ScriptedItemProvider extends AbstractProvider<Item>
         implements ItemProvider, ManagedProvider<Item, String> {
     private final Logger logger = LoggerFactory.getLogger(ScriptedItemProvider.class);
