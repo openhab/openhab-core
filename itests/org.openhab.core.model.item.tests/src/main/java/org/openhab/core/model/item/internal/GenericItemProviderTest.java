@@ -504,7 +504,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItem() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -517,7 +517,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesFunctionParameters() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -530,7 +530,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItemAndFunction() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
