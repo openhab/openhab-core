@@ -124,11 +124,12 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.POSITION);
         defaultTags.add(DefaultSemanticTags.Property.GEO_LOCATION);
         defaultTags.add(DefaultSemanticTags.Property.POWER);
+        defaultTags.add(DefaultSemanticTags.Property.PRECIPITATION);
+        defaultTags.add(DefaultSemanticTags.Property.RAIN);
         defaultTags.add(DefaultSemanticTags.Property.PRESENCE);
         defaultTags.add(DefaultSemanticTags.Property.PRESSURE);
         defaultTags.add(DefaultSemanticTags.Property.PROGRESS);
         defaultTags.add(DefaultSemanticTags.Property.QUALITY_OF_SERVICE);
-        defaultTags.add(DefaultSemanticTags.Property.RAIN);
         defaultTags.add(DefaultSemanticTags.Property.SIGNAL_STRENGTH);
         defaultTags.add(DefaultSemanticTags.Property.RSSI);
         defaultTags.add(DefaultSemanticTags.Property.SMOKE);

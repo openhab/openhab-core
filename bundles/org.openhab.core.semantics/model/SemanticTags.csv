@@ -84,11 +84,12 @@ Property,OpenState,Opening,Open State,Open Closed,Open state (digital) of a door
 Property,Position,,Position,,Position measurement or control
 Property,GeoLocation,Position,Geo Location,,Geo location coordinate
 Property,Power,,Power,,
+Property,Precipitation,,Precipitation,,
+Property,Rain,Precipitation,Rain,,
 Property,Presence,,Presence,,Presence detection
 Property,Pressure,,Pressure,,
 Property,Progress,,Progress,,
 Property,QualityOfService,,Quality of Service,,
-Property,Rain,,Rain,,
 Property,SignalStrength,,Signal Strength,,
 Property,RSSI,SignalStrength,RSSI,Received Signal Strength Indication,
 Property,Smoke,,Smoke,,Smoke detection
