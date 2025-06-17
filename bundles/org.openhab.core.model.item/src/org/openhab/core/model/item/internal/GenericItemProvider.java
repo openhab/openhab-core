@@ -69,7 +69,8 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 @NonNullByDefault
-@Component(service = { ItemProvider.class, StateDescriptionFragmentProvider.class }, immediate = true)
+@Component(service = { ItemProvider.class, GenericItemProvider.class,
+        StateDescriptionFragmentProvider.class }, immediate = true)
 public class GenericItemProvider extends AbstractProvider<Item>
         implements ModelRepositoryChangeListener, ItemProvider, StateDescriptionFragmentProvider {
 
