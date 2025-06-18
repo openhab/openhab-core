@@ -12,11 +12,7 @@
  */
 package org.openhab.core.media;
 
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.media.model.MediaRegistry;
 
 /**
  * This is an interface that is
@@ -24,14 +20,27 @@ import org.openhab.core.media.model.MediaRegistry;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public interface MediaService {
-    public MediaRegistry getMediaRegistry();
+public class MediaDevice {
+    private String id;
+    private String name;
+    private String type;
 
-    public Map<String, MediaDevice> getMediaDevices();
+    public MediaDevice(String id, String name, String type) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+    }
 
-    public void addMediaListenner(String key, MediaListenner mediaListenner);
+    public String getId() {
+        return this.id;
+    }
 
-    public @Nullable MediaListenner getMediaListenner(String key);
+    public String getName() {
+        return this.name;
+    }
 
-    public void registerDevice(MediaDevice device);
+    public String getType() {
+        return this.type;
+    }
+
 }
