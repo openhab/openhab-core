@@ -17,7 +17,7 @@
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.auth.jaas</artifactId>
+      <artifactId>org.openhab.core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
