@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.media.internal;
 
 import java.util.Locale;
+import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
@@ -30,6 +31,7 @@ import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.media.MediaDevice;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
 import org.openhab.core.media.model.MediaCollection;
@@ -136,4 +138,24 @@ public class MediaResource implements RESTResource {
 
     }
 
+    @GET
+    @Path("/sinks")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getMediaSinks", summary = "Get the list of all sinks.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MediaSinkDTO.class)))) })
+    public Response getSinks(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("path") @Parameter(description = "path of the ressource") @Nullable String path) {
+        final Locale locale = localeService.getLocale(language);
+
+        Map<String, MediaDevice> devices = mediaService.getMediaDevices();
+
+        MediaSinkDTOCollection dtoCol = new MediaSinkDTOCollection();
+        for (MediaDevice device : devices.values()) {
+            MediaSinkDTO dto = new MediaSinkDTO(device.getId(), device.getName(), device.getType());
+            dtoCol.addMediaSinkDTO(dto);
+        }
+
+        return Response.ok(dtoCol).build();
+    }
 }

@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.media.MediaDevice;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
 import org.openhab.core.media.model.MediaRegistry;
@@ -33,6 +34,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true)
 public class MediaServiceImpl implements MediaService {
     private Map<String, MediaListenner> mediaListenner = new HashMap<String, MediaListenner>();
+    private Map<String, MediaDevice> mediaDevices = new HashMap<String, MediaDevice>();
 
     public @Nullable MediaListenner listenner = null;
     public MediaRegistry registry = new MediaRegistry();
@@ -59,6 +61,16 @@ public class MediaServiceImpl implements MediaService {
         }
 
         return null;
+    }
+
+    @Override
+    public void registerDevice(MediaDevice device) {
+        mediaDevices.put(device.getId(), device);
+    }
+
+    @Override
+    public Map<String, MediaDevice> getMediaDevices() {
+        return mediaDevices;
     }
 
     public Map<String, MediaListenner> getMediaListenners() {
