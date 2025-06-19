@@ -152,7 +152,8 @@ public class MediaResource implements RESTResource {
 
         MediaSinkDTOCollection dtoCol = new MediaSinkDTOCollection();
         for (MediaDevice device : devices.values()) {
-            MediaSinkDTO dto = new MediaSinkDTO(device.getId(), device.getName(), device.getType());
+            MediaSinkDTO dto = new MediaSinkDTO(device.getId(), device.getName(), device.getType(),
+                    device.getBinding());
             dtoCol.addMediaSinkDTO(dto);
         }
 
