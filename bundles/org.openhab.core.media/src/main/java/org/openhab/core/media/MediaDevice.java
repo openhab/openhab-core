@@ -24,11 +24,13 @@ public class MediaDevice {
     private String id;
     private String name;
     private String type;
+    private String binding;
 
-    public MediaDevice(String id, String name, String type) {
+    public MediaDevice(String id, String name, String type, String binding) {
         this.id = id;
         this.name = name;
         this.type = type;
+        this.binding = binding;
     }
 
     public String getId() {
@@ -41,6 +43,10 @@ public class MediaDevice {
 
     public String getType() {
         return this.type;
+    }
+
+    public String getBinding() {
+        return this.binding;
     }
 
 }
