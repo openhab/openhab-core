@@ -25,7 +25,8 @@ import org.openhab.core.types.PrimitiveType;
 public enum MediaCommandType implements PrimitiveType, Command {
     NONE,
     PLAY,
-    ENQUEUE;
+    ENQUEUE,
+    DEVICE;
 
     @Override
     public String format(String pattern) {
