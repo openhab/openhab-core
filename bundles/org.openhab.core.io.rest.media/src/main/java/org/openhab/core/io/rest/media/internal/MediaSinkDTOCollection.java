@@ -7,7 +7,7 @@ public class MediaSinkDTOCollection extends MediaSinkDTO {
     private final List<MediaSinkDTO> childs;
 
     public MediaSinkDTOCollection() {
-        super("id", "name", "type");
+        super("id", "name", "type", "binding");
         childs = new ArrayList<>();
     }
 
