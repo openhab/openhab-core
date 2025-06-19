@@ -35,17 +35,20 @@ public class MediaType implements ComplexType, State, Command {
 
     public static final String KEY_COMMAND = "command";
     public static final String KEY_PARAM = "param";
+    public static final String KEY_DEVICE = "device";
 
     private final MediaCommandType command;
     private final String param;
+    private final String device;
 
     public MediaType() {
-        this(MediaCommandType.NONE, "");
+        this(MediaCommandType.NONE, "", "");
     }
 
-    public MediaType(MediaCommandType command, @Nullable String param) {
+    public MediaType(MediaCommandType command, @Nullable String param, @Nullable String device) {
         this.command = command;
         this.param = param != null ? param : "";
+        this.device = device != null ? device : "";
     }
 
     @Override
@@ -55,15 +58,24 @@ public class MediaType implements ComplexType, State, Command {
 
     @Override
     public String toFullString() {
-        return this.command.toFullString() + "," + param;
+        return this.command.toFullString() + "," + param + "," + device;
     }
 
     public static MediaType valueOf(String value) {
         List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).toList();
-        if (constituents.size() == 2) {
+        if (constituents.size() >= 2) {
             String commandSt = constituents.getFirst();
             MediaCommandType command = MediaCommandType.valueOf(commandSt);
-            return new MediaType(command, constituents.get(1));
+
+            if (command == MediaCommandType.DEVICE) {
+                String device = constituents.size() >= 2 ? constituents.get(2) : "";
+                return new MediaType(command, "", device);
+            } else {
+                String param = constituents.size() >= 1 ? constituents.get(1) : "";
+                String device = constituents.size() >= 2 ? constituents.get(2) : "";
+
+                return new MediaType(command, param, device);
+            }
         } else {
             throw new IllegalArgumentException(value + " is not a valid HSBType syntax");
         }
@@ -84,6 +96,7 @@ public class MediaType implements ComplexType, State, Command {
         TreeMap<String, PrimitiveType> map = new TreeMap<>();
         map.put(KEY_COMMAND, getCommand());
         map.put(KEY_PARAM, getCommand());
+        map.put(KEY_DEVICE, getDevice());
         return map;
     }
 
@@ -93,6 +106,10 @@ public class MediaType implements ComplexType, State, Command {
 
     public StringType getParam() {
         return new StringType(param);
+    }
+
+    public StringType getDevice() {
+        return new StringType(device);
     }
 
     @Override
@@ -110,6 +127,6 @@ public class MediaType implements ComplexType, State, Command {
             return false;
         }
         MediaType other = (MediaType) obj;
-        return Objects.equals(this.param, other.param);
+        return Objects.equals(this.param, other.param) && Objects.equals(this.device, other.device);
     }
 }
