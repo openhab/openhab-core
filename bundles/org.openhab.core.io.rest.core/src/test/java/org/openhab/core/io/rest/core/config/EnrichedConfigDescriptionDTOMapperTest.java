@@ -95,9 +95,9 @@ public class EnrichedConfigDescriptionDTOMapperTest {
 
     @Test
     public void testThatDefaultValuesDontSplitEscapedCommas() {
-        final String config_parameter_default_value = "Me\\, myself\\, and I,You \\\\,";
+        final String configParameterDefaultValue = "Me\\, myself\\, and I,You \\\\,";
         ConfigDescriptionParameter configDescriptionParameter = ConfigDescriptionParameterBuilder
-                .create(CONFIG_PARAMETER_NAME, Type.TEXT).withDefault(config_parameter_default_value).withMultiple(true)
+                .create(CONFIG_PARAMETER_NAME, Type.TEXT).withDefault(configParameterDefaultValue).withMultiple(true)
                 .build();
         ConfigDescription configDescription = ConfigDescriptionBuilder.create(CONFIG_URI)
                 .withParameter(configDescriptionParameter).build();
@@ -107,7 +107,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
 
         ConfigDescriptionParameterDTO cdpdto = cddto.parameters.getFirst();
         assertThat(cdpdto, instanceOf(EnrichedConfigDescriptionParameterDTO.class));
-        assertThat(cdpdto.defaultValue, is(config_parameter_default_value));
+        assertThat(cdpdto.defaultValue, is(configParameterDefaultValue));
         EnrichedConfigDescriptionParameterDTO ecdpdto = (EnrichedConfigDescriptionParameterDTO) cdpdto;
         assertThat(ecdpdto.defaultValues, is(notNullValue()));
         assertThat(ecdpdto.defaultValues, hasSize(2));
