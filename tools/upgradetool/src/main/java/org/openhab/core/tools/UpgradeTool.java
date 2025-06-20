@@ -31,6 +31,7 @@ import org.openhab.core.tools.internal.ItemUnitToMetadataUpgrader;
 import org.openhab.core.tools.internal.JSProfileUpgrader;
 import org.openhab.core.tools.internal.ScriptProfileUpgrader;
 import org.openhab.core.tools.internal.YamlConfigurationV1TagsUpgrader;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
