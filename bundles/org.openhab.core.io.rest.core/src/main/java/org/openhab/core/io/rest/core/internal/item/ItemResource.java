@@ -277,11 +277,7 @@ public class ItemResource implements RESTResource {
             Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                     .map(item -> EnrichedItemDTOMapper.map(item, false, null, uriBuilder, locale, zoneId)) //
                     .peek(dto -> addMetadata(dto, namespaces, null)) //
-<<<<<<< HEAD
                     .peek(dto -> dto.editable = isEditable(dto));
-=======
-                    .peek(dto -> dto.editable = isEditable(dto.name));
->>>>>>> 0cbd2e12b (include all parents)
             itemStream = dtoMapper.limitToFields(itemStream,
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
@@ -305,7 +301,7 @@ public class ItemResource implements RESTResource {
                     }
                     if (dto.parents != null) {
                         for (EnrichedItemDTO parent : dto.parents) {
-                            parent.editable = isEditable(parent.name);
+                            parent.editable = isEditable(parent);
                         }
                     }
                 });
@@ -374,7 +370,7 @@ public class ItemResource implements RESTResource {
             }
             if (dto.parents != null) {
                 for (EnrichedItemDTO parent : dto.parents) {
-                    parent.editable = isEditable(parent.name);
+                    parent.editable = isEditable(parent);
                 }
             }
             return JSONResponse.createResponse(Status.OK, dto, null);
