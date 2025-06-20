@@ -27,11 +27,7 @@ import org.apache.commons.cli.ParseException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.json.internal.JsonStorage;
-import org.openhab.core.tools.internal.ItemUnitToMetadataUpgrader;
-import org.openhab.core.tools.internal.JSProfileUpgrader;
-import org.openhab.core.tools.internal.ScriptProfileUpgrader;
-import org.openhab.core.tools.internal.YamlConfigurationV1TagsUpgrader;
-import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.openhab.core.tools.internal.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
