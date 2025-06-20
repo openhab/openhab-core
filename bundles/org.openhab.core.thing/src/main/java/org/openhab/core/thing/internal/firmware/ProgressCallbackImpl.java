@@ -55,7 +55,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
     private final BundleResolver bundleResolver;
     private final ThingUID thingUID;
     private final Firmware firmware;
-    private final Locale locale;
+    private final @Nullable Locale locale;
 
     private @Nullable Collection<ProgressStep> sequence;
     private @Nullable Iterator<ProgressStep> progressIterator;
@@ -73,7 +73,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
 
     ProgressCallbackImpl(FirmwareUpdateHandler firmwareUpdateHandler, EventPublisher eventPublisher,
             TranslationProvider i18nProvider, BundleResolver bundleResolver, ThingUID thingUID, Firmware firmware,
-            Locale locale) {
+            @Nullable Locale locale) {
         this.firmwareUpdateHandler = firmwareUpdateHandler;
         ParameterChecks.checkNotNull(eventPublisher, "Event publisher");
         this.eventPublisher = eventPublisher;
