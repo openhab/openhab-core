@@ -27,9 +27,9 @@ import org.osgi.service.http.HttpContext;
 @NonNullByDefault
 class BundleHttpContext extends DelegatingHttpContext {
 
-    private final Bundle bundle;
+    private final @Nullable Bundle bundle;
 
-    BundleHttpContext(HttpContext delegate, Bundle bundle) {
+    BundleHttpContext(HttpContext delegate, @Nullable Bundle bundle) {
         super(delegate);
         this.bundle = bundle;
     }
@@ -37,7 +37,7 @@ class BundleHttpContext extends DelegatingHttpContext {
     @Override
     @Nullable
     public URL getResource(@Nullable String name) {
-        if (name != null) {
+        if ((name != null) && (bundle != null)) {
             String resourceName;
             if (name.startsWith("/")) {
                 resourceName = name.substring(1);

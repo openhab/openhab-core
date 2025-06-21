@@ -77,7 +77,7 @@ public class OpenHABHttpContext implements WrappingHttpContext {
     }
 
     @Override
-    public HttpContext wrap(Bundle bundle) {
+    public HttpContext wrap(@Nullable Bundle bundle) {
         return new BundleHttpContext(this, bundle);
     }
 
