@@ -13,21 +13,25 @@
 package org.openhab.core.library.types;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.library.items.PlayerItem;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
-import org.openhab.core.types.State;
 
 /**
- * This type is used by the {@link PlayerItem}.
+ * This type is used by the {@link org.openhab.core.library.items.PlayerItem}.
  *
- * @author Alex Tugarev - Initial contribution
+ * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public enum PlayPauseType implements PrimitiveType, State, Command {
+public enum MediaCommandType implements PrimitiveType, Command {
     NONE,
     PLAY,
-    PAUSE;
+    ENQUEUE,
+    DEVICE,
+    PAUSE,
+    NEXT,
+    PREVIOUS,
+    REWIND,
+    FASTFORWARD;
 
     @Override
     public String format(String pattern) {
