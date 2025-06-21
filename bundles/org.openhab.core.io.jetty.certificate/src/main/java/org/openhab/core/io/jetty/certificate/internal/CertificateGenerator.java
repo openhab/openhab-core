@@ -12,6 +12,9 @@
  */
 package org.openhab.core.io.jetty.certificate.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -82,7 +85,7 @@ public class CertificateGenerator implements BundleActivator {
     private File keystoreFile;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(@Nullable BundleContext context) throws Exception {
         logger = LoggerFactory.getLogger(CertificateGenerator.class);
         try {
             KeyStore keystore = ensureKeystore();
@@ -99,7 +102,7 @@ public class CertificateGenerator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(@Nullable BundleContext context) throws Exception {
         // Nothing to do.
     }
 

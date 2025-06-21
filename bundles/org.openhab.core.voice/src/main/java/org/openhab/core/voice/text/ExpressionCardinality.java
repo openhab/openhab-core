@@ -17,12 +17,15 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Expression that successfully parses, if a given expression occurs or repeats with a specified cardinality. This class
  * is immutable.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public final class ExpressionCardinality extends Expression {
 
     private Expression subExpression;
