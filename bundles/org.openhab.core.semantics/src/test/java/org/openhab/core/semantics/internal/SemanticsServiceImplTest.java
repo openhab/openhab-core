@@ -292,37 +292,37 @@ public class SemanticsServiceImplTest {
     @Test
     public void testCheckSemantics() {
         // Valid Locations and Equipments to be used for the tests
-        GroupItem Location1 = new GroupItem("Location1");
-        Location1.addTag("Bathroom");
+        GroupItem location1 = new GroupItem("Location1");
+        location1.addTag("Bathroom");
 
-        GroupItem Location2 = new GroupItem("Location2");
-        Location2.addTag("Kitchen");
+        GroupItem location2 = new GroupItem("Location2");
+        location2.addTag("Kitchen");
 
-        GroupItem Location1Sub = new GroupItem("Location1Sub");
-        Location1Sub.addTag("Room");
+        GroupItem location1Sub = new GroupItem("Location1Sub");
+        location1Sub.addTag("Room");
 
-        GroupItem Equipment1 = new GroupItem("Equipment1");
-        Equipment1.addTag("Lightbulb");
+        GroupItem equipment1 = new GroupItem("Equipment1");
+        equipment1.addTag("Lightbulb");
 
-        GroupItem Equipment2 = new GroupItem("Equipment2");
-        Equipment2.addTag("Lightbulb");
+        GroupItem equipment2 = new GroupItem("Equipment2");
+        equipment2.addTag("Lightbulb");
 
-        GroupItem Equipment1Sub = new GroupItem("Equipment1Sub");
-        Equipment1Sub.addTag("Lightbulb");
+        GroupItem equipment1Sub = new GroupItem("Equipment1Sub");
+        equipment1Sub.addTag("Lightbulb");
 
-        GroupItem PointGroup = new GroupItem("PointGroup");
-        PointGroup.addTag("Switch");
+        GroupItem pointGroup = new GroupItem("PointGroup");
+        pointGroup.addTag("Switch");
 
-        Equipment1.addMember(Equipment1Sub);
-        Equipment1.addMember(PointGroup);
+        equipment1.addMember(equipment1Sub);
+        equipment1.addMember(pointGroup);
 
-        Location1.addMember(Location1Sub);
-        Location1.addMember(Equipment1);
-        Location1.addMember(PointGroup);
+        location1.addMember(location1Sub);
+        location1.addMember(equipment1);
+        location1.addMember(pointGroup);
 
-        Location1Sub.addMember(Equipment2);
+        location1Sub.addMember(equipment2);
 
-        Stream.of(Location1, Location2, Location1Sub, Equipment1, Equipment2, Equipment1Sub, PointGroup).forEach(i -> {
+        Stream.of(location1, location2, location1Sub, equipment1, equipment2, equipment1Sub, pointGroup).forEach(i -> {
             try {
                 when(itemRegistryMock.getItem(i.getName())).thenReturn(i);
             } catch (ItemNotFoundException e) {
@@ -333,177 +333,177 @@ public class SemanticsServiceImplTest {
         // Test Items
 
         // Valid Points
-        GenericItem ValidPoint1 = new NumberItem("ValidPoint1");
-        ValidPoint1.addTag("Switch");
-        Location1.addMember(ValidPoint1);
-        assertTrue(service.checkSemantics(ValidPoint1));
+        GenericItem validPoint1 = new NumberItem("ValidPoint1");
+        validPoint1.addTag("Switch");
+        location1.addMember(validPoint1);
+        assertTrue(service.checkSemantics(validPoint1));
 
-        GenericItem ValidPoint2 = new NumberItem("ValidPoint2");
-        ValidPoint2.addTag("Switch");
-        Equipment1.addMember(ValidPoint2);
-        assertTrue(service.checkSemantics(ValidPoint2));
+        GenericItem validPoint2 = new NumberItem("ValidPoint2");
+        validPoint2.addTag("Switch");
+        equipment1.addMember(validPoint2);
+        assertTrue(service.checkSemantics(validPoint2));
 
         // A Group Item is a valid Point
-        GroupItem ValidPoint3 = new GroupItem("ValidPoint3");
-        ValidPoint3.addTag("Switch");
-        assertTrue(service.checkSemantics(ValidPoint3));
+        GroupItem validPoint3 = new GroupItem("ValidPoint3");
+        validPoint3.addTag("Switch");
+        assertTrue(service.checkSemantics(validPoint3));
 
         // Being a Member of another Point (Group) is OK, they are independent of each other
-        GenericItem ValidPoint4 = new NumberItem("ValidPoint4");
-        ValidPoint4.addTag("Switch");
-        PointGroup.addMember(ValidPoint4);
-        assertTrue(service.checkSemantics(ValidPoint4));
+        GenericItem validPoint4 = new NumberItem("ValidPoint4");
+        validPoint4.addTag("Switch");
+        pointGroup.addMember(validPoint4);
+        assertTrue(service.checkSemantics(validPoint4));
 
         // Not a member of any Location or Equipment
-        GenericItem ValidPoint5 = new NumberItem("ValidPoint5");
-        ValidPoint5.addTag("Switch");
-        assertTrue(service.checkSemantics(ValidPoint5));
+        GenericItem validPoint5 = new NumberItem("ValidPoint5");
+        validPoint5.addTag("Switch");
+        assertTrue(service.checkSemantics(validPoint5));
 
         // Belonging to Location and Equipment is allowed
         // for example:
         // When a location contains multiple equipments / temperature points,
         // a point who is the direct member of the location is preferred
-        GenericItem ValidPoint6 = new NumberItem("ValidPoint6");
-        ValidPoint6.addTag("Switch");
-        Location1.addMember(ValidPoint6);
-        Equipment1.addMember(ValidPoint6);
-        assertTrue(service.checkSemantics(ValidPoint6));
+        GenericItem validPoint6 = new NumberItem("ValidPoint6");
+        validPoint6.addTag("Switch");
+        location1.addMember(validPoint6);
+        equipment1.addMember(validPoint6);
+        assertTrue(service.checkSemantics(validPoint6));
 
         // Same case as above, but in a sub equipment
-        GenericItem ValidPoint7 = new NumberItem("ValidPoint7");
-        ValidPoint7.addTag("Switch");
-        Location1.addMember(ValidPoint7);
-        Equipment1Sub.addMember(ValidPoint7);
-        assertTrue(service.checkSemantics(ValidPoint7));
+        GenericItem validPoint7 = new NumberItem("ValidPoint7");
+        validPoint7.addTag("Switch");
+        location1.addMember(validPoint7);
+        equipment1Sub.addMember(validPoint7);
+        assertTrue(service.checkSemantics(validPoint7));
 
         // Belongs to two independent locations
-        GenericItem InvalidPoint1 = new NumberItem("InvalidPoint1");
-        InvalidPoint1.addTag("Switch");
-        Location1.addMember(InvalidPoint1);
-        Location2.addMember(InvalidPoint1);
-        assertTrue(InvalidPoint1.getGroupNames().contains(Location1.getName()));
-        assertFalse(service.checkSemantics(InvalidPoint1));
+        GenericItem invalidPoint1 = new NumberItem("InvalidPoint1");
+        invalidPoint1.addTag("Switch");
+        location1.addMember(invalidPoint1);
+        location2.addMember(invalidPoint1);
+        assertTrue(invalidPoint1.getGroupNames().contains(location1.getName()));
+        assertFalse(service.checkSemantics(invalidPoint1));
 
         // Belongs to Location and its sub location
-        GenericItem InvalidPoint2 = new NumberItem("InvalidPoint2");
-        InvalidPoint2.addTag("Switch");
-        Location1.addMember(InvalidPoint2);
-        Location1Sub.addMember(InvalidPoint2);
-        assertFalse(service.checkSemantics(InvalidPoint2));
+        GenericItem invalidPoint2 = new NumberItem("InvalidPoint2");
+        invalidPoint2.addTag("Switch");
+        location1.addMember(invalidPoint2);
+        location1Sub.addMember(invalidPoint2);
+        assertFalse(service.checkSemantics(invalidPoint2));
 
         // Belongs to two Equipments
-        GenericItem InvalidPoint3 = new NumberItem("InvalidPoint3");
-        InvalidPoint3.addTag("Switch");
-        Equipment1.addMember(InvalidPoint3);
-        Equipment2.addMember(InvalidPoint3);
-        assertFalse(service.checkSemantics(InvalidPoint3));
+        GenericItem invalidPoint3 = new NumberItem("InvalidPoint3");
+        invalidPoint3.addTag("Switch");
+        equipment1.addMember(invalidPoint3);
+        equipment2.addMember(invalidPoint3);
+        assertFalse(service.checkSemantics(invalidPoint3));
 
         // Locations
 
         // It's OK not to be a member of any Location
-        GroupItem ValidLocation1 = new GroupItem("ValidLocation1");
-        ValidLocation1.addTag("Bathroom");
-        assertTrue(service.checkSemantics(ValidLocation1));
+        GroupItem validLocation1 = new GroupItem("ValidLocation1");
+        validLocation1.addTag("Bathroom");
+        assertTrue(service.checkSemantics(validLocation1));
 
         // Member of a Location
-        GroupItem ValidLocation2 = new GroupItem("ValidLocation2");
-        ValidLocation2.addTag("Bathroom");
-        Location1.addMember(ValidLocation2);
-        assertTrue(service.checkSemantics(ValidLocation2));
+        GroupItem validLocation2 = new GroupItem("ValidLocation2");
+        validLocation2.addTag("Bathroom");
+        location1.addMember(validLocation2);
+        assertTrue(service.checkSemantics(validLocation2));
 
         // Member of a Point is fine
-        GroupItem ValidLocation3 = new GroupItem("ValidLocation3");
-        ValidLocation3.addTag("Bathroom");
-        PointGroup.addMember(ValidLocation3);
-        assertTrue(service.checkSemantics(ValidLocation3));
+        GroupItem validLocation3 = new GroupItem("validLocation3");
+        validLocation3.addTag("Bathroom");
+        pointGroup.addMember(validLocation3);
+        assertTrue(service.checkSemantics(validLocation3));
 
         // Non-GroupItem is not a valid Location
-        NumberItem InvalidLocation1 = new NumberItem("InvalidLocation1");
-        InvalidLocation1.addTag("Bathroom");
-        assertFalse(service.checkSemantics(InvalidLocation1));
+        NumberItem invalidLocation1 = new NumberItem("InvalidLocation1");
+        invalidLocation1.addTag("Bathroom");
+        assertFalse(service.checkSemantics(invalidLocation1));
 
         // Belongs to two Locations
-        GroupItem InvalidLocation2 = new GroupItem("InvalidLocation2");
-        InvalidLocation2.addTag("Bathroom");
-        Location1.addMember(InvalidLocation2);
-        Location2.addMember(InvalidLocation2);
-        assertFalse(service.checkSemantics(InvalidLocation2));
+        GroupItem invalidLocation2 = new GroupItem("InvalidLocation2");
+        invalidLocation2.addTag("Bathroom");
+        location1.addMember(invalidLocation2);
+        location2.addMember(invalidLocation2);
+        assertFalse(service.checkSemantics(invalidLocation2));
 
         // Belongs to Equipment
-        GroupItem InvalidLocation3 = new GroupItem("InvalidLocation3");
-        InvalidLocation3.addTag("Bathroom");
-        Equipment1.addMember(InvalidLocation3);
-        assertFalse(service.checkSemantics(InvalidLocation3));
+        GroupItem invalidLocation3 = new GroupItem("InvalidLocation3");
+        invalidLocation3.addTag("Bathroom");
+        equipment1.addMember(invalidLocation3);
+        assertFalse(service.checkSemantics(invalidLocation3));
 
         // Belongs to Location and Equipment
-        GroupItem InvalidLocation4 = new GroupItem("InvalidLocation4");
-        InvalidLocation4.addTag("Bathroom");
-        Location1.addMember(InvalidLocation4);
-        Equipment1.addMember(InvalidLocation4);
-        assertFalse(service.checkSemantics(InvalidLocation4));
+        GroupItem invalidLocation4 = new GroupItem("InvalidLocation4");
+        invalidLocation4.addTag("Bathroom");
+        location1.addMember(invalidLocation4);
+        equipment1.addMember(invalidLocation4);
+        assertFalse(service.checkSemantics(invalidLocation4));
 
         // Belongs to Location and Location1Sub
-        GroupItem InvalidLocation5 = new GroupItem("InvalidLocation5");
-        InvalidLocation5.addTag("Bathroom");
-        Location1Sub.addMember(InvalidLocation5);
-        Location1.addMember(InvalidLocation5);
-        assertFalse(service.checkSemantics(InvalidLocation5));
+        GroupItem invalidLocation5 = new GroupItem("InvalidLocation5");
+        invalidLocation5.addTag("Bathroom");
+        location1Sub.addMember(invalidLocation5);
+        location1.addMember(invalidLocation5);
+        assertFalse(service.checkSemantics(invalidLocation5));
 
         // Equipments
 
         // It's OK not to be a member of any Equipment or Location
-        GroupItem ValidEquipment1 = new GroupItem("ValidEquipment1");
-        ValidEquipment1.addTag("Lightbulb");
-        assertTrue(service.checkSemantics(ValidEquipment1));
+        GroupItem validEquipment1 = new GroupItem("ValidEquipment1");
+        validEquipment1.addTag("Lightbulb");
+        assertTrue(service.checkSemantics(validEquipment1));
 
         // Member of an Equipment
-        GroupItem ValidEquipment2 = new GroupItem("ValidEquipment2");
-        ValidEquipment2.addTag("Lightbulb");
-        Equipment1.addMember(ValidEquipment2);
-        assertTrue(service.checkSemantics(ValidEquipment2));
+        GroupItem validEquipment2 = new GroupItem("ValidEquipment2");
+        validEquipment2.addTag("Lightbulb");
+        equipment1.addMember(validEquipment2);
+        assertTrue(service.checkSemantics(validEquipment2));
 
         // Member of a Equipment1Sub
-        GroupItem ValidEquipment3 = new GroupItem("ValidEquipment3");
-        ValidEquipment3.addTag("Lightbulb");
-        Equipment1Sub.addMember(ValidEquipment3);
-        assertTrue(service.checkSemantics(ValidEquipment3));
+        GroupItem validEquipment3 = new GroupItem("ValidEquipment3");
+        validEquipment3.addTag("Lightbulb");
+        equipment1Sub.addMember(validEquipment3);
+        assertTrue(service.checkSemantics(validEquipment3));
 
         // Member of a Point is fine
-        GroupItem ValidEquipment4 = new GroupItem("ValidEquipment4");
-        ValidEquipment4.addTag("Lightbulb");
-        PointGroup.addMember(ValidEquipment4);
-        assertTrue(service.checkSemantics(ValidEquipment4));
+        GroupItem validEquipment4 = new GroupItem("ValidEquipment4");
+        validEquipment4.addTag("Lightbulb");
+        pointGroup.addMember(validEquipment4);
+        assertTrue(service.checkSemantics(validEquipment4));
 
         // Non-GroupItem is a valid Equipment
-        NumberItem ValidEquipment5 = new NumberItem("ValidEquipment5");
-        ValidEquipment5.addTag("Lightbulb");
-        assertTrue(service.checkSemantics(ValidEquipment5));
+        NumberItem validEquipment5 = new NumberItem("ValidEquipment5");
+        validEquipment5.addTag("Lightbulb");
+        assertTrue(service.checkSemantics(validEquipment5));
 
         // Belongs to a Location
-        GroupItem ValidEquipment6 = new GroupItem("ValidEquipment6");
-        ValidEquipment6.addTag("Lightbulb");
-        Location1.addMember(ValidEquipment6);
-        assertTrue(service.checkSemantics(ValidEquipment6));
+        GroupItem validEquipment6 = new GroupItem("ValidEquipment6");
+        validEquipment6.addTag("Lightbulb");
+        location1.addMember(validEquipment6);
+        assertTrue(service.checkSemantics(validEquipment6));
 
         // Belongs to two Equipments
-        GroupItem InvalidEquipment1 = new GroupItem("InvalidEquipment1");
-        InvalidEquipment1.addTag("Lightbulb");
-        Equipment1.addMember(InvalidEquipment1);
-        Equipment2.addMember(InvalidEquipment1);
-        assertFalse(service.checkSemantics(InvalidEquipment1));
+        GroupItem invalidEquipment1 = new GroupItem("InvalidEquipment1");
+        invalidEquipment1.addTag("Lightbulb");
+        equipment1.addMember(invalidEquipment1);
+        equipment2.addMember(invalidEquipment1);
+        assertFalse(service.checkSemantics(invalidEquipment1));
 
         // Belongs to Location and Equipment
-        GroupItem InvalidEquipment2 = new GroupItem("InvalidEquipment2");
-        InvalidEquipment2.addTag("Lightbulb");
-        Location1.addMember(InvalidEquipment2);
-        Equipment1.addMember(InvalidEquipment2);
-        assertFalse(service.checkSemantics(InvalidEquipment2));
+        GroupItem invalidEquipment2 = new GroupItem("InvalidEquipment2");
+        invalidEquipment2.addTag("Lightbulb");
+        location1.addMember(invalidEquipment2);
+        equipment1.addMember(invalidEquipment2);
+        assertFalse(service.checkSemantics(invalidEquipment2));
 
         // Belongs to two Locations
-        GroupItem InvalidEquipment3 = new GroupItem("InvalidEquipment3");
-        InvalidEquipment3.addTag("Lightbulb");
-        Location1.addMember(InvalidEquipment3);
-        Location2.addMember(InvalidEquipment3);
-        assertFalse(service.checkSemantics(InvalidEquipment3));
+        GroupItem invalidEquipment3 = new GroupItem("InvalidEquipment3");
+        invalidEquipment3.addTag("Lightbulb");
+        location1.addMember(invalidEquipment3);
+        location2.addMember(invalidEquipment3);
+        assertFalse(service.checkSemantics(invalidEquipment3));
     }
 }

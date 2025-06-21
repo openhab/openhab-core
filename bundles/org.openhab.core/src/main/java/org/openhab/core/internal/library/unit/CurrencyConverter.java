@@ -110,6 +110,5 @@ public class CurrencyConverter extends AbstractConverter {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException("Could not add currency converter", e);
         }
-
     }
 }
