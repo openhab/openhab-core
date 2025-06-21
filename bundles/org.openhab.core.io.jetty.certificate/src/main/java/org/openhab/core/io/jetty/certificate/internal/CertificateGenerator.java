@@ -12,9 +12,6 @@
  */
 package org.openhab.core.io.jetty.certificate.internal;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,6 +55,7 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
