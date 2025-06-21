@@ -63,10 +63,8 @@ final class TypeIntrospections {
     abstract static class TypeIntrospection {
 
         private final Class<?> clazz;
-        @Nullable
-        private final MessageKey minViolationMessageKey;
-        @Nullable
-        private final MessageKey maxViolationMessageKey;
+        private final @Nullable MessageKey minViolationMessageKey;
+        private final @Nullable MessageKey maxViolationMessageKey;
 
         private TypeIntrospection(Class<?> clazz) {
             this(clazz, null, null);
