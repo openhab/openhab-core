@@ -15,11 +15,11 @@ package org.openhab.core.io.http.internal;
 import java.util.Deque;
 import java.util.Iterator;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.http.Handler;
 import org.openhab.core.io.http.HandlerContext;
 import org.slf4j.Logger;
