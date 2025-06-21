@@ -36,9 +36,9 @@ public final class FirmwareUpdateProgressInfo {
 
     private final String firmwareVersion;
 
-    private final ProgressStep progressStep;
+    private final @Nullable ProgressStep progressStep;
 
-    private final Collection<ProgressStep> sequence;
+    private final @Nullable Collection<ProgressStep> sequence;
 
     private final boolean pending;
 
@@ -66,10 +66,6 @@ public final class FirmwareUpdateProgressInfo {
         if (progress < 0 || progress > 100) {
             throw new IllegalArgumentException("The progress must be between 0 and 100.");
         }
-        if (sequence == null || sequence.isEmpty()) {
-            throw new IllegalArgumentException("Sequence must not be null or empty.");
-        }
-        Objects.requireNonNull(progressStep, "Progress step must not be null.");
 
         this.thingUID = thingUID;
         this.firmwareVersion = firmwareVersion;
@@ -148,6 +144,7 @@ public final class FirmwareUpdateProgressInfo {
      *
      * @return the current progress step (not null)
      */
+    @Nullable
     public ProgressStep getProgressStep() {
         return progressStep;
     }
@@ -157,6 +154,7 @@ public final class FirmwareUpdateProgressInfo {
      *
      * @return the sequence (not null)
      */
+    @Nullable
     public Collection<ProgressStep> getSequence() {
         return sequence;
     }
