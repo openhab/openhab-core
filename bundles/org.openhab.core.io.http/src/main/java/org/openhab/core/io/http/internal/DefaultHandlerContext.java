@@ -15,6 +15,8 @@ package org.openhab.core.io.http.internal;
 import java.util.Deque;
 import java.util.Iterator;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,12 +35,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public class DefaultHandlerContext implements HandlerContext {
 
     private final Logger logger = LoggerFactory.getLogger(DefaultHandlerContext.class);
     private final Deque<Handler> handlers;
     private Iterator<Handler> cursor;
-    private Exception error;
+    private @Nullable Exception error;
 
     public DefaultHandlerContext(Deque<Handler> handlers) {
         this.handlers = handlers;
@@ -46,7 +49,7 @@ public class DefaultHandlerContext implements HandlerContext {
     }
 
     @Override
-    public void execute(HttpServletRequest request, HttpServletResponse response) {
+    public void execute(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response) {
         if (cursor.hasNext()) {
             boolean hasError = hasError();
 
@@ -84,7 +87,7 @@ public class DefaultHandlerContext implements HandlerContext {
     }
 
     @Override
-    public void error(Exception error) {
+    public void error(@Nullable Exception error) {
         this.error = error;
     }
 }
