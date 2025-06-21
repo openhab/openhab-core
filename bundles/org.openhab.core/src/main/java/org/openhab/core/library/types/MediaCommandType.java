@@ -26,7 +26,12 @@ public enum MediaCommandType implements PrimitiveType, Command {
     NONE,
     PLAY,
     ENQUEUE,
-    DEVICE;
+    DEVICE,
+    PAUSE,
+    NEXT,
+    PREVIOUS,
+    REWIND,
+    FASTFORWARD;
 
     @Override
     public String format(String pattern) {
