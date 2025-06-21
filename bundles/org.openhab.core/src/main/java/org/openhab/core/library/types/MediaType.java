@@ -33,22 +33,29 @@ import org.openhab.core.types.State;
 @NonNullByDefault
 public class MediaType implements ComplexType, State, Command {
 
+    public static final String KEY_STATE = "state";
     public static final String KEY_COMMAND = "command";
     public static final String KEY_PARAM = "param";
     public static final String KEY_DEVICE = "device";
+    public static final String KEY_BINDING = "binding";
 
+    private final PlayPauseType state;
     private final MediaCommandType command;
     private final String param;
-    private final String device;
+    private final StringType device;
+    private final StringType binding;
 
     public MediaType() {
-        this(MediaCommandType.NONE, "", "");
+        this(PlayPauseType.PLAY, MediaCommandType.NONE, "", new StringType(""), new StringType(""));
     }
 
-    public MediaType(MediaCommandType command, @Nullable String param, @Nullable String device) {
+    public MediaType(PlayPauseType state, MediaCommandType command, @Nullable String param, @Nullable StringType device,
+            @Nullable StringType binding) {
+        this.state = state;
         this.command = command;
         this.param = param != null ? param : "";
-        this.device = device != null ? device : "";
+        this.device = device != null ? device : new StringType("");
+        this.binding = binding != null ? binding : new StringType("");
     }
 
     @Override
@@ -58,27 +65,20 @@ public class MediaType implements ComplexType, State, Command {
 
     @Override
     public String toFullString() {
-        return this.command.toFullString() + "," + param + "," + device;
+        return this.state.toFullString() + "," + this.command.toFullString() + "," + param + "," + device + ","
+                + binding;
     }
 
     public static MediaType valueOf(String value) {
         List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).toList();
-        if (constituents.size() >= 2) {
-            String commandSt = constituents.getFirst();
-            MediaCommandType command = MediaCommandType.valueOf(commandSt);
 
-            if (command == MediaCommandType.DEVICE) {
-                String device = constituents.size() >= 2 ? constituents.get(2) : "";
-                return new MediaType(command, "", device);
-            } else {
-                String param = constituents.size() >= 1 ? constituents.get(1) : "";
-                String device = constituents.size() >= 2 ? constituents.get(2) : "";
+        PlayPauseType state = PlayPauseType.valueOf(constituents.get(0));
+        MediaCommandType command = MediaCommandType.valueOf(constituents.get(1));
+        String param = constituents.get(2);
+        StringType device = new StringType(constituents.get(3));
+        StringType binding = new StringType(constituents.get(4));
 
-                return new MediaType(command, param, device);
-            }
-        } else {
-            throw new IllegalArgumentException(value + " is not a valid HSBType syntax");
-        }
+        return new MediaType(state, command, param, device, binding);
     }
 
     @Override
@@ -94,10 +94,15 @@ public class MediaType implements ComplexType, State, Command {
     @Override
     public SortedMap<String, PrimitiveType> getConstituents() {
         TreeMap<String, PrimitiveType> map = new TreeMap<>();
+        map.put(KEY_STATE, getState());
         map.put(KEY_COMMAND, getCommand());
         map.put(KEY_PARAM, getCommand());
         map.put(KEY_DEVICE, getDevice());
         return map;
+    }
+
+    public PlayPauseType getState() {
+        return state;
     }
 
     public MediaCommandType getCommand() {
@@ -109,7 +114,7 @@ public class MediaType implements ComplexType, State, Command {
     }
 
     public StringType getDevice() {
-        return new StringType(device);
+        return device;
     }
 
     @Override
@@ -127,6 +132,7 @@ public class MediaType implements ComplexType, State, Command {
             return false;
         }
         MediaType other = (MediaType) obj;
-        return Objects.equals(this.param, other.param) && Objects.equals(this.device, other.device);
+        return Objects.equals(this.param, other.param) && Objects.equals(this.device, other.device)
+                && Objects.equals(this.state, other.state) && Objects.equals(this.binding, other.binding);
     }
 }
