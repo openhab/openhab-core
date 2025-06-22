@@ -25,6 +25,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.Gson;
 
@@ -33,7 +34,7 @@ import com.google.gson.Gson;
  *
  * @author Markus Rathgeb - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public class GsonMessageBodyReader<T> implements MessageBodyReader<T> {
 
     private final Gson gson;
@@ -48,12 +49,13 @@ public class GsonMessageBodyReader<T> implements MessageBodyReader<T> {
     }
 
     @Override
-    public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType) {
+    public boolean isReadable(final @Nullable Class<?> type, final @Nullable Type genericType, final Annotation @Nullable [] annotations,
+            final @Nullable MediaType mediaType) {
         return true;
     }
 
     @Override
+    @NonNullByDefault({})
     public T readFrom(final Class<T> type, final Type genericType, final Annotation[] annotations,
             final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
             throws IOException, WebApplicationException {

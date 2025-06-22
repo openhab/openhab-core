@@ -27,6 +27,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.JSONInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ import com.google.gson.Gson;
  *
  * @author Markus Rathgeb - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public class GsonMessageBodyWriter<T> implements MessageBodyWriter<T> {
 
     private final Logger logger = LoggerFactory.getLogger(GsonMessageBodyWriter.class);
@@ -55,18 +56,19 @@ public class GsonMessageBodyWriter<T> implements MessageBodyWriter<T> {
     }
 
     @Override
-    public long getSize(final T object, final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType) {
+    public long getSize(final @Nullable T object, final @Nullable Class<?> type, final @Nullable Type genericType, final Annotation @Nullable [] annotations,
+            final @Nullable MediaType mediaType) {
         return -1;
     }
 
     @Override
-    public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType) {
+    public boolean isWriteable(final @Nullable Class<?> type, final @Nullable Type genericType, final Annotation @Nullable [] annotations,
+            final @Nullable MediaType mediaType) {
         return true;
     }
 
     @Override
+    @NonNullByDefault({})
     public void writeTo(final T object, final Class<?> type, final Type genericType, final Annotation[] annotations,
             final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders,
             final OutputStream entityStream) throws IOException, WebApplicationException {
