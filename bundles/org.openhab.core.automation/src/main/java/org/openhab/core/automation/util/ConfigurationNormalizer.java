@@ -27,12 +27,15 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class provides utility methods used by {@link RuleRegistry} to resolve and normalize the {@link RuleImpl}s
  * configuration values.
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class ConfigurationNormalizer {
 
     /**
