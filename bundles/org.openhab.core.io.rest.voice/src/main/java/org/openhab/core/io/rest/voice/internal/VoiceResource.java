@@ -109,7 +109,7 @@ public class VoiceResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getVoiceInterpreters", summary = "Get the list of all interpreters.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = HumanLanguageInterpreterDTO.class)))) })
-    public Response getInterpreters(
+    public @Nullable Response getInterpreters(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         List<HumanLanguageInterpreterDTO> dtos = voiceManager.getHLIs().stream().map(hli -> HLIMapper.map(hli, locale))
@@ -123,7 +123,7 @@ public class VoiceResource implements RESTResource {
     @Operation(operationId = "getVoiceInterpreterByUID", summary = "Gets a single interpreter.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = HumanLanguageInterpreterDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Interpreter not found") })
-    public Response getInterpreter(
+    public @Nullable Response getInterpreter(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("id") @Parameter(description = "interpreter id") String id) {
         final Locale locale = localeService.getLocale(language);
@@ -144,7 +144,7 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
-    public Response interpret(
+    public @Nullable Response interpret(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @Parameter(description = "text to interpret", required = true) String text,
             @PathParam("ids") @Parameter(description = "comma separated list of interpreter ids") List<String> ids) {
@@ -181,7 +181,7 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
-    public Response interpret(
+    public @Nullable Response interpret(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @Parameter(description = "text to interpret", required = true) String text) {
         final Locale locale = localeService.getLocale(language);
@@ -203,7 +203,7 @@ public class VoiceResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getVoices", summary = "Get the list of all voices.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = VoiceDTO.class)))) })
-    public Response getVoices() {
+    public @Nullable Response getVoices() {
         List<VoiceDTO> dtos = voiceManager.getAllVoices().stream().map(VoiceMapper::map).toList();
         return Response.ok(dtos).build();
     }
@@ -214,7 +214,7 @@ public class VoiceResource implements RESTResource {
     @Operation(operationId = "getDefaultVoice", summary = "Gets the default voice.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = VoiceDTO.class))),
             @ApiResponse(responseCode = "404", description = "No default voice was found.") })
-    public Response getDefaultVoice() {
+    public @Nullable Response getDefaultVoice() {
         Voice voice = voiceManager.getDefaultVoice();
         if (voice == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Default voice not found");
@@ -229,7 +229,7 @@ public class VoiceResource implements RESTResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "textToSpeech", summary = "Speaks a given text with a given voice through the given audio sink.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
-    public Response say(@Parameter(description = "text to speak", required = true) String text,
+    public @Nullable Response say(@Parameter(description = "text to speak", required = true) String text,
             @QueryParam("voiceid") @Parameter(description = "voice id") @Nullable String voiceId,
             @QueryParam("sinkid") @Parameter(description = "audio sink id") @Nullable String sinkId,
             @QueryParam("volume") @Parameter(description = "volume level") @Nullable String volume) {
@@ -248,7 +248,7 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "One of the given ids is wrong."),
             @ApiResponse(responseCode = "400", description = "Services are missing or language is not supported by services or dialog processing is already started for the audio source.") })
-    public Response startDialog(
+    public @Nullable Response startDialog(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
             @QueryParam("ksId") @Parameter(description = "keywork spotter ID") @Nullable String ksId,
@@ -330,7 +330,7 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "No audio source was found."),
             @ApiResponse(responseCode = "400", description = "No dialog processing is started for the audio source.") })
-    public Response stopDialog(
+    public @Nullable Response stopDialog(
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId) {
         AudioSource source = null;
         if (sourceId != null) {
@@ -354,7 +354,7 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "One of the given ids is wrong."),
             @ApiResponse(responseCode = "400", description = "Services are missing or language is not supported by services or dialog processing is already started for the audio source.") })
-    public Response listenAndAnswer(
+    public @Nullable Response listenAndAnswer(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("sourceId") @Parameter(description = "source ID") @Nullable String sourceId,
             @QueryParam("sttId") @Parameter(description = "Speech-to-Text ID") @Nullable String sttId,
