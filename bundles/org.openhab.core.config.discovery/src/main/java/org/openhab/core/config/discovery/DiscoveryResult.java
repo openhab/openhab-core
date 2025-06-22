@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -121,10 +122,19 @@ public interface DiscoveryResult {
     ThingUID getBridgeUID();
 
     /**
-     * Returns the timestamp of this result object.
+     * Returns the creation time of this result object.
+     *
+     * @return timestamp
+     */
+    Instant getCreationTime();
+
+    /**
+     * Returns the creation time of this result object.
      *
      * @return timestamp as long
+     * @deprecated Use {@link #getCreationTime} instead.
      */
+    @Deprecated(since = "5.0", forRemoval = true)
     long getTimestamp();
 
     /**
