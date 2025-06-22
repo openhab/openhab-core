@@ -23,10 +23,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.openhab.core.automation.module.script.providersupport.shared.ProviderItemRegistryDelegate;
+import org.openhab.core.automation.module.script.providersupport.shared.ProviderMetadataRegistryDelegate;
 import org.openhab.core.automation.module.script.providersupport.shared.ProviderThingRegistryDelegate;
 import org.openhab.core.automation.module.script.providersupport.shared.ScriptedItemProvider;
+import org.openhab.core.automation.module.script.providersupport.shared.ScriptedMetadataProvider;
 import org.openhab.core.automation.module.script.providersupport.shared.ScriptedThingProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.thing.ThingRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -43,21 +46,27 @@ import org.osgi.service.component.annotations.Reference;
 public class ProviderScriptExtension implements ScriptExtensionProvider {
     private static final String PRESET_NAME = "provider";
     private static final String ITEM_REGISTRY_NAME = "itemRegistry";
+    private static final String METADATA_REGISTRY_NAME = "metadataRegistry";
     private static final String THING_REGISTRY_NAME = "thingRegistry";
 
     private final Map<String, Map<String, ProviderRegistryDelegate>> registryCache = new ConcurrentHashMap<>();
 
     private final ItemRegistry itemRegistry;
     private final ScriptedItemProvider itemProvider;
+    private final MetadataRegistry metadataRegistry;
+    private final ScriptedMetadataProvider metadataProvider;
     private final ThingRegistry thingRegistry;
     private final ScriptedThingProvider thingProvider;
 
     @Activate
     public ProviderScriptExtension(final @Reference ItemRegistry itemRegistry,
-            final @Reference ScriptedItemProvider itemProvider, final @Reference ThingRegistry thingRegistry,
+            final @Reference ScriptedItemProvider itemProvider, final @Reference MetadataRegistry metadataRegistry,
+            final @Reference ScriptedMetadataProvider metadataProvider, final @Reference ThingRegistry thingRegistry,
             final @Reference ScriptedThingProvider thingProvider) {
         this.itemRegistry = itemRegistry;
         this.itemProvider = itemProvider;
+        this.metadataRegistry = metadataRegistry;
+        this.metadataProvider = metadataProvider;
         this.thingRegistry = thingRegistry;
         this.thingProvider = thingProvider;
     }
@@ -74,7 +83,7 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getTypes() {
-        return Set.of(ITEM_REGISTRY_NAME, THING_REGISTRY_NAME);
+        return Set.of(ITEM_REGISTRY_NAME, METADATA_REGISTRY_NAME, THING_REGISTRY_NAME);
     }
 
     @Override
@@ -94,6 +103,12 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
                 registries.put(ITEM_REGISTRY_NAME, itemRegistryDelegate);
                 yield itemRegistryDelegate;
             }
+            case METADATA_REGISTRY_NAME -> {
+                ProviderMetadataRegistryDelegate metadataRegistryDelegate = new ProviderMetadataRegistryDelegate(
+                        metadataRegistry, metadataProvider);
+                registries.put(METADATA_REGISTRY_NAME, metadataRegistryDelegate);
+                yield metadataRegistryDelegate;
+            }
             case THING_REGISTRY_NAME -> {
                 ProviderThingRegistryDelegate thingRegistryDelegate = new ProviderThingRegistryDelegate(thingRegistry,
                         thingProvider);
@@ -108,6 +123,7 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
     public Map<String, Object> importPreset(String scriptIdentifier, String preset) {
         if (PRESET_NAME.equals(preset)) {
             return Map.of(ITEM_REGISTRY_NAME, Objects.requireNonNull(get(scriptIdentifier, ITEM_REGISTRY_NAME)),
+                    METADATA_REGISTRY_NAME, Objects.requireNonNull(get(scriptIdentifier, METADATA_REGISTRY_NAME)),
                     THING_REGISTRY_NAME, Objects.requireNonNull(get(scriptIdentifier, THING_REGISTRY_NAME)));
         }
 
