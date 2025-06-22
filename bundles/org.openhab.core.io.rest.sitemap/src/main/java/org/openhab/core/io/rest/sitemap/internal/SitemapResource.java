@@ -368,7 +368,7 @@ public class SitemapResource
     @Operation(operationId = "createSitemapEventSubscription", summary = "Creates a sitemap event subscription.", responses = {
             @ApiResponse(responseCode = "201", description = "Subscription created."),
             @ApiResponse(responseCode = "503", description = "Subscriptions limit reached.") })
-    public Object createEventSubscription() {
+    public @Nullable Object createEventSubscription() {
         logger.debug("Received HTTP POST request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
 
         String subscriptionId = subscriptions.createSubscription(this);
