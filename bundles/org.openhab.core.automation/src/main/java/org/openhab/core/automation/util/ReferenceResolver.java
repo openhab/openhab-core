@@ -359,8 +359,8 @@ public class ReferenceResolver {
         }
     }
 
-    private static Object getValueFromMap(Map<?, ?> map, String key) {
-        return Objects.requireNonNull(map.get(key));
+    private static @Nullable Object getValueFromMap(Map<?, ?> map, String key) {
+        return map.get(key);
     }
 
     private static Object getValueFromList(List<?> list, int index) {
