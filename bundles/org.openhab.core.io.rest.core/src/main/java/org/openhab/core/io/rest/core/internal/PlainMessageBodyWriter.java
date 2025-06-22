@@ -23,11 +23,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A message body writer for plain text.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault({})
 public class PlainMessageBodyWriter<T> implements MessageBodyWriter<T> {
 
     @Override

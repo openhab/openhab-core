@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.ext.MessageBodyWriter;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.JSONInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import com.google.gson.Gson;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault({})
 public class GsonMessageBodyWriter<T> implements MessageBodyWriter<T> {
 
     private final Logger logger = LoggerFactory.getLogger(GsonMessageBodyWriter.class);
