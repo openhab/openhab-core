@@ -116,7 +116,7 @@ public class TokenResource implements RESTResource {
     @Operation(operationId = "getOAuthToken", summary = "Get access and refresh tokens.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TokenResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters") })
-    public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
+    public  @Nullable Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri, @FormParam("client_id") String clientId,
             @FormParam("refresh_token") String refreshToken, @FormParam("code_verifier") String codeVerifier,
             @QueryParam("useCookie") boolean useCookie,
