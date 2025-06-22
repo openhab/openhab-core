@@ -148,7 +148,7 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getSessions(@Context SecurityContext securityContext) {
+    public @Nullable Response getSessions(@Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
@@ -169,7 +169,7 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getApiTokens(@Context SecurityContext securityContext) {
+    public @Nullable Response getApiTokens(@Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
@@ -189,7 +189,7 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or API token not found") })
-    public Response removeApiToken(@Context SecurityContext securityContext, @PathParam("name") String name) {
+    public @Nullable Response removeApiToken(@Context SecurityContext securityContext, @PathParam("name") String name) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
@@ -216,7 +216,7 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or refresh token not found") })
-    public Response deleteSession(@Nullable @FormParam("refresh_token") String refreshToken,
+    public @Nullable Response deleteSession(@Nullable @FormParam("refresh_token") String refreshToken,
             @Nullable @FormParam("id") String id, @Nullable @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie,
             @Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
