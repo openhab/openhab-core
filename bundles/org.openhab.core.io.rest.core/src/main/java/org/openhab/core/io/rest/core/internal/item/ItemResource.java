@@ -966,7 +966,7 @@ public class ItemResource implements RESTResource {
      * @param itemname item name that could not be found
      * @return Response configured for 'item not found'
      */
-    private static Response getItemNotFoundResponse(String itemname) {
+    private static @Nullable Response getItemNotFoundResponse(String itemname) {
         String message = "Item " + itemname + " does not exist!";
         return JSONResponse.createResponse(Status.NOT_FOUND, null, message);
     }

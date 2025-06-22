@@ -747,7 +747,7 @@ public class ThingResource implements RESTResource {
      * @param thingUID
      * @return Response configured for NOT_FOUND
      */
-    private static Response getThingNotFoundResponse(String thingUID) {
+    private static @Nullable Response getThingNotFoundResponse(String thingUID) {
         String message = "Thing " + thingUID + " does not exist!";
         return JSONResponse.createResponse(Status.NOT_FOUND, null, message);
     }
