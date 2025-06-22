@@ -110,8 +110,8 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      */
     public OAuthConnectorRFC8628(OAuthClientService oAuthClientService, String handle,
             OAuthStoreHandler oAuthStoreHandler, HttpClientFactory httpClientFactory, @Nullable GsonBuilder gsonBuilder,
-            @Nullable String accessTokenRequestUrl, @Nullable String deviceCodeRequestUrl, @Nullable String clientId, @Nullable String scope)
-            throws OAuthException {
+            @Nullable String accessTokenRequestUrl, @Nullable String deviceCodeRequestUrl, @Nullable String clientId,
+            @Nullable String scope) throws OAuthException {
         super(httpClientFactory, null, gsonBuilder != null ? gsonBuilder : new GsonBuilder());
         this.oAuthClientService = oAuthClientService;
         this.oAuthStoreHandler = oAuthStoreHandler;

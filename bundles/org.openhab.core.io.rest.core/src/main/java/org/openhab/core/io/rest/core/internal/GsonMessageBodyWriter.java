@@ -56,14 +56,14 @@ public class GsonMessageBodyWriter<T> implements MessageBodyWriter<T> {
     }
 
     @Override
-    public long getSize(final @Nullable T object, final @Nullable Class<?> type, final @Nullable Type genericType, final Annotation @Nullable [] annotations,
-            final @Nullable MediaType mediaType) {
+    public long getSize(final @Nullable T object, final @Nullable Class<?> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType) {
         return -1;
     }
 
     @Override
-    public boolean isWriteable(final @Nullable Class<?> type, final @Nullable Type genericType, final Annotation @Nullable [] annotations,
-            final @Nullable MediaType mediaType) {
+    public boolean isWriteable(final @Nullable Class<?> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType) {
         return true;
     }
 

@@ -41,8 +41,8 @@ public class PlainMessageBodyReader<T> implements MessageBodyReader<T> {
     private final Logger logger = LoggerFactory.getLogger(PlainMessageBodyReader.class);
 
     @Override
-    public boolean isReadable(final @Nullable Class<?> type, final @Nullable Type genericType, final Annotation @Nullable [] annotations,
-            final @Nullable MediaType mediaType) {
+    public boolean isReadable(final @Nullable Class<?> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType) {
         return true;
     }
 

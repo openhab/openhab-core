@@ -49,8 +49,8 @@ public class GsonMessageBodyReader<T> implements MessageBodyReader<T> {
     }
 
     @Override
-    public boolean isReadable(final @Nullable Class<?> type, final @Nullable Type genericType, final Annotation @Nullable [] annotations,
-            final @Nullable MediaType mediaType) {
+    public boolean isReadable(final @Nullable Class<?> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType) {
         return true;
     }
 

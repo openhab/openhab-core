@@ -25,15 +25,24 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 class PersistedParams {
-    @Nullable String handle;
-    @Nullable String tokenUrl;
-    @Nullable String authorizationUrl;
-    @Nullable String clientId;
-    @Nullable String clientSecret;
-    @Nullable String scope;
-    @Nullable Boolean supportsBasicAuth;
-    @Nullable String state;
-    @Nullable String redirectUri;
+    @Nullable
+    String handle;
+    @Nullable
+    String tokenUrl;
+    @Nullable
+    String authorizationUrl;
+    @Nullable
+    String clientId;
+    @Nullable
+    String clientSecret;
+    @Nullable
+    String scope;
+    @Nullable
+    Boolean supportsBasicAuth;
+    @Nullable
+    String state;
+    @Nullable
+    String redirectUri;
     int tokenExpiresInSeconds = 60;
 
     /**
@@ -60,9 +69,9 @@ class PersistedParams {
      *            official stated expiry time; thus prevents the caller obtaining a valid token at the time of invoke,
      *            only to find the token immediately expired.
      */
-    public PersistedParams(@Nullable String handle, @Nullable String tokenUrl, @Nullable String authorizationUrl, @Nullable String clientId,
-            @Nullable String clientSecret, @Nullable String scope, @Nullable Boolean supportsBasicAuth, int tokenExpiresInSeconds,
-            @Nullable String deserializerClassName) {
+    public PersistedParams(@Nullable String handle, @Nullable String tokenUrl, @Nullable String authorizationUrl,
+            @Nullable String clientId, @Nullable String clientSecret, @Nullable String scope,
+            @Nullable Boolean supportsBasicAuth, int tokenExpiresInSeconds, @Nullable String deserializerClassName) {
         this.handle = handle;
         this.tokenUrl = tokenUrl;
         this.authorizationUrl = authorizationUrl;
