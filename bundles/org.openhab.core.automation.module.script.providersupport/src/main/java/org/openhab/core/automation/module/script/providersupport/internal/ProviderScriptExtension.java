@@ -22,15 +22,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
+import org.openhab.core.automation.module.script.providersupport.shared.ProviderItemChannelLinkRegistry;
 import org.openhab.core.automation.module.script.providersupport.shared.ProviderItemRegistryDelegate;
 import org.openhab.core.automation.module.script.providersupport.shared.ProviderMetadataRegistryDelegate;
 import org.openhab.core.automation.module.script.providersupport.shared.ProviderThingRegistryDelegate;
+import org.openhab.core.automation.module.script.providersupport.shared.ScriptedItemChannelLinkProvider;
 import org.openhab.core.automation.module.script.providersupport.shared.ScriptedItemProvider;
 import org.openhab.core.automation.module.script.providersupport.shared.ScriptedMetadataProvider;
 import org.openhab.core.automation.module.script.providersupport.shared.ScriptedThingProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -45,12 +48,15 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ProviderScriptExtension implements ScriptExtensionProvider {
     private static final String PRESET_NAME = "provider";
+    private static final String ITEM_CHANNEL_LINK_REGISTRY_NAME = "itemChannelLinkRegistry";
     private static final String ITEM_REGISTRY_NAME = "itemRegistry";
     private static final String METADATA_REGISTRY_NAME = "metadataRegistry";
     private static final String THING_REGISTRY_NAME = "thingRegistry";
 
     private final Map<String, Map<String, ProviderRegistry>> registryCache = new ConcurrentHashMap<>();
 
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ScriptedItemChannelLinkProvider itemChannelLinkProvider;
     private final ItemRegistry itemRegistry;
     private final ScriptedItemProvider itemProvider;
     private final MetadataRegistry metadataRegistry;
@@ -59,10 +65,15 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
     private final ScriptedThingProvider thingProvider;
 
     @Activate
-    public ProviderScriptExtension(final @Reference ItemRegistry itemRegistry,
-            final @Reference ScriptedItemProvider itemProvider, final @Reference MetadataRegistry metadataRegistry,
+    public ProviderScriptExtension( //
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
+            final @Reference ScriptedItemChannelLinkProvider itemChannelLinkProvider,
+            final @Reference ItemRegistry itemRegistry, final @Reference ScriptedItemProvider itemProvider,
+            final @Reference MetadataRegistry metadataRegistry,
             final @Reference ScriptedMetadataProvider metadataProvider, final @Reference ThingRegistry thingRegistry,
             final @Reference ScriptedThingProvider thingProvider) {
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.itemChannelLinkProvider = itemChannelLinkProvider;
         this.itemRegistry = itemRegistry;
         this.itemProvider = itemProvider;
         this.metadataRegistry = metadataRegistry;
@@ -83,7 +94,7 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getTypes() {
-        return Set.of(ITEM_REGISTRY_NAME, METADATA_REGISTRY_NAME, THING_REGISTRY_NAME);
+        return Set.of(ITEM_CHANNEL_LINK_REGISTRY_NAME, ITEM_REGISTRY_NAME, METADATA_REGISTRY_NAME, THING_REGISTRY_NAME);
     }
 
     @Override
@@ -97,6 +108,12 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
         }
 
         return switch (type) {
+            case ITEM_CHANNEL_LINK_REGISTRY_NAME -> {
+                ProviderItemChannelLinkRegistry providerItemChannelLinkRegistry = new ProviderItemChannelLinkRegistry(
+                        itemChannelLinkRegistry, itemChannelLinkProvider);
+                registries.put(type, providerItemChannelLinkRegistry);
+                yield providerItemChannelLinkRegistry;
+            }
             case ITEM_REGISTRY_NAME -> {
                 ProviderItemRegistryDelegate itemRegistryDelegate = new ProviderItemRegistryDelegate(itemRegistry,
                         itemProvider);
@@ -122,9 +139,11 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
     @Override
     public Map<String, Object> importPreset(String scriptIdentifier, String preset) {
         if (PRESET_NAME.equals(preset)) {
-            return Map.of(ITEM_REGISTRY_NAME, Objects.requireNonNull(get(scriptIdentifier, ITEM_REGISTRY_NAME)),
-                    METADATA_REGISTRY_NAME, Objects.requireNonNull(get(scriptIdentifier, METADATA_REGISTRY_NAME)),
-                    THING_REGISTRY_NAME, Objects.requireNonNull(get(scriptIdentifier, THING_REGISTRY_NAME)));
+            return Map.of(ITEM_CHANNEL_LINK_REGISTRY_NAME,
+                    Objects.requireNonNull(get(scriptIdentifier, ITEM_CHANNEL_LINK_REGISTRY_NAME)), ITEM_REGISTRY_NAME,
+                    Objects.requireNonNull(get(scriptIdentifier, ITEM_REGISTRY_NAME)), METADATA_REGISTRY_NAME,
+                    Objects.requireNonNull(get(scriptIdentifier, METADATA_REGISTRY_NAME)), THING_REGISTRY_NAME,
+                    Objects.requireNonNull(get(scriptIdentifier, THING_REGISTRY_NAME)));
         }
 
         return Map.of();
