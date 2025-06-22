@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistryDelegate;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -38,7 +39,7 @@ import org.openhab.core.items.ItemRegistry;
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public class ProviderItemRegistryDelegate implements ItemRegistry {
+public class ProviderItemRegistryDelegate implements ItemRegistry, ProviderRegistryDelegate {
     private final ItemRegistry itemRegistry;
 
     private final Set<String> items = new HashSet<>();
@@ -175,10 +176,7 @@ public class ProviderItemRegistryDelegate implements ItemRegistry {
         }
     }
 
-    /**
-     * Removes all items that are provided by this script.
-     * To be called when the script is unloaded or reloaded.
-     */
+    @Override
     public void removeAllAddedByScript() {
         for (String item : items) {
             itemProvider.remove(item);

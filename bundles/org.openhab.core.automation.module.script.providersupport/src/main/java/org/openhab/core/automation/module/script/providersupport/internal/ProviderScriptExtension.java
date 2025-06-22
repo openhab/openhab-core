@@ -45,7 +45,7 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
     private static final String ITEM_REGISTRY_NAME = "itemRegistry";
     private static final String THING_REGISTRY_NAME = "thingRegistry";
 
-    private final Map<String, Map<String, Object>> objectCache = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, ProviderRegistryDelegate>> registryCache = new ConcurrentHashMap<>();
 
     private final ItemRegistry itemRegistry;
     private final ScriptedItemProvider itemProvider;
@@ -79,25 +79,25 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public @Nullable Object get(String scriptIdentifier, String type) throws IllegalArgumentException {
-        Map<String, Object> objects = Objects
-                .requireNonNull(objectCache.computeIfAbsent(scriptIdentifier, k -> new HashMap<>()));
+        Map<String, ProviderRegistryDelegate> registries = Objects
+                .requireNonNull(registryCache.computeIfAbsent(scriptIdentifier, k -> new HashMap<>()));
 
-        Object obj = objects.get(type);
-        if (obj != null) {
-            return obj;
+        ProviderRegistryDelegate registry = registries.get(type);
+        if (registry != null) {
+            return registry;
         }
 
         return switch (type) {
             case ITEM_REGISTRY_NAME -> {
                 ProviderItemRegistryDelegate itemRegistryDelegate = new ProviderItemRegistryDelegate(itemRegistry,
                         itemProvider);
-                objects.put(ITEM_REGISTRY_NAME, itemRegistryDelegate);
+                registries.put(ITEM_REGISTRY_NAME, itemRegistryDelegate);
                 yield itemRegistryDelegate;
             }
             case THING_REGISTRY_NAME -> {
                 ProviderThingRegistryDelegate thingRegistryDelegate = new ProviderThingRegistryDelegate(thingRegistry,
                         thingProvider);
-                objects.put(THING_REGISTRY_NAME, thingRegistryDelegate);
+                registries.put(THING_REGISTRY_NAME, thingRegistryDelegate);
                 yield thingRegistryDelegate;
             }
             default -> null;
@@ -116,17 +116,10 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public void unload(String scriptIdentifier) {
-        Map<String, Object> objects = objectCache.remove(scriptIdentifier);
-        if (objects != null) {
-            Object itemRegistry = objects.get(ITEM_REGISTRY_NAME);
-            if (itemRegistry != null) {
-                ProviderItemRegistryDelegate itemRegistryDelegate = (ProviderItemRegistryDelegate) itemRegistry;
-                itemRegistryDelegate.removeAllAddedByScript();
-            }
-            Object thingRegistry = objects.get(THING_REGISTRY_NAME);
-            if (thingRegistry != null) {
-                ProviderThingRegistryDelegate thingRegistryDelegate = (ProviderThingRegistryDelegate) thingRegistry;
-                thingRegistryDelegate.removeAllAddedByScript();
+        Map<String, ProviderRegistryDelegate> registries = registryCache.remove(scriptIdentifier);
+        if (registries != null) {
+            for (ProviderRegistryDelegate registry : registries.values()) {
+                registry.removeAllAddedByScript();
             }
         }
     }

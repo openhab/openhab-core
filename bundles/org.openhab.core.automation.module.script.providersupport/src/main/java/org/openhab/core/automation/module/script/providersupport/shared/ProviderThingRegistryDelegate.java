@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistryDelegate;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;
@@ -39,7 +40,7 @@ import org.openhab.core.thing.ThingUID;
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public class ProviderThingRegistryDelegate implements ThingRegistry {
+public class ProviderThingRegistryDelegate implements ThingRegistry, ProviderRegistryDelegate {
     private final ThingRegistry thingRegistry;
 
     private final Set<ThingUID> things = new HashSet<>();
@@ -131,10 +132,7 @@ public class ProviderThingRegistryDelegate implements ThingRegistry {
         return thingRegistry.remove(thingUID);
     }
 
-    /**
-     * Removes all Things that are provided by this script.
-     * To be called when the script is unloaded or reloaded.
-     */
+    @Override
     public void removeAllAddedByScript() {
         for (ThingUID thing : things) {
             thingProvider.remove(thing);
