@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.rulesupport.internal;
+package org.openhab.core.automation.module.script.providersupport.internal;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,10 +22,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
-import org.openhab.core.automation.module.script.rulesupport.shared.ProviderItemRegistryDelegate;
-import org.openhab.core.automation.module.script.rulesupport.shared.ProviderThingRegistryDelegate;
-import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedItemProvider;
-import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedThingProvider;
+import org.openhab.core.automation.module.script.providersupport.shared.ProviderItemRegistryDelegate;
+import org.openhab.core.automation.module.script.providersupport.shared.ProviderThingRegistryDelegate;
+import org.openhab.core.automation.module.script.providersupport.shared.ScriptedItemProvider;
+import org.openhab.core.automation.module.script.providersupport.shared.ScriptedThingProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.thing.ThingRegistry;
 import org.osgi.service.component.annotations.Activate;

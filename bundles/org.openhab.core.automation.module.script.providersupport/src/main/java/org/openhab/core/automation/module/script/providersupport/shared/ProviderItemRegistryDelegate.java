@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.rulesupport.shared;
+package org.openhab.core.automation.module.script.providersupport.shared;
 
 import java.util.ArrayList;
 import java.util.Collection;
