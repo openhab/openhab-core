@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.internal.ModuleImpl;
@@ -26,8 +27,6 @@ import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
-
-import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * This class provides utility methods used by {@link RuleRegistry} to resolve and normalize the {@link RuleImpl}s

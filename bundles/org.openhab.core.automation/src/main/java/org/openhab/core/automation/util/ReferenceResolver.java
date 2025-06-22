@@ -22,14 +22,13 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.config.core.Configuration;
 import org.slf4j.Logger;
-
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Resolves Module references. They can be
@@ -283,7 +282,8 @@ public class ReferenceResolver {
      * @param reference the reference that should be split
      * @return array of the tokens in the reference
      */
-    public static @Nullable String @Nullable [] splitReferenceToTokens(@Nullable String reference) throws IllegalArgumentException {
+    public static @Nullable String @Nullable [] splitReferenceToTokens(@Nullable String reference)
+            throws IllegalArgumentException {
         if (reference == null) {
             return null;
         }
@@ -332,7 +332,7 @@ public class ReferenceResolver {
      * @throws NumberFormatException if one of the tokens is accessing a list and the token that represent the
      *             index can't be converted to integer.
      */
-    public static Object resolveComplexDataReference(@Nullable Object object, String @Nullable ... tokens)
+    public static Object resolveComplexDataReference(@Nullable Object object, String @Nullable... tokens)
             throws IllegalArgumentException, SecurityException {
         if (object == null) {
             throw new IllegalArgumentException("Object is null.");
