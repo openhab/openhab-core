@@ -73,7 +73,7 @@ public class ScriptedMetadataProvider extends AbstractProvider<Metadata> impleme
             metadataStorage.put(metadata.getUID(), metadata);
             notifyListenersAboutUpdatedElement(oldMetadata, metadata);
         } else {
-            logger.warn("Could not update metadata with UID {}, because it does not exist", metadata.getUID());
+            logger.warn("Could not update metadata with UID '{}', because it does not exist", metadata.getUID());
         }
         return oldMetadata;
     }
