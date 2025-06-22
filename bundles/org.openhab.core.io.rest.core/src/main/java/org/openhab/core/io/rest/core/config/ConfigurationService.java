@@ -95,7 +95,8 @@ public class ConfigurationService {
      * @return old config or null if no old config existed
      * @throws IOException if configuration can not be stored
      */
-    public @Nullable Configuration update(String configId, Configuration newConfiguration, boolean override) throws IOException {
+    public @Nullable Configuration update(String configId, Configuration newConfiguration, boolean override)
+            throws IOException {
         org.osgi.service.cm.Configuration configuration = null;
         if (newConfiguration.containsKey(OpenHAB.SERVICE_CONTEXT)) {
             try {

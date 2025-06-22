@@ -96,7 +96,7 @@ public class JSONResponse {
      * @param status
      * @return ResponseBuilder configured for "Content-Type" MediaType.APPLICATION_JSON
      */
-    private ResponseBuilder responseBuilder(Response.StatusType status) {
+    private @Nullable ResponseBuilder responseBuilder(Response.StatusType status) {
         return Response.status(status).header("Content-Type", MediaType.APPLICATION_JSON);
     }
 
@@ -142,7 +142,7 @@ public class JSONResponse {
         return resultJson;
     }
 
-    private Response createErrorResponse(Response.StatusType status, @Nullable Object entity,
+    private @Nullable Response createErrorResponse(Response.StatusType status, @Nullable Object entity,
             @Nullable String errormessage) {
         ResponseBuilder rp = responseBuilder(status);
         JsonElement errorJson = createErrorJson(errormessage, status, entity, null);
@@ -150,7 +150,7 @@ public class JSONResponse {
         return rp.build();
     }
 
-    private Response createResponse(Response.StatusType status, final @Nullable Object entity) {
+    private @Nullable Response createResponse(Response.StatusType status, final @Nullable Object entity) {
         ResponseBuilder rp = responseBuilder(status);
 
         if (entity == null) {

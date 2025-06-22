@@ -412,7 +412,8 @@ public class HttpUtil {
      * @return a RawType object containing the image, null if the content type could not be found or the content type is
      *         not an image or the data size is too big
      */
-    public static @Nullable RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength, int timeout) {
+    public static @Nullable RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength,
+            int timeout) {
         return downloadData(url, "image/.*", scanTypeInContent, maxContentLength, timeout);
     }
 
@@ -427,8 +428,8 @@ public class HttpUtil {
      * @return a RawType object containing the downloaded data, null if the content type does not match the expected
      *         type or the data size is too big
      */
-    public static @Nullable RawType downloadData(String url, @Nullable String contentTypeRegex, boolean scanTypeInContent,
-            long maxContentLength) {
+    public static @Nullable RawType downloadData(String url, @Nullable String contentTypeRegex,
+            boolean scanTypeInContent, long maxContentLength) {
         return downloadData(url, contentTypeRegex, scanTypeInContent, maxContentLength, DEFAULT_TIMEOUT_MS);
     }
 
@@ -444,8 +445,8 @@ public class HttpUtil {
      * @return a RawType object containing the downloaded data, null if the content type does not match the expected
      *         type or the data size is too big
      */
-    public static @Nullable RawType downloadData(String url, @Nullable String contentTypeRegex, boolean scanTypeInContent,
-            long maxContentLength, int timeout) {
+    public static @Nullable RawType downloadData(String url, @Nullable String contentTypeRegex,
+            boolean scanTypeInContent, long maxContentLength, int timeout) {
         final ProxyParams proxyParams = prepareProxyParams();
 
         RawType rawData = null;

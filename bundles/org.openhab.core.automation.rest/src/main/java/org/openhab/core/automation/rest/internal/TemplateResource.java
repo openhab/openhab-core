@@ -87,7 +87,7 @@ public class TemplateResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTemplates", summary = "Get all available templates.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Template.class)))) })
-    public  @Nullable Response getAll(
+    public @Nullable Response getAll(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         Collection<RuleTemplateDTO> result = templateRegistry.getAll(locale).stream()
@@ -101,7 +101,7 @@ public class TemplateResource implements RESTResource {
     @Operation(operationId = "getTemplateById", summary = "Gets a template corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Template.class))),
             @ApiResponse(responseCode = "404", description = "Template corresponding to the given UID does not found.") })
-    public  @Nullable Response getByUID(
+    public @Nullable Response getByUID(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @PathParam("templateUID") @Parameter(description = "templateUID") String templateUID) {
         Locale locale = localeService.getLocale(language);

@@ -171,8 +171,8 @@ public class ThingFactoryHelper {
         return channelBuilder;
     }
 
-    public static @Nullable ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelDefinition channelDefinition,
-            @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
+    public static @Nullable ChannelBuilder createChannelBuilder(ChannelUID channelUID,
+            ChannelDefinition channelDefinition, @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
         ChannelType channelType = withChannelTypeRegistry(channelTypeRegistry -> (channelTypeRegistry != null)
                 ? channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID())
                 : null);

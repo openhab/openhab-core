@@ -316,7 +316,8 @@ public class ModbusManagerImpl implements ModbusManager {
                 }
 
                 @Override
-                public @Nullable EndpointPoolConfiguration visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
+                public @Nullable EndpointPoolConfiguration visit(
+                        ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
                     EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
                     // never "disconnect" (close/open serial port) serial connection between borrows
                     endpointPoolConfig.setReconnectAfterMillis(-1);
