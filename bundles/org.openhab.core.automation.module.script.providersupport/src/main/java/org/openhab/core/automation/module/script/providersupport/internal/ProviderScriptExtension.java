@@ -49,7 +49,7 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
     private static final String METADATA_REGISTRY_NAME = "metadataRegistry";
     private static final String THING_REGISTRY_NAME = "thingRegistry";
 
-    private final Map<String, Map<String, ProviderRegistryDelegate>> registryCache = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, ProviderRegistry>> registryCache = new ConcurrentHashMap<>();
 
     private final ItemRegistry itemRegistry;
     private final ScriptedItemProvider itemProvider;
@@ -88,10 +88,10 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public @Nullable Object get(String scriptIdentifier, String type) throws IllegalArgumentException {
-        Map<String, ProviderRegistryDelegate> registries = Objects
+        Map<String, ProviderRegistry> registries = Objects
                 .requireNonNull(registryCache.computeIfAbsent(scriptIdentifier, k -> new HashMap<>()));
 
-        ProviderRegistryDelegate registry = registries.get(type);
+        ProviderRegistry registry = registries.get(type);
         if (registry != null) {
             return registry;
         }
@@ -132,9 +132,9 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public void unload(String scriptIdentifier) {
-        Map<String, ProviderRegistryDelegate> registries = registryCache.remove(scriptIdentifier);
+        Map<String, ProviderRegistry> registries = registryCache.remove(scriptIdentifier);
         if (registries != null) {
-            for (ProviderRegistryDelegate registry : registries.values()) {
+            for (ProviderRegistry registry : registries.values()) {
                 registry.removeAllAddedByScript();
             }
         }

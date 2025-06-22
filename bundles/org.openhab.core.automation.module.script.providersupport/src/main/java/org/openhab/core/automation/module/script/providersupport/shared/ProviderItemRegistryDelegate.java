@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistryDelegate;
+import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistry;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -39,7 +39,7 @@ import org.openhab.core.items.ItemRegistry;
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public class ProviderItemRegistryDelegate implements ItemRegistry, ProviderRegistryDelegate {
+public class ProviderItemRegistryDelegate implements ItemRegistry, ProviderRegistry {
     private final ItemRegistry itemRegistry;
 
     private final Set<String> items = new HashSet<>();

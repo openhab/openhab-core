@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistryDelegate;
+import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistry;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;
@@ -40,7 +40,7 @@ import org.openhab.core.thing.ThingUID;
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public class ProviderThingRegistryDelegate implements ThingRegistry, ProviderRegistryDelegate {
+public class ProviderThingRegistryDelegate implements ThingRegistry, ProviderRegistry {
     private final ThingRegistry thingRegistry;
 
     private final Set<ThingUID> things = new HashSet<>();
