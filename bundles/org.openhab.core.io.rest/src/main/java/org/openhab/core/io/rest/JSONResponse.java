@@ -68,8 +68,7 @@ public class JSONResponse {
      * @param errormessage
      * @return Response containing a status and the errormessage in JSON format
      */
-    @Nullable
-    public static Response createErrorResponse(Response.StatusType status, @Nullable String errormessage) {
+    public static @Nullable Response createErrorResponse(Response.StatusType status, @Nullable String errormessage) {
         return createResponse(status, null, errormessage);
     }
 
@@ -82,8 +81,7 @@ public class JSONResponse {
      * @param errormessage an optional error message (may be null), ignored if the status family is successful
      * @return Response configure for error or success
      */
-    @Nullable
-    public static Response createResponse(Response.StatusType status, @Nullable Object entity,
+    public static @Nullable Response createResponse(Response.StatusType status, @Nullable Object entity,
             @Nullable String errormessage) {
         if (status.getFamily() != Response.Status.Family.SUCCESSFUL) {
             return INSTANCE.createErrorResponse(status, entity, errormessage);
@@ -193,8 +191,7 @@ public class JSONResponse {
         private final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
 
         @Override
-        @Nullable
-        public Response toResponse(@Nullable Exception e) {
+        public @Nullable Response toResponse(@Nullable Exception e) {
             logger.debug("Exception during REST handling.", e);
 
             Response.StatusType status = Response.Status.INTERNAL_SERVER_ERROR;

@@ -999,8 +999,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return new ArrayList<>(itemsData.keySet());
     }
 
-    @Nullable
-    private Item filterMatchedItemsByLocation(Map<Item, ItemInterpretationMetadata> itemsData, String locationContext) {
+    private @Nullable Item filterMatchedItemsByLocation(Map<Item, ItemInterpretationMetadata> itemsData, String locationContext) {
         var itemsFilteredByLocation = itemsData.entrySet().stream()
                 .filter(entry -> entry.getValue().locationParentNames.contains(locationContext)).toList();
         if (itemsFilteredByLocation.size() != 1) {

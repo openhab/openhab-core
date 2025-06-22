@@ -369,8 +369,7 @@ public class HttpUtil {
      * @return a RawType object containing the image, null if the content type could not be found or the content type is
      *         not an image
      */
-    @Nullable
-    public static RawType downloadImage(String url) {
+    public static @Nullable RawType downloadImage(String url) {
         return downloadImage(url, DEFAULT_TIMEOUT_MS);
     }
 
@@ -384,8 +383,7 @@ public class HttpUtil {
      * @return a RawType object containing the image, null if the content type could not be found or the content type is
      *         not an image
      */
-    @Nullable
-    public static RawType downloadImage(String url, int timeout) {
+    public static @Nullable RawType downloadImage(String url, int timeout) {
         return downloadImage(url, true, -1, timeout);
     }
 
@@ -399,8 +397,7 @@ public class HttpUtil {
      * @return a RawType object containing the image, null if the content type could not be found or the content type is
      *         not an image or the data size is too big
      */
-    @Nullable
-    public static RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength) {
+    public static @Nullable RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength) {
         return downloadImage(url, scanTypeInContent, maxContentLength, DEFAULT_TIMEOUT_MS);
     }
 
@@ -415,8 +412,7 @@ public class HttpUtil {
      * @return a RawType object containing the image, null if the content type could not be found or the content type is
      *         not an image or the data size is too big
      */
-    @Nullable
-    public static RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength, int timeout) {
+    public static @Nullable RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength, int timeout) {
         return downloadData(url, "image/.*", scanTypeInContent, maxContentLength, timeout);
     }
 
@@ -431,8 +427,7 @@ public class HttpUtil {
      * @return a RawType object containing the downloaded data, null if the content type does not match the expected
      *         type or the data size is too big
      */
-    @Nullable
-    public static RawType downloadData(String url, @Nullable String contentTypeRegex, boolean scanTypeInContent,
+    public static @Nullable RawType downloadData(String url, @Nullable String contentTypeRegex, boolean scanTypeInContent,
             long maxContentLength) {
         return downloadData(url, contentTypeRegex, scanTypeInContent, maxContentLength, DEFAULT_TIMEOUT_MS);
     }
@@ -449,8 +444,7 @@ public class HttpUtil {
      * @return a RawType object containing the downloaded data, null if the content type does not match the expected
      *         type or the data size is too big
      */
-    @Nullable
-    public static RawType downloadData(String url, @Nullable String contentTypeRegex, boolean scanTypeInContent,
+    public static @Nullable RawType downloadData(String url, @Nullable String contentTypeRegex, boolean scanTypeInContent,
             long maxContentLength, int timeout) {
         final ProxyParams proxyParams = prepareProxyParams();
 
@@ -515,8 +509,7 @@ public class HttpUtil {
      * @param data the data as a buffer of bytes
      * @return the MIME type of the content, null if the content type could not be found
      */
-    @Nullable
-    public static String guessContentTypeFromData(byte[] data) {
+    public static @Nullable String guessContentTypeFromData(byte[] data) {
         String contentType = null;
 
         // URLConnection.guessContentTypeFromStream(input) is not sufficient to detect all JPEG files

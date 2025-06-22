@@ -144,8 +144,7 @@ public final class FirmwareUpdateProgressInfo {
      *
      * @return the current progress step (not null)
      */
-    @Nullable
-    public ProgressStep getProgressStep() {
+    public @Nullable ProgressStep getProgressStep() {
         return progressStep;
     }
 
@@ -154,8 +153,7 @@ public final class FirmwareUpdateProgressInfo {
      *
      * @return the sequence (not null)
      */
-    @Nullable
-    public Collection<ProgressStep> getSequence() {
+    public @Nullable Collection<ProgressStep> getSequence() {
         return sequence;
     }
 

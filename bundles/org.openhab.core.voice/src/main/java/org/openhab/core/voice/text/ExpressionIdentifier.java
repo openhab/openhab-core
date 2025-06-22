@@ -89,8 +89,7 @@ public final class ExpressionIdentifier extends Expression {
     /**
      * @return the stopper expression
      */
-    @Nullable
-    public Expression getStopper() {
+    public @Nullable Expression getStopper() {
         return stopper;
     }
 }

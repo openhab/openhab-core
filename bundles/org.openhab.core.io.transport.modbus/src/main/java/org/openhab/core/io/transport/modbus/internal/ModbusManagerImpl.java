@@ -307,8 +307,7 @@ public class ModbusManagerImpl implements ModbusManager {
             .accept(new ModbusSlaveEndpointVisitor<EndpointPoolConfiguration>() {
 
                 @Override
-                @Nullable
-                public EndpointPoolConfiguration visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
+                public @Nullable EndpointPoolConfiguration visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
                     EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
                     endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
                     endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
@@ -317,8 +316,7 @@ public class ModbusManagerImpl implements ModbusManager {
                 }
 
                 @Override
-                @Nullable
-                public EndpointPoolConfiguration visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
+                public @Nullable EndpointPoolConfiguration visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
                     EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
                     // never "disconnect" (close/open serial port) serial connection between borrows
                     endpointPoolConfig.setReconnectAfterMillis(-1);
@@ -329,8 +327,7 @@ public class ModbusManagerImpl implements ModbusManager {
                 }
 
                 @Override
-                @Nullable
-                public EndpointPoolConfiguration visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
+                public @Nullable EndpointPoolConfiguration visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
                     EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
                     endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
                     endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);

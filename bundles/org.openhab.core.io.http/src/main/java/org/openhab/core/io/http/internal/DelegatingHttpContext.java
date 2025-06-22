@@ -43,14 +43,12 @@ class DelegatingHttpContext implements HttpContext {
     }
 
     @Override
-    @Nullable
-    public URL getResource(@Nullable String name) {
+    public @Nullable URL getResource(@Nullable String name) {
         return delegate.getResource(name);
     }
 
     @Override
-    @Nullable
-    public String getMimeType(@Nullable String name) {
+    public @Nullable String getMimeType(@Nullable String name) {
         return delegate.getMimeType(name);
     }
 }

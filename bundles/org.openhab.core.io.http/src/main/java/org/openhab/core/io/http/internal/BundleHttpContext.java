@@ -35,8 +35,7 @@ class BundleHttpContext extends DelegatingHttpContext {
     }
 
     @Override
-    @Nullable
-    public URL getResource(@Nullable String name) {
+    public @Nullable URL getResource(@Nullable String name) {
         if ((name != null) && (bundle != null)) {
             String resourceName;
             if (name.startsWith("/")) {

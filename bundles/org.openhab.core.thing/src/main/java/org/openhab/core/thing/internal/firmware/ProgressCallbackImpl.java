@@ -190,8 +190,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
         postResultInfoEvent(FirmwareUpdateResult.ERROR, errorMessage);
     }
 
-    @Nullable
-    private String getMessage(Class<?> clazz, String errorMessageKey, Object... arguments) {
+    private @Nullable String getMessage(Class<?> clazz, String errorMessageKey, Object... arguments) {
         Bundle bundle = bundleResolver.resolveBundle(clazz);
         return i18nProvider.getText(bundle, errorMessageKey, null, locale, arguments);
     }

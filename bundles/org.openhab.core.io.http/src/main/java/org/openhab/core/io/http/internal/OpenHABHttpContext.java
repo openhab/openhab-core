@@ -65,14 +65,12 @@ public class OpenHABHttpContext implements WrappingHttpContext {
     }
 
     @Override
-    @Nullable
-    public URL getResource(@Nullable String name) {
+    public @Nullable URL getResource(@Nullable String name) {
         return null;
     }
 
     @Override
-    @Nullable
-    public String getMimeType(@Nullable String name) {
+    public @Nullable String getMimeType(@Nullable String name) {
         return null;
     }
 

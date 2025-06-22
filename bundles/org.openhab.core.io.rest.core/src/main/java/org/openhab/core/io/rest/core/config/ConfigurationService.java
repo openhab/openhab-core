@@ -69,13 +69,11 @@ public class ConfigurationService {
      * @return old config or null if no old config existed
      * @throws IOException if configuration can not be stored
      */
-    @Nullable
-    public Configuration update(String configId, Configuration newConfiguration) throws IOException {
+    public @Nullable Configuration update(String configId, Configuration newConfiguration) throws IOException {
         return update(configId, newConfiguration, false);
     }
 
-    @Nullable
-    public String getProperty(String servicePID, String key) {
+    public @Nullable String getProperty(String servicePID, String key) {
         try {
             org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration(servicePID, null);
             if (configuration != null && configuration.getProperties() != null) {
@@ -97,8 +95,7 @@ public class ConfigurationService {
      * @return old config or null if no old config existed
      * @throws IOException if configuration can not be stored
      */
-    @Nullable
-    public Configuration update(String configId, Configuration newConfiguration, boolean override) throws IOException {
+    public @Nullable Configuration update(String configId, Configuration newConfiguration, boolean override) throws IOException {
         org.osgi.service.cm.Configuration configuration = null;
         if (newConfiguration.containsKey(OpenHAB.SERVICE_CONTEXT)) {
             try {

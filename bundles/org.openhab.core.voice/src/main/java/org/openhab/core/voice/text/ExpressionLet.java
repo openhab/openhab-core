@@ -116,24 +116,21 @@ public final class ExpressionLet extends Expression {
     /**
      * @return the name
      */
-    @Nullable
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
     /**
      * @return the value
      */
-    @Nullable
-    public Object getValue() {
+    public @Nullable Object getValue() {
         return value;
     }
 
     /**
      * @return the tag
      */
-    @Nullable
-    public Object getTag() {
+    public @Nullable Object getTag() {
         return tag;
     }
 }

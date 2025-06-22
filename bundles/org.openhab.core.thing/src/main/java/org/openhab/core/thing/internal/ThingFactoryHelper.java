@@ -135,8 +135,7 @@ public class ThingFactoryHelper {
         }
     }
 
-    @Nullable
-    private static Channel createChannel(ChannelDefinition channelDefinition, ThingUID thingUID,
+    private static @Nullable Channel createChannel(ChannelDefinition channelDefinition, ThingUID thingUID,
             @Nullable String groupId, @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
         final ChannelUID channelUID = new ChannelUID(thingUID, groupId, channelDefinition.getId());
         final ChannelBuilder channelBuilder = createChannelBuilder(channelUID, channelDefinition,
@@ -172,8 +171,7 @@ public class ThingFactoryHelper {
         return channelBuilder;
     }
 
-    @Nullable
-    public static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelDefinition channelDefinition,
+    public static @Nullable ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelDefinition channelDefinition,
             @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
         ChannelType channelType = withChannelTypeRegistry(channelTypeRegistry -> (channelTypeRegistry != null)
                 ? channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID())

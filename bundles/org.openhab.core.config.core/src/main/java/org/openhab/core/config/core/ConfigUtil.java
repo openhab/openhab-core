@@ -175,8 +175,7 @@ public class ConfigUtil {
      * @return corresponding value as a valid type
      * @throws IllegalArgumentException if an invalid type has been given
      */
-    @Nullable
-    public static Object normalizeType(@Nullable Object value,
+    public static @Nullable Object normalizeType(@Nullable Object value,
             @Nullable ConfigDescriptionParameter configDescriptionParameter) {
         if (configDescriptionParameter != null) {
             Normalizer normalizer = NormalizerFactory.getNormalizer(configDescriptionParameter);

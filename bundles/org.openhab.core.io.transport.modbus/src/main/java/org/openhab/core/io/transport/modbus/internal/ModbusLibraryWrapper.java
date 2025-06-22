@@ -193,22 +193,19 @@ public class ModbusLibraryWrapper {
         ModbusTransaction transaction = endpoint.accept(new ModbusSlaveEndpointVisitor<>() {
 
             @Override
-            @Nullable
-            public ModbusTransaction visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
+            public @Nullable ModbusTransaction visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
                 ModbusTCPTransaction transaction = new ModbusTCPTransaction();
                 transaction.setReconnecting(false);
                 return transaction;
             }
 
             @Override
-            @Nullable
-            public ModbusTransaction visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
+            public @Nullable ModbusTransaction visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
                 return new ModbusSerialTransaction();
             }
 
             @Override
-            @Nullable
-            public ModbusTransaction visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
+            public @Nullable ModbusTransaction visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
                 return new ModbusUDPTransaction();
             }
         });
