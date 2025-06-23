@@ -14,6 +14,8 @@ package org.openhab.core.auth.oauth2client.test.internal;
 
 import java.io.IOException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
@@ -24,6 +26,7 @@ import org.openhab.core.auth.client.oauth2.OAuthResponseException;
  *
  * @author Gary Tse - Initial contribution
  */
+@NonNullByDefault
 public interface TestAgent {
 
     OAuthClientService testCreateClient();
@@ -31,7 +34,8 @@ public interface TestAgent {
     AccessTokenResponse testGetAccessTokenByResourceOwnerPasswordCredentials()
             throws OAuthException, IOException, OAuthResponseException;
 
-    OAuthClientService testGetClient(String handle) throws OAuthException;
+    @Nullable
+    OAuthClientService testGetClient(@Nullable String handle) throws OAuthException;
 
     AccessTokenResponse testGetAccessTokenByAuthorizationCode(String code)
             throws OAuthException, IOException, OAuthResponseException;
@@ -40,7 +44,8 @@ public interface TestAgent {
 
     AccessTokenResponse testGetCachedAccessToken() throws OAuthException, IOException, OAuthResponseException;
 
-    String testGetAuthorizationUrl(String state) throws OAuthException;
+    @Nullable
+    String testGetAuthorizationUrl(@Nullable String state) throws OAuthException;
 
     void close();
 

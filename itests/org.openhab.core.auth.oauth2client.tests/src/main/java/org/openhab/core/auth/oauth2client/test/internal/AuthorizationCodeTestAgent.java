@@ -14,6 +14,7 @@ package org.openhab.core.auth.oauth2client.test.internal;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.client.oauth2.OAuthFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Gary Tse - Initial contribution
  */
 @Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, name = "AuthorizationCodeTestAgent", configurationPid = "AuthorizationCodeTestAgent")
+@NonNullByDefault
 public class AuthorizationCodeTestAgent extends AbstractTestAgent implements TestAgent {
 
     public static final String CONFIGURATION_PID = "AuthorizationCodeTestAgent";
