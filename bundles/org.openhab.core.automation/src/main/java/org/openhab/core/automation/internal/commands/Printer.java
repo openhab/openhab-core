@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -45,6 +46,7 @@ import org.openhab.core.config.core.ParameterOption;
  * @author Ana Dimova - Initial contribution
  * @author Yordan Mihaylov - updates related to api changes
  */
+@NonNullByDefault
 public class Printer {
 
     private static final int TABLE_WIDTH = 100;
@@ -329,7 +331,7 @@ public class Printer {
      * @return list of strings, representing the auxiliary automation objects.
      */
     @SuppressWarnings("unchecked")
-    private static List<String> collectRecords(int[] columnWidths, String prop, Collection<?> list) {
+    private static List<String> collectRecords(int[] columnWidths, String prop, @Nullable Collection<?> list) {
         List<String> res = new ArrayList<>();
         boolean isFirst = true;
         boolean isList = false;
@@ -460,7 +462,7 @@ public class Printer {
      * @return a formated string, representing the set of {@link ConfigDescriptionParameter}s.
      */
     private static List<String> getConfigurationDescriptionRecords(
-            List<ConfigDescriptionParameter> configDescriptions) {
+            @Nullable List<ConfigDescriptionParameter> configDescriptions) {
         List<String> configParamContent = new ArrayList<>();
         if (configDescriptions != null && !configDescriptions.isEmpty()) {
             for (ConfigDescriptionParameter parameter : configDescriptions) {
