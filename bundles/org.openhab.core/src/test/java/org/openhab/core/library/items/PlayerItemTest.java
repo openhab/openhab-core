@@ -16,8 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.library.types.MediaCommandType;
+import org.openhab.core.library.types.MediaType;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.RewindFastforwardType;
+import org.openhab.core.library.types.StringType;
 
 /**
  *
@@ -44,6 +47,18 @@ public class PlayerItemTest {
 
         item.setState(RewindFastforwardType.FASTFORWARD);
         assertEquals(RewindFastforwardType.FASTFORWARD, item.getState());
+    }
+
+    @Test
+    public void setMediaType() {
+        PlayerItem item = new PlayerItem("test");
+        item.setState(
+                new MediaType(PlayPauseType.NONE, MediaCommandType.NONE, "", new StringType(""), new StringType("")));
+
+        assertEquals(MediaType.class, item.getState().getClass());
+        MediaType mt = (MediaType) item.getState();
+        assertEquals(PlayPauseType.NONE, mt.getState());
+        assertEquals(MediaCommandType.NONE, mt.getCommand());
     }
 
     @Test
