@@ -346,6 +346,7 @@
 			<xs:enumeration value="Control"/>
 			<xs:enumeration value="Forecast"/>
 			<xs:enumeration value="Measurement"/>
+			<xs:enumeration value="Point"/>
 			<xs:enumeration value="Setpoint"/>
 			<xs:enumeration value="Status"/>
 			<xs:enumeration value="Switch"/>
@@ -399,6 +400,7 @@
 			<xs:enumeration value="DrinkingWater"/>
 			<xs:enumeration value="Dryer"/>
 			<xs:enumeration value="ElectricMeter"/>
+			<xs:enumeration value="Equipment"/>
 			<xs:enumeration value="EVSE"/>
 			<xs:enumeration value="ExhaustFan"/>
 			<xs:enumeration value="Fan"/>

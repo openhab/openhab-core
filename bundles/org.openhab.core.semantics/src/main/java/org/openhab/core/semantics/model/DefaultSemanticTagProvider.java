@@ -68,6 +68,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Location.LIVING_ROOM);
         defaultTags.add(DefaultSemanticTags.Location.OFFICE);
         defaultTags.add(DefaultSemanticTags.Location.VERANDA);
+        defaultTags.add(DefaultSemanticTags.Location.LOCATION);
         defaultTags.add(DefaultSemanticTags.Location.OUTDOOR);
         defaultTags.add(DefaultSemanticTags.Location.CARPORT);
         defaultTags.add(DefaultSemanticTags.Location.DRIVEWAY);
@@ -81,6 +82,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Point.SWITCH);
         defaultTags.add(DefaultSemanticTags.Point.FORECAST);
         defaultTags.add(DefaultSemanticTags.Point.MEASUREMENT);
+        defaultTags.add(DefaultSemanticTags.Point.POINT);
         defaultTags.add(DefaultSemanticTags.Point.SETPOINT);
         defaultTags.add(DefaultSemanticTags.Point.STATUS);
         defaultTags.add(DefaultSemanticTags.Property.AIR_QUALITY);
@@ -179,6 +181,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.HOT_WATER_FAUCET);
         defaultTags.add(DefaultSemanticTags.Equipment.WATER_FILTER);
         defaultTags.add(DefaultSemanticTags.Equipment.WATER_SOFTENER);
+        defaultTags.add(DefaultSemanticTags.Equipment.EQUIPMENT);
         defaultTags.add(DefaultSemanticTags.Equipment.HVAC);
         defaultTags.add(DefaultSemanticTags.Equipment.AIR_CONDITIONER);
         defaultTags.add(DefaultSemanticTags.Equipment.AIR_FILTER);

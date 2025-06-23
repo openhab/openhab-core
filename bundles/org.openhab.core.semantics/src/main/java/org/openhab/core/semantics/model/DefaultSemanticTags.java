@@ -175,6 +175,11 @@ public class DefaultSemanticTags {
                 "Veranda", //
                 "", //
                 "Verandas");
+        public static final SemanticTag LOCATION = new SemanticTagImpl( //
+                "Location_Location", //
+                "Undefined Location", //
+                "Semantic Location which is undefined", //
+                "Undefined");
         public static final SemanticTag OUTDOOR = new SemanticTagImpl( //
                 "Location_Outdoor", //
                 "Outdoor", //
@@ -243,6 +248,11 @@ public class DefaultSemanticTags {
                 "Measurement", //
                 "Read only analog data point from a sensor", //
                 "");
+        public static final SemanticTag POINT = new SemanticTagImpl( //
+                "Point_Point", //
+                "Undefined Point", //
+                "Semantic Point which is undefined", //
+                "Undefined");
         public static final SemanticTag SETPOINT = new SemanticTagImpl( //
                 "Point_Setpoint", //
                 "Setpoint", //
@@ -739,6 +749,11 @@ public class DefaultSemanticTags {
                 "Water Softener", //
                 "", //
                 "");
+        public static final SemanticTag EQUIPMENT = new SemanticTagImpl( //
+                "Equipment_Equipment", //
+                "Undefined Equipment", //
+                "Semantic Equipment which is undefined", //
+                "Undefined");
         public static final SemanticTag HVAC = new SemanticTagImpl( //
                 "Equipment_HVAC", //
                 "HVAC", //

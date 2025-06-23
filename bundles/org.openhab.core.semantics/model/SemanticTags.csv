@@ -28,6 +28,7 @@ Location,LaundryRoom,Room,Laundry Room,Laundry Rooms,
 Location,LivingRoom,Room,Living Room,Living Rooms,
 Location,Office,Room,Office,Offices,
 Location,Veranda,Room,Veranda,Verandas,
+Location,Location,,Undefined Location,Undefined,Semantic Location which is undefined
 Location,Outdoor,,Outdoor,,
 Location,Carport,Outdoor,Carport,Carports,
 Location,Driveway,Outdoor,Driveway,Driveways,
@@ -41,6 +42,7 @@ Point,Control,,Control,,Read-Write analog data point
 Point,Switch,Control,Switch,,Read-Write digital data point
 Point,Forecast,,Forecast,,Read only analog predicted data point
 Point,Measurement,,Measurement,,Read only analog data point from a sensor
+Point,Point,,Undefined Point,Undefined,Semantic Point which is undefined
 Point,Setpoint,,Setpoint,,Read-Write analog data point for a controller
 Point,Status,,Status,,Read only data point indicating a status condition
 Property,AirQuality,,Air Quality,,
@@ -139,6 +141,7 @@ Equipment,DrinkingWater,,Drinking Water,Potable Water,
 Equipment,HotWaterFaucet,DrinkingWater,Hot Water Faucet,"Hot Water Tap, Boiling Water Tap, Boiling Water Faucet",Hot water faucet or tap
 Equipment,WaterFilter,DrinkingWater,Water Filter,,
 Equipment,WaterSoftener,DrinkingWater,Water Softener,,
+Equipment,Equipment,,Undefined Equipment,Undefined,Semantic Equipment which is undefined
 Equipment,HVAC,,HVAC,"Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC","Heating, Ventilation or AirConditioning"
 Equipment,AirConditioner,HVAC,Air Conditioner,,
 Equipment,AirFilter,HVAC,Air Filter,,
