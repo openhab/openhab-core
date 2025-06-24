@@ -44,11 +44,11 @@ public class ProviderItemRegistryDelegate implements ItemRegistry, ProviderRegis
 
     private final Set<String> items = new HashSet<>();
 
-    private final ScriptedItemProvider itemProvider;
+    private final ScriptedItemProvider scriptedProvider;
 
-    public ProviderItemRegistryDelegate(ItemRegistry itemRegistry, ScriptedItemProvider itemProvider) {
+    public ProviderItemRegistryDelegate(ItemRegistry itemRegistry, ScriptedItemProvider scriptedProvider) {
         this.itemRegistry = itemRegistry;
-        this.itemProvider = itemProvider;
+        this.scriptedProvider = scriptedProvider;
     }
 
     @Override
@@ -86,7 +86,7 @@ public class ProviderItemRegistryDelegate implements ItemRegistry, ProviderRegis
                     "Cannot add item, because an item with same name (" + itemName + ") already exists.");
         }
 
-        itemProvider.add(element);
+        scriptedProvider.add(element);
         items.add(itemName);
 
         return element;
@@ -106,7 +106,7 @@ public class ProviderItemRegistryDelegate implements ItemRegistry, ProviderRegis
     @Override
     public @Nullable Item update(Item element) {
         if (items.contains(element.getName())) {
-            return itemProvider.update(element);
+            return scriptedProvider.update(element);
         }
         return itemRegistry.update(element);
     }
@@ -114,7 +114,7 @@ public class ProviderItemRegistryDelegate implements ItemRegistry, ProviderRegis
     @Override
     public @Nullable Item remove(String key) {
         if (items.remove(key)) {
-            return itemProvider.remove(key);
+            return scriptedProvider.remove(key);
         }
 
         return itemRegistry.remove(key);
@@ -179,7 +179,7 @@ public class ProviderItemRegistryDelegate implements ItemRegistry, ProviderRegis
     @Override
     public void removeAllAddedByScript() {
         for (String item : items) {
-            itemProvider.remove(item);
+            scriptedProvider.remove(item);
         }
         items.clear();
     }

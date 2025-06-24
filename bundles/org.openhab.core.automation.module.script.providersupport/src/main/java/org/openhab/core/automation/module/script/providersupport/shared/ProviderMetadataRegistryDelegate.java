@@ -41,12 +41,12 @@ public class ProviderMetadataRegistryDelegate implements MetadataRegistry, Provi
 
     private final Set<MetadataKey> metadataKeys = new HashSet<>();
 
-    private final ScriptedMetadataProvider metadataProvider;
+    private final ScriptedMetadataProvider scriptedProvider;
 
     public ProviderMetadataRegistryDelegate(MetadataRegistry metadataRegistry,
-            ScriptedMetadataProvider metadataProvider) {
+            ScriptedMetadataProvider scriptedProvider) {
         this.metadataRegistry = metadataRegistry;
-        this.metadataProvider = metadataProvider;
+        this.scriptedProvider = scriptedProvider;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class ProviderMetadataRegistryDelegate implements MetadataRegistry, Provi
                     "Cannot add metadata, because metadata with same name (" + key + ") already exists.");
         }
 
-        metadataProvider.add(element);
+        scriptedProvider.add(element);
         metadataKeys.add(key);
 
         return element;
@@ -104,7 +104,7 @@ public class ProviderMetadataRegistryDelegate implements MetadataRegistry, Provi
     @Override
     public @Nullable Metadata update(Metadata element) {
         if (metadataKeys.contains(element.getUID())) {
-            return metadataProvider.update(element);
+            return scriptedProvider.update(element);
         }
         return metadataRegistry.update(element);
     }
@@ -112,7 +112,7 @@ public class ProviderMetadataRegistryDelegate implements MetadataRegistry, Provi
     @Override
     public @Nullable Metadata remove(MetadataKey key) {
         if (metadataKeys.contains(key)) {
-            return metadataProvider.remove(key);
+            return scriptedProvider.remove(key);
         }
         return metadataRegistry.remove(key);
     }
@@ -129,8 +129,8 @@ public class ProviderMetadataRegistryDelegate implements MetadataRegistry, Provi
 
     @Override
     public void removeItemMetadata(String itemname) {
-        if (metadataProvider.getAll().stream().anyMatch(MetadataPredicates.ofItem(itemname))) {
-            metadataProvider.removeItemMetadata(itemname);
+        if (scriptedProvider.getAll().stream().anyMatch(MetadataPredicates.ofItem(itemname))) {
+            scriptedProvider.removeItemMetadata(itemname);
             return;
         }
         metadataRegistry.removeItemMetadata(itemname);
@@ -139,7 +139,7 @@ public class ProviderMetadataRegistryDelegate implements MetadataRegistry, Provi
     @Override
     public void removeAllAddedByScript() {
         for (MetadataKey key : metadataKeys) {
-            metadataProvider.remove(key);
+            scriptedProvider.remove(key);
         }
         metadataKeys.clear();
     }
