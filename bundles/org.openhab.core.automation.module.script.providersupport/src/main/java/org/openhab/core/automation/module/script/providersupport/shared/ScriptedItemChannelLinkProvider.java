@@ -76,7 +76,7 @@ public class ScriptedItemChannelLinkProvider extends AbstractProvider<ItemChanne
 
     @Override
     public @Nullable ItemChannelLink remove(String key) {
-        ItemChannelLink itemChannelLink = itemChannelLinks.get(key);
+        ItemChannelLink itemChannelLink = itemChannelLinks.remove(key);
         if (itemChannelLink != null) {
             notifyListenersAboutRemovedElement(itemChannelLink);
         }

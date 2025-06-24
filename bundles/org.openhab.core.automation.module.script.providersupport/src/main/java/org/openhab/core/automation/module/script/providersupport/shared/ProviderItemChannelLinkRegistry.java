@@ -90,7 +90,7 @@ public class ProviderItemChannelLinkRegistry implements Registry<ItemChannelLink
                             + ") already exists.");
         }
 
-        itemChannelLinkRegistry.add(element);
+        scriptedProvider.add(element);
         uids.add(uid);
 
         return element;
