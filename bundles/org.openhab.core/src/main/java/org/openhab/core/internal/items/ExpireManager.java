@@ -22,8 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -50,6 +48,7 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.DurationUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -306,9 +305,6 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         protected static final String COMMAND_PREFIX = CONFIG_COMMAND + "=";
         protected static final String STATE_PREFIX = CONFIG_STATE + "=";
 
-        protected static final Pattern DURATION_PATTERN = Pattern.compile(
-                "(?:([0-9]+)D)?\\s*(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?", Pattern.CASE_INSENSITIVE);
-
         final @Nullable Command expireCommand;
         final @Nullable State expireState;
         final String durationString;
@@ -323,17 +319,17 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
          *
          * {@code &lt;duration&gt;[,(state=|command=|)&lt;stateOrCommand&gt;]}<br>
          * if neither state= or command= is present, assume state
-         * 
+         *
          * {@code duration} is a string of the form "1d1h15m30s" or "1d" or "1h" or "15m" or "30s",
          * or an ISO-8601 duration string (e.g. "PT1H15M30S").
-         * 
+         *
          * {@code configuration} is a map of configuration keys and values:
          * - {@code duration}: the duration string
          * - {@code command}: the {@link Command} to send when the item expires
          * - {@code state}: the {@link State} to send when the item expires
          * - {@code ignoreStateUpdates}: if true, ignore state updates
          * - {@code ignoreCommands}: if true, ignore commands
-         * 
+         *
          * - When neither command nor state is specified, the default is to post an {@link UNDEF} state.
          *
          * @param item the item to which we are bound
@@ -358,7 +354,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             }
 
             durationString = durationStr;
-            duration = parseDuration(durationString);
+            duration = DurationUtils.parse(durationString);
             if (duration.isNegative()) {
                 throw new IllegalArgumentException(
                         "Expire duration for item " + item.getName() + " must be a positive value");
@@ -456,36 +452,6 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                 configValue = false;
             }
             return configValue;
-        }
-
-        private Duration parseDuration(String durationString) throws IllegalArgumentException {
-            try {
-                return Duration.parse(durationString);
-            } catch (Exception e) {
-                // ignore
-            }
-
-            Matcher m = DURATION_PATTERN.matcher(durationString);
-            if (!m.matches()
-                    || (m.group(1) == null && m.group(2) == null && m.group(3) == null && m.group(4) == null)) {
-                throw new IllegalArgumentException(
-                        "Invalid duration: " + durationString + ". Expected something like: '1d 1h 15m 30s'");
-            }
-
-            Duration duration = Duration.ZERO;
-            if (m.group(1) != null) {
-                duration = duration.plus(Duration.ofDays(Long.parseLong(m.group(1))));
-            }
-            if (m.group(2) != null) {
-                duration = duration.plus(Duration.ofHours(Long.parseLong(m.group(2))));
-            }
-            if (m.group(3) != null) {
-                duration = duration.plus(Duration.ofMinutes(Long.parseLong(m.group(3))));
-            }
-            if (m.group(4) != null) {
-                duration = duration.plus(Duration.ofSeconds(Long.parseLong(m.group(4))));
-            }
-            return duration;
         }
 
         @Override
