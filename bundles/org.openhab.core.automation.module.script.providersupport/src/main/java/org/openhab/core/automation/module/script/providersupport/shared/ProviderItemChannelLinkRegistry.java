@@ -14,6 +14,7 @@ package org.openhab.core.automation.module.script.providersupport.shared;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -44,12 +45,12 @@ public class ProviderItemChannelLinkRegistry implements Registry<ItemChannelLink
 
     private final Set<String> uids = new HashSet<>();
 
-    private final ScriptedItemChannelLinkProvider itemChannelLinkProvider;
+    private final ScriptedItemChannelLinkProvider scriptedProvider;
 
     public ProviderItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry,
-            ScriptedItemChannelLinkProvider itemChannelLinkProvider) {
+            ScriptedItemChannelLinkProvider scriptedProvider) {
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-        this.itemChannelLinkProvider = itemChannelLinkProvider;
+        this.scriptedProvider = scriptedProvider;
     }
 
     @Override
@@ -109,7 +110,7 @@ public class ProviderItemChannelLinkRegistry implements Registry<ItemChannelLink
     @Override
     public @Nullable ItemChannelLink update(ItemChannelLink element) {
         if (uids.contains(element.getUID())) {
-            return itemChannelLinkProvider.update(element);
+            return scriptedProvider.update(element);
         }
         return itemChannelLinkRegistry.update(element);
     }
@@ -117,7 +118,7 @@ public class ProviderItemChannelLinkRegistry implements Registry<ItemChannelLink
     @Override
     public @Nullable ItemChannelLink remove(String key) {
         if (uids.contains(key)) {
-            return itemChannelLinkProvider.remove(key);
+            return scriptedProvider.remove(key);
         }
         return itemChannelLinkRegistry.remove(key);
     }
@@ -146,10 +147,19 @@ public class ProviderItemChannelLinkRegistry implements Registry<ItemChannelLink
         return removedLinks;
     }
 
+    public int purge() {
+        List<String> toRemove = itemChannelLinkRegistry.getOrphanLinks().keySet().stream().map(ItemChannelLink::getUID)
+                .filter(i -> scriptedProvider.get(i) != null).toList();
+
+        toRemove.forEach(this::remove);
+
+        return toRemove.size() + itemChannelLinkRegistry.purge();
+    }
+
     @Override
     public void removeAllAddedByScript() {
         for (String uid : uids) {
-            itemChannelLinkProvider.remove(uid);
+            scriptedProvider.remove(uid);
         }
         uids.clear();
     }
