@@ -92,6 +92,12 @@
       <version>${slf4j.version}</version>
       <scope>compile</scope>
     </dependency>
+    <!-- do not remove, inherited dependency gson from core.storage.json is not provided via runtime bom -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.11.0</version>
+    </dependency>
   </dependencies>
 
   <build>
