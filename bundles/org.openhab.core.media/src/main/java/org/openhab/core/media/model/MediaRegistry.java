@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.media.MediaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +28,15 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class MediaRegistry extends MediaCollection {
     private final Logger logger = LoggerFactory.getLogger(MediaEntry.class);
+    private final MediaService mediaService;
     private Map<String, MediaEntry> pathToEntry;
 
-    public MediaRegistry() {
+    public MediaRegistry(MediaService mediaService) {
         super("Root", "Registry");
         pathToEntry = new HashMap<String, MediaEntry>();
         pathToEntry.put("/Root", this);
+
+        this.mediaService = mediaService;
     }
 
     public void addEntry(MediaEntry mediaEntry) {
@@ -41,6 +45,10 @@ public class MediaRegistry extends MediaCollection {
 
     public @Nullable MediaEntry getEntry(String path) {
         return pathToEntry.get(path);
+    }
+
+    public MediaService getMediaService() {
+        return mediaService;
     }
 
     @Override

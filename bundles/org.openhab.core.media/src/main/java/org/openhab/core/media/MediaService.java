@@ -34,4 +34,10 @@ public interface MediaService {
     public @Nullable MediaListenner getMediaListenner(String key);
 
     public void registerDevice(MediaDevice device);
+
+    public @Nullable String getProxy(String key);
+
+    public String handleImageProxy(String uri);
+
+    public void setBaseUri(String baseUri);
 }

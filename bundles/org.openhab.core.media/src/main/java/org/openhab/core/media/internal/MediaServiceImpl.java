@@ -37,10 +37,46 @@ public class MediaServiceImpl implements MediaService {
     private Map<String, MediaDevice> mediaDevices = new HashMap<String, MediaDevice>();
 
     public @Nullable MediaListenner listenner = null;
-    public MediaRegistry registry = new MediaRegistry();
+    public MediaRegistry registry = new MediaRegistry(this);
+
+    private Map<String, String> proxyRegistry = new HashMap<String, String>();
+    private String baseUri = "none";
 
     @Activate
     public MediaServiceImpl() {
+        this.addProxySource("lyrionUpnp1", "http://192.168.254.1:9000/");
+        this.addProxySource("lyrionUpnp2", "http://192.168.0.1:9000/");
+        this.addProxySource("emby", "http://192.168.254.1:8096/");
+
+    }
+
+    public void setBaseUri(String baseUri) {
+        this.baseUri = baseUri;
+    }
+
+    @Override
+    public String handleImageProxy(String uri) {
+        String result = uri;
+        for (String key : proxyRegistry.keySet()) {
+            String proxyUri = proxyRegistry.get(key);
+            if (proxyUri != null) {
+                result = result.replace(proxyUri, baseUri + "/proxy/" + key + "/");
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public @Nullable String getProxy(String key) {
+        if (!proxyRegistry.containsKey(key)) {
+            return null;
+        }
+
+        return proxyRegistry.get(key);
+    }
+
+    public void addProxySource(String source, String uri) {
+        proxyRegistry.put(source, uri);
     }
 
     @Override
