@@ -105,7 +105,16 @@ public class MediaResource implements RESTResource {
         String host = uri.getHost();
         int port = uri.getPort();
 
-        String baseUri = scheme + "://" + host + ":8080" + MediaServlet.SERVLET_PATH;
+        if (port == -1) {
+            if (scheme.equals("http")) {
+                port = 80;
+            } else if (scheme.equals("https")) {
+                port = 443;
+            }
+
+        }
+
+        String baseUri = scheme + "://" + host + ":" + port + MediaServlet.SERVLET_PATH;
         mediaService.setBaseUri(baseUri);
 
         if (path == null || path.isEmpty()) {
