@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.media.internal;
 
+import java.net.URI;
 import java.util.Locale;
 import java.util.Map;
 
@@ -21,9 +22,11 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -34,6 +37,7 @@ import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.media.MediaDevice;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
+import org.openhab.core.media.internal.MediaServlet;
 import org.openhab.core.media.model.MediaCollection;
 import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
@@ -89,19 +93,27 @@ public class MediaResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getMediaSources", summary = "Get the list of all sources.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MediaDTO.class)))) })
-    public Response getSources(
+    public Response getSources(@Context UriInfo uriInfo,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("path") @Parameter(description = "path of the ressource") @Nullable String path) {
         final Locale locale = localeService.getLocale(language);
 
         MediaRegistry registry = mediaService.getMediaRegistry();
 
+        URI uri = uriInfo.getRequestUri();
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        int port = uri.getPort();
+
+        String baseUri = scheme + "://" + host + ":8080" + MediaServlet.SERVLET_PATH;
+        mediaService.setBaseUri(baseUri);
+
         if (path == null || path.isEmpty()) {
             path = "/Root";
         }
         MediaEntry entry = registry.getEntry(path);
 
-        MediaSource mediaSource = entry.getMediaSource();
+        MediaSource mediaSource = entry.getMediaSource(false);
         if (mediaSource != null) {
             MediaListenner mediaListenner = mediaService.getMediaListenner(mediaSource.getKey());
             if (mediaListenner != null) {
@@ -123,7 +135,7 @@ public class MediaResource implements RESTResource {
                 MediaDTO dto = new MediaDTO(subEntry.getKey(), subEntry.getPath(), subEntry.getClass().getTypeName(),
                         subEntry.getName());
                 if (subEntry instanceof MediaCollection) {
-                    String artUri = ((MediaCollection) subEntry).getArtUri();
+                    String artUri = ((MediaCollection) subEntry).getExternalArtUri();
                     dto.setArtUri(artUri);
 
                 }

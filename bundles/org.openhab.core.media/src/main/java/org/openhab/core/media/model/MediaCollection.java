@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.media.MediaService;
 
 /**
  *
@@ -67,6 +68,12 @@ public class MediaCollection extends MediaEntry {
 
     public String getArtUri() {
         return artUri;
+    }
+
+    public String getExternalArtUri() {
+        MediaService mediaService = this.getMediaRegistry().getMediaService();
+        String result = mediaService.handleImageProxy(artUri);
+        return result;
     }
 
     public void setArtUri(String artUri) {
