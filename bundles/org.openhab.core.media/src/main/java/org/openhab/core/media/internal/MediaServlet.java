@@ -17,9 +17,7 @@ import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
@@ -87,7 +85,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
 
     public final MediaService mediaService;
 
-    static final String SERVLET_PATH = "/media";
+    public static final String SERVLET_PATH = "/media";
 
     private final Logger logger = LoggerFactory.getLogger(MediaServlet.class);
 
@@ -140,20 +138,10 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         } catch (Exception e) {
             logger.warn("Unable to start Jetty HttpClient {}", e.getMessage());
         }
-
-        this.addProxySource("lyrionUpnp", "http://192.168.254.1:9000/");
-        this.addProxySource("emby", "http://192.168.254.1:8096/");
-
     }
 
     @Deactivate
     protected synchronized void deactivate() {
-    }
-
-    private Map<String, String> proxyRegistry = new HashMap<String, String>();
-
-    public void addProxySource(String source, String uri) {
-        proxyRegistry.put(source, uri);
     }
 
     private void handleProxy(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
@@ -168,10 +156,10 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
             int idxProxyName = urlPath.indexOf("/");
             String proxyName = urlPath.substring(0, idxProxyName);
 
-            if (!proxyRegistry.containsKey(proxyName)) {
+            if (mediaService.getProxy(proxyName) == null) {
                 throw new Exception(String.format("proxyName %s not registered", proxyName));
             }
-            String targetUri = proxyRegistry.get(proxyName);
+            String targetUri = mediaService.getProxy(proxyName);
 
             urlPath = urlPath.substring(idxProxyName + 1);
 
@@ -191,7 +179,9 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                 resp.setStatus(404);
             }
 
-        } catch (Exception ex) {
+        } catch (
+
+        Exception ex) {
             throw new ServletException("Error", ex);
 
         }
@@ -228,7 +218,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         MediaEntry currentEntry = mediaRegistry.getEntry(path);
 
         if (currentEntry != null) {
-            MediaSource mediaSource = currentEntry.getMediaSource();
+            MediaSource mediaSource = currentEntry.getMediaSource(false);
             if (mediaSource != null) {
                 MediaListenner mediaListenner = mediaService.getMediaListenner(mediaSource.getKey());
                 if (mediaListenner != null) {
@@ -253,7 +243,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
             if (currentEntry instanceof MediaAlbum) {
                 MediaAlbum album = (MediaAlbum) currentEntry;
                 sb.append("Album:" + album.getName());
-                sb.append("<img src=\"" + handleImageProxy(album.getArtUri()) + "\"/>");
+                sb.append("<img src=\"" + mediaService.handleImageProxy(album.getArtUri()) + "\"/>");
             }
 
             for (String key : col.getChilds().keySet()) {
@@ -267,7 +257,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                             + "\" style=\"text-decoration: none;color:#ffffff;\">");
                     sb.append(entry.getName());
                     sb.append("<br/>");
-                    sb.append("<img width=160 src=\"" + handleImageProxy(album.getArtUri()) + "\">");
+                    sb.append("<img width=160 src=\"" + mediaService.handleImageProxy(album.getArtUri()) + "\">");
                     sb.append("</a>");
                     sb.append("<br/>");
                     sb.append("</div>");
@@ -280,7 +270,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                             + "\" style=\"text-decoration: none;color:#ffffff;\">");
                     sb.append(entry.getName());
                     sb.append("<br/>");
-                    sb.append("<img width=160 src=\"" + artist.getArtUri() + "\">");
+                    sb.append("<img width=160 src=\"" + mediaService.handleImageProxy(artist.getArtUri()) + "\">");
                     sb.append("</a>");
                     sb.append("<br/>");
                     sb.append("</div>");
@@ -291,10 +281,10 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                     sb.append("<a href=\"" + requestURI + "?path=" + entry.getPath()
                             + "\" style=\"text-decoration: none;color:#000000;vertical-align:middle;\">");
                     if (track.getArtUri().indexOf("Arrow") >= 0) {
-                        sb.append("<img src=\"" + handleImageProxy(track.getArtUri())
+                        sb.append("<img src=\"" + mediaService.handleImageProxy(track.getArtUri())
                                 + "\" style=\"vertical-align:middle;\">");
                     } else {
-                        sb.append("<img width=80 src=\"" + handleImageProxy(track.getArtUri())
+                        sb.append("<img width=80 src=\"" + mediaService.handleImageProxy(track.getArtUri())
                                 + "\" style=\"vertical-align:middle;\">");
                     }
                     sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");
@@ -311,7 +301,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                             + "\" style=\"text-decoration: none;color:#ffffff;\">");
                     sb.append(entry.getName());
                     sb.append("<br/>");
-                    sb.append("<img width=160 src=\"" + handleImageProxy(playList.getArtUri()) + "\">");
+                    sb.append("<img width=160 src=\"" + mediaService.handleImageProxy(playList.getArtUri()) + "\">");
                     sb.append("</a>");
                     sb.append("<br/>");
                     sb.append("</div>");
@@ -324,7 +314,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                             + "\" style=\"text-decoration: none;color:#000000;\">");
                     sb.append(entry.getName());
                     sb.append("<br/>");
-                    sb.append("<img width=160 src=\"" + handleImageProxy(collection.getArtUri()) + "\">");
+                    sb.append("<img width=160 src=\"" + mediaService.handleImageProxy(collection.getArtUri()) + "\">");
                     sb.append("</a>");
                     sb.append("<br/>");
                     sb.append("</div>");
@@ -339,13 +329,6 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         resp.setContentType("text/html; charset=utf-8");
         stream.write(sb.toString().getBytes(StandardCharsets.UTF_8));
 
-    }
-
-    public String handleImageProxy(String uri) {
-        uri = uri.replace("http://192.168.254.1:9000/", baseUri + "/proxy/lyrionUpnp/");
-        uri = uri.replace("http://192.168.0.1:9000/", baseUri + "/proxy/lyrionUpnp/");
-        uri = uri.replace("http://192.168.254.1:8096/", baseUri + "/proxy/emby/");
-        return uri;
     }
 
 }

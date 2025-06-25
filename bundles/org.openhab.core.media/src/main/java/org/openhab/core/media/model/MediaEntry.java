@@ -57,16 +57,17 @@ public class MediaEntry {
 
     }
 
-    public @Nullable MediaSource getMediaSource() {
+    public @Nullable MediaSource getMediaSource(boolean first) {
         if (this instanceof MediaSource) {
-            if (parent instanceof MediaSource) {
-                return (MediaSource) parent;
+            if (parent != null && parent instanceof MediaSource && !first) {
+                return parent.getMediaSource(first);
+            } else {
+                return (MediaSource) this;
             }
-            return (MediaSource) this;
         }
 
-        if (parent != null) {
-            return parent.getMediaSource();
+        if (getParent() != null) {
+            return getParent().getMediaSource(first);
         }
 
         return null;
