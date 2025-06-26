@@ -166,7 +166,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     public synchronized void processWatchEvent(Kind kind, Path fullPath) {
         Path relativePath = mainWatchPath.relativize(fullPath);
         String modelName = relativePath.toString();
-        if (!modelName.endsWith(".yaml")) {
+        if (!modelName.endsWith(".yaml") && !modelName.endsWith(".yml")) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
