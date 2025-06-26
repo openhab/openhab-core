@@ -97,13 +97,13 @@ public class XmlToTranslationsConverter {
 
     private Stream<TranslationsGroup> translateConfigDescription(ConfigDescription configDescription,
             @Nullable String configKeyPrefix) {
-        String uid = configDescription.getUID().toString();
-        if (processedURIs.contains(uid)) {
+        String UID = configDescription.getUID().toString();
+        if (processedURIs.contains(UID)) {
             return Stream.empty();
         }
-        processedURIs.add(uid);
+        processedURIs.add(UID);
         String keyPrefix = configKeyPrefix != null ? configKeyPrefix
-                : uid.replaceFirst(":", ".config.").replace(":", ".");
+                : UID.replaceFirst(":", ".config.").replace(":", ".");
         Builder<TranslationsGroup> streamBuilder = Stream.builder();
         configDescriptionGroupParameters(keyPrefix, configDescription.getParameterGroups()).forEach(streamBuilder::add);
         configDescriptionParameters(keyPrefix, configDescription.getParameters()).forEach(streamBuilder::add);
