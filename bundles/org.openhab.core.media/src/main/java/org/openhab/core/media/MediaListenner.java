@@ -22,5 +22,5 @@ import org.openhab.core.media.model.MediaEntry;
  */
 @NonNullByDefault
 public interface MediaListenner {
-    void refreshEntry(MediaEntry mediaEntry);
+    void refreshEntry(MediaEntry mediaEntry, long start, long size);
 }
