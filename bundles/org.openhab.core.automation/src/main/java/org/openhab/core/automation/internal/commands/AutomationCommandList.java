@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Map;
 
 import org.openhab.core.automation.Rule;
@@ -23,6 +24,9 @@ import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.Template;
 import org.openhab.core.automation.type.ModuleType;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * This class provides common functionality of commands:
@@ -34,20 +38,21 @@ import org.openhab.core.automation.type.ModuleType;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class AutomationCommandList extends AutomationCommand {
 
     /**
      * This field serves to keep the UID of a {@link Rule}, {@link Template} or {@link ModuleType}, or part of it, or
      * sequence number of a {@link Rule}, {@link Template}, or {@link ModuleType} in the list.
      */
-    private String id;
+    private String id = "";
 
     /**
      * This field is used to search for templates or types of modules, which have been translated to the language from
      * the locale. If the parameter <b>locale</b> is not passed to the command line then the default locale will be
      * used.
      */
-    private Locale locale;
+    private @Nullable Locale locale;
 
     /**
      * @see AutomationCommand#AutomationCommand(String, String[], int, AutomationCommandsPluggable)
@@ -293,7 +298,7 @@ public class AutomationCommandList extends AutomationCommand {
                 } else {
                     for (String ruleUID : list.values()) {
                         if (ruleUID.contains(id)) {
-                            rules.add(autoCommands.getRule(ruleUID));
+                            rules.add(Objects.requireNonNull(autoCommands.getRule(ruleUID)));
                         }
                     }
                 }
@@ -328,7 +333,7 @@ public class AutomationCommandList extends AutomationCommand {
             } else {
                 for (String templateUID : list.keySet()) {
                     if (templateUID.contains(id)) {
-                        templates.add(autoCommands.getTemplate(templateUID, locale));
+                        templates.add(Objects.requireNonNull(autoCommands.getTemplate(templateUID, locale)));
                     }
                 }
             }
@@ -363,7 +368,7 @@ public class AutomationCommandList extends AutomationCommand {
                 } else {
                     for (String typeUID : list.values()) {
                         if (typeUID.contains(id)) {
-                            moduleTypes.add(autoCommands.getModuleType(typeUID, locale));
+                            moduleTypes.add(Objects.requireNonNull(autoCommands.getModuleType(typeUID, locale)));
                         }
                     }
                 }
@@ -382,7 +387,7 @@ public class AutomationCommandList extends AutomationCommand {
      *            filled with the objects from <tt>collection</tt>.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void addCollection(Collection collection, Map list) {
+    private void addCollection(@Nullable Collection collection, Map list) {
         if (collection != null && !collection.isEmpty()) {
             for (Object element : collection) {
                 if (element instanceof ModuleType type) {
