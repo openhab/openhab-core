@@ -12,7 +12,9 @@
  */
 package org.openhab.core.media.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -24,7 +26,8 @@ import org.openhab.core.media.MediaService;
  */
 @NonNullByDefault
 public class MediaCollection extends MediaEntry {
-    private Map<String, MediaEntry> childs;
+    private Map<String, MediaEntry> maps;
+    private List<MediaEntry> list = new ArrayList<>();
     public String artUri = "/static/playlist.png";
 
     public MediaCollection(String key, String name) {
@@ -38,32 +41,38 @@ public class MediaCollection extends MediaEntry {
             artUri = "/static/Folder.png";
         }
 
-        childs = new HashMap<String, MediaEntry>();
+        maps = new HashMap<String, MediaEntry>();
+        list = new ArrayList<MediaEntry>();
     }
 
     public MediaCollection(String key, String name, String artUri) {
         super(key, name);
 
         this.artUri = artUri;
-        childs = new HashMap<String, MediaEntry>();
+        maps = new HashMap<String, MediaEntry>();
     }
 
-    public Map<String, MediaEntry> getChilds() {
-        return childs;
+    public Map<String, MediaEntry> getChildsAsMap() {
+        return maps;
+    }
+
+    public List<MediaEntry> getChildsAsArray() {
+        return list;
     }
 
     @Override
     public void print() {
         super.print();
 
-        for (MediaEntry child : childs.values()) {
+        for (MediaEntry child : list) {
             child.print();
         }
     }
 
     @Override
     public void addChild(String key, MediaEntry childEntry) {
-        childs.put(key, childEntry);
+        maps.put(key, childEntry);
+        list.add(childEntry);
     }
 
     public String getArtUri() {

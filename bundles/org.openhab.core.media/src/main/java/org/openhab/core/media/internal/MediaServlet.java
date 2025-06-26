@@ -222,7 +222,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
             if (mediaSource != null) {
                 MediaListenner mediaListenner = mediaService.getMediaListenner(mediaSource.getKey());
                 if (mediaListenner != null) {
-                    mediaListenner.refreshEntry(currentEntry);
+                    mediaListenner.refreshEntry(currentEntry, 0, 0);
                 }
             }
         }
@@ -246,8 +246,8 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                 sb.append("<img src=\"" + mediaService.handleImageProxy(album.getArtUri()) + "\"/>");
             }
 
-            for (String key : col.getChilds().keySet()) {
-                MediaEntry entry = col.getChilds().get(key);
+            for (String key : col.getChildsAsMap().keySet()) {
+                MediaEntry entry = col.getChildsAsMap().get(key);
 
                 if (entry instanceof MediaAlbum) {
                     MediaAlbum album = (MediaAlbum) entry;

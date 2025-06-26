@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.media.internal;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -95,7 +96,9 @@ public class MediaResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MediaDTO.class)))) })
     public Response getSources(@Context UriInfo uriInfo,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @QueryParam("path") @Parameter(description = "path of the ressource") @Nullable String path) {
+            @QueryParam("path") @Parameter(description = "path of the ressource") @Nullable String path,
+            @QueryParam("start") @Parameter(description = "start index to get") long start,
+            @QueryParam("size") @Parameter(description = "number of element to get") long size) {
         final Locale locale = localeService.getLocale(language);
 
         MediaRegistry registry = mediaService.getMediaRegistry();
@@ -111,7 +114,11 @@ public class MediaResource implements RESTResource {
             } else if (scheme.equals("https")) {
                 port = 443;
             }
+        }
 
+        // Handle specific dev case
+        if (port == 8081) {
+            port = 8080;
         }
 
         String baseUri = scheme + "://" + host + ":" + port + MediaServlet.SERVLET_PATH;
@@ -126,7 +133,7 @@ public class MediaResource implements RESTResource {
         if (mediaSource != null) {
             MediaListenner mediaListenner = mediaService.getMediaListenner(mediaSource.getKey());
             if (mediaListenner != null) {
-                mediaListenner.refreshEntry(entry);
+                mediaListenner.refreshEntry(entry, start, size);
             }
         }
 
@@ -135,11 +142,14 @@ public class MediaResource implements RESTResource {
 
             MediaDTOCollection dtoCollection = new MediaDTOCollection(entry.getKey(), entry.getPath(),
                     entry.getClass().getTypeName(), entry.getName());
-            String artUriCol = col.getArtUri();
+            String artUriCol = col.getExternalArtUri();
             dtoCollection.setArtUri(artUriCol);
 
-            for (String key : col.getChilds().keySet()) {
-                MediaEntry subEntry = col.getChilds().get(key);
+            // for (String key : col.getChilds().keySet()) {
+
+            List<MediaEntry> colEntries = col.getChildsAsArray();
+            for (long idx = start; idx < start + size && idx < colEntries.size(); idx++) {
+                MediaEntry subEntry = colEntries.get((int) idx);
 
                 MediaDTO dto = new MediaDTO(subEntry.getKey(), subEntry.getPath(), subEntry.getClass().getTypeName(),
                         subEntry.getName());
