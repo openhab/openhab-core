@@ -25,6 +25,7 @@ import org.openhab.core.types.StateDescription;
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Added metadata
  * @author Mark Herwege - Added default unit symbol
+ * @author Mark Herwege - Added parent groups
  */
 public class EnrichedItemDTO extends ItemDTO {
 
@@ -38,6 +39,7 @@ public class EnrichedItemDTO extends ItemDTO {
     public Long lastStateChange;
     public String unitSymbol;
     public Map<String, Object> metadata;
+    public EnrichedItemDTO[] parents = null;
     public Boolean editable;
 
     public EnrichedItemDTO(ItemDTO itemDTO, String link, String state, String lastState, Long lastStateUpdate,
