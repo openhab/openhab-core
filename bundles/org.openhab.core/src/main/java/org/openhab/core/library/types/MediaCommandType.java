@@ -31,7 +31,8 @@ public enum MediaCommandType implements PrimitiveType, Command {
     NEXT,
     PREVIOUS,
     REWIND,
-    FASTFORWARD;
+    FASTFORWARD,
+    SEARCH;
 
     @Override
     public String format(String pattern) {
