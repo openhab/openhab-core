@@ -21,6 +21,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class MediaSource extends MediaCollection {
 
+    public MediaSource() {
+
+    }
+
     public MediaSource(String key, String sourceName) {
         super(key, sourceName);
     }

@@ -24,6 +24,10 @@ public class MediaAlbum extends MediaCollection {
     private String artist = "";
     private String genre = "";
 
+    public MediaAlbum() {
+
+    }
+
     public MediaAlbum(String key, String albumName) {
         super(key, albumName);
 

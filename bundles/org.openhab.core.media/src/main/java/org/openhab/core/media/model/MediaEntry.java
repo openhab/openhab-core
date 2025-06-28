@@ -30,6 +30,11 @@ public class MediaEntry {
     private String key;
     private String name;
 
+    public MediaEntry() {
+        key = "";
+        name = "";
+    }
+
     public MediaEntry(String key, String name) {
         this.name = name;
         this.key = key;
@@ -77,12 +82,16 @@ public class MediaEntry {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getKey() {
         return key;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public @Nullable MediaEntry getParent() {

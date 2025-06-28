@@ -22,6 +22,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class MediaTrack extends MediaEntry {
     private String artUri = "/static/Arrow.png";
 
+    public MediaTrack() {
+
+    }
+
     public MediaTrack(String key, String trackName) {
         super(key, trackName);
     }
