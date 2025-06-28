@@ -35,6 +35,11 @@ public class MediaCollection extends MediaEntry {
         list = new ArrayList<MediaEntry>();
     }
 
+    public void Clear() {
+        list.clear();
+        maps.clear();
+    }
+
     public MediaCollection(String key, String name) {
         super(key, name);
 
@@ -76,8 +81,10 @@ public class MediaCollection extends MediaEntry {
 
     @Override
     public void addChild(String key, MediaEntry childEntry) {
-        maps.put(key, childEntry);
-        list.add(childEntry);
+        if (!maps.containsKey(key)) {
+            maps.put(key, childEntry);
+            list.add(childEntry);
+        }
     }
 
     public String getArtUri() {

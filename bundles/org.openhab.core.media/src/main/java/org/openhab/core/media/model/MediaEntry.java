@@ -53,6 +53,8 @@ public class MediaEntry {
             }
 
             addChild(key, result);
+        } else {
+            addChild(key, result);
         }
 
         return result;
