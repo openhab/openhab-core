@@ -42,6 +42,7 @@ import org.openhab.core.media.internal.MediaServlet;
 import org.openhab.core.media.model.MediaCollection;
 import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
+import org.openhab.core.media.model.MediaSearchResult;
 import org.openhab.core.media.model.MediaSource;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -138,28 +139,7 @@ public class MediaResource implements RESTResource {
         }
 
         if (entry instanceof MediaCollection) {
-            MediaCollection col = (MediaCollection) entry;
-
-            MediaDTOCollection dtoCollection = new MediaDTOCollection(entry.getKey(), entry.getPath(),
-                    entry.getClass().getTypeName(), entry.getName());
-            String artUriCol = col.getExternalArtUri();
-            dtoCollection.setArtUri(artUriCol);
-
-            // for (String key : col.getChilds().keySet()) {
-
-            List<MediaEntry> colEntries = col.getChildsAsArray();
-            for (long idx = start; idx < start + size && idx < colEntries.size(); idx++) {
-                MediaEntry subEntry = colEntries.get((int) idx);
-
-                MediaDTO dto = new MediaDTO(subEntry.getKey(), subEntry.getPath(), subEntry.getClass().getTypeName(),
-                        subEntry.getName());
-                if (subEntry instanceof MediaCollection) {
-                    String artUri = ((MediaCollection) subEntry).getExternalArtUri();
-                    dto.setArtUri(artUri);
-
-                }
-                dtoCollection.addMediaDTO(dto);
-            }
+            MediaDTOCollection dtoCollection = constructResponse(entry, start, size);
             return Response.ok(dtoCollection).build();
         } else {
             MediaDTO dto = new MediaDTO(entry.getKey(), entry.getPath(), entry.getClass().getTypeName(),
@@ -167,6 +147,38 @@ public class MediaResource implements RESTResource {
             return Response.ok(dto).build();
         }
 
+    }
+
+    public MediaDTOCollection constructResponse(MediaEntry entry, long start, long size) {
+        MediaCollection col = (MediaCollection) entry;
+
+        MediaDTOCollection dtoCollection = new MediaDTOCollection(entry.getKey(), entry.getPath(),
+                entry.getClass().getTypeName(), entry.getName());
+        String artUriCol = col.getExternalArtUri();
+        dtoCollection.setArtUri(artUriCol);
+
+        // for (String key : col.getChilds().keySet()) {
+
+        List<MediaEntry> colEntries = col.getChildsAsArray();
+        for (long idx = start; idx < start + size && idx < colEntries.size(); idx++) {
+            MediaEntry subEntry = colEntries.get((int) idx);
+
+            MediaDTO dto;
+            if (entry instanceof MediaSearchResult) {
+                dto = constructResponse(subEntry, start, size);
+            } else if (subEntry instanceof MediaCollection) {
+                dto = new MediaDTOCollection(subEntry.getKey(), subEntry.getPath(), subEntry.getClass().getTypeName(),
+                        subEntry.getName());
+                dto.setArtUri(((MediaCollection) subEntry).getExternalArtUri());
+            } else {
+                dto = new MediaDTO(subEntry.getKey(), subEntry.getPath(), subEntry.getClass().getTypeName(),
+                        subEntry.getName());
+            }
+
+            dtoCollection.addMediaDTO(dto);
+        }
+
+        return dtoCollection;
     }
 
     @GET
