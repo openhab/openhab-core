@@ -414,6 +414,12 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.automation.module.script.providersupport</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.automation.module.script.rulesupport</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
