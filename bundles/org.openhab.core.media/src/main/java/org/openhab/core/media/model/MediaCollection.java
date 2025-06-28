@@ -30,6 +30,11 @@ public class MediaCollection extends MediaEntry {
     private List<MediaEntry> list = new ArrayList<>();
     public String artUri = "/static/playlist.png";
 
+    public MediaCollection() {
+        maps = new HashMap<String, MediaEntry>();
+        list = new ArrayList<MediaEntry>();
+    }
+
     public MediaCollection(String key, String name) {
         super(key, name);
 

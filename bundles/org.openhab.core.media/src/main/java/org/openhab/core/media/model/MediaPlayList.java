@@ -21,6 +21,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class MediaPlayList extends MediaCollection {
 
+    public MediaPlayList() {
+
+    }
+
     public MediaPlayList(String key, String playListName) {
         super(key, playListName);
     }
