@@ -19,9 +19,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaPostcast extends MediaCollection {
+public class MediaPodcast extends MediaCollection {
 
-    public MediaPostcast(String key, String albumName) {
+    public MediaPodcast() {
+        
+    }
+    public MediaPodcast(String key, String albumName) {
         super(key, albumName);
 
     }
