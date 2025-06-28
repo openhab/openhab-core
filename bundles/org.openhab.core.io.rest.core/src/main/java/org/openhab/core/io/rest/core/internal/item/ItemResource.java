@@ -952,7 +952,7 @@ public class ItemResource implements RESTResource {
     public Response getSemanticsHealth(@Context HttpHeaders headers) {
         List<ItemSemanticsProblem> semanticsProblems = this.itemRegistry.stream().flatMap(item -> {
             return semanticsService.getItemSemanticsProblems(item).stream()
-                    .map(p -> p.setEditable(isEditable(p.item())));
+                    .map(p -> p.setEditable(isItemEditable(p.item())));
         }).toList();
         return JSONResponse.createResponse(Status.OK, semanticsProblems, null);
     }
@@ -1061,7 +1061,11 @@ public class ItemResource implements RESTResource {
     }
 
     private boolean isEditable(EnrichedItemDTO item) {
-        return managedItemProvider.get(item.name) != null;
+        return isItemEditable(item.name);
+    }
+
+    private boolean isItemEditable(String itemName) {
+        return managedItemProvider.get(itemName) != null;
     }
 
     private boolean isEditable(MetadataKey metadataKey) {
