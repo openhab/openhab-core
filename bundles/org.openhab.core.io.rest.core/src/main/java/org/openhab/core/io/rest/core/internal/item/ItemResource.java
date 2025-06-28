@@ -75,6 +75,7 @@ import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ManagedItemProvider;
+import org.openhab.core.items.ManagedMetadataProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
@@ -183,6 +184,7 @@ public class ItemResource implements RESTResource {
     private final LocaleService localeService;
     private final ManagedItemProvider managedItemProvider;
     private final MetadataRegistry metadataRegistry;
+    private final ManagedMetadataProvider managedMetadataProvider;
     private final MetadataSelectorMatcher metadataSelectorMatcher;
     private final SemanticTagRegistry semanticTagRegistry;
     private final TimeZoneProvider timeZoneProvider;
@@ -203,6 +205,7 @@ public class ItemResource implements RESTResource {
             final @Reference LocaleService localeService, //
             final @Reference ManagedItemProvider managedItemProvider,
             final @Reference MetadataRegistry metadataRegistry,
+            final @Reference ManagedMetadataProvider managedMetadataProvider,
             final @Reference MetadataSelectorMatcher metadataSelectorMatcher,
             final @Reference SemanticTagRegistry semanticTagRegistry,
             final @Reference TimeZoneProvider timeZoneProvider) {
@@ -213,6 +216,7 @@ public class ItemResource implements RESTResource {
         this.localeService = localeService;
         this.managedItemProvider = managedItemProvider;
         this.metadataRegistry = metadataRegistry;
+        this.managedMetadataProvider = managedMetadataProvider;
         this.metadataSelectorMatcher = metadataSelectorMatcher;
         this.semanticTagRegistry = semanticTagRegistry;
         this.timeZoneProvider = timeZoneProvider;
@@ -267,7 +271,7 @@ public class ItemResource implements RESTResource {
             Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                     .map(item -> EnrichedItemDTOMapper.map(item, false, null, uriBuilder, locale, zoneId)) //
                     .peek(dto -> addMetadata(dto, namespaces, null)) //
-                    .peek(dto -> dto.editable = isEditable(dto.name));
+                    .peek(dto -> dto.editable = isEditable(dto));
             itemStream = dtoMapper.limitToFields(itemStream,
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
@@ -278,11 +282,11 @@ public class ItemResource implements RESTResource {
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                 .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale, zoneId)) //
                 .peek(dto -> addMetadata(dto, namespaces, null)) //
-                .peek(dto -> dto.editable = isEditable(dto.name)) //
+                .peek(dto -> dto.editable = isEditable(dto)) //
                 .peek(dto -> {
                     if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
                         for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
-                            member.editable = isEditable(member.name);
+                            member.editable = isEditable(member);
                         }
                     }
                 });
@@ -338,10 +342,10 @@ public class ItemResource implements RESTResource {
             EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder(uriInfo, httpHeaders),
                     locale, zoneId);
             addMetadata(dto, namespaces, null);
-            dto.editable = isEditable(dto.name);
+            dto.editable = isEditable(dto);
             if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
                 for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
-                    member.editable = isEditable(member.name);
+                    member.editable = isEditable(member);
                 }
             }
             return JSONResponse.createResponse(Status.OK, dto, null);
@@ -929,7 +933,7 @@ public class ItemResource implements RESTResource {
 
         EnrichedItemDTO dto = EnrichedItemDTOMapper.map(foundItem, false, null, uriBuilder(uriInfo, httpHeaders),
                 locale, zoneId);
-        dto.editable = isEditable(dto.name);
+        dto.editable = isEditable(dto);
         return JSONResponse.createResponse(Status.OK, dto, null);
     }
 
@@ -1021,6 +1025,7 @@ public class ItemResource implements RESTResource {
                 MetadataDTO mdDto = new MetadataDTO();
                 mdDto.value = md.getValue();
                 mdDto.config = md.getConfiguration().isEmpty() ? null : md.getConfiguration();
+                mdDto.editable = isEditable(key);
                 metadata.put(namespace, mdDto);
             }
         }
@@ -1035,8 +1040,12 @@ public class ItemResource implements RESTResource {
         }
     }
 
-    private boolean isEditable(String itemName) {
-        return managedItemProvider.get(itemName) != null;
+    private boolean isEditable(EnrichedItemDTO item) {
+        return managedItemProvider.get(item.name) != null;
+    }
+
+    private boolean isEditable(MetadataKey metadataKey) {
+        return managedMetadataProvider.get(metadataKey) != null;
     }
 
     private record ValueContainer(String value) {
