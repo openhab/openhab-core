@@ -14,7 +14,6 @@ package org.openhab.core.config.discovery.internal.console;
 
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
-import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -199,7 +198,7 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
             ThingUID bridgeId = discoveryResult.getBridgeUID();
             Map<String, Object> properties = discoveryResult.getProperties();
             String representationProperty = discoveryResult.getRepresentationProperty();
-            String timestamp = Instant.ofEpochMilli(discoveryResult.getTimestamp()).toString();
+            String timestamp = discoveryResult.getCreationTime().toString();
             String timeToLive = discoveryResult.getTimeToLive() == DiscoveryResult.TTL_UNLIMITED ? "UNLIMITED"
                     : "" + discoveryResult.getTimeToLive();
             console.println(String.format(

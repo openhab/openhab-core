@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -209,11 +210,11 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     @Test
     public void testRemoveOlderResults() {
         discoveryServiceRegistry.addDiscoveryListener(discoveryListenerMock);
-        discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimestampOfLastScan());
+        discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimeOfLastScan());
 
         waitForAssert(() -> {
-            verify(discoveryListenerMock, times(1)).removeOlderResults(any(DiscoveryService.class), anyLong(), any(),
-                    any());
+            verify(discoveryListenerMock, times(1)).removeOlderResults(any(DiscoveryService.class), any(Instant.class),
+                    any(), any());
         });
         verifyNoMoreInteractions(discoveryListenerMock);
     }
@@ -235,7 +236,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
         assertThat(inbox.getAll().size(), is(2));
         // should not remove anything
-        discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimestampOfLastScan());
+        discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimeOfLastScan());
         assertThat(inbox.getAll().size(), is(2));
 
         // start discovery again
@@ -246,7 +247,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
         assertThat(inbox.getAll().size(), is(3));
         // should remove one entry
-        discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimestampOfLastScan());
+        discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimeOfLastScan());
         assertThat(inbox.getAll().size(), is(2));
     }
 
@@ -280,11 +281,11 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
         // should remove no entry, as there is no older entry discovery of this specific discovery service
         anotherDiscoveryServiceMockForBinding1
-                .removeOlderResults(anotherDiscoveryServiceMockForBinding1.getTimestampOfLastScan());
+                .removeOlderResults(anotherDiscoveryServiceMockForBinding1.getTimeOfLastScan());
         assertThat(inbox.getAll().size(), is(3));
 
         // should remove only one entry
-        discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimestampOfLastScan());
+        discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimeOfLastScan());
         assertThat(inbox.getAll().size(), is(2));
 
         anotherDiscoveryServiceMockForBinding1.abortScan();
@@ -308,13 +309,13 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
         // should not remove anything
         discoveryServiceMockForBinding3Bridge1.removeOlderResults(
-                discoveryServiceMockForBinding3Bridge1.getTimestampOfLastScan(),
+                discoveryServiceMockForBinding3Bridge1.getTimeOfLastScan(),
                 discoveryServiceMockForBinding3Bridge1.getBridge());
         assertThat(inbox.getAll().size(), is(2));
 
         // should not remove anything
         discoveryServiceMockForBinding3Bridge2.removeOlderResults(
-                discoveryServiceMockForBinding3Bridge2.getTimestampOfLastScan(),
+                discoveryServiceMockForBinding3Bridge2.getTimeOfLastScan(),
                 discoveryServiceMockForBinding3Bridge2.getBridge());
         assertThat(inbox.getAll().size(), is(2));
 
@@ -332,7 +333,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
         // should remove only 1 entry (of bridge1)
         discoveryServiceMockForBinding3Bridge1.removeOlderResults(
-                discoveryServiceMockForBinding3Bridge1.getTimestampOfLastScan(),
+                discoveryServiceMockForBinding3Bridge1.getTimeOfLastScan(),
                 discoveryServiceMockForBinding3Bridge1.getBridge());
         assertThat(inbox.getAll().size(), is(3));
         assertThat(inbox.getAll().stream().filter(r -> BRIDGE_UID_1.equals(r.getBridgeUID())).count(), is(1L));
@@ -340,7 +341,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
         // should remove only 1 entry (of bridge2)
         discoveryServiceMockForBinding3Bridge2.removeOlderResults(
-                discoveryServiceMockForBinding3Bridge2.getTimestampOfLastScan(),
+                discoveryServiceMockForBinding3Bridge2.getTimeOfLastScan(),
                 discoveryServiceMockForBinding3Bridge2.getBridge());
         assertThat(inbox.getAll().size(), is(2));
         assertThat(inbox.getAll().stream().filter(r -> BRIDGE_UID_1.equals(r.getBridgeUID())).count(), is(1L));

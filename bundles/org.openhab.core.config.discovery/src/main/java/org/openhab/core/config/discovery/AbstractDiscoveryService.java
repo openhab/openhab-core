@@ -352,8 +352,22 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * as timestamp.
      *
      * @param timestamp timestamp, older results will be removed
+     * @deprecated Use {@link #removeOlderResults(Instant)} instead.
      */
+    @Deprecated(since = "5.0", forRemoval = true)
     protected void removeOlderResults(long timestamp) {
+        removeOlderResults(Instant.ofEpochMilli(timestamp));
+    }
+
+    /**
+     * Call to remove all results of all {@link #supportedThingTypes} that are
+     * older than the given timestamp. To remove all left over results after a
+     * full scan, this method could be called {@link #getTimeOfLastScan()}
+     * as timestamp.
+     *
+     * @param timestamp timestamp, older results will be removed
+     */
+    protected void removeOlderResults(Instant timestamp) {
         removeOlderResults(timestamp, null, null);
     }
 
@@ -365,8 +379,23 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *
      * @param timestamp timestamp, older results will be removed
      * @param bridgeUID if not {@code null} only results of that bridge are being removed
+     * @deprecated Use {@link #removeOlderResults(Instant, ThingUID)} instead.
      */
+    @Deprecated(since = "5.0", forRemoval = true)
     protected void removeOlderResults(long timestamp, @Nullable ThingUID bridgeUID) {
+        removeOlderResults(Instant.ofEpochMilli(timestamp), null);
+    }
+
+    /**
+     * Call to remove all results of all {@link #supportedThingTypes} that are
+     * older than the given timestamp. To remove all left over results after a
+     * full scan, this method could be called {@link #getTimeOfLastScan()}
+     * as timestamp.
+     *
+     * @param timestamp timestamp, older results will be removed
+     * @param bridgeUID if not {@code null} only results of that bridge are being removed
+     */
+    protected void removeOlderResults(Instant timestamp, @Nullable ThingUID bridgeUID) {
         removeOlderResults(timestamp, null, bridgeUID);
     }
 
@@ -381,8 +410,27 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            {@link DiscoveryService#getSupportedThingTypes()} will be used
      *            instead
      * @param bridgeUID if not {@code null} only results of that bridge are being removed
+     * @deprecated Use {@link #removeOlderResults(Instant, Collection, ThingUID)} instead.
      */
+    @Deprecated(since = "5.0", forRemoval = true)
     protected void removeOlderResults(long timestamp, @Nullable Collection<ThingTypeUID> thingTypeUIDs,
+            @Nullable ThingUID bridgeUID) {
+        removeOlderResults(Instant.ofEpochMilli(timestamp), thingTypeUIDs, bridgeUID);
+    }
+
+    /**
+     * Call to remove all results of the given types that are older than the
+     * given timestamp. To remove all left over results after a full scan, this
+     * method could be called {@link #getTimeOfLastScan()} as timestamp.
+     *
+     * @param timestamp timestamp, older results will be removed
+     * @param thingTypeUIDs collection of {@code ThingType}s, only results of these
+     *            {@code ThingType}s will be removed; if {@code null} then
+     *            {@link DiscoveryService#getSupportedThingTypes()} will be used
+     *            instead
+     * @param bridgeUID if not {@code null} only results of that bridge are being removed
+     */
+    protected void removeOlderResults(Instant timestamp, @Nullable Collection<ThingTypeUID> thingTypeUIDs,
             @Nullable ThingUID bridgeUID) {
         Collection<ThingUID> removedThings = null;
 
@@ -485,9 +533,20 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * Get the timestamp of the last call of {@link #startScan()}.
      *
      * @return timestamp as long
+     * @deprecated Use {@link #getTimeOfLastScan} instead.
      */
+    @Deprecated(since = "5.0", forRemoval = true)
     protected long getTimestampOfLastScan() {
         return Instant.MIN.equals(timestampOfLastScan) ? 0 : timestampOfLastScan.toEpochMilli();
+    }
+
+    /**
+     * Get the timestamp of the last call of {@link #startScan()}.
+     *
+     * @return timestamp as {@link Instant}
+     */
+    protected Instant getTimeOfLastScan() {
+        return timestampOfLastScan;
     }
 
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {

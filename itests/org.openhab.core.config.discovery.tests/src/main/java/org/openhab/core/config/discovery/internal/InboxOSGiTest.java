@@ -1019,7 +1019,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsOnlyRemovesResultsFromTheSameDiscoveryService() {
         inbox.thingDiscovered(discoveryService1, testDiscoveryResult);
-        long now = Instant.now().toEpochMilli() + 1;
+        Instant now = Instant.now().plusMillis(1);
         assertThat(inbox.getAll().size(), is(1));
 
         // should not remove a result
@@ -1034,7 +1034,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsRemovesResultsWithoutAsource() {
         inbox.add(testDiscoveryResult);
-        long now = Instant.now().toEpochMilli() + 1;
+        Instant now = Instant.now().plusMillis(1);
         assertThat(inbox.getAll().size(), is(1));
 
         // should remove a result

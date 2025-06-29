@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery;
 
+import java.time.Instant;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -72,6 +73,28 @@ public interface DiscoveryListener {
      * @return collection of thing UIDs of all removed things
      */
     @Nullable
+    default Collection<ThingUID> removeOlderResults(DiscoveryService source, Instant timestamp,
+            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
+        return removeOlderResults(source, timestamp.toEpochMilli(), thingTypeUIDs, bridgeUID);
+    }
+
+    /**
+     * Removes all results belonging to one of the given types that are older
+     * than the given timestamp.
+     *
+     * @param source the discovery service which is the source of this event (not
+     *            null)
+     * @param timestamp timestamp, all <b>older</b> results will be removed
+     * @param thingTypeUIDs collection of {@code ThingType}s, only results of these
+     *            {@code ThingType}s will be removed; if {@code null} then
+     *            {@link DiscoveryService#getSupportedThingTypes()} will be used
+     *            instead
+     * @param bridgeUID if not {@code null} only results of that bridge are being removed
+     * @return collection of thing UIDs of all removed things
+     * @deprecated Use {@link #removeOlderResults(DiscoveryService, Instant, Collection, ThingUID)} instead.
+     */
+    @Nullable
+    @Deprecated(since = "5.0", forRemoval = true)
     Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
             @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID);
 }

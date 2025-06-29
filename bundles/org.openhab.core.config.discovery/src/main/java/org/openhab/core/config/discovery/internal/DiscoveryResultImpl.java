@@ -216,7 +216,12 @@ public class DiscoveryResultImpl implements DiscoveryResult {
 
     @Override
     public long getTimestamp() {
-        return Instant.MIN.equals(timestamp) ? 0 : timestamp.toEpochMilli();
+        return getCreationTime().toEpochMilli();
+    }
+
+    @Override
+    public Instant getCreationTime() {
+        return timestamp;
     }
 
     @Override

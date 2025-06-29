@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -191,6 +192,12 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
 
     @Override
     public void thingRemoved(DiscoveryService source, ThingUID thingUID) {
+    }
+
+    @Override
+    public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, Instant timestamp,
+            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
+        return null;
     }
 
     @Override

@@ -126,7 +126,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
             if (ttl == DiscoveryResult.TTL_UNLIMITED) {
                 return false;
             }
-            return Instant.ofEpochMilli(result.getTimestamp()).plusSeconds(ttl).isBefore(now);
+            return result.getCreationTime().plusSeconds(ttl).isBefore(now);
         }
     }
 
@@ -414,18 +414,23 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     @Override
     public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
             @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
+        return removeOlderResults(source, Instant.ofEpochMilli(timestamp), thingTypeUIDs, bridgeUID);
+    }
+
+    @Override
+    public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, Instant timestamp,
+            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
         Set<ThingUID> removedThings = new HashSet<>();
         for (DiscoveryResult discoveryResult : getAll()) {
             Class<?> discoverer = resultDiscovererMap.get(discoveryResult);
             if (thingTypeUIDs != null && thingTypeUIDs.contains(discoveryResult.getThingTypeUID())
-                    && discoveryResult.getTimestamp() < timestamp
+                    && discoveryResult.getCreationTime().isBefore(timestamp)
                     && (discoverer == null || source.getClass() == discoverer)) {
                 ThingUID thingUID = discoveryResult.getThingUID();
                 if (bridgeUID == null || bridgeUID.equals(discoveryResult.getBridgeUID())) {
                     removedThings.add(thingUID);
                     remove(thingUID);
-                    logger.debug("Removed thing '{}' from inbox because it was older than {}.", thingUID,
-                            Instant.ofEpochMilli(timestamp));
+                    logger.debug("Removed thing '{}' from inbox because it was older than {}.", thingUID, timestamp);
                 }
             }
         }
