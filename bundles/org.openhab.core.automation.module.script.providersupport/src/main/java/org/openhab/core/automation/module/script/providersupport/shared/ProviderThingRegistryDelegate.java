@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.rulesupport.shared;
+package org.openhab.core.automation.module.script.providersupport.shared;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistry;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;
@@ -39,16 +40,16 @@ import org.openhab.core.thing.ThingUID;
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public class ProviderThingRegistryDelegate implements ThingRegistry {
+public class ProviderThingRegistryDelegate implements ThingRegistry, ProviderRegistry {
     private final ThingRegistry thingRegistry;
 
     private final Set<ThingUID> things = new HashSet<>();
 
-    private final ScriptedThingProvider thingProvider;
+    private final ScriptedThingProvider scriptedProvider;
 
-    public ProviderThingRegistryDelegate(ThingRegistry thingRegistry, ScriptedThingProvider thingProvider) {
+    public ProviderThingRegistryDelegate(ThingRegistry thingRegistry, ScriptedThingProvider scriptedProvider) {
         this.thingRegistry = thingRegistry;
-        this.thingProvider = thingProvider;
+        this.scriptedProvider = scriptedProvider;
     }
 
     @Override
@@ -81,7 +82,7 @@ public class ProviderThingRegistryDelegate implements ThingRegistry {
                     "Cannot add Thing, because a Thing with same UID (" + thingUID + ") already exists.");
         }
 
-        thingProvider.add(element);
+        scriptedProvider.add(element);
         things.add(thingUID);
 
         return element;
@@ -101,7 +102,7 @@ public class ProviderThingRegistryDelegate implements ThingRegistry {
     @Override
     public @Nullable Thing update(Thing element) {
         if (things.contains(element.getUID())) {
-            return thingProvider.update(element);
+            return scriptedProvider.update(element);
         }
 
         return thingRegistry.update(element);
@@ -131,13 +132,10 @@ public class ProviderThingRegistryDelegate implements ThingRegistry {
         return thingRegistry.remove(thingUID);
     }
 
-    /**
-     * Removes all Things that are provided by this script.
-     * To be called when the script is unloaded or reloaded.
-     */
+    @Override
     public void removeAllAddedByScript() {
         for (ThingUID thing : things) {
-            thingProvider.remove(thing);
+            scriptedProvider.remove(thing);
         }
         things.clear();
     }
@@ -145,7 +143,7 @@ public class ProviderThingRegistryDelegate implements ThingRegistry {
     @Override
     public @Nullable Thing forceRemove(ThingUID thingUID) {
         if (things.remove(thingUID)) {
-            return thingProvider.remove(thingUID);
+            return scriptedProvider.remove(thingUID);
         }
 
         return thingRegistry.forceRemove(thingUID);

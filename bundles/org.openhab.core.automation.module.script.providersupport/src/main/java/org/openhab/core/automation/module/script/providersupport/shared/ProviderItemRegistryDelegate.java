@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.rulesupport.shared;
+package org.openhab.core.automation.module.script.providersupport.shared;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistry;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -38,16 +39,16 @@ import org.openhab.core.items.ItemRegistry;
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public class ProviderItemRegistryDelegate implements ItemRegistry {
+public class ProviderItemRegistryDelegate implements ItemRegistry, ProviderRegistry {
     private final ItemRegistry itemRegistry;
 
     private final Set<String> items = new HashSet<>();
 
-    private final ScriptedItemProvider itemProvider;
+    private final ScriptedItemProvider scriptedProvider;
 
-    public ProviderItemRegistryDelegate(ItemRegistry itemRegistry, ScriptedItemProvider itemProvider) {
+    public ProviderItemRegistryDelegate(ItemRegistry itemRegistry, ScriptedItemProvider scriptedProvider) {
         this.itemRegistry = itemRegistry;
-        this.itemProvider = itemProvider;
+        this.scriptedProvider = scriptedProvider;
     }
 
     @Override
@@ -85,7 +86,7 @@ public class ProviderItemRegistryDelegate implements ItemRegistry {
                     "Cannot add item, because an item with same name (" + itemName + ") already exists.");
         }
 
-        itemProvider.add(element);
+        scriptedProvider.add(element);
         items.add(itemName);
 
         return element;
@@ -105,7 +106,7 @@ public class ProviderItemRegistryDelegate implements ItemRegistry {
     @Override
     public @Nullable Item update(Item element) {
         if (items.contains(element.getName())) {
-            return itemProvider.update(element);
+            return scriptedProvider.update(element);
         }
         return itemRegistry.update(element);
     }
@@ -113,7 +114,7 @@ public class ProviderItemRegistryDelegate implements ItemRegistry {
     @Override
     public @Nullable Item remove(String key) {
         if (items.remove(key)) {
-            return itemProvider.remove(key);
+            return scriptedProvider.remove(key);
         }
 
         return itemRegistry.remove(key);
@@ -175,13 +176,10 @@ public class ProviderItemRegistryDelegate implements ItemRegistry {
         }
     }
 
-    /**
-     * Removes all items that are provided by this script.
-     * To be called when the script is unloaded or reloaded.
-     */
+    @Override
     public void removeAllAddedByScript() {
         for (String item : items) {
-            itemProvider.remove(item);
+            scriptedProvider.remove(item);
         }
         items.clear();
     }
