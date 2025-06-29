@@ -27,20 +27,29 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class DurationUtils {
 
-    private static final Pattern DURATION_PATTERN = Pattern.compile(
-            "(?:([0-9]+)D)?\\s*(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?\\s*(?:([0-9]+)MS)?",
-            Pattern.CASE_INSENSITIVE);
+    private static final Pattern DURATION_PATTERN = Pattern.compile("""
+            (?:([0-9]+)\\s*(?:d|days?))?
+            \\s*
+            (?:([0-9]+)\\s*(?:h|hrs?|hours?))?
+            \\s*
+            (?:([0-9]+)\\s*(?:m|mins?|minutes?))?
+            \\s*
+            (?:([0-9]+)\\s*(?:s|secs?|seconds?))?
+            \\s*
+            (?:([0-9]+)\\s*(?:ms|milliseconds?))?
+            """, Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
+
     private static final ChronoUnit[] DURATION_UNITS = { ChronoUnit.DAYS, ChronoUnit.HOURS, ChronoUnit.MINUTES,
             ChronoUnit.SECONDS, ChronoUnit.MILLIS };
 
     /**
      * Parses a duration string in ISO-8601 format or a custom format like
      * "1d 1h 15m 30s 500ms" where
-     * 'd' stands for days,
-     * 'h' for hours,
-     * 'm' for minutes,
-     * 's' for seconds, and
-     * 'ms' for milliseconds.
+     * 'd|day|days' for days,
+     * 'h|hr|hrs|hour|hours' for hours,
+     * 'm|min|mins|minute|minutes' for minutes,
+     * 's|sec|secs|second|seconds' for seconds, and
+     * 'ms|millisecond|milliseconds' for milliseconds.
      *
      * @param durationString the string representation of the duration
      * @return a Duration object representing the parsed duration
