@@ -31,8 +31,7 @@ class Invocation implements Callable<Object> {
     private final AbstractInvocationHandler<?> invocationHandler;
     private final Deque<Invocation> invocationStack = new LinkedList<>();
 
-    @Nullable
-    private Thread thread;
+    private @Nullable Thread thread;
 
     Invocation(AbstractInvocationHandler<?> invocationHandler, Method method, @Nullable Object @Nullable [] args) {
         this.method = method;

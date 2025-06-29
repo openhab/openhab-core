@@ -12,6 +12,8 @@
  */
 package org.openhab.core.ui.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -20,15 +22,16 @@ import org.osgi.framework.BundleContext;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public final class UIActivator implements BundleActivator {
 
-    private static BundleContext context;
+    private static @Nullable BundleContext context;
 
     /**
      * Called whenever the OSGi framework starts our bundle
      */
     @Override
-    public void start(BundleContext bc) throws Exception {
+    public void start(@Nullable BundleContext bc) throws Exception {
         context = bc;
     }
 
@@ -36,11 +39,11 @@ public final class UIActivator implements BundleActivator {
      * Called whenever the OSGi framework stops our bundle
      */
     @Override
-    public void stop(BundleContext bc) throws Exception {
+    public void stop(@Nullable BundleContext bc) throws Exception {
         context = null;
     }
 
-    public static BundleContext getContext() {
+    public static @Nullable BundleContext getContext() {
         return context;
     }
 }

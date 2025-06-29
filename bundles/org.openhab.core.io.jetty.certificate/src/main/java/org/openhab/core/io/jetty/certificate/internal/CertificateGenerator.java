@@ -55,6 +55,7 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -82,7 +83,7 @@ public class CertificateGenerator implements BundleActivator {
     private File keystoreFile;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(@Nullable BundleContext context) throws Exception {
         logger = LoggerFactory.getLogger(CertificateGenerator.class);
         try {
             KeyStore keystore = ensureKeystore();
@@ -99,7 +100,7 @@ public class CertificateGenerator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(@Nullable BundleContext context) throws Exception {
         // Nothing to do.
     }
 

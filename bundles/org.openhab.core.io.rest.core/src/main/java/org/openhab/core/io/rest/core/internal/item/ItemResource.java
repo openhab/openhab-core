@@ -246,7 +246,7 @@ public class ItemResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getItems", summary = "Get all available items.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedItemDTO.class)))) })
-    public Response getItems(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+    public @Nullable Response getItems(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @Context Request request,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("type") @Parameter(description = "item type filter") @Nullable String type,
@@ -310,7 +310,8 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "getItemNamespaces", summary = "Gets the namespace of an item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getItemNamespaces(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public @Nullable Response getItemNamespaces(
+            @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Item item = getItem(itemname);
 
@@ -329,7 +330,7 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "getItemByName", summary = "Gets a single item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getItemByName(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+    public @Nullable Response getItemByName(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("true") @QueryParam("recursive") @Parameter(description = "get member items if the item is a group item") boolean recursive,
@@ -374,7 +375,8 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "getItemState", summary = "Gets the state of an item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getPlainItemState(@PathParam("itemname") @Parameter(description = "item name") String itemname) {
+    public @Nullable Response getPlainItemState(
+            @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         // get item
         Item item = getItem(itemname);
 
@@ -401,7 +403,7 @@ public class ItemResource implements RESTResource {
             @ApiResponse(responseCode = "400", description = "Item state is not RawType"),
             @ApiResponse(responseCode = "404", description = "Item not found"),
             @ApiResponse(responseCode = "415", description = "MediaType not supported by item state") })
-    public Response getBinaryItemState(@HeaderParam("Accept") @Nullable String mediaType,
+    public @Nullable Response getBinaryItemState(@HeaderParam("Accept") @Nullable String mediaType,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         List<String> acceptedMediaTypes = Arrays.stream(Objects.requireNonNullElse(mediaType, "").split(","))
                 .map(String::trim).toList();
@@ -439,7 +441,7 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "202", description = "Accepted"),
                     @ApiResponse(responseCode = "404", description = "Item not found"),
                     @ApiResponse(responseCode = "400", description = "State cannot be parsed") })
-    public Response putItemStatePlain(
+    public @Nullable Response putItemStatePlain(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Parameter(description = "valid item state (e.g. ON, OFF)", required = true) String value) {
@@ -450,12 +452,12 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/state")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response putItemStateJson(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Nullable String language,
+    public @Nullable Response putItemStateJson(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Nullable String language,
             @PathParam("itemname") String itemname, ValueContainer valueContainer) {
         return sendItemStateInternal(language, itemname, valueContainer.value());
     }
 
-    private Response sendItemStateInternal(@Nullable String language, String itemname, String value) {
+    private @Nullable Response sendItemStateInternal(@Nullable String language, String itemname, String value) {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
 
@@ -491,7 +493,8 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found"),
                     @ApiResponse(responseCode = "400", description = "Command cannot be parsed") })
-    public Response postItemCommandPlain(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public @Nullable Response postItemCommandPlain(
+            @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Parameter(description = "valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)", required = true) String value) {
         return sendItemCommandInternal(itemname, value);
     }
@@ -500,11 +503,12 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response postItemCommandJson(@PathParam("itemname") String itemname, ValueContainer valueContainer) {
+    public @Nullable Response postItemCommandJson(@PathParam("itemname") String itemname,
+            ValueContainer valueContainer) {
         return sendItemCommandInternal(itemname, valueContainer.value());
     }
 
-    private Response sendItemCommandInternal(String itemname, String value) {
+    private @Nullable Response sendItemCommandInternal(String itemname, String value) {
         Item item = getItem(itemname);
         Command command = null;
         if (item != null) {
@@ -545,7 +549,7 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item or member item not found or item is not of type group item."),
                     @ApiResponse(responseCode = "405", description = "Member item is not editable.") })
-    public Response addMember(@PathParam("itemName") @Parameter(description = "item name") String itemName,
+    public @Nullable Response addMember(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("memberItemName") @Parameter(description = "member item name") String memberItemName) {
         try {
             Item item = itemRegistry.getItem(itemName);
@@ -584,7 +588,7 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item or member item not found or item is not of type group item."),
                     @ApiResponse(responseCode = "405", description = "Member item is not editable.") })
-    public Response removeMember(@PathParam("itemName") @Parameter(description = "item name") String itemName,
+    public @Nullable Response removeMember(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("memberItemName") @Parameter(description = "member item name") String memberItemName) {
         try {
             Item item = itemRegistry.getItem(itemName);
@@ -622,7 +626,7 @@ public class ItemResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found or item is not editable.") })
-    public Response removeItem(@PathParam("itemname") @Parameter(description = "item name") String itemname) {
+    public @Nullable Response removeItem(@PathParam("itemname") @Parameter(description = "item name") String itemname) {
         if (managedItemProvider.remove(itemname) == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
@@ -637,7 +641,7 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found."),
                     @ApiResponse(responseCode = "405", description = "Item not editable.") })
-    public Response addTag(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public @Nullable Response addTag(@PathParam("itemname") @Parameter(description = "item name") String itemname,
             @PathParam("tag") @Parameter(description = "tag") String tag) {
         Item item = getItem(itemname);
 
@@ -663,7 +667,7 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found."),
                     @ApiResponse(responseCode = "405", description = "Item not editable.") })
-    public Response removeTag(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public @Nullable Response removeTag(@PathParam("itemname") @Parameter(description = "item name") String itemname,
             @PathParam("tag") @Parameter(description = "tag") String tag) {
         Item item = getItem(itemname);
 
@@ -692,7 +696,7 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "400", description = "Metadata value empty."), //
                     @ApiResponse(responseCode = "404", description = "Item not found."), //
                     @ApiResponse(responseCode = "405", description = "Metadata not editable.") })
-    public Response addMetadata(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public @Nullable Response addMetadata(@PathParam("itemname") @Parameter(description = "item name") String itemname,
             @PathParam("namespace") @Parameter(description = "namespace") String namespace,
             @Parameter(description = "metadata", required = true) MetadataDTO metadata) {
         Item item = getItem(itemname);
@@ -725,7 +729,8 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found."),
                     @ApiResponse(responseCode = "405", description = "Meta data not editable.") })
-    public Response removeMetadata(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public @Nullable Response removeMetadata(
+            @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Nullable @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
         Item item = getItem(itemname);
 
@@ -755,7 +760,7 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "purgeDatabase", summary = "Remove unused/orphaned metadata.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK") })
-    public Response purge() {
+    public @Nullable Response purge() {
         Collection<String> itemNames = itemRegistry.stream().map(Item::getName)
                 .collect(Collectors.toCollection(HashSet::new));
 
@@ -782,7 +787,7 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "400", description = "Payload invalid."),
                     @ApiResponse(responseCode = "404", description = "Item not found or name in path invalid."),
                     @ApiResponse(responseCode = "405", description = "Item not editable.") })
-    public Response createOrUpdateItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+    public @Nullable Response createOrUpdateItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Parameter(description = "item data", required = true) @Nullable GroupItemDTO item) {
@@ -844,7 +849,7 @@ public class ItemResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Payload is invalid.") })
-    public Response createOrUpdateItems(
+    public @Nullable Response createOrUpdateItems(
             @Parameter(description = "array of item data", required = true) GroupItemDTO @Nullable [] items) {
         // If we didn't get an item list bean, then return!
         if (items == null) {
@@ -917,7 +922,7 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "getSemanticItem", summary = "Gets the item which defines the requested semantics of an item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getSemanticItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+    public @Nullable Response getSemanticItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("semanticClass") @Parameter(description = "semantic class") String semanticClassName) {
@@ -985,7 +990,7 @@ public class ItemResource implements RESTResource {
      * @param itemname item name that could not be found
      * @return Response configured for 'item not found'
      */
-    private static Response getItemNotFoundResponse(String itemname) {
+    private static @Nullable Response getItemNotFoundResponse(String itemname) {
         String message = "Item " + itemname + " does not exist!";
         return JSONResponse.createResponse(Status.NOT_FOUND, null, message);
     }
@@ -1000,8 +1005,8 @@ public class ItemResource implements RESTResource {
      * @param errormessage optional message in case of error
      * @return Response configured to represent the Item in depending on the status
      */
-    private Response getItemResponse(final @Nullable UriBuilder uriBuilder, Status status, @Nullable Item item,
-            Locale locale, ZoneId zoneId, @Nullable String errormessage) {
+    private @Nullable Response getItemResponse(final @Nullable UriBuilder uriBuilder, Status status,
+            @Nullable Item item, Locale locale, ZoneId zoneId, @Nullable String errormessage) {
         Object entity = null != item ? EnrichedItemDTOMapper.map(item, true, null, uriBuilder, locale, zoneId) : null;
         return JSONResponse.createResponse(status, entity, errormessage);
     }
