@@ -201,6 +201,12 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         }
         try {
             onAddElement(element);
+        } catch (final IllegalArgumentException ex) {
+            logger.warn("Cannot add \"{}\" with key \"{}\": {}", element.getClass().getSimpleName(), uid,
+                    ex.getMessage());
+            logger.debug("Cannot add \"{}\" with key \"{}\": {}", element.getClass().getSimpleName(), uid,
+                    ex.getMessage(), ex);
+            return false;
         } catch (final RuntimeException ex) {
             logger.warn("Cannot add \"{}\" with key \"{}\": {}", element.getClass().getSimpleName(), uid,
                     ex.getMessage(), ex);
