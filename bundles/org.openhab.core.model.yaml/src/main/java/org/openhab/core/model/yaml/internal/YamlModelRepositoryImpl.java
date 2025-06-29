@@ -182,8 +182,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 logger.warn("Could not list YAML files in '{}', models might be missing: {}", watchPath,
                         e.getMessage());
             }
-        initializing = false;
         });
+        initializing = false;
     }
 
     @Deactivate
@@ -207,9 +207,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return;
         }
 
-        if ((!modelName.endsWith(".yaml") && !modelName.endsWith(".yml")) || modelName.endsWith(".inc.yaml") ||
-                modelName.endsWith(".inc.yml")) {
-                                logger.trace("Ignored {}", fullPath);
+        if ((!modelName.endsWith(".yaml") && !modelName.endsWith(".yml")) || modelName.endsWith(".inc.yaml")
+                || modelName.endsWith(".inc.yml")) {
+            logger.trace("Ignored {}", fullPath);
             return;
         }
 
@@ -374,7 +374,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         });
 
         dependingModels.forEach(modelName -> {
-            Path modelPath = watchPath.resolve(modelName);
+            Path modelPath = mainWatchPath.resolve(modelName);
             try {
                 // reprocess the model that depends on this include file
                 processWatchEvent(WatchService.Kind.MODIFY, modelPath);
