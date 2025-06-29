@@ -100,9 +100,25 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
+         org.eclipse.emf.ecore.resource.ResourceSet resourceSet,
+            Map<Object, Object> resourceOptions) {
+
         logger.info("Loading model '{}'", name);
         Resource resource = null;
         byte[] bytes;
+
+         // Enhance resource options with XXE protections
+        Map<Object, Object> secureResourceOptions = new HashMap<>(resourceOptions);
+        
+        // Add XML security features to prevent XXE attacks
+        Map<String, Object> parserFeatures = new HashMap<String, Object>();
+        parserFeatures.put("http://apache.org/xml/features/disallow-doctype-decl", Boolean.TRUE);
+        parserFeatures.put("http://apache.org/xml/features/nonvalidating/load-external-dtd", Boolean.FALSE);
+        parserFeatures.put("http://xml.org/sax/features/external-general-entities", Boolean.FALSE);
+        parserFeatures.put("http://xml.org/sax/features/external-parameter-entities", Boolean.FALSE);
+        
+        secureResourceOptions.put(XMLResource.OPTION_PARSER_FEATURES, parserFeatures);
+        
         try (InputStream inputStream = originalInputStream) {
             bytes = inputStream.readAllBytes();
             String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
