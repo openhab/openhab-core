@@ -114,6 +114,13 @@
       <artifactId>indriya</artifactId>
       <version>2.2.2</version>
     </dependency>
+    <!-- do not remove, required for JavaDoc build, inherited dependency annotations from core.persistence is not provided via runtime bom -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+      <version>1.5.1</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
