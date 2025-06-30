@@ -12,11 +12,12 @@
  */
 package org.openhab.core.io.rest.core.internal.persistence;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.time.ZoneId;
@@ -36,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.core.config.ConfigurationService;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
@@ -77,13 +79,14 @@ public class PersistenceResourceTest {
     private @Mock @NonNullByDefault({}) PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
     private @Mock @NonNullByDefault({}) ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProviderMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
+    private @Mock @NonNullByDefault({}) ConfigurationService configurationServiceMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
 
     @BeforeEach
     public void beforeEach() {
         pResource = new PersistenceResource(itemRegistryMock, localeServiceMock, persistenceServiceRegistryMock,
                 persistenceManagerMock, persistenceServiceConfigurationRegistryMock,
-                managedPersistenceServiceConfigurationProviderMock, timeZoneProviderMock);
+                managedPersistenceServiceConfigurationProviderMock, timeZoneProviderMock, configurationServiceMock);
 
         int startValue = 2016;
         int endValue = 2018;

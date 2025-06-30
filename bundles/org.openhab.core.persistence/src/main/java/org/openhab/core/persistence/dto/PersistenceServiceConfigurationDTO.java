@@ -17,18 +17,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link PersistenceServiceConfigurationDTO} is used for transferring persistence service configurations
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Mark Herwege - Make default strategy to be only a configuration suggestion
  */
 @NonNullByDefault
 public class PersistenceServiceConfigurationDTO {
     public String serviceId = "";
     public Collection<PersistenceItemConfigurationDTO> configs = List.of();
     public Map<String, String> aliases = Map.of();
-    public Collection<String> defaults = List.of();
+    public @Nullable Collection<String> defaults; // Kept to be able to migrate previous version storage
     public Collection<PersistenceCronStrategyDTO> cronStrategies = List.of();
     public Collection<PersistenceFilterDTO> thresholdFilters = List.of();
     public Collection<PersistenceFilterDTO> timeFilters = List.of();

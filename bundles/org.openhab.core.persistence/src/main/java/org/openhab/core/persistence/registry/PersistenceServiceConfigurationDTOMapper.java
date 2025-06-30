@@ -47,6 +47,7 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Mark Herwege - Implement aliases
+ * @author Mark Herwege - Make default strategy to be only a configuration suggestion
  */
 @NonNullByDefault
 public class PersistenceServiceConfigurationDTOMapper {
@@ -62,8 +63,6 @@ public class PersistenceServiceConfigurationDTOMapper {
         dto.configs = persistenceServiceConfiguration.getConfigs().stream()
                 .map(PersistenceServiceConfigurationDTOMapper::mapPersistenceItemConfig).toList();
         dto.aliases = Map.copyOf(persistenceServiceConfiguration.getAliases());
-        dto.defaults = persistenceServiceConfiguration.getDefaults().stream().map(PersistenceStrategy::getName)
-                .toList();
         dto.cronStrategies = filterList(persistenceServiceConfiguration.getStrategies(), PersistenceCronStrategy.class,
                 PersistenceServiceConfigurationDTOMapper::mapPersistenceCronStrategy);
         dto.thresholdFilters = filterList(persistenceServiceConfiguration.getFilters(),
@@ -92,9 +91,6 @@ public class PersistenceServiceConfigurationDTOMapper {
                         .map(f -> new PersistenceIncludeFilter(f.name, f.lower, f.upper, f.unit, f.inverted)))
                 .flatMap(Function.identity()).collect(Collectors.toMap(PersistenceFilter::getName, e -> e));
 
-        List<PersistenceStrategy> defaults = dto.defaults.stream()
-                .map(str -> stringToPersistenceStrategy(str, strategyMap, dto.serviceId)).toList();
-
         List<PersistenceItemConfiguration> configs = dto.configs.stream().map(config -> {
             List<PersistenceConfig> items = config.items.stream()
                     .map(PersistenceServiceConfigurationDTOMapper::stringToPersistenceConfig).toList();
@@ -107,7 +103,7 @@ public class PersistenceServiceConfigurationDTOMapper {
 
         Map<String, String> aliases = Map.copyOf(dto.aliases);
 
-        return new PersistenceServiceConfiguration(dto.serviceId, configs, aliases, defaults, strategyMap.values(),
+        return new PersistenceServiceConfiguration(dto.serviceId, configs, aliases, strategyMap.values(),
                 filterMap.values());
     }
 
@@ -154,7 +150,7 @@ public class PersistenceServiceConfigurationDTOMapper {
         throw new IllegalArgumentException("Filter '" + string + "' unknown for service '" + serviceId + "'");
     }
 
-    private static String persistenceConfigToString(PersistenceConfig config) {
+    public static String persistenceConfigToString(PersistenceConfig config) {
         if (config instanceof PersistenceAllConfig) {
             return "*";
         } else if (config instanceof PersistenceGroupConfig persistenceGroupConfig) {
