@@ -203,7 +203,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
             onAddElement(element);
         } catch (final RuntimeException ex) {
             logger.warn("Cannot add \"{}\" with key \"{}\": {}", element.getClass().getSimpleName(), uid,
-                    ex.getMessage(), ex);
+                    ex.getMessage(), logger.isDebugEnabled() ? ex : null);
             return false;
         }
         identifierToElement.put(element.getUID(), element);
