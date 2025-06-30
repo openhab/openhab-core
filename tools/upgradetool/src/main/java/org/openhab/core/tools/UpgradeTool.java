@@ -27,7 +27,11 @@ import org.apache.commons.cli.ParseException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.json.internal.JsonStorage;
-import org.openhab.core.tools.internal.*;
+import org.openhab.core.tools.internal.ItemUnitToMetadataUpgrader;
+import org.openhab.core.tools.internal.JSProfileUpgrader;
+import org.openhab.core.tools.internal.PersistenceUpgrader;
+import org.openhab.core.tools.internal.ScriptProfileUpgrader;
+import org.openhab.core.tools.internal.YamlConfigurationV1TagsUpgrader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Jimmy Tanagra - Refactor upgraders into individual classes
+ * @author Mark Herwege - Added persistence strategy upgrader
  */
 @NonNullByDefault
 public class UpgradeTool {
@@ -56,7 +61,8 @@ public class UpgradeTool {
             new ScriptProfileUpgrader(), //
             new YamlConfigurationV1TagsUpgrader(), // Added in 5.0
             new HomeAssistantAddonUpgrader(), // Added in 5.1
-            new HomieAddonUpgrader() // Added in 5.1
+            new HomieAddonUpgrader(), // Added in 5.1
+            new PersistenceUpgrader() // Added in 5.1
     );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeTool.class);
