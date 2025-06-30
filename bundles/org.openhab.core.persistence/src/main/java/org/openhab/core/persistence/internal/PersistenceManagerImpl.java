@@ -92,6 +92,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Refactored to use service configuration registry
  * @author Jan N. Klug - Added time series support
  * @author Mark Herwege - Added restoring lastState, lastStateChange and lastStateUpdate
+ * @author Mark Herwege - Make default strategy to be only a configuration suggestion
  */
 @Component(immediate = true, service = PersistenceManager.class)
 @NonNullByDefault
@@ -461,7 +462,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
         public PersistenceServiceContainer(PersistenceService persistenceService,
                 @Nullable PersistenceServiceConfiguration configuration) {
             this.persistenceService = persistenceService;
-            this.configuration = Objects.requireNonNullElseGet(configuration, this::getDefaultConfig);
+            this.configuration = Objects.requireNonNullElseGet(configuration, this::getEmptyConfig);
         }
 
         public PersistenceService getPersistenceService() {
@@ -471,13 +472,13 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
         /**
          * Set a new configuration for this persistence service (also cancels all cron jobs)
          *
-         * @param configuration the new {@link PersistenceServiceConfiguration}, if {@code null} the default
-         *            configuration of the service is used
+         * @param configuration the new {@link PersistenceServiceConfiguration}, if {@code null} all configuration will
+         *            be removed
          */
         public void setConfiguration(@Nullable PersistenceServiceConfiguration configuration) {
             cancelPersistJobs();
             cancelForecastJobs();
-            this.configuration = Objects.requireNonNullElseGet(configuration, this::getDefaultConfig);
+            this.configuration = Objects.requireNonNullElseGet(configuration, this::getEmptyConfig);
             strategyCache.clear();
         }
 
@@ -489,25 +490,18 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
          */
         public Stream<PersistenceItemConfiguration> getMatchingConfigurations(PersistenceStrategy strategy) {
             return Objects.requireNonNull(strategyCache.computeIfAbsent(strategy, s -> {
-                boolean matchesDefaultStrategies = configuration.getDefaults().contains(strategy);
                 return configuration.getConfigs().stream()
-                        .filter(itemConfig -> itemConfig.strategies().contains(strategy)
-                                || (itemConfig.strategies().isEmpty() && matchesDefaultStrategies))
-                        .toList();
-            }).stream());
+                        .filter(itemConfig -> itemConfig.strategies().contains(strategy)).toList();
+            })).stream();
         }
 
         public @Nullable String getAlias(Item item) {
             return configuration.getAliases().get(item.getName());
         }
 
-        private PersistenceServiceConfiguration getDefaultConfig() {
-            List<PersistenceStrategy> strategies = persistenceService.getDefaultStrategies();
-            List<PersistenceItemConfiguration> configs = List
-                    .of(new PersistenceItemConfiguration(List.of(new PersistenceAllConfig()), strategies, null));
-            Map<String, String> aliases = Map.of();
-            return new PersistenceServiceConfiguration(persistenceService.getId(), configs, aliases, strategies,
-                    strategies, List.of());
+        private PersistenceServiceConfiguration getEmptyConfig() {
+            return new PersistenceServiceConfiguration(persistenceService.getId(), List.of(), Map.of(), List.of(),
+                    List.of());
         }
 
         /**
