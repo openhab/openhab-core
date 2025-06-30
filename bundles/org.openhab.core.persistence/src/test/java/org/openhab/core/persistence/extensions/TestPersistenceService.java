@@ -231,7 +231,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
     }
 
     @Override
-    public List<PersistenceStrategy> getDefaultStrategies() {
+    public List<PersistenceStrategy> getSuggestedStrategies() {
         return List.of();
     }
 
