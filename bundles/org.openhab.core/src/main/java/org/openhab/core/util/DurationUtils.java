@@ -44,12 +44,40 @@ public class DurationUtils {
 
     /**
      * Parses a duration string in ISO-8601 format or a custom format like
-     * "1d 1h 15m 30s 500ms" where
-     * 'd|day|days' for days,
-     * 'h|hr|hrs|hour|hours' for hours,
-     * 'm|min|mins|minute|minutes' for minutes,
-     * 's|sec|secs|second|seconds' for seconds, and
-     * 'ms|millisecond|milliseconds' for milliseconds.
+     * "1d 1h 15m 30s 500ms".
+     *
+     * When specifying a duration, the units must be specified in the order of
+     * days, hours, minutes, seconds, and milliseconds,
+     * although any individual unit may be omitted.
+     * Each unit must be preceded by an integer value.
+     * A space between the number and its corresponding unit is permitted but not required.
+     * Likewise, whitespace between unit groups is optional.
+     *
+     * The units supported in the duration format are:
+     * <ul>
+     * <li>'d|day|days' for days,
+     * <li>'h|hr|hrs|hour|hours' for hours,
+     * <li>'m|min|mins|minute|minutes' for minutes,
+     * <li>'s|sec|secs|second|seconds' for seconds, and
+     * <li>'ms|millisecond|milliseconds' for milliseconds.
+     * </ul>
+     *
+     * Examples:
+     * <ul>
+     * <li>"1h" represents 1 hour
+     * <li>"15m" represents 15 minutes
+     * <li>"1h15m" represents 1 day and 15 minutes. It can also be written as "1h 15m", "1 h 15 m", "1 hr 15 mins",
+     * "1hour 15 minutes", etc.
+     * <li>"1d 1h 30s" represents 1 day, 1 hour, and 30 seconds
+     * <li>"PT1H30M" represents 1 hour and 30 minutes
+     * <li>"PT1D" represents 1 day
+     * </ul>
+     *
+     * The ISO-8601 format is also supported, but only days, hours, minutes, seconds, and milliseconds.
+     * Specifically, years, months, and weeks are not supported.
+     * For example, "PT1H30M" is valid and represents 1 hour and 30 minutes,
+     * however, "P1M" (1 month) is not supported.
+     * The numbers in the ISO-8601 format must be integers.
      *
      * @param durationString the string representation of the duration
      * @return a Duration object representing the parsed duration
