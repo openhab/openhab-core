@@ -192,7 +192,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         E existingElement = identifierToElement.get(uid);
         if (existingElement != null) {
             Provider<E> existingElementProvider = elementToProvider.get(existingElement);
-            logger.debug(
+            logger.warn(
                     "Cannot add \"{}\" with key \"{}\". It exists already from provider \"{}\"! Failed to add a second with the same UID from provider \"{}\"!",
                     element.getClass().getSimpleName(), uid,
                     existingElementProvider != null ? existingElementProvider.getClass().getSimpleName() : null,
@@ -249,7 +249,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
             }
             Provider<E> elementProvider = elementToProvider.get(existingElement);
             if (elementProvider != null && !elementProvider.equals(provider)) {
-                logger.error(
+                logger.debug(
                         "Provider '{}' is not allowed to remove element '{}' with key '{}' from the registry because it was added by provider '{}'.",
                         provider.getClass().getSimpleName(), element.getClass().getSimpleName(), uid,
                         elementProvider.getClass().getSimpleName());
