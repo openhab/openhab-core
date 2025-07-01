@@ -43,7 +43,7 @@ public class DurationUtils {
             ChronoUnit.SECONDS, ChronoUnit.MILLIS };
 
     /**
-     * Parses a duration string in ISO-8601 format or a custom format like
+     * Parses a duration string in ISO-8601 duration format or a custom format like
      * "1d 1h 15m 30s 500ms".
      *
      * When specifying a duration, the units must be specified in the order of
@@ -62,22 +62,29 @@ public class DurationUtils {
      * <li>'ms|millisecond|milliseconds' for milliseconds.
      * </ul>
      *
-     * Examples:
+     * Examples of valid duration strings:
      * <ul>
      * <li>"1h" represents 1 hour
      * <li>"15m" represents 15 minutes
      * <li>"1h15m" represents 1 day and 15 minutes. It can also be written as "1h 15m", "1 h 15 m", "1 hr 15 mins",
      * "1hour 15 minutes", etc.
      * <li>"1d 1h 30s" represents 1 day, 1 hour, and 30 seconds
-     * <li>"PT1H30M" represents 1 hour and 30 minutes
-     * <li>"PT1D" represents 1 day
      * </ul>
      *
-     * The ISO-8601 format is also supported, but only days, hours, minutes, seconds, and milliseconds.
-     * Specifically, years, months, and weeks are not supported.
-     * For example, "PT1H30M" is valid and represents 1 hour and 30 minutes,
-     * however, "P1M" (1 month) is not supported.
-     * The numbers in the ISO-8601 format must be integers.
+     * The ISO-8601 duration format is supported, but only the following units are recognized:
+     * days, hours, minutes, and seconds.
+     * Units such as years, months, and weeks are not supported.
+     * The number of days, hours and minutes must parse to a long.
+     * The number of seconds must parse to a long with optional fraction.
+     * The decimal point may be either a dot or a comma.
+     * The fractional part may have from zero to 9 digits.
+     *
+     * Examples of ISO-8601 durations:
+     * <ul>
+     * <li>"PT1H30M" represents 1 hour and 30 minutes
+     * <li>"PT1D" represents 1 day
+     * <li>"PT0.5S" represents 0.5 seconds (500 milliseconds)
+     * </ul>
      *
      * @param durationString the string representation of the duration
      * @return a Duration object representing the parsed duration
