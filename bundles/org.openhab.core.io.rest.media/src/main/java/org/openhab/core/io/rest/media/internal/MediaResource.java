@@ -13,9 +13,11 @@
 package org.openhab.core.io.rest.media.internal;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
@@ -35,6 +37,8 @@ import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.media.MediaDevice;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
@@ -44,6 +48,9 @@ import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
 import org.openhab.core.media.model.MediaSearchResult;
 import org.openhab.core.media.model.MediaSource;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -52,6 +59,8 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -77,17 +86,25 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @NonNullByDefault
 public class MediaResource implements RESTResource {
 
+    private final Logger logger = LoggerFactory.getLogger(MediaResource.class);
+
     /** The URI path to this resource */
     public static final String PATH_MEDIA = "media";
 
     private final MediaService mediaService;
     private final LocaleService localeService;
+    private final ItemRegistry itemRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
 
     @Activate
     public MediaResource( //
-            final @Reference MediaService mediaService, final @Reference LocaleService localeService) {
+            final @Reference MediaService mediaService, final @Reference LocaleService localeService,
+            final @Reference ItemRegistry itemRegistry,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry) {
         this.mediaService = mediaService;
         this.localeService = localeService;
+        this.itemRegistry = itemRegistry;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
     }
 
     @GET
@@ -193,10 +210,30 @@ public class MediaResource implements RESTResource {
 
         Map<String, MediaDevice> devices = mediaService.getMediaDevices();
 
+        Collection<Item> colItem = itemRegistry.getItemsOfType("Player");
+        for (Item item : colItem) {
+
+            Set<ChannelUID> r1 = itemChannelLinkRegistry.getBoundChannels(item.getName());
+            Set<Thing> r2 = itemChannelLinkRegistry.getBoundThings(item.getName());
+
+            logger.debug("");
+        }
+
         MediaSinkDTOCollection dtoCol = new MediaSinkDTOCollection();
         for (MediaDevice device : devices.values()) {
             MediaSinkDTO dto = new MediaSinkDTO(device.getId(), device.getName(), device.getType(),
                     device.getBinding());
+
+            for (Item item : colItem) {
+                Set<ChannelUID> r1 = itemChannelLinkRegistry.getBoundChannels(item.getName());
+                for (ChannelUID ruid : r1) {
+                    if (ruid.getBindingId().equals(device.getBinding())
+                            && ruid.getThingUID().getId().equals(device.getId())) {
+                        dto.setPlayerItemName(item.getName());
+                    }
+                }
+            }
+
             dtoCol.addMediaSinkDTO(dto);
         }
 
