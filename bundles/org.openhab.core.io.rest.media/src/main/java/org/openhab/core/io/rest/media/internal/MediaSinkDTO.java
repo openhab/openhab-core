@@ -25,12 +25,14 @@ public class MediaSinkDTO {
     private String name;
     private String type;
     private String binding;
+    private String playerItemName;
 
     public MediaSinkDTO(String id, String name, String type, String binding) {
         this.id = id;
         this.name = name;
         this.type = type;
         this.binding = binding;
+        this.playerItemName = "";
     }
 
     public String getId() {
@@ -47,5 +49,13 @@ public class MediaSinkDTO {
 
     public String getBinding() {
         return this.binding;
+    }
+
+    public String getPlayerItemName() {
+        return this.getPlayerItemName();
+    }
+
+    public void setPlayerItemName(String playerItemName) {
+        this.playerItemName = playerItemName;
     }
 }
