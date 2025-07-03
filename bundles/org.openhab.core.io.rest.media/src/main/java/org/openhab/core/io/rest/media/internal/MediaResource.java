@@ -115,6 +115,7 @@ public class MediaResource implements RESTResource {
     public Response getSources(@Context UriInfo uriInfo,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("path") @Parameter(description = "path of the ressource") @Nullable String path,
+            @QueryParam("query") @Parameter(description = "a search query") @Nullable String query,
             @QueryParam("start") @Parameter(description = "start index to get") long start,
             @QueryParam("size") @Parameter(description = "number of element to get") long size) {
         final Locale locale = localeService.getLocale(language);
@@ -147,9 +148,29 @@ public class MediaResource implements RESTResource {
         }
         MediaEntry entry = registry.getEntry(path);
 
-        MediaSource mediaSource = entry.getMediaSource(false);
-        if (mediaSource != null) {
-            MediaListenner mediaListenner = mediaService.getMediaListenner(mediaSource.getKey());
+        if (path.startsWith("/Root/Search")) {
+            Map<String, MediaListenner> allMediaListenner = mediaService.getAllMediaListenner();
+            for (String key : allMediaListenner.keySet()) {
+                if (key.equals("/Root")) {
+                    continue;
+                }
+                if (entry instanceof MediaSearchResult) {
+                    ((MediaSearchResult) entry).setSearchQuery("" + query);
+                }
+                MediaListenner mediaListenner = allMediaListenner.get(key);
+                if (entry != null) {
+                    mediaListenner.refreshEntry(entry, start, size);
+                }
+            }
+
+        } else {
+            MediaSource mediaSource = entry.getMediaSource(false);
+            String key = "/Root";
+            if (mediaSource != null) {
+                key = mediaSource.getKey();
+            }
+
+            MediaListenner mediaListenner = mediaService.getMediaListenner(key);
             if (mediaListenner != null) {
                 mediaListenner.refreshEntry(entry, start, size);
             }

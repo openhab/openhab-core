@@ -114,11 +114,15 @@ public class MediaType implements ComplexType, State, Command {
     }
 
     public static MediaType valueOf(String value) {
-        MediaType res = JSONCONVERTER.fromJson(value, MediaType.class);
-        if (res == null) {
-            return new MediaType();
+        try {
+            MediaType res = JSONCONVERTER.fromJson(value, MediaType.class);
+            if (res == null) {
+                return new MediaType();
+            }
+            return res;
+        } catch (Exception ex) {
+            throw ex;
         }
-        return res;
 
         /*
          * List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).toList();
