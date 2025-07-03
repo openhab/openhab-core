@@ -27,6 +27,7 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
  * for sending data to an IoT (Internet of Things) service.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Mark Herwege - Make default strategy to be only a configuration suggestion
  */
 @NonNullByDefault
 public interface PersistenceService {
@@ -76,7 +77,22 @@ public interface PersistenceService {
     /**
      * Provides default persistence strategies that are used for all items if no user defined configuration is found.
      *
-     * @return The default persistence strategies
+     * This method has been deprecated and {@link #getSuggestedStrategies()} should be used instead. These
+     * persistence strategies are no longer applied automatically.
+     *
+     * @return The suggested persistence strategies
      */
-    List<PersistenceStrategy> getDefaultStrategies();
+    @Deprecated
+    default List<PersistenceStrategy> getDefaultStrategies() {
+        return List.of();
+    }
+
+    /**
+     * Provides suggested persistence strategies that can be used in the UI as a suggestion for configuration.
+     *
+     * @return The suggested persistence strategies
+     */
+    default List<PersistenceStrategy> getSuggestedStrategies() {
+        return getDefaultStrategies();
+    }
 }
