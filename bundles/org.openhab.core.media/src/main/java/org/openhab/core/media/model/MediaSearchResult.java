@@ -20,6 +20,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class MediaSearchResult extends MediaCollection {
+    public String searchQuery = "";
+
     public MediaSearchResult() {
 
     }
@@ -27,5 +29,13 @@ public class MediaSearchResult extends MediaCollection {
     public MediaSearchResult(String key, String albumName) {
         super(key, albumName);
 
+    }
+
+    public String getSearchQuery() {
+        return searchQuery;
+    }
+
+    public void setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
     }
 }
