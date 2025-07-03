@@ -31,6 +31,8 @@ public interface MediaService {
 
     public void addMediaListenner(String key, MediaListenner mediaListenner);
 
+    public Map<String, MediaListenner> getAllMediaListenner();
+
     public @Nullable MediaListenner getMediaListenner(String key);
 
     public void registerDevice(MediaDevice device);

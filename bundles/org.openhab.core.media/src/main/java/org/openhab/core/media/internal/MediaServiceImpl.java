@@ -20,9 +20,13 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.media.MediaDevice;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
+import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
+import org.openhab.core.media.model.MediaSearchResult;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of
@@ -32,7 +36,9 @@ import org.osgi.service.component.annotations.Component;
  */
 @NonNullByDefault
 @Component(immediate = true)
-public class MediaServiceImpl implements MediaService {
+public class MediaServiceImpl implements MediaService, MediaListenner {
+    private final Logger logger = LoggerFactory.getLogger(MediaServiceImpl.class);
+
     private Map<String, MediaListenner> mediaListenner = new HashMap<String, MediaListenner>();
     private Map<String, MediaDevice> mediaDevices = new HashMap<String, MediaDevice>();
 
@@ -47,9 +53,11 @@ public class MediaServiceImpl implements MediaService {
         this.addProxySource("lyrionUpnp1", "http://192.168.254.1:9000/");
         this.addProxySource("lyrionUpnp2", "http://192.168.0.1:9000/");
         this.addProxySource("emby", "http://192.168.254.1:8096/");
+        this.addMediaListenner("/Root", this);
 
     }
 
+    @Override
     public void setBaseUri(String baseUri) {
         this.baseUri = baseUri;
     }
@@ -64,6 +72,16 @@ public class MediaServiceImpl implements MediaService {
             }
         }
         return result;
+    }
+
+    @Override
+    public void refreshEntry(MediaEntry mediaEntry, long start, long size) {
+        mediaEntry.registerEntry("Search", () -> {
+            MediaSearchResult searchResult = new MediaSearchResult("Search", "Search");
+            return searchResult;
+        });
+
+        logger.debug("");
     }
 
     @Override
@@ -87,6 +105,11 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public void addMediaListenner(String key, MediaListenner listenner) {
         mediaListenner.put(key, listenner);
+    }
+
+    @Override
+    public Map<String, MediaListenner> getAllMediaListenner() {
+        return this.mediaListenner;
     }
 
     @Override
