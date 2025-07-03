@@ -34,17 +34,13 @@ import com.google.gson.GsonBuilder;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaType implements ComplexType, State, Command {
+public class MediaStateType implements ComplexType, State, Command {
 
     public static final String KEY_STATE = "state";
-    public static final String KEY_COMMAND = "command";
-    public static final String KEY_PARAM = "param";
     public static final String KEY_DEVICE = "device";
     public static final String KEY_BINDING = "binding";
 
     private final PlayPauseType state;
-    private final MediaCommandType command;
-    private final String param;
     private final StringType device;
     private final StringType binding;
     private StringType currentPlayingArtistName;
@@ -57,16 +53,13 @@ public class MediaType implements ComplexType, State, Command {
     private static final Gson JSONCONVERTER = new GsonBuilder()
             .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter()).create();
 
-    public MediaType() {
-        this(PlayPauseType.PLAY, MediaCommandType.NONE, "", new StringType(""), new StringType(""));
+    public MediaStateType() {
+        this(PlayPauseType.PLAY, new StringType(""), new StringType(""));
 
     }
 
-    public MediaType(PlayPauseType state, MediaCommandType command, @Nullable String param, @Nullable StringType device,
-            @Nullable StringType binding) {
+    public MediaStateType(PlayPauseType state, @Nullable StringType device, @Nullable StringType binding) {
         this.state = state;
-        this.command = command;
-        this.param = param != null ? param : "";
         this.device = device != null ? device : new StringType("");
         this.binding = binding != null ? binding : new StringType("");
         this.currentPlayingArtistName = new StringType("Artist");
@@ -113,11 +106,11 @@ public class MediaType implements ComplexType, State, Command {
         this.currentPlayingArtUri = new StringType(artUri);
     }
 
-    public static MediaType valueOf(String value) {
+    public static MediaStateType valueOf(String value) {
         try {
-            MediaType res = JSONCONVERTER.fromJson(value, MediaType.class);
+            MediaStateType res = JSONCONVERTER.fromJson(value, MediaStateType.class);
             if (res == null) {
-                return new MediaType();
+                return new MediaStateType();
             }
             return res;
         } catch (Exception ex) {
@@ -139,21 +132,20 @@ public class MediaType implements ComplexType, State, Command {
 
     @Override
     public String format(String pattern) {
-        return String.format(pattern, param);
+        return String.format(pattern, state, device, binding);
     }
 
     @Override
     public int hashCode() {
-        return param.hashCode();
+        return Objects.hash(device, binding);
     }
 
     @Override
     public SortedMap<String, PrimitiveType> getConstituents() {
         TreeMap<String, PrimitiveType> map = new TreeMap<>();
         map.put(KEY_STATE, getState());
-        map.put(KEY_COMMAND, getCommand());
-        map.put(KEY_PARAM, getCommand());
         map.put(KEY_DEVICE, getDevice());
+        map.put(KEY_BINDING, getBinding());
         return map;
     }
 
@@ -161,16 +153,12 @@ public class MediaType implements ComplexType, State, Command {
         return state;
     }
 
-    public MediaCommandType getCommand() {
-        return command;
-    }
-
-    public StringType getParam() {
-        return new StringType(param);
-    }
-
     public StringType getDevice() {
         return device;
+    }
+
+    public StringType getBinding() {
+        return binding;
     }
 
     @Override
@@ -181,16 +169,13 @@ public class MediaType implements ComplexType, State, Command {
         if (obj == null) {
             return false;
         }
-        if (obj instanceof String) {
-            return obj.equals(param);
-        }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        MediaType other = (MediaType) obj;
-        return Objects.equals(this.param, other.param) && Objects.equals(this.device, other.device)
+
+        MediaStateType other = (MediaStateType) obj;
+        return Objects.equals(this.device, other.device) && Objects.equals(this.binding, other.binding)
                 && Objects.equals(this.state, other.state)
-                && Objects.equals(this.currentPlayingTrackPosition, other.currentPlayingTrackPosition)
-                && Objects.equals(this.binding, other.binding);
+                && Objects.equals(this.currentPlayingTrackPosition, other.currentPlayingTrackPosition);
     }
 }
