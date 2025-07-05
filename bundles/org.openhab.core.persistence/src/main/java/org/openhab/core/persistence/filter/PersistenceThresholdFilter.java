@@ -104,7 +104,7 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
                     }
                 } else if (!unit.isBlank()) {
                     // consider unit only if not relative threshold
-                    delta = delta.toUnit(unit);
+                    delta = delta.toUnitRelative(unit);
                     if (delta == null) {
                         throw new UnconvertibleException("");
                     }
