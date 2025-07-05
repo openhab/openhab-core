@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,7 +40,7 @@ public class ReferenceResolverUtilTest {
 
     private static final Map<String, Object> CONTEXT = new HashMap<>();
     private static final Map<String, Object> MODULE_CONFIGURATION = new HashMap<>();
-    private static final Map<String, @Nullable Object> EXPECTED_MODULE_CONFIGURATION = new HashMap<>();
+    private static final Map<String, Object> EXPECTED_MODULE_CONFIGURATION = new HashMap<>();
     private static final Map<String, String> COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES = new HashMap<>();
     private static final Map<String, @Nullable Object> EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT = new HashMap<>();
 
@@ -68,7 +69,7 @@ public class ReferenceResolverUtilTest {
                 String.format("{key1: {{UNKNOWN}}, key2: {{%s}}, key3: {{UNKNOWN2}}}", CONTEXT_PROPERTY2));
 
         // expected resolved module configuration
-        EXPECTED_MODULE_CONFIGURATION.put("simpleReference", CONTEXT.get(CONTEXT_PROPERTY4));
+        EXPECTED_MODULE_CONFIGURATION.put("simpleReference", Objects.requireNonNull(CONTEXT.get(CONTEXT_PROPERTY4)));
         EXPECTED_MODULE_CONFIGURATION.put("complexReference",
                 String.format("Hello %s %s", CONTEXT.get(CONTEXT_PROPERTY1), CONTEXT.get(CONTEXT_PROPERTY4)));
         EXPECTED_MODULE_CONFIGURATION.put("complexReferenceWithMissing",

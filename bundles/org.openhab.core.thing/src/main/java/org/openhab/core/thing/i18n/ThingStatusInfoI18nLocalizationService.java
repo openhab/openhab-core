@@ -14,7 +14,10 @@ package org.openhab.core.thing.i18n;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.I18nUtil;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.thing.Thing;
@@ -50,10 +53,11 @@ import org.osgi.service.component.annotations.Reference;
  * @author Henning Sudbrock - Permit translations from thing handler parent bundles
  */
 @Component(service = ThingStatusInfoI18nLocalizationService.class)
+@NonNullByDefault
 public final class ThingStatusInfoI18nLocalizationService {
 
-    private TranslationProvider i18nProvider;
-    private BundleResolver bundleResolver;
+    private @Nullable TranslationProvider i18nProvider;
+    private @Nullable BundleResolver bundleResolver;
 
     /**
      * Localizes the {@link ThingStatusInfo} for the given thing.
@@ -67,7 +71,7 @@ public final class ThingStatusInfoI18nLocalizationService {
      *         </ul>
      * @throws IllegalArgumentException if given thing is null
      */
-    public ThingStatusInfo getLocalizedThingStatusInfo(Thing thing, Locale locale) {
+    public ThingStatusInfo getLocalizedThingStatusInfo(@Nullable Thing thing, @Nullable Locale locale) {
         if (thing == null) {
             throw new IllegalArgumentException("Thing must not be null.");
         }
@@ -111,14 +115,14 @@ public final class ThingStatusInfoI18nLocalizationService {
      * the given thingHandler and its parent classes. The description may contain arguments that may also need
      * translation (see class JavaDoc for an example); those arguments are translated in the same way.
      */
-    private String translateDescription(String description, Locale locale, ThingHandler thingHandler) {
+    private String translateDescription(String description, @Nullable Locale locale, ThingHandler thingHandler) {
         ParsedDescription parsedDescription = new ParsedDescription(description);
 
         Object[] translatedArgs = null;
         if (parsedDescription.args != null) {
             translatedArgs = Arrays.stream(parsedDescription.args).map(arg -> {
                 if (I18nUtil.isConstant(arg)) {
-                    return getTranslationForClass(arg, locale, thingHandler.getClass());
+                    return getTranslationForClass(Objects.requireNonNull(arg), locale, thingHandler.getClass());
                 } else {
                     return arg;
                 }
@@ -133,7 +137,8 @@ public final class ThingStatusInfoI18nLocalizationService {
      * given class; if there is no translation look up the translation in the bundle in the parent class, and so
      * forth. If no translation is found for the bundle of any parent class, return the i18n constant.
      */
-    private String getTranslationForClass(String i18nConstant, Locale locale, Class<?> clazz, Object... args) {
+    private String getTranslationForClass(String i18nConstant, @Nullable Locale locale, @Nullable Class<?> clazz,
+            Object... args) {
         if (clazz == null) {
             return i18nConstant;
         }
@@ -162,7 +167,7 @@ public final class ThingStatusInfoI18nLocalizationService {
         private static final int LIMIT = 2;
 
         private final String key;
-        private final String[] args;
+        private final String @Nullable [] args;
 
         private ParsedDescription(String description) {
             String[] parts = description.split("\\s+", LIMIT);
