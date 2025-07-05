@@ -18,11 +18,14 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import javax.security.auth.login.Configuration;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Describes a JAAS configuration with the {@link ManagedUserLoginModule} as a sufficient login module.
  *
  * @author Yannick Schaus - initial contribution
  */
+@NonNullByDefault({})
 public class ManagedUserLoginConfiguration extends Configuration {
 
     @Override

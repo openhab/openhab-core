@@ -96,7 +96,7 @@ public class SystemInfoResource implements RESTResource, ConfigurationListener {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSystemInformation", summary = "Gets information about the system.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SystemInfoBean.class))) })
-    public Response getSystemInfo(@Context UriInfo uriInfo) {
+    public @Nullable Response getSystemInfo(@Context UriInfo uriInfo) {
         final SystemInfoBean bean = new SystemInfoBean(startLevelService.getStartLevel());
         return Response.ok(bean).build();
     }
@@ -106,7 +106,7 @@ public class SystemInfoResource implements RESTResource, ConfigurationListener {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getUoMInformation", summary = "Get all supported dimensions and their system units.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UoMInfoBean.class))) })
-    public Response getUoMInfo(final @Context Request request, final @Context UriInfo uriInfo) {
+    public @Nullable Response getUoMInfo(final @Context Request request, final @Context UriInfo uriInfo) {
         if (lastModified != null) {
             Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
             if (responseBuilder != null) {

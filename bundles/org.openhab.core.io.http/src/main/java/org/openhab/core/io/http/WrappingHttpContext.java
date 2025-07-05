@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.http;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
@@ -24,6 +26,7 @@ import org.osgi.service.http.HttpContext;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public interface WrappingHttpContext extends HttpContext {
 
     /**
@@ -32,5 +35,5 @@ public interface WrappingHttpContext extends HttpContext {
      * @param bundle Bundle with resources.
      * @return New context instance.
      */
-    HttpContext wrap(Bundle bundle);
+    HttpContext wrap(@Nullable Bundle bundle);
 }

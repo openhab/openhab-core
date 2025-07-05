@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.id.InstanceUUID;
 import org.openhab.core.io.rest.RESTConstants;
@@ -59,7 +60,7 @@ public class UUIDResource implements RESTResource {
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "getUUID", summary = "A unified unique id.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
-    public Response getInstanceUUID() {
+    public @Nullable Response getInstanceUUID() {
         return Response.ok(InstanceUUID.get()).build();
     }
 }

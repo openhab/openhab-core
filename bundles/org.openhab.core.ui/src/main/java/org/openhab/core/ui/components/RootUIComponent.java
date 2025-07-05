@@ -55,7 +55,7 @@ public class RootUIComponent extends UIComponent implements Identifiable<String>
      *
      * @param name the name of the UI component to render on client frontends, ie. "oh-block"
      */
-    public RootUIComponent(String name) {
+    public RootUIComponent(@Nullable String name) {
         super(name);
         this.uid = UUID.randomUUID().toString();
         this.props = new ConfigDescriptionDTO(null, new ArrayList<>(), new ArrayList<>());
@@ -67,7 +67,7 @@ public class RootUIComponent extends UIComponent implements Identifiable<String>
      * @param uid the UID of the new card
      * @param name the name of the UI component to render on client frontends, ie. "oh-block"
      */
-    public RootUIComponent(String uid, String name) {
+    public RootUIComponent(String uid, @Nullable String name) {
         super(name);
         this.uid = uid;
         this.props = new ConfigDescriptionDTO(null, new ArrayList<>(), new ArrayList<>());
