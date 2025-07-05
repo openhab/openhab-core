@@ -299,6 +299,7 @@
 			<xs:enumeration value="Info"/>
 			<xs:enumeration value="Level"/>
 			<xs:enumeration value="Light"/>
+			<xs:enumeration value="LockState"/>
 			<xs:enumeration value="LowBattery"/>
 			<xs:enumeration value="MediaControl"/>
 			<xs:enumeration value="Mode"/>
