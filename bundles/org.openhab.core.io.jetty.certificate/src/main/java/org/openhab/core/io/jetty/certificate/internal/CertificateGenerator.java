@@ -55,6 +55,8 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -64,6 +66,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class CertificateGenerator implements BundleActivator {
 
     private static final String JETTY_KEYSTORE_PATH_PROPERTY = "jetty.keystore.path";
@@ -77,12 +80,14 @@ public class CertificateGenerator implements BundleActivator {
     private static final String CERTIFICATE_X509_TYPE = "X.509";
     private static final String X500_NAME = "CN=openhab.org, OU=None, O=None, L=None, C=None";
 
+    @NonNullByDefault({})
     private Logger logger;
 
+    @NonNullByDefault({})
     private File keystoreFile;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(@Nullable BundleContext context) throws Exception {
         logger = LoggerFactory.getLogger(CertificateGenerator.class);
         try {
             KeyStore keystore = ensureKeystore();
@@ -99,7 +104,7 @@ public class CertificateGenerator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(@Nullable BundleContext context) throws Exception {
         // Nothing to do.
     }
 

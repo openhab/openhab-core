@@ -14,6 +14,8 @@ package org.openhab.core.io.http.internal;
 
 import java.net.URL;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
@@ -22,18 +24,19 @@ import org.osgi.service.http.HttpContext;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 class BundleHttpContext extends DelegatingHttpContext {
 
-    private final Bundle bundle;
+    private final @Nullable Bundle bundle;
 
-    BundleHttpContext(HttpContext delegate, Bundle bundle) {
+    BundleHttpContext(HttpContext delegate, @Nullable Bundle bundle) {
         super(delegate);
         this.bundle = bundle;
     }
 
     @Override
-    public URL getResource(String name) {
-        if (name != null) {
+    public @Nullable URL getResource(@Nullable String name) {
+        if ((name != null) && (bundle != null)) {
             String resourceName;
             if (name.startsWith("/")) {
                 resourceName = name.substring(1);

@@ -15,6 +15,7 @@ package org.openhab.core.config.core.status;
 import java.util.Arrays;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -38,6 +39,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Thomas Höfer - Initial contribution
  * @author Chris Jackson - Add withMessageKey and remove message from other methods
  */
+@NonNullByDefault
 public final class ConfigStatusMessage {
 
     /**
@@ -70,10 +72,10 @@ public final class ConfigStatusMessage {
     }
 
     /** The name of the configuration parameter. */
-    public final String parameterName;
+    public final @Nullable String parameterName;
 
     /** The {@link Type} of the configuration status message. */
-    public final Type type;
+    public final @Nullable Type type;
 
     /** The key for the message to be internalized. */
     final transient @Nullable String messageKey;
@@ -116,11 +118,12 @@ public final class ConfigStatusMessage {
      * @param message the corresponding internationalized status message
      * @param statusCode the optional status code
      */
-    ConfigStatusMessage(String parameterName, Type type, String message, @Nullable Integer statusCode) {
+    ConfigStatusMessage(@Nullable String parameterName, @Nullable Type type, @Nullable String message,
+            @Nullable Integer statusCode) {
         this(parameterName, type, null, null, message, statusCode);
     }
 
-    private ConfigStatusMessage(String parameterName, Type type, @Nullable String messageKey,
+    private ConfigStatusMessage(@Nullable String parameterName, @Nullable Type type, @Nullable String messageKey,
             Object @Nullable [] arguments, @Nullable String message, @Nullable Integer statusCode) {
         this.parameterName = parameterName;
         this.type = type;
