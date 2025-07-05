@@ -15,6 +15,8 @@ package org.openhab.core.auth.oauth2client.test.internal.console;
 import java.io.IOException;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
@@ -34,6 +36,7 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Gary Tse - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, name = "ConsoleOAuthCommandExtension")
 public class ConsoleOAuthCommandExtension extends AbstractConsoleCommandExtension implements ConsoleCommandExtension {
 
@@ -42,9 +45,9 @@ public class ConsoleOAuthCommandExtension extends AbstractConsoleCommandExtensio
                 + "The commands in oauth requires oauth provider data to be inputted in configuration admin.");
     }
 
-    private AuthorizationCodeTestAgent authorizationCodeTestAgent;
-    private ResourceOwnerTestAgent resourceOwnerTestAgent;
-    private Console console;
+    private @Nullable AuthorizationCodeTestAgent authorizationCodeTestAgent;
+    private @Nullable ResourceOwnerTestAgent resourceOwnerTestAgent;
+    private @Nullable Console console;
 
     @Override
     public void execute(String[] args, Console console) {
@@ -116,7 +119,7 @@ public class ConsoleOAuthCommandExtension extends AbstractConsoleCommandExtensio
         }
     }
 
-    private AbstractTestAgent getTestAgent(String name) {
+    private @Nullable AbstractTestAgent getTestAgent(String name) {
         if ("Code".equals(name)) {
             return authorizationCodeTestAgent;
         } else if ("ResourceOwner".equals(name)) {

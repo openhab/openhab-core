@@ -15,8 +15,10 @@ package org.openhab.core.internal.common;
 import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -24,6 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 class Invocation implements Callable<Object> {
 
     private final Method method;
@@ -31,8 +34,7 @@ class Invocation implements Callable<Object> {
     private final AbstractInvocationHandler<?> invocationHandler;
     private final Deque<Invocation> invocationStack = new LinkedList<>();
 
-    @Nullable
-    private Thread thread;
+    private @Nullable Thread thread;
 
     Invocation(AbstractInvocationHandler<?> invocationHandler, Method method, @Nullable Object @Nullable [] args) {
         this.method = method;
@@ -49,14 +51,17 @@ class Invocation implements Callable<Object> {
     @Override
     public Object call() throws Exception {
         thread = Thread.currentThread();
-        return invocationHandler.invokeDirect(this);
+        // TODO check incompatible null annotations, Callable requires non-null return type but
+        // AbstractInvocationHandler clearly returns null on error
+        return Objects.requireNonNull(invocationHandler.invokeDirect(this));
     }
 
     Method getMethod() {
         return method;
     }
 
-    Object[] getArgs() {
+    @Nullable
+    Object @Nullable [] getArgs() {
         return args;
     }
 

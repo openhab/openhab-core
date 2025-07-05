@@ -99,7 +99,7 @@ public class ModuleTypeResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getModuleTypes", summary = "Get all available module types.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ModuleTypeDTO.class)))) })
-    public Response getAll(
+    public @Nullable Response getAll(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @QueryParam("tags") @Parameter(description = "tags for filtering") @Nullable String tagList,
             @QueryParam("type") @Parameter(description = "filtering by action, condition or trigger") @Nullable String type,
@@ -147,7 +147,7 @@ public class ModuleTypeResource implements RESTResource {
     @Operation(operationId = "getModuleTypeById", summary = "Gets a module type corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ModuleTypeDTO.class))),
             @ApiResponse(responseCode = "404", description = "Module Type corresponding to the given UID does not found.") })
-    public Response getByUID(
+    public @Nullable Response getByUID(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @PathParam("moduleTypeUID") @Parameter(description = "moduleTypeUID") String moduleTypeUID) {
         Locale locale = localeService.getLocale(language);

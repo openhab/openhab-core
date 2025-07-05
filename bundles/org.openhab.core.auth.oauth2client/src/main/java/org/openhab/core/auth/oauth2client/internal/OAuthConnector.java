@@ -214,8 +214,8 @@ public class OAuthConnector {
      * @throws OAuthResponseException Error codes given by authorization provider, as in RFC 6749 section 5.2 Error
      *             Response
      */
-    public AccessTokenResponse grantTypeRefreshToken(String tokenUrl, String refreshToken, @Nullable String clientId,
-            @Nullable String clientSecret, @Nullable String scope, boolean supportsBasicAuth)
+    public AccessTokenResponse grantTypeRefreshToken(String tokenUrl, @Nullable String refreshToken,
+            @Nullable String clientId, @Nullable String clientSecret, @Nullable String scope, boolean supportsBasicAuth)
             throws OAuthResponseException, OAuthException, IOException {
         HttpClient httpClient = null;
         try {

@@ -111,7 +111,7 @@ public class DiscoveryResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getBindingsWithDiscoverySupport", summary = "Gets all bindings that support discovery.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class), uniqueItems = true))) })
-    public Response getDiscoveryServices() {
+    public @Nullable Response getDiscoveryServices() {
         Collection<String> supportedBindings = discoveryServiceRegistry.getSupportedBindings();
         return Response.ok(new LinkedHashSet<>(supportedBindings)).build();
     }
@@ -122,7 +122,7 @@ public class DiscoveryResource implements RESTResource {
     @Operation(operationId = "getDiscoveryServicesInfo", summary = "Gets information about the discovery services for a binding.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DiscoveryInfoDTO.class))),
             @ApiResponse(responseCode = "404", description = "Discovery service not found") })
-    public Response getDiscoveryServicesInfo(
+    public @Nullable Response getDiscoveryServicesInfo(
             @PathParam("bindingId") @Parameter(description = "binding Id") final String bindingId,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
@@ -161,7 +161,8 @@ public class DiscoveryResource implements RESTResource {
     @Operation(operationId = "scan", summary = "Starts asynchronous discovery process for a binding and returns the timeout in seconds of the discovery operation.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integer.class))),
             @ApiResponse(responseCode = "404", description = "Discovery service not found") })
-    public Response scan(@PathParam("bindingId") @Parameter(description = "binding Id") final String bindingId,
+    public @Nullable Response scan(
+            @PathParam("bindingId") @Parameter(description = "binding Id") final String bindingId,
             @QueryParam("input") @Parameter(description = "input parameter to start the discovery") @Nullable String input) {
         if (discoveryServiceRegistry.getDiscoveryServices(bindingId).isEmpty()) {
             return JSONResponse.createResponse(Status.NOT_FOUND, null,

@@ -86,6 +86,7 @@ import com.google.gson.JsonSyntaxException;
  * @author Stefan Triller - Add support for service contexts
  * @author Christoph Weitkamp - Added support for value containing a list of configuration options
  */
+@NonNullByDefault
 @Component(immediate = true, service = ConfigDispatcher.class)
 public class ConfigDispatcher {
 
@@ -118,11 +119,11 @@ public class ConfigDispatcher {
     private static final String DEFAULT_LIST_ENDING_CHARACTER = "]";
     private static final String DEFAULT_LIST_DELIMITER = ",";
 
-    private ExclusivePIDMap exclusivePIDMap;
+    private @NonNullByDefault({}) ExclusivePIDMap exclusivePIDMap;
 
     private final ConfigurationAdmin configAdmin;
 
-    private File exclusivePIDStore;
+    private @NonNullByDefault({}) File exclusivePIDStore;
 
     @Activate
     public ConfigDispatcher(final @Reference ConfigurationAdmin configAdmin) {
@@ -162,7 +163,7 @@ public class ConfigDispatcher {
         }
     }
 
-    private Configuration getConfigurationWithContext(String pidWithContext)
+    private @Nullable Configuration getConfigurationWithContext(String pidWithContext)
             throws IOException, InvalidSyntaxException {
         if (!pidWithContext.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
             throw new IllegalArgumentException("Given PID should be followed by a context");
@@ -399,7 +400,7 @@ public class ConfigDispatcher {
         storeCurrentExclusivePIDList();
     }
 
-    private String getPIDFromLine(String line) {
+    private @Nullable String getPIDFromLine(String line) {
         if (line.startsWith(PID_MARKER)) {
             return line.substring(PID_MARKER.length()).trim();
         }
@@ -491,7 +492,7 @@ public class ConfigDispatcher {
          * service config files.
          * The map will hold a 1:1 relation mapping from an exclusive PID to its absolute path in the file system.
          */
-        private transient Map<String, String> processedPIDMapping = new HashMap<>();
+        private transient Map<String, @Nullable String> processedPIDMapping = new HashMap<>();
 
         /**
          * Package protected default constructor to allow reflective instantiation.
@@ -510,7 +511,7 @@ public class ConfigDispatcher {
         }
 
         public void setFileRemoved(String absolutePath) {
-            for (Entry<String, String> entry : processedPIDMapping.entrySet()) {
+            for (Entry<String, @Nullable String> entry : processedPIDMapping.entrySet()) {
                 if (entry.getValue().equals(absolutePath)) {
                     entry.setValue(null);
                     return; // we expect a 1:1 relation between PID and path
@@ -543,7 +544,7 @@ public class ConfigDispatcher {
                     .toList();
         }
 
-        public boolean contains(String pid) {
+        public boolean contains(@Nullable String pid) {
             return processedPIDMapping.containsKey(pid);
         }
     }
