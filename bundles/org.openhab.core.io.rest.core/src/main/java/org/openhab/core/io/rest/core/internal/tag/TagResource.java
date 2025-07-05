@@ -118,7 +118,7 @@ public class TagResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSemanticTags", summary = "Get all available semantic tags.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedSemanticTagDTO.class)))) })
-    public Response getTags(final @Context Request request, final @Context UriInfo uriInfo,
+    public @Nullable Response getTags(final @Context Request request, final @Context UriInfo uriInfo,
             final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         if (lastModified != null) {
@@ -147,7 +147,7 @@ public class TagResource implements RESTResource {
     @Operation(operationId = "getSemanticTagAndSubTags", summary = "Gets a semantic tag and its sub tags.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedSemanticTagDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Semantic tag not found.") })
-    public Response getTagAndSubTags(final @Context Request request,
+    public @Nullable Response getTagAndSubTags(final @Context Request request,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("tagId") @Parameter(description = "tag id") String tagId) {
         if (lastModified != null) {
@@ -183,7 +183,7 @@ public class TagResource implements RESTResource {
                     @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = EnrichedSemanticTagDTO.class))),
                     @ApiResponse(responseCode = "400", description = "The tag identifier is invalid or the tag label is missing."),
                     @ApiResponse(responseCode = "409", description = "A tag with the same identifier already exists.") })
-    public Response create(
+    public @Nullable Response create(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @Parameter(description = "tag data", required = true) EnrichedSemanticTagDTO data) {
         final Locale locale = localeService.getLocale(language);
@@ -227,7 +227,7 @@ public class TagResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK, was deleted."),
                     @ApiResponse(responseCode = "404", description = "Semantic tag not found."),
                     @ApiResponse(responseCode = "405", description = "Semantic tag not removable.") })
-    public Response remove(
+    public @Nullable Response remove(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("tagId") @Parameter(description = "tag id") String tagId) {
         String uid = tagId.trim();
@@ -257,7 +257,7 @@ public class TagResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedSemanticTagDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Semantic tag not found."),
                     @ApiResponse(responseCode = "405", description = "Semantic tag not editable.") })
-    public Response update(
+    public @Nullable Response update(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("tagId") @Parameter(description = "tag id") String tagId,
             @Parameter(description = "tag data", required = true) EnrichedSemanticTagDTO data) {

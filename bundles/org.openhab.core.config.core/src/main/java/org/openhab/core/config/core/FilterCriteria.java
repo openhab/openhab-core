@@ -12,6 +12,9 @@
  */
 package org.openhab.core.config.core;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link FilterCriteria} specifies a filter for dynamic selection list
  * providers of a {@link ConfigDescriptionParameter}.
@@ -22,10 +25,11 @@ package org.openhab.core.config.core;
  * @author Alex Tugarev - Initial contribution
  * @author Markus Rathgeb - Add default constructor for deserialization
  */
+@NonNullByDefault
 public class FilterCriteria {
 
-    private String value;
-    private String name;
+    private @Nullable String value;
+    private @Nullable String name;
 
     /**
      * Default constructor for deserialization e.g. by Gson.
@@ -33,16 +37,16 @@ public class FilterCriteria {
     protected FilterCriteria() {
     }
 
-    public FilterCriteria(String name, String value) {
+    public FilterCriteria(@Nullable String name, @Nullable String value) {
         this.name = name;
         this.value = value;
     }
 
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
-    public String getValue() {
+    public @Nullable String getValue() {
         return value;
     }
 
@@ -61,7 +65,7 @@ public class FilterCriteria {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

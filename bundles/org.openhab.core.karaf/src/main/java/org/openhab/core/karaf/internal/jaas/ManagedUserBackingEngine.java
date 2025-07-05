@@ -16,12 +16,15 @@ import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.Role;
 import org.openhab.core.auth.User;
@@ -32,6 +35,7 @@ import org.openhab.core.auth.UserRegistry;
  *
  * @author Yannick Schaus - initial contribution
  */
+@NonNullByDefault
 public class ManagedUserBackingEngine implements BackingEngine {
 
     private final UserRegistry userRegistry;
@@ -41,22 +45,27 @@ public class ManagedUserBackingEngine implements BackingEngine {
     }
 
     @Override
-    public void addUser(String username, String password) {
+    public void addUser(@Nullable String username, @Nullable String password) {
+        Objects.requireNonNull(username);
+        Objects.requireNonNull(password);
         userRegistry.register(username, password, new HashSet<>(Set.of(Role.USER)));
     }
 
     @Override
-    public void deleteUser(String username) {
+    public void deleteUser(@Nullable String username) {
+        Objects.requireNonNull(username);
         userRegistry.remove(username);
     }
 
     @Override
+    @NonNullByDefault({})
     public List<UserPrincipal> listUsers() {
         return userRegistry.getAll().stream().map(u -> new UserPrincipal(u.getName())).toList();
     }
 
     @Override
-    public UserPrincipal lookupUser(String username) {
+    public @Nullable UserPrincipal lookupUser(@Nullable String username) {
+        Objects.requireNonNull(username);
         User user = userRegistry.get(username);
         if (user != null) {
             return new UserPrincipal(user.getName());
@@ -65,32 +74,35 @@ public class ManagedUserBackingEngine implements BackingEngine {
     }
 
     @Override
-    public List<GroupPrincipal> listGroups(UserPrincipal user) {
+    @NonNullByDefault({})
+    public List<GroupPrincipal> listGroups(@Nullable UserPrincipal user) {
         return List.of();
     }
 
     @Override
+    @NonNullByDefault({})
     public Map<GroupPrincipal, String> listGroups() {
         return Map.of();
     }
 
     @Override
-    public void addGroup(String username, String group) {
+    public void addGroup(@Nullable String username, @Nullable String group) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void createGroup(String group) {
+    public void createGroup(@Nullable String group) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deleteGroup(String username, String group) {
+    public void deleteGroup(@Nullable String username, @Nullable String group) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<RolePrincipal> listRoles(Principal principal) {
+    @NonNullByDefault({})
+    public List<RolePrincipal> listRoles(@Nullable Principal principal) {
         User user = userRegistry.get(principal.getName());
         if (user != null) {
             return user.getRoles().stream().map(r -> new RolePrincipal(r)).toList();
@@ -99,7 +111,9 @@ public class ManagedUserBackingEngine implements BackingEngine {
     }
 
     @Override
-    public void addRole(String username, String role) {
+    public void addRole(@Nullable String username, @Nullable String role) {
+        Objects.requireNonNull(username);
+        Objects.requireNonNull(role);
         User user = userRegistry.get(username);
         if (user instanceof ManagedUser managedUser) {
             managedUser.getRoles().add(role);
@@ -108,7 +122,8 @@ public class ManagedUserBackingEngine implements BackingEngine {
     }
 
     @Override
-    public void deleteRole(String username, String role) {
+    public void deleteRole(@Nullable String username, @Nullable String role) {
+        Objects.requireNonNull(username);
         User user = userRegistry.get(username);
         if (user instanceof ManagedUser managedUser) {
             managedUser.getRoles().remove(role);
@@ -117,12 +132,12 @@ public class ManagedUserBackingEngine implements BackingEngine {
     }
 
     @Override
-    public void addGroupRole(String group, String role) {
+    public void addGroupRole(@Nullable String group, @Nullable String role) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deleteGroupRole(String group, String role) {
+    public void deleteGroupRole(@Nullable String group, @Nullable String role) {
         throw new UnsupportedOperationException();
     }
 }

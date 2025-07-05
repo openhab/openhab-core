@@ -91,7 +91,7 @@ public class AudioResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAudioSources", summary = "Get the list of all sources.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AudioSourceDTO.class)))) })
-    public Response getSources(
+    public @Nullable Response getSources(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         Collection<AudioSource> sources = audioManager.getAllSources();
@@ -108,7 +108,7 @@ public class AudioResource implements RESTResource {
     @Operation(operationId = "getAudioDefaultSource", summary = "Get the default source if defined or the first available source.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AudioSourceDTO.class))),
             @ApiResponse(responseCode = "404", description = "Source not found") })
-    public Response getDefaultSource(
+    public @Nullable Response getDefaultSource(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         AudioSource source = audioManager.getSource();
@@ -124,7 +124,7 @@ public class AudioResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAudioSinks", summary = "Get the list of all sinks.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AudioSinkDTO.class)))) })
-    public Response getSinks(
+    public @Nullable Response getSinks(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         Collection<AudioSink> sinks = audioManager.getAllSinks();
@@ -141,7 +141,7 @@ public class AudioResource implements RESTResource {
     @Operation(operationId = "getAudioDefaultSink", summary = "Get the default sink if defined or the first available sink.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AudioSinkDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sink not found") })
-    public Response getDefaultSink(
+    public @Nullable Response getDefaultSink(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         AudioSink sink = audioManager.getSink();
