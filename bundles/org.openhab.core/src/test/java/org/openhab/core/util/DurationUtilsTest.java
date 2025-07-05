@@ -39,16 +39,25 @@ public class DurationUtilsTest {
         assertEquals(3661000, DurationUtils.parse("PT1H1M1S").toMillis());
     }
 
+    private void testUnitCombinations(long expectedMillis, String number, String... units) {
+        for (String unit : units) {
+            assertEquals(expectedMillis, DurationUtils.parse(number + unit).toMillis());
+            assertEquals(expectedMillis, DurationUtils.parse(number + " " + unit).toMillis());
+        }
+    }
+
     @Test
     public void testParseCustom() {
-        assertEquals(350, DurationUtils.parse("350ms").toMillis());
-        assertEquals(1000, DurationUtils.parse("1s").toMillis());
-        assertEquals(60000, DurationUtils.parse("1m").toMillis());
-        assertEquals(3600000, DurationUtils.parse("1h").toMillis());
-        assertEquals(86400000, DurationUtils.parse("1d").toMillis());
+        testUnitCombinations(350, "350", "ms", "millisecond", "milliseconds");
+        testUnitCombinations(1000, "1", "s", "sec", "secs", "second", "seconds");
+        testUnitCombinations(60000, "1", "m", "min", "mins", "minute", "minutes");
+        testUnitCombinations(3600000, "1", "h", "hr", "hrs", "hour", "hours");
+        testUnitCombinations(86400000, "1", "d", "day", "days");
 
         // Mixed units
         assertEquals(61000, DurationUtils.parse("1m 1s").toMillis());
+        assertEquals(61000, DurationUtils.parse("1 m 1 s").toMillis());
+        assertEquals(61000, DurationUtils.parse("1 min 1 sec").toMillis());
         assertEquals(3661000, DurationUtils.parse("1h 1m 1s").toMillis());
         assertEquals(3661000, DurationUtils.parse("1h1m1s").toMillis());
     }

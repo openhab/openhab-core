@@ -27,20 +27,64 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class DurationUtils {
 
-    private static final Pattern DURATION_PATTERN = Pattern.compile(
-            "(?:([0-9]+)D)?\\s*(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?\\s*(?:([0-9]+)MS)?",
-            Pattern.CASE_INSENSITIVE);
+    private static final Pattern DURATION_PATTERN = Pattern.compile("""
+            (?:([0-9]+)\\s*(?:d|days?))?
+            \\s*
+            (?:([0-9]+)\\s*(?:h|hrs?|hours?))?
+            \\s*
+            (?:([0-9]+)\\s*(?:m|mins?|minutes?))?
+            \\s*
+            (?:([0-9]+)\\s*(?:s|secs?|seconds?))?
+            \\s*
+            (?:([0-9]+)\\s*(?:ms|milliseconds?))?
+            """, Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
+
     private static final ChronoUnit[] DURATION_UNITS = { ChronoUnit.DAYS, ChronoUnit.HOURS, ChronoUnit.MINUTES,
             ChronoUnit.SECONDS, ChronoUnit.MILLIS };
 
     /**
-     * Parses a duration string in ISO-8601 format or a custom format like
-     * "1d 1h 15m 30s 500ms" where
-     * 'd' stands for days,
-     * 'h' for hours,
-     * 'm' for minutes,
-     * 's' for seconds, and
-     * 'ms' for milliseconds.
+     * Parses a duration string in ISO-8601 duration format or a custom format like
+     * "1d 1h 15m 30s 500ms".
+     *
+     * When specifying a duration, the units must be specified in the order of
+     * days, hours, minutes, seconds, and milliseconds,
+     * although any individual unit may be omitted.
+     * Each unit must be preceded by an integer value.
+     * A space between the number and its corresponding unit is permitted but not required.
+     * Likewise, whitespace between unit groups is optional.
+     *
+     * The units supported in the duration format are:
+     * <ul>
+     * <li>'d|day|days' for days,
+     * <li>'h|hr|hrs|hour|hours' for hours,
+     * <li>'m|min|mins|minute|minutes' for minutes,
+     * <li>'s|sec|secs|second|seconds' for seconds, and
+     * <li>'ms|millisecond|milliseconds' for milliseconds.
+     * </ul>
+     *
+     * Examples of valid duration strings:
+     * <ul>
+     * <li>"1h" represents 1 hour
+     * <li>"15m" represents 15 minutes
+     * <li>"1h15m" represents 1 day and 15 minutes. It can also be written as "1h 15m", "1 h 15 m", "1 hr 15 mins",
+     * "1hour 15 minutes", etc.
+     * <li>"1d 1h 30s" represents 1 day, 1 hour, and 30 seconds
+     * </ul>
+     *
+     * The ISO-8601 duration format is supported, but only the following units are recognized:
+     * days, hours, minutes, and seconds.
+     * Units such as years, months, and weeks are not supported.
+     * The number of days, hours and minutes must parse to a long.
+     * The number of seconds must parse to a long with optional fraction.
+     * The decimal point may be either a dot or a comma.
+     * The fractional part may have from zero to 9 digits.
+     *
+     * Examples of ISO-8601 durations:
+     * <ul>
+     * <li>"PT1H30M" represents 1 hour and 30 minutes
+     * <li>"PT1D" represents 1 day
+     * <li>"PT0.5S" represents 0.5 seconds (500 milliseconds)
+     * </ul>
      *
      * @param durationString the string representation of the duration
      * @return a Duration object representing the parsed duration
