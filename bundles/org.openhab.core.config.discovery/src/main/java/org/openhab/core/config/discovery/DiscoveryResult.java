@@ -129,15 +129,6 @@ public interface DiscoveryResult {
     Instant getCreationTime();
 
     /**
-     * Returns the creation time of this result object.
-     *
-     * @return timestamp as long
-     * @deprecated Use {@link #getCreationTime} instead.
-     */
-    @Deprecated(since = "5.0", forRemoval = true)
-    long getTimestamp();
-
-    /**
      * Returns the time to live in seconds for this entry.
      *
      * @return time to live in seconds

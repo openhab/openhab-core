@@ -73,10 +73,8 @@ public interface DiscoveryListener {
      * @return collection of thing UIDs of all removed things
      */
     @Nullable
-    default Collection<ThingUID> removeOlderResults(DiscoveryService source, Instant timestamp,
-            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
-        return removeOlderResults(source, timestamp.toEpochMilli(), thingTypeUIDs, bridgeUID);
-    }
+    Collection<ThingUID> removeOlderResults(DiscoveryService source, Instant timestamp,
+            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID);
 
     /**
      * Removes all results belonging to one of the given types that are older
@@ -95,6 +93,8 @@ public interface DiscoveryListener {
      */
     @Nullable
     @Deprecated(since = "5.0", forRemoval = true)
-    Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
-            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID);
+    default Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
+            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
+        return removeOlderResults(source, Instant.ofEpochMilli(timestamp), thingTypeUIDs, bridgeUID);
+    }
 }

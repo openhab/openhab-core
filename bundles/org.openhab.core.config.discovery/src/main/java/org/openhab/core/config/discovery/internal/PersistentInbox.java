@@ -412,12 +412,6 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     }
 
     @Override
-    public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
-            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
-        return removeOlderResults(source, Instant.ofEpochMilli(timestamp), thingTypeUIDs, bridgeUID);
-    }
-
-    @Override
     public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, Instant timestamp,
             @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
         Set<ThingUID> removedThings = new HashSet<>();

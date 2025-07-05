@@ -200,12 +200,6 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
         return null;
     }
 
-    @Override
-    public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
-            @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
-        return null;
-    }
-
     @Test
     public void testDiscoveryResults() {
         TestDiscoveryService discoveryService = new TestDiscoveryService(i18nProvider, localeProvider);
