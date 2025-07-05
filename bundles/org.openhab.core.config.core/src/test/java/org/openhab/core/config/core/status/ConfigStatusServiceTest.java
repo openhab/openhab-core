@@ -115,8 +115,8 @@ public class ConfigStatusServiceTest extends JavaTest {
         configStatusService.addConfigStatusProvider(getConfigStatusProviderMock(ENTITY_ID2));
     }
 
-    private ConfigStatusMessage buildConfigStatusMessage(String parameterName, Type type, String msg,
-            @Nullable Integer statusCode) {
+    private ConfigStatusMessage buildConfigStatusMessage(@Nullable String parameterName, @Nullable Type type,
+            @Nullable String msg, @Nullable Integer statusCode) {
         return new ConfigStatusMessage(parameterName, type, msg, statusCode);
     }
 

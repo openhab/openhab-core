@@ -15,7 +15,6 @@ package org.openhab.core.config.discovery;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigParser;
@@ -43,7 +42,7 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
 
     // this works around a bug in ecj: @NonNullByDefault({}) complains about the field not being
     // initialized when the type is generic, so we have to initialize it with "something"
-    protected @NonNullByDefault({}) T thingHandler = (@NonNull T) null;
+    protected @NonNullByDefault({}) T thingHandler = (T) null;
 
     protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
             int timeout, boolean backgroundDiscoveryEnabledByDefault, @Nullable String scanInputLabel,

@@ -21,6 +21,7 @@ import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.UserRegistry;
 import org.osgi.service.component.annotations.Component;
 
@@ -29,6 +30,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Yannick Schaus - initial contribution
  */
+@NonNullByDefault
 @Component(service = JaasRealm.class)
 @Service
 public class ManagedUserRealm implements JaasRealm {

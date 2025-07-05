@@ -155,13 +155,14 @@ public class ConfigUtil {
      * @param configuration the configuration that needs to be normalized
      * @return normalized configuration
      */
-    public static Map<String, @Nullable Object> normalizeTypes(Map<String, @Nullable Object> configuration) {
-        Map<String, @Nullable Object> convertedConfiguration = new HashMap<>(configuration.size());
-        for (Entry<String, @Nullable Object> parameter : configuration.entrySet()) {
+    public static Map<String, Object> normalizeTypes(Map<String, Object> configuration) {
+        Map<String, Object> convertedConfiguration = new HashMap<>(configuration.size());
+        for (Entry<String, Object> parameter : configuration.entrySet()) {
             String name = parameter.getKey();
             Object value = parameter.getValue();
             if (!isOSGiConfigParameter(name)) {
-                convertedConfiguration.put(name, value == null ? null : normalizeType(value, null));
+                Objects.requireNonNull(value); // according to Null annotations, it should never be null
+                convertedConfiguration.put(name, normalizeType(value, null));
             }
         }
         return convertedConfiguration;
@@ -175,18 +176,21 @@ public class ConfigUtil {
      * @return corresponding value as a valid type
      * @throws IllegalArgumentException if an invalid type has been given
      */
-    @Nullable
     public static Object normalizeType(@Nullable Object value,
             @Nullable ConfigDescriptionParameter configDescriptionParameter) {
         if (configDescriptionParameter != null) {
             Normalizer normalizer = NormalizerFactory.getNormalizer(configDescriptionParameter);
-            return normalizer.normalize(value);
+            // normalize is tolerant to null values, but will not return null for non-null values
+            return Objects.requireNonNull(normalizer.normalize(value));
         } else if (value instanceof Boolean) {
-            return NormalizerFactory.getNormalizer(Type.BOOLEAN).normalize(value);
+            // normalize is tolerant to null values, but will not return null for non-null values
+            return Objects.requireNonNull(NormalizerFactory.getNormalizer(Type.BOOLEAN).normalize(value));
         } else if (value instanceof String) {
-            return NormalizerFactory.getNormalizer(Type.TEXT).normalize(value);
+            // normalize is tolerant to null values, but will not return null for non-null values
+            return Objects.requireNonNull(NormalizerFactory.getNormalizer(Type.TEXT).normalize(value));
         } else if (value instanceof Number) {
-            return NormalizerFactory.getNormalizer(Type.DECIMAL).normalize(value);
+            // normalize is tolerant to null values, but will not return null for non-null values
+            return Objects.requireNonNull(NormalizerFactory.getNormalizer(Type.DECIMAL).normalize(value));
         } else if (value instanceof Collection collection) {
             return normalizeCollection(collection);
         }
@@ -211,21 +215,21 @@ public class ConfigUtil {
      * @return the normalized configuration or null if given configuration was null
      * @throws IllegalArgumentException if given config description is null
      */
-    public static Map<String, @Nullable Object> normalizeTypes(Map<String, @Nullable Object> configuration,
+    public static Map<String, Object> normalizeTypes(Map<String, Object> configuration,
             List<ConfigDescription> configDescriptions) {
         if (configDescriptions.isEmpty()) {
             throw new IllegalArgumentException("Config description must not be empty.");
         }
 
-        Map<String, @Nullable Object> convertedConfiguration = new HashMap<>();
+        Map<String, Object> convertedConfiguration = new HashMap<>();
 
         Map<String, ConfigDescriptionParameter> configParams = new HashMap<>();
         for (int i = configDescriptions.size() - 1; i >= 0; i--) {
             configParams.putAll(configDescriptions.get(i).toParametersMap());
         }
-        for (Entry<String, @Nullable Object> parameter : configuration.entrySet()) {
+        for (Entry<String, Object> parameter : configuration.entrySet()) {
             String name = parameter.getKey();
-            @Nullable
+            // value should never be null according to Null annotations
             Object value = parameter.getValue();
             if (!isOSGiConfigParameter(name)) {
                 ConfigDescriptionParameter configDescriptionParameter = configParams.get(name);
@@ -244,7 +248,7 @@ public class ConfigUtil {
      * @param value the value to return as normalized type
      * @return corresponding value as a valid type
      */
-    public static @Nullable Object normalizeType(@Nullable Object value) {
+    public static Object normalizeType(Object value) {
         return normalizeType(value, null);
     }
 

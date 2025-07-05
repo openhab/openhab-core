@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -165,7 +166,7 @@ public class ConfigUtilTest {
         verifyValuesOfConfiguration(configuration.get("p2"), 3, List.of("first value", "second value", "third value"));
     }
 
-    private void verifyValuesOfConfiguration(Object subject, int expectedSize, List<?> expectedValues) {
+    private void verifyValuesOfConfiguration(@Nullable Object subject, int expectedSize, List<?> expectedValues) {
         assertThat(subject, is(notNullValue()));
         assertThat(subject, is(instanceOf(List.class)));
         assertThat(((List<?>) subject).size(), is(expectedSize));
