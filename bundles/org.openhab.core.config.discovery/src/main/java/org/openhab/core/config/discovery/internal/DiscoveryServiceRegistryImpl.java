@@ -288,12 +288,6 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     }
 
     @Override
-    public @Nullable Collection<ThingUID> removeOlderResults(final DiscoveryService source, final long timestamp,
-            final @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
-        return removeOlderResults(source, Instant.ofEpochMilli(timestamp), thingTypeUIDs, bridgeUID);
-    }
-
-    @Override
     public @Nullable Collection<ThingUID> removeOlderResults(final DiscoveryService source, final Instant timestamp,
             final @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
         Set<ThingUID> removedResults = new HashSet<>();
