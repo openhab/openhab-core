@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -212,8 +213,8 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimestampOfLastScan());
 
         waitForAssert(() -> {
-            verify(discoveryListenerMock, times(1)).removeOlderResults(any(DiscoveryService.class), anyLong(), any(),
-                    any());
+            verify(discoveryListenerMock, times(1)).removeOlderResults(any(DiscoveryService.class), any(Instant.class),
+                    any(), any());
         });
         verifyNoMoreInteractions(discoveryListenerMock);
     }
