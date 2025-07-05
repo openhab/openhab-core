@@ -117,7 +117,7 @@ public class TransformationResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTransformations", summary = "Get a list of all transformations", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransformationDTO.class)))) })
-    public Response getTransformations(@Context Request request) {
+    public @Nullable Response getTransformations(@Context Request request) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
 
         if (lastModified != null) {
@@ -140,7 +140,7 @@ public class TransformationResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTransformationServices", summary = "Get all transformation services", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))) })
-    public Response getTransformationServices() {
+    public @Nullable Response getTransformationServices() {
         try {
             Collection<ServiceReference<TransformationService>> refs = bundleContext
                     .getServiceReferences(TransformationService.class, null);
@@ -159,7 +159,8 @@ public class TransformationResource implements RESTResource {
     @Operation(operationId = "getTransformation", summary = "Get a single transformation", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Transformation.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
-    public Response getTransformation(@PathParam("uid") @Parameter(description = "Transformation UID") String uid) {
+    public @Nullable Response getTransformation(
+            @PathParam("uid") @Parameter(description = "Transformation UID") String uid) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
 
         Transformation transformation = transformationRegistry.get(uid);
@@ -179,7 +180,8 @@ public class TransformationResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Bad Request (content missing or invalid)"),
             @ApiResponse(responseCode = "405", description = "Transformation not editable") })
-    public Response putTransformation(@PathParam("uid") @Parameter(description = "Transformation UID") String uid,
+    public @Nullable Response putTransformation(
+            @PathParam("uid") @Parameter(description = "Transformation UID") String uid,
             @Parameter(description = "transformation", required = true) @Nullable TransformationDTO newTransformation) {
         logger.debug("Received HTTP PUT request at '{}'", uriInfo.getPath());
 
@@ -220,7 +222,8 @@ public class TransformationResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "UID not found"),
             @ApiResponse(responseCode = "405", description = "Transformation not editable") })
-    public Response deleteTransformation(@PathParam("uid") @Parameter(description = "Transformation UID") String uid) {
+    public @Nullable Response deleteTransformation(
+            @PathParam("uid") @Parameter(description = "Transformation UID") String uid) {
         logger.debug("Received HTTP DELETE request at '{}'", uriInfo.getPath());
 
         Transformation oldTransformation = transformationRegistry.get(uid);

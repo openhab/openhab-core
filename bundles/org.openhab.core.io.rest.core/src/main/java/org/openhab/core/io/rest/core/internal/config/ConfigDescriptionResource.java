@@ -97,7 +97,7 @@ public class ConfigDescriptionResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getConfigDescriptions", summary = "Gets all available config descriptions.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigDescriptionDTO.class)))) })
-    public Response getAll(
+    public @Nullable Response getAll(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language, //
             @QueryParam("scheme") @Parameter(description = "scheme filter") @Nullable String scheme) {
         Locale locale = localeService.getLocale(language);
@@ -114,7 +114,7 @@ public class ConfigDescriptionResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigDescriptionDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid URI syntax"),
             @ApiResponse(responseCode = "404", description = "Not found") })
-    public Response getByURI(
+    public @Nullable Response getByURI(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @PathParam("uri") @Parameter(description = "uri") String uri) {
         Locale locale = localeService.getLocale(language);

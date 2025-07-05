@@ -12,6 +12,9 @@
  */
 package org.openhab.core.config.core;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link ParameterOption} specifies one option of a static selection list.
  * <p>
@@ -20,10 +23,11 @@ package org.openhab.core.config.core;
  *
  * @author Alex Tugarev - Initial contribution
  */
+@NonNullByDefault
 public class ParameterOption {
 
-    private String label;
-    private String value;
+    private @Nullable String label;
+    private @Nullable String value;
 
     /**
      * Default constructor for deserialization e.g. by Gson.
@@ -31,16 +35,16 @@ public class ParameterOption {
     protected ParameterOption() {
     }
 
-    public ParameterOption(String value, String label) {
+    public ParameterOption(@Nullable String value, @Nullable String label) {
         this.value = value;
         this.label = label;
     }
 
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return label;
     }
 
-    public String getValue() {
+    public @Nullable String getValue() {
         return value;
     }
 
@@ -59,7 +63,7 @@ public class ParameterOption {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

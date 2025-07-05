@@ -116,7 +116,7 @@ public class TokenResource implements RESTResource {
     @Operation(operationId = "getOAuthToken", summary = "Get access and refresh tokens.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TokenResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters") })
-    public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
+    public @Nullable Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri, @FormParam("client_id") String clientId,
             @FormParam("refresh_token") String refreshToken, @FormParam("code_verifier") String codeVerifier,
             @QueryParam("useCookie") boolean useCookie,
@@ -148,7 +148,7 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getSessions(@Context SecurityContext securityContext) {
+    public @Nullable Response getSessions(@Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
@@ -169,7 +169,7 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getApiTokens(@Context SecurityContext securityContext) {
+    public @Nullable Response getApiTokens(@Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
@@ -189,7 +189,7 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or API token not found") })
-    public Response removeApiToken(@Context SecurityContext securityContext, @PathParam("name") String name) {
+    public @Nullable Response removeApiToken(@Context SecurityContext securityContext, @PathParam("name") String name) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
@@ -216,7 +216,7 @@ public class TokenResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or refresh token not found") })
-    public Response deleteSession(@Nullable @FormParam("refresh_token") String refreshToken,
+    public @Nullable Response deleteSession(@Nullable @FormParam("refresh_token") String refreshToken,
             @Nullable @FormParam("id") String id, @Nullable @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie,
             @Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
@@ -269,7 +269,7 @@ public class TokenResource implements RESTResource {
         return new UserApiTokenDTO(apiToken.getName(), apiToken.getCreatedTime(), apiToken.getScope());
     }
 
-    private Response processAuthorizationCodeGrant(String code, String redirectUri, String clientId,
+    private @Nullable Response processAuthorizationCodeGrant(String code, String redirectUri, String clientId,
             @Nullable String codeVerifier, boolean useCookie) throws TokenEndpointException, NoSuchAlgorithmException {
         // find a user with the authorization code pending
         Optional<User> user = userRegistry.getAll().stream().filter(u -> {
@@ -373,7 +373,7 @@ public class TokenResource implements RESTResource {
         return response.build();
     }
 
-    private Response processRefreshTokenGrant(String clientId, @Nullable String refreshToken,
+    private @Nullable Response processRefreshTokenGrant(String clientId, @Nullable String refreshToken,
             @Nullable Cookie sessionCookie) throws TokenEndpointException {
         if (refreshToken == null) {
             throw new TokenEndpointException(ErrorType.INVALID_REQUEST);

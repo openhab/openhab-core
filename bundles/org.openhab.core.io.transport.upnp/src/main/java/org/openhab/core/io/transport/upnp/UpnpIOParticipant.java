@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.transport.upnp;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link UpnpIOParticipant} is an interface that needs to
  * be implemented by classes that wants to participate in
@@ -19,6 +21,7 @@ package org.openhab.core.io.transport.upnp;
  *
  * @author Karel Goderis - Initial contribution
  */
+@NonNullByDefault
 public interface UpnpIOParticipant {
 
     /** Get the UDN of the participant **/

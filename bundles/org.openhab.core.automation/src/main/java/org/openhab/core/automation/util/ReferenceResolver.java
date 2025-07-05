@@ -21,6 +21,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -61,6 +63,7 @@ import org.slf4j.Logger;
  * @author Vasil Ilchev - Initial contribution
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field
  */
+@NonNullByDefault
 public class ReferenceResolver {
 
     /**
@@ -235,7 +238,7 @@ public class ReferenceResolver {
      * @param value the value for evaluation
      * @return True if this value is a '{{reference}}', false otherwise.
      */
-    private static boolean isReference(String value) {
+    private static boolean isReference(@Nullable String value) {
         String trimmedVal = value == null ? null : value.trim();
         // starts with '{{' and contains it only once contains '}}' only once - last char reference is not empty '{{}}'
         return trimmedVal != null && trimmedVal.lastIndexOf("{{") == 0
@@ -248,7 +251,7 @@ public class ReferenceResolver {
      * @param value the value for evaluation
      * @return True if this value is a '...{{reference}}...', false otherwise.
      */
-    private static boolean containsPattern(String value) {
+    private static boolean containsPattern(@Nullable String value) {
         return value != null && value.trim().contains("{{") && value.trim().indexOf("{{") < value.trim().indexOf("}}");
     }
 
@@ -278,7 +281,8 @@ public class ReferenceResolver {
      * @param reference the reference that should be split
      * @return array of the tokens in the reference
      */
-    public static String[] splitReferenceToTokens(String reference) throws IllegalArgumentException {
+    public static @Nullable String @Nullable [] splitReferenceToTokens(@Nullable String reference)
+            throws IllegalArgumentException {
         if (reference == null) {
             return null;
         }
@@ -327,7 +331,7 @@ public class ReferenceResolver {
      * @throws NumberFormatException if one of the tokens is accessing a list and the token that represent the
      *             index can't be converted to integer.
      */
-    public static Object resolveComplexDataReference(Object object, String... tokens)
+    public static Object resolveComplexDataReference(@Nullable Object object, String @Nullable... tokens)
             throws IllegalArgumentException, SecurityException {
         if (object == null) {
             throw new IllegalArgumentException("Object is null.");
@@ -354,7 +358,7 @@ public class ReferenceResolver {
         }
     }
 
-    private static Object getValueFromMap(Map<?, ?> map, String key) {
+    private static @Nullable Object getValueFromMap(Map<?, ?> map, String key) {
         return map.get(key);
     }
 
@@ -362,7 +366,7 @@ public class ReferenceResolver {
         return list.get(index);
     }
 
-    private static Object getValueFromBean(Class<?> objClass, Object bean, String fieldName)
+    private static @Nullable Object getValueFromBean(Class<?> objClass, Object bean, String fieldName)
             throws NoSuchFieldException, SecurityException {
         try {
             Field f = objClass.getDeclaredField(fieldName);

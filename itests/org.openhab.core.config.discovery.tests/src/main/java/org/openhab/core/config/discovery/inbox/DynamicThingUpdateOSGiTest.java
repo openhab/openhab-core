@@ -128,7 +128,7 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
         final String cfgIpAddressValue = "127.0.0.1";
 
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_ID).build();
-        thing.getConfiguration().put(cfgIpAddressKey, null);
+        thing.getConfiguration().put(cfgIpAddressKey, "");
         managedThingProvider.add(thing);
         waitForAssert(() -> {
             assertNotNull(callback);

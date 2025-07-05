@@ -12,6 +12,7 @@
  */
 package org.openhab.core.common;
 
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -24,6 +25,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +61,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
 
     private final Logger logger = LoggerFactory.getLogger(QueueingThreadPoolExecutor.class);
@@ -69,7 +73,7 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
     private final BlockingQueue<Runnable> taskQueue = new LinkedTransferQueue<>();
 
     /** The thread for processing the queued tasks */
-    private volatile Thread queueThread;
+    private volatile @Nullable Thread queueThread;
     private final ReadWriteLock queueThreadLock = new ReentrantReadWriteLock(true);
 
     private final Object semaphore = new Object();
@@ -79,12 +83,12 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
     /**
      * Allows to subclass QueueingThreadPoolExecutor.
      */
-    protected QueueingThreadPoolExecutor(String name, int threadPoolSize) {
+    protected QueueingThreadPoolExecutor(@Nullable String name, int threadPoolSize) {
         this(name, new CommonThreadFactory(name), threadPoolSize,
                 new QueueingThreadPoolExecutor.QueueingRejectionHandler());
     }
 
-    private QueueingThreadPoolExecutor(String threadPoolName, ThreadFactory threadFactory, int threadPoolSize,
+    private QueueingThreadPoolExecutor(@Nullable String threadPoolName, ThreadFactory threadFactory, int threadPoolSize,
             RejectedExecutionHandler rejectionHandler) {
         super(CORE_THREAD_POOL_SIZE, threadPoolSize, 10L, TimeUnit.SECONDS, new SynchronousQueue<>(), threadFactory,
                 rejectionHandler);
@@ -104,7 +108,7 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
      * @param threadPoolSize the maximum size of the pool
      * @return the {@link QueueingThreadPoolExecutor} instance
      */
-    public static QueueingThreadPoolExecutor createInstance(String name, int threadPoolSize) {
+    public static QueueingThreadPoolExecutor createInstance(@Nullable String name, int threadPoolSize) {
         return new QueueingThreadPoolExecutor(name, threadPoolSize);
     }
 
@@ -139,7 +143,7 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
     }
 
     @Override
-    protected void afterExecute(Runnable r, Throwable t) {
+    protected void afterExecute(@Nullable Runnable r, @Nullable Throwable t) {
         super.afterExecute(r, t);
         synchronized (semaphore) {
             semaphore.notify();
@@ -152,11 +156,12 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
      * @throws UnsupportedOperationException if called.
      */
     @Override
-    public void setRejectedExecutionHandler(RejectedExecutionHandler handler) {
+    public void setRejectedExecutionHandler(@Nullable RejectedExecutionHandler handler) {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    @NonNullByDefault({})
     public BlockingQueue<Runnable> getQueue() {
         return taskQueue;
     }
@@ -230,17 +235,17 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
      */
     private static class CommonThreadFactory implements ThreadFactory {
 
-        protected final ThreadGroup group;
+        protected final @Nullable ThreadGroup group;
         protected final AtomicInteger threadNumber = new AtomicInteger(1);
-        protected final String name;
+        protected final @Nullable String name;
 
-        public CommonThreadFactory(String name) {
+        public CommonThreadFactory(@Nullable String name) {
             this.name = name;
             group = Thread.currentThread().getThreadGroup();
         }
 
         @Override
-        public Thread newThread(Runnable r) {
+        public @Nullable Thread newThread(@Nullable Runnable r) {
             String namePrefix = "OH-" + name + "-";
             Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
             if (t.isDaemon()) {
@@ -261,10 +266,10 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
     private static class QueueingRejectionHandler extends ThreadPoolExecutor.DiscardPolicy {
 
         @Override
-        public void rejectedExecution(Runnable runnable, ThreadPoolExecutor threadPoolExecutor) {
+        public void rejectedExecution(@Nullable Runnable runnable, @Nullable ThreadPoolExecutor threadPoolExecutor) {
             if (!threadPoolExecutor.isShutdown()) {
                 QueueingThreadPoolExecutor queueingThreadPoolExecutor = (QueueingThreadPoolExecutor) threadPoolExecutor;
-                queueingThreadPoolExecutor.addToQueue(runnable);
+                queueingThreadPoolExecutor.addToQueue(Objects.requireNonNull(runnable));
             }
         }
     }

@@ -16,18 +16,22 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Expression that decorates the resulting (proxied) AST node of a given expression by a name, value and tag.
  * This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public final class ExpressionLet extends Expression {
 
     private Expression subExpression;
-    private String name;
-    private Object value;
-    private Object tag;
+    private @Nullable String name;
+    private @Nullable Object value;
+    private @Nullable Object tag;
 
     /**
      * Constructs a new instance.
@@ -45,7 +49,7 @@ public final class ExpressionLet extends Expression {
      * @param subExpression the expression who's resulting node should be altered
      * @param value the value that should be set on the node. Null, if the node's value should not be changed.
      */
-    public ExpressionLet(Expression subExpression, Object value) {
+    public ExpressionLet(Expression subExpression, @Nullable Object value) {
         this(null, subExpression, value, null);
     }
 
@@ -57,7 +61,8 @@ public final class ExpressionLet extends Expression {
      * @param value the value that should be set on the node. Null, if the node's value should not be changed.
      * @param tag the tag that should be set on the node. Null, if the node's tag should not be changed.
      */
-    public ExpressionLet(String name, Expression subExpression, Object value, Object tag) {
+    public ExpressionLet(@Nullable String name, Expression subExpression, @Nullable Object value,
+            @Nullable Object tag) {
         if (name != null) {
             this.name = name;
         }
@@ -110,21 +115,21 @@ public final class ExpressionLet extends Expression {
     /**
      * @return the name
      */
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
     /**
      * @return the value
      */
-    public Object getValue() {
+    public @Nullable Object getValue() {
         return value;
     }
 
     /**
      * @return the tag
      */
-    public Object getTag() {
+    public @Nullable Object getTag() {
         return tag;
     }
 }

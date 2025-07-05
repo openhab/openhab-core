@@ -22,11 +22,15 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Implementation of {@link ScheduledExecutorService} which simply delegates to the instance supplied.
  *
  * @author Jonathan Gilbert - initial contribution
  */
+@NonNullByDefault
 public class DelegatingScheduledExecutorService implements ScheduledExecutorService {
     private ScheduledExecutorService delegate;
 
@@ -35,22 +39,25 @@ public class DelegatingScheduledExecutorService implements ScheduledExecutorServ
     }
 
     @Override
-    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+    public ScheduledFuture<?> schedule(@Nullable Runnable command, long delay, @Nullable TimeUnit unit) {
         return delegate.schedule(command, delay, unit);
     }
 
     @Override
+    @NonNullByDefault({})
     public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
         return delegate.schedule(callable, delay, unit);
     }
 
     @Override
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+    public ScheduledFuture<?> scheduleAtFixedRate(@Nullable Runnable command, long initialDelay, long period,
+            @Nullable TimeUnit unit) {
         return delegate.scheduleAtFixedRate(command, initialDelay, period, unit);
     }
 
     @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+    public ScheduledFuture<?> scheduleWithFixedDelay(@Nullable Runnable command, long initialDelay, long delay,
+            @Nullable TimeUnit unit) {
         return delegate.scheduleWithFixedDelay(command, initialDelay, delay, unit);
     }
 
@@ -60,6 +67,7 @@ public class DelegatingScheduledExecutorService implements ScheduledExecutorServ
     }
 
     @Override
+    @NonNullByDefault({})
     public List<Runnable> shutdownNow() {
         return delegate.shutdownNow();
     }
@@ -75,42 +83,48 @@ public class DelegatingScheduledExecutorService implements ScheduledExecutorServ
     }
 
     @Override
-    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+    public boolean awaitTermination(long timeout, @Nullable TimeUnit unit) throws InterruptedException {
         return delegate.awaitTermination(timeout, unit);
     }
 
     @Override
+    @NonNullByDefault({})
     public <T> Future<T> submit(Callable<T> task) {
         return delegate.submit(task);
     }
 
     @Override
+    @NonNullByDefault({})
     public <T> Future<T> submit(Runnable task, T result) {
         return delegate.submit(task, result);
     }
 
     @Override
-    public Future<?> submit(Runnable task) {
+    public @Nullable Future<?> submit(@Nullable Runnable task) {
         return delegate.submit(task);
     }
 
     @Override
+    @NonNullByDefault({})
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
         return delegate.invokeAll(tasks);
     }
 
     @Override
+    @NonNullByDefault({})
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
             throws InterruptedException {
         return delegate.invokeAll(tasks, timeout, unit);
     }
 
     @Override
+    @NonNullByDefault({})
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
         return delegate.invokeAny(tasks);
     }
 
     @Override
+    @NonNullByDefault({})
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
         return delegate.invokeAny(tasks, timeout, unit);

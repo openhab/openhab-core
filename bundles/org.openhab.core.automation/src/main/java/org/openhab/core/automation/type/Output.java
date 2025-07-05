@@ -12,8 +12,11 @@
  */
 package org.openhab.core.automation.type;
 
+import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
 
@@ -42,19 +45,20 @@ import org.openhab.core.automation.Rule;
  * @author Ana Dimova - Initial contribution
  * @author Vasil Ilchev - Initial contribution
  */
+@NonNullByDefault
 public class Output {
 
     /**
      * is a unique name of the {@code Output} in scope of the {@link Module}.
      */
-    private String name;
+    private @Nullable String name;
 
     /**
      * This field specifies the type of the output data. The value could be any string that makes sense for the user,
      * like a fully qualified name of a Java class, or a general description like "temperature", for example. The type
      * is used to determine which {@link Input} can be connected to this {@link Output}.
      */
-    private String type;
+    private @Nullable String type;
 
     /**
      * This field is associated with the {@code Output}. The tags add additional restrictions to connections between
@@ -64,29 +68,29 @@ public class Output {
      * type. The the output has assign "temperature" and "celsius" tags then the input must have at least one of these
      * output's tags (i.e. "temperature") to connect this input to the selected {@code Output}.
      */
-    private Set<String> tags;
+    private @Nullable Set<String> tags;
 
     /**
      * This field keeps a single word description of the {@code Output}.
      */
-    private String label;
+    private @Nullable String label;
 
     /**
      * This field keeps the user friendly description of the {@code Output}.
      */
-    private String description;
+    private @Nullable String description;
 
     /**
      * The value of this field refers to the data source. It defines what part of complex data should be used as source
      * of this {@code Output}.
      */
-    private String reference;
+    private @Nullable String reference;
 
     /**
      * The string representation of the default value of the {@link Output}. The value of this field is used when there
      * is no runtime value for this {@code Output}. It must be compatible with the type of the {@link Output}.
      */
-    private String defaultValue;
+    private @Nullable String defaultValue;
 
     /**
      * Default constructor for deserialization e.g. by Gson.
@@ -101,7 +105,7 @@ public class Output {
      * @param type the type of the output data.
      * @throws IllegalArgumentException If one of the name or type parameters is null.
      */
-    public Output(String name, String type) {
+    public Output(@Nullable String name, @Nullable String type) {
         this(name, type, null, null, null, null, null);
     }
 
@@ -125,6 +129,7 @@ public class Output {
      *            must be the type of the {@code Output}.
      * @throws IllegalArgumentException If one of the name or type parameters is null.
      */
+    @NonNullByDefault({})
     public Output(String name, String type, String label, String description, Set<String> tags, String reference,
             String defaultValue) {
         if (name == null) {
@@ -149,7 +154,7 @@ public class Output {
      * @return name is a unique identifier of the {@code Output}.
      */
     public String getName() {
-        return name;
+        return Objects.requireNonNull(name);
     }
 
     /**
@@ -159,7 +164,7 @@ public class Output {
      * @return the type of the output data.
      */
     public String getType() {
-        return type;
+        return Objects.requireNonNull(type);
     }
 
     /**
@@ -168,7 +173,7 @@ public class Output {
      *
      * @return label of the Output.
      */
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return label;
     }
 
@@ -177,7 +182,7 @@ public class Output {
      *
      * @return user friendly description of the {@code Output}.
      */
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
@@ -188,7 +193,7 @@ public class Output {
      *
      * @return a reference to data source.
      */
-    public String getReference() {
+    public @Nullable String getReference() {
         return reference;
     }
 
@@ -203,7 +208,7 @@ public class Output {
      *
      * @return the tags, associated with this {@link Input}.
      */
-    public Set<String> getTags() {
+    public @Nullable Set<String> getTags() {
         return tags != null ? tags : Set.of();
     }
 
@@ -213,7 +218,7 @@ public class Output {
      *
      * @return the string representation of the default value of this {@code Output}.
      */
-    public String getDefaultValue() {
+    public @Nullable String getDefaultValue() {
         return defaultValue;
     }
 

@@ -15,6 +15,9 @@ package org.openhab.core.io.http;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Handler which is responsible for processing request and response.
  *
@@ -27,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public interface Handler {
 
     /**
@@ -49,7 +53,8 @@ public interface Handler {
      *             will be then asked to handle error via
      *             {@link #handleError(HttpServletRequest, HttpServletResponse, HandlerContext)} method.
      */
-    void handle(HttpServletRequest request, HttpServletResponse response, HandlerContext context) throws Exception;
+    void handle(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response, HandlerContext context)
+            throws Exception;
 
     /**
      * Method which is called only if any of {@link #handle(HttpServletRequest, HttpServletResponse, HandlerContext)}
@@ -62,5 +67,6 @@ public interface Handler {
      * @param response Http response.
      * @param context Handler execution context.
      */
-    void handleError(HttpServletRequest request, HttpServletResponse response, HandlerContext context);
+    void handleError(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response,
+            HandlerContext context);
 }

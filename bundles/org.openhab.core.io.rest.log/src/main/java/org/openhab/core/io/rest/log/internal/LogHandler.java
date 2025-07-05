@@ -93,7 +93,7 @@ public class LogHandler implements RESTResource {
     @Path("/levels")
     @Operation(operationId = "getLogLevels", summary = "Get log severities, which are logged by the current logger settings.", responses = {
             @ApiResponse(responseCode = "200", description = "This depends on the current log settings at the backend.") })
-    public Response getLogLevels() {
+    public @Nullable Response getLogLevels() {
         return Response.ok(createLogLevelsMap()).build();
     }
 
@@ -101,7 +101,7 @@ public class LogHandler implements RESTResource {
     @Operation(operationId = "getLastLogMessagesForFrontend", summary = "Returns the last logged frontend messages. The amount is limited to the "
             + LogConstants.LOG_BUFFER_LIMIT + " last entries.")
 
-    public Response getLastLogs(@DefaultValue(LogConstants.LOG_BUFFER_LIMIT
+    public @Nullable Response getLastLogs(@DefaultValue(LogConstants.LOG_BUFFER_LIMIT
             + "") @QueryParam("limit") @Parameter(name = "limit", schema = @Schema(implementation = Integer.class, minimum = "1", maximum = ""
                     + LogConstants.LOG_BUFFER_LIMIT)) @Nullable Integer limit) {
         if (logBuffer.isEmpty()) {
@@ -133,7 +133,7 @@ public class LogHandler implements RESTResource {
     @Operation(operationId = "logMessageToBackend", summary = "Log a frontend log message to the backend.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "403", description = LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED) })
-    public Response log(
+    public @Nullable Response log(
             final @Parameter(name = "logMessage", description = "Severity is required and can be one of error, warn, info or debug, depending on activated severities which you can GET at /logLevels.", example = "{\"severity\": \"error\", \"url\": \"http://example.org\", \"message\": \"Error message\"}") @Nullable LogMessage logMessage) {
         if (logMessage == null) {
             logger.debug("Received null log message model!");

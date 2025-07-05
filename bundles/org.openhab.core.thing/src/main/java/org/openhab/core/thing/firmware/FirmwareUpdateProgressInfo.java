@@ -36,9 +36,9 @@ public final class FirmwareUpdateProgressInfo {
 
     private final String firmwareVersion;
 
-    private final ProgressStep progressStep;
+    private final @Nullable ProgressStep progressStep;
 
-    private final Collection<ProgressStep> sequence;
+    private final @Nullable Collection<ProgressStep> sequence;
 
     private final boolean pending;
 
@@ -58,8 +58,8 @@ public final class FirmwareUpdateProgressInfo {
         progress = null;
     }
 
-    private FirmwareUpdateProgressInfo(ThingUID thingUID, String firmwareVersion, ProgressStep progressStep,
-            Collection<ProgressStep> sequence, boolean pending, int progress) {
+    private FirmwareUpdateProgressInfo(ThingUID thingUID, String firmwareVersion, @Nullable ProgressStep progressStep,
+            @Nullable Collection<ProgressStep> sequence, boolean pending, int progress) {
         Objects.requireNonNull(thingUID, "ThingUID must not be null.");
         Objects.requireNonNull(firmwareVersion, "Firmware version must not be null.");
 
@@ -89,12 +89,13 @@ public final class FirmwareUpdateProgressInfo {
      * @throws IllegalArgumentException if sequence is null or empty or progress is not between 0 and 100
      */
     public static FirmwareUpdateProgressInfo createFirmwareUpdateProgressInfo(ThingUID thingUID, String firmwareVersion,
-            ProgressStep progressStep, Collection<ProgressStep> sequence, boolean pending, int progress) {
+            @Nullable ProgressStep progressStep, @Nullable Collection<ProgressStep> sequence, boolean pending,
+            int progress) {
         return new FirmwareUpdateProgressInfo(thingUID, firmwareVersion, progressStep, sequence, pending, progress);
     }
 
-    private FirmwareUpdateProgressInfo(ThingUID thingUID, String firmwareVersion, ProgressStep progressStep,
-            Collection<ProgressStep> sequence, boolean pending) {
+    private FirmwareUpdateProgressInfo(ThingUID thingUID, String firmwareVersion, @Nullable ProgressStep progressStep,
+            @Nullable Collection<ProgressStep> sequence, boolean pending) {
         Objects.requireNonNull(thingUID, "ThingUID must not be null.");
         Objects.requireNonNull(firmwareVersion, "Firmware version must not be null.");
 
@@ -124,8 +125,8 @@ public final class FirmwareUpdateProgressInfo {
      * @throws IllegalArgumentException if sequence is null or empty
      */
     public static FirmwareUpdateProgressInfo createFirmwareUpdateProgressInfo(ThingUID thingUID,
-            ThingTypeUID thingTypeUID, String firmwareVersion, ProgressStep progressStep,
-            Collection<ProgressStep> sequence, boolean pending) {
+            ThingTypeUID thingTypeUID, String firmwareVersion, @Nullable ProgressStep progressStep,
+            @Nullable Collection<ProgressStep> sequence, boolean pending) {
         return new FirmwareUpdateProgressInfo(thingUID, firmwareVersion, progressStep, sequence, pending);
     }
 
@@ -143,7 +144,7 @@ public final class FirmwareUpdateProgressInfo {
      *
      * @return the current progress step (not null)
      */
-    public ProgressStep getProgressStep() {
+    public @Nullable ProgressStep getProgressStep() {
         return progressStep;
     }
 
@@ -152,7 +153,7 @@ public final class FirmwareUpdateProgressInfo {
      *
      * @return the sequence (not null)
      */
-    public Collection<ProgressStep> getSequence() {
+    public @Nullable Collection<ProgressStep> getSequence() {
         return sequence;
     }
 

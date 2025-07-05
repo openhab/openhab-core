@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.http.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.http.HttpContextFactoryService;
 import org.openhab.core.io.http.WrappingHttpContext;
 import org.osgi.framework.Bundle;
@@ -29,21 +31,22 @@ import org.osgi.service.http.HttpService;
  * @author Henning Treu - Initial contribution
  */
 @Component(service = HttpContextFactoryService.class)
+@NonNullByDefault
 public class HttpContextFactoryServiceImpl implements HttpContextFactoryService {
 
-    private WrappingHttpContext httpContext;
+    private @Nullable WrappingHttpContext httpContext;
 
     @Override
-    public HttpContext createDefaultHttpContext(Bundle bundle) {
+    public HttpContext createDefaultHttpContext(@Nullable Bundle bundle) {
         return httpContext.wrap(bundle);
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    public void setHttpContext(WrappingHttpContext httpContext) {
+    public void setHttpContext(@Nullable WrappingHttpContext httpContext) {
         this.httpContext = httpContext;
     }
 
-    public void unsetHttpContext(WrappingHttpContext httpContext) {
+    public void unsetHttpContext(@Nullable WrappingHttpContext httpContext) {
         this.httpContext = null;
     }
 }

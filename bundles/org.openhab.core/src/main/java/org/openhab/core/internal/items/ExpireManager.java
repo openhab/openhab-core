@@ -94,7 +94,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     private @Nullable ScheduledFuture<?> expireJob;
 
     @Activate
-    public ExpireManager(Map<String, @Nullable Object> configuration, final @Reference EventPublisher eventPublisher,
+    public ExpireManager(Map<String, Object> configuration, final @Reference EventPublisher eventPublisher,
             final @Reference MetadataRegistry metadataRegistry, final @Reference ItemRegistry itemRegistry) {
         this.eventPublisher = eventPublisher;
         this.metadataRegistry = metadataRegistry;
@@ -104,7 +104,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     }
 
     @Modified
-    protected void modified(Map<String, @Nullable Object> configuration) {
+    protected void modified(Map<String, Object> configuration) {
         Object valueEnabled = configuration.get(PROPERTY_ENABLED);
         if (valueEnabled != null) {
             enabled = Boolean.parseBoolean(valueEnabled.toString());

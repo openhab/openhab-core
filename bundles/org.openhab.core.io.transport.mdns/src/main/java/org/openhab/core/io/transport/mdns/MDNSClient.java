@@ -20,12 +20,15 @@ import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This interface defines how to get an JmDNS instance
  * to access Bonjour/MDNS
  *
  * @author Tobias Br�utigam - Initial contribution
  */
+@NonNullByDefault
 public interface MDNSClient {
 
     /**

@@ -239,7 +239,9 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             return;
         }
         for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(addon.getType(), addon.getContentType())) {
+            String type = addon.getType();
+            String contentType = addon.getContentType();
+            if (type != null && contentType != null && handler.supports(type, contentType)) {
                 if (!handler.isInstalled(addon.getUid())) {
                     try {
                         handler.install(addon);
@@ -268,7 +270,9 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             return;
         }
         for (MarketplaceAddonHandler handler : addonHandlers) {
-            if (handler.supports(addon.getType(), addon.getContentType())) {
+            String type = addon.getType();
+            String contentType = addon.getContentType();
+            if (type != null && contentType != null && handler.supports(type, contentType)) {
                 if (handler.isInstalled(addon.getUid())) {
                     try {
                         handler.uninstall(addon);

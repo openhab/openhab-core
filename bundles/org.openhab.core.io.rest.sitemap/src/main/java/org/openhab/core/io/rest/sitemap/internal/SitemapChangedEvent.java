@@ -12,11 +12,14 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Event to notify the browser that the sitemap has been changed
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class SitemapChangedEvent extends SitemapEvent {
     public final String TYPE = "SITEMAP_CHANGED";
 }

@@ -168,7 +168,7 @@ public class RuleResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getRules", summary = "Get available rules, optionally filtered by tags and/or prefix.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedRuleDTO.class)))) })
-    public Response get(@Context SecurityContext securityContext, @Context Request request,
+    public @Nullable Response get(@Context SecurityContext securityContext, @Context Request request,
             @QueryParam("prefix") final @Nullable String prefix, @QueryParam("tags") final @Nullable List<String> tags,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary,
             @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and honors the If-Modified-Since header, all other parameters are ignored") boolean staticDataOnly) {
@@ -226,7 +226,8 @@ public class RuleResource implements RESTResource {
             @ApiResponse(responseCode = "201", description = "Created", headers = @Header(name = "Location", description = "Newly created Rule", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "409", description = "Creation of the rule is refused. Rule with the same UID already exists."),
             @ApiResponse(responseCode = "400", description = "Creation of the rule is refused. Missing required parameter.") })
-    public Response create(@Parameter(description = "rule data", required = true) RuleDTO rule) throws IOException {
+    public @Nullable Response create(@Parameter(description = "rule data", required = true) RuleDTO rule)
+            throws IOException {
         try {
             final Rule newRule = ruleRegistry.add(RuleDTOMapper.map(rule));
             return Response.status(Status.CREATED)
@@ -256,7 +257,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "getRuleById", summary = "Gets the rule corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedRuleDTO.class))),
             @ApiResponse(responseCode = "404", description = "Rule not found") })
-    public Response getByUID(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
+    public @Nullable Response getByUID(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule != null) {
             return Response.ok(EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider)).build();
@@ -271,7 +272,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "deleteRule", summary = "Removes an existing rule corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
-    public Response remove(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
+    public @Nullable Response remove(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
         Rule removedRule = ruleRegistry.remove(ruleUID);
         if (removedRule == null) {
             logger.info("Received HTTP DELETE request at '{}' for the unknown rule '{}'.", uriInfo.getPath(), ruleUID);
@@ -287,7 +288,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "updateRule", summary = "Updates an existing rule corresponding to the given UID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
-    public Response update(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
+    public @Nullable Response update(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
             @Parameter(description = "rule data", required = true) RuleDTO rule) throws IOException {
         rule.uid = ruleUID;
         final Rule oldRule = ruleRegistry.update(RuleDTOMapper.map(rule));
@@ -306,7 +307,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "getRuleConfiguration", summary = "Gets the rule configuration values.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
-    public Response getConfiguration(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
+    public @Nullable Response getConfiguration(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
             throws IOException {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule == null) {
@@ -324,10 +325,10 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "updateRuleConfiguration", summary = "Sets the rule configuration values.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
-    public Response updateConfiguration(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
-            @Parameter(description = "config") Map<String, @Nullable Object> configurationParameters)
-            throws IOException {
-        Map<String, @Nullable Object> config = ConfigUtil.normalizeTypes(configurationParameters);
+    public @Nullable Response updateConfiguration(
+            @PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
+            @Parameter(description = "config") Map<String, Object> configurationParameters) throws IOException {
+        Map<String, Object> config = ConfigUtil.normalizeTypes(configurationParameters);
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule == null) {
             logger.info("Received HTTP PUT request for update config at '{}' for the unknown rule '{}'.",
@@ -346,7 +347,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "enableRule", summary = "Sets the rule enabled status.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID was not found.") })
-    public Response enableRule(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
+    public @Nullable Response enableRule(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
             @Parameter(description = "enable", required = true) String enabled) throws IOException {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule == null) {
@@ -365,7 +366,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "regenerateRule", summary = "Regenerates the rule from its template.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "A template-based rule with the given UID was not found.") })
-    public Response regenerateRule(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
+    public @Nullable Response regenerateRule(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
             throws IOException {
         try {
             ruleRegistry.regenerateFromTemplate(ruleUID);
@@ -385,7 +386,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "runRuleNow", summary = "Executes actions of the rule.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID was not found.") })
-    public Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
+    public @Nullable Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
             @Nullable @Parameter(description = "the context for running this rule", allowEmptyValue = true) Map<String, Object> context)
             throws IOException {
         Rule rule = ruleRegistry.get(ruleUID);
@@ -413,7 +414,7 @@ public class RuleResource implements RESTResource {
     @Operation(deprecated = true, operationId = "runRuleNow", summary = "Executes actions of the rule.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
-    public Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
+    public @Nullable Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
             throws IOException {
         return runNow(ruleUID, null);
     }
@@ -424,7 +425,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "getRuleTriggers", summary = "Gets the rule triggers.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TriggerDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
-    public Response getTriggers(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
+    public @Nullable Response getTriggers(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule != null) {
             return Response.ok(TriggerDTOMapper.map(rule.getTriggers())).build();
@@ -439,7 +440,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "getScheduleRuleSimulations", summary = "Simulates the executions of rules filtered by tag 'Schedule' within the given times.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RuleExecution.class)))),
             @ApiResponse(responseCode = "400", description = "The max. simulation duration of 180 days is exceeded.") })
-    public Response simulateRules(
+    public @Nullable Response simulateRules(
             @Parameter(description = "Start time of the simulated rule executions. Will default to the current time. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]") @QueryParam("from") @Nullable String from,
             @Parameter(description = "End time of the simulated rule executions. Will default to 30 days after the start time. Must be less than 180 days after the given start time. ["
@@ -470,7 +471,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "getRuleConditions", summary = "Gets the rule conditions.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConditionDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
-    public Response getConditions(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
+    public @Nullable Response getConditions(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule != null) {
             return Response.ok(ConditionDTOMapper.map(rule.getConditions())).build();
@@ -485,7 +486,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "getRuleActions", summary = "Gets the rule actions.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ActionDTO.class)))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
-    public Response getActions(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
+    public @Nullable Response getActions(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID) {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule != null) {
             return Response.ok(ActionDTOMapper.map(rule.getActions())).build();
@@ -500,7 +501,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "getRuleModuleById", summary = "Gets the rule's module corresponding to the given Category and ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ModuleDTO.class))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found or does not have a module with such Category and ID.") })
-    public Response getModuleById(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
+    public @Nullable Response getModuleById(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
             @PathParam("moduleCategory") @Parameter(description = "moduleCategory") String moduleCategory,
             @PathParam("id") @Parameter(description = "id") String id) {
         Rule rule = ruleRegistry.get(ruleUID);
@@ -519,7 +520,7 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "getRuleModuleConfig", summary = "Gets the module's configuration.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found or does not have a module with such Category and ID.") })
-    public Response getModuleConfig(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
+    public @Nullable Response getModuleConfig(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
             @PathParam("moduleCategory") @Parameter(description = "moduleCategory") String moduleCategory,
             @PathParam("id") @Parameter(description = "id") String id) {
         Rule rule = ruleRegistry.get(ruleUID);
@@ -538,7 +539,8 @@ public class RuleResource implements RESTResource {
     @Operation(operationId = "getRuleModuleConfigParameter", summary = "Gets the module's configuration parameter.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found or does not have a module with such Category and ID.") })
-    public Response getModuleConfigParam(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
+    public @Nullable Response getModuleConfigParam(
+            @PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
             @PathParam("moduleCategory") @Parameter(description = "moduleCategory") String moduleCategory,
             @PathParam("id") @Parameter(description = "id") String id,
             @PathParam("param") @Parameter(description = "param") String param) {
@@ -558,7 +560,8 @@ public class RuleResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found or does not have a module with such Category and ID.") })
     @Consumes(MediaType.TEXT_PLAIN)
-    public Response setModuleConfigParam(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
+    public @Nullable Response setModuleConfigParam(
+            @PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
             @PathParam("moduleCategory") @Parameter(description = "moduleCategory") String moduleCategory,
             @PathParam("id") @Parameter(description = "id") String id,
             @PathParam("param") @Parameter(description = "param") String param,

@@ -101,13 +101,13 @@ public class ModuleTypeI18nUtil {
     }
 
     private @Nullable String getOutputLabel(Bundle bundle, String ruleTemplateUID, String outputName,
-            String defaultLabel, @Nullable Locale locale) {
+            @Nullable String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferOutputKey(ruleTemplateUID, outputName, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
     private @Nullable String getOutputDescription(Bundle bundle, String moduleTypeUID, String outputName,
-            String defaultDescription, @Nullable Locale locale) {
+            @Nullable String defaultDescription, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription,
                 () -> inferOutputKey(moduleTypeUID, outputName, "description"));
         return i18nProvider.getText(bundle, key, defaultDescription, locale);

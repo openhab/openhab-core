@@ -17,6 +17,8 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.io.http.Handler;
 import org.openhab.core.io.http.HandlerContext;
@@ -29,6 +31,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Łukasz Dywicki - Initial contribution.
  */
 @Component
+@NonNullByDefault
 public class RedirectHandler implements Handler {
 
     @Override
@@ -37,15 +40,16 @@ public class RedirectHandler implements Handler {
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, HandlerContext context) {
-        Optional<Authentication> authhentication = Optional
+    public void handle(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response,
+            @Nullable HandlerContext context) {
+        Optional<Authentication> authentication = Optional
                 .ofNullable(request.getAttribute(Authentication.class.getName()))
                 .filter(Authentication.class::isInstance).map(Authentication.class::cast);
 
         Optional<String> redirect = Optional
                 .ofNullable(request.getParameter(AuthenticationHandler.REDIRECT_PARAM_NAME));
 
-        if (authhentication.isPresent() && redirect.isPresent()) {
+        if (authentication.isPresent() && redirect.isPresent()) {
             response.setHeader("Location", redirect.get());
         }
 
@@ -53,7 +57,8 @@ public class RedirectHandler implements Handler {
     }
 
     @Override
-    public void handleError(HttpServletRequest request, HttpServletResponse response, HandlerContext context) {
+    public void handleError(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response,
+            @Nullable HandlerContext context) {
         context.execute(request, response);
     }
 }

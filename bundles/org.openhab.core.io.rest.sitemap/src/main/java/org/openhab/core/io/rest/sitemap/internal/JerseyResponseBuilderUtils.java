@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.sitemap.internal.JerseyResponseBuilderUtils.JerseyResponseBuilderDTO.ContextDTO;
 import org.openhab.core.io.rest.sitemap.internal.JerseyResponseBuilderUtils.JerseyResponseBuilderDTO.ContextDTO.StreamInfoDTO;
 import org.osgi.dto.DTO;
@@ -30,6 +31,7 @@ import org.osgi.dto.DTO;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault({}) // DTOs not to be checked
 public class JerseyResponseBuilderUtils extends DTO {
 
     public static class JerseyResponseBuilderDTO extends DTO {

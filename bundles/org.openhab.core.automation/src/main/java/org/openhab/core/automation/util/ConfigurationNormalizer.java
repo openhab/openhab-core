@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.internal.ModuleImpl;
@@ -33,6 +34,7 @@ import org.openhab.core.config.core.Configuration;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class ConfigurationNormalizer {
 
     /**

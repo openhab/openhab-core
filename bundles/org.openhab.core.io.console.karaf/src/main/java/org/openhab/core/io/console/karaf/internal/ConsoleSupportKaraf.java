@@ -20,6 +20,8 @@ import java.util.Map;
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.SessionFactory;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -34,11 +36,12 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - Initial contribution
  */
 @Component(immediate = true)
+@NonNullByDefault
 public class ConsoleSupportKaraf {
 
     private final Logger logger = LoggerFactory.getLogger(ConsoleSupportKaraf.class);
 
-    private SessionFactory sessionFactory;
+    private @Nullable SessionFactory sessionFactory;
 
     // This collection contains all available / known commands.
     private final Collection<ConsoleCommandExtension> commands = new HashSet<>();
@@ -46,7 +49,7 @@ public class ConsoleSupportKaraf {
     // This map contains all registered commands.
     private final Map<ConsoleCommandExtension, CommandWrapper> registeredCommands = new HashMap<>();
 
-    private Manager manager;
+    private @Nullable Manager manager;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     public void setSessionFactory(SessionFactory sessionFactory) {

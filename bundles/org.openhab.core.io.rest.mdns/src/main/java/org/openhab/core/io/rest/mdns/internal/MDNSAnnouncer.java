@@ -14,7 +14,10 @@ package org.openhab.core.io.rest.mdns.internal;
 
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.transport.mdns.MDNSService;
 import org.openhab.core.io.transport.mdns.ServiceDescription;
@@ -34,6 +37,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Use HTTP service utility functions
  */
+@NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.mdns", property = {
         Constants.SERVICE_PID + "=org.openhab.mdns" //
 })
@@ -43,9 +47,9 @@ public class MDNSAnnouncer {
 
     private int httpPort;
 
-    private String mdnsName;
+    private @Nullable String mdnsName;
 
-    private MDNSService mdnsService;
+    private @Nullable MDNSService mdnsService;
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
     public void setMDNSService(MDNSService mdnsService) {
@@ -91,6 +95,7 @@ public class MDNSAnnouncer {
     }
 
     private ServiceDescription getDefaultServiceDescription() {
+        Objects.requireNonNull(mdnsName);
         Hashtable<String, String> serviceProperties = new Hashtable<>();
         serviceProperties.put("uri", RESTConstants.REST_URI);
         return new ServiceDescription("_" + mdnsName + "-server._tcp.local.", mdnsName, httpPort, serviceProperties);

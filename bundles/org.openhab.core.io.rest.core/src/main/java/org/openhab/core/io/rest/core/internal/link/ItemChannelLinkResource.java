@@ -129,7 +129,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getItemLinks", summary = "Gets all available links.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedItemChannelLinkDTO.class)))) })
-    public Response getAll(
+    public @Nullable Response getAll(
             @QueryParam("channelUID") @Parameter(description = "filter by channel UID") @Nullable String channelUID,
             @QueryParam("itemName") @Parameter(description = "filter by item name") @Nullable String itemName) {
         Stream<EnrichedItemChannelLinkDTO> linkStream = itemChannelLinkRegistry.stream()
@@ -152,7 +152,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @Operation(operationId = "removeAllLinksForObject", summary = "Delete all links that refer to an item or thing.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK") })
-    public Response removeAllLinksForObject(
+    public @Nullable Response removeAllLinksForObject(
             @PathParam("object") @Parameter(description = "item name or thing UID") String object) {
         int removedLinks;
         try {
@@ -170,7 +170,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @Operation(operationId = "getItemLink", summary = "Retrieves an individual link.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemChannelLinkDTO.class))),
             @ApiResponse(responseCode = "404", description = "Content does not match the path") })
-    public Response getLink(@PathParam("itemName") @Parameter(description = "item name") String itemName,
+    public @Nullable Response getLink(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("channelUID") @Parameter(description = "channel UID") String channelUid) {
         List<EnrichedItemChannelLinkDTO> links = itemChannelLinkRegistry.stream()
                 .filter(link -> channelUid.equals(link.getLinkedUID().getAsString()))
@@ -194,7 +194,7 @@ public class ItemChannelLinkResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "400", description = "Content does not match the path"),
                     @ApiResponse(responseCode = "405", description = "Link is not editable") })
-    public Response link(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
+    public @Nullable Response link(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
             @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid,
             @Parameter(description = "link data") @Nullable ItemChannelLinkDTO bean) {
         Item item;
@@ -275,7 +275,7 @@ public class ItemChannelLinkResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Link not found."),
                     @ApiResponse(responseCode = "405", description = "Link not editable.") })
-    public Response unlink(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
+    public @Nullable Response unlink(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
             @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid) {
         ChannelUID uid;
         try {
@@ -301,7 +301,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @Operation(operationId = "purgeDatabase", summary = "Remove unused/orphaned links.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK") })
-    public Response purge() {
+    public @Nullable Response purge() {
         itemChannelLinkRegistry.purge();
         return Response.ok().build();
     }
@@ -322,7 +322,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @Path("/orphans")
     @Operation(operationId = "getOrphanLinks", summary = "Get orphan links between items and broken/non-existent thing channels", responses = {
             @ApiResponse(responseCode = "200", description = "List of broken links") })
-    public Response getOrphanLinks() {
+    public @Nullable Response getOrphanLinks() {
         Map<ItemChannelLink, ItemChannelLinkProblem> orphanLinks = itemChannelLinkRegistry.getOrphanLinks();
         List<BrokenItemChannelLinkDTO> brokenLinks = orphanLinks.entrySet().stream()
                 .map(e -> new BrokenItemChannelLinkDTO(EnrichedItemChannelLinkDTOMapper.map(e.getKey(),

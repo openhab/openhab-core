@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serial;
 import java.net.URI;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -24,6 +25,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
@@ -40,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Svilen Valkanov - Replaced Apache HttpClient with Jetty
  * @author John Cocula - refactored to support alternate implementation
  */
+@NonNullByDefault
 public class BlockingProxyServlet extends HttpServlet {
 
     private final Logger logger = LoggerFactory.getLogger(BlockingProxyServlet.class);
@@ -66,13 +70,16 @@ public class BlockingProxyServlet extends HttpServlet {
     }
 
     @Override
-    public String getServletInfo() {
+    public @Nullable String getServletInfo() {
         return "Proxy (blocking)";
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response)
             throws ServletException, IOException {
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(response);
+
         URI uri = service.uriFromRequest(request);
 
         if (uri == null) {

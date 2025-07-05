@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.dto.ChannelDTO;
@@ -30,6 +32,7 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public class EnrichedThingDTOMapper extends ThingDTOMapper {
 
     /**
@@ -42,8 +45,9 @@ public class EnrichedThingDTOMapper extends ThingDTOMapper {
      * @param editable true if this thing can be edited
      * @return the enriched thing DTO object
      */
-    public static EnrichedThingDTO map(Thing thing, ThingStatusInfo thingStatusInfo, FirmwareStatusDTO firmwareStatus,
-            Map<String, Set<String>> linkedItemsMap, boolean editable) {
+    public static EnrichedThingDTO map(Thing thing, ThingStatusInfo thingStatusInfo,
+            @Nullable FirmwareStatusDTO firmwareStatus, @Nullable Map<String, Set<String>> linkedItemsMap,
+            boolean editable) {
         ThingDTO thingDTO = ThingDTOMapper.map(thing);
 
         List<EnrichedChannelDTO> channels = new ArrayList<>();

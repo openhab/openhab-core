@@ -17,11 +17,14 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Expression that successfully parses, if one of the given alternative expressions matches. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 final class ExpressionAlternatives extends Expression {
 
     private List<Expression> subExpressions;

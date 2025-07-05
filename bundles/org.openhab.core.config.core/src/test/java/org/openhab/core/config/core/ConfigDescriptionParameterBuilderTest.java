@@ -167,21 +167,9 @@ public class ConfigDescriptionParameterBuilderTest {
     }
 
     @Test
-    public void assertThatNameMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> ConfigDescriptionParameterBuilder.create(null, Type.BOOLEAN).build());
-    }
-
-    @Test
     public void assertThatNameMustNotBeEmpty() {
         assertThrows(IllegalArgumentException.class,
                 () -> ConfigDescriptionParameterBuilder.create("", Type.BOOLEAN).build());
-    }
-
-    @Test
-    public void assertThatTypeMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> ConfigDescriptionParameterBuilder.create("Dummy", null).build());
     }
 
     @Test

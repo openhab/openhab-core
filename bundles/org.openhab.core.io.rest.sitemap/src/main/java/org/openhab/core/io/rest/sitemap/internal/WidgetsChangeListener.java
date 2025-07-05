@@ -22,7 +22,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
@@ -58,17 +60,17 @@ import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
  * @author Laurent Garnier - New widget icon parameter based on conditional rules
  * @author Laurent Garnier - Buttongrid as container for Button elements
  */
+@NonNullByDefault
 public class WidgetsChangeListener implements EventSubscriber {
 
     private static final int REVERT_INTERVAL = 300;
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private final String sitemapName;
-    private final String pageId;
+    private final @Nullable String pageId;
     private final ItemUIRegistry itemUIRegistry;
     private final TimeZoneProvider timeZoneProvider;
-    private EList<Widget> widgets;
-    private Set<Item> items;
+    private EList<Widget> widgets = new BasicEList<>();
     private final HashSet<String> filterItems = new HashSet<>();
     private final List<SitemapSubscriptionCallback> callbacks = Collections.synchronizedList(new ArrayList<>());
     private Set<SitemapSubscriptionCallback> distinctCallbacks = Set.of();
@@ -81,7 +83,7 @@ public class WidgetsChangeListener implements EventSubscriber {
      * @param itemUIRegistry the ItemUIRegistry which is needed for the functionality
      * @param widgets the list of widgets that are part of the page.
      */
-    public WidgetsChangeListener(String sitemapName, String pageId, final ItemUIRegistry itemUIRegistry,
+    public WidgetsChangeListener(String sitemapName, @Nullable String pageId, final ItemUIRegistry itemUIRegistry,
             final TimeZoneProvider timeZoneProvider, EList<Widget> widgets) {
         this.sitemapName = sitemapName;
         this.pageId = pageId;
@@ -93,7 +95,7 @@ public class WidgetsChangeListener implements EventSubscriber {
 
     private void updateItemsAndWidgets(EList<Widget> widgets) {
         this.widgets = widgets;
-        items = getAllItems(widgets);
+        Set<Item> items = getAllItems(widgets);
         filterItems.clear();
         filterItems.addAll(items.stream().map(Item::getName).collect(Collectors.toSet()));
     }
@@ -102,7 +104,7 @@ public class WidgetsChangeListener implements EventSubscriber {
         return sitemapName;
     }
 
-    public String getPageId() {
+    public @Nullable String getPageId() {
         return pageId;
     }
 
@@ -199,22 +201,24 @@ public class WidgetsChangeListener implements EventSubscriber {
 
     private Set<SitemapEvent> constructSitemapEvents(Item item, State state, List<Widget> widgets) {
         Set<SitemapEvent> events = new HashSet<>();
-        for (Widget w : widgets) {
-            if (w instanceof Frame frame) {
-                events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren(frame)));
-            } else if (w instanceof Buttongrid grid) {
-                events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren(grid)));
-            }
+        if (widgets != null) {
+            for (Widget w : widgets) {
+                if (w instanceof Frame frame) {
+                    events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren(frame)));
+                } else if (w instanceof Buttongrid grid) {
+                    events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren(grid)));
+                }
 
-            boolean itemBelongsToWidget = w.getItem() != null && w.getItem().equals(item.getName());
-            boolean skipWidget = !itemBelongsToWidget;
-            // We skip the chart widgets having a refresh argument
-            if (!skipWidget && w instanceof Chart chartWidget) {
-                skipWidget = chartWidget.getRefresh() > 0;
-            }
-            if (!skipWidget || definesVisibilityOrColorOrIcon(w, item.getName())) {
-                SitemapWidgetEvent event = constructSitemapEventForWidget(item, state, w);
-                events.add(event);
+                boolean itemBelongsToWidget = w.getItem() != null && w.getItem().equals(item.getName());
+                boolean skipWidget = !itemBelongsToWidget;
+                // We skip the chart widgets having a refresh argument
+                if (!skipWidget && w instanceof Chart chartWidget) {
+                    skipWidget = chartWidget.getRefresh() > 0;
+                }
+                if (!skipWidget || definesVisibilityOrColorOrIcon(w, item.getName())) {
+                    SitemapWidgetEvent event = constructSitemapEventForWidget(item, state, w);
+                    events.add(event);
+                }
             }
         }
         return events;
@@ -268,7 +272,7 @@ public class WidgetsChangeListener implements EventSubscriber {
         return event;
     }
 
-    private Item getItemForWidget(Widget w) {
+    private @Nullable Item getItemForWidget(Widget w) {
         final String itemName = w.getItem();
         if (itemName != null) {
             try {
@@ -313,18 +317,20 @@ public class WidgetsChangeListener implements EventSubscriber {
     }
 
     public void descriptionChanged(String itemName) {
-        try {
-            Item item = itemUIRegistry.getItem(itemName);
+        if (widgets != null) {
+            try {
+                Item item = itemUIRegistry.getItem(itemName);
 
-            Set<SitemapEvent> events = constructSitemapEventsForUpdatedDescr(item, widgets);
+                Set<SitemapEvent> events = constructSitemapEventsForUpdatedDescr(item, widgets);
 
-            for (SitemapEvent event : events) {
-                for (SitemapSubscriptionCallback callback : distinctCallbacks) {
-                    callback.onEvent(event);
+                for (SitemapEvent event : events) {
+                    for (SitemapSubscriptionCallback callback : distinctCallbacks) {
+                        callback.onEvent(event);
+                    }
                 }
+            } catch (ItemNotFoundException e) {
+                // ignore
             }
-        } catch (ItemNotFoundException e) {
-            // ignore
         }
     }
 

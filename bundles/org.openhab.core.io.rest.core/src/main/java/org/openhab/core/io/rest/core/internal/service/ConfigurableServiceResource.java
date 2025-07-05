@@ -142,7 +142,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @Operation(operationId = "getServicesById", summary = "Get configurable service for given service ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigurableServiceDTO.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
-    public Response getById(
+    public @Nullable Response getById(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         Locale locale = localeService.getLocale(language);
@@ -202,7 +202,8 @@ public class ConfigurableServiceResource implements RESTResource {
     @Operation(operationId = "getServiceConfig", summary = "Get service configuration for given service ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Configuration can not be read due to internal error") })
-    public Response getConfiguration(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
+    public @Nullable Response getConfiguration(
+            @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         try {
             Configuration configuration = configurationService.get(serviceId);
             return configuration != null ? Response.ok(configuration.getProperties()).build()
@@ -221,10 +222,10 @@ public class ConfigurableServiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "204", description = "No old configuration"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
-    public Response updateConfiguration(
+    public @Nullable Response updateConfiguration(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @PathParam("serviceId") @Parameter(description = "service ID") String serviceId,
-            @Nullable Map<String, @Nullable Object> configuration) {
+            @Nullable Map<String, Object> configuration) {
         Locale locale = localeService.getLocale(language);
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
@@ -238,8 +239,8 @@ public class ConfigurableServiceResource implements RESTResource {
         }
     }
 
-    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
-            @Nullable Map<String, @Nullable Object> properties, String serviceId, Locale locale) {
+    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
+            String serviceId, Locale locale) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -272,7 +273,7 @@ public class ConfigurableServiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "204", description = "No old configuration"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be deleted due to internal error") })
-    public Response deleteConfiguration(
+    public @Nullable Response deleteConfiguration(
             @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);

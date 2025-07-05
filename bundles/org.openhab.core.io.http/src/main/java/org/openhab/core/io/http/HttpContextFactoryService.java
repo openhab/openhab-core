@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.http;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -22,6 +23,7 @@ import org.osgi.service.http.HttpService;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public interface HttpContextFactoryService {
 
     /**

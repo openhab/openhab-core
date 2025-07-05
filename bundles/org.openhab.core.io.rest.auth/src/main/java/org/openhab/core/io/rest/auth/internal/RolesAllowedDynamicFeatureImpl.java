@@ -31,6 +31,8 @@ import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
@@ -55,11 +57,12 @@ import org.slf4j.LoggerFactory;
 @Component
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@NonNullByDefault
 public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
     private final Logger logger = LoggerFactory.getLogger(RolesAllowedDynamicFeatureImpl.class);
 
     @Override
-    public void configure(ResourceInfo resourceInfo, FeatureContext configuration) {
+    public void configure(@Nullable ResourceInfo resourceInfo, @Nullable FeatureContext configuration) {
         final Method am = resourceInfo.getResourceMethod();
         try {
             // DenyAll on the method take precedence over RolesAllowed and PermitAll
@@ -99,23 +102,27 @@ public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
     private static class RolesAllowedRequestFilter implements ContainerRequestFilter {
 
         private final boolean denyAll;
-        private final String[] rolesAllowed;
+        private final String @Nullable [] rolesAllowed;
 
         RolesAllowedRequestFilter() {
             this.denyAll = true;
             this.rolesAllowed = null;
         }
 
-        RolesAllowedRequestFilter(final String[] rolesAllowed) {
+        RolesAllowedRequestFilter(final String @Nullable [] rolesAllowed) {
             this.denyAll = false;
             this.rolesAllowed = (rolesAllowed != null) ? rolesAllowed : new String[] {};
         }
 
         @Override
-        public void filter(final ContainerRequestContext requestContext) throws IOException {
+        public void filter(final @Nullable ContainerRequestContext requestContext) throws IOException {
             if (!denyAll) {
                 if (rolesAllowed.length == 0) {
                     return;
+                }
+
+                if (requestContext == null) {
+                    throw new IOException("Request context cannot be null");
                 }
 
                 for (final String role : rolesAllowed) {
@@ -123,6 +130,10 @@ public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
                         return;
                     }
                 }
+            }
+
+            if (requestContext == null) {
+                throw new IOException("Request context cannot be null");
             }
 
             if (!isAuthenticated(requestContext)) {

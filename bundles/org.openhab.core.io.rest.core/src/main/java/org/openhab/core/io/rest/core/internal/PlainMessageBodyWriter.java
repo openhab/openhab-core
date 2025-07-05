@@ -23,26 +23,31 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * A message body writer for plain text.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class PlainMessageBodyWriter<T> implements MessageBodyWriter<T> {
 
     @Override
-    public long getSize(final T object, final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType) {
+    public long getSize(final @Nullable T object, final @Nullable Class<?> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType) {
         return -1;
     }
 
     @Override
-    public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType) {
+    public boolean isWriteable(@Nullable final Class<?> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType) {
         return true;
     }
 
     @Override
+    @NonNullByDefault({})
     public void writeTo(final T object, final Class<?> type, final Type genericType, final Annotation[] annotations,
             final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders,
             final OutputStream entityStream) throws IOException, WebApplicationException {

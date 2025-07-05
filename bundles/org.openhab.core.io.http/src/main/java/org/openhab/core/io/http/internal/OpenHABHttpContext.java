@@ -23,6 +23,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.http.Handler;
 import org.openhab.core.io.http.WrappingHttpContext;
 import org.osgi.framework.Bundle;
@@ -44,6 +46,7 @@ import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardContext;
  */
 @Component(service = { HttpContext.class, WrappingHttpContext.class })
 @HttpWhiteboardContext(path = "/", name = "oh-dfl-http-ctx")
+@NonNullByDefault
 public class OpenHABHttpContext implements WrappingHttpContext {
 
     /**
@@ -52,7 +55,8 @@ public class OpenHABHttpContext implements WrappingHttpContext {
     private final List<Handler> handlers = new CopyOnWriteArrayList<>();
 
     @Override
-    public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public boolean handleSecurity(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response)
+            throws IOException {
         Deque<Handler> queue = new ArrayDeque<>(handlers);
         DefaultHandlerContext handlerContext = new DefaultHandlerContext(queue);
         handlerContext.execute(request, response);
@@ -61,17 +65,17 @@ public class OpenHABHttpContext implements WrappingHttpContext {
     }
 
     @Override
-    public URL getResource(String name) {
+    public @Nullable URL getResource(@Nullable String name) {
         return null;
     }
 
     @Override
-    public String getMimeType(String name) {
+    public @Nullable String getMimeType(@Nullable String name) {
         return null;
     }
 
     @Override
-    public HttpContext wrap(Bundle bundle) {
+    public HttpContext wrap(@Nullable Bundle bundle) {
         return new BundleHttpContext(this, bundle);
     }
 

@@ -17,6 +17,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
@@ -34,6 +35,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Markus Rathgeb - Initial contribution
  */
 @Component(service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class SerialCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String CMD_SERIAL = "serial";

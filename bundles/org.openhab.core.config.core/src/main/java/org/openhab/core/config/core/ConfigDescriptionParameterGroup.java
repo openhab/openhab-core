@@ -87,8 +87,7 @@ public class ConfigDescriptionParameterGroup {
      *
      * @return group label as a string
      */
-    @Nullable
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return label;
     }
 
@@ -97,8 +96,7 @@ public class ConfigDescriptionParameterGroup {
      *
      * @return group description as a string
      */
-    @Nullable
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 

@@ -161,7 +161,7 @@ public class PersistenceResource implements RESTResource {
     @Operation(operationId = "getPersistenceServices", summary = "Gets a list of persistence services.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceServiceDTO.class)))) })
-    public Response httpGetPersistenceServices(@Context HttpHeaders headers,
+    public @Nullable Response httpGetPersistenceServices(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
 
@@ -177,7 +177,7 @@ public class PersistenceResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PersistenceServiceConfigurationDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Service configuration not found.") })
-    public Response httpGetPersistenceServiceConfiguration(@Context HttpHeaders headers,
+    public @Nullable Response httpGetPersistenceServiceConfiguration(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
         PersistenceServiceConfiguration configuration = persistenceServiceConfigurationRegistry.get(serviceId);
         boolean editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
@@ -216,7 +216,8 @@ public class PersistenceResource implements RESTResource {
                     @ApiResponse(responseCode = "201", description = "PersistenceServiceConfiguration created."),
                     @ApiResponse(responseCode = "400", description = "Payload invalid."),
                     @ApiResponse(responseCode = "405", description = "PersistenceServiceConfiguration not editable.") })
-    public Response httpPutPersistenceServiceConfiguration(@Context UriInfo uriInfo, @Context HttpHeaders headers,
+    public @Nullable Response httpPutPersistenceServiceConfiguration(@Context UriInfo uriInfo,
+            @Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId,
             @Parameter(description = "service configuration", required = true) @Nullable PersistenceServiceConfigurationDTO serviceConfigurationDTO) {
         if (serviceConfigurationDTO == null) {
@@ -260,7 +261,8 @@ public class PersistenceResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Persistence service configuration not found."),
                     @ApiResponse(responseCode = "405", description = "Persistence service configuration not editable.") })
-    public Response httpDeletePersistenceServiceConfiguration(@Context UriInfo uriInfo, @Context HttpHeaders headers,
+    public @Nullable Response httpDeletePersistenceServiceConfiguration(@Context UriInfo uriInfo,
+            @Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
         if (persistenceServiceConfigurationRegistry.get(serviceId) == null) {
             return Response.status(Status.NOT_FOUND).build();
@@ -280,7 +282,7 @@ public class PersistenceResource implements RESTResource {
     @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of items available via a specific persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))) })
-    public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
+    public @Nullable Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId) {
         return getServiceItemList(serviceId);
     }
@@ -292,7 +294,7 @@ public class PersistenceResource implements RESTResource {
     @Operation(operationId = "getItemDataFromPersistenceService", summary = "Gets item persistence data from the persistence service.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
             @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
-    public Response httpGetPersistenceItemData(@Context HttpHeaders headers,
+    public @Nullable Response httpGetPersistenceItemData(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
             @Parameter(description = "The item name") @PathParam("itemname") String itemName,
             @Parameter(description = "Start time of the data to return. Will default to 1 day before endtime. ["
@@ -316,7 +318,7 @@ public class PersistenceResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))),
                     @ApiResponse(responseCode = "400", description = "Invalid filter parameters"),
                     @ApiResponse(responseCode = "404", description = "Unknown persistence service") })
-    public Response httpDeletePersistenceServiceItem(@Context HttpHeaders headers,
+    public @Nullable Response httpDeletePersistenceServiceItem(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.", required = true) @QueryParam("serviceId") String serviceId,
             @Parameter(description = "The item name.") @PathParam("itemname") String itemName,
             @Parameter(description = "Start of the time range to be deleted. ["
@@ -335,7 +337,7 @@ public class PersistenceResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
-    public Response httpPutPersistenceItemData(@Context HttpHeaders headers,
+    public @Nullable Response httpPutPersistenceItemData(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
             @Parameter(description = "The item name.") @PathParam("itemname") String itemName,
             @Parameter(description = "Time of the data to be stored. Will default to current time. ["
@@ -349,8 +351,9 @@ public class PersistenceResource implements RESTResource {
         return dateTime.getZonedDateTime(timeZoneProvider.getTimeZone());
     }
 
-    private Response getItemHistoryDTO(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
-            @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary, boolean itemState) {
+    private @Nullable Response getItemHistoryDTO(@Nullable String serviceId, String itemName,
+            @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary,
+            boolean itemState) {
         // Benchmarking timer...
         long timerStart = System.currentTimeMillis();
 
@@ -552,7 +555,7 @@ public class PersistenceResource implements RESTResource {
         return dtoList;
     }
 
-    private Response getServiceItemList(@Nullable String serviceId) {
+    private @Nullable Response getServiceItemList(@Nullable String serviceId) {
         // If serviceId is null, then use the default service
         PersistenceService service;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
@@ -611,8 +614,8 @@ public class PersistenceResource implements RESTResource {
         return JSONResponse.createResponse(Status.OK, itemInfo, "");
     }
 
-    private Response deletePersistenceItemData(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
-            @Nullable String timeEnd) {
+    private @Nullable Response deletePersistenceItemData(@Nullable String serviceId, String itemName,
+            @Nullable String timeBegin, @Nullable String timeEnd) {
         // For deleting, we must specify a service id - don't use the default service
         if (serviceId == null || serviceId.isEmpty()) {
             logger.debug("Persistence service must be specified for delete operations.");
@@ -662,7 +665,8 @@ public class PersistenceResource implements RESTResource {
         return Response.status(Status.OK).build();
     }
 
-    private Response putItemState(@Nullable String serviceId, String itemName, String value, @Nullable String time) {
+    private @Nullable Response putItemState(@Nullable String serviceId, String itemName, String value,
+            @Nullable String time) {
         // If serviceId is null, then use the default service
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
 

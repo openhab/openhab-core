@@ -33,6 +33,8 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.wrapper.WrapperService;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Davy Vanherbergen - Initial contribution
  */
+@NonNullByDefault
 @Command(scope = "openhab", name = "install-service", description = "Install openHAB as a system service.")
 @Service
 public class InstallServiceCommand implements Action {
@@ -65,11 +68,12 @@ public class InstallServiceCommand implements Action {
     private static final String[] ARG_EXCLUSION_LIST = new String[] { "-Djava.endorsed", "-Djava.ext", "-Dkaraf.home",
             "-Dkaraf.base", "-Dkaraf.data", "-Dkaraf.etc", "-Dkaraf.start", "-agentlib" };
 
+    @NonNullByDefault({})
     @Reference
     private WrapperService service;
 
     @Override
-    public Object execute() throws Exception {
+    public @Nullable Object execute() throws Exception {
         System.out.println("");
         System.out.println("Starting openHAB system service installation...");
         System.out.println("");

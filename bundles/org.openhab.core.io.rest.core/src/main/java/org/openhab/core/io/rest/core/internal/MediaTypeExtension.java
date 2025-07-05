@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.WebApplicationException;
@@ -29,6 +30,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.library.types.DateTimeType;
 import org.osgi.service.component.annotations.Component;
@@ -45,13 +48,15 @@ import com.google.gson.GsonBuilder;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 @Component(scope = PROTOTYPE)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JaxrsExtension
 @JaxrsMediaType({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
 public class MediaTypeExtension<T> implements MessageBodyReader<T>, MessageBodyWriter<T> {
 
-    private static String mediaTypeWithoutParams(final MediaType mediaType) {
+    private static String mediaTypeWithoutParams(final @Nullable MediaType mediaType) {
+        Objects.requireNonNull(mediaType);
         return mediaType.getType() + "/" + mediaType.getSubtype();
     }
 
@@ -70,16 +75,17 @@ public class MediaTypeExtension<T> implements MessageBodyReader<T>, MessageBodyW
     }
 
     @Override
-    public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType) {
+    public boolean isWriteable(final @Nullable Class<?> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType) {
         final MessageBodyWriter<T> writer = writers.get(mediaTypeWithoutParams(mediaType));
         return writer != null && writer.isWriteable(type, genericType, annotations, mediaType);
     }
 
     @Override
-    public void writeTo(final T object, final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders,
-            final OutputStream entityStream) throws IOException, WebApplicationException {
+    public void writeTo(final @Nullable T object, final @Nullable Class<?> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType,
+            final @NonNullByDefault({}) MultivaluedMap<String, Object> httpHeaders,
+            final @Nullable OutputStream entityStream) throws IOException, WebApplicationException {
         final MessageBodyWriter<T> writer = writers.get(mediaTypeWithoutParams(mediaType));
         if (writer != null) {
             writer.writeTo(object, type, genericType, annotations, mediaType, httpHeaders, entityStream);
@@ -89,16 +95,17 @@ public class MediaTypeExtension<T> implements MessageBodyReader<T>, MessageBodyW
     }
 
     @Override
-    public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType) {
+    public boolean isReadable(final @Nullable Class<?> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType) {
         final MessageBodyReader<T> reader = readers.get(mediaTypeWithoutParams(mediaType));
         return reader != null && reader.isReadable(type, genericType, annotations, mediaType);
     }
 
     @Override
-    public T readFrom(final Class<T> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
-            throws IOException, WebApplicationException {
+    public T readFrom(final @Nullable Class<T> type, final @Nullable Type genericType,
+            final Annotation @Nullable [] annotations, final @Nullable MediaType mediaType,
+            final @NonNullByDefault({}) MultivaluedMap<String, String> httpHeaders,
+            final @Nullable InputStream entityStream) throws IOException, WebApplicationException {
         final MessageBodyReader<T> reader = readers.get(mediaTypeWithoutParams(mediaType));
         if (reader != null) {
             return reader.readFrom(type, genericType, annotations, mediaType, httpHeaders, entityStream);

@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TranslationProvider;
@@ -39,6 +41,7 @@ import org.osgi.framework.Bundle;
  * @author Christoph Knauf - Introduced pending, canceled, update and InternalState
  * @author Dimitar Ivanov - Callback contains firmware domain object
  */
+@NonNullByDefault
 final class ProgressCallbackImpl implements ProgressCallback {
 
     private static final String UPDATE_CANCELED_MESSAGE_KEY = "update-canceled";
@@ -52,12 +55,12 @@ final class ProgressCallbackImpl implements ProgressCallback {
     private final BundleResolver bundleResolver;
     private final ThingUID thingUID;
     private final Firmware firmware;
-    private final Locale locale;
+    private final @Nullable Locale locale;
 
-    private Collection<ProgressStep> sequence;
-    private Iterator<ProgressStep> progressIterator;
-    private ProgressStep current;
-    private Integer progress;
+    private @Nullable Collection<ProgressStep> sequence;
+    private @Nullable Iterator<ProgressStep> progressIterator;
+    private @Nullable ProgressStep current;
+    private @Nullable Integer progress;
 
     private enum InternalState {
         FINISHED,
@@ -66,11 +69,11 @@ final class ProgressCallbackImpl implements ProgressCallback {
         INITIALIZED
     }
 
-    private InternalState state;
+    private @Nullable InternalState state;
 
     ProgressCallbackImpl(FirmwareUpdateHandler firmwareUpdateHandler, EventPublisher eventPublisher,
             TranslationProvider i18nProvider, BundleResolver bundleResolver, ThingUID thingUID, Firmware firmware,
-            Locale locale) {
+            @Nullable Locale locale) {
         this.firmwareUpdateHandler = firmwareUpdateHandler;
         ParameterChecks.checkNotNull(eventPublisher, "Event publisher");
         this.eventPublisher = eventPublisher;
@@ -113,7 +116,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
     }
 
     @Override
-    public void failed(String errorMessageKey, Object... arguments) {
+    public void failed(@Nullable String errorMessageKey, Object... arguments) {
         if (this.state == InternalState.FINISHED) {
             throw new IllegalStateException("Update is finished.");
         }
@@ -187,12 +190,12 @@ final class ProgressCallbackImpl implements ProgressCallback {
         postResultInfoEvent(FirmwareUpdateResult.ERROR, errorMessage);
     }
 
-    private String getMessage(Class<?> clazz, String errorMessageKey, Object... arguments) {
+    private @Nullable String getMessage(Class<?> clazz, String errorMessageKey, Object... arguments) {
         Bundle bundle = bundleResolver.resolveBundle(clazz);
         return i18nProvider.getText(bundle, errorMessageKey, null, locale, arguments);
     }
 
-    private void postResultInfoEvent(FirmwareUpdateResult result, String message) {
+    private void postResultInfoEvent(FirmwareUpdateResult result, @Nullable String message) {
         post(FirmwareEventFactory.createFirmwareUpdateResultInfoEvent(
                 FirmwareUpdateResultInfo.createFirmwareUpdateResultInfo(thingUID, result, message)));
     }
@@ -213,6 +216,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
         eventPublisher.post(event);
     }
 
+    @Nullable
     ProgressStep getCurrentStep() {
         if (current != null) {
             return current;

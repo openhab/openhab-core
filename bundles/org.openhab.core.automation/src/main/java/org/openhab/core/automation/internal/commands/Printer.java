@@ -17,8 +17,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -45,6 +47,7 @@ import org.openhab.core.config.core.ParameterOption;
  * @author Ana Dimova - Initial contribution
  * @author Yordan Mihaylov - updates related to api changes
  */
+@NonNullByDefault
 public class Printer {
 
     private static final int TABLE_WIDTH = 100;
@@ -111,7 +114,7 @@ public class Printer {
                 columnValues.set(0, id);
                 columnValues.set(1, uid);
                 Rule rule = autoCommands.getRule(uid);
-                columnValues.set(2, rule.getName());
+                columnValues.set(2, Objects.requireNonNullElse(rule.getName(), "null"));
                 columnValues.set(3, autoCommands.getRuleStatus(uid).toString());
                 rulesRows.add(Utils.getRow(columnWidths, columnValues));
             }
@@ -174,12 +177,12 @@ public class Printer {
         ruleContent.add(Utils.getRow(columnWidths, ruleProperty));
         if (rule.getName() != null) {
             ruleProperty.set(0, NAME);
-            ruleProperty.set(1, rule.getName());
+            ruleProperty.set(1, Objects.requireNonNullElse(rule.getName(), "null"));
             ruleContent.add(Utils.getRow(columnWidths, ruleProperty));
         }
         if (rule.getDescription() != null) {
             ruleProperty.set(0, DESCRIPTION);
-            ruleProperty.set(1, rule.getDescription());
+            ruleProperty.set(1, Objects.requireNonNullElse(rule.getDescription(), "null"));
             ruleContent.add(Utils.getRow(columnWidths, ruleProperty));
         }
         ruleProperty.set(0, TAGS);
@@ -216,12 +219,12 @@ public class Printer {
         templateContent.add(Utils.getRow(columnWidths, templateProperty));
         if (template.getLabel() != null) {
             templateProperty.set(0, LABEL);
-            templateProperty.set(1, template.getLabel());
+            templateProperty.set(1, Objects.requireNonNullElse(template.getLabel(), "null"));
             templateContent.add(Utils.getRow(columnWidths, templateProperty));
         }
         if (template.getDescription() != null) {
             templateProperty.set(0, DESCRIPTION);
-            templateProperty.set(1, template.getDescription());
+            templateProperty.set(1, Objects.requireNonNullElse(template.getDescription(), "null"));
             templateContent.add(Utils.getRow(columnWidths, templateProperty));
         }
         templateProperty.set(0, VISIBILITY);
@@ -260,12 +263,12 @@ public class Printer {
         moduleTypeContent.add(Utils.getRow(columnWidths, moduleTypeProperty));
         if (moduleType.getLabel() != null) {
             moduleTypeProperty.set(0, LABEL);
-            moduleTypeProperty.set(1, moduleType.getLabel());
+            moduleTypeProperty.set(1, Objects.requireNonNullElse(moduleType.getLabel(), "null"));
             moduleTypeContent.add(Utils.getRow(columnWidths, moduleTypeProperty));
         }
         if (moduleType.getDescription() != null) {
             moduleTypeProperty.set(0, DESCRIPTION);
-            moduleTypeProperty.set(1, moduleType.getDescription());
+            moduleTypeProperty.set(1, Objects.requireNonNullElse(moduleType.getDescription(), "null"));
             moduleTypeContent.add(Utils.getRow(columnWidths, moduleTypeProperty));
         }
         moduleTypeProperty.set(0, VISIBILITY);
@@ -405,12 +408,12 @@ public class Printer {
 
         if (module.getLabel() != null) {
             columnValues.set(0, LABEL);
-            columnValues.set(1, module.getLabel());
+            columnValues.set(1, Objects.requireNonNullElse(module.getLabel(), "null"));
             moduleContent.add(Utils.getRow(columnWidths, columnValues));
         }
         if (module.getDescription() != null) {
             columnValues.set(0, DESCRIPTION);
-            columnValues.set(1, module.getDescription());
+            columnValues.set(1, Objects.requireNonNullElse(module.getDescription(), "null"));
             moduleContent.add(Utils.getRow(columnWidths, columnValues));
         }
 
@@ -474,27 +477,27 @@ public class Printer {
                 configParamContent.add(Utils.getRow(columnWidths, configParamProperty));
                 if (parameter.getLabel() != null) {
                     configParamProperty.set(1, LABEL);
-                    configParamProperty.set(2, parameter.getLabel());
+                    configParamProperty.set(2, Objects.requireNonNullElse(parameter.getLabel(), "null"));
                     configParamContent.add(Utils.getRow(columnWidths, configParamProperty));
                 }
                 if (parameter.getDescription() != null) {
                     configParamProperty.set(1, DESCRIPTION);
-                    configParamProperty.set(2, parameter.getDescription());
+                    configParamProperty.set(2, Objects.requireNonNullElse(parameter.getDescription(), "null"));
                     configParamContent.add(Utils.getRow(columnWidths, configParamProperty));
                 }
                 if (parameter.getDefault() != null) {
                     configParamProperty.set(1, DEFAULT);
-                    configParamProperty.set(2, parameter.getDefault());
+                    configParamProperty.set(2, Objects.requireNonNullElse(parameter.getDefault(), "null"));
                     configParamContent.add(Utils.getRow(columnWidths, configParamProperty));
                 }
                 if (parameter.getContext() != null) {
                     configParamProperty.set(1, CONTEXT);
-                    configParamProperty.set(2, parameter.getContext());
+                    configParamProperty.set(2, Objects.requireNonNullElse(parameter.getContext(), "null"));
                     configParamContent.add(Utils.getRow(columnWidths, configParamProperty));
                 }
                 if (parameter.getPattern() != null) {
                     configParamProperty.set(1, PATTERN);
-                    configParamProperty.set(2, parameter.getPattern());
+                    configParamProperty.set(2, Objects.requireNonNullElse(parameter.getPattern(), "null"));
                     configParamContent.add(Utils.getRow(columnWidths, configParamProperty));
                 }
                 if (parameter.getStepSize() != null) {

@@ -207,9 +207,13 @@ public class SystemRangeStateProfileTest {
     }
 
     private StateProfile initProfile(@Nullable Object lower, @Nullable Object upper, boolean inverted) {
-        final Map<String, @Nullable Object> properties = new HashMap<>(2);
-        properties.put(SystemRangeStateProfile.LOWER_PARAM, lower);
-        properties.put(SystemRangeStateProfile.UPPER_PARAM, upper);
+        final Map<String, Object> properties = new HashMap<>(2);
+        if (lower != null) {
+            properties.put(SystemRangeStateProfile.LOWER_PARAM, lower);
+        }
+        if (upper != null) {
+            properties.put(SystemRangeStateProfile.UPPER_PARAM, upper);
+        }
         properties.put(SystemRangeStateProfile.INVERTED_PARAM, inverted);
         when(contextMock.getConfiguration()).thenReturn(new Configuration(properties));
         return new SystemRangeStateProfile(callbackMock, contextMock);
