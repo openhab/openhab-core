@@ -119,6 +119,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.NOISE);
         defaultTags.add(DefaultSemanticTags.Property.OIL);
         defaultTags.add(DefaultSemanticTags.Property.OPENING);
+        defaultTags.add(DefaultSemanticTags.Property.LOCK_STATE);
         defaultTags.add(DefaultSemanticTags.Property.OPEN_LEVEL);
         defaultTags.add(DefaultSemanticTags.Property.OPEN_STATE);
         defaultTags.add(DefaultSemanticTags.Property.POSITION);
