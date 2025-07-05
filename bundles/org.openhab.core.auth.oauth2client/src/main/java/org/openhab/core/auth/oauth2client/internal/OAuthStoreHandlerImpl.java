@@ -252,7 +252,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         return dcrDecrypted;
     }
 
-    private @Nullable String encrypt(String token) throws GeneralSecurityException {
+    private @Nullable String encrypt(@Nullable String token) throws GeneralSecurityException {
         if (storageCipher.isEmpty()) {
             return token; // do nothing if no cipher
         } else {

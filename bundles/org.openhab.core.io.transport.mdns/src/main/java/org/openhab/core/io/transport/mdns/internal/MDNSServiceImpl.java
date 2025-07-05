@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.io.transport.mdns.MDNSService;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Victor Belov - Initial contribution
  */
 @Component(immediate = true)
+@NonNullByDefault
 public class MDNSServiceImpl implements MDNSService {
     private final Logger logger = LoggerFactory.getLogger(MDNSServiceImpl.class);
 

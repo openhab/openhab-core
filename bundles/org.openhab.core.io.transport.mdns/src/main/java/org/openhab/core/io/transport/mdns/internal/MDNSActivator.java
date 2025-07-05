@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.transport.mdns.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public final class MDNSActivator implements BundleActivator {
 
     private final Logger logger = LoggerFactory.getLogger(MDNSActivator.class);
@@ -30,7 +33,7 @@ public final class MDNSActivator implements BundleActivator {
      * Called whenever the OSGi framework starts our bundle
      */
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(@Nullable BundleContext context) throws Exception {
         logger.debug("mDNS service has been started.");
     }
 
@@ -38,7 +41,7 @@ public final class MDNSActivator implements BundleActivator {
      * Called whenever the OSGi framework stops our bundle
      */
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(@Nullable BundleContext context) throws Exception {
         logger.debug("mDNS service has been stopped.");
     }
 }

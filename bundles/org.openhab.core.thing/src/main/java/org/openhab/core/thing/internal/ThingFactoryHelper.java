@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
@@ -48,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * @author Simon Kaufmann - Initial contribution
  * @author Kai Kreuzer - Changed creation of channels to not require a thing type
  */
+@NonNullByDefault
 public class ThingFactoryHelper {
 
     private static Logger logger = LoggerFactory.getLogger(ThingFactoryHelper.class);
@@ -62,7 +64,7 @@ public class ThingFactoryHelper {
      * @return a list of {@link Channel}s
      */
     public static List<Channel> createChannels(ThingType thingType, ThingUID thingUID,
-            ConfigDescriptionRegistry configDescriptionRegistry) {
+            @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
         List<Channel> channels = new ArrayList<>();
         List<ChannelDefinition> channelDefinitions = thingType.getChannelDefinitions();
         for (ChannelDefinition channelDefinition : channelDefinitions) {
@@ -133,8 +135,8 @@ public class ThingFactoryHelper {
         }
     }
 
-    private static Channel createChannel(ChannelDefinition channelDefinition, ThingUID thingUID, String groupId,
-            ConfigDescriptionRegistry configDescriptionRegistry) {
+    private static @Nullable Channel createChannel(ChannelDefinition channelDefinition, ThingUID thingUID,
+            @Nullable String groupId, @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
         final ChannelUID channelUID = new ChannelUID(thingUID, groupId, channelDefinition.getId());
         final ChannelBuilder channelBuilder = createChannelBuilder(channelUID, channelDefinition,
                 configDescriptionRegistry);
@@ -146,7 +148,7 @@ public class ThingFactoryHelper {
     }
 
     public static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelType channelType,
-            ConfigDescriptionRegistry configDescriptionRegistry) {
+            @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
         final ChannelBuilder channelBuilder = ChannelBuilder.create(channelUID, channelType.getItemType()) //
                 .withType(channelType.getUID()) //
                 .withDefaultTags(channelType.getTags()) //
@@ -169,8 +171,8 @@ public class ThingFactoryHelper {
         return channelBuilder;
     }
 
-    public static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelDefinition channelDefinition,
-            ConfigDescriptionRegistry configDescriptionRegistry) {
+    public static @Nullable ChannelBuilder createChannelBuilder(ChannelUID channelUID,
+            ChannelDefinition channelDefinition, @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
         ChannelType channelType = withChannelTypeRegistry(channelTypeRegistry -> (channelTypeRegistry != null)
                 ? channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID())
                 : null);

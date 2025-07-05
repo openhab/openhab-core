@@ -15,6 +15,9 @@ package org.openhab.core.config.core;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -30,6 +33,7 @@ import com.google.gson.JsonSerializer;
  * @author Ana Dimova - provide serialization of multiple configuration values.
  * @author Sami Salonen - property names are sorted for serialization for minimal diffs
  */
+@NonNullByDefault
 public class ConfigurationSerializer implements JsonSerializer<Configuration> {
 
     @Override
@@ -50,7 +54,7 @@ public class ConfigurationSerializer implements JsonSerializer<Configuration> {
         return result;
     }
 
-    private JsonPrimitive serializePrimitive(Object primitive) {
+    private @Nullable JsonPrimitive serializePrimitive(@Nullable Object primitive) {
         if (primitive instanceof String string) {
             return new JsonPrimitive(string);
         } else if (primitive instanceof Number number) {

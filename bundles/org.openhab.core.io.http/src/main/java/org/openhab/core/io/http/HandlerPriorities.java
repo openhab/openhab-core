@@ -12,11 +12,14 @@
  */
 package org.openhab.core.io.http;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Constants for making handlers in proper order.
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public interface HandlerPriorities {
 
     int AUTHENTICATION = 100;

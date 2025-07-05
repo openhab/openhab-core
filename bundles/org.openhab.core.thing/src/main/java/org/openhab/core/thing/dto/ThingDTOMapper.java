@@ -82,7 +82,11 @@ public class ThingDTOMapper {
     private static Map<String, Object> toMap(Configuration configuration) {
         Map<String, Object> configurationMap = new HashMap<>(configuration.keySet().size());
         for (String key : configuration.keySet()) {
-            configurationMap.put(key, configuration.get(key));
+            // should be non-null, as key exists and entires are not-null
+            Object value = configuration.get(key);
+            if (value != null) {
+                configurationMap.put(key, value);
+            }
         }
         return configurationMap;
     }
