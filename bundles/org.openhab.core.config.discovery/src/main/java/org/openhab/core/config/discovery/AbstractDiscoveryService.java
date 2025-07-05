@@ -362,7 +362,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     /**
      * Call to remove all results of all {@link #supportedThingTypes} that are
      * older than the given timestamp. To remove all left over results after a
-     * full scan, this method could be called {@link #getTimeOfLastScan()}
+     * full scan, this method could be called {@link #getTimestampOfLastScan()}
      * as timestamp.
      *
      * @param timestamp timestamp, older results will be removed
@@ -389,7 +389,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     /**
      * Call to remove all results of all {@link #supportedThingTypes} that are
      * older than the given timestamp. To remove all left over results after a
-     * full scan, this method could be called {@link #getTimeOfLastScan()}
+     * full scan, this method could be called {@link #getTimestampOfLastScan()}
      * as timestamp.
      *
      * @param timestamp timestamp, older results will be removed
@@ -421,7 +421,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     /**
      * Call to remove all results of the given types that are older than the
      * given timestamp. To remove all left over results after a full scan, this
-     * method could be called {@link #getTimeOfLastScan()} as timestamp.
+     * method could be called {@link #getTimestampOfLastScan()} as timestamp.
      *
      * @param timestamp timestamp, older results will be removed
      * @param thingTypeUIDs collection of {@code ThingType}s, only results of these
@@ -532,20 +532,9 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     /**
      * Get the timestamp of the last call of {@link #startScan()}.
      *
-     * @return timestamp as long
-     * @deprecated Use {@link #getTimeOfLastScan} instead.
-     */
-    @Deprecated(since = "5.0", forRemoval = true)
-    protected long getTimestampOfLastScan() {
-        return Instant.MIN.equals(timestampOfLastScan) ? 0 : timestampOfLastScan.toEpochMilli();
-    }
-
-    /**
-     * Get the timestamp of the last call of {@link #startScan()}.
-     *
      * @return timestamp as {@link Instant}
      */
-    protected Instant getTimeOfLastScan() {
+    protected Instant getTimestampOfLastScan() {
         return timestampOfLastScan;
     }
 
