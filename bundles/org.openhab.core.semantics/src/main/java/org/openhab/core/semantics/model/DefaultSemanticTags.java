@@ -315,7 +315,7 @@ public class DefaultSemanticTags {
                 "Property_App", //
                 "App", //
                 "Software program", //
-                "Application");
+                "");
         public static final SemanticTag BRIGHTNESS = new SemanticTagImpl( //
                 "Property_Brightness", //
                 "Brightness", //
@@ -395,7 +395,7 @@ public class DefaultSemanticTags {
                 "Property_Light", //
                 "Light", //
                 "Control or status of a light", //
-                "Lights, Lighting");
+                "");
         public static final SemanticTag LOW_BATTERY = new SemanticTagImpl( //
                 "Property_LowBattery", //
                 "Low Battery", //
@@ -583,7 +583,7 @@ public class DefaultSemanticTags {
                 "Equipment_Application", //
                 "Application", //
                 "Software program", //
-                "App, Software program");
+                "Software program");
         public static final SemanticTag AUDIO_VISUAL = new SemanticTagImpl( //
                 "Equipment_AudioVisual", //
                 "Audio Visual", //
@@ -742,11 +742,11 @@ public class DefaultSemanticTags {
         public static final SemanticTag HVAC = new SemanticTagImpl( //
                 "Equipment_HVAC", //
                 "HVAC", //
-                "Heating, Ventilation or AirConditioning", //
-                "Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC");
+                "Heating, Ventilation, and Air Conditioning", //
+                "");
         public static final SemanticTag AIR_CONDITIONER = new SemanticTagImpl( //
                 "Equipment_HVAC_AirConditioner", //
-                "Air Conditioner", //
+                "Air Conditioner, Air Conditioning, A/C, AC, A/Cs", //
                 "", //
                 "");
         public static final SemanticTag AIR_FILTER = new SemanticTagImpl( //
@@ -878,7 +878,7 @@ public class DefaultSemanticTags {
                 "Equipment_LightSource_Lamp", //
                 "Lamp", //
                 "", //
-                "");
+                "Lamps");
         public static final SemanticTag LIGHT_STRIP = new SemanticTagImpl( //
                 "Equipment_LightSource_LightStrip", //
                 "Light Strip", //
@@ -893,7 +893,7 @@ public class DefaultSemanticTags {
                 "Equipment_LightSource_Lightbulb", //
                 "Light Bulb", //
                 "", //
-                "Lightbulbs, Bulb, Bulbs, Lamp, Lamps");
+                "Lightbulbs, Bulb, Bulbs");
         public static final SemanticTag PENDANT = new SemanticTagImpl( //
                 "Equipment_LightSource_Pendant", //
                 "Pendant", //
@@ -1243,7 +1243,7 @@ public class DefaultSemanticTags {
                 "Equipment_Wellness_SwimmingPool", //
                 "Swimming Pool", //
                 "", //
-                "Swimming Pool, Pool");
+                "Pool");
         public static final SemanticTag WHITE_GOOD = new SemanticTagImpl( //
                 "Equipment_WhiteGood", //
                 "White Good", //
