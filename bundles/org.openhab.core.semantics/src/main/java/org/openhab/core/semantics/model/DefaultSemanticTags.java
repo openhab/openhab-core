@@ -440,7 +440,7 @@ public class DefaultSemanticTags {
                 "Property_Opening_LockState", //
                 "Lock State", //
                 "State of the lock on a door or window etc.", //
-                "Locked, Unlocked");
+                "");
         public static final SemanticTag OPEN_LEVEL = new SemanticTagImpl( //
                 "Property_Opening_OpenLevel", //
                 "Open Level", //
@@ -450,7 +450,7 @@ public class DefaultSemanticTags {
                 "Property_Opening_OpenState", //
                 "Open State", //
                 "Open state (digital) of a door or window etc.", //
-                "Open, Closed");
+                "");
         public static final SemanticTag POSITION = new SemanticTagImpl( //
                 "Property_Position", //
                 "Position", //

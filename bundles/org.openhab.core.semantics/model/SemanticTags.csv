@@ -79,9 +79,9 @@ Property,Motion,,Motion,,Motion detected
 Property,Noise,,Noise,,
 Property,Oil,,Oil,,
 Property,Opening,,Opening,,Opening of a door or window etc.
-Property,LockState,Opening,Lock State,"Locked, Unlocked",State of the lock on a door or window etc.
+Property,LockState,Opening,Lock State,,State of the lock on a door or window etc.
 Property,OpenLevel,Opening,Open Level,,Open position (analog) of a door or window etc.
-Property,OpenState,Opening,Open State,"Open, Closed",Open state (digital) of a door or window etc.
+Property,OpenState,Opening,Open State,,Open state (digital) of a door or window etc.
 Property,Position,,Position,,Position measurement or control
 Property,GeoLocation,Position,Geo Location,,Geo location coordinate
 Property,Power,,Power,,
