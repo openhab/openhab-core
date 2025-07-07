@@ -21,8 +21,8 @@
     <cxf.version>3.6.5</cxf.version>
     <jackson.version>2.19.2</jackson.version>
     <jetty.version>9.4.57.v20241219</jetty.version>
-    <pax.logging.version>2.2.8</pax.logging.version>
-    <pax.web.version>8.0.30</pax.web.version>
+    <pax.logging.version>2.3.0</pax.logging.version>
+    <pax.web.version>8.0.33</pax.web.version>
     <swagger.version>2.2.28</swagger.version>
   </properties>
 
@@ -405,18 +405,18 @@
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.5</version>
+      <version>1.6.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.18.0</version>
+      <version>2.20.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.17.0</version>
+      <version>3.18.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -455,7 +455,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
-      <version>1.78.1</version>
+      <version>1.81</version>
     </dependency>
 
     <!-- Gson -->
@@ -785,13 +785,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.26</version>
+      <version>4.27</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.26</version>
+      <version>4.27</version>
       <scope>compile</scope>
     </dependency>
 
@@ -799,7 +799,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>33.3.1-jre</version>
+      <version>33.4.8-jre</version>
       <scope>compile</scope>
     </dependency>
 
@@ -911,7 +911,7 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>9.7.1</version>
+      <version>9.8</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -1074,13 +1074,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.16.0</version>
+      <version>5.17.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.16.0</version>
+      <version>5.17.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
