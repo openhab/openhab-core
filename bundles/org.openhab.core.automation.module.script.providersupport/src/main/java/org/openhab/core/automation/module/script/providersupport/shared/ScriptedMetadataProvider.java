@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * This {@link org.openhab.core.items.MetadataProvider} keeps metadata provided by scripts during runtime.
  * This ensures that metadata is not kept on reboot, but has to be provided by the scripts again.
  *
- * @author Florian Hotze
+ * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ScriptedMetadataProvider.class, MetadataProvider.class })
