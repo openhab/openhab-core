@@ -888,11 +888,17 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @return true if compilation succeeded, otherwise false
      */
     private boolean compileRule(final WrappedRule rule) {
+        logger.debug("Compiling rule {}", rule.getUID());
         try {
             compileConditions(rule);
             compileActions(rule);
             return true;
         } catch (Throwable t) {
+            if (logger.isDebugEnabled()) {
+                logger.error("Failed to compile rule: {}", rule.getUID(), t);
+            } else {
+                logger.error("Failed to compile rule {}: {}", rule.getUID(), t.getMessage());
+            }
             setStatus(rule.getUID(), new RuleStatusInfo(RuleStatus.UNINITIALIZED,
                     RuleStatusDetail.HANDLER_INITIALIZING_ERROR, t.getMessage()));
             unregister(rule);
@@ -1215,6 +1221,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (conditions.isEmpty()) {
             return;
         }
+        logger.trace("Compiling conditions of {}", rule.getUID());
         for (WrappedCondition wrappedCondition : conditions) {
             final Condition condition = wrappedCondition.unwrap();
             ConditionHandler cHandler = wrappedCondition.getModuleHandler();
@@ -1222,7 +1229,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 try {
                     cHandler.compile();
                 } catch (Throwable t) {
-                    String errMessage = "Failed to pre-compile condition: " + condition.getId() + "(" + t.getMessage()
+                    String errMessage = "Failed to compile condition: " + condition.getId() + "(" + t.getMessage()
                             + ")";
                     throw new RuntimeException(errMessage, t);
                 }
@@ -1270,6 +1277,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (actions.isEmpty()) {
             return;
         }
+        logger.trace("Compiling actions of rule {}", rule.getUID());
         for (WrappedAction wrappedAction : actions) {
             final Action action = wrappedAction.unwrap();
             ActionHandler aHandler = wrappedAction.getModuleHandler();
@@ -1277,7 +1285,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 try {
                     aHandler.compile();
                 } catch (Throwable t) {
-                    String errMessage = "Failed to pre-compile action: " + action.getId() + "(" + t.getMessage() + ")";
+                    String errMessage = "Failed to compile action: " + action.getId() + "(" + t.getMessage() + ")";
                     throw new RuntimeException(errMessage, t);
                 }
             }
@@ -1571,6 +1579,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * handlers weren't available when the rule was added to the rule engine.
      */
     private void compileRules() {
+        logger.debug("Compiling all enabled rules");
         getScheduledExecutor().submit(() -> {
             ruleRegistry.stream() //
                     .filter(r -> isEnabled(r.getUID())) //
