@@ -142,6 +142,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Stefan Triller - Added bulk item add method
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Mark Herwege - Added option to retrieve item groups with item REST call
  */
 @Component
 @JaxrsResource
@@ -253,6 +254,7 @@ public class ItemResource implements RESTResource {
             @QueryParam("tags") @Parameter(description = "item tag filter") @Nullable String tags,
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("false") @QueryParam("recursive") @Parameter(description = "get member items recursively") boolean recursive,
+            @DefaultValue("false") @QueryParam("parents") @Parameter(description = "get parent group items recursively") boolean parents,
             @QueryParam("fields") @Parameter(description = "limit output to the given fields (comma separated)") @Nullable String fields,
             @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and checks the If-Modified-Since header, all other parameters are ignored except \"metadata\"") boolean staticDataOnly) {
         final Locale locale = localeService.getLocale(language);
@@ -285,7 +287,11 @@ public class ItemResource implements RESTResource {
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                 .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale, zoneId)) //
-                .peek(dto -> addMetadata(dto, namespaces, null)) //
+                .peek(dto -> {
+                    if (parents) {
+                        addParents(dto, uriInfo, httpHeaders, locale, zoneId);
+                    }
+                }).peek(dto -> addMetadata(dto, namespaces, null)) //
                 .peek(dto -> dto.editable = isEditable(dto)) //
                 .peek(dto -> {
                     if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
@@ -293,7 +299,13 @@ public class ItemResource implements RESTResource {
                             member.editable = isEditable(member);
                         }
                     }
+                    if (dto.parents != null) {
+                        for (EnrichedItemDTO parent : dto.parents) {
+                            parent.editable = isEditable(parent);
+                        }
+                    }
                 });
+
         itemStream = dtoMapper.limitToFields(itemStream, fields);
         return Response.ok(new Stream2JSONInputStream(itemStream)).build();
     }
@@ -333,6 +345,7 @@ public class ItemResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("true") @QueryParam("recursive") @Parameter(description = "get member items if the item is a group item") boolean recursive,
+            @DefaultValue("false") @QueryParam("parents") @Parameter(description = "get parent group items recursively") boolean parents,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
@@ -345,11 +358,19 @@ public class ItemResource implements RESTResource {
         if (item != null) {
             EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder(uriInfo, httpHeaders),
                     locale, zoneId);
+            if (parents) {
+                addParents(dto, uriInfo, httpHeaders, locale, zoneId);
+            }
             addMetadata(dto, namespaces, null);
             dto.editable = isEditable(dto);
             if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
                 for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
                     member.editable = isEditable(member);
+                }
+            }
+            if (dto.parents != null) {
+                for (EnrichedItemDTO parent : dto.parents) {
+                    parent.editable = isEditable(parent);
                 }
             }
             return JSONResponse.createResponse(Status.OK, dto, null);
@@ -1054,10 +1075,25 @@ public class ItemResource implements RESTResource {
                 addMetadata(member, namespaces, filter);
             }
         }
+        if (dto.parents != null) {
+            for (EnrichedItemDTO parent : dto.parents) {
+                addMetadata(parent, namespaces, filter);
+            }
+        }
         if (!metadata.isEmpty()) {
             // we only set it in the dto if there is really data available
             dto.metadata = metadata;
         }
+    }
+
+    private void addParents(EnrichedItemDTO dto, UriInfo uriInfo, HttpHeaders httpHeaders, Locale locale,
+            ZoneId zoneId) {
+        dto.parents = dto.groupNames.stream() //
+                .map(groupName -> getItem(groupName)).filter(Objects::nonNull) //
+                .map(parentItem -> EnrichedItemDTOMapper.map(parentItem, false, null, uriBuilder(uriInfo, httpHeaders),
+                        locale, zoneId)) //
+                .peek(parentEnrichedItemDto -> addParents(parentEnrichedItemDto, uriInfo, httpHeaders, locale, zoneId)) //
+                .toArray(size -> new EnrichedItemDTO[size]);
     }
 
     private boolean isEditable(EnrichedItemDTO item) {
