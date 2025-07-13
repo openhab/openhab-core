@@ -120,6 +120,11 @@ public class FolderObserver implements WatchService.WatchEventListener {
 
     @Activate
     public void activate(ComponentContext ctx) {
+        logger.debug("FolderObserver activate");
+
+        /* set of file extensions for added parsers before activation but without an existing directory */
+        Set<String> parsersWithoutFolder = new HashSet<>();
+
         Dictionary<String, Object> config = ctx.getProperties();
 
         Enumeration<String> keys = config.keys();
@@ -132,10 +137,11 @@ public class FolderObserver implements WatchService.WatchEventListener {
             }
 
             Path folderPath = watchPath.resolve(folderName);
+            Set<String> validExtensions = Set.of(((String) config.get(folderName)).split(","));
             if (Files.exists(folderPath) && Files.isDirectory(folderPath)) {
-                String[] validExtensions = ((String) config.get(folderName)).split(",");
-                folderFileExtMap.put(folderName, Set.of(validExtensions));
+                folderFileExtMap.put(folderName, validExtensions);
             } else {
+                parsersWithoutFolder.addAll(validExtensions);
                 logger.warn("Directory '{}' does not exist in '{}'. Please check your configuration settings!",
                         folderName, OpenHAB.getConfigFolder());
             }
@@ -147,6 +153,15 @@ public class FolderObserver implements WatchService.WatchEventListener {
         this.activated = true;
         logger.debug("{} has been activated", FolderObserver.class.getSimpleName());
 
+        logger.debug("{} elements in parsersWithoutFolder and {} elements in missingParsers",
+                parsersWithoutFolder.size(), missingParsers.size());
+        // process parsers without existing directory which were added during activation
+        for (String extension : parsersWithoutFolder) {
+            if (parsers.contains(extension) && !missingParsers.contains(extension)) {
+                readyService.markReady(new ReadyMarker(READYMARKER_TYPE, extension));
+                logger.debug("Marked extension '{}' as ready", extension);
+            }
+        }
         // process ignored paths for missing parsers which were added during activation
         for (String extension : missingParsers) {
             if (parsers.contains(extension)) {
