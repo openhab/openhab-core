@@ -12,18 +12,22 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * A general sitemap event, meant to be sub-classed.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class SitemapEvent {
 
     /** The sitemap name this event is for */
-    public String sitemapName;
+    public @Nullable String sitemapName;
 
     /** The page id this event is for */
-    public String pageId;
+    public @Nullable String pageId;
 
     public SitemapEvent() {
     }

@@ -215,9 +215,13 @@ public class SystemHysteresisStateProfileTest {
     }
 
     private StateProfile initProfile(@Nullable Object lower, @Nullable Object upper, boolean inverted) {
-        final Map<String, @Nullable Object> properties = new HashMap<>(2);
-        properties.put("lower", lower);
-        properties.put("upper", upper);
+        final Map<String, Object> properties = new HashMap<>(2);
+        if (lower != null) {
+            properties.put("lower", lower);
+        }
+        if (upper != null) {
+            properties.put("upper", upper);
+        }
         properties.put("inverted", inverted);
         when(mockContext.getConfiguration()).thenReturn(new Configuration(properties));
         return new SystemHysteresisStateProfile(mockCallback, mockContext);

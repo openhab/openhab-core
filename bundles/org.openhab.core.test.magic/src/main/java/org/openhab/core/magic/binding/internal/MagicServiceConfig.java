@@ -16,6 +16,8 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.magic.binding.MagicService;
 
 /**
@@ -23,26 +25,27 @@ import org.openhab.core.magic.binding.MagicService;
  *
  * @author David Graeff - Initial contribution
  */
+@NonNullByDefault
 public class MagicServiceConfig {
-    public String text;
+    public @Nullable String text;
     public boolean bool;
-    public BigDecimal decimal;
-    public Integer integer;
+    public @Nullable BigDecimal decimal;
+    public @Nullable Integer integer;
 
-    public String textAdvanced;
+    public @Nullable String textAdvanced;
     public boolean booleanAdvanced;
-    public BigDecimal decimalAdvanced;
-    public Integer integerAdvanced;
+    public @Nullable BigDecimal decimalAdvanced;
+    public @Nullable Integer integerAdvanced;
 
-    public String requiredTextParameter;
-    public String verifiedTextParameter;
-    public String selectLimited;
-    public String selectVariable;
+    public @Nullable String requiredTextParameter;
+    public @Nullable String verifiedTextParameter;
+    public @Nullable String selectLimited;
+    public @Nullable String selectVariable;
 
-    public List<String> multiselectTextLimit;
-    public List<BigDecimal> multiselectIntegerLimit;
+    public @Nullable List<String> multiselectTextLimit;
+    public @Nullable List<BigDecimal> multiselectIntegerLimit;
 
-    public BigDecimal selectDecimalLimit;
+    public @Nullable BigDecimal selectDecimalLimit;
 
     @Override
     public String toString() {

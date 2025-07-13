@@ -15,6 +15,8 @@ package org.openhab.core.config.core.internal.validation;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
@@ -23,6 +25,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 final class TypeIntrospections {
 
     private static final Map<Type, TypeIntrospection> INTROSPECTIONS = Map.of( //
@@ -60,15 +63,15 @@ final class TypeIntrospections {
     abstract static class TypeIntrospection {
 
         private final Class<?> clazz;
-        private final MessageKey minViolationMessageKey;
-        private final MessageKey maxViolationMessageKey;
+        private final @Nullable MessageKey minViolationMessageKey;
+        private final @Nullable MessageKey maxViolationMessageKey;
 
         private TypeIntrospection(Class<?> clazz) {
             this(clazz, null, null);
         }
 
-        private TypeIntrospection(Class<?> clazz, MessageKey minViolationMessageKey,
-                MessageKey maxViolationMessageKey) {
+        private TypeIntrospection(Class<?> clazz, @Nullable MessageKey minViolationMessageKey,
+                @Nullable MessageKey maxViolationMessageKey) {
             this.clazz = clazz;
             this.minViolationMessageKey = minViolationMessageKey;
             this.maxViolationMessageKey = maxViolationMessageKey;
@@ -82,7 +85,7 @@ final class TypeIntrospections {
          *
          * @return true, if the given value is less than the given min attribute, otherwise false
          */
-        boolean isMinViolated(Object value, BigDecimal min) {
+        boolean isMinViolated(Object value, @Nullable BigDecimal min) {
             if (min == null) {
                 return false;
             }
@@ -134,7 +137,7 @@ final class TypeIntrospections {
          *
          * @return true, if the given value is a string, otherwise false
          */
-        final boolean isStringInstance(Object value) {
+        final boolean isStringInstance(@Nullable Object value) {
             return value instanceof String;
         }
 
@@ -145,7 +148,7 @@ final class TypeIntrospections {
          *
          * @return true, if the given value is a big decimal, otherwise false
          */
-        final boolean isBigDecimalInstance(Object value) {
+        final boolean isBigDecimalInstance(@Nullable Object value) {
             return value instanceof BigDecimal;
         }
 
@@ -154,7 +157,7 @@ final class TypeIntrospections {
          *
          * @return the corresponding {@link MessageKey} for the min attribute violation
          */
-        final MessageKey getMinViolationMessageKey() {
+        final @Nullable MessageKey getMinViolationMessageKey() {
             return minViolationMessageKey;
         }
 
@@ -163,7 +166,7 @@ final class TypeIntrospections {
          *
          * @return the corresponding {@link MessageKey} for the max attribute violation
          */
-        final MessageKey getMaxViolationMessageKey() {
+        final @Nullable MessageKey getMaxViolationMessageKey() {
             return maxViolationMessageKey;
         }
     }
@@ -175,12 +178,12 @@ final class TypeIntrospections {
         }
 
         @Override
-        boolean isMinViolated(Object value, BigDecimal min) {
+        boolean isMinViolated(Object value, @Nullable BigDecimal min) {
             throw new UnsupportedOperationException("Min attribute not supported for boolean parameter.");
         }
 
         @Override
-        boolean isMaxViolated(Object value, BigDecimal max) {
+        boolean isMaxViolated(Object value, @Nullable BigDecimal max) {
             throw new UnsupportedOperationException("Max attribute not supported for boolean parameter.");
         }
     }
@@ -222,7 +225,7 @@ final class TypeIntrospections {
         }
 
         @Override
-        boolean isMinViolated(Object value, BigDecimal min) {
+        boolean isMinViolated(Object value, @Nullable BigDecimal min) {
             if (min == null) {
                 return false;
             }
@@ -230,7 +233,7 @@ final class TypeIntrospections {
         }
 
         @Override
-        boolean isMaxViolated(Object value, BigDecimal max) {
+        boolean isMaxViolated(Object value, @Nullable BigDecimal max) {
             if (max == null) {
                 return false;
             }

@@ -14,8 +14,11 @@ package org.openhab.core.auth.oauth2client.test.internal;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
@@ -29,25 +32,26 @@ import org.slf4j.LoggerFactory;
  *
  * @author Gary Tse - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractTestAgent implements TestAgent {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractTestAgent.class);
 
-    public String handle;
+    public String handle = "";
 
-    protected String tokenUrl;
-    protected String clientId;
+    protected String tokenUrl = "";
+    protected String clientId = "";
 
-    protected String authUrl;
-    protected String redirectUri;
+    protected String authUrl = "";
+    protected String redirectUri = "";
 
-    protected String clientSecret;
-    protected String username;
-    protected String password;
-    protected String scope;
+    protected String clientSecret = "";
+    protected String username = "";
+    protected String password = "";
+    protected String scope = "";
 
-    protected OAuthFactory oauthFactory;
-    protected OAuthClientService oauthClientService;
+    protected @Nullable OAuthFactory oauthFactory;
+    protected @Nullable OAuthClientService oauthClientService;
 
     public void activate(Map<String, Object> properties) {
         tokenUrl = getProperty(properties, "TOKEN_URL");
@@ -96,7 +100,7 @@ public abstract class AbstractTestAgent implements TestAgent {
     }
 
     @Override
-    public OAuthClientService testGetClient(String handle) throws OAuthException {
+    public @Nullable OAuthClientService testGetClient(@Nullable String handle) throws OAuthException {
         logger.debug("test GetClient handle: {}", handle);
         if (handle == null) {
             if (this.handle == null) {
@@ -140,7 +144,7 @@ public abstract class AbstractTestAgent implements TestAgent {
     @Override
     public AccessTokenResponse testGetCachedAccessToken() throws OAuthException, IOException, OAuthResponseException {
         logger.debug("test getCachedAccessToken");
-        return oauthClientService.getAccessTokenResponse();
+        return Objects.requireNonNull(oauthClientService.getAccessTokenResponse());
     }
 
     @Override
@@ -150,7 +154,7 @@ public abstract class AbstractTestAgent implements TestAgent {
     }
 
     @Override
-    public String testGetAuthorizationUrl(String state) throws OAuthException {
+    public @Nullable String testGetAuthorizationUrl(@Nullable String state) throws OAuthException {
         logger.debug("test getAuthorizationUrl {}", state);
         return oauthClientService.getAuthorizationUrl(redirectUri, scope, state);
     }

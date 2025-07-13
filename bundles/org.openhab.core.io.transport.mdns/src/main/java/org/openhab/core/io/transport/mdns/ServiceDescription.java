@@ -14,17 +14,21 @@ package org.openhab.core.io.transport.mdns;
 
 import java.util.Hashtable;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is a simple data container to keep all details of a service description together.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ServiceDescription {
 
-    public String serviceType;
-    public String serviceName;
+    public @Nullable String serviceType;
+    public @Nullable String serviceName;
     public int servicePort;
-    public Hashtable<String, String> serviceProperties;
+    public @Nullable Hashtable<String, String> serviceProperties;
 
     /**
      * Constructor for a {@link ServiceDescription}, which takes all details as parameters
@@ -34,7 +38,7 @@ public class ServiceDescription {
      * @param servicePort Int service port, like 8080
      * @param serviceProperties Hashtable service props, like url = "/rest"
      */
-    public ServiceDescription(String serviceType, String serviceName, int servicePort,
+    public ServiceDescription(@Nullable String serviceType, @Nullable String serviceName, int servicePort,
             Hashtable<String, String> serviceProperties) {
         this.serviceType = serviceType;
         this.serviceName = serviceName;
@@ -53,7 +57,7 @@ public class ServiceDescription {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
