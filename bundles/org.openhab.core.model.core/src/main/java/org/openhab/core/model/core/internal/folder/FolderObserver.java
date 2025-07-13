@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -111,7 +112,8 @@ public class FolderObserver implements WatchService.WatchEventListener {
         parsers.remove(extension);
 
         Set<String> removed = modelRepository.removeAllModelsOfType(extension);
-        ignoredPaths.addAll(removed.stream().map(namePathMap::get).collect(Collectors.toSet()));
+        ignoredPaths
+                .addAll(removed.stream().map(namePathMap::get).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
 
     @Activate
