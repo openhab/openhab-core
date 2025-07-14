@@ -130,6 +130,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         // read initial contents
         WATCHED_PATHS.forEach(watchPath -> {
             Path fullPath = mainWatchPath.resolve(watchPath);
+            if (!Files.exists(fullPath) || !Files.isDirectory(fullPath)) {
+                return;
+            }
             try {
                 Files.walkFileTree(fullPath, new SimpleFileVisitor<>() {
                     @Override
