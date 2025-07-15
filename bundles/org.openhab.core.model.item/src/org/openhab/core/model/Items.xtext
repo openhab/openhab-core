@@ -17,9 +17,9 @@ ModelItem:
 	(ModelNormalItem | ModelGroupItem) name=ID
 	(label=STRING)?
 	('<' icon=Icon '>')?
-	('(' groups+=ID (',' groups+=ID)* ')')? 
+	('(' groups+=ID (',' groups+=ID)* ')')?
 	('[' tags+=(ID|STRING) (',' tags+=(ID|STRING))* ']')?
-	('{' bindings+=ModelBinding (',' bindings+=ModelBinding)* '}')? 
+	('{' bindings+=ModelBinding (',' bindings+=ModelBinding)* '}')?
 ;
 
 ModelGroupItem:
@@ -56,7 +56,7 @@ ValueType returns ecore::EJavaObject:
     STRING | NUMBER | BOOLEAN
 ;
 
-BOOLEAN returns ecore::EBoolean: 
+BOOLEAN returns ecore::EBoolean:
     'true' | 'false'
 ;
 
@@ -68,7 +68,7 @@ Icon:
 	(ID ':' (ID ':')?)? ID
 ;
 
-terminal ID: '^'?('a'..'z'|'A'..'Z'|'_'|'0'..'9') ('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9')*;
+terminal ID: '^'?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 
 terminal STRING:
 			'"' ( '\\' ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') | !('\\'|'"') )* '"' |
