@@ -130,7 +130,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         // read initial contents
         WATCHED_PATHS.forEach(watchPath -> {
             Path fullPath = mainWatchPath.resolve(watchPath);
-            if (!Files.exists(fullPath) || !Files.isDirectory(fullPath)) {
+            if (!Files.exists(fullPath)) {
+                return;
+            } else if (!Files.isDirectory(fullPath)) {
+                logger.warn("Expecting '{}' to be a directory, but it's a file. Ignoring it.", fullPath);
                 return;
             }
             try {
