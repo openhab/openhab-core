@@ -78,6 +78,8 @@ public class CorsFilter implements ContainerResponseFilter {
 
     static final String ACCEPTED_HTTP_METHODS = String.join(HEADERS_SEPARATOR, ACCEPTED_HTTP_METHODS_LIST);
 
+    static boolean hasLogged;
+
     private final transient Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
     private boolean isEnabled;
@@ -183,8 +185,9 @@ public class CorsFilter implements ContainerResponseFilter {
             this.isEnabled = "true".equalsIgnoreCase(corsPropertyValue);
         }
 
-        if (this.isEnabled) {
-            logger.info("enabled CORS for REST API.");
+        if (this.isEnabled && !hasLogged) {
+            logger.info("Enabled CORS for REST API.");
+            hasLogged = true;
         }
     }
 }
