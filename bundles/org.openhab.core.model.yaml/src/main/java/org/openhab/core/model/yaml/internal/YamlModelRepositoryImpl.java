@@ -130,6 +130,12 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         // read initial contents
         WATCHED_PATHS.forEach(watchPath -> {
             Path fullPath = mainWatchPath.resolve(watchPath);
+            if (!Files.exists(fullPath)) {
+                return;
+            } else if (!Files.isDirectory(fullPath)) {
+                logger.warn("Expecting '{}' to be a directory, but it's a file. Ignoring it.", fullPath);
+                return;
+            }
             try {
                 Files.walkFileTree(fullPath, new SimpleFileVisitor<>() {
                     @Override
@@ -144,7 +150,14 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     @Override
                     public FileVisitResult visitFileFailed(@NonNullByDefault({}) Path file,
                             @NonNullByDefault({}) IOException exc) throws IOException {
-                        logger.warn("Failed to process {}: {}", file.toAbsolutePath(), exc.getMessage());
+                        String message = exc.getMessage();
+                        if (file.toString().equals(message)) {
+                            // If the message is just the path, we do not need to log it again.
+                            // This is the case for FileNotFoundException, AccessDeniedException, etc.
+                            // Instead of the path, we log the exception class to provide additional details.
+                            message = exc.getClass().getSimpleName();
+                        }
+                        logger.warn("Failed to process {}: {}", file.toAbsolutePath(), message);
                         return FileVisitResult.CONTINUE;
                     }
                 });
