@@ -1,0 +1,8 @@
+variables:
+  foo: bar
+  baz: qux
+
+packages:
+  foo: bar
+  baz: qux
+
