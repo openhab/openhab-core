@@ -295,6 +295,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private void assignTags(ModelItem modelItem, ActiveItem item) {
         boolean isTagged = false;
+        item.removeAllTags();
         List<String> tags = modelItem.getTags();
         if (!tags.isEmpty()) {
             for (String tag : tags) {
