@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.emf.common.util.EList;
@@ -49,6 +50,12 @@ import org.openhab.core.model.items.ModelGroupFunction;
 import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
 import org.openhab.core.model.items.ModelNormalItem;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateDescriptionFragmentProvider;
@@ -89,13 +96,20 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private final Map<String, StateDescriptionFragment> stateDescriptionFragments = new ConcurrentHashMap<>();
 
+    private final ThingRegistry thingRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+
     private Integer rank;
 
     @Activate
     public GenericItemProvider(final @Reference ModelRepository modelRepository,
-            final @Reference GenericMetadataProvider genericMetadataProvider, Map<String, Object> properties) {
+            final @Reference GenericMetadataProvider genericMetadataProvider,
+            final @Reference ThingRegistry thingRegistry,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry, Map<String, Object> properties) {
         this.modelRepository = modelRepository;
         this.genericMetaDataProvider = genericMetadataProvider;
+        this.thingRegistry = thingRegistry;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
 
         Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
         if (serviceRanking instanceof Integer integerValue) {
@@ -280,9 +294,34 @@ public class GenericItemProvider extends AbstractProvider<Item>
     }
 
     private void assignTags(ModelItem modelItem, ActiveItem item) {
+        boolean isTagged = false;
         List<String> tags = modelItem.getTags();
-        for (String tag : tags) {
-            item.addTag(tag);
+        if (!tags.isEmpty()) {
+            for (String tag : tags) {
+                item.addTag(tag);
+            }
+            isTagged = true;
+        }
+        for (ItemChannelLink link : itemChannelLinkRegistry.getLinks(item.getName())) {
+            ChannelUID channelUID = link.getLinkedUID();
+            Thing thing = thingRegistry.get(channelUID.getThingUID());
+            if (thing != null) {
+                Channel channel = thing.getChannel(channelUID.getId());
+                if (channel != null) {
+                    Configuration config = link.getConfiguration();
+                    if (Boolean.TRUE.equals(config.get("useTags"))) {
+                        Set<String> defaultTags = channel.getDefaultTags();
+                        if (isTagged && !defaultTags.isEmpty()) {
+                            logger.warn("Item '{}': Multiple tag sources forbidden.", item.getName());
+                            return;
+                        }
+                        for (String tag : defaultTags) {
+                            item.addTag(tag);
+                        }
+                        isTagged = true;
+                    }
+                }
+            }
         }
     }
 
