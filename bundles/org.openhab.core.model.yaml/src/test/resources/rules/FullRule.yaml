@@ -1,0 +1,125 @@
+version: 1
+rules:
+  test:full-rule:
+    label: Full Rule
+    description: The description of the full rule
+    templateUid: template:non-existing
+    templateState: template missing
+    visibility: expert
+    config:
+      textParam: " text"
+      integerParam: 5
+      decimalParam: 6.75
+      booleanParam: true
+    configDescriptions:
+      - name: textParam
+        label: Text parameter
+        description: This is a text parameter.
+        default: A text
+        type: TEXT
+        required: false
+        pattern: \s\w+
+        readOnly: true
+        multiple: true
+        multipleLimit: 3
+        groupName: Group Name
+        advanced: true
+        verify: true
+        limitToOptions: false
+        options:
+          - label: First Option
+            value: 1st
+          - label: Second Option
+            value: 2nd
+        filterCriteria:
+          - name: filter1
+            value: .*
+          - name: filter2
+            value: a.*
+      - name: integerParam
+        label: Integer parameter
+        description: This is an integer parameter.
+        default: 4
+        type: INTEGER
+        required: true
+        min: 2
+        max: 8
+        stepsize: 1
+        readOnly: false
+        groupName: Group Name
+        unit: rpm
+        unitLabel: Rounds per Minute
+      - name: itemParam
+        label: Item parameter
+        description: This is an item parameter
+        context: item
+        type: TEXT
+        required: false
+        groupName: Group Name
+      - name: decimalParam
+        label: Decimal parameter
+        description: This is a decimal parameter.
+        default: 3.25
+        type: DECIMAL
+        min: 0.5
+        max: 11
+        stepsize: 0.25
+        groupName: Group Name
+        advanced: true
+        verify: true
+      - name: booleanParam
+        label: Boolean parameter
+        description: This is a boolean parameter.
+        default: true
+        type: BOOLEAN
+        readOnly: false
+        groupName: Group Name
+    tags:
+      - First Tag
+      - Second Tag
+    triggers:
+      - id: first
+        label: First Trigger
+        description: The first trigger.
+        type: StartLevel
+        config:
+          startlevel: 80
+      - label: Second Trigger
+        description: The second trigger.
+        type: Cron
+        config:
+          cronExpression: 0 3/30 8 * * ? *
+    conditions:
+      - id: holiday
+        label: Is Holiday
+        description: It must be a holiday.
+        type: Holiday
+      - id: weekday
+        type: Weekday
+      - type: TimeOfDay
+        label: Work Hours
+        config:
+          startTime: 08:00
+          endTime: 16:00
+      - type: ItemState
+        label: Heating Power Sufficient
+        config:
+          itemName: CurrentPower
+          operator: ">"
+          state: "50"
+    actions:
+      - id: greet
+        label: Greet
+        description: Greets the person.
+        config:
+          volume: 100
+          sink: enhancedjavasound
+          text: Welcome
+        type: Say
+      - label: Print
+        description: Gives a warm welcome.
+        config:
+          type: Ruby
+          script: |
+            puts "Hello and welcome"
+        type: Script
