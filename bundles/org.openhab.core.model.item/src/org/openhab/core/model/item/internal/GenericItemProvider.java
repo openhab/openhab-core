@@ -304,13 +304,13 @@ public class GenericItemProvider extends AbstractProvider<Item>
             isTagged = true;
         }
         for (ItemChannelLink link : itemChannelLinkRegistry.getLinks(item.getName())) {
-            ChannelUID channelUID = link.getLinkedUID();
-            Thing thing = thingRegistry.get(channelUID.getThingUID());
-            if (thing != null) {
-                Channel channel = thing.getChannel(channelUID.getId());
-                if (channel != null) {
-                    Configuration config = link.getConfiguration();
-                    if (Boolean.TRUE.equals(config.get("useTags"))) {
+            Configuration config = link.getConfiguration();
+            if (Boolean.TRUE.equals(config.get("useTags"))) {
+                ChannelUID channelUID = link.getLinkedUID();
+                Thing thing = thingRegistry.get(channelUID.getThingUID());
+                if (thing != null) {
+                    Channel channel = thing.getChannel(channelUID.getId());
+                    if (channel != null) {
                         Set<String> defaultTags = channel.getDefaultTags();
                         if (isTagged && !defaultTags.isEmpty()) {
                             logger.warn("Item '{}': Multiple tag sources forbidden.", item.getName());
