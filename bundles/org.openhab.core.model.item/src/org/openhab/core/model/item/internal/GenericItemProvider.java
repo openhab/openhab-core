@@ -49,6 +49,12 @@ import org.openhab.core.model.items.ModelGroupFunction;
 import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
 import org.openhab.core.model.items.ModelNormalItem;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateDescriptionFragmentProvider;
@@ -74,6 +80,8 @@ import org.slf4j.LoggerFactory;
 public class GenericItemProvider extends AbstractProvider<Item>
         implements ModelRepositoryChangeListener, ItemProvider, StateDescriptionFragmentProvider {
 
+    public static final String USE_TAGS = "useTags";
+
     private final Logger logger = LoggerFactory.getLogger(GenericItemProvider.class);
 
     /** to keep track of all binding config readers */
@@ -89,13 +97,20 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private final Map<String, StateDescriptionFragment> stateDescriptionFragments = new ConcurrentHashMap<>();
 
+    private final ThingRegistry thingRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+
     private Integer rank;
 
     @Activate
     public GenericItemProvider(final @Reference ModelRepository modelRepository,
-            final @Reference GenericMetadataProvider genericMetadataProvider, Map<String, Object> properties) {
+            final @Reference GenericMetadataProvider genericMetadataProvider,
+            final @Reference ThingRegistry thingRegistry,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry, Map<String, Object> properties) {
         this.modelRepository = modelRepository;
         this.genericMetaDataProvider = genericMetadataProvider;
+        this.thingRegistry = thingRegistry;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
 
         Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
         if (serviceRanking instanceof Integer integerValue) {
@@ -279,11 +294,48 @@ public class GenericItemProvider extends AbstractProvider<Item>
         return format;
     }
 
+    /**
+     * Assign any tags that are defined directly in the item definition text
+     */
     private void assignTags(ModelItem modelItem, ActiveItem item) {
-        List<String> tags = modelItem.getTags();
-        for (String tag : tags) {
-            item.addTag(tag);
+        Collection<String> newTags = modelItem.getTags();
+        if (!newTags.isEmpty()) {
+            item.addTags(newTags);
+            logger.debug("Item '{}' tags '{}' assigned", item.getName(), newTags);
         }
+    }
+
+    /**
+     * Assign any tags that are defined in any linked channel's default tags
+     */
+    private Item assignDefaultTags(Item baseItem) {
+        if (baseItem instanceof ActiveItem item) {
+            for (ItemChannelLink link : itemChannelLinkRegistry.getLinks(item.getName())) {
+                Configuration config = link.getConfiguration();
+                if (Boolean.TRUE.equals(config.get(USE_TAGS))) {
+                    ChannelUID channelUID = link.getLinkedUID();
+                    Thing thing = thingRegistry.get(channelUID.getThingUID());
+                    if (thing != null) {
+                        Channel channel = thing.getChannel(channelUID.getId());
+                        if (channel != null) {
+                            Collection<String> newTags = channel.getDefaultTags();
+                            if (!newTags.isEmpty()) {
+                                Collection<String> oldTags = item.getTags();
+                                if (oldTags.isEmpty()) {
+                                    item.addTags(newTags);
+                                    logger.debug("Item '{}' tags '{}' assigned from channel '{}'.", item.getName(),
+                                            newTags, channel.getUID());
+                                } else if (!newTags.equals(oldTags)) {
+                                    logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
+                                            item.getName());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return baseItem;
     }
 
     private GroupItem applyGroupFunction(Item baseItem, ModelGroupItem modelGroupItem, ModelGroupFunction function) {
@@ -403,7 +455,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 case MODIFIED:
                     Map<String, Item> oldItems = toItemMap(itemsMap.get(modelName));
                     Map<String, Item> newItems = toItemMap(getItemsFromModel(modelName));
-                    itemsMap.put(modelName, newItems.values());
+                    processBindingConfigsFromModel(modelName, type);
+                    itemsMap.put(modelName, newItems.values().stream().map(i -> assignDefaultTags(i)).toList());
                     for (Item newItem : newItems.values()) {
                         Item oldItem = oldItems.get(newItem.getName());
                         if (oldItem != null) {
@@ -414,7 +467,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                             notifyListenersAboutAddedElement(newItem);
                         }
                     }
-                    processBindingConfigsFromModel(modelName, type);
+                    // TODO did moving the following line up to #458 cause unexpected effects?
+                    // processBindingConfigsFromModel(modelName, type);
                     for (Item oldItem : oldItems.values()) {
                         if (!newItems.containsKey(oldItem.getName())) {
                             notifyAndCleanup(oldItem);
