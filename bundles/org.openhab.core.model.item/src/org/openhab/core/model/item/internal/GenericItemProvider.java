@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.emf.common.util.EList;
@@ -80,6 +79,8 @@ import org.slf4j.LoggerFactory;
         StateDescriptionFragmentProvider.class }, immediate = true)
 public class GenericItemProvider extends AbstractProvider<Item>
         implements ModelRepositoryChangeListener, ItemProvider, StateDescriptionFragmentProvider {
+
+    public static final String USE_TAGS = "useTags";
 
     private final Logger logger = LoggerFactory.getLogger(GenericItemProvider.class);
 
@@ -293,37 +294,48 @@ public class GenericItemProvider extends AbstractProvider<Item>
         return format;
     }
 
+    /**
+     * Assign any tags that are defined directly in the item definition text
+     */
     private void assignTags(ModelItem modelItem, ActiveItem item) {
-        boolean isTagged = false;
-        item.removeAllTags();
-        List<String> tags = modelItem.getTags();
-        if (!tags.isEmpty()) {
-            for (String tag : tags) {
-                item.addTag(tag);
-            }
-            isTagged = true;
+        Collection<String> newTags = modelItem.getTags();
+        if (!newTags.isEmpty()) {
+            item.addTags(newTags);
+            logger.debug("Item '{}' tags '{}' assigned", item.getName(), newTags);
         }
-        for (ItemChannelLink link : itemChannelLinkRegistry.getLinks(item.getName())) {
-            Configuration config = link.getConfiguration();
-            if (Boolean.TRUE.equals(config.get("useTags"))) {
-                ChannelUID channelUID = link.getLinkedUID();
-                Thing thing = thingRegistry.get(channelUID.getThingUID());
-                if (thing != null) {
-                    Channel channel = thing.getChannel(channelUID.getId());
-                    if (channel != null) {
-                        Set<String> defaultTags = channel.getDefaultTags();
-                        if (isTagged && !defaultTags.isEmpty()) {
-                            logger.warn("Item '{}': Multiple tag sources forbidden.", item.getName());
-                            return;
+    }
+
+    /**
+     * Assign any tags that are defined in any linked channel's default tags
+     */
+    private Item assignDefaultTags(Item baseItem) {
+        if (baseItem instanceof ActiveItem item) {
+            for (ItemChannelLink link : itemChannelLinkRegistry.getLinks(item.getName())) {
+                Configuration config = link.getConfiguration();
+                if (Boolean.TRUE.equals(config.get(USE_TAGS))) {
+                    ChannelUID channelUID = link.getLinkedUID();
+                    Thing thing = thingRegistry.get(channelUID.getThingUID());
+                    if (thing != null) {
+                        Channel channel = thing.getChannel(channelUID.getId());
+                        if (channel != null) {
+                            Collection<String> newTags = channel.getDefaultTags();
+                            if (!newTags.isEmpty()) {
+                                Collection<String> oldTags = item.getTags();
+                                if (oldTags.isEmpty()) {
+                                    item.addTags(newTags);
+                                    logger.debug("Item '{}' tags '{}' assigned from channel '{}'.", item.getName(),
+                                            newTags, channel.getUID());
+                                } else if (!newTags.equals(oldTags)) {
+                                    logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
+                                            item.getName());
+                                }
+                            }
                         }
-                        for (String tag : defaultTags) {
-                            item.addTag(tag);
-                        }
-                        isTagged = true;
                     }
                 }
             }
         }
+        return baseItem;
     }
 
     private GroupItem applyGroupFunction(Item baseItem, ModelGroupItem modelGroupItem, ModelGroupFunction function) {
@@ -443,7 +455,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 case MODIFIED:
                     Map<String, Item> oldItems = toItemMap(itemsMap.get(modelName));
                     Map<String, Item> newItems = toItemMap(getItemsFromModel(modelName));
-                    itemsMap.put(modelName, newItems.values());
+                    processBindingConfigsFromModel(modelName, type);
+                    itemsMap.put(modelName, newItems.values().stream().map(i -> assignDefaultTags(i)).toList());
                     for (Item newItem : newItems.values()) {
                         Item oldItem = oldItems.get(newItem.getName());
                         if (oldItem != null) {
@@ -454,7 +467,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                             notifyListenersAboutAddedElement(newItem);
                         }
                     }
-                    processBindingConfigsFromModel(modelName, type);
+                    // TODO did moving the following line up to #458 cause unexpected effects?
+                    // processBindingConfigsFromModel(modelName, type);
                     for (Item oldItem : oldItems.values()) {
                         if (!newItems.containsKey(oldItem.getName())) {
                             notifyAndCleanup(oldItem);
