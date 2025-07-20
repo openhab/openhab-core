@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ActiveItem;
 import org.openhab.core.items.GenericItem;
@@ -38,9 +39,19 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataAwareItem;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.semantics.Point;
+import org.openhab.core.semantics.Property;
+import org.openhab.core.semantics.SemanticTags;
+import org.openhab.core.semantics.Tag;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.StateDescriptionService;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -50,7 +61,6 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.introspector.Property;
 
 /**
  * This is the main implementing class of the {@link ItemRegistry} interface. It
