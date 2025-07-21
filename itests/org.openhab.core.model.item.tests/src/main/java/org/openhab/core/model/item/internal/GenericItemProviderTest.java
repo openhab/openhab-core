@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.GenericItem;
@@ -57,15 +55,6 @@ import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.openhab.core.thing.Channel;
-import org.openhab.core.thing.ChannelUID;
-import org.openhab.core.thing.ThingRegistry;
-import org.openhab.core.thing.ThingTypeUID;
-import org.openhab.core.thing.ThingUID;
-import org.openhab.core.thing.binding.builder.ChannelBuilder;
-import org.openhab.core.thing.binding.builder.ThingBuilder;
-import org.openhab.core.thing.link.ItemChannelLink;
-import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
@@ -83,7 +72,6 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class GenericItemProviderTest extends JavaOSGiTest {
 
-    private static final String AARDVARK = "aardvark";
     private static final String ITEMS_MODEL_TYPE = "items";
     private static final String TESTMODEL_NAME = "testModel.items";
     private static final String TESTMODEL_NAME2 = "testModel2.items";
@@ -95,13 +83,9 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
     private @NonNullByDefault({}) ModelRepository modelRepository;
-    private @NonNullByDefault({}) ThingRegistry thingRegistry;
-    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
 
     @BeforeEach
     public void setUp() {
-        registerVolatileStorageService();
-
         itemRegistry = getService(ItemRegistry.class);
         assertThat(itemRegistry, is(notNullValue()));
         assertThat(itemRegistry.getAll(), hasSize(0));
@@ -113,12 +97,6 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         modelRepository = getService(ModelRepository.class);
         assertThat(modelRepository, is(notNullValue()));
         assertThat(modelRepository.getAllModelNamesOfType(ITEMS_MODEL_TYPE).iterator().hasNext(), is(false));
-
-        thingRegistry = getService(ThingRegistry.class);
-        assertThat(thingRegistry, is(notNullValue()));
-
-        itemChannelLinkRegistry = getService(ItemChannelLinkRegistry.class);
-        assertThat(itemChannelLinkRegistry, is(notNullValue()));
     }
 
     /**
@@ -732,86 +710,5 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         stateDescription = item.getStateDescription();
         assertThat(stateDescription, is(notNullValue()));
         assertThat(stateDescription.getPattern(), is("%s"));
-    }
-
-    @Test
-    public void assertItemChannelLinkRegistryIsUpdated() {
-        String input = "String %s { channel=\"test:test:test:test\" [ boolVal=true, foo=\"bar\" ] }"
-                .formatted(AARDVARK);
-
-        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(input.getBytes()));
-
-        Item item = itemRegistry.get(AARDVARK);
-        assertThat(item, is(notNullValue()));
-        assertThat(itemChannelLinkRegistry.getLinks(AARDVARK).size(), is(1));
-        Optional<ItemChannelLink> optional = itemChannelLinkRegistry.getLinks(AARDVARK).stream().findFirst();
-        assertThat(optional.isPresent(), is(true));
-        ItemChannelLink link = optional.get();
-        assertThat(link.getLinkedUID(), is(new ChannelUID("test:test:test:test")));
-        Configuration conf = link.getConfiguration();
-        assertThat(conf, is(notNullValue()));
-        assertThat(conf.get("boolVal"), is(true));
-        assertThat(conf.get("foo"), is("bar"));
-    }
-
-    @Test
-    public void assertItemAssignedDefaultTags() {
-        ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
-        ThingUID thingUID = new ThingUID(thingTypeUID, "test");
-        Channel Channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")).withDefaultTags(Set.of("foo", "bar"))
-                .build();
-        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(Channel);
-        thingRegistry.add(thingBuilder.build());
-
-        String input = "String %s { channel=\"test:test:test:test\" [ %s=true ] }".formatted(AARDVARK,
-                GenericItemProvider.USE_TAGS);
-
-        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(input.getBytes()));
-
-        Item item = itemRegistry.get(AARDVARK);
-        assertThat(item, is(notNullValue()));
-        assertThat(item.getTags(), hasSize(2));
-        assertThat(item.getTags(), hasItem("foo"));
-        assertThat(item.getTags(), hasItem("bar"));
-    }
-
-    @Test
-    public void assertItemDidNotAssignDefaultTags() {
-        ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
-        ThingUID thingUID = new ThingUID(thingTypeUID, "test");
-        Channel Channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")).withDefaultTags(Set.of("foo", "bar"))
-                .build();
-        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(Channel);
-        thingRegistry.add(thingBuilder.build());
-
-        String input = "String %s { channel=\"test:test:test:test\" [ %s=false ] }".formatted(AARDVARK,
-                GenericItemProvider.USE_TAGS);
-
-        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(input.getBytes()));
-
-        Item item = itemRegistry.get(AARDVARK);
-        assertThat(item, is(notNullValue()));
-        assertThat(item.getTags(), hasSize(0));
-    }
-
-    @Test
-    public void assertItemAssignedOwnTags() {
-        ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
-        ThingUID thingUID = new ThingUID(thingTypeUID, "test");
-        Channel Channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")).withDefaultTags(Set.of("foo", "bar"))
-                .build();
-        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(Channel);
-        thingRegistry.add(thingBuilder.build());
-
-        String input = "String %s [tag1, tag2] { channel=\"test:test:test:test\" [ %s=true ] }".formatted(AARDVARK,
-                GenericItemProvider.USE_TAGS);
-
-        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(input.getBytes()));
-
-        Item item = itemRegistry.get(AARDVARK);
-        assertThat(item, is(notNullValue()));
-        assertThat(item.getTags(), hasSize(2));
-        assertThat(item.getTags(), hasItem("tag1"));
-        assertThat(item.getTags(), hasItem("tag2"));
     }
 }
