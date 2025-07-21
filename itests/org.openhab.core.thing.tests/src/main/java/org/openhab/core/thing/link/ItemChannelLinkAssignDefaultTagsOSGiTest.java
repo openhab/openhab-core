@@ -196,5 +196,6 @@ public class ItemChannelLinkAssignDefaultTagsOSGiTest extends JavaOSGiTest {
         assertEquals(2, item.getTags().size());
         assertTrue(item.getTags().contains("tag1"));
         assertTrue(item.getTags().contains("tag2"));
+        assertTrue(item.getTags().contains("this should fail"));
     }
 }
