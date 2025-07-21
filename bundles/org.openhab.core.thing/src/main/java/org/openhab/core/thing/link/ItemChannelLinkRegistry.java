@@ -19,13 +19,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.ManagedProvider;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.ActiveItem;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.semantics.Point;
+import org.openhab.core.semantics.Property;
+import org.openhab.core.semantics.SemanticTags;
+import org.openhab.core.semantics.Tag;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -39,6 +45,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link ItemChannelLinkRegistry} tracks all {@link ItemChannelLinkProvider}s
@@ -51,6 +59,10 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @NonNullByDefault
 @Component(immediate = true, service = ItemChannelLinkRegistry.class)
 public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider> {
+
+    public static final String USE_TAGS = "useTags";
+
+    private final Logger logger = LoggerFactory.getLogger(ItemChannelLinkRegistry.class);
 
     private final ThingRegistry thingRegistry;
     private final ItemRegistry itemRegistry;
@@ -86,8 +98,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound items for the given channel UID
      */
     public Set<Item> getLinkedItems(final UID uid) {
-        return ((Stream<Item>) super.getLinkedItemNames(uid).stream().map(itemName -> itemRegistry.get(itemName))
-                .filter(Objects::nonNull)).collect(Collectors.toSet());
+        return super.getLinkedItemNames(uid).stream().map(itemName -> itemRegistry.get(itemName))
+                .filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     /**
@@ -97,9 +109,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound things for the given item name
      */
     public Set<Thing> getBoundThings(final String itemName) {
-        return ((Stream<Thing>) getBoundChannels(itemName).stream()
-                .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull))
-                .collect(Collectors.toSet());
+        return getBoundChannels(itemName).stream().map(channelUID -> thingRegistry.get(channelUID.getThingUID()))
+                .filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     @Reference
@@ -208,6 +219,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     @Override
     protected void notifyListenersAboutAddedElement(final ItemChannelLink element) {
+        assignTags(element);
         super.notifyListenersAboutAddedElement(element);
         postEvent(LinkEventFactory.createItemChannelLinkAddedEvent(element));
     }
@@ -220,6 +232,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     @Override
     protected void notifyListenersAboutUpdatedElement(final ItemChannelLink oldElement, final ItemChannelLink element) {
+        assignTags(element);
         super.notifyListenersAboutUpdatedElement(oldElement, element);
         // it is not needed to send an event, because links can not be updated
     }
@@ -228,5 +241,47 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         THING_CHANNEL_MISSING,
         ITEM_MISSING,
         ITEM_AND_THING_CHANNEL_MISSING;
+    }
+
+    public void assignTags(ItemChannelLink link) {
+        Item baseItem;
+        try {
+            baseItem = itemRegistry.getItem(link.getItemName());
+        } catch (ItemNotFoundException e) {
+            return;
+        }
+
+        if (baseItem instanceof ActiveItem item) {
+            boolean alreadyHasPointOrPropertyTag = false;
+            for (String tag : item.getTags()) {
+                Class<? extends Tag> type = SemanticTags.getById(tag);
+                if ((type != null) && (Point.class.isAssignableFrom(type) || Property.class.isAssignableFrom(type))) {
+                    alreadyHasPointOrPropertyTag = true;
+                    break;
+                }
+            }
+
+            Configuration configuration = link.getConfiguration();
+            if (Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
+                ChannelUID channelUID = link.getLinkedUID();
+                Thing thing = thingRegistry.get(channelUID.getThingUID());
+                if (thing != null) {
+                    Channel channel = thing.getChannel(channelUID.getId());
+                    if (channel != null) {
+                        Collection<String> defaultTags = channel.getDefaultTags();
+                        if (!defaultTags.isEmpty()) {
+                            if (alreadyHasPointOrPropertyTag) {
+                                logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
+                                        item.getName());
+                            } else {
+                                item.addTags(defaultTags);
+                                logger.debug("Item '{}' tags '{}' assigned from channel '{}'.", item.getName(),
+                                        defaultTags, channel.getUID());
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

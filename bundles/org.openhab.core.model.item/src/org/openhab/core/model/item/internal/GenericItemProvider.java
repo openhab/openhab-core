@@ -279,11 +279,11 @@ public class GenericItemProvider extends AbstractProvider<Item>
         return format;
     }
 
-    /**
-     * Assign any tags that are defined directly in the item definition text
-     */
     private void assignTags(ModelItem modelItem, ActiveItem item) {
-        item.addTags(modelItem.getTags());
+        List<String> tags = modelItem.getTags();
+        for (String tag : tags) {
+            item.addTag(tag);
+        }
     }
 
     private GroupItem applyGroupFunction(Item baseItem, ModelGroupItem modelGroupItem, ModelGroupFunction function) {
@@ -403,6 +403,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 case MODIFIED:
                     Map<String, Item> oldItems = toItemMap(itemsMap.get(modelName));
                     Map<String, Item> newItems = toItemMap(getItemsFromModel(modelName));
+                    itemsMap.put(modelName, newItems.values());
                     for (Item newItem : newItems.values()) {
                         Item oldItem = oldItems.get(newItem.getName());
                         if (oldItem != null) {
