@@ -15,16 +15,13 @@ package org.openhab.core.internal.items;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.RegistryChangeListener;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.items.ActiveItem;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -39,19 +36,9 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataAwareItem;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
-import org.openhab.core.semantics.Point;
-import org.openhab.core.semantics.Property;
-import org.openhab.core.semantics.SemanticTags;
-import org.openhab.core.semantics.Tag;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.StateDescriptionService;
-import org.openhab.core.thing.Channel;
-import org.openhab.core.thing.ChannelUID;
-import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingRegistry;
-import org.openhab.core.thing.link.ItemChannelLink;
-import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -77,29 +64,21 @@ import org.slf4j.LoggerFactory;
 public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvider>
         implements ItemRegistry, RegistryChangeListener<Metadata> {
 
-    public static final String USE_TAGS = "useTags";
-
     private final Logger logger = LoggerFactory.getLogger(ItemRegistryImpl.class);
 
     private @Nullable StateDescriptionService stateDescriptionService;
     private @Nullable CommandDescriptionService commandDescriptionService;
     private final MetadataRegistry metadataRegistry;
     private final DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider;
-    private final ThingRegistry thingRegistry;
-    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
 
     private @Nullable ItemStateConverter itemStateConverter;
 
     @Activate
     public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry,
-            final @Reference DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider,
-            final @Reference ThingRegistry thingRegistry,
-            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry, Map<String, Object> properties) {
+            final @Reference DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider) {
         super(ItemProvider.class);
         this.metadataRegistry = metadataRegistry;
         this.defaultStateDescriptionFragmentProvider = defaultStateDescriptionFragmentProvider;
-        this.thingRegistry = thingRegistry;
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
     }
 
     @Activate
@@ -390,7 +369,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     protected void notifyListenersAboutAddedElement(Item element) {
-        element = assignDefaultTags(element);
         postEvent(ItemEventFactory.createAddedEvent(element));
         super.notifyListenersAboutAddedElement(element);
     }
@@ -403,7 +381,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     protected void notifyListenersAboutUpdatedElement(Item oldElement, Item element) {
-        element = assignDefaultTags(element);
         postEvent(ItemEventFactory.createUpdateEvent(element, oldElement));
         super.notifyListenersAboutUpdatedElement(oldElement, element);
     }
@@ -486,47 +463,5 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         if (item instanceof MetadataAwareItem metadataAwareItem) {
             metadataAwareItem.updatedMetadata(oldElement, element);
         }
-    }
-
-    /**
-     * Assign any tags that are defined in any linked channel's default tags
-     */
-    private Item assignDefaultTags(Item item) {
-        if (item instanceof ActiveItem activeItem) {
-            boolean hasPointOrPropertyTag = false;
-            for (String tag : activeItem.getTags()) {
-                Class<? extends Tag> tagType = SemanticTags.getById(tag);
-                if ((tagType != null)
-                        && (Point.class.isAssignableFrom(tagType) || Property.class.isAssignableFrom(tagType))) {
-                    hasPointOrPropertyTag = true;
-                    break;
-                }
-            }
-            for (ItemChannelLink link : itemChannelLinkRegistry.getLinks(activeItem.getName())) {
-                Configuration configuration = link.getConfiguration();
-                if (Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
-                    ChannelUID channelUID = link.getLinkedUID();
-                    Thing thing = thingRegistry.get(channelUID.getThingUID());
-                    if (thing != null) {
-                        Channel channel = thing.getChannel(channelUID.getId());
-                        if (channel != null) {
-                            Collection<String> newTags = channel.getDefaultTags();
-                            if (!newTags.isEmpty()) {
-                                if (hasPointOrPropertyTag) {
-                                    logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
-                                            activeItem.getName());
-                                } else {
-                                    activeItem.addTags(newTags);
-                                    hasPointOrPropertyTag = true;
-                                    logger.debug("Item '{}' tags '{}' assigned from channel '{}'.",
-                                            activeItem.getName(), newTags, channel.getUID());
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return item;
     }
 }
