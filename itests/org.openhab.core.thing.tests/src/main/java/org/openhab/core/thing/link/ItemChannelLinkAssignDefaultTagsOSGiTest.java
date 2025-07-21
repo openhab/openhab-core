@@ -35,12 +35,13 @@ import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 
 /**
- * Tests for {@link ItemChannelLinkRegistry} assignment of default tags.
+ * Tests for {@link ItemChannelLinkRegistry} assignment of the linked
+ * channel's default tags to the item.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class UseLinkedChannelDefaultTagsTest extends JavaOSGiTest {
+public class ItemChannelLinkAssignDefaultTagsOSGiTest extends JavaOSGiTest {
 
     private static final String TEST_ITEM_NAME = "testItem";
     private static final String TEST_MODEL_NAME = "testModel.items";
@@ -94,9 +95,9 @@ public class UseLinkedChannelDefaultTagsTest extends JavaOSGiTest {
     public void assertItemAssignedDefaultTags() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
         ThingUID thingUID = new ThingUID(thingTypeUID, "test");
-        Channel Channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")).withDefaultTags(Set.of("foo", "bar"))
+        Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")).withDefaultTags(Set.of("foo", "bar"))
                 .build();
-        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(Channel);
+        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(channel);
         thingRegistry.add(thingBuilder.build());
 
         String input = "String %s { channel=\"test:test:test:test\" [ %s=true ] }".formatted(TEST_ITEM_NAME,
@@ -115,9 +116,9 @@ public class UseLinkedChannelDefaultTagsTest extends JavaOSGiTest {
     public void assertItemDidNotAssignDefaultTags() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
         ThingUID thingUID = new ThingUID(thingTypeUID, "test");
-        Channel Channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")).withDefaultTags(Set.of("foo", "bar"))
+        Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")).withDefaultTags(Set.of("foo", "bar"))
                 .build();
-        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(Channel);
+        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(channel);
         thingRegistry.add(thingBuilder.build());
 
         String input = "String %s { channel=\"test:test:test:test\" [ %s=false ] }".formatted(TEST_ITEM_NAME,
@@ -131,12 +132,58 @@ public class UseLinkedChannelDefaultTagsTest extends JavaOSGiTest {
     }
 
     @Test
+    public void assertItemDidNotAssignDefaultTags2() {
+        ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
+        ThingUID thingUID = new ThingUID(thingTypeUID, "test");
+        Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, "test"))
+                .withDefaultTags(Set.of("Switch", "Power")).build();
+        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(channel);
+        thingRegistry.add(thingBuilder.build());
+
+        String input = "String %s [Measurement, Temperature, CustomTag] { channel=\"test:test:test:test\" [ %s=true ] }"
+                .formatted(TEST_ITEM_NAME, ItemChannelLinkRegistry.USE_TAGS);
+
+        modelRepository.addOrRefreshModel(TEST_MODEL_NAME, new ByteArrayInputStream(input.getBytes()));
+
+        Item item = itemRegistry.get(TEST_ITEM_NAME);
+        assertNotNull(item);
+        assertEquals(3, item.getTags().size());
+        assertTrue(item.getTags().contains("Measurement"));
+        assertTrue(item.getTags().contains("Temperature"));
+        assertTrue(item.getTags().contains("CustomTag"));
+    }
+
+    @Test
+    public void assertItemDidNotAssignSecondChannelDefaultTags() {
+        ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
+        ThingUID thingUID = new ThingUID(thingTypeUID, "test");
+        Channel channel1 = ChannelBuilder.create(new ChannelUID(thingUID, "test1"))
+                .withDefaultTags(Set.of("Switch", "Power")).build();
+        Channel channel2 = ChannelBuilder.create(new ChannelUID(thingUID, "test2"))
+                .withDefaultTags(Set.of("Measurement", "Temperature")).build();
+        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(channel1)
+                .withChannel(channel2);
+        thingRegistry.add(thingBuilder.build());
+
+        String input = "String %s { channel=\"test:test:test:test1\" [ %s=true ], channel=\"test:test:test:test2\" [ %s=true ] }"
+                .formatted(TEST_ITEM_NAME, ItemChannelLinkRegistry.USE_TAGS, ItemChannelLinkRegistry.USE_TAGS);
+
+        modelRepository.addOrRefreshModel(TEST_MODEL_NAME, new ByteArrayInputStream(input.getBytes()));
+
+        Item item = itemRegistry.get(TEST_ITEM_NAME);
+        assertNotNull(item);
+        assertEquals(2, item.getTags().size());
+        assertTrue(item.getTags().contains("Switch"));
+        assertTrue(item.getTags().contains("Power"));
+    }
+
+    @Test
     public void assertItemAssignedOwnTags() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
         ThingUID thingUID = new ThingUID(thingTypeUID, "test");
-        Channel Channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")).withDefaultTags(Set.of("foo", "bar"))
+        Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")).withDefaultTags(Set.of("foo", "bar"))
                 .build();
-        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(Channel);
+        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(channel);
         thingRegistry.add(thingBuilder.build());
 
         String input = "String %s [tag1, tag2] { channel=\"test:test:test:test\" [ %s=true ] }"

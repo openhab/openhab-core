@@ -219,7 +219,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     @Override
     protected void notifyListenersAboutAddedElement(final ItemChannelLink element) {
-        assignTags(element);
+        assignChannelDefaultTags(element);
         super.notifyListenersAboutAddedElement(element);
         postEvent(LinkEventFactory.createItemChannelLinkAddedEvent(element));
     }
@@ -232,7 +232,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     @Override
     protected void notifyListenersAboutUpdatedElement(final ItemChannelLink oldElement, final ItemChannelLink element) {
-        assignTags(element);
+        assignChannelDefaultTags(element);
         super.notifyListenersAboutUpdatedElement(oldElement, element);
         // it is not needed to send an event, because links can not be updated
     }
@@ -243,7 +243,15 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         ITEM_AND_THING_CHANNEL_MISSING;
     }
 
-    public void assignTags(ItemChannelLink link) {
+    /**
+     * If the item does not already have a Point and/or a Property tag and if the linked channel
+     * has 'useTags=true' then add the default tags from that channel to the respective item. By
+     * contrast if the item does already have a Point and/or a Property tag then we write a warning
+     * message in the log. The warning is also logged if the ttem has more than one linked channel
+     * with the 'useTags=true' configuration.
+     *
+     */
+    private void assignChannelDefaultTags(ItemChannelLink link) {
         Item baseItem;
         try {
             baseItem = itemRegistry.getItem(link.getItemName());
