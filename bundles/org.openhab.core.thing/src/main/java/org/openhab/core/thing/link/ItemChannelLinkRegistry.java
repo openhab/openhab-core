@@ -226,6 +226,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     @Override
     protected void notifyListenersAboutRemovedElement(final ItemChannelLink element) {
+        removeChannelDefaultTags(element);
         super.notifyListenersAboutRemovedElement(element);
         postEvent(LinkEventFactory.createItemChannelLinkRemovedEvent(element));
     }
@@ -245,11 +246,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     /**
      * If the item does not already have a Point and/or a Property tag and if the linked channel
-     * has 'useTags=true' then add the default tags from that channel to the respective item. By
-     * contrast if the item does already have a Point and/or a Property tag then we write a warning
-     * message in the log. The warning is also logged if the ttem has more than one linked channel
-     * with the 'useTags=true' configuration.
-     *
+     * has 'useTags=true' then assign the default tags from that channel to the respective item.
+     * By contrast if the item does already have a Point and/or a Property tag then we write a warning
+     * message in the log. The warning is also logged if the item has more than one linked channel
+     * with the 'useTags=true' configuration. If the item has native custom tags then those tags
+     * remain.
      */
     private void assignChannelDefaultTags(ItemChannelLink link) {
         Item baseItem;
@@ -269,27 +270,80 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                 }
             }
 
-            Configuration configuration = link.getConfiguration();
-            if (Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
-                ChannelUID channelUID = link.getLinkedUID();
-                Thing thing = thingRegistry.get(channelUID.getThingUID());
-                if (thing != null) {
-                    Channel channel = thing.getChannel(channelUID.getId());
-                    if (channel != null) {
-                        Collection<String> defaultTags = channel.getDefaultTags();
-                        if (!defaultTags.isEmpty()) {
+            Set<String> channelDefaultTags = getChannelDefaultTags(link);
+            if (!channelDefaultTags.isEmpty()) {
+                if (alreadyHasPointOrPropertyTag) {
+                    logger.warn("Item '{}' forbidden to assign tags from multiple sources.", item.getName());
+                } else {
+                    item.addTags(channelDefaultTags);
+                    logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", item.getName(), channelDefaultTags,
+                            link.getLinkedUID());
+                }
+            }
+        }
+    }
+
+    /**
+     * If the linked channel has 'useTags=true' and the item's native tag set contains all of the
+     * tags of the linked channel then remove those tags from the item. If the item had any native
+     * custom tags they shall NOT be removed. Finally iterate over any other linked channels so
+     * they may eventually provide new tags.
+     */
+    private void removeChannelDefaultTags(ItemChannelLink thisLink) {
+        Item baseItem;
+        try {
+            baseItem = itemRegistry.getItem(thisLink.getItemName());
+        } catch (ItemNotFoundException e) {
+            return;
+        }
+
+        if (baseItem instanceof ActiveItem item) {
+            Set<String> channelDefaultTags = getChannelDefaultTags(thisLink);
+            if (!channelDefaultTags.isEmpty() && item.getTags().containsAll(channelDefaultTags)) {
+                // remove the original tags
+                channelDefaultTags.forEach(tag -> item.removeTag(tag));
+                logger.debug("Item '{}' removed tags '{}' from channel '{}'.", item.getName(), channelDefaultTags,
+                        thisLink.getLinkedUID());
+
+                // iterate over other links in case one may provide new tags
+                boolean alreadyHasPointOrPropertyTag = false;
+                for (ItemChannelLink otherLink : getLinks(item.getName())) {
+                    if (!otherLink.getUID().equals(thisLink.getUID())) {
+                        channelDefaultTags = getChannelDefaultTags(otherLink);
+                        if (!channelDefaultTags.isEmpty()) {
                             if (alreadyHasPointOrPropertyTag) {
                                 logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
                                         item.getName());
+                                return;
                             } else {
-                                item.addTags(defaultTags);
-                                logger.debug("Item '{}' tags '{}' assigned from channel '{}'.", item.getName(),
-                                        defaultTags, channel.getUID());
+                                alreadyHasPointOrPropertyTag = true;
+                                item.addTags(channelDefaultTags);
+                                logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", item.getName(),
+                                        channelDefaultTags, otherLink.getLinkedUID());
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    /**
+     * If the linked channel has 'useTags=true' in its configuration return it's default tags.
+     * Otherwise return an empty set.
+     */
+    private Set<String> getChannelDefaultTags(ItemChannelLink link) {
+        Configuration configuration = link.getConfiguration();
+        if (Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
+            ChannelUID channelUID = link.getLinkedUID();
+            Thing thing = thingRegistry.get(channelUID.getThingUID());
+            if (thing != null) {
+                Channel channel = thing.getChannel(channelUID.getId());
+                if (channel != null) {
+                    return channel.getDefaultTags();
+                }
+            }
+        }
+        return Set.of();
     }
 }
