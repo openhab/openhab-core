@@ -276,6 +276,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                     logger.warn("Item '{}' forbidden to assign tags from multiple sources.", item.getName());
                 } else {
                     item.addTags(channelDefaultTags);
+                    itemRegistry.update(item);
                     logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", item.getName(), channelDefaultTags,
                             link.getLinkedUID());
                 }
@@ -314,7 +315,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                             if (alreadyHasPointOrPropertyTag) {
                                 logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
                                         item.getName());
-                                return;
+                                break;
                             } else {
                                 alreadyHasPointOrPropertyTag = true;
                                 item.addTags(channelDefaultTags);
@@ -324,6 +325,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                         }
                     }
                 }
+
+                itemRegistry.update(item);
             }
         }
     }
