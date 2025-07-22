@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.script.ScriptException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
@@ -100,6 +102,11 @@ public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory impleme
         if (handler != null) {
             logger.debug("Resetting script engine for script {}", engineIdentifier);
             handler.resetScriptEngine();
+            try {
+                handler.compile();
+            } catch (ScriptException e) {
+                logger.error("Failed to recompile action for rule {}: {}", handler.getRuleUID(), e.getMessage());
+            }
         }
     }
 }
