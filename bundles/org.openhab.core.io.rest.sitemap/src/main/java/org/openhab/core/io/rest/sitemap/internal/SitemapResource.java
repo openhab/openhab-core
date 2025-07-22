@@ -699,6 +699,7 @@ public class SitemapResource
             bean.legend = chartWidget.getLegend();
             bean.forceAsItem = chartWidget.getForceAsItem();
             bean.yAxisDecimalPattern = chartWidget.getYAxisDecimalPattern();
+            bean.interpolation = chartWidget.getInterpolation();
             if (chartWidget.getRefresh() > 0) {
                 bean.refresh = chartWidget.getRefresh();
             }
