@@ -342,7 +342,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * If the linked channel has 'useTags=true' in its configuration return it's default tags.
+     * If the linked channel has 'useTags=true' in its configuration return its default tags.
      * Otherwise return an empty set.
      */
     private Set<String> getChannelDefaultTags(ItemChannelLink link) {
