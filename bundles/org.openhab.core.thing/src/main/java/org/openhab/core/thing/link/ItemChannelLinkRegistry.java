@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.ManagedProvider;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ActiveItem;
@@ -58,7 +59,8 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(immediate = true, service = ItemChannelLinkRegistry.class)
-public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider> {
+public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider>
+        implements RegistryChangeListener<Item> {
 
     public static final String USE_TAGS = "useTags";
 
@@ -73,6 +75,13 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         super(ItemChannelLinkProvider.class);
         this.thingRegistry = thingRegistry;
         this.itemRegistry = itemRegistry;
+        this.itemRegistry.addRegistryChangeListener(this);
+    }
+
+    @Override
+    protected void deactivate() {
+        itemRegistry.removeRegistryChangeListener(this);
+        super.deactivate();
     }
 
     /**
@@ -252,35 +261,36 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * with the 'useTags=true' configuration. If the item has native custom tags then those tags
      * remain.
      */
-    private void assignChannelDefaultTags(ItemChannelLink link) {
-        Item baseItem;
-        try {
-            baseItem = itemRegistry.getItem(link.getItemName());
-        } catch (ItemNotFoundException e) {
-            return;
+    private void assignChannelDefaultTags(ItemChannelLink link, ActiveItem activeItem) {
+        boolean alreadyHasPointOrPropertyTag = false;
+
+        for (String tag : activeItem.getTags()) {
+            Class<? extends Tag> type = SemanticTags.getById(tag);
+            if ((type != null) && (Point.class.isAssignableFrom(type) || Property.class.isAssignableFrom(type))) {
+                alreadyHasPointOrPropertyTag = true;
+                break;
+            }
         }
 
-        if (baseItem instanceof ActiveItem item) {
-            boolean alreadyHasPointOrPropertyTag = false;
-            for (String tag : item.getTags()) {
-                Class<? extends Tag> type = SemanticTags.getById(tag);
-                if ((type != null) && (Point.class.isAssignableFrom(type) || Property.class.isAssignableFrom(type))) {
-                    alreadyHasPointOrPropertyTag = true;
-                    break;
-                }
+        Set<String> channelDefaultTags = getChannelDefaultTags(link);
+        if (!channelDefaultTags.isEmpty()) {
+            if (alreadyHasPointOrPropertyTag) {
+                logger.warn("Item '{}' forbidden to assign tags from multiple sources.", activeItem.getName());
+            } else {
+                activeItem.addTags(channelDefaultTags);
+                itemRegistry.update(activeItem);
+                logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
+                        channelDefaultTags, link.getLinkedUID());
             }
+        }
+    }
 
-            Set<String> channelDefaultTags = getChannelDefaultTags(link);
-            if (!channelDefaultTags.isEmpty()) {
-                if (alreadyHasPointOrPropertyTag) {
-                    logger.warn("Item '{}' forbidden to assign tags from multiple sources.", item.getName());
-                } else {
-                    item.addTags(channelDefaultTags);
-                    itemRegistry.update(item);
-                    logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", item.getName(), channelDefaultTags,
-                            link.getLinkedUID());
-                }
+    private void assignChannelDefaultTags(ItemChannelLink link) {
+        try {
+            if (itemRegistry.getItem(link.getItemName()) instanceof ActiveItem activeItem) {
+                assignChannelDefaultTags(link, activeItem);
             }
+        } catch (ItemNotFoundException e) {
         }
     }
 
@@ -290,44 +300,44 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * custom tags they shall NOT be removed. Finally iterate over any other linked channels so
      * they may eventually provide new tags.
      */
-    private void removeChannelDefaultTags(ItemChannelLink thisLink) {
-        Item baseItem;
-        try {
-            baseItem = itemRegistry.getItem(thisLink.getItemName());
-        } catch (ItemNotFoundException e) {
-            return;
-        }
+    private void removeChannelDefaultTags(ItemChannelLink thisLink, ActiveItem activeItem) {
+        Set<String> channelDefaultTags = getChannelDefaultTags(thisLink);
+        if (!channelDefaultTags.isEmpty() && activeItem.getTags().containsAll(channelDefaultTags)) {
 
-        if (baseItem instanceof ActiveItem item) {
-            Set<String> channelDefaultTags = getChannelDefaultTags(thisLink);
-            if (!channelDefaultTags.isEmpty() && item.getTags().containsAll(channelDefaultTags)) {
-                // remove the original tags
-                channelDefaultTags.forEach(tag -> item.removeTag(tag));
-                logger.debug("Item '{}' removed tags '{}' from channel '{}'.", item.getName(), channelDefaultTags,
-                        thisLink.getLinkedUID());
+            // remove the original tags
+            channelDefaultTags.forEach(tag -> activeItem.removeTag(tag));
+            logger.debug("Item '{}' removed tags '{}' from channel '{}'.", activeItem.getName(), channelDefaultTags,
+                    thisLink.getLinkedUID());
 
-                // iterate over other links in case one may provide new tags
-                boolean alreadyHasPointOrPropertyTag = false;
-                for (ItemChannelLink otherLink : getLinks(item.getName())) {
-                    if (!otherLink.getUID().equals(thisLink.getUID())) {
-                        channelDefaultTags = getChannelDefaultTags(otherLink);
-                        if (!channelDefaultTags.isEmpty()) {
-                            if (alreadyHasPointOrPropertyTag) {
-                                logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
-                                        item.getName());
-                                break;
-                            } else {
-                                alreadyHasPointOrPropertyTag = true;
-                                item.addTags(channelDefaultTags);
-                                logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", item.getName(),
-                                        channelDefaultTags, otherLink.getLinkedUID());
-                            }
+            // iterate over other links in case one may assign new tags
+            boolean alreadyHasPointOrPropertyTag = false;
+            for (ItemChannelLink otherLink : getLinks(activeItem.getName())) {
+                if (!otherLink.getUID().equals(thisLink.getUID())) {
+                    channelDefaultTags = getChannelDefaultTags(otherLink);
+                    if (!channelDefaultTags.isEmpty()) {
+                        if (alreadyHasPointOrPropertyTag) {
+                            logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
+                                    activeItem.getName());
+                            break;
+                        } else {
+                            alreadyHasPointOrPropertyTag = true;
+                            activeItem.addTags(channelDefaultTags);
+                            logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
+                                    channelDefaultTags, otherLink.getLinkedUID());
                         }
                     }
                 }
-
-                itemRegistry.update(item);
             }
+            itemRegistry.update(activeItem);
+        }
+    }
+
+    private void removeChannelDefaultTags(ItemChannelLink link) {
+        try {
+            if (itemRegistry.getItem(link.getItemName()) instanceof ActiveItem activeItem) {
+                removeChannelDefaultTags(link, activeItem);
+            }
+        } catch (ItemNotFoundException e) {
         }
     }
 
@@ -348,5 +358,33 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             }
         }
         return Set.of();
+    }
+
+    /**
+     * If a new item is added to the item registry and we already have prior "pre- orphaned"
+     * links to it, then update the tags from the default tags of the prior linked channels.
+     */
+    @Override
+    public void added(Item item) {
+        if (item instanceof ActiveItem activeItem) {
+            for (ItemChannelLink link : getLinks(activeItem.getName())) {
+                assignChannelDefaultTags(link, activeItem);
+            }
+        }
+    }
+
+    @Override
+    public void removed(Item item) {
+        // do nothing
+    }
+
+    /**
+     * Either this class applied channel default tags to the item, or something else updated the
+     * item (including possibly updating its tags), so in any case do NOT try to re-apply the
+     * channel default tags. Since that might cause an infinite loop.
+     */
+    @Override
+    public void updated(Item oldItem, Item item) {
+        // do nothing
     }
 }
