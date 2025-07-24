@@ -277,6 +277,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             if (alreadyHasPointOrPropertyTag) {
                 logger.warn("Item '{}' forbidden to assign tags from multiple sources.", activeItem.getName());
             } else {
+                link.setTagsLinked(true);
                 activeItem.addTags(channelDefaultTags);
                 itemRegistry.update(activeItem);
                 logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
@@ -295,35 +296,36 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * If the linked channel has 'useTags=true' and the item's native tag set contains all of the
-     * tags of the linked channel then remove those tags from the item. If the item had any native
-     * custom tags they shall NOT be removed. Finally iterate over any other linked channels so
-     * they may eventually provide new tags.
+     * if the linked channel is the actual source of the item's tags then remove those tags from
+     * the item. If the item had any native custom tags they shall NOT be removed. Finally iterate
+     * over any other linked channels so they may eventually provide new tags.
      */
-    private void removeChannelDefaultTags(ItemChannelLink thisLink, ActiveItem activeItem) {
-        Set<String> channelDefaultTags = getChannelDefaultTags(thisLink);
-        if (!channelDefaultTags.isEmpty() && activeItem.getTags().containsAll(channelDefaultTags)) {
+    private void removeChannelDefaultTags(ItemChannelLink oldLink, ActiveItem activeItem) {
+        if (oldLink.tagsLinked()) {
+            oldLink.setTagsLinked(false);
 
-            // remove the original tags
-            channelDefaultTags.forEach(tag -> activeItem.removeTag(tag));
-            logger.debug("Item '{}' removed tags '{}' from channel '{}'.", activeItem.getName(), channelDefaultTags,
-                    thisLink.getLinkedUID());
+            // remove old link's tags
+            Set<String> oldLinkTags = getChannelDefaultTags(oldLink);
+            oldLinkTags.forEach(tag -> activeItem.removeTag(tag));
+            logger.debug("Item '{}' removed tags '{}' from channel '{}'.", activeItem.getName(), oldLinkTags,
+                    oldLink.getLinkedUID());
 
             // iterate over other links in case one may assign new tags
             boolean alreadyHasPointOrPropertyTag = false;
             for (ItemChannelLink otherLink : getLinks(activeItem.getName())) {
-                if (!otherLink.getUID().equals(thisLink.getUID())) {
-                    channelDefaultTags = getChannelDefaultTags(otherLink);
-                    if (!channelDefaultTags.isEmpty()) {
+                if (!otherLink.getUID().equals(oldLink.getUID())) {
+                    Set<String> otherLinkTags = getChannelDefaultTags(otherLink);
+                    if (!otherLinkTags.isEmpty()) {
                         if (alreadyHasPointOrPropertyTag) {
                             logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
                                     activeItem.getName());
                             break;
                         } else {
                             alreadyHasPointOrPropertyTag = true;
-                            activeItem.addTags(channelDefaultTags);
+                            otherLink.setTagsLinked(true);
+                            activeItem.addTags(otherLinkTags);
                             logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
-                                    channelDefaultTags, otherLink.getLinkedUID());
+                                    oldLinkTags, otherLink.getLinkedUID());
                         }
                     }
                 }
