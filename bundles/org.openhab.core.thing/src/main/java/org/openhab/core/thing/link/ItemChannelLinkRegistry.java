@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.Configuration;
@@ -45,6 +46,7 @@ import org.openhab.core.thing.UID;
 import org.openhab.core.thing.link.events.LinkEventFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -60,11 +62,12 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - Rewrite collection handling to improve performance
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemChannelLinkRegistry.class)
+@Component(immediate = true, service = ItemChannelLinkRegistry.class, configurationPid = "org.openhab.core.things.ItemChannelLinkRegistry")
 public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider>
         implements RegistryChangeListener<Item> {
 
     public static final String USE_TAGS = "useTags";
+    public static final String ALWAYS_USE_TAGS = "alwaysUseTags";
 
     private final Logger logger = LoggerFactory.getLogger(ItemChannelLinkRegistry.class);
 
@@ -72,14 +75,25 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     private final ItemRegistry itemRegistry;
     private final ItemBuilderFactory itemBuilderFactory;
 
+    private boolean alwaysUseTags = false;
+
     @Activate
-    public ItemChannelLinkRegistry(final @Reference ThingRegistry thingRegistry,
-            final @Reference ItemRegistry itemRegistry, final @Reference ItemBuilderFactory itemBuilderFactory) {
+    public ItemChannelLinkRegistry(final @Nullable Map<String, @Nullable Object> configuration,
+            final @Reference ThingRegistry thingRegistry, final @Reference ItemRegistry itemRegistry,
+            final @Reference ItemBuilderFactory itemBuilderFactory) {
         super(ItemChannelLinkProvider.class);
         this.thingRegistry = thingRegistry;
         this.itemRegistry = itemRegistry;
         this.itemRegistry.addRegistryChangeListener(this);
         this.itemBuilderFactory = itemBuilderFactory;
+
+        modified(configuration);
+    }
+
+    @Modified
+    protected void modified(@Nullable Map<String, @Nullable Object> configuration) {
+        Object entry = configuration != null ? configuration.get(ALWAYS_USE_TAGS) : null;
+        alwaysUseTags = entry != null ? Boolean.parseBoolean(entry.toString()) : false;
     }
 
     @Override
@@ -278,7 +292,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         Set<String> channelDefaultTags = getChannelDefaultTags(link);
         if (!channelDefaultTags.isEmpty()) {
             if (alreadyHasPointOrPropertyTag) {
-                logger.warn("Item '{}' forbidden to assign tags from multiple sources.", activeItem.getName());
+                logger.warn("Item '{}' already tagged; forbidden to assign tags from channel '{}'.",
+                        activeItem.getName(), link.getLinkedUID());
             } else {
                 Set<String> newTags = new HashSet<>(activeItem.getTags());
                 newTags.addAll(channelDefaultTags);
@@ -313,7 +328,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             // remove old link's tags
             Set<String> oldLinkTags = getChannelDefaultTags(oldLink);
             newTags.removeAll(oldLinkTags);
-            logger.info("Item '{}' removed tags '{}' from channel '{}'.", activeItem.getName(), oldLinkTags,
+            logger.info("Item '{}' removed tags '{}' supplied from channel '{}'.", activeItem.getName(), oldLinkTags,
                     oldLink.getLinkedUID());
 
             // iterate over other links in case one may assign new tags
@@ -323,8 +338,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                     Set<String> otherLinkTags = getChannelDefaultTags(otherLink);
                     if (!otherLinkTags.isEmpty()) {
                         if (alreadyHasPointOrPropertyTag) {
-                            logger.warn("Item '{}' forbidden to assign tags from multiple sources.",
-                                    activeItem.getName());
+                            logger.warn("Item '{}' already tagged; forbidden to assign tags from channel '{}'.",
+                                    activeItem.getName(), otherLink.getLinkedUID());
                             break;
                         } else {
                             alreadyHasPointOrPropertyTag = true;
@@ -357,7 +372,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      */
     private Set<String> getChannelDefaultTags(ItemChannelLink link) {
         Configuration configuration = link.getConfiguration();
-        if (Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
+        if (alwaysUseTags || Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
             ChannelUID channelUID = link.getLinkedUID();
             Thing thing = thingRegistry.get(channelUID.getThingUID());
             if (thing != null) {

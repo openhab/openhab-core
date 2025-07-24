@@ -93,7 +93,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private static class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
         public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry,
                 ItemBuilderFactory itemBuilderFactory) {
-            super(thingRegistry, itemRegistry, itemBuilderFactory);
+            super(null, thingRegistry, itemRegistry, itemBuilderFactory);
         }
 
         @Override
