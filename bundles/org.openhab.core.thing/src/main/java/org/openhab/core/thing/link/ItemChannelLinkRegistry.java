@@ -14,6 +14,7 @@ package org.openhab.core.thing.link;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +28,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ActiveItem;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.semantics.Point;
@@ -68,14 +70,16 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     private final ThingRegistry thingRegistry;
     private final ItemRegistry itemRegistry;
+    private final ItemBuilderFactory itemBuilderFactory;
 
     @Activate
     public ItemChannelLinkRegistry(final @Reference ThingRegistry thingRegistry,
-            final @Reference ItemRegistry itemRegistry) {
+            final @Reference ItemRegistry itemRegistry, final @Reference ItemBuilderFactory itemBuilderFactory) {
         super(ItemChannelLinkProvider.class);
         this.thingRegistry = thingRegistry;
         this.itemRegistry = itemRegistry;
         this.itemRegistry.addRegistryChangeListener(this);
+        this.itemBuilderFactory = itemBuilderFactory;
     }
 
     @Override
@@ -254,12 +258,12 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * If the item does not already have a Point and/or a Property tag and if the linked channel
-     * has 'useTags=true' then assign the default tags from that channel to the respective item.
+     * If the item does not already have a Point and/or a Property tag and if the linked channel does
+     * not have 'useTags=false' then assign the default tags from that channel to the respective item.
      * By contrast if the item does already have a Point and/or a Property tag then we write a warning
      * message in the log. The warning is also logged if the item has more than one linked channel
-     * with the 'useTags=true' configuration. If the item has native custom tags then those tags
-     * remain.
+     * not having the 'useTags=false' configuration. If the item has native custom tags then those
+     * tags remain.
      */
     private void assignChannelDefaultTags(ItemChannelLink link, ActiveItem activeItem) {
         boolean alreadyHasPointOrPropertyTag = false;
@@ -277,12 +281,14 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             if (alreadyHasPointOrPropertyTag) {
                 logger.warn("Item '{}' forbidden to assign tags from multiple sources.", activeItem.getName());
             } else {
-                link.setTagsLinked(true);
-                activeItem.addTags(channelDefaultTags);
-                // TODO notify listeners (currently it logs an error since .items file is read only)
-                // itemRegistry.update(activeItem);
+                Set<String> newTags = new HashSet<>(activeItem.getTags());
+                newTags.addAll(channelDefaultTags);
                 logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
                         channelDefaultTags, link.getLinkedUID());
+
+                link.setTagsLinked(true);
+
+                updateExistingRegistryItemTagsAndNotifyRegistryListeners(activeItem.getName(), newTags);
             }
         }
     }
@@ -303,11 +309,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      */
     private void removeChannelDefaultTags(ItemChannelLink oldLink, ActiveItem activeItem) {
         if (oldLink.tagsLinked()) {
-            oldLink.setTagsLinked(false);
+            Set<String> newTags = new HashSet<>(activeItem.getTags());
 
             // remove old link's tags
             Set<String> oldLinkTags = getChannelDefaultTags(oldLink);
-            oldLinkTags.forEach(tag -> activeItem.removeTag(tag));
+            newTags.removeAll(oldLinkTags);
             logger.debug("Item '{}' removed tags '{}' from channel '{}'.", activeItem.getName(), oldLinkTags,
                     oldLink.getLinkedUID());
 
@@ -323,16 +329,18 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                             break;
                         } else {
                             alreadyHasPointOrPropertyTag = true;
-                            otherLink.setTagsLinked(true);
-                            activeItem.addTags(otherLinkTags);
+                            newTags.addAll(otherLinkTags);
                             logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
-                                    oldLinkTags, otherLink.getLinkedUID());
+                                    otherLinkTags, otherLink.getLinkedUID());
+                            otherLink.setTagsLinked(true);
                         }
                     }
                 }
             }
-            // TODO notify listeners (currently it logs an error since .items file is read only)
-            // itemRegistry.update(activeItem);
+
+            oldLink.setTagsLinked(false);
+
+            updateExistingRegistryItemTagsAndNotifyRegistryListeners(activeItem.getName(), newTags);
         }
     }
 
@@ -346,7 +354,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * If the linked channel has 'useTags=true' in its configuration return its default tags.
+     * If the linked channel does not have 'useTags=false' in its configuration return its default tags.
      * Otherwise return an empty set.
      */
     private Set<String> getChannelDefaultTags(ItemChannelLink link) {
@@ -362,6 +370,28 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             }
         }
         return Set.of();
+    }
+
+    /**
+     * Update the tags on the item instance in item registry and notify the item registry listeners about
+     * the change. For items provisioned by an .items file, the item registry is read only so instead of
+     * trying to replace the item with a new instance, we just modify the tags on the existing item instance.
+     * However since the notification method requires both old and new items so we create a 'fake old item'
+     * instance having the prior tags.
+     *
+     * @param itemName the name of the item in the registry that shall be be updated.
+     * @param newTags the new tags that shall be applied to that item instance.
+     */
+    private void updateExistingRegistryItemTagsAndNotifyRegistryListeners(String itemName, Set<String> newTags) {
+        try {
+            if (itemRegistry.getItem(itemName) instanceof ActiveItem item) {
+                Item fakeOldItem = itemBuilderFactory.newItemBuilder(item).build();
+                item.removeAllTags();
+                item.addTags(newTags);
+                itemRegistry.notifyListenersAboutItemExternalUpdate(fakeOldItem, item);
+            }
+        } catch (ItemNotFoundException e) {
+        }
     }
 
     /**

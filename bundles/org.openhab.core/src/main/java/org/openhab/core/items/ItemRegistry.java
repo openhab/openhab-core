@@ -105,4 +105,11 @@ public interface ItemRegistry extends Registry<Item, String> {
      */
     @Nullable
     Item remove(String itemName, boolean recursive);
+
+    /**
+     * Called when an item instance has been externally updated in order to inform all registry
+     * listeners the change between its old and new state.
+     */
+    default void notifyListenersAboutItemExternalUpdate(Item oldItem, Item newItem) {
+    }
 }
