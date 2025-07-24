@@ -282,8 +282,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             } else {
                 Set<String> newTags = new HashSet<>(activeItem.getTags());
                 newTags.addAll(channelDefaultTags);
-                logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
-                        channelDefaultTags, link.getLinkedUID());
+                logger.info("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(), channelDefaultTags,
+                        link.getLinkedUID());
 
                 link.setTagsLinked(true);
 
@@ -313,7 +313,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             // remove old link's tags
             Set<String> oldLinkTags = getChannelDefaultTags(oldLink);
             newTags.removeAll(oldLinkTags);
-            logger.debug("Item '{}' removed tags '{}' from channel '{}'.", activeItem.getName(), oldLinkTags,
+            logger.info("Item '{}' removed tags '{}' from channel '{}'.", activeItem.getName(), oldLinkTags,
                     oldLink.getLinkedUID());
 
             // iterate over other links in case one may assign new tags
@@ -329,7 +329,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                         } else {
                             alreadyHasPointOrPropertyTag = true;
                             newTags.addAll(otherLinkTags);
-                            logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
+                            logger.info("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
                                     otherLinkTags, otherLink.getLinkedUID());
                             otherLink.setTagsLinked(true);
                         }
