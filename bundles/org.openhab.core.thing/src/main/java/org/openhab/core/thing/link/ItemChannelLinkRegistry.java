@@ -279,7 +279,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             } else {
                 link.setTagsLinked(true);
                 activeItem.addTags(channelDefaultTags);
-                itemRegistry.update(activeItem);
+                // TODO notify listeners (currently it logs an error since .items file is read only)
+                // itemRegistry.update(activeItem);
                 logger.debug("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
                         channelDefaultTags, link.getLinkedUID());
             }
@@ -330,7 +331,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                     }
                 }
             }
-            itemRegistry.update(activeItem);
+            // TODO notify listeners (currently it logs an error since .items file is read only)
+            // itemRegistry.update(activeItem);
         }
     }
 
