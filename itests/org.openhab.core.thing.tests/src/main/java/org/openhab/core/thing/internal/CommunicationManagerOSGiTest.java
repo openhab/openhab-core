@@ -35,6 +35,7 @@ import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.items.Metadata;
@@ -90,8 +91,9 @@ import org.openhab.core.types.TimeSeries;
 public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private static class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
-        public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry) {
-            super(thingRegistry, itemRegistry);
+        public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry,
+                ItemBuilderFactory itemBuilderFactory) {
+            super(thingRegistry, itemRegistry, itemBuilderFactory);
         }
 
         @Override
@@ -153,12 +155,13 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ThingHandler thingHandlerMock;
     private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
     private @Mock @NonNullByDefault({}) TriggerProfile triggerProfileMock;
+    private @Mock @NonNullByDefault({}) ItemBuilderFactory itemBuilderFactoryMock;
 
     private @NonNullByDefault({}) CommunicationManager manager;
     private @NonNullByDefault({}) SafeCaller safeCaller;
 
     private ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock,
-            itemRegistryMock);
+            itemRegistryMock, itemBuilderFactoryMock);
 
     @BeforeEach
     public void beforeEach() {
