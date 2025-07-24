@@ -113,11 +113,35 @@ public class ItemChannelLinkAssignDefaultTagsOSGiTest extends JavaOSGiTest {
     }
 
     /**
-     * Assert that a text item channel link with useTags=true configuration assigns
+     * Assert that a text item channel link without any useTags configuration assigns
      * the channel's tags to the respective item.
      */
     @Test
     public void assertItemAssignedDefaultTags() {
+        ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
+        ThingUID thingUID = new ThingUID(thingTypeUID, "test");
+        Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")) //
+                .withDefaultTags(Set.of("Switch", "Power")).build();
+        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(channel);
+        thingRegistry.add(thingBuilder.build());
+
+        String input = "String %s { channel=\"test:test:test:test\" }".formatted(TEST_ITEM_NAME);
+
+        modelRepository.addOrRefreshModel(TEST_MODEL_NAME, new ByteArrayInputStream(input.getBytes()));
+
+        Item item = itemRegistry.get(TEST_ITEM_NAME);
+        assertNotNull(item);
+        assertEquals(2, item.getTags().size());
+        assertTrue(item.getTags().contains("Switch"));
+        assertTrue(item.getTags().contains("Power"));
+    }
+
+    /**
+     * Assert that a text item channel link with useTags=true configuration assigns
+     * the channel's tags to the respective item.
+     */
+    @Test
+    public void assertItemAssignedDefaultTags2() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
         ThingUID thingUID = new ThingUID(thingTypeUID, "test");
         Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, "test")) //
@@ -138,7 +162,7 @@ public class ItemChannelLinkAssignDefaultTagsOSGiTest extends JavaOSGiTest {
     }
 
     /**
-     * Assert that a text item channel link with useTags=false configuration does NOT assign
+     * Assert that a text item channel link with a useTags=false configuration does NOT assign
      * the channel's tags to the respective item.
      */
     @Test
@@ -161,11 +185,37 @@ public class ItemChannelLinkAssignDefaultTagsOSGiTest extends JavaOSGiTest {
     }
 
     /**
-     * Assert that a text item with its own native tags plus a channel link with useTags=true
+     * Assert that a text item with its own native tags plus a channel link without a useTags
      * configuration does NOT assign the channel's tags to the respective item.
      */
     @Test
     public void assertItemDidNotAssignDefaultTags2() {
+        ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
+        ThingUID thingUID = new ThingUID(thingTypeUID, "test");
+        Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, "test"))
+                .withDefaultTags(Set.of("Switch", "Power")).build();
+        ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(channel);
+        thingRegistry.add(thingBuilder.build());
+
+        String input = "String %s [Measurement, Temperature, CustomTag] { channel=\"test:test:test:test\" }"
+                .formatted(TEST_ITEM_NAME);
+
+        modelRepository.addOrRefreshModel(TEST_MODEL_NAME, new ByteArrayInputStream(input.getBytes()));
+
+        Item item = itemRegistry.get(TEST_ITEM_NAME);
+        assertNotNull(item);
+        assertEquals(3, item.getTags().size());
+        assertTrue(item.getTags().contains("Measurement"));
+        assertTrue(item.getTags().contains("Temperature"));
+        assertTrue(item.getTags().contains("CustomTag"));
+    }
+
+    /**
+     * Assert that a text item with its own native tags plus a channel link with useTags=true
+     * configuration does NOT assign the channel's tags to the respective item.
+     */
+    @Test
+    public void assertItemDidNotAssignDefaultTags3() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
         ThingUID thingUID = new ThingUID(thingTypeUID, "test");
         Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, "test"))
@@ -232,8 +282,8 @@ public class ItemChannelLinkAssignDefaultTagsOSGiTest extends JavaOSGiTest {
                 .withChannel(channel2);
         thingRegistry.add(thingBuilder.build());
 
-        String input = "String %s { channel=\"test:test:test:test1\" [ %s=true ], channel=\"test:test:test:test2\" [ %s=true ] }"
-                .formatted(TEST_ITEM_NAME, ItemChannelLinkRegistry.USE_TAGS, ItemChannelLinkRegistry.USE_TAGS);
+        String input = "String %s { channel=\"test:test:test:test1\" [ %s=true ], channel=\"test:test:test:test2\" }"
+                .formatted(TEST_ITEM_NAME, ItemChannelLinkRegistry.USE_TAGS);
 
         modelRepository.addOrRefreshModel(TEST_MODEL_NAME, new ByteArrayInputStream(input.getBytes()));
 
