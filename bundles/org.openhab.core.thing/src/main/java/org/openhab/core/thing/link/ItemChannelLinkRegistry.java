@@ -349,7 +349,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      */
     private Set<String> getChannelDefaultTags(ItemChannelLink link) {
         Configuration configuration = link.getConfiguration();
-        if (Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
+        if (!Boolean.FALSE.equals(configuration.get(USE_TAGS))) {
             ChannelUID channelUID = link.getLinkedUID();
             Thing thing = thingRegistry.get(channelUID.getThingUID());
             if (thing != null) {
@@ -369,15 +369,15 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     @Override
     public void added(Item item) {
         if (item instanceof ActiveItem activeItem) {
-            for (ItemChannelLink link : getLinks(activeItem.getName())) {
-                assignChannelDefaultTags(link, activeItem);
-            }
+            getLinks(activeItem.getName()).forEach(link -> assignChannelDefaultTags(link, activeItem));
         }
     }
 
     @Override
     public void removed(Item item) {
-        // do nothing
+        if (item instanceof ActiveItem activeItem) {
+            getLinks(activeItem.getName()).forEach(link -> link.setTagsLinked(false));
+        }
     }
 
     /**
