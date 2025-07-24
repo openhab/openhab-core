@@ -96,6 +96,17 @@
       <artifactId>gson</artifactId>
       <version>2.11.0</version>
     </dependency>
+    <!-- do not remove, inherited dependency si-units and indriya are not provided via runtime bom -->
+    <dependency>
+      <groupId>si.uom</groupId>
+      <artifactId>si-units</artifactId>
+      <version>2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>tech.units</groupId>
+      <artifactId>indriya</artifactId>
+      <version>2.2.2</version>
+    </dependency>
   </dependencies>
 
   <build>
