@@ -373,6 +373,9 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         }
     }
 
+    /**
+     * If the item has gone then clear the 'tagsLinked' flag.
+     */
     @Override
     public void removed(Item item) {
         if (item instanceof ActiveItem activeItem) {
