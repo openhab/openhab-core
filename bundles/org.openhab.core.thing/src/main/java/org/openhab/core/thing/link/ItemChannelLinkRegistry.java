@@ -258,12 +258,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * If the item does not already have a Point and/or a Property tag and if the linked channel does
-     * not have 'useTags=false' then assign the default tags from that channel to the respective item.
-     * By contrast if the item does already have a Point and/or a Property tag then we write a warning
-     * message in the log. The warning is also logged if the item has more than one linked channel
-     * not having the 'useTags=false' configuration. If the item has native custom tags then those
-     * tags remain.
+     * If the item does not already have a Point and/or a Property tag and if the linked channel has
+     * 'useTags=true' then assign the default tags from that channel to the respective item. By contrast
+     * if the item does already have a Point and/or a Property tag then we write a warning message in
+     * the log. The warning is also logged if the item has more than one linked channel with 'useTags=true'.
+     * And in any case if the item has native custom tags then those tags remain.
      */
     private void assignChannelDefaultTags(ItemChannelLink link, ActiveItem activeItem) {
         boolean alreadyHasPointOrPropertyTag = false;
@@ -354,12 +353,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * If the linked channel does not have 'useTags=false' in its configuration return its default tags.
-     * Otherwise return an empty set.
+     * If the linked channel has 'useTags=true' return its default tags, otherwise return an empty set.
      */
     private Set<String> getChannelDefaultTags(ItemChannelLink link) {
         Configuration configuration = link.getConfiguration();
-        if (!Boolean.FALSE.equals(configuration.get(USE_TAGS))) {
+        if (Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
             ChannelUID channelUID = link.getLinkedUID();
             Thing thing = thingRegistry.get(channelUID.getThingUID());
             if (thing != null) {
