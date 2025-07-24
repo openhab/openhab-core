@@ -31,6 +31,8 @@ public class ItemChannelLink extends AbstractLink {
     private final @NonNullByDefault({}) ChannelUID channelUID;
     private final Configuration configuration;
 
+    private transient boolean tagsLinked = false;
+
     /**
      * Default constructor in package scope only. Will allow to instantiate this
      * class by reflection. Not intended to be used for normal instantiation.
@@ -71,5 +73,16 @@ public class ItemChannelLink extends AbstractLink {
     @Override
     public int hashCode() {
         return super.hashCode() * configuration.hashCode();
+    }
+
+    /**
+     * Indicates if the linked channel is the actual source of the item's tags.
+     */
+    public boolean tagsLinked() {
+        return tagsLinked;
+    }
+
+    public void setTagsLinked(boolean value) {
+        tagsLinked = value;
     }
 }
