@@ -62,12 +62,11 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - Rewrite collection handling to improve performance
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemChannelLinkRegistry.class, configurationPid = "org.openhab.core.things.ItemChannelLinkRegistry")
+@Component(immediate = true, service = ItemChannelLinkRegistry.class, configurationPid = "org.openhab.ItemChannelLinkRegistry")
 public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider>
         implements RegistryChangeListener<Item> {
 
     public static final String USE_TAGS = "useTags";
-    public static final String ALWAYS_USE_TAGS = "alwaysUseTags";
 
     private final Logger logger = LoggerFactory.getLogger(ItemChannelLinkRegistry.class);
 
@@ -75,7 +74,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     private final ItemRegistry itemRegistry;
     private final ItemBuilderFactory itemBuilderFactory;
 
-    private boolean alwaysUseTags = false;
+    private boolean useTagsGlobally = false;
 
     @Activate
     public ItemChannelLinkRegistry(final @Nullable Map<String, @Nullable Object> configuration,
@@ -92,8 +91,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     @Modified
     protected void modified(@Nullable Map<String, @Nullable Object> configuration) {
-        Object entry = configuration != null ? configuration.get(ALWAYS_USE_TAGS) : null;
-        alwaysUseTags = entry != null ? Boolean.parseBoolean(entry.toString()) : false;
+        Object entry = configuration != null ? configuration.get(USE_TAGS) : null;
+        useTagsGlobally = entry != null ? Boolean.parseBoolean(entry.toString()) : false;
     }
 
     @Override
@@ -372,7 +371,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      */
     private Set<String> getChannelDefaultTags(ItemChannelLink link) {
         Configuration configuration = link.getConfiguration();
-        if (alwaysUseTags || Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
+        if (useTagsGlobally || Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
             ChannelUID channelUID = link.getLinkedUID();
             Thing thing = thingRegistry.get(channelUID.getThingUID());
             if (thing != null) {
