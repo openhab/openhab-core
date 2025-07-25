@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
 public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider>
         implements RegistryChangeListener<Item> {
 
-    public static final String USE_TAGS = "useTags";
+    public static final String USE_TAGS = "applyChannelTagsToItem";
 
     private final Logger logger = LoggerFactory.getLogger(ItemChannelLinkRegistry.class);
 
@@ -291,8 +291,10 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         Set<String> channelDefaultTags = getChannelDefaultTags(link);
         if (!channelDefaultTags.isEmpty()) {
             if (alreadyHasPointOrPropertyTag) {
-                logger.warn("Item '{}' already tagged; forbidden to assign tags from channel '{}'.",
-                        activeItem.getName(), link.getLinkedUID());
+                if (!useTagsGlobally) {
+                    logger.warn("Item '{}' already tagged; forbidden to assign tags from channel '{}'.",
+                            activeItem.getName(), link.getLinkedUID());
+                }
             } else {
                 Set<String> newTags = new HashSet<>(activeItem.getTags());
                 newTags.addAll(channelDefaultTags);
@@ -337,8 +339,10 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                     Set<String> otherLinkTags = getChannelDefaultTags(otherLink);
                     if (!otherLinkTags.isEmpty()) {
                         if (alreadyHasPointOrPropertyTag) {
-                            logger.warn("Item '{}' already tagged; forbidden to assign tags from channel '{}'.",
-                                    activeItem.getName(), otherLink.getLinkedUID());
+                            if (!useTagsGlobally) {
+                                logger.warn("Item '{}' already tagged; forbidden to assign tags from channel '{}'.",
+                                        activeItem.getName(), otherLink.getLinkedUID());
+                            }
                             break;
                         } else {
                             alreadyHasPointOrPropertyTag = true;
