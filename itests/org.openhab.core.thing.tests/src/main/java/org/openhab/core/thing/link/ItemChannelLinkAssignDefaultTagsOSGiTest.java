@@ -173,7 +173,7 @@ public class ItemChannelLinkAssignDefaultTagsOSGiTest extends JavaOSGiTest {
         ThingBuilder thingBuilder = ThingBuilder.create(thingTypeUID, thingUID).withChannel(channel);
         thingRegistry.add(thingBuilder.build());
 
-        String input = "String %s [Measurement, Temperature, CustomTag] { channel=\"test:test:test:test\" [ %s=true ] }"
+        String input = "String %s [^Measurement, ^Temperature, CustomTag] { channel=\"test:test:test:test\" [ %s=true ] }"
                 .formatted(TEST_ITEM_NAME, ItemChannelLinkRegistry.USE_TAGS);
 
         modelRepository.addOrRefreshModel(TEST_MODEL_NAME, new ByteArrayInputStream(input.getBytes()));
