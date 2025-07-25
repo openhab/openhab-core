@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
 public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider>
         implements RegistryChangeListener<Item> {
 
-    public static final String USE_TAGS = "applyChannelTagsToItem";
+    public static final String USE_TAGS = "useTags";
 
     private final Logger logger = LoggerFactory.getLogger(ItemChannelLinkRegistry.class);
 
