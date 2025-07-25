@@ -35,6 +35,7 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
@@ -45,8 +46,6 @@ import org.openhab.core.model.item.internal.GenericMetadataProvider;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
 import org.openhab.core.model.items.ModelBinding;
-import org.openhab.core.model.items.ModelGroupFunction;
-import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
 import org.openhab.core.model.items.ModelProperty;
 import org.openhab.core.types.State;
@@ -115,26 +114,25 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
 
     private ModelItem buildModelItem(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
             @Nullable String stateFormatter, boolean hideDefaultParameters) {
-        ModelItem model;
+        ModelItem model = ItemsFactory.eINSTANCE.createModelItem();
         if (item instanceof GroupItem groupItem) {
-            ModelGroupItem modelGroup = ItemsFactory.eINSTANCE.createModelGroupItem();
-            model = modelGroup;
             Item baseItem = groupItem.getBaseItem();
+            List<String> groupType = new ArrayList<>();
+            groupType.add(groupItem.getType());
             if (baseItem != null) {
-                modelGroup.setType(baseItem.getType());
+                groupType.add(baseItem.getType());
                 GroupFunction function = groupItem.getFunction();
                 if (function != null) {
-                    ModelGroupFunction modelFunction = ModelGroupFunction
-                            .getByName(function.getClass().getSimpleName().toUpperCase());
-                    modelGroup.setFunction(modelFunction);
+                    groupType.add(function.getClass().getSimpleName().toUpperCase());
                     State[] parameters = function.getParameters();
                     for (int i = 0; i < parameters.length; i++) {
-                        modelGroup.getArgs().add(parameters[i].toString());
+                        model.getArgs().add(parameters[i].toString());
                     }
                 }
+
             }
+            model.setType(groupType.stream().collect(Collectors.joining(ItemUtil.EXTENSION_SEPARATOR)));
         } else {
-            model = ItemsFactory.eINSTANCE.createModelNormalItem();
             model.setType(item.getType());
         }
 

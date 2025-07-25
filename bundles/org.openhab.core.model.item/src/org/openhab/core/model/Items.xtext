@@ -14,31 +14,18 @@ ItemModel:
 ;
 
 ModelItem:
-	(ModelNormalItem | ModelGroupItem) name=ID
+	type=ModelItemType ('(' args+=(ID|STRING) (',' args+=(ID|STRING))* ')')?
+	name=ID
 	(label=STRING)?
 	('<' icon=Icon '>')?
-	('(' groups+=ID (',' groups+=ID)* ')')? 
+	('(' groups+=ID (',' groups+=ID)* ')')?
 	('[' tags+=(ID|STRING) (',' tags+=(ID|STRING))* ']')?
-	('{' bindings+=ModelBinding (',' bindings+=ModelBinding)* '}')? 
+	('{' bindings+=ModelBinding (',' bindings+=ModelBinding)* '}')?
 ;
 
-ModelGroupItem:
-	{ModelGroupItem} 'Group' (':' type=ModelItemType ( ':' function=ModelGroupFunction ('(' args+=(ID|STRING) (',' args+=(ID|STRING))* ')')?)?)?
-;
-
-enum ModelGroupFunction:
-	EQUALITY='EQUALITY' | AND='AND' | OR='OR' | NAND='NAND' | NOR='NOR' | XOR='XOR' | AVG='AVG' | MEDIAN='MEDIAN' | SUM='SUM' | MAX='MAX' | MIN='MIN' | COUNT='COUNT' | LATEST='LATEST' | EARLIEST='EARLIEST'
-;
-
-ModelNormalItem:
-	type=ModelItemType
-;
-
+// Supports item types with up to 4 colon-separated segments, e.g., Group:Number:Dimension:MAX
 ModelItemType:
-	BaseModelItemType | ('Number' (':' ID)?)
-;
-BaseModelItemType:
-	'Switch' | 'Rollershutter' | 'String' | 'Dimmer' | 'Contact' | 'DateTime' | 'Color' | 'Player' | 'Location' | 'Call' | 'Image'
+   ID (':' ID (':' ID (':' ID )?)?)?
 ;
 
 ModelBinding:
@@ -56,7 +43,7 @@ ValueType returns ecore::EJavaObject:
     STRING | NUMBER | BOOLEAN
 ;
 
-BOOLEAN returns ecore::EBoolean: 
+BOOLEAN returns ecore::EBoolean:
     'true' | 'false'
 ;
 

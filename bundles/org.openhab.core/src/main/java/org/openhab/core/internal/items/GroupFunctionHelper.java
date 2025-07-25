@@ -82,15 +82,15 @@ public class GroupFunctionHelper {
         Unit<?> baseItemUnit = baseItem.getUnit();
         if (baseItemUnit != null) {
             switch (functionName.toUpperCase()) {
-                case "AVG":
+                case GroupFunction.AVG:
                     return new QuantityTypeArithmeticGroupFunction.Avg(baseItemUnit);
-                case "MEDIAN":
+                case GroupFunction.MEDIAN:
                     return new QuantityTypeArithmeticGroupFunction.Median(baseItemUnit);
-                case "SUM":
+                case GroupFunction.SUM:
                     return new QuantityTypeArithmeticGroupFunction.Sum(baseItemUnit);
-                case "MIN":
+                case GroupFunction.MIN:
                     return new QuantityTypeArithmeticGroupFunction.Min(baseItemUnit);
-                case "MAX":
+                case GroupFunction.MAX:
                     return new QuantityTypeArithmeticGroupFunction.Max(baseItemUnit);
                 default:
             }
@@ -102,7 +102,7 @@ public class GroupFunctionHelper {
         final String functionName = function.name;
         final List<State> args;
         switch (functionName.toUpperCase()) {
-            case "AND":
+            case GroupFunction.AND:
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
                     return new ArithmeticGroupFunction.And(args.getFirst(), args.get(1));
@@ -110,7 +110,7 @@ public class GroupFunctionHelper {
                     logger.error("Group function 'AND' requires two arguments. Using Equality instead.");
                 }
                 break;
-            case "OR":
+            case GroupFunction.OR:
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
                     return new ArithmeticGroupFunction.Or(args.getFirst(), args.get(1));
@@ -118,7 +118,7 @@ public class GroupFunctionHelper {
                     logger.error("Group function 'OR' requires two arguments. Using Equality instead.");
                 }
                 break;
-            case "NAND":
+            case GroupFunction.NAND:
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
                     return new ArithmeticGroupFunction.NAnd(args.getFirst(), args.get(1));
@@ -126,7 +126,7 @@ public class GroupFunctionHelper {
                     logger.error("Group function 'NOT AND' requires two arguments. Using Equality instead.");
                 }
                 break;
-            case "NOR":
+            case GroupFunction.NOR:
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
                     return new ArithmeticGroupFunction.NOr(args.getFirst(), args.get(1));
@@ -134,7 +134,7 @@ public class GroupFunctionHelper {
                     logger.error("Group function 'NOT OR' requires two arguments. Using Equality instead.");
                 }
                 break;
-            case "XOR":
+            case GroupFunction.XOR:
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
                     return new ArithmeticGroupFunction.Xor(args.getFirst(), args.get(1));
@@ -142,7 +142,7 @@ public class GroupFunctionHelper {
                     logger.error("Group function 'XOR' requires two arguments. Using Equality instead.");
                 }
                 break;
-            case "COUNT":
+            case GroupFunction.COUNT:
                 if (function.params != null && function.params.length == 1) {
                     State countParam = new StringType(function.params[0]);
                     return new ArithmeticGroupFunction.Count(countParam);
@@ -150,21 +150,21 @@ public class GroupFunctionHelper {
                     logger.error("Group function 'COUNT' requires one argument. Using Equality instead.");
                 }
                 break;
-            case "AVG":
+            case GroupFunction.AVG:
                 return new ArithmeticGroupFunction.Avg();
-            case "MEDIAN":
+            case GroupFunction.MEDIAN:
                 return new ArithmeticGroupFunction.Median();
-            case "SUM":
+            case GroupFunction.SUM:
                 return new ArithmeticGroupFunction.Sum();
-            case "MIN":
+            case GroupFunction.MIN:
                 return new ArithmeticGroupFunction.Min();
-            case "MAX":
+            case GroupFunction.MAX:
                 return new ArithmeticGroupFunction.Max();
-            case "LATEST":
+            case GroupFunction.LATEST:
                 return new DateTimeGroupFunction.Latest();
-            case "EARLIEST":
+            case GroupFunction.EARLIEST:
                 return new DateTimeGroupFunction.Earliest();
-            case "EQUALITY":
+            case GroupFunction.EQUALITY:
                 return new GroupFunction.Equality();
             default:
                 logger.error("Unknown group function '{}'. Using Equality instead.", functionName);

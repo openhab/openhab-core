@@ -25,8 +25,10 @@ class ItemsFormatter extends AbstractDeclarativeFormatter {
 	@Inject extension ItemsGrammarAccess
 
 	override protected void configureFormatting(FormattingConfig c) {
-		c.setLinewrap(1, 1, 2).before(modelGroupItemRule)
-		c.setLinewrap(1, 1, 2).before(modelNormalItemRule)
+		c.setLinewrap(1, 1, 2).before(modelItemRule)
+
+		// No space between the item type and the opening parenthesis for the group function arguments
+		c.setNoSpace().between(modelItemTypeRule, modelItemAccess.leftParenthesisKeyword_1_0)
 
 		c.setNoSpace().withinKeywordPairs("<", ">")
 		c.setNoSpace().withinKeywordPairs("(", ")")
