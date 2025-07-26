@@ -13,6 +13,7 @@
 package org.openhab.core.automation;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,6 +41,7 @@ import org.openhab.core.config.core.Configuration;
  * They can help the user to classify or label the Rules, and to filter and search them.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Ravi Nadahar - Added TemplateState
  */
 @NonNullByDefault
 public interface Rule extends Identifiable<String> {
@@ -65,6 +67,17 @@ public interface Rule extends Identifiable<String> {
      */
     @Nullable
     String getTemplateUID();
+
+    /**
+     * This method is used to track the template processing state by the {@link RuleRegistry}. The default
+     * implementation doesn't support templates and must be overridden if the {@link Rule} implementation
+     * supports templates.
+     *
+     * @return the current template processing state.
+     */
+    default TemplateState getTemplateState() {
+        return TemplateState.NO_TEMPLATE;
+    }
 
     /**
      * This method is used to obtain the {@link Rule}'s human-readable name.
@@ -153,5 +166,62 @@ public interface Rule extends Identifiable<String> {
             }
         }
         return null;
+    }
+
+    /**
+     * This enum represent the different states a rule can have in respect to rule templates.
+     */
+    public enum TemplateState {
+
+        /** This {@link Rule} isn't associated with a template */
+        NO_TEMPLATE,
+
+        /** This {@link Rule} is associated with a template and it has yet to be instantiated */
+        PENDING,
+
+        /** This {@link Rule} is associated with a template that wasn't found */
+        TEMPLATE_MISSING,
+
+        /** This {@link Rule} is associated with a template and has been instantiated */
+        INSTANTIATED;
+
+        @Override
+        public String toString() {
+            switch (this) {
+                case INSTANTIATED:
+                    return "instantiated";
+                case PENDING:
+                    return "pending";
+                case TEMPLATE_MISSING:
+                    return "template-missing";
+                case NO_TEMPLATE:
+                default:
+                    return "no-template";
+            }
+        }
+
+        /**
+         * Returns the {@link TemplateState} that best represents the specified string. If no match is found,
+         * {@link TemplateState#NO_TEMPLATE} is returned.
+         *
+         * @param templateState the string to convert.
+         * @return The resulting {@link TemplateState}.
+         */
+        public static TemplateState typeOf(@Nullable String templateState) {
+            if (templateState == null) {
+                return NO_TEMPLATE;
+            }
+            String s = templateState.trim().toLowerCase(Locale.ROOT);
+            switch (s) {
+                case "instantiated":
+                    return INSTANTIATED;
+                case "pending":
+                    return PENDING;
+                case "template-missing":
+                    return TEMPLATE_MISSING;
+                default:
+                    return NO_TEMPLATE;
+            }
+        }
     }
 }

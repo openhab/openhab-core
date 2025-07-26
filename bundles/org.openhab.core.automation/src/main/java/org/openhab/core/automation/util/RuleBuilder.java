@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.Rule.TemplateState;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.internal.RuleImpl;
@@ -45,6 +46,7 @@ public class RuleBuilder {
     private Configuration configuration;
     private List<ConfigDescriptionParameter> configDescriptions;
     private @Nullable String templateUID;
+    private TemplateState templateState;
     private final String uid;
     private @Nullable String name;
     private Set<String> tags;
@@ -58,6 +60,7 @@ public class RuleBuilder {
         this.configuration = new Configuration(rule.getConfiguration());
         this.configDescriptions = new LinkedList<>(rule.getConfigurationDescriptions());
         this.templateUID = rule.getTemplateUID();
+        this.templateState = TemplateState.NO_TEMPLATE;
         this.uid = rule.getUID();
         this.name = rule.getName();
         this.tags = new HashSet<>(rule.getTags());
@@ -74,7 +77,8 @@ public class RuleBuilder {
         return create(r.getUID()).withActions(r.getActions()).withConditions(r.getConditions())
                 .withTriggers(r.getTriggers()).withConfiguration(r.getConfiguration())
                 .withConfigurationDescriptions(r.getConfigurationDescriptions()).withDescription(r.getDescription())
-                .withName(r.getName()).withTags(r.getTags());
+                .withName(r.getName()).withTags(r.getTags()).withTemplateUID(r.getTemplateUID())
+                .withTemplateState(r.getTemplateState());
     }
 
     public static RuleBuilder create(RuleTemplate template, String uid, @Nullable String name,
@@ -82,7 +86,8 @@ public class RuleBuilder {
         return create(uid).withActions(template.getActions()).withConditions(template.getConditions())
                 .withTriggers(template.getTriggers()).withConfiguration(configuration)
                 .withConfigurationDescriptions(template.getConfigurationDescriptions())
-                .withDescription(template.getDescription()).withName(name).withTags(template.getTags());
+                .withDescription(template.getDescription()).withName(name).withTags(template.getTags())
+                .withTemplateState(TemplateState.INSTANTIATED).withTemplateUID(template.getUID());
     }
 
     public RuleBuilder withName(@Nullable String name) {
@@ -97,6 +102,11 @@ public class RuleBuilder {
 
     public RuleBuilder withTemplateUID(@Nullable String uid) {
         this.templateUID = uid;
+        return this;
+    }
+
+    public RuleBuilder withTemplateState(TemplateState templateState) {
+        this.templateState = templateState;
         return this;
     }
 
@@ -166,6 +176,6 @@ public class RuleBuilder {
 
     public Rule build() {
         return new RuleImpl(uid, name, description, tags, triggers, conditions, actions, configDescriptions,
-                configuration, templateUID, visibility);
+                configuration, templateUID, templateState, visibility);
     }
 }

@@ -122,7 +122,6 @@ final class RuleExecutionSimulator {
                 result.add(new RuleExecution(Date.from(currentTime.toInstant()), rule));
             }
             currentTime = ZonedDateTime.from(temporalAdjuster.adjustInto(currentTime));
-
         }
         return result;
     }

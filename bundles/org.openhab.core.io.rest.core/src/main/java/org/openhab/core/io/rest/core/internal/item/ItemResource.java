@@ -75,6 +75,7 @@ import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ManagedItemProvider;
+import org.openhab.core.items.ManagedMetadataProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
@@ -87,8 +88,10 @@ import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.semantics.ItemSemanticsProblem;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticsPredicates;
+import org.openhab.core.semantics.SemanticsService;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
@@ -139,6 +142,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Stefan Triller - Added bulk item add method
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Mark Herwege - Added option to retrieve item groups with item REST call
  */
 @Component
 @JaxrsResource
@@ -183,8 +187,10 @@ public class ItemResource implements RESTResource {
     private final LocaleService localeService;
     private final ManagedItemProvider managedItemProvider;
     private final MetadataRegistry metadataRegistry;
+    private final ManagedMetadataProvider managedMetadataProvider;
     private final MetadataSelectorMatcher metadataSelectorMatcher;
     private final SemanticTagRegistry semanticTagRegistry;
+    private final SemanticsService semanticsService;
     private final TimeZoneProvider timeZoneProvider;
 
     private final RegistryChangedRunnableListener<Item> resetLastModifiedItemChangeListener = new RegistryChangedRunnableListener<>(
@@ -203,9 +209,10 @@ public class ItemResource implements RESTResource {
             final @Reference LocaleService localeService, //
             final @Reference ManagedItemProvider managedItemProvider,
             final @Reference MetadataRegistry metadataRegistry,
+            final @Reference ManagedMetadataProvider managedMetadataProvider,
             final @Reference MetadataSelectorMatcher metadataSelectorMatcher,
             final @Reference SemanticTagRegistry semanticTagRegistry,
-            final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference SemanticsService semanticsService, final @Reference TimeZoneProvider timeZoneProvider) {
         this.dtoMapper = dtoMapper;
         this.eventPublisher = eventPublisher;
         this.itemBuilderFactory = itemBuilderFactory;
@@ -213,8 +220,10 @@ public class ItemResource implements RESTResource {
         this.localeService = localeService;
         this.managedItemProvider = managedItemProvider;
         this.metadataRegistry = metadataRegistry;
+        this.managedMetadataProvider = managedMetadataProvider;
         this.metadataSelectorMatcher = metadataSelectorMatcher;
         this.semanticTagRegistry = semanticTagRegistry;
+        this.semanticsService = semanticsService;
         this.timeZoneProvider = timeZoneProvider;
 
         this.itemRegistry.addRegistryChangeListener(resetLastModifiedItemChangeListener);
@@ -245,6 +254,7 @@ public class ItemResource implements RESTResource {
             @QueryParam("tags") @Parameter(description = "item tag filter") @Nullable String tags,
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("false") @QueryParam("recursive") @Parameter(description = "get member items recursively") boolean recursive,
+            @DefaultValue("false") @QueryParam("parents") @Parameter(description = "get parent group items recursively") boolean parents,
             @QueryParam("fields") @Parameter(description = "limit output to the given fields (comma separated)") @Nullable String fields,
             @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and checks the If-Modified-Since header, all other parameters are ignored except \"metadata\"") boolean staticDataOnly) {
         final Locale locale = localeService.getLocale(language);
@@ -267,7 +277,7 @@ public class ItemResource implements RESTResource {
             Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                     .map(item -> EnrichedItemDTOMapper.map(item, false, null, uriBuilder, locale, zoneId)) //
                     .peek(dto -> addMetadata(dto, namespaces, null)) //
-                    .peek(dto -> dto.editable = isEditable(dto.name));
+                    .peek(dto -> dto.editable = isEditable(dto));
             itemStream = dtoMapper.limitToFields(itemStream,
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
@@ -277,15 +287,25 @@ public class ItemResource implements RESTResource {
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                 .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale, zoneId)) //
-                .peek(dto -> addMetadata(dto, namespaces, null)) //
-                .peek(dto -> dto.editable = isEditable(dto.name)) //
+                .peek(dto -> {
+                    if (parents) {
+                        addParents(dto, uriInfo, httpHeaders, locale, zoneId);
+                    }
+                }).peek(dto -> addMetadata(dto, namespaces, null)) //
+                .peek(dto -> dto.editable = isEditable(dto)) //
                 .peek(dto -> {
                     if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
                         for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
-                            member.editable = isEditable(member.name);
+                            member.editable = isEditable(member);
+                        }
+                    }
+                    if (dto.parents != null) {
+                        for (EnrichedItemDTO parent : dto.parents) {
+                            parent.editable = isEditable(parent);
                         }
                     }
                 });
+
         itemStream = dtoMapper.limitToFields(itemStream, fields);
         return Response.ok(new Stream2JSONInputStream(itemStream)).build();
     }
@@ -325,6 +345,7 @@ public class ItemResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("true") @QueryParam("recursive") @Parameter(description = "get member items if the item is a group item") boolean recursive,
+            @DefaultValue("false") @QueryParam("parents") @Parameter(description = "get parent group items recursively") boolean parents,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
@@ -337,11 +358,19 @@ public class ItemResource implements RESTResource {
         if (item != null) {
             EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder(uriInfo, httpHeaders),
                     locale, zoneId);
+            if (parents) {
+                addParents(dto, uriInfo, httpHeaders, locale, zoneId);
+            }
             addMetadata(dto, namespaces, null);
-            dto.editable = isEditable(dto.name);
+            dto.editable = isEditable(dto);
             if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
                 for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
-                    member.editable = isEditable(member.name);
+                    member.editable = isEditable(member);
+                }
+            }
+            if (dto.parents != null) {
+                for (EnrichedItemDTO parent : dto.parents) {
+                    parent.editable = isEditable(parent);
                 }
             }
             return JSONResponse.createResponse(Status.OK, dto, null);
@@ -907,7 +936,7 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemName: \\w+}/semantic/{semanticClass: \\w+}")
     @Operation(operationId = "getSemanticItem", summary = "Gets the item which defines the requested semantics of an item.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
     public Response getSemanticItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -929,8 +958,24 @@ public class ItemResource implements RESTResource {
 
         EnrichedItemDTO dto = EnrichedItemDTOMapper.map(foundItem, false, null, uriBuilder(uriInfo, httpHeaders),
                 locale, zoneId);
-        dto.editable = isEditable(dto.name);
+        dto.editable = isEditable(dto);
         return JSONResponse.createResponse(Status.OK, dto, null);
+    }
+
+    @GET
+    @RolesAllowed({ Role.ADMIN })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("semantics/health")
+    @Operation(operationId = "getSemanticsHealth", summary = "Gets configuration problems with item semantics.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ItemSemanticsProblem.class)))),
+                    @ApiResponse(responseCode = "404", description = "Item not found.") })
+    public Response getSemanticsHealth(@Context HttpHeaders headers) {
+        List<ItemSemanticsProblem> semanticsProblems = this.itemRegistry.stream().flatMap(item -> {
+            return semanticsService.getItemSemanticsProblems(item).stream()
+                    .map(p -> p.setEditable(isItemEditable(p.item())));
+        }).toList();
+        return JSONResponse.createResponse(Status.OK, semanticsProblems, null);
     }
 
     private JsonObject buildStatusObject(String itemName, String status, @Nullable String message) {
@@ -1021,6 +1066,7 @@ public class ItemResource implements RESTResource {
                 MetadataDTO mdDto = new MetadataDTO();
                 mdDto.value = md.getValue();
                 mdDto.config = md.getConfiguration().isEmpty() ? null : md.getConfiguration();
+                mdDto.editable = isEditable(key);
                 metadata.put(namespace, mdDto);
             }
         }
@@ -1029,14 +1075,37 @@ public class ItemResource implements RESTResource {
                 addMetadata(member, namespaces, filter);
             }
         }
+        if (dto.parents != null) {
+            for (EnrichedItemDTO parent : dto.parents) {
+                addMetadata(parent, namespaces, filter);
+            }
+        }
         if (!metadata.isEmpty()) {
             // we only set it in the dto if there is really data available
             dto.metadata = metadata;
         }
     }
 
-    private boolean isEditable(String itemName) {
+    private void addParents(EnrichedItemDTO dto, UriInfo uriInfo, HttpHeaders httpHeaders, Locale locale,
+            ZoneId zoneId) {
+        dto.parents = dto.groupNames.stream() //
+                .map(groupName -> getItem(groupName)).filter(Objects::nonNull) //
+                .map(parentItem -> EnrichedItemDTOMapper.map(parentItem, false, null, uriBuilder(uriInfo, httpHeaders),
+                        locale, zoneId)) //
+                .peek(parentEnrichedItemDto -> addParents(parentEnrichedItemDto, uriInfo, httpHeaders, locale, zoneId)) //
+                .toArray(size -> new EnrichedItemDTO[size]);
+    }
+
+    private boolean isEditable(EnrichedItemDTO item) {
+        return isItemEditable(item.name);
+    }
+
+    private boolean isItemEditable(String itemName) {
         return managedItemProvider.get(itemName) != null;
+    }
+
+    private boolean isEditable(MetadataKey metadataKey) {
+        return managedMetadataProvider.get(metadataKey) != null;
     }
 
     private record ValueContainer(String value) {

@@ -39,7 +39,6 @@ import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
-import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -491,7 +490,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemIsSame() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -504,7 +503,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItem() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -517,7 +516,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesFunctionParameters() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -530,7 +529,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItemAndFunction() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),

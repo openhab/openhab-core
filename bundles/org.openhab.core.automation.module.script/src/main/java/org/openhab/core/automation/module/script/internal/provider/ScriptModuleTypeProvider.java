@@ -84,13 +84,13 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
         List<Output> outputs = new ArrayList<>();
         Output result = new Output("result", "java.lang.Object", "result", "the script result", null, null, null);
         outputs.add(result);
-        return new ActionType(ScriptActionHandler.TYPE_ID, getConfigDescriptions(locale), "execute an inline script",
-                "Allows the execution of a user-defined script.", null, Visibility.VISIBLE, null, outputs);
+        return new ActionType(ScriptActionHandler.TYPE_ID, getConfigDescriptions(locale), "Execute an inline script",
+                "Executes a user-defined script", null, Visibility.VISIBLE, null, outputs);
     }
 
     private ModuleType getScriptConditionType(@Nullable Locale locale) {
         return new ConditionType(ScriptConditionHandler.TYPE_ID, getConfigDescriptions(locale),
-                "an inline script evaluates to true", "Allows the definition of a condition through a script.", null,
+                "An inline script evaluates to true", "Allows the definition of a condition through a script", null,
                 Visibility.VISIBLE, null);
     }
 
@@ -111,11 +111,11 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
         }
         final ConfigDescriptionParameter scriptType = ConfigDescriptionParameterBuilder.create("type", Type.TEXT)
                 .withRequired(true).withMultiple(false).withLabel("Script Type")
-                .withDescription("the scripting language used").withOptions(parameterOptionsList)
+                .withDescription("The scripting language used").withOptions(parameterOptionsList)
                 .withLimitToOptions(true).build();
         final ConfigDescriptionParameter script = ConfigDescriptionParameterBuilder.create("script", Type.TEXT)
                 .withRequired(true).withReadOnly(false).withMultiple(false).withLabel("Script").withContext("script")
-                .withDescription("the script to execute").build();
+                .withDescription("The script to execute").build();
         return List.of(scriptType, script);
     }
 

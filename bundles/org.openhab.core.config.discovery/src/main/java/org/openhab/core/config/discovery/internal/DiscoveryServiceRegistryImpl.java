@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery.internal;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -287,7 +288,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     }
 
     @Override
-    public @Nullable Collection<ThingUID> removeOlderResults(final DiscoveryService source, final long timestamp,
+    public @Nullable Collection<ThingUID> removeOlderResults(final DiscoveryService source, final Instant timestamp,
             final @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
         Set<ThingUID> removedResults = new HashSet<>();
         for (final DiscoveryListener listener : listeners) {

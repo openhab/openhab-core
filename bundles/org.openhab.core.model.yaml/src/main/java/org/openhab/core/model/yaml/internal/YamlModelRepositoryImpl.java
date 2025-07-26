@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -97,10 +98,12 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
     private static final String UNWANTED_EXCEPTION_TEXT2 = "\\n \\(through reference chain: .*";
 
+    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "yaml").map(Path::of).toList();
+
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
     private final WatchService watchService;
-    private final Path watchPath;
+    private final Path mainWatchPath;
     private final ObjectMapper objectMapper;
 
     private final Map<String, List<YamlModelListener<?>>> elementListeners = new ConcurrentHashMap<>();
@@ -128,31 +131,49 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
 
         this.watchService = watchService;
-        watchService.registerListener(this, Path.of(""));
-        watchPath = watchService.getWatchPath();
+        this.mainWatchPath = watchService.getWatchPath();
+
+        watchService.registerListener(this, WATCHED_PATHS);
 
         // read initial contents
-        try {
-            Files.walkFileTree(watchPath, new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(@NonNullByDefault({}) Path file,
-                        @NonNullByDefault({}) BasicFileAttributes attrs) throws IOException {
-                    if (attrs.isRegularFile()) {
-                        processWatchEvent(CREATE, file);
+        WATCHED_PATHS.forEach(watchPath -> {
+            Path fullPath = mainWatchPath.resolve(watchPath);
+            if (!Files.exists(fullPath)) {
+                return;
+            } else if (!Files.isDirectory(fullPath)) {
+                logger.warn("Expecting '{}' to be a directory, but it's a file. Ignoring it.", fullPath);
+                return;
+            }
+            try {
+                Files.walkFileTree(fullPath, new SimpleFileVisitor<>() {
+                    @Override
+                    public FileVisitResult visitFile(@NonNullByDefault({}) Path file,
+                            @NonNullByDefault({}) BasicFileAttributes attrs) throws IOException {
+                        if (attrs.isRegularFile()) {
+                            processWatchEvent(CREATE, file);
+                        }
+                        return FileVisitResult.CONTINUE;
                     }
-                    return FileVisitResult.CONTINUE;
-                }
 
-                @Override
-                public FileVisitResult visitFileFailed(@NonNullByDefault({}) Path file,
-                        @NonNullByDefault({}) IOException exc) throws IOException {
-                    logger.warn("Failed to process {}: {}", file.toAbsolutePath(), exc.getMessage());
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (IOException e) {
-            logger.warn("Could not list YAML files in '{}', models might be missing: {}", watchPath, e.getMessage());
-        }
+                    @Override
+                    public FileVisitResult visitFileFailed(@NonNullByDefault({}) Path file,
+                            @NonNullByDefault({}) IOException exc) throws IOException {
+                        String message = exc.getMessage();
+                        if (file.toString().equals(message)) {
+                            // If the message is just the path, we do not need to log it again.
+                            // This is the case for FileNotFoundException, AccessDeniedException, etc.
+                            // Instead of the path, we log the exception class to provide additional details.
+                            message = exc.getClass().getSimpleName();
+                        }
+                        logger.warn("Failed to process {}: {}", file.toAbsolutePath(), message);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            } catch (IOException e) {
+                logger.warn("Could not list YAML files in '{}', models might be missing: {}", watchPath,
+                        e.getMessage());
+            }
+        });
     }
 
     @Deactivate
@@ -163,9 +184,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     // The method is "synchronized" to avoid concurrent files processing
     @Override
     public synchronized void processWatchEvent(Kind kind, Path fullPath) {
-        Path relativePath = watchPath.relativize(fullPath);
+        Path relativePath = mainWatchPath.relativize(fullPath);
         String modelName = relativePath.toString();
-        if (relativePath.startsWith("automation") || !modelName.endsWith(".yaml")) {
+        if (!modelName.endsWith(".yaml") && !modelName.endsWith(".yml")) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
@@ -236,7 +257,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
             if (!node.isContainerNode() || node.isArray()) {
                 // all processable sub-elements are container nodes (not array)
-                logger.trace("Element {} in model {} is not a container object, ignoring it", elementName, modelName);
+                logger.warn("Element {} in model {} is not a container object, ignoring it", elementName, modelName);
                 if (getElementName(YamlSemanticTagDTO.class).equals(elementName) && node.isArray()) {
                     logger.warn(
                             "Your YAML model {} contains custom tags with an old and now unsupported syntax. An upgrade of this model is required to upgrade to the new syntax. This can be done by running the upgrade tool.",
@@ -547,7 +568,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
 
         try {
-            Path outFile = watchPath.resolve(modelName);
+            Path outFile = mainWatchPath.resolve(modelName);
             String fileContent = objectMapper.writeValueAsString(rootNode);
             if (Files.exists(outFile) && !Files.isWritable(outFile)) {
                 logger.warn("Failed writing model {}: model exists but is read-only.", modelName);

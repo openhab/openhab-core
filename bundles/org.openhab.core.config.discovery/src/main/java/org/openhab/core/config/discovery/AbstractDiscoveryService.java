@@ -353,7 +353,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *
      * @param timestamp timestamp, older results will be removed
      */
-    protected void removeOlderResults(long timestamp) {
+    protected void removeOlderResults(Instant timestamp) {
         removeOlderResults(timestamp, null, null);
     }
 
@@ -366,7 +366,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * @param timestamp timestamp, older results will be removed
      * @param bridgeUID if not {@code null} only results of that bridge are being removed
      */
-    protected void removeOlderResults(long timestamp, @Nullable ThingUID bridgeUID) {
+    protected void removeOlderResults(Instant timestamp, @Nullable ThingUID bridgeUID) {
         removeOlderResults(timestamp, null, bridgeUID);
     }
 
@@ -382,7 +382,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            instead
      * @param bridgeUID if not {@code null} only results of that bridge are being removed
      */
-    protected void removeOlderResults(long timestamp, @Nullable Collection<ThingTypeUID> thingTypeUIDs,
+    protected void removeOlderResults(Instant timestamp, @Nullable Collection<ThingTypeUID> thingTypeUIDs,
             @Nullable ThingUID bridgeUID) {
         Collection<ThingUID> removedThings = null;
 
@@ -484,10 +484,10 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     /**
      * Get the timestamp of the last call of {@link #startScan()}.
      *
-     * @return timestamp as long
+     * @return timestamp as {@link Instant}
      */
-    protected long getTimestampOfLastScan() {
-        return Instant.MIN.equals(timestampOfLastScan) ? 0 : timestampOfLastScan.toEpochMilli();
+    protected Instant getTimestampOfLastScan() {
+        return timestampOfLastScan;
     }
 
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {

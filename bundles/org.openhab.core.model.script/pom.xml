@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.bundles</groupId>
     <artifactId>org.openhab.core.reactor.bundles</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>5.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.model.script</artifactId>
@@ -17,7 +17,7 @@
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.model.persistence</artifactId>
+      <artifactId>org.openhab.core.persistence</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -60,6 +60,31 @@
       <artifactId>org.openhab.core.automation.module.script.rulesupport</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.model.core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.console</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.config.core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.audio</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -86,7 +111,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.5.0</version>
+        <version>3.5.1</version>
         <configuration>
           <executable>java</executable>
           <classpathScope>compile</classpathScope>
@@ -116,7 +141,7 @@
             <artifactId>antlr-runtime</artifactId>
             <version>3.2</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../antlr-generator-3.2.0-patch.jar</systemPath>
+            <systemPath>${project.basedir}/../.antlr-generator-3.2.0-patch.jar</systemPath>
           </dependency>
         </dependencies>
         <executions>

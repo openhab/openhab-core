@@ -113,6 +113,9 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
 
         Collection<RemoteDevice> devices = upnpService.getRegistry().getRemoteDevices();
         for (RemoteDevice device : devices) {
+            if (!device.isRoot() && !participant.notifyChildDevices()) {
+                continue;
+            }
             DiscoveryResult result = participant.createResult(device);
             if (result != null) {
                 final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
@@ -171,6 +174,9 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     @Override
     public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
         for (UpnpDiscoveryParticipant participant : participants) {
+            if (!device.isRoot() && !participant.notifyChildDevices()) {
+                continue;
+            }
             try {
                 DiscoveryResult result = participant.createResult(device);
                 if (result != null) {
@@ -200,6 +206,9 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     @Override
     public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
         for (UpnpDiscoveryParticipant participant : participants) {
+            if (!device.isRoot() && !participant.notifyChildDevices()) {
+                continue;
+            }
             try {
                 ThingUID thingUID = participant.getThingUID(device);
                 if (thingUID != null) {

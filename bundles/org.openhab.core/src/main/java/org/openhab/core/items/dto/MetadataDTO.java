@@ -27,4 +27,5 @@ public class MetadataDTO {
 
     public @Nullable String value;
     public @Nullable Map<String, Object> config;
+    public @Nullable Boolean editable;
 }

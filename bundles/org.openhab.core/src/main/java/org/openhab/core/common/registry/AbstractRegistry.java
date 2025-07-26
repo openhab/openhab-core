@@ -192,18 +192,27 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         E existingElement = identifierToElement.get(uid);
         if (existingElement != null) {
             Provider<E> existingElementProvider = elementToProvider.get(existingElement);
-            logger.debug(
-                    "Cannot add \"{}\" with key \"{}\". It exists already from provider \"{}\"! Failed to add a second with the same UID from provider \"{}\"!",
-                    element.getClass().getSimpleName(), uid,
-                    existingElementProvider != null ? existingElementProvider.getClass().getSimpleName() : null,
-                    provider.getClass().getSimpleName());
+            String elementClassName = element.getClass().getSimpleName();
+            if ("ActionType".equals(elementClassName) || "Metadata".equals(elementClassName)) {
+                logger.debug(
+                        "Cannot add \"{}\" with key \"{}\". It exists already from provider \"{}\"! Failed to add a second with the same UID from provider \"{}\"!",
+                        elementClassName, uid,
+                        existingElementProvider != null ? existingElementProvider.getClass().getSimpleName() : null,
+                        provider.getClass().getSimpleName());
+            } else {
+                logger.warn(
+                        "Cannot add \"{}\" with key \"{}\". It exists already from provider \"{}\"! Failed to add a second with the same UID from provider \"{}\"!",
+                        elementClassName, uid,
+                        existingElementProvider != null ? existingElementProvider.getClass().getSimpleName() : null,
+                        provider.getClass().getSimpleName());
+            }
             return false;
         }
         try {
             onAddElement(element);
         } catch (final RuntimeException ex) {
             logger.warn("Cannot add \"{}\" with key \"{}\": {}", element.getClass().getSimpleName(), uid,
-                    ex.getMessage(), ex);
+                    ex.getMessage(), logger.isDebugEnabled() ? ex : null);
             return false;
         }
         identifierToElement.put(element.getUID(), element);
@@ -249,7 +258,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
             }
             Provider<E> elementProvider = elementToProvider.get(existingElement);
             if (elementProvider != null && !elementProvider.equals(provider)) {
-                logger.error(
+                logger.warn(
                         "Provider '{}' is not allowed to remove element '{}' with key '{}' from the registry because it was added by provider '{}'.",
                         provider.getClass().getSimpleName(), element.getClass().getSimpleName(), uid,
                         elementProvider.getClass().getSimpleName());

@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.bom</groupId>
     <artifactId>org.openhab.core.reactor.bom</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>5.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.bom.compile</artifactId>
@@ -69,7 +69,6 @@
       <groupId>org.eclipse.jdt</groupId>
       <artifactId>org.eclipse.jdt.annotation</artifactId>
       <version>2.2.600</version>
-      <!--<scope>compile</scope> -->
     </dependency>
 
     <!-- Annotation API -->
@@ -361,7 +360,7 @@
     <dependency>
       <groupId>de.focus-shift</groupId>
       <artifactId>jollyday-jackson</artifactId>
-      <version>1.5.0</version>
+      <version>1.5.4</version>
       <scope>compile</scope>
     </dependency>
 

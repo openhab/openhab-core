@@ -162,7 +162,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
             fileContent.properties().forEach(entry -> {
                 String key = entry.getKey();
                 JsonNode node = entry.getValue();
-                if (key.equals("tags")) {
+                if ("tags".equals(key)) {
                     ObjectNode tagsMap = objectMapper.createObjectNode();
                     for (JsonNode tag : node) {
                         if (tag.hasNonNull("uid")) {

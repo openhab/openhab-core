@@ -54,7 +54,7 @@ Property,Radon,AirQuality,Radon,,
 Property,VOC,AirQuality,VOC,Volatile Organic Compounds,
 Property,Airconditioning,,Airconditioning,,
 Property,Airflow,,Airflow,,
-Property,App,,App,Application,Software program
+Property,App,,App,,Software program
 Property,Brightness,,Brightness,,Brightness of a light source
 Property,Channel,,Channel,,Media channel selection
 Property,Color,,Color,,
@@ -70,7 +70,7 @@ Property,Humidity,,Humidity,,
 Property,Illuminance,,Illuminance,,
 Property,Info,,Information,,General information
 Property,Level,,Level,,
-Property,Light,,Light,"Lights, Lighting",Control or status of a light
+Property,Light,,Light,,Control or status of a light
 Property,LowBattery,,Low Battery,,Low battery indication
 Property,MediaControl,,Media Control,,Audio- or visual- media control
 Property,Mode,,Mode,,Operating mode
@@ -79,16 +79,18 @@ Property,Motion,,Motion,,Motion detected
 Property,Noise,,Noise,,
 Property,Oil,,Oil,,
 Property,Opening,,Opening,,Opening of a door or window etc.
+Property,LockState,Opening,Lock State,,State of the lock on a door or window etc.
 Property,OpenLevel,Opening,Open Level,,Open position (analog) of a door or window etc.
-Property,OpenState,Opening,Open State,Open Closed,Open state (digital) of a door or window etc.
+Property,OpenState,Opening,Open State,,Open state (digital) of a door or window etc.
 Property,Position,,Position,,Position measurement or control
 Property,GeoLocation,Position,Geo Location,,Geo location coordinate
 Property,Power,,Power,,
+Property,Precipitation,,Precipitation,,
+Property,Rain,Precipitation,Rain,,
 Property,Presence,,Presence,,Presence detection
 Property,Pressure,,Pressure,,
 Property,Progress,,Progress,,
 Property,QualityOfService,,Quality of Service,,
-Property,Rain,,Rain,,
 Property,SignalStrength,,Signal Strength,,
 Property,RSSI,SignalStrength,RSSI,Received Signal Strength Indication,
 Property,Smoke,,Smoke,,Smoke detection
@@ -106,7 +108,7 @@ Property,Water,,Water,,
 Property,Wind,,Wind,,Wind speed or direction
 Equipment,AlarmDevice,,Alarm Device,,
 Equipment,AlarmSystem,,Alarm System,Alarm Systems,
-Equipment,Application,,Application,"App, Software program",Software program
+Equipment,Application,,Application,Software program,Software program
 Equipment,AudioVisual,,Audio Visual,,Audio visual device
 Equipment,Display,AudioVisual,Display,,Visual display
 Equipment,Projector,Display,Projector,"Projectors, Beamer, Beamers",Projector
@@ -138,8 +140,8 @@ Equipment,DrinkingWater,,Drinking Water,Potable Water,
 Equipment,HotWaterFaucet,DrinkingWater,Hot Water Faucet,"Hot Water Tap, Boiling Water Tap, Boiling Water Faucet",Hot water faucet or tap
 Equipment,WaterFilter,DrinkingWater,Water Filter,,
 Equipment,WaterSoftener,DrinkingWater,Water Softener,,
-Equipment,HVAC,,HVAC,"Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC","Heating, Ventilation or AirConditioning"
-Equipment,AirConditioner,HVAC,Air Conditioner,,
+Equipment,HVAC,,HVAC,,"Heating, Ventilation, and Air Conditioning"
+Equipment,AirConditioner,HVAC,"Air Conditioner, Air Conditioning, A/C, AC, A/Cs",,
 Equipment,AirFilter,HVAC,Air Filter,,
 Equipment,Boiler,HVAC,Boiler,Boilers,
 Equipment,Dehumidifier,HVAC,Dehumidifier,,
@@ -165,10 +167,10 @@ Equipment,AccentLight,LightSource,Accent Light,,
 Equipment,Chandelier,LightSource,Chandelier,,
 Equipment,Downlight,LightSource,Downlight,"Can Light, Pot Light",
 Equipment,FloodLight,LightSource,Flood Light,,
-Equipment,Lamp,LightSource,Lamp,,
+Equipment,Lamp,LightSource,Lamp,Lamps,
 Equipment,LightStrip,LightSource,Light Strip,LED Strip,
 Equipment,LightStripe,LightSource,Light Stripe,Light Stripes,
-Equipment,Lightbulb,LightSource,Light Bulb,"Lightbulbs, Bulb, Bulbs, Lamp, Lamps",
+Equipment,Lightbulb,LightSource,Light Bulb,"Lightbulbs, Bulb, Bulbs",
 Equipment,Pendant,LightSource,Pendant,,Pendant light
 Equipment,Sconce,LightSource,Sconce,,Sconce light
 Equipment,SpotLight,LightSource,Spot Light,,
@@ -238,7 +240,7 @@ Equipment,PoolCover,Wellness,Pool Cover,,Swimming or wellness pool cover
 Equipment,PoolHeater,Wellness,Pool Heater,,Swimming or wellness pool heater
 Equipment,Sauna,Wellness,Sauna,Steam Room,
 Equipment,Shower,Wellness,Shower,,
-Equipment,SwimmingPool,Wellness,Swimming Pool,"Swimming Pool, Pool",
+Equipment,SwimmingPool,Wellness,Swimming Pool,Pool,
 Equipment,WhiteGood,,White Good,White Goods,White goods appliance
 Equipment,AirFryer,WhiteGood,Air Fryer,,
 Equipment,CoffeeMaker,WhiteGood,Coffee Maker,"Coffee Makers, Coffee Machine, Coffee Machines",

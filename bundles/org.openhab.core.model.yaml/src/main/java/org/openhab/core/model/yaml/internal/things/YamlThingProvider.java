@@ -393,46 +393,11 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         Set<String> addedChannelIds = new HashSet<>();
         List<Channel> channels = new ArrayList<>();
         channelsDto.forEach((channelId, channelDto) -> {
-            ChannelTypeUID channelTypeUID = null;
-            ChannelKind kind = channelDto.getKind();
-            String itemType = channelDto.getItemType();
-            String label = channelDto.label;
-            String description = channelDto.description;
-            AutoUpdatePolicy autoUpdatePolicy = null;
-            Configuration configuration = new Configuration(channelDto.config);
-            if (channelDto.type != null) {
-                channelTypeUID = new ChannelTypeUID(thingUID.getBindingId(), channelDto.type);
-                ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID,
-                        localeProvider.getLocale());
-                if (channelType != null) {
-                    kind = channelType.getKind();
-                    itemType = channelType.getItemType();
-                    if (label == null) {
-                        label = channelType.getLabel();
-                    }
-                    if (description == null) {
-                        description = channelType.getDescription();
-                    }
-                    autoUpdatePolicy = channelType.getAutoUpdatePolicy();
-                    URI descUriO = channelType.getConfigDescriptionURI();
-                    if (descUriO != null) {
-                        ConfigUtil.applyDefaultConfiguration(configuration,
-                                configDescriptionRegistry.getConfigDescription(descUriO));
-                    }
-                } else {
-                    logger.warn("Channel type {} could not be found for thing '{}'.", channelTypeUID, thingUID);
-                }
-            }
-
-            ChannelBuilder builder = ChannelBuilder.create(new ChannelUID(thingUID, channelId), itemType).withKind(kind)
-                    .withConfiguration(configuration).withType(channelTypeUID).withAutoUpdatePolicy(autoUpdatePolicy);
-            if (label != null) {
-                builder.withLabel(label);
-            }
-            if (description != null) {
-                builder.withDescription(description);
-            }
-            Channel channel = builder.build();
+            ChannelTypeUID channelTypeUID = channelDto.type == null ? null
+                    : new ChannelTypeUID(thingUID.getBindingId(), channelDto.type);
+            Channel channel = createChannel(thingUID, channelId, channelTypeUID, channelDto.getKind(),
+                    channelDto.getItemType(), channelDto.label, channelDto.description, null,
+                    new Configuration(channelDto.config), true);
             channels.add(channel);
             addedChannelIds.add(channelId);
         });
@@ -455,6 +420,49 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             }
         });
         return channels;
+    }
+
+    private Channel createChannel(ThingUID thingUID, String channelId, @Nullable ChannelTypeUID channelTypeUID,
+            ChannelKind channelKind, @Nullable String channelItemType, @Nullable String channelLabel,
+            @Nullable String channelDescription, @Nullable AutoUpdatePolicy channelAutoUpdatePolicy,
+            Configuration channelConfiguration, boolean ignoreMissingChannelType) {
+        ChannelKind kind = channelKind;
+        String itemType = channelItemType;
+        String label = channelLabel;
+        String description = channelDescription;
+        AutoUpdatePolicy autoUpdatePolicy = channelAutoUpdatePolicy;
+        Configuration configuration = new Configuration(channelConfiguration);
+        if (channelTypeUID != null) {
+            ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID, localeProvider.getLocale());
+            if (channelType != null) {
+                kind = channelType.getKind();
+                itemType = channelType.getItemType();
+                if (label == null) {
+                    label = channelType.getLabel();
+                }
+                if (description == null) {
+                    description = channelType.getDescription();
+                }
+                autoUpdatePolicy = channelType.getAutoUpdatePolicy();
+                URI descUriO = channelType.getConfigDescriptionURI();
+                if (descUriO != null) {
+                    ConfigUtil.applyDefaultConfiguration(configuration,
+                            configDescriptionRegistry.getConfigDescription(descUriO));
+                }
+            } else if (!ignoreMissingChannelType) {
+                logger.warn("Channel type {} could not be found for thing '{}'.", channelTypeUID, thingUID);
+            }
+        }
+
+        ChannelBuilder builder = ChannelBuilder.create(new ChannelUID(thingUID, channelId), itemType).withKind(kind)
+                .withConfiguration(configuration).withType(channelTypeUID).withAutoUpdatePolicy(autoUpdatePolicy);
+        if (label != null) {
+            builder.withLabel(label);
+        }
+        if (description != null) {
+            builder.withDescription(description);
+        }
+        return builder.build();
     }
 
     private void mergeThing(Thing target, Thing source) {
@@ -480,7 +488,16 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     targetChannel.getConfiguration().put(paramName, channel.getConfiguration().get(paramName));
                 });
             } else {
-                channelsToAdd.add(channel);
+                Channel newChannel = channel;
+                if (channel.getChannelTypeUID() != null) {
+                    // We create again the user defined channel because channel type was potentially not yet
+                    // in the registry when the channel was initially created
+                    newChannel = createChannel(target.getUID(), channel.getUID().getIdWithoutGroup(),
+                            channel.getChannelTypeUID(), channel.getKind(), channel.getAcceptedItemType(),
+                            channel.getLabel(), channel.getDescription(), channel.getAutoUpdatePolicy(),
+                            channel.getConfiguration(), false);
+                }
+                channelsToAdd.add(newChannel);
             }
         });
 

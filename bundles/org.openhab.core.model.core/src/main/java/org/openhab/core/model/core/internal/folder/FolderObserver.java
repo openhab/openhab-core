@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -113,11 +114,17 @@ public class FolderObserver implements WatchService.WatchEventListener {
         parsers.remove(extension);
 
         Set<String> removed = modelRepository.removeAllModelsOfType(extension);
-        ignoredPaths.addAll(removed.stream().map(namePathMap::get).collect(Collectors.toSet()));
+        ignoredPaths
+                .addAll(removed.stream().map(namePathMap::get).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
 
     @Activate
     public void activate(ComponentContext ctx) {
+        logger.debug("FolderObserver activate");
+
+        /* set of file extensions for added parsers before activation but without an existing directory */
+        Set<String> parsersWithoutFolder = new HashSet<>();
+
         Dictionary<String, Object> config = ctx.getProperties();
 
         Enumeration<String> keys = config.keys();
@@ -130,10 +137,11 @@ public class FolderObserver implements WatchService.WatchEventListener {
             }
 
             Path folderPath = watchPath.resolve(folderName);
+            Set<String> validExtensions = Set.of(((String) config.get(folderName)).split(","));
             if (Files.exists(folderPath) && Files.isDirectory(folderPath)) {
-                String[] validExtensions = ((String) config.get(folderName)).split(",");
-                folderFileExtMap.put(folderName, Set.of(validExtensions));
+                folderFileExtMap.put(folderName, validExtensions);
             } else {
+                parsersWithoutFolder.addAll(validExtensions);
                 logger.warn("Directory '{}' does not exist in '{}'. Please check your configuration settings!",
                         folderName, OpenHAB.getConfigFolder());
             }
@@ -145,6 +153,15 @@ public class FolderObserver implements WatchService.WatchEventListener {
         this.activated = true;
         logger.debug("{} has been activated", FolderObserver.class.getSimpleName());
 
+        logger.debug("{} elements in parsersWithoutFolder and {} elements in missingParsers",
+                parsersWithoutFolder.size(), missingParsers.size());
+        // process parsers without existing directory which were added during activation
+        for (String extension : parsersWithoutFolder) {
+            if (parsers.contains(extension) && !missingParsers.contains(extension)) {
+                readyService.markReady(new ReadyMarker(READYMARKER_TYPE, extension));
+                logger.debug("Marked extension '{}' as ready", extension);
+            }
+        }
         // process ignored paths for missing parsers which were added during activation
         for (String extension : missingParsers) {
             if (parsers.contains(extension)) {
@@ -238,7 +255,19 @@ public class FolderObserver implements WatchService.WatchEventListener {
     }
 
     private void checkPath(final Path path, final WatchService.Kind kind) {
+        String fileName = path.getFileName().toString();
         try {
+            // Checking isHidden() on a deleted file will throw an IOException on some file systems,
+            // so deal with deletion first.
+            if (kind == DELETE) {
+                synchronized (FolderObserver.class) {
+                    modelRepository.removeModel(fileName);
+                    namePathMap.remove(fileName);
+                    logger.debug("Removed '{}' model ", fileName);
+                }
+                return;
+            }
+
             if (Files.isHidden(path)) {
                 // we omit parsing of hidden files possibly created by editors or operating systems
                 if (logger.isDebugEnabled()) {
@@ -248,7 +277,6 @@ public class FolderObserver implements WatchService.WatchEventListener {
             }
 
             synchronized (FolderObserver.class) {
-                String fileName = path.getFileName().toString();
                 if (kind == CREATE || kind == MODIFY) {
                     String extension = getExtension(fileName);
                     if (parsers.contains(extension)) {
@@ -269,10 +297,6 @@ public class FolderObserver implements WatchService.WatchEventListener {
                                     path.toAbsolutePath());
                         }
                     }
-                } else if (kind == WatchService.Kind.DELETE) {
-                    modelRepository.removeModel(fileName);
-                    namePathMap.remove(fileName);
-                    logger.debug("Removed '{}' model ", fileName);
                 }
             }
         } catch (Exception e) {

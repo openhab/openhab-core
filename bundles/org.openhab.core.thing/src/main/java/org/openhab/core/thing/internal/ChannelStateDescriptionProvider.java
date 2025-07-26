@@ -91,24 +91,33 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
 
     private @Nullable StateDescription getStateDescription(String itemName, @Nullable Locale locale) {
         Set<ChannelUID> boundChannels = itemChannelLinkRegistry.getBoundChannels(itemName);
-        if (!boundChannels.isEmpty()) {
-            ChannelUID channelUID = boundChannels.iterator().next();
+        StateDescription stateDescription = null;
+        for (ChannelUID channelUID : boundChannels) {
             Channel channel = thingRegistry.getChannel(channelUID);
             if (channel != null) {
-                StateDescription stateDescription = null;
                 ChannelType channelType = thingTypeRegistry.getChannelType(channel, locale);
+                StateDescription nextStateDescription = null;
                 if (channelType != null) {
-                    stateDescription = channelType.getState();
+                    nextStateDescription = channelType.getState();
                 }
-                StateDescription dynamicStateDescription = getDynamicStateDescription(channel, stateDescription,
+                StateDescription dynamicStateDescription = getDynamicStateDescription(channel, nextStateDescription,
                         locale);
                 if (dynamicStateDescription != null) {
-                    return dynamicStateDescription;
+                    nextStateDescription = dynamicStateDescription;
                 }
-                return stateDescription;
+                if (nextStateDescription != null) {
+                    if (stateDescription == null) {
+                        stateDescription = nextStateDescription;
+                    } else {
+                        if (stateDescription.isReadOnly() && !nextStateDescription.isReadOnly()) {
+                            stateDescription = nextStateDescription;
+                            break;
+                        }
+                    }
+                }
             }
         }
-        return null;
+        return stateDescription;
     }
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")

@@ -57,7 +57,7 @@ public class UpgradeTool {
             new YamlConfigurationV1TagsUpgrader() // Added in 5.0
     );
 
-    private static final Logger logger = LoggerFactory.getLogger(UpgradeTool.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeTool.class);
     private static @Nullable JsonStorage<UpgradeRecord> upgradeRecords = null;
 
     private static Options getOptions() {
@@ -116,7 +116,7 @@ public class UpgradeTool {
                         .resolve(Path.of("jsondb", "org.openhab.core.tools.UpgradeTool"));
                 upgradeRecords = new JsonStorage<>(upgradeJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
             } else {
-                logger.warn("Upgrade records storage is not initialized.");
+                LOGGER.warn("Upgrade records storage is not initialized.");
             }
 
             UPGRADERS.forEach(upgrader -> {
@@ -125,17 +125,17 @@ public class UpgradeTool {
                     return;
                 }
                 if (!force && lastExecuted(upgraderName) instanceof String executionDate) {
-                    logger.info("Already executed '{}' on {}. Use '--force' to execute it again.", upgraderName,
+                    LOGGER.info("Already executed '{}' on {}. Use '--force' to execute it again.", upgraderName,
                             executionDate);
                     return;
                 }
                 try {
-                    logger.info("Executing {}: {}", upgraderName, upgrader.getDescription());
+                    LOGGER.info("Executing {}: {}", upgraderName, upgrader.getDescription());
                     if (upgrader.execute(userdataPath, confPath)) {
                         updateUpgradeRecord(upgraderName);
                     }
                 } catch (Exception e) {
-                    logger.error("Error executing upgrader {}: {}", upgraderName, e.getMessage());
+                    LOGGER.error("Error executing upgrader {}: {}", upgraderName, e.getMessage());
                 }
             });
         } catch (ParseException e) {
@@ -173,7 +173,7 @@ public class UpgradeTool {
         if (path.toFile().isDirectory()) {
             return path;
         } else {
-            logger.warn(
+            LOGGER.warn(
                     "The '{}' directory '{}' does not exist. Some tasks may fail. To set it, either set the environment variable ${{}} or provide a directory through the --{} option.",
                     pathName, path, env, option);
             return null;

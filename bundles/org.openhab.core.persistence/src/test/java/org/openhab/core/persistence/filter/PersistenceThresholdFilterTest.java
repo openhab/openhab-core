@@ -102,6 +102,10 @@ public class PersistenceThresholdFilterTest {
                 // quantity type, below threshold, absolute, with unit
                 Arguments.of(new QuantityType<>("10 m"), new QuantityType<>("10.002 m"), "mm", false, false),
                 // quantity type, above threshold, absolute, with unit
+                Arguments.of(new QuantityType<>("1 ft"), new QuantityType<>("11 in"), "mm", false, true),
+                // quantity type, below threshold, absolute, with unit
+                Arguments.of(new QuantityType<>("0 °C"), new QuantityType<>("0 °C"), "K", false, false),
+                // quantity type, above threshold, absolute, with unit
                 Arguments.of(new QuantityType<>("-10 °C"), new QuantityType<>("5 °C"), "K", false, true));
     }
 

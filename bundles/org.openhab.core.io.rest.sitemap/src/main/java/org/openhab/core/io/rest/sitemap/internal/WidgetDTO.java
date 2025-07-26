@@ -68,6 +68,7 @@ public class WidgetDTO {
     public String service;
     public String period;
     public String yAxisDecimalPattern;
+    public String interpolation;
     public Boolean legend;
     public Boolean forceAsItem;
     public Integer row;
