@@ -292,14 +292,14 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         if (!channelDefaultTags.isEmpty()) {
             if (alreadyHasPointOrPropertyTag) {
                 if (!useTagsGlobally) {
-                    logger.warn("Item '{}' already tagged; forbidden to assign tags from channel '{}'.",
+                    logger.warn("Item '{}' already tagged; forbidden to add tags supplied by channel '{}'.",
                             activeItem.getName(), link.getLinkedUID());
                 }
             } else {
                 Set<String> newTags = new HashSet<>(activeItem.getTags());
                 newTags.addAll(channelDefaultTags);
-                logger.info("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(), channelDefaultTags,
-                        link.getLinkedUID());
+                logger.info("Item '{}' added tags '{}' supplied by channel '{}'.", activeItem.getName(),
+                        channelDefaultTags, link.getLinkedUID());
 
                 link.setTagsLinked(true);
 
@@ -329,8 +329,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             // remove old link's tags
             Set<String> oldLinkTags = getChannelDefaultTags(oldLink);
             newTags.removeAll(oldLinkTags);
-            logger.info("Item '{}' removed tags '{}' supplied from channel '{}'.", activeItem.getName(), oldLinkTags,
-                    oldLink.getLinkedUID());
+            // on OH shutdown tagsLinked may be true but oldLinkTags is already empty so suppress that log
+            if (oldLinkTags.isEmpty()) {
+                logger.info("Item '{}' removed tags '{}' supplied by channel '{}'.", activeItem.getName(), oldLinkTags,
+                        oldLink.getLinkedUID());
+            }
 
             // iterate over other links in case one may assign new tags
             boolean alreadyHasPointOrPropertyTag = false;
@@ -340,14 +343,14 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                     if (!otherLinkTags.isEmpty()) {
                         if (alreadyHasPointOrPropertyTag) {
                             if (!useTagsGlobally) {
-                                logger.warn("Item '{}' already tagged; forbidden to assign tags from channel '{}'.",
+                                logger.warn("Item '{}' already tagged; forbidden to add tags supplied by channel '{}'.",
                                         activeItem.getName(), otherLink.getLinkedUID());
                             }
                             break;
                         } else {
                             alreadyHasPointOrPropertyTag = true;
                             newTags.addAll(otherLinkTags);
-                            logger.info("Item '{}' assigned tags '{}' from channel '{}'.", activeItem.getName(),
+                            logger.info("Item '{}' added tags '{}' supplied by channel '{}'.", activeItem.getName(),
                                     otherLinkTags, otherLink.getLinkedUID());
                             otherLink.setTagsLinked(true);
                         }
@@ -374,8 +377,16 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * If the linked channel has 'useTags=true' return its default tags, otherwise return an empty set.
      */
     private Set<String> getChannelDefaultTags(ItemChannelLink link) {
-        Configuration configuration = link.getConfiguration();
-        if (useTagsGlobally || Boolean.TRUE.equals(configuration.get(USE_TAGS))) {
+        boolean getChannelTags;
+        if (useTagsGlobally) {
+            getChannelTags = true;
+        } else {
+            Configuration configuration = link.getConfiguration();
+            Object entry = configuration.get(USE_TAGS);
+            getChannelTags = entry != null ? Boolean.parseBoolean(entry.toString()) : false;
+        }
+
+        if (getChannelTags) {
             ChannelUID channelUID = link.getLinkedUID();
             Thing thing = thingRegistry.get(channelUID.getThingUID());
             if (thing != null) {
@@ -385,6 +396,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                 }
             }
         }
+
         return Set.of();
     }
 
