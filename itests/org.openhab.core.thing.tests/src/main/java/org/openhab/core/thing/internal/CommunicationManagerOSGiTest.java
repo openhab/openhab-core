@@ -80,6 +80,7 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.TimeSeries;
+import org.osgi.framework.BundleContext;
 
 /**
  *
@@ -93,7 +94,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private static class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
         public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry,
                 ItemBuilderFactory itemBuilderFactory) {
-            super(null, thingRegistry, itemRegistry, itemBuilderFactory);
+            super(null, thingRegistry, itemRegistry, itemBuilderFactory, mock(BundleContext.class));
         }
 
         @Override

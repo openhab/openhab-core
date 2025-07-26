@@ -12,6 +12,8 @@
  */
 package org.openhab.core.thing.link;
 
+import static org.openhab.core.service.StartLevelService.STARTLEVEL_COMPLETE;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,6 +49,8 @@ import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.UID;
 import org.openhab.core.thing.link.events.LinkEventFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -77,6 +81,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     private final ThingRegistry thingRegistry;
     private final ItemRegistry itemRegistry;
     private final ItemBuilderFactory itemBuilderFactory;
+    private final ServiceRegistration<?> eventRegistration;
 
     private boolean useTagsGlobally = false;
     private int startlevel = 0;
@@ -84,12 +89,14 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     @Activate
     public ItemChannelLinkRegistry(final @Nullable Map<String, @Nullable Object> configuration,
             final @Reference ThingRegistry thingRegistry, final @Reference ItemRegistry itemRegistry,
-            final @Reference ItemBuilderFactory itemBuilderFactory) {
+            final @Reference ItemBuilderFactory itemBuilderFactory, BundleContext bundleContext) {
         super(ItemChannelLinkProvider.class);
+
         this.thingRegistry = thingRegistry;
         this.itemRegistry = itemRegistry;
         this.itemRegistry.addRegistryChangeListener(this);
         this.itemBuilderFactory = itemBuilderFactory;
+        this.eventRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, null);
 
         modified(configuration);
     }
@@ -102,6 +109,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     @Override
     protected void deactivate() {
+        eventRegistration.unregister();
         itemRegistry.removeRegistryChangeListener(this);
         super.deactivate();
     }
@@ -467,18 +475,18 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * When start level reaches 100 then re-initialize all the channel default tags.
+     * Re-initialize (one off) all the channel default tags when startup is complete.
      */
     @Override
     public void receive(Event event) {
-        if (event instanceof StartlevelEvent startLevelEvent) {
-            int newStartLevel = startLevelEvent.getStartlevel();
-            if (newStartLevel >= 100 && startlevel < 100) {
+        if (event instanceof StartlevelEvent startlevelEvent) {
+            int newStartlevel = startlevelEvent.getStartlevel();
+            if (newStartlevel != startlevel && newStartlevel >= STARTLEVEL_COMPLETE) {
                 for (ItemChannelLink link : getAll()) {
                     assignChannelDefaultTags(link);
                 }
             }
-            startlevel = newStartLevel;
+            startlevel = newStartlevel;
         }
     }
 }
