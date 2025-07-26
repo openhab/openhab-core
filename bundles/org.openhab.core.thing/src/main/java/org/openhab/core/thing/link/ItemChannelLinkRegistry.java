@@ -26,7 +26,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.system.StartlevelEvent;
 import org.openhab.core.items.ActiveItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemBuilderFactory;
@@ -60,11 +63,12 @@ import org.slf4j.LoggerFactory;
  * @author Dennis Nobel - Initial contribution
  * @author Markus Rathgeb - Linked items returns only existing items
  * @author Markus Rathgeb - Rewrite collection handling to improve performance
+ * @author Andrew Fiddian-Green - Apply channel default tags to items
  */
 @NonNullByDefault
 @Component(immediate = true, service = ItemChannelLinkRegistry.class, configurationPid = "org.openhab.ItemChannelLinkRegistry")
 public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider>
-        implements RegistryChangeListener<Item> {
+        implements RegistryChangeListener<Item>, EventSubscriber {
 
     public static final String USE_TAGS = "useTags";
 
@@ -75,6 +79,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     private final ItemBuilderFactory itemBuilderFactory;
 
     private boolean useTagsGlobally = false;
+    private int startlevel = 0;
 
     @Activate
     public ItemChannelLinkRegistry(final @Nullable Map<String, @Nullable Object> configuration,
@@ -292,7 +297,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         if (!channelDefaultTags.isEmpty()) {
             if (alreadyHasPointOrPropertyTag) {
                 if (!useTagsGlobally) {
-                    logger.warn("Item '{}' already tagged; forbidden to add tags supplied by channel '{}'.",
+                    logger.warn("Item '{}' already tagged; so did not add tags supplied by channel '{}'.",
                             activeItem.getName(), link.getLinkedUID());
                 }
             } else {
@@ -329,8 +334,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             // remove old link's tags
             Set<String> oldLinkTags = getChannelDefaultTags(oldLink);
             newTags.removeAll(oldLinkTags);
-            // on OH shutdown tagsLinked may be true but oldLinkTags is already empty so suppress that log
-            if (oldLinkTags.isEmpty()) {
+            // on OH shutdown tagsLinked may be true but oldLinkTags has become empty so do not log
+            if (startlevel >= 100) {
                 logger.info("Item '{}' removed tags '{}' supplied by channel '{}'.", activeItem.getName(), oldLinkTags,
                         oldLink.getLinkedUID());
             }
@@ -343,7 +348,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                     if (!otherLinkTags.isEmpty()) {
                         if (alreadyHasPointOrPropertyTag) {
                             if (!useTagsGlobally) {
-                                logger.warn("Item '{}' already tagged; forbidden to add tags supplied by channel '{}'.",
+                                logger.warn("Item '{}' already tagged; so did not add tags supplied by channel '{}'.",
                                         activeItem.getName(), otherLink.getLinkedUID());
                             }
                             break;
@@ -451,5 +456,29 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     @Override
     public void updated(Item oldItem, Item item) {
         // do nothing
+    }
+
+    /**
+     * Subscribe to system start level events.
+     */
+    @Override
+    public Set<String> getSubscribedEventTypes() {
+        return Set.of(StartlevelEvent.TYPE);
+    }
+
+    /**
+     * When start level reaches 100 then re-initialize all the channel default tags.
+     */
+    @Override
+    public void receive(Event event) {
+        if (event instanceof StartlevelEvent startLevelEvent) {
+            int newStartLevel = startLevelEvent.getStartlevel();
+            if (newStartLevel >= 100 && startlevel < 100) {
+                for (ItemChannelLink link : getAll()) {
+                    assignChannelDefaultTags(link);
+                }
+            }
+            startlevel = newStartLevel;
+        }
     }
 }
