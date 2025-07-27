@@ -105,7 +105,7 @@ public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory impleme
             try {
                 handler.compile();
             } catch (ScriptException e) {
-                logger.error("Failed to recompile action for rule {}: {}", handler.getRuleUID(), e.getMessage());
+                logger.error("Failed to recompile script for rule {}: {}", handler.getRuleUID(), e.getMessage());
             }
         }
     }
