@@ -93,8 +93,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private static class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
         public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry,
-                ItemBuilderFactory itemBuilderFactory) {
-            super(null, thingRegistry, itemRegistry, itemBuilderFactory, mock(BundleContext.class));
+                ItemBuilderFactory itemBuilderFactory, BundleContext bundleContext) {
+            super(null, thingRegistry, itemRegistry, itemBuilderFactory, bundleContext);
         }
 
         @Override
@@ -160,12 +160,15 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private @NonNullByDefault({}) CommunicationManager manager;
     private @NonNullByDefault({}) SafeCaller safeCaller;
-
-    private ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock,
-            itemRegistryMock, itemBuilderFactoryMock);
+    private @NonNullByDefault({}) ItemChannelLinkRegistryAdvanced iclRegistry;
 
     @BeforeEach
     public void beforeEach() {
+        registerVolatileStorageService();
+
+        iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock, itemRegistryMock, itemBuilderFactoryMock,
+                bundleContext);
+
         when(UNIT_PROVIDER_MOCK.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
         item5 = new NumberItem("Number:Temperature", ITEM_NAME_5, UNIT_PROVIDER_MOCK);
 
