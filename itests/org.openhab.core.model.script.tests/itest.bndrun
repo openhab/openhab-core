@@ -141,4 +141,5 @@ Fragment-Host: org.openhab.core.model.script
 	com.fasterxml.jackson.dataformat.jackson-dataformat-yaml;version='[2.18.2,2.18.3)',\
 	org.yaml.snakeyaml;version='[2.3.0,2.3.1)',\
 	de.focus_shift.jollyday-core;version='[1.5.4,1.5.5)',\
-	de.focus_shift.jollyday-jackson;version='[1.5.4,1.5.5)'
+	de.focus_shift.jollyday-jackson;version='[1.5.4,1.5.5)',\
+	org.openhab.core.model.persistence.runtime;version='[5.1.0,5.1.1)'

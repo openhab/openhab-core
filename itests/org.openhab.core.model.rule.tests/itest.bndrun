@@ -134,3 +134,4 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	org.yaml.snakeyaml;version='[2.4.0,2.4.1)'
 	org.openhab.core.model.persistence.runtime;version='[5.1.0,5.1.1)'
 	de.focus_shift.jollyday-jackson;version='[1.5.4,1.5.5)'
+	org.openhab.core.model.persistence.runtime;version='[5.1.0,5.1.1)'
