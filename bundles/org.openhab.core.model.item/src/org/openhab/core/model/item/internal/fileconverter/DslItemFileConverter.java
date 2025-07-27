@@ -50,7 +50,6 @@ import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
 import org.openhab.core.model.items.ModelProperty;
 import org.openhab.core.types.State;
-import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -94,14 +93,14 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
 
     @Override
     public void setItemsToBeGenerated(String id, List<Item> items, Collection<Metadata> metadata,
-            boolean hideDefaultParameters) {
+            Map<String, String> stateFormatters, boolean hideDefaultParameters) {
         if (items.isEmpty()) {
             return;
         }
         ItemModel model = ItemsFactory.eINSTANCE.createItemModel();
         for (Item item : items) {
             model.getItems().add(buildModelItem(item, getChannelLinks(metadata, item.getName()),
-                    getMetadata(metadata, item.getName()), hideDefaultParameters));
+                    getMetadata(metadata, item.getName()), stateFormatters, hideDefaultParameters));
         }
         elementsToGenerate.put(id, model);
     }
@@ -115,7 +114,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     }
 
     private ModelItem buildModelItem(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
-            boolean hideDefaultParameters) {
+            Map<String, String> stateFormatters, boolean hideDefaultParameters) {
         ModelItem model;
         if (item instanceof GroupItem groupItem) {
             ModelGroupItem modelGroup = ItemsFactory.eINSTANCE.createModelGroupItem();
@@ -144,8 +143,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
         boolean patternInjected = false;
         String defaultPattern = getDefaultStatePattern(item);
         if (label != null && !label.isEmpty()) {
-            StateDescription stateDescr = item.getStateDescription();
-            String statePattern = stateDescr == null ? null : stateDescr.getPattern();
+            String statePattern = stateFormatters.get(item.getName());
             String patterToInject = statePattern != null && !statePattern.equals(defaultPattern) ? statePattern : null;
             if (patterToInject != null) {
                 // Inject the pattern in the label
@@ -320,6 +318,11 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     @Override
     public Collection<Metadata> getParsedMetadata(String modelName) {
         return metadataProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Map<String, String> getParsedStateFormatters(String modelName) {
+        return itemProvider.getStateFormattersFromModel(modelName);
     }
 
     @Override

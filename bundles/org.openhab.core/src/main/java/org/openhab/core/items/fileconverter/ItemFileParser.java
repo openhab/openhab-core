@@ -14,6 +14,7 @@ package org.openhab.core.items.fileconverter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -61,6 +62,14 @@ public interface ItemFileParser {
      * @return the collection of metadata
      */
     Collection<Metadata> getParsedMetadata(String modelName);
+
+    /**
+     * Get the state formatters found when parsing the file format.
+     *
+     * @param modelName the model name used for parsing
+     * @return the state formatters as a Map per item name
+     */
+    Map<String, String> getParsedStateFormatters(String modelName);
 
     /**
      * Release the data from a previously started file format parsing.

@@ -29,6 +29,7 @@ public class FileFormatItemDTO extends ItemDTO {
 
     public String groupType;
     public GroupFunctionDTO function;
+    public String format;
     public Map<String, MetadataDTO> metadata;
     public List<FileFormatChannelLinkDTO> channelLinks;
 

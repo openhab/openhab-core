@@ -42,8 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = { YamlChannelLinkProvider.class, ItemChannelLinkProvider.class,
-        YamlChannelLinkProvider.class })
+@Component(immediate = true, service = { ItemChannelLinkProvider.class, YamlChannelLinkProvider.class })
 public class YamlChannelLinkProvider extends AbstractProvider<ItemChannelLink> implements ItemChannelLinkProvider {
 
     private final Logger logger = LoggerFactory.getLogger(YamlChannelLinkProvider.class);

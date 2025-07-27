@@ -88,6 +88,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private final Collection<ItemFactory> itemFactorys = new ArrayList<>();
 
+    private final Map<String, Map<String, String>> stateFormattersMap = new ConcurrentHashMap<>();
     private final Map<String, StateDescriptionFragment> stateDescriptionFragments = new ConcurrentHashMap<>();
 
     private Integer rank;
@@ -176,6 +177,10 @@ public class GenericItemProvider extends AbstractProvider<Item>
         return itemsMap.getOrDefault(modelName, List.of());
     }
 
+    public Map<String, String> getStateFormattersFromModel(String modelName) {
+        return stateFormattersMap.getOrDefault(modelName, Map.of());
+    }
+
     private Collection<Item> getItemsFromModel(String modelName) {
         logger.debug("Read items from model '{}'", modelName);
 
@@ -259,11 +264,21 @@ public class GenericItemProvider extends AbstractProvider<Item>
             String format = extractFormat(label);
             if (format != null) {
                 label = label.substring(0, label.indexOf("[")).trim();
+                Map<String, String> formatters = Objects
+                        .requireNonNull(stateFormattersMap.computeIfAbsent(modelName, k -> new HashMap<>()));
+                formatters.put(modelItem.getName(), format);
                 if (!modelRepository.isIsolatedModel(modelName)) {
                     stateDescriptionFragments.put(modelItem.getName(),
                             StateDescriptionFragmentBuilder.create().withPattern(format).build());
                 }
             } else {
+                Map<String, String> formatters = stateFormattersMap.get(modelName);
+                if (formatters != null) {
+                    formatters.remove(modelItem.getName());
+                    if (formatters.isEmpty()) {
+                        stateFormattersMap.remove(modelName);
+                    }
+                }
                 if (!modelRepository.isIsolatedModel(modelName)) {
                     stateDescriptionFragments.remove(modelItem.getName());
                 }
@@ -437,6 +452,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                     processBindingConfigsFromModel(modelName, type);
                     Collection<Item> itemsFromModel = getItemsFromModel(modelName);
                     itemsMap.remove(modelName);
+                    stateFormattersMap.remove(modelName);
                     for (Item item : itemsFromModel) {
                         notifyAndCleanup(modelName, item);
                     }
@@ -538,7 +554,6 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     @Override
     public @Nullable StateDescriptionFragment getStateDescriptionFragment(String itemName, @Nullable Locale locale) {
-        // FIXME: what to do for isolated models to not override data for items in item registry ?
         return stateDescriptionFragments.get(itemName);
     }
 }

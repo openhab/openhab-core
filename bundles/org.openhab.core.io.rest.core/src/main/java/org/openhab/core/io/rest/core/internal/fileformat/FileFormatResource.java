@@ -87,6 +87,7 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.core.thing.util.ThingHelper;
+import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -315,8 +316,16 @@ public class FileFormatResource implements RESTResource {
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        String genId = GEN_ID_PATTERN.formatted(++counter);
-        generator.setItemsToBeGenerated(genId, items, getMetadata(items), hideDefaultParameters);
+        String genId = newIdForGeneration();
+        Map<String, String> stateFormatters = new HashMap<>();
+        items.forEach(item -> {
+            StateDescription stateDescr = item.getStateDescription();
+            String format = stateDescr == null ? null : stateDescr.getPattern();
+            if (format != null) {
+                stateFormatters.put(item.getName(), format);
+            }
+        });
+        generator.setItemsToBeGenerated(genId, items, getMetadata(items), stateFormatters, hideDefaultParameters);
         generator.generateFileFormat(genId, outputStream);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
@@ -354,7 +363,7 @@ public class FileFormatResource implements RESTResource {
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        String genId = GEN_ID_PATTERN.formatted(++counter);
+        String genId = newIdForGeneration();
         generator.setThingsToBeGenerated(genId, things, true, hideDefaultParameters);
         generator.generateFileFormat(genId, outputStream);
         return Response.ok(new String(outputStream.toByteArray())).build();
@@ -384,15 +393,16 @@ public class FileFormatResource implements RESTResource {
         List<Thing> things = new ArrayList<>();
         List<Item> items = new ArrayList<>();
         List<Metadata> metadata = new ArrayList<>();
+        Map<String, String> stateFormatters = new HashMap<>();
         List<String> errors = new ArrayList<>();
-        if (!convertFromFileFormatDTO(data, things, items, metadata, errors)) {
+        if (!convertFromFileFormatDTO(data, things, items, metadata, stateFormatters, errors)) {
             return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
         }
 
         ThingFileGenerator thingGenerator = getThingFileGenerator(acceptHeader);
         ItemFileGenerator itemGenerator = getItemFileGenerator(acceptHeader);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        String genId = GEN_ID_PATTERN.formatted(++counter);
+        String genId = newIdForGeneration();
         switch (acceptHeader) {
             case "text/vnd.openhab.dsl.thing":
                 if (thingGenerator == null) {
@@ -412,7 +422,7 @@ public class FileFormatResource implements RESTResource {
                     return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
                 }
                 itemGenerator.setItemsToBeGenerated(genId, items, hideChannelLinksAndMetadata ? List.of() : metadata,
-                        hideDefaultParameters);
+                        stateFormatters, hideDefaultParameters);
                 itemGenerator.generateFileFormat(genId, outputStream);
                 break;
             case "application/yaml":
@@ -421,7 +431,7 @@ public class FileFormatResource implements RESTResource {
                 }
                 if (itemGenerator != null) {
                     itemGenerator.setItemsToBeGenerated(genId, items,
-                            hideChannelLinksAndMetadata ? List.of() : metadata, hideDefaultParameters);
+                            hideChannelLinksAndMetadata ? List.of() : metadata, stateFormatters, hideDefaultParameters);
                 }
                 if (thingGenerator != null) {
                     thingGenerator.generateFileFormat(genId, outputStream);
@@ -459,6 +469,7 @@ public class FileFormatResource implements RESTResource {
         Collection<Item> items = List.of();
         Collection<Metadata> metadata = List.of();
         Collection<ItemChannelLink> channelLinks = List.of();
+        Map<String, String> stateFormatters = Map.of();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         ThingFileParser thingParser = getThingFileParser(contentTypeHeader);
@@ -496,6 +507,7 @@ public class FileFormatResource implements RESTResource {
                     return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
                 }
                 metadata = itemParser.getParsedMetadata(modelName2);
+                stateFormatters = itemParser.getParsedStateFormatters(modelName2);
                 // We need to go through the thing parser to retrieve the items channel links
                 // But there is no need to parse again the input
                 if (thingParser != null) {
@@ -524,13 +536,16 @@ public class FileFormatResource implements RESTResource {
                             .getParsedItems(modelName != null ? modelName : Objects.requireNonNull(modelName2));
                     metadata = itemParser
                             .getParsedMetadata(modelName != null ? modelName : Objects.requireNonNull(modelName2));
+                    stateFormatters = itemParser.getParsedStateFormatters(
+                            modelName != null ? modelName : Objects.requireNonNull(modelName2));
                 }
                 break;
             default:
                 return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                         .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
         }
-        ExtendedFileFormatDTO result = convertToFileFormatDTO(things, items, metadata, channelLinks, warnings);
+        ExtendedFileFormatDTO result = convertToFileFormatDTO(things, items, metadata, stateFormatters, channelLinks,
+                warnings);
         if (modelName != null && thingParser != null) {
             thingParser.finishParsingFileFormat(modelName);
         }
@@ -538,6 +553,10 @@ public class FileFormatResource implements RESTResource {
             itemParser.finishParsingFileFormat(modelName2);
         }
         return Response.ok(result).build();
+    }
+
+    private String newIdForGeneration() {
+        return GEN_ID_PATTERN.formatted(++counter);
     }
 
     /*
@@ -739,7 +758,7 @@ public class FileFormatResource implements RESTResource {
     }
 
     private boolean convertFromFileFormatDTO(FileFormatDTO data, List<Thing> things, List<Item> items,
-            List<Metadata> metadata, List<String> errors) {
+            List<Metadata> metadata, Map<String, String> stateFormatters, List<String> errors) {
         boolean ok = true;
         if (data.things != null) {
             for (ThingDTO thingBean : data.things) {
@@ -823,13 +842,17 @@ public class FileFormatResource implements RESTResource {
                 }
                 items.add(item);
                 metadata.addAll(FileFormatItemDTOMapper.mapMetadata(itemData));
+                if (itemData.format != null) {
+                    stateFormatters.put(name, itemData.format);
+                }
             }
         }
         return ok;
     }
 
     private ExtendedFileFormatDTO convertToFileFormatDTO(Collection<Thing> things, Collection<Item> items,
-            Collection<Metadata> metadata, Collection<ItemChannelLink> channelLinks, List<String> warnings) {
+            Collection<Metadata> metadata, Map<String, String> stateFormatters,
+            Collection<ItemChannelLink> channelLinks, List<String> warnings) {
         ExtendedFileFormatDTO dto = new ExtendedFileFormatDTO();
         dto.warnings = warnings.isEmpty() ? null : warnings;
         if (!things.isEmpty()) {
@@ -841,7 +864,8 @@ public class FileFormatResource implements RESTResource {
         if (!items.isEmpty()) {
             dto.items = new ArrayList<>();
             items.forEach(item -> {
-                dto.items.add(FileFormatItemDTOMapper.map(item, metadata, channelLinks));
+                dto.items.add(
+                        FileFormatItemDTOMapper.map(item, metadata, stateFormatters.get(item.getName()), channelLinks));
             });
         }
         return dto;

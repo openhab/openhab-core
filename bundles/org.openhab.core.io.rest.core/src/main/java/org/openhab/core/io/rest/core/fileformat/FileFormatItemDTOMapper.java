@@ -46,13 +46,16 @@ public class FileFormatItemDTOMapper {
      *
      * @param item the item
      * @param metadata some metadata
+     * @param format the format to be used to format the item state, can be NULL
      * @param channelLinks some items channel links
      * @return file format item DTO object
      */
-    public static FileFormatItemDTO map(Item item, Collection<Metadata> metadata,
+    public static FileFormatItemDTO map(Item item, Collection<Metadata> metadata, @Nullable String format,
             Collection<ItemChannelLink> channelLinks) {
         ItemDTO itemDto = ItemDTOMapper.map(item);
         FileFormatItemDTO dto = new FileFormatItemDTO(itemDto, itemDto instanceof GroupItemDTO);
+
+        dto.format = format;
 
         Map<String, MetadataDTO> metadataDTO = new LinkedHashMap<>();
         metadata.forEach(md -> {

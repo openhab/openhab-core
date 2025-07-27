@@ -51,7 +51,6 @@ import org.openhab.core.model.yaml.internal.items.YamlItemProvider;
 import org.openhab.core.model.yaml.internal.items.YamlMetadataDTO;
 import org.openhab.core.model.yaml.internal.items.YamlMetadataProvider;
 import org.openhab.core.types.State;
-import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -91,11 +90,11 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
 
     @Override
     public void setItemsToBeGenerated(String id, List<Item> items, Collection<Metadata> metadata,
-            boolean hideDefaultParameters) {
+            Map<String, String> stateFormatters, boolean hideDefaultParameters) {
         List<YamlElement> elements = new ArrayList<>();
         items.forEach(item -> {
             elements.add(buildItemDTO(item, getChannelLinks(metadata, item.getName()),
-                    getMetadata(metadata, item.getName()), hideDefaultParameters));
+                    getMetadata(metadata, item.getName()), stateFormatters, hideDefaultParameters));
         });
         modelRepository.addElementsToBeGenerated(id, elements);
     }
@@ -106,7 +105,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
     }
 
     private YamlItemDTO buildItemDTO(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
-            boolean hideDefaultParameters) {
+            Map<String, String> stateFormatters, boolean hideDefaultParameters) {
         YamlItemDTO dto = new YamlItemDTO();
         dto.name = item.getName();
 
@@ -115,8 +114,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
         String defaultPattern = getDefaultStatePattern(item);
         if (label != null && !label.isEmpty()) {
             dto.label = item.getLabel();
-            StateDescription stateDescr = item.getStateDescription();
-            String statePattern = stateDescr == null ? null : stateDescr.getPattern();
+            String statePattern = stateFormatters.get(item.getName());
             String patterToSet = statePattern != null && !statePattern.equals(defaultPattern) ? statePattern : null;
             dto.format = patterToSet;
             patternSet = patterToSet != null;
@@ -289,6 +287,11 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
     @Override
     public Collection<Metadata> getParsedMetadata(String modelName) {
         return metadataProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Map<String, String> getParsedStateFormatters(String modelName) {
+        return Map.of();
     }
 
     @Override

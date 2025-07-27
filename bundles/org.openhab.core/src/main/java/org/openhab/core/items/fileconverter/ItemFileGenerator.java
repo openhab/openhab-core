@@ -15,6 +15,7 @@ package org.openhab.core.items.fileconverter;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.Item;
@@ -42,10 +43,11 @@ public interface ItemFileGenerator {
      * @param id the identifier of the file format generation
      * @param items the items
      * @param metadata the provided collection of metadata for these items (including channel links)
+     * @param stateFormatters the optional state formatter for each item
      * @param hideDefaultParameters true to hide the configuration parameters having the default value
      */
     void setItemsToBeGenerated(String id, List<Item> items, Collection<Metadata> metadata,
-            boolean hideDefaultParameters);
+            Map<String, String> stateFormatters, boolean hideDefaultParameters);
 
     /**
      * Generate the file format for all data that were associated to the provided identifier.
