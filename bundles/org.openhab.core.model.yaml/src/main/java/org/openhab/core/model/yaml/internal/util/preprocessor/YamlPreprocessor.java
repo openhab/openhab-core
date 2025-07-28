@@ -192,6 +192,7 @@ public class YamlPreprocessor {
             includeCallback.accept(includeFile);
             return loadedFile;
         } catch (IOException e) {
+            // The exception message includes the file path, so we don't need to log it again
             LOGGER.warn("Error loading include file {}", e.getMessage());
             return Map.of();
         }
