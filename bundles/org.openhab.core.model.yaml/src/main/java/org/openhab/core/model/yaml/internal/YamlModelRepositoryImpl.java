@@ -99,12 +99,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "yaml").map(Path::of).toList();
 
-    private static final Map<Kind, String> WATCH_KIND_TO_ACTION = Map.of( //
-            Kind.CREATE, "created", //
-            Kind.DELETE, "deleted", //
-            Kind.MODIFY, "modified" //
-    );
-
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
     private final WatchService watchService;
@@ -355,7 +349,13 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return false;
         }
 
-        logger.info("An include file '{}' was {}", fullPath, WATCH_KIND_TO_ACTION.getOrDefault(kind, kind.name()));
+        String action = switch (kind) {
+            case CREATE -> "created";
+            case DELETE -> "deleted";
+            case MODIFY -> "modified";
+            default -> kind.name();
+        };
+        logger.info("An include file '{}' was {}", fullPath, action);
 
         dependingModels.forEach(modelName -> {
             Path modelPath = mainWatchPath.resolve(modelName);
