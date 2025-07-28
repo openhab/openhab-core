@@ -35,7 +35,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * The {@link YamlPreprocessor} is a utility class to load YAML files
- * and preprocess them before they are loaded by {@link YamlModelRepositoryImpl}.
+ * and preprocess them before they are loaded by {@link org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl}.
  *
  * The following enhancements are made:
  *
