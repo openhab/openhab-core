@@ -33,6 +33,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.PoolBasedSequentialScheduledExecutorService.BasePoolExecutor;
 import org.openhab.core.internal.common.WrappedScheduledExecutorService;
 import org.osgi.framework.Constants;
@@ -59,6 +61,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component(configurationPid = ThreadPoolManager.CONFIGURATION_PID)
+@NonNullByDefault
 public class ThreadPoolManager {
 
     public static final String CONFIGURATION_PID = "org.openhab.threadpool";
@@ -244,6 +247,7 @@ public class ThreadPoolManager {
         }
 
         @Override
+        @NonNullByDefault({})
         public List<Runnable> shutdownNow() {
             logger.warn("shutdownNow() invoked on a shared thread pool '{}'. This is a bug, please submit a bug report",
                     threadPoolName, new IllegalStateException());
@@ -261,44 +265,48 @@ public class ThreadPoolManager {
         }
 
         @Override
-        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+        public boolean awaitTermination(long timeout, @Nullable TimeUnit unit) throws InterruptedException {
             return delegate.awaitTermination(timeout, unit);
         }
 
         @Override
-        public <T> Future<T> submit(Callable<T> task) {
+        public <T> Future<T> submit(@Nullable Callable<T> task) {
             return delegate.submit(task);
         }
 
         @Override
-        public <T> Future<T> submit(Runnable task, T result) {
+        public <T> Future<T> submit(@Nullable Runnable task, T result) {
             return delegate.submit(task, result);
         }
 
         @Override
-        public Future<?> submit(Runnable task) {
+        public Future<?> submit(@Nullable Runnable task) {
             return delegate.submit(task);
         }
 
         @Override
+        @NonNullByDefault({})
         public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
             return delegate.invokeAll(tasks);
         }
 
         @Override
+        @NonNullByDefault({})
         public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
                 throws InterruptedException {
             return delegate.invokeAll(tasks, timeout, unit);
         }
 
         @Override
-        public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
+        @NonNullByDefault({})
+        public <T> T invokeAny(@Nullable Collection<? extends Callable<T>> tasks)
                 throws InterruptedException, ExecutionException {
             return delegate.invokeAny(tasks);
         }
 
         @Override
-        public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+        @NonNullByDefault({})
+        public <T> T invokeAny(@Nullable Collection<? extends Callable<T>> tasks, long timeout, @Nullable TimeUnit unit)
                 throws InterruptedException, ExecutionException, TimeoutException {
             return delegate.invokeAny(tasks, timeout, unit);
         }
@@ -353,6 +361,7 @@ public class ThreadPoolManager {
         }
 
         @Override
+        @NonNullByDefault({})
         public BlockingQueue<Runnable> getQueue() {
             return new ArrayBlockingQueue<Runnable>(1) {
                 public int remainingCapacity() {
@@ -376,23 +385,24 @@ public class ThreadPoolManager {
         }
 
         @Override
-        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+        public ScheduledFuture<?> schedule(@Nullable Runnable command, long delay, @Nullable TimeUnit unit) {
             return delegate.schedule(command, delay, unit);
         }
 
         @Override
-        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+        public <V> ScheduledFuture<V> schedule(@Nullable Callable<V> callable, long delay, @Nullable TimeUnit unit) {
             return delegate.schedule(callable, delay, unit);
         }
 
         @Override
-        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+        public ScheduledFuture<?> scheduleAtFixedRate(@Nullable Runnable command, long initialDelay, long period,
+                @Nullable TimeUnit unit) {
             return delegate.scheduleAtFixedRate(command, initialDelay, period, unit);
         }
 
         @Override
-        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay,
-                TimeUnit unit) {
+        public ScheduledFuture<?> scheduleWithFixedDelay(@Nullable Runnable command, long initialDelay, long delay,
+                @Nullable TimeUnit unit) {
             return delegate.scheduleWithFixedDelay(command, initialDelay, delay, unit);
         }
     }

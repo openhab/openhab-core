@@ -132,7 +132,7 @@ public class ThingTypeResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getThingTypes", summary = "Gets all available thing types without config description, channels and properties.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = StrippedThingTypeDTO.class), uniqueItems = true))) })
-    public Response getAll(
+    public @Nullable Response getAll(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("bindingId") @Parameter(description = "filter by binding Id") @Nullable String bindingId) {
         Locale locale = localeService.getLocale(language);
@@ -153,7 +153,8 @@ public class ThingTypeResource implements RESTResource {
     @Operation(operationId = "getThingTypeById", summary = "Gets thing type by UID.", responses = {
             @ApiResponse(responseCode = "200", description = "Thing type with provided thingTypeUID does not exist.", content = @Content(schema = @Schema(implementation = ThingTypeDTO.class))),
             @ApiResponse(responseCode = "404", description = "No content") })
-    public Response getByUID(@PathParam("thingTypeUID") @Parameter(description = "thingTypeUID") String thingTypeUID,
+    public @Nullable Response getByUID(
+            @PathParam("thingTypeUID") @Parameter(description = "thingTypeUID") String thingTypeUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         ThingType thingType = thingTypeRegistry.getThingType(new ThingTypeUID(thingTypeUID), locale);

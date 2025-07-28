@@ -17,6 +17,9 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is the Access Token Response, a simple value-object that holds the result of the
  * from an Access Token Request, as listed in RFC 6749:
@@ -28,6 +31,7 @@ import java.util.Objects;
  * @author Michael Bock - Initial contribution
  * @author Gary Tse - Adaptation for Eclipse SmartHome
  */
+@NonNullByDefault
 public final class AccessTokenResponse implements Serializable, Cloneable {
 
     /**
@@ -46,14 +50,14 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-1.4">rfc6749 section-1.4</a>
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-10.3">rfc6749 section-10.3</a>
      */
-    private String accessToken;
+    private @Nullable String accessToken;
 
     /**
      * Token type. e.g. Bearer, MAC
      *
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-7.1">rfc6749 section-7.1</a>
      */
-    private String tokenType;
+    private @Nullable String tokenType;
 
     /**
      * Number of seconds that this OAuthToken is valid for since the time it was created.
@@ -74,7 +78,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-1.5">rfc6749 section-1.5</a>
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-10.4">rfc6749 section-10.4</a>
      */
-    private String refreshToken;
+    private @Nullable String refreshToken;
 
     /**
      * A space-delimited case-sensitive un-ordered string. This may be used
@@ -83,7 +87,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      *
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3">rfc6749 section-3.3</a>
      */
-    private String scope;
+    private @Nullable String scope;
 
     /**
      * If the {@code state} parameter was present in the access token request.
@@ -91,7 +95,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      *
      * <a href="https://tools.ietf.org/html/rfc6749#section-4.2.2">rfc6749 section-4.2.2</a>
      */
-    private String state;
+    private @Nullable String state;
 
     /**
      * Created datetime of this access token. This is generated locally
@@ -100,7 +104,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * This should be slightly later than the actual time the access token
      * is produced at the server.
      */
-    private Instant createdOn;
+    private @Nullable Instant createdOn;
 
     /**
      * Calculate if the token is expired against the given time.
@@ -117,19 +121,19 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
                 || createdOn.plusSeconds(expiresIn).minusSeconds(tokenExpiresInBuffer).isBefore(givenTime);
     }
 
-    public String getAccessToken() {
+    public @Nullable String getAccessToken() {
         return accessToken;
     }
 
-    public void setAccessToken(String accessToken) {
+    public void setAccessToken(@Nullable String accessToken) {
         this.accessToken = accessToken;
     }
 
-    public String getTokenType() {
+    public @Nullable String getTokenType() {
         return tokenType;
     }
 
-    public void setTokenType(String tokenType) {
+    public void setTokenType(@Nullable String tokenType) {
         this.tokenType = tokenType;
     }
 
@@ -141,35 +145,35 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         this.expiresIn = expiresIn;
     }
 
-    public String getRefreshToken() {
+    public @Nullable String getRefreshToken() {
         return refreshToken;
     }
 
-    public void setRefreshToken(String refreshToken) {
+    public void setRefreshToken(@Nullable String refreshToken) {
         this.refreshToken = refreshToken;
     }
 
-    public String getScope() {
+    public @Nullable String getScope() {
         return scope;
     }
 
-    public void setScope(String scope) {
+    public void setScope(@Nullable String scope) {
         this.scope = scope;
     }
 
-    public String getState() {
+    public @Nullable String getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(@Nullable String state) {
         this.state = state;
     }
 
-    public Instant getCreatedOn() {
+    public @Nullable Instant getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(Instant createdOn) {
+    public void setCreatedOn(@Nullable Instant createdOn) {
         this.createdOn = createdOn;
     }
 
@@ -188,7 +192,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
     }
 
     @Override
-    public boolean equals(Object thatAuthTokenObj) {
+    public boolean equals(@Nullable Object thatAuthTokenObj) {
         if (this == thatAuthTokenObj) {
             return true;
         }
