@@ -12,8 +12,6 @@
  */
 package org.openhab.core.model.yaml.internal;
 
-import static org.openhab.core.service.WatchService.Kind.CREATE;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -101,6 +99,12 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "yaml").map(Path::of).toList();
 
+    private static final Map<Kind, String> WATCH_KIND_TO_ACTION = Map.of( //
+            Kind.CREATE, "created", //
+            Kind.DELETE, "deleted", //
+            Kind.MODIFY, "modified" //
+    );
+
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
     private final WatchService watchService;
@@ -152,7 +156,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     public FileVisitResult visitFile(@NonNullByDefault({}) Path file,
                             @NonNullByDefault({}) BasicFileAttributes attrs) throws IOException {
                         if (attrs.isRegularFile()) {
-                            processWatchEvent(CREATE, file);
+                            processWatchEvent(Kind.CREATE, file);
                         }
                         return FileVisitResult.CONTINUE;
                     }
@@ -208,7 +212,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
 
         try {
-            if (kind == WatchService.Kind.DELETE) {
+            if (kind == Kind.DELETE) {
                 removeModel(modelName);
             } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
                 Object yamlObject = YamlPreprocessor.load(fullPath, includePath -> {
@@ -351,18 +355,13 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return false;
         }
 
-        logger.info("An include file '{}' was {}", fullPath, switch (kind) {
-            case WatchService.Kind.CREATE -> "created";
-            case WatchService.Kind.DELETE -> "deleted";
-            case WatchService.Kind.MODIFY -> "modified";
-            default -> "unknown";
-        });
+        logger.info("An include file '{}' was {}", fullPath, WATCH_KIND_TO_ACTION.getOrDefault(kind, kind.name()));
 
         dependingModels.forEach(modelName -> {
             Path modelPath = mainWatchPath.resolve(modelName);
             try {
                 // reprocess the model that depends on this include file
-                processWatchEvent(WatchService.Kind.MODIFY, modelPath);
+                processWatchEvent(Kind.MODIFY, modelPath);
             } catch (Exception e) {
                 logger.warn("Failed to reprocess model {} after include file change: {}", modelName, e.getMessage());
             }
