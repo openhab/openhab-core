@@ -148,7 +148,7 @@ class ModelConstructor extends Constructor {
                 @Nullable String defaultValue) {
             String value = variables.get(name);
             if (value != null && !value.isEmpty()) {
-                return value.toString();
+                return value;
             }
             // variable is either unset or empty
             if (separator != null) {
