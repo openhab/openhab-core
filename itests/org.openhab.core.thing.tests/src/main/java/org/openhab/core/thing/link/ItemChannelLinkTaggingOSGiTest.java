@@ -15,17 +15,26 @@ package org.openhab.core.thing.link;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.model.ItemsStandaloneSetup;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.thing.ThingStandaloneSetup;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
 
 /**
  * Tests for {@link ItemChannelLinkRegistry} tagging.
@@ -35,32 +44,23 @@ import org.openhab.core.thing.ThingRegistry;
 @NonNullByDefault
 public class ItemChannelLinkTaggingOSGiTest extends JavaOSGiTest {
 
-    private static final String THINGS_MODEL_ID = "test.things";
     private static final String ITEMS_MODEL_ID = "test.items";
-
-    private static final String THINGS_MODEL = """
-            Bridge hue:bridge-api2:bridge "Bridge" [ipAddress="123.123.123.123", applicationKey="0123456789ABCDEF"] {
-                Thing device light "Light" [resourceId="11111111-1111-1111-1111-111111111111"]
-                Thing device dimmer "Dimmer" [resourceId="22222222-2222-2222-2222-222222222222"]
-            }
-                            """;
-
     private static final String ITEMS_MODEL = """
-            String Item_01 {channel="hue:device:bridge:light:color" }
-            String Item_02 {channel="hue:device:bridge:light:color" [useTags=false] }
-            String Item_03 {channel="hue:device:bridge:light:color" [useTags="false"] }
-            String Item_04 "Control, Color" {channel="hue:device:bridge:light:color" [useTags=true] }
-            String Item_05 "Control, Color" {channel="hue:device:bridge:light:color" [useTags="true"] }
-            String Item_06 "Control Color, Custom" ["Custom"] {channel="hue:device:bridge:light:color" [useTags=true] }
-            String Item_07 "'Control', Power, Custom" ["Power", "Custom"] {channel="hue:device:bridge:light:color" }
-            String Item_08 "'Control', Power, Custom" ["Power", "Custom"] {channel="hue:device:bridge:light:color" [useTags=true] }
-            String Item_09 "Switch, Custom" ["Switch", "Custom"] {channel="hue:device:bridge:light:color" }
-            String Item_10 "Switch, Custom" ["Switch", "Custom"] {channel="hue:device:bridge:light:color" [useTags=true] }
-            String Item_11 "Switch, Power, Custom" ["Switch", "Power", "Custom"] {channel="hue:device:bridge:light:color" }
-            String Item_12 "Switch, Power, Custom" ["Switch", "Power", "Custom"] {channel="hue:device:bridge:light:color" [useTags=true] }
-            String Item_13 "Alarm, LowBattery" {channel="hue:device:bridge:dimmer:battery-low" [useTags=true] }
-            String Item_14 "Control, Color" {channel="hue:device:bridge:light:color" [useTags=true], channel="hue:device:bridge:dimmer:battery-low" [useTags=true] }
-            String Item_15 "Alarm, LowBattery" {channel="hue:device:bridge:light:color" [useTags=false], channel="hue:device:bridge:dimmer:battery-low" [useTags=true] }
+            String Item_01 {channel="hue:device:dummy:color" }
+            String Item_02 {channel="hue:device:dummy:color" [useTags=false] }
+            String Item_03 {channel="hue:device:dummy:color" [useTags="false"] }
+            String Item_04 "Control, Color" {channel="hue:device:dummy:color" [useTags=true] }
+            String Item_05 "Control, Color" {channel="hue:device:dummy:color" [useTags="true"] }
+            String Item_06 "Control Color, Custom" ["Custom"] {channel="hue:device:dummy:color" [useTags=true] }
+            String Item_07 "'Control', Power, Custom" ["Power", "Custom"] {channel="hue:device:dummy:color" }
+            String Item_08 "'Control', Power, Custom" ["Power", "Custom"] {channel="hue:device:dummy:color" [useTags=true] }
+            String Item_09 "Switch, Custom" ["Switch", "Custom"] {channel="hue:device:dummy:color" }
+            String Item_10 "Switch, Custom" ["Switch", "Custom"] {channel="hue:device:dummy:color" [useTags=true] }
+            String Item_11 "Switch, Power, Custom" ["Switch", "Power", "Custom"] {channel="hue:device:dummy:color" }
+            String Item_12 "Switch, Power, Custom" ["Switch", "Power", "Custom"] {channel="hue:device:dummy:color" [useTags=true] }
+            String Item_13 "Alarm, LowBattery" {channel="hue:device:dummy:battery-low" [useTags=true] }
+            String Item_14 "Control, Color" {channel="hue:device:dummy:color" [useTags=true], channel="hue:device:dummy:battery-low" [useTags=true] }
+            String Item_15 "Alarm, LowBattery" {channel="hue:device:dummy:color" [useTags=false], channel="hue:device:dummy:battery-low" [useTags=true] }
                             """;
 
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
@@ -71,6 +71,9 @@ public class ItemChannelLinkTaggingOSGiTest extends JavaOSGiTest {
     @BeforeEach
     public void setup() {
         registerVolatileStorageService();
+
+        ItemsStandaloneSetup.doSetup();
+        ThingStandaloneSetup.doSetup();
 
         itemRegistry = getService(ItemRegistry.class);
         assertNotNull(itemRegistry);
@@ -85,35 +88,25 @@ public class ItemChannelLinkTaggingOSGiTest extends JavaOSGiTest {
         assertNotNull(modelRepository);
     }
 
-    /**
-     * TODO I wrote this to test the channel / item tagging but it fails with the stack trace below ("resource" is null)
-     * and in spite of many hours trying I was unable to find a solution to make it work. So in the menatime the test is
-     * currently disabled until some kind maintainer can help me to fix it.
-     *
-     * <pre>
-     * {@code
-     * TEST org.openhab.core.thing.link.ItemChannelLinkTaggingOSGiTest#assertTagsAreCorrect() <<< ERROR: Cannot invoke
-     * "org.eclipse.emf.ecore.resource.Resource.load(java.io.InputStream, java.util.Map)" because "resource" is null
-     * java.lang.NullPointerException: Cannot invoke "org.eclipse.emf.ecore.resource.Resource.load(java.io.InputStream, java.util.Map)" because "resource" is null
-     *     at org.openhab.core.model.core.internal.ModelRepositoryImpl.validateModel(ModelRepositoryImpl.java:280)
-     *     at org.openhab.core.model.core.internal.ModelRepositoryImpl.addOrRefreshModel(ModelRepositoryImpl.java:108)
-     *     at org.openhab.core.thing.link.ItemChannelLinkTaggingOSGiTest.assertTagsAreCorrect( ItemChannelLinkTaggingOSGiTest.java:107)
-     * }
-     * </pre>
-     */
     @Test
-    @Disabled
     public void assertTagsAreCorrect() {
-        modelRepository.addOrRefreshModel(THINGS_MODEL_ID, new ByteArrayInputStream(THINGS_MODEL.getBytes())); // <== !!
-        waitForAssert(() -> {
-            assertEquals(3, thingRegistry.getAll().size());
-        });
+        ThingTypeUID thingTypeUID = new ThingTypeUID("hue", "device");
+        ThingUID thingUID = new ThingUID(thingTypeUID, "dummy");
 
-        modelRepository.addOrRefreshModel(ITEMS_MODEL_ID, new ByteArrayInputStream(ITEMS_MODEL.getBytes())); // <== !!
-        waitForAssert(() -> {
-            assertEquals(15, itemRegistry.getAll().size());
-            assertEquals(17, itemChannelLinkRegistry.getAll().size());
-        });
+        Channel colorChannel = ChannelBuilder.create(new ChannelUID(thingUID, "color"), "Color")
+                .withDefaultTags(Set.of("Control", "Color")).build();
+        Channel batteryChannel = ChannelBuilder.create(new ChannelUID(thingUID, "battery-low"), "Switch")
+                .withDefaultTags(Set.of("Alarm", "LowBattery")).build();
+
+        Thing thing = ThingBuilder.create(thingTypeUID, thingUID) //
+                .withChannels(List.of(colorChannel, batteryChannel)).build();
+
+        thingRegistry.add(thing);
+        assertEquals(1, thingRegistry.getAll().size());
+
+        modelRepository.addOrRefreshModel(ITEMS_MODEL_ID, new ByteArrayInputStream(ITEMS_MODEL.getBytes()));
+        assertEquals(15, itemRegistry.getAll().size());
+        assertEquals(17, itemChannelLinkRegistry.getAll().size());
 
         Item item;
 
