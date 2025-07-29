@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -84,9 +85,9 @@ public class YamlPreprocessorTest {
     @Test
     void getNestedValueTest() {
         Map<String, Object> data = Map.of("top", Map.of("level1", Map.of("level2", "value")));
-        assertThat(YamlPreprocessor.getNestedValue(data, "top", "level1", "level2"), equalTo("value"));
-        assertNull(YamlPreprocessor.getNestedValue(data, "top", "nolevel1", "level2"));
-        assertNull(YamlPreprocessor.getNestedValue(data, "top", "level1", "nolevel2"));
+        assertThat(getNestedValue(data, "top", "level1", "level2"), equalTo("value"));
+        assertNull(getNestedValue(data, "top", "nolevel1", "level2"));
+        assertNull(getNestedValue(data, "top", "level1", "nolevel2"));
     }
 
     @Test
@@ -153,7 +154,7 @@ public class YamlPreprocessorTest {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("include1Deep.yaml"),
                 this::emptyCallback);
 
-        assertThat(YamlPreprocessor.getNestedValue(data, "toplevel", "includedkey"), equalTo("value"));
+        assertThat(getNestedValue(data, "toplevel", "includedkey"), equalTo("value"));
     }
 
     @Test
@@ -161,7 +162,7 @@ public class YamlPreprocessorTest {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("include2Deep.yaml"),
                 this::emptyCallback);
 
-        assertThat(YamlPreprocessor.getNestedValue(data, "toplevel", "level1", "level2"), equalTo("foo"));
+        assertThat(getNestedValue(data, "toplevel", "level1", "level2"), equalTo("foo"));
     }
 
     @Test
@@ -187,12 +188,10 @@ public class YamlPreprocessorTest {
         assertThat(data.get("path"), equalTo(file.toAbsolutePath().getParent().toString()));
 
         file = sourcePath.resolveSibling("predefinedVarsNotOverridable.inc.yaml");
-        assertThat(YamlPreprocessor.getNestedValue(data, "include", "file"), equalTo(file.toAbsolutePath().toString()));
-        assertThat(YamlPreprocessor.getNestedValue(data, "include", "filename"),
-                equalTo("predefinedVarsNotOverridable.inc"));
-        assertThat(YamlPreprocessor.getNestedValue(data, "include", "ext"), equalTo("yaml"));
-        assertThat(YamlPreprocessor.getNestedValue(data, "include", "path"),
-                equalTo(file.toAbsolutePath().getParent().toString()));
+        assertThat(getNestedValue(data, "include", "file"), equalTo(file.toAbsolutePath().toString()));
+        assertThat(getNestedValue(data, "include", "filename"), equalTo("predefinedVarsNotOverridable.inc"));
+        assertThat(getNestedValue(data, "include", "ext"), equalTo("yaml"));
+        assertThat(getNestedValue(data, "include", "path"), equalTo(file.toAbsolutePath().getParent().toString()));
     }
 
     @Test
@@ -210,7 +209,7 @@ public class YamlPreprocessorTest {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
                 .load(SOURCE_PATH.resolve("includedTopLevelVars.yaml"), this::emptyCallback);
 
-        assertThat(YamlPreprocessor.getNestedValue(data, "toplevel", "level1"), equalTo("set_at_toplevel"));
+        assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_toplevel"));
     }
 
     @Test
@@ -218,7 +217,7 @@ public class YamlPreprocessorTest {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
                 .load(SOURCE_PATH.resolve("includedTopLevelFileVars.yaml"), this::emptyCallback);
 
-        assertThat(YamlPreprocessor.getNestedValue(data, "toplevel", "level1"), equalTo("set_at_include_level"));
+        assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_include_level"));
     }
 
     @Test
@@ -226,7 +225,7 @@ public class YamlPreprocessorTest {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
                 .load(SOURCE_PATH.resolve("varsPropagate2Levels.yaml"), this::emptyCallback);
 
-        assertThat(YamlPreprocessor.getNestedValue(data, "toplevel", "data", "data"), equalTo("toplevel"));
+        assertThat(getNestedValue(data, "toplevel", "data", "data"), equalTo("toplevel"));
     }
 
     @Test
@@ -235,25 +234,46 @@ public class YamlPreprocessorTest {
                 this::emptyCallback);
 
         // defined in the package
-        assertThat(YamlPreprocessor.getNestedValue(data, "things", "thing1", "label"), equalTo("label1"));
-        assertThat(YamlPreprocessor.getNestedValue(data, "things", "thing2", "label"), equalTo("label2"));
+        assertThat(getNestedValue(data, "things", "thing1", "label"), equalTo("label1"));
+        assertThat(getNestedValue(data, "things", "thing2", "label"), equalTo("label2"));
 
         // defined in the main level
-        assertThat(YamlPreprocessor.getNestedValue(data, "things", "thing3", "label"), equalTo("label3"));
+        assertThat(getNestedValue(data, "things", "thing3", "label"), equalTo("label3"));
 
         // defined in both main and package, they should be merged with values from the main overriding
         // the package
-        assertThat(YamlPreprocessor.getNestedValue(data, "things", "thing4", "label"), equalTo("main"));
-        assertThat(YamlPreprocessor.getNestedValue(data, "things", "thing4", "config", "mainprop"), equalTo("main"));
-        assertThat(YamlPreprocessor.getNestedValue(data, "things", "thing4", "config", "pkgprop"), equalTo("package"));
-        assertThat(YamlPreprocessor.getNestedValue(data, "things", "thing4", "config", "commonprop"),
-                equalTo("overridden"));
+        assertThat(getNestedValue(data, "things", "thing4", "label"), equalTo("main"));
+        assertThat(getNestedValue(data, "things", "thing4", "config", "mainprop"), equalTo("main"));
+        assertThat(getNestedValue(data, "things", "thing4", "config", "pkgprop"), equalTo("package"));
+        assertThat(getNestedValue(data, "things", "thing4", "config", "commonprop"), equalTo("overridden"));
 
-        assertThat(YamlPreprocessor.getNestedValue(data, "list", "test1"), equalTo(List.of("main1", "package1")));
+        assertThat(getNestedValue(data, "list", "test1"), equalTo(List.of("main1", "package1")));
     }
 
     void emptyCallback(Path includeFile) {
         // This method is intentionally left empty to satisfy the callback interface
         // in the tests where no action is needed on include files.
+    }
+
+    /**
+     * Retrieves a nested value from a map using the provided keys.
+     * <p>
+     * This method navigates through a map structure using the given keys in order.
+     * If a key is not found or the current value is not a map, the method returns {@code null}.
+     *
+     * @param data the map to retrieve the value from; must not be {@code null}.
+     * @param key the sequence of keys to navigate the map; must not be {@code null}.
+     * @return the nested value if found, or {@code null} if a key is missing or the value is not a map.
+     */
+    private @Nullable Object getNestedValue(Map<String, Object> data, String... key) {
+        Object value = data;
+        for (String k : key) {
+            if (value instanceof Map<?, ?> map) {
+                value = map.get(k);
+            } else {
+                return null;
+            }
+        }
+        return value;
     }
 }
