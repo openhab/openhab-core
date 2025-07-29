@@ -242,16 +242,4 @@ public class YamlPreprocessor {
         return new Yaml(new ModelConstructor(variables), new Representer(new DumperOptions()), new DumperOptions(),
                 new ModelResolver());
     }
-
-    public static @Nullable Object getNestedValue(Map<String, Object> data, String... key) {
-        Object value = data;
-        for (String k : key) {
-            if (value instanceof Map<?, ?> map) {
-                value = map.get(k);
-            } else {
-                return null;
-            }
-        }
-        return value;
-    }
 }
