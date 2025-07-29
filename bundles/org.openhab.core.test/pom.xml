@@ -67,8 +67,8 @@
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>osgi.core</artifactId>
-      <version>8.0.0</version>
+      <artifactId>org.osgi.framework</artifactId>
+      <version>1.10.0</version>
     </dependency>
   </dependencies>
 
