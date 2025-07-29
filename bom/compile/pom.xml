@@ -26,8 +26,28 @@
   <dependencies>
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>osgi.core</artifactId>
-      <version>8.0.0</version>
+      <artifactId>org.osgi.framework</artifactId>
+      <version>1.10.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.util.tracker</artifactId>
+      <version>1.5.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.packageadmin</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.dto</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.log</artifactId>
+      <version>1.5.0</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
