@@ -362,8 +362,7 @@ public class PersistenceResource implements RESTResource {
     @Path("persistencehealth")
     @Operation(operationId = "getPersistenceHealth", summary = "Gets configuration problems with persistence services.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceStrategyDTO.class), uniqueItems = true))),
-                    @ApiResponse(responseCode = "404", description = "Suggested strategies not found.") })
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceServiceProblem.class), uniqueItems = true))) })
     public Response httpGetPersistenceHealth(@Context HttpHeaders headers) {
         List<PersistenceServiceProblem> persistenceProblems = new ArrayList<>();
         Set<PersistenceService> persistenceServices = persistenceServiceRegistry.getAll();
