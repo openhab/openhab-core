@@ -109,8 +109,9 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
             } else if (jsonContent != null) {
                 persistedTransformation = addTransformationFromJSON(addon.getUid(), jsonContent);
             } else {
-                throw new IllegalArgumentException(
-                        "Couldn't find the transformation in the add-on entry. The starting code fence may not be marked as ```yaml");
+                logger.error("Transformation {} has neither download URL nor embedded content", addon.getUid());
+                throw new MarketplaceHandlerException("Transformation has neither download URL nor embedded content",
+                        null);
             }
             Transformation transformation = map(persistedTransformation);
 
