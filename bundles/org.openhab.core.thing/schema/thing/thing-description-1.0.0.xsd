@@ -217,11 +217,16 @@
 	</xs:complexType>
 
 	<xs:complexType name="tags">
-            <xs:element name="tag" minOccurs="1" maxOccurs="2">
-                <xs:alternative test="position() = 1" type="thing-description:semanticPointTag"/>
-                <xs:alternative test="position() = 2" type="thing-description:semanticPropertyTag"/>
-                <xs:alternative type="xs:error"/> <!-- If more than two tags are present -->
-            </xs:element>
+		<xs:sequence>
+			<xs:element name="tag">
+				<xs:alternative test="position() = 1" type="thing-description:semanticPointTag"/>
+				<xs:alternative type="xs:error"/>
+			</xs:element>
+			<xs:element name="tag" minOccurs="0">
+				<xs:alternative test="position() = 2" type="thing-description:semanticPropertyTag"/>
+				<xs:alternative type="xs:error"/>
+			</xs:element>
+		</xs:sequence>
 	</xs:complexType>
 
 	<xs:complexType name="state">
