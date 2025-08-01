@@ -57,18 +57,16 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
 
     private final Logger logger = LoggerFactory.getLogger(ThingStatusTriggerHandler.class);
 
-    private final String thingUID;
     private @Nullable final String status;
     private @Nullable final String previousStatus;
     private final Set<String> types;
-    private final BundleContext bundleContext;
 
     private final ServiceRegistration<?> eventSubscriberRegistration;
     private final TopicEventFilter eventTopicFilter;
 
     public ThingStatusTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
-        this.thingUID = (String) module.getConfiguration().get(CFG_THING_UID);
+        String thingUID = (String) module.getConfiguration().get(CFG_THING_UID);
         this.status = (String) module.getConfiguration().get(CFG_STATUS);
         this.previousStatus = (String) module.getConfiguration().get(CFG_PREVIOUS_STATUS);
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
@@ -76,12 +74,11 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
         } else {
             this.types = Set.of(ThingStatusInfoChangedEvent.TYPE);
         }
-        this.bundleContext = bundleContext;
 
         this.eventTopicFilter = new TopicEventFilter(
                 "^openhab/things/" + thingUID.replace("?", ".?").replace("*", ".*?") + "/.*$");
 
-        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
+        eventSubscriberRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, null);
     }
 
     @Override
@@ -97,11 +94,10 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
     @Override
     public void receive(Event event) {
         final ModuleHandlerCallback callback = this.callback;
-        if (!(callback instanceof TriggerHandlerCallback)) {
+        if (!(callback instanceof TriggerHandlerCallback thCallback)) {
             return;
         }
 
-        TriggerHandlerCallback thCallback = (TriggerHandlerCallback) callback;
         logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(), event.getTopic(),
                 event.getType(), event.getPayload());
         Map<String, Object> values = new HashMap<>();
