@@ -2,7 +2,9 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:thing-description="https://openhab.org/schemas/thing-description/v1.0.0"
 	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
-	targetNamespace="https://openhab.org/schemas/thing-description/v1.0.0">
+	targetNamespace="https://openhab.org/schemas/thing-description/v1.0.0"
+	xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+	vc:minVersion="1.1">
 
 	<xs:import namespace="https://openhab.org/schemas/config-description/v1.0.0"
 		schemaLocation="https://openhab.org/schemas/config-description-1.0.0.xsd"/>
@@ -215,10 +217,11 @@
 	</xs:complexType>
 
 	<xs:complexType name="tags">
-		<xs:sequence>
-			<xs:element name="tag" type="xs:string" minOccurs="1" maxOccurs="2"/>
-		</xs:sequence>
-		<xs:assert test="count(tag[. = $semanticPointTag]) = 1 and count(tag[. = $semanticPropertyTag]) > 0"/>
+            <xs:element name="tag" minOccurs="1" maxOccurs="2">
+                <xs:alternative test="position() = 1" type="thing-description:semanticPointTag"/>
+                <xs:alternative test="position() = 2" type="thing-description:semanticPropertyTag"/>
+                <xs:alternative type="xs:error"/> <!-- If more than two tags are present -->
+            </xs:element>
 	</xs:complexType>
 
 	<xs:complexType name="state">
