@@ -15,7 +15,9 @@ package org.openhab.core.model.yaml.internal.items;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -130,8 +132,18 @@ public class YamlItemDTOTest {
         assertEquals(item1.hashCode(), item2.hashCode());
 
         item1.type = "Number";
-        item1.dimension = "Temperature";
+        item2.type = "String";
+        assertFalse(item1.equals(item2));
         item2.type = "Number";
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item2.type = "number";
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.dimension = "Temperature";
+        assertFalse(item1.equals(item2));
+        item2.dimension = "Humidity";
+        assertFalse(item1.equals(item2));
         item2.dimension = "Temperature";
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
@@ -155,20 +167,50 @@ public class YamlItemDTOTest {
         item2.tags = Set.of("Tag1", "Tag 2");
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
-        item2.tags = Set.of("Tag 2", "Tag1");
-        assertTrue(item1.equals(item2));
-        assertEquals(item1.hashCode(), item2.hashCode());
 
         item1.group = new YamlGroupDTO();
         item1.group.type = "Switch";
         item1.group.function = "OR";
         item1.group.parameters = List.of("ON", "OFF");
+        assertFalse(item1.equals(item2));
         item2.group = new YamlGroupDTO();
         item2.group.type = "Switch";
-        item2.group.function = "OR";
+        item2.group.function = "AND";
         item2.group.parameters = List.of("ON", "OFF");
+        assertFalse(item1.equals(item2));
+        item2.group.function = "OR";
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
+
+        item1.channel = "binding:type:uid:channelid";
+        assertFalse(item1.equals(item2));
+        item2.channel = "binding:type:uid2:channelid";
+        assertFalse(item1.equals(item2));
+        item2.channel = "binding:type:uid:channelid";
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+
+        YamlMetadataDTO md1 = new YamlMetadataDTO();
+        md1.value = "value";
+        md1.config = Map.of("param", 50);
+        YamlMetadataDTO md2 = new YamlMetadataDTO();
+        md2.value = "value";
+        md2.config = Map.of("param", "parameter value");
+        item1.metadata = new HashMap<>();
+        item1.metadata.put("namespace", md1);
+        assertFalse(item1.equals(item2));
+        item2.metadata = new HashMap<>();
+        item2.metadata.put("namespace2", md1);
+        assertFalse(item1.equals(item2));
+        item2.metadata = new HashMap<>();
+        item2.metadata.put("namespace", md2);
+        assertFalse(item1.equals(item2));
+        item2.metadata = new HashMap<>();
+        item2.metadata.put("namespace", md1);
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item2.metadata.put("namespace2", md2);
+        assertFalse(item1.equals(item2));
     }
 
     @Test
@@ -325,6 +367,75 @@ public class YamlItemDTOTest {
         assertEquals(item1.hashCode(), item2.hashCode());
         item1.autoupdate = true;
         item2.autoupdate = true;
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+    }
+
+    @Test
+    public void testEqualsWithGroups() throws IOException {
+        YamlItemDTO item1 = new YamlItemDTO();
+        YamlItemDTO item2 = new YamlItemDTO();
+
+        item1.name = "item-name";
+        item2.name = "item-name";
+        item1.type = "Number";
+        item2.type = "Number";
+
+        item1.groups = null;
+        item2.groups = null;
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.groups = List.of();
+        item2.groups = List.of();
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.groups = List.of("group1", "group2");
+        item2.groups = null;
+        assertFalse(item1.equals(item2));
+        item2.groups = List.of();
+        assertFalse(item1.equals(item2));
+        item2.groups = List.of("group1");
+        assertFalse(item1.equals(item2));
+        item2.groups = List.of("group1", "group2", "group3");
+        assertFalse(item1.equals(item2));
+        item2.groups = List.of("group2", "group1");
+        assertFalse(item1.equals(item2));
+        item2.groups = List.of("group1", "group2");
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+    }
+
+    @Test
+    public void testEqualsWithTags() throws IOException {
+        YamlItemDTO item1 = new YamlItemDTO();
+        YamlItemDTO item2 = new YamlItemDTO();
+
+        item1.name = "item-name";
+        item2.name = "item-name";
+        item1.type = "Number";
+        item2.type = "Number";
+
+        item1.tags = null;
+        item2.tags = null;
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.tags = Set.of();
+        item2.tags = Set.of();
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.tags = Set.of("tag1", "tag2");
+        item2.tags = null;
+        assertFalse(item1.equals(item2));
+        item2.tags = Set.of();
+        assertFalse(item1.equals(item2));
+        item2.tags = Set.of("tag1");
+        assertFalse(item1.equals(item2));
+        item2.tags = Set.of("tag1", "tag2", "tag3");
+        assertFalse(item1.equals(item2));
+        item2.tags = Set.of("tag1", "tag2");
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item2.tags = Set.of("tag2", "tag1");
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
     }
