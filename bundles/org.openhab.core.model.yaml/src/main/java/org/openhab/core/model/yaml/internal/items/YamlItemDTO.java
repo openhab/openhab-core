@@ -252,7 +252,7 @@ public class YamlItemDTO implements YamlElement, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, getType(), label, icon);
+        return Objects.hash(name, getType(), group, label, icon, format, unit, autoupdate, channel);
     }
 
     @Override
