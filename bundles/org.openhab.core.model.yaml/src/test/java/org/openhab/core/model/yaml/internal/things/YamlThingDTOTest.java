@@ -89,32 +89,32 @@ public class YamlThingDTOTest {
         assertFalse(th1.equals(th2));
         th2.uid = "binding:type:id";
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
 
         th1.isBridge = true;
         th2.isBridge = true;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
 
         th1.bridge = "binding:bridge:idBridge";
         th2.bridge = "binding:bridge:idBridge";
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
 
         th1.label = "A label";
         th2.label = "A label";
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
 
         th1.location = "A location";
         th2.location = "A location";
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
 
         th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
 
         YamlChannelDTO ch1 = new YamlChannelDTO();
         ch1.type = "channel-type";
@@ -123,7 +123,7 @@ public class YamlThingDTOTest {
         th1.channels = Map.of("channel", ch1);
         th2.channels = Map.of("channel", ch2);
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
     }
 
     @Test
@@ -137,7 +137,7 @@ public class YamlThingDTOTest {
         th1.label = null;
         th2.label = null;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
         th1.label = "A label";
         th2.label = null;
         assertFalse(th1.equals(th2));
@@ -150,7 +150,7 @@ public class YamlThingDTOTest {
         th1.label = "A label";
         th2.label = "A label";
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
     }
 
     @Test
@@ -164,7 +164,7 @@ public class YamlThingDTOTest {
         th1.location = null;
         th2.location = null;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
         th1.location = "A location";
         th2.location = null;
         assertFalse(th1.equals(th2));
@@ -177,7 +177,7 @@ public class YamlThingDTOTest {
         th1.location = "A location";
         th2.location = "A location";
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
     }
 
     @Test
@@ -191,7 +191,7 @@ public class YamlThingDTOTest {
         th1.isBridge = null;
         th2.isBridge = null;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
         th1.isBridge = false;
         th2.isBridge = true;
         assertFalse(th1.equals(th2));
@@ -207,19 +207,19 @@ public class YamlThingDTOTest {
         th1.isBridge = false;
         th2.isBridge = null;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
         th1.isBridge = null;
         th2.isBridge = false;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
         th1.isBridge = false;
         th2.isBridge = false;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
         th1.isBridge = true;
         th2.isBridge = true;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
     }
 
     @Test
@@ -233,7 +233,7 @@ public class YamlThingDTOTest {
         th1.bridge = null;
         th2.bridge = null;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
         th1.bridge = "binding:bridge:idBridge";
         th2.bridge = null;
         assertFalse(th1.equals(th2));
@@ -246,7 +246,7 @@ public class YamlThingDTOTest {
         th1.bridge = "binding:bridge:idBridge";
         th2.bridge = "binding:bridge:idBridge";
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
     }
 
     @Test
@@ -260,7 +260,7 @@ public class YamlThingDTOTest {
         th1.config = null;
         th2.config = null;
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
         th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = null;
         assertFalse(th1.equals(th2));
@@ -291,7 +291,7 @@ public class YamlThingDTOTest {
         th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
     }
 
     @Test
@@ -313,12 +313,12 @@ public class YamlThingDTOTest {
         th1.channels = Map.of("channel1", ch1);
         th2.channels = Map.of("channel1", ch3);
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
 
         th1.channels = Map.of("channel1", ch1, "channel2", ch2);
         th2.channels = Map.of("channel1", ch3, "channel2", ch4);
         assertTrue(th1.equals(th2));
-        assertTrue(th1.hashCode() == th2.hashCode());
+        assertEquals(th1.hashCode(), th2.hashCode());
 
         th1.channels = Map.of("channel1", ch1);
         th2.channels = null;

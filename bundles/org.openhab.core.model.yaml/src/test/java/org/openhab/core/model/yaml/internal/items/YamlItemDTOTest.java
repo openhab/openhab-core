@@ -127,37 +127,37 @@ public class YamlItemDTOTest {
         assertFalse(item1.equals(item2));
         item2.name = "item-name";
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
 
         item1.type = "Number";
         item1.dimension = "Temperature";
         item2.type = "Number";
         item2.dimension = "Temperature";
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
 
         item1.label = "A label";
         item2.label = "A label";
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
 
         item1.icon = "oh:classic:temperature";
         item2.icon = "oh:classic:temperature";
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
 
         item1.groups = List.of("group1", "group2");
         item2.groups = List.of("group1", "group2");
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
 
         item1.tags = Set.of("Tag1", "Tag 2");
         item2.tags = Set.of("Tag1", "Tag 2");
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
         item2.tags = Set.of("Tag 2", "Tag1");
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
 
         item1.group = new YamlGroupDTO();
         item1.group.type = "Switch";
@@ -168,7 +168,7 @@ public class YamlItemDTOTest {
         item2.group.function = "OR";
         item2.group.parameters = List.of("ON", "OFF");
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
     }
 
     @Test
@@ -184,7 +184,7 @@ public class YamlItemDTOTest {
         item1.label = null;
         item2.label = null;
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
         item1.label = "A label";
         item2.label = null;
         assertFalse(item1.equals(item2));
@@ -197,7 +197,7 @@ public class YamlItemDTOTest {
         item1.label = "A label";
         item2.label = "A label";
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
     }
 
     @Test
@@ -213,7 +213,7 @@ public class YamlItemDTOTest {
         item1.icon = null;
         item2.icon = null;
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
         item1.icon = "humidity";
         item2.icon = null;
         assertFalse(item1.equals(item2));
@@ -226,7 +226,7 @@ public class YamlItemDTOTest {
         item1.icon = "humidity";
         item2.icon = "humidity";
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
     }
 
     @Test
@@ -242,7 +242,7 @@ public class YamlItemDTOTest {
         item1.format = null;
         item2.format = null;
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
         item1.format = "%.1f °C";
         item2.format = null;
         assertFalse(item1.equals(item2));
@@ -255,7 +255,7 @@ public class YamlItemDTOTest {
         item1.format = "%.1f °C";
         item2.format = "%.1f °C";
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
     }
 
     @Test
@@ -271,7 +271,7 @@ public class YamlItemDTOTest {
         item1.unit = null;
         item2.unit = null;
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
         item1.unit = "°C";
         item2.unit = null;
         assertFalse(item1.equals(item2));
@@ -284,7 +284,7 @@ public class YamlItemDTOTest {
         item1.unit = "°C";
         item2.unit = "°C";
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
     }
 
     @Test
@@ -300,7 +300,7 @@ public class YamlItemDTOTest {
         item1.autoupdate = null;
         item2.autoupdate = null;
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
         item1.autoupdate = false;
         item2.autoupdate = true;
         assertFalse(item1.equals(item2));
@@ -322,11 +322,11 @@ public class YamlItemDTOTest {
         item1.autoupdate = false;
         item2.autoupdate = false;
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
         item1.autoupdate = true;
         item2.autoupdate = true;
         assertTrue(item1.equals(item2));
-        assertTrue(item1.hashCode() == item2.hashCode());
+        assertEquals(item1.hashCode(), item2.hashCode());
     }
 
     // @Test
