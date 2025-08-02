@@ -15,7 +15,6 @@ package org.openhab.core.model.yaml.internal.items;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -175,42 +174,31 @@ public class YamlItemDTOTest {
         assertFalse(item1.equals(item2));
         item2.group = new YamlGroupDTO();
         item2.group.type = "Switch";
-        item2.group.function = "AND";
-        item2.group.parameters = List.of("ON", "OFF");
-        assertFalse(item1.equals(item2));
         item2.group.function = "OR";
+        item2.group.parameters = List.of("ON", "OFF");
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
 
         item1.channel = "binding:type:uid:channelid";
-        assertFalse(item1.equals(item2));
-        item2.channel = "binding:type:uid2:channelid";
-        assertFalse(item1.equals(item2));
         item2.channel = "binding:type:uid:channelid";
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
 
-        YamlMetadataDTO md1 = new YamlMetadataDTO();
-        md1.value = "value";
-        md1.config = Map.of("param", 50);
-        YamlMetadataDTO md2 = new YamlMetadataDTO();
-        md2.value = "value";
-        md2.config = Map.of("param", "parameter value");
-        item1.metadata = new HashMap<>();
-        item1.metadata.put("namespace", md1);
-        assertFalse(item1.equals(item2));
-        item2.metadata = new HashMap<>();
-        item2.metadata.put("namespace2", md1);
-        assertFalse(item1.equals(item2));
-        item2.metadata = new HashMap<>();
-        item2.metadata.put("namespace", md2);
-        assertFalse(item1.equals(item2));
-        item2.metadata = new HashMap<>();
-        item2.metadata.put("namespace", md1);
+        item1.channels = Map.of("binding:type:uid:channelid2", Map.of());
+        item2.channels = Map.of("binding:type:uid:channelid2", Map.of());
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
-        item2.metadata.put("namespace2", md2);
-        assertFalse(item1.equals(item2));
+
+        YamlMetadataDTO md = new YamlMetadataDTO();
+        md.value = "value";
+        md.config = Map.of("param", 50);
+        item1.metadata = Map.of("namespace", md);
+        YamlMetadataDTO md2 = new YamlMetadataDTO();
+        md2.value = "value";
+        md2.config = Map.of("param", 50);
+        item2.metadata = Map.of("namespace", md2);
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
     }
 
     @Test
@@ -440,91 +428,94 @@ public class YamlItemDTOTest {
         assertEquals(item1.hashCode(), item2.hashCode());
     }
 
-    // @Test
-    // public void testEqualsWithConfigurations() throws IOException {
-    // YamlThingDTO th1 = new YamlThingDTO();
-    // YamlThingDTO th2 = new YamlThingDTO();
-    //
-    // th1.uid = "binding:type:id";
-    // th2.uid = "binding:type:id";
-    //
-    // th1.config = null;
-    // th2.config = null;
-    // assertTrue(th1.equals(th2));
-    // th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // th2.config = null;
-    // assertFalse(th1.equals(th2));
-    // th1.config = null;
-    // th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // assertFalse(th1.equals(th2));
-    // th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // th2.config = Map.of("param1", "other value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // assertFalse(th1.equals(th2));
-    // th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // th2.config = Map.of("param1", "value", "param2", 25, "param3", true, "param4", List.of("val 1", "val 2"));
-    // assertFalse(th1.equals(th2));
-    // th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // th2.config = Map.of("param1", "value", "param2", 50, "param3", false, "param4", List.of("val 1", "val 2"));
-    // assertFalse(th1.equals(th2));
-    // th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "value 2"));
-    // assertFalse(th1.equals(th2));
-    // th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1"));
-    // assertFalse(th1.equals(th2));
-    // th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", 75);
-    // assertFalse(th1.equals(th2));
-    // th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // th2.config = Map.of("param1", "value", "param2", 50, "param3", true);
-    // assertFalse(th1.equals(th2));
-    // th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
-    // assertTrue(th1.equals(th2));
-    // }
-    //
-    // @Test
-    // public void testEqualsWithChannels() throws IOException {
-    // YamlThingDTO th1 = new YamlThingDTO();
-    // th1.uid = "binding:type:id";
-    // YamlThingDTO th2 = new YamlThingDTO();
-    // th2.uid = "binding:type:id";
-    //
-    // YamlChannelDTO ch1 = new YamlChannelDTO();
-    // ch1.type = "channel-type";
-    // YamlChannelDTO ch2 = new YamlChannelDTO();
-    // ch2.type = "channel-other-type";
-    // YamlChannelDTO ch3 = new YamlChannelDTO();
-    // ch3.type = "channel-type";
-    // YamlChannelDTO ch4 = new YamlChannelDTO();
-    // ch4.type = "channel-other-type";
-    //
-    // th1.channels = Map.of("channel1", ch1);
-    // th2.channels = Map.of("channel1", ch3);
-    // assertTrue(th1.equals(th2));
-    //
-    // th1.channels = Map.of("channel1", ch1, "channel2", ch2);
-    // th2.channels = Map.of("channel1", ch3, "channel2", ch4);
-    // assertTrue(th1.equals(th2));
-    //
-    // th1.channels = Map.of("channel1", ch1);
-    // th2.channels = null;
-    // assertFalse(th1.equals(th2));
-    //
-    // th1.channels = null;
-    // th2.channels = Map.of("channel1", ch3);
-    // assertFalse(th1.equals(th2));
-    //
-    // th1.channels = Map.of("channel1", ch1, "channel2", ch2);
-    // th2.channels = Map.of("channel1", ch3);
-    // assertFalse(th1.equals(th2));
-    //
-    // th1.channels = Map.of("channel1", ch1);
-    // th2.channels = Map.of("channel1", ch4);
-    // assertFalse(th1.equals(th2));
-    //
-    // th1.channels = Map.of("channel", ch1);
-    // th2.channels = Map.of("channel1", ch3);
-    // assertFalse(th1.equals(th2));
-    // }
+    @Test
+    public void testEqualsWithChannels() throws IOException {
+        YamlItemDTO item1 = new YamlItemDTO();
+        YamlItemDTO item2 = new YamlItemDTO();
+
+        item1.name = "item-name";
+        item2.name = "item-name";
+        item1.type = "Number";
+        item2.type = "Number";
+
+        item1.channel = "binding:type:uid:channelid";
+        assertFalse(item1.equals(item2));
+        item2.channel = "binding:type:uid2:channelid";
+        assertFalse(item1.equals(item2));
+        item2.channel = "binding:type:uid:channelid";
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+
+        item1.channels = null;
+        item2.channels = null;
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.channels = Map.of();
+        item2.channels = Map.of();
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.channels = Map.of("binding:type:uid:channelid2", Map.of());
+        item2.channels = null;
+        assertFalse(item1.equals(item2));
+        item2.channels = Map.of();
+        assertFalse(item1.equals(item2));
+        item2.channels = Map.of("binding:type:uid:channelid2", Map.of());
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.channels = Map.of("binding:type:uid:channelid2",
+                Map.of("profile", "anyprofile", "param", "profile param"));
+        item2.channels = Map.of("binding:type:uid:channelid2", Map.of());
+        assertFalse(item1.equals(item2));
+        item2.channels = Map.of("binding:type:uid:channelid2",
+                Map.of("profile", "anyprofile", "param", "profile param"));
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.channels = Map.of("binding:type:uid:channelid2", Map.of());
+        item2.channels = Map.of("binding:type:uid:channelid2", Map.of(), "binding:type:uid:channelid3", Map.of());
+        assertFalse(item1.equals(item2));
+        item1.channels = Map.of("binding:type:uid:channelid2", Map.of(), "binding:type:uid:channelid3", Map.of());
+        item2.channels = Map.of("binding:type:uid:channelid2", Map.of());
+        assertFalse(item1.equals(item2));
+    }
+
+    @Test
+    public void testEqualsWithMetadata() throws IOException {
+        YamlItemDTO item1 = new YamlItemDTO();
+        YamlItemDTO item2 = new YamlItemDTO();
+
+        item1.name = "item-name";
+        item2.name = "item-name";
+        item1.type = "Number";
+        item2.type = "Number";
+
+        YamlMetadataDTO md1 = new YamlMetadataDTO();
+        md1.value = "value";
+        md1.config = Map.of("param", 50);
+        YamlMetadataDTO md2 = new YamlMetadataDTO();
+        md2.value = "value";
+        md2.config = Map.of("param", "parameter value");
+        YamlMetadataDTO md3 = new YamlMetadataDTO();
+        md3.value = "value";
+        md3.config = Map.of("param", 50);
+
+        item1.metadata = null;
+        item2.metadata = null;
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.metadata = Map.of();
+        item2.metadata = Map.of();
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.metadata = Map.of("namespace", md1);
+        assertFalse(item1.equals(item2));
+        item2.metadata = Map.of("namespace2", md3);
+        assertFalse(item1.equals(item2));
+        item2.metadata = Map.of("namespace", md2);
+        assertFalse(item1.equals(item2));
+        item2.metadata = Map.of("namespace", md3);
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item2.metadata = Map.of("namespace", md3, "namespace2", md2);
+        assertFalse(item1.equals(item2));
+    }
 }
