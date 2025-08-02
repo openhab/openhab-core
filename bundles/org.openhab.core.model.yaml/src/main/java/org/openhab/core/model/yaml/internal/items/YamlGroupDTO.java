@@ -68,9 +68,13 @@ public class YamlGroupDTO {
         return function != null ? function.toUpperCase() : DEFAULT_FUNCTION;
     }
 
+    public @NonNull List<@NonNull String> getParameters() {
+        return parameters == null ? List.of() : parameters;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(getBaseType(), getFunction());
+        return Objects.hash(getBaseType(), getFunction(), getParameters());
     }
 
     @Override
@@ -82,6 +86,6 @@ public class YamlGroupDTO {
         }
         YamlGroupDTO other = (YamlGroupDTO) obj;
         return Objects.equals(getBaseType(), other.getBaseType()) && Objects.equals(getFunction(), other.getFunction())
-                && YamlElementUtils.equalsListStrings(parameters, other.parameters);
+                && Objects.equals(getParameters(), other.getParameters());
     }
 }

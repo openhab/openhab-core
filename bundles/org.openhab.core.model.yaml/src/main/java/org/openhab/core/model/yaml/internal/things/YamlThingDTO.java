@@ -144,7 +144,7 @@ public class YamlThingDTO implements YamlElement, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(uid, bridge, label, location);
+        return Objects.hash(uid, isBridge(), bridge, label, location);
     }
 
     @Override
