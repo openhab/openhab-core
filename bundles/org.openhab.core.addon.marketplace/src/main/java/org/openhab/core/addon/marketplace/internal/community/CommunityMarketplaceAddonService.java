@@ -18,6 +18,7 @@ import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -407,20 +408,32 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
         // try to extract contents or links
         if (topic.postStream.posts[0].linkCounts != null) {
+            URI uri;
+            String path;
             for (DiscoursePostLink postLink : topic.postStream.posts[0].linkCounts) {
-                if (postLink.url.toLowerCase(Locale.ROOT).endsWith(".jar")) {
-                    properties.put(JAR_DOWNLOAD_URL_PROPERTY, postLink.url);
+                try {
+                    uri = processResourceURL(postLink.url);
+                    path = uri.getPath();
+                    if (path == null) {
+                        continue;
+                    }
+                } catch (IllegalArgumentException e) {
+                    continue;
+                }
+                path = path.toLowerCase(Locale.ROOT);
+                if (path.endsWith(".jar")) {
+                    properties.put(JAR_DOWNLOAD_URL_PROPERTY, uri.toString());
                     id = determineIdFromUrl(postLink.url);
                 }
-                if (postLink.url.toLowerCase(Locale.ROOT).endsWith(".kar")) {
-                    properties.put(KAR_DOWNLOAD_URL_PROPERTY, postLink.url);
+                if (path.endsWith(".kar")) {
+                    properties.put(KAR_DOWNLOAD_URL_PROPERTY, uri.toString());
                     id = determineIdFromUrl(postLink.url);
                 }
-                if (postLink.url.toLowerCase(Locale.ROOT).endsWith(".json")) {
-                    properties.put(JSON_DOWNLOAD_URL_PROPERTY, postLink.url);
+                if (path.endsWith(".json")) {
+                    properties.put(JSON_DOWNLOAD_URL_PROPERTY, uri.toString());
                 }
-                if (postLink.url.toLowerCase(Locale.ROOT).endsWith(".yaml")) {
-                    properties.put(YAML_DOWNLOAD_URL_PROPERTY, postLink.url);
+                if (path.endsWith(".yaml")) {
+                    properties.put(YAML_DOWNLOAD_URL_PROPERTY, uri.toString());
                 }
             }
         }
@@ -454,6 +467,47 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
                 .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties);
 
         return builder.build();
+    }
+
+    private URI processResourceURL(String url) throws IllegalArgumentException {
+        URI uri;
+        try {
+            uri = new URI(url);
+            if (uri.getFragment() != null) {
+                throw new IllegalArgumentException("Fragment not allowed in resource URLs: " + uri.getFragment());
+            }
+            String host = uri.getHost();
+            if (host == null) {
+                throw new IllegalArgumentException("Missing host in resource URL: " + url);
+            }
+            String query, path;
+            switch (host) {
+                case "github.com":
+                case "www.github.com":
+                    // Modify GitHub URLs to use their "raw" version if necessary
+                    path = uri.getPath();
+                    if (path != null && path.contains("/blob/")) {
+                        query = uri.getQuery();
+                        if (query == null) {
+                            return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "raw=true", null);
+                        }
+                        if (!query.contains("raw=true")) {
+                            String[] parts = query.split("&");
+                            String[] newParts = new String[parts.length + 1];
+                            System.arraycopy(parts, 0, newParts, 0, parts.length);
+                            newParts[parts.length] = "raw=true";
+                            return new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(),
+                                    String.join("&", newParts), null);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return uri;
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid URL: " + url, e);
+        }
     }
 
     private @Nullable String determineIdFromUrl(String url) {
