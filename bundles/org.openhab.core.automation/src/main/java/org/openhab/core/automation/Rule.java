@@ -218,6 +218,8 @@ public interface Rule extends Identifiable<String> {
                 case "pending":
                     return PENDING;
                 case "template-missing":
+                case "template missing":
+                case "template_missing":
                     return TEMPLATE_MISSING;
                 default:
                     return NO_TEMPLATE;

@@ -1,0 +1,157 @@
+version: 1
+rules:
+  mode-tv-rule:
+    label: Mode TV
+    templateState: instantiated
+    config:
+      sourceItem: None
+    configDescriptions:
+      - name: sourceItem
+        type: TEXT
+        context: item
+        label: Source Item
+        description: The source Item whose state to monitor
+        required: true
+    tags:
+      - tag1
+      - tag2
+      - Tag 3
+    triggers:
+      - config:
+          itemName: TvPower
+          state: ON
+          previousState: OFF
+        type: ItemChanged
+    actions:
+      - id: script
+        config:
+          type: DSL
+          script: |
+            logInfo("Rule","mode TV")
+            // Stop Item
+            ItemStop.sendCommand(ON)
+        type: Script
+  stub:mode-tv-rule:
+    label: Template based mode TV
+    template: mode-tv-template
+    templateState: pending
+    config:
+      sourceItem: 'TvPower'
+  rules_tools:tsm:
+    actions:
+      - config:
+          script: >
+            // Version 1.0
+
+            var {TimerMgr, helpers} = require('openhab_rules_tools');
+
+            console.loggerName =
+            'org.openhab.automation.rules_tools.TimeStateMachine';
+          type: JavaScript
+        id: '3'
+        type: Script
+    config:
+      timeOfDay: Yes
+      timesOfDayGrp: No
+      namespace: None
+    configDescriptions:
+      - context: item
+        description: String Item that holds the current time of day's state.
+        filterCriteria:
+          - name: type
+            value: String
+        label: Time of Day State Item
+        name: timeOfDay
+        required: true
+        type: TEXT
+      - context: item
+        description: Has as members all the DateTime Items that define time of day states.
+        filterCriteria:
+          - name: type
+            value: Group
+        label: Times of Day Group
+        name: timesOfDayGrp
+        required: true
+        type: TEXT
+      - description: The Item metadata namespace (e.g. "tsm").
+        label: Time of Day Namespace
+        name: namespace
+        required: true
+        type: TEXT
+    description: >-
+      Creates timers to transition a state Item to a new state at defined times of
+      day.
+    label: Time Based State Machine Test Rule
+    templateUID: none
+    templateState: TEMPLATE_MISSING
+    triggers:
+      - config:
+          groupName: DemoSwitchGroup
+        id: '1'
+        type: MemberChanged
+      - config:
+          startlevel: 100
+        id: '2'
+        type: StartLevel
+      - config:
+          time: '00:05'
+        id: '4'
+        type: TimeOfDay
+  ysc:washing_machine_alert_test:
+    visibility: hidden
+    actions:
+      - config:
+          script: |
+            var from = parseFloat(oldState.toString().split(' ')[0]);
+            var to = parseFloat(newState.toString().split(' ')[0]);
+
+            print(from + '>' + to);
+
+            if (to < 2 && from >= 2) {
+              events.sendCommand('DemoSwitch', 'LSELECT');
+            }
+          type: javascript
+        type: Script
+    configDescriptions:
+      - context: item
+        description: >-
+          Item that holds the power (in watts) of the washing machine. Can be a
+          quantity type (Number:Power).
+        label: Power Item
+        name: powerItem
+        required: true
+        type: TEXT
+      - defaultValue: 2
+        description: >-
+          When the power measurement was at or above the threshold and crosses
+          below it, trigger the alert.
+        label: Threshold
+        name: threshold
+        required: true
+        type: DECIMAL
+      - context: item
+        description: >-
+          Item to send a command to when the measured power gets below the
+          threshold. For instance, a Hue light advanced Alert channel.
+        label: Alert Item
+        name: alertItem
+        required: false
+        type: TEXT
+      - defaultValue: LSELECT
+        description: >-
+          Command to send to the alert item (for an item linked to a Hue light
+          alert channel, LSELECT will flash the light for a few seconds).
+        label: Alert Command
+        name: alertCommand
+        required: true
+        type: TEXT
+    description: >-
+      This will monitor the power consumption of a washing machine and send an
+      alert command when it gets below a threshold, meaning it has finished.
+    label: Alert when Washing Machine Finished Test
+    templateState: template-missing
+    triggers:
+      - config:
+          itemName: CurrentPower
+          state: ''
+        type: ItemChanged
