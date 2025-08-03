@@ -110,6 +110,7 @@ Fragment-Host: org.openhab.core.model.item
 	org.openhab.core.model.script.runtime;version='[5.1.0,5.1.1)',\
 	org.openhab.core.model.sitemap;version='[5.1.0,5.1.1)',\
 	org.openhab.core.model.thing;version='[5.1.0,5.1.1)',\
+	org.openhab.core.model.thing.runtime;version='[5.1.0,5.1.1)',\
 	org.openhab.core.persistence;version='[5.1.0,5.1.1)',\
 	org.openhab.core.semantics;version='[5.1.0,5.1.1)',\
 	org.openhab.core.test;version='[5.1.0,5.1.1)',\
@@ -119,7 +120,6 @@ Fragment-Host: org.openhab.core.model.item
 	stax2-api;version='[4.2.2,4.2.3)',\
 	com.google.guava;version='[33.4.8,33.4.9)',\
 	biz.aQute.tester.junit-platform;version='[7.1.0,7.1.1)',\
-	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.0,2.3.1)',\
 	de.focus_shift.jollyday-core;version='[1.5.4,1.5.5)',\
 	de.focus_shift.jollyday-jackson;version='[1.5.4,1.5.5)',\

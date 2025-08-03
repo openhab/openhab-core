@@ -117,6 +117,7 @@ Fragment-Host: org.openhab.core.model.script
 	org.openhab.core.model.script.tests;version='[5.1.0,5.1.1)',\
 	org.openhab.core.model.sitemap;version='[5.1.0,5.1.1)',\
 	org.openhab.core.model.thing;version='[5.1.0,5.1.1)',\
+	org.openhab.core.model.thing.runtime;version='[5.1.0,5.1.1)',\
 	org.openhab.core.persistence;version='[5.1.0,5.1.1)',\
 	org.openhab.core.semantics;version='[5.1.0,5.1.1)',\
 	org.openhab.core.test;version='[5.1.0,5.1.1)',\
@@ -134,5 +135,4 @@ Fragment-Host: org.openhab.core.model.script
 	com.fasterxml.jackson.core.jackson-databind;version='[2.19.2,2.19.3)',\
 	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.19.2,2.19.3)',\
 	com.fasterxml.jackson.dataformat.jackson-dataformat-yaml;version='[2.19.2,2.19.3)',\
-	org.openhab.core.model.item.runtime;version='[5.1.0,5.1.1)',\
 	org.yaml.snakeyaml;version='[2.4.0,2.4.1)'
