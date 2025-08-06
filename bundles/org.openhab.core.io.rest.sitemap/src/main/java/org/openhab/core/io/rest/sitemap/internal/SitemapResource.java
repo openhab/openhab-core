@@ -82,6 +82,7 @@ import org.openhab.core.library.types.HSBType;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Button;
 import org.openhab.core.model.sitemap.sitemap.ButtonDefinition;
+import org.openhab.core.model.sitemap.sitemap.ButtonDefinitionList;
 import org.openhab.core.model.sitemap.sitemap.Buttongrid;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
@@ -614,7 +615,7 @@ public class SitemapResource
         }
         bean.widgetId = widgetId;
         bean.icon = itemUIRegistry.getCategory(widget);
-        bean.staticIcon = widget.getStaticIcon() != null || !widget.getIconRules().isEmpty();
+        bean.staticIcon = widget.getStaticIcon() != null || !widget.getIconRules().getElements().isEmpty();
         bean.labelcolor = convertItemValueColor(itemUIRegistry.getLabelColor(widget), itemState);
         bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
         bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
@@ -643,7 +644,7 @@ public class SitemapResource
             }
         }
         if (widget instanceof Switch switchWidget) {
-            for (Mapping mapping : switchWidget.getMappings()) {
+            for (Mapping mapping : switchWidget.getMappings().getElements()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.releaseCommand = mapping.getReleaseCmd();
@@ -653,7 +654,7 @@ public class SitemapResource
             }
         }
         if (widget instanceof Selection selectionWidget) {
-            for (Mapping mapping : selectionWidget.getMappings()) {
+            for (Mapping mapping : selectionWidget.getMappings().getElements()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.label = mapping.getLabel();
@@ -714,19 +715,23 @@ public class SitemapResource
             bean.maxValue = colortemperaturepickerWidget.getMaxValue();
         }
         if (widget instanceof Buttongrid buttonGridWidget) {
-            for (ButtonDefinition button : buttonGridWidget.getButtons()) {
-                MappingDTO mappingBean = new MappingDTO();
-                mappingBean.row = button.getRow();
-                mappingBean.column = button.getColumn();
-                mappingBean.command = button.getCmd();
-                mappingBean.label = button.getLabel();
-                mappingBean.icon = button.getIcon();
-                bean.mappings.add(mappingBean);
+            ButtonDefinitionList buttonDefinitionList = buttonGridWidget.getButtons();
+            if (buttonDefinitionList != null) {
+                for (ButtonDefinition button : buttonDefinitionList.getElements()) {
+                    MappingDTO mappingBean = new MappingDTO();
+                    mappingBean.row = button.getRow();
+                    mappingBean.column = button.getColumn();
+                    mappingBean.command = button.getCmd();
+                    mappingBean.label = button.getLabel();
+                    mappingBean.icon = button.getIcon();
+                    bean.mappings.add(mappingBean);
+                }
             }
         }
         if (widget instanceof Button buttonWidget) {
             // Get the icon from the widget only
-            if (widget.getIcon() == null && widget.getStaticIcon() == null && widget.getIconRules().isEmpty()) {
+            if (widget.getIcon() == null && widget.getStaticIcon() == null
+                    && widget.getIconRules().getElements().isEmpty()) {
                 bean.icon = null;
                 bean.staticIcon = null;
             }
@@ -867,12 +872,12 @@ public class SitemapResource
                 items.addAll(getAllItems(grid.getChildren()));
             }
             // Consider items involved in any icon condition
-            items.addAll(getItemsInIconCond(widget.getIconRules()));
+            items.addAll(getItemsInIconCond(widget.getIconRules().getElements()));
             // Consider items involved in any visibility, labelcolor, valuecolor and iconcolor condition
-            items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
-            items.addAll(getItemsInColorCond(widget.getLabelColor()));
-            items.addAll(getItemsInColorCond(widget.getValueColor()));
-            items.addAll(getItemsInColorCond(widget.getIconColor()));
+            items.addAll(getItemsInVisibilityCond(widget.getVisibility().getElements()));
+            items.addAll(getItemsInColorCond(widget.getLabelColor().getElements()));
+            items.addAll(getItemsInColorCond(widget.getValueColor().getElements()));
+            items.addAll(getItemsInColorCond(widget.getIconColor().getElements()));
         }
         return items;
     }

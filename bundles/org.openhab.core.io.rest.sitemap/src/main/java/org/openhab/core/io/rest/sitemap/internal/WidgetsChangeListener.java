@@ -40,10 +40,13 @@ import org.openhab.core.model.sitemap.sitemap.Button;
 import org.openhab.core.model.sitemap.sitemap.Buttongrid;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.ColorArrayList;
 import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Frame;
 import org.openhab.core.model.sitemap.sitemap.IconRule;
+import org.openhab.core.model.sitemap.sitemap.IconRuleList;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
@@ -135,24 +138,39 @@ public class WidgetsChangeListener implements EventSubscriber {
                     items.addAll(getAllItems(grid.getChildren()));
                 }
                 // now scan icon rules
-                for (IconRule rule : widget.getIconRules()) {
-                    addItemsFromConditions(items, rule.getConditions());
+                IconRuleList iconRuleList = widget.getIconRules();
+                if (iconRuleList != null) {
+                    for (IconRule rule : iconRuleList.getElements()) {
+                        addItemsFromConditions(items, rule.getConditions());
+                    }
                 }
                 // now scan visibility rules
-                for (VisibilityRule rule : widget.getVisibility()) {
-                    addItemsFromConditions(items, rule.getConditions());
+                VisibilityRuleList visibilityRuleList = widget.getVisibility();
+                if (visibilityRuleList != null) {
+                    for (VisibilityRule rule : visibilityRuleList.getElements()) {
+                        addItemsFromConditions(items, rule.getConditions());
+                    }
                 }
                 // now scan label color rules
-                for (ColorArray rule : widget.getLabelColor()) {
-                    addItemsFromConditions(items, rule.getConditions());
+                ColorArrayList labelColorArrayList = widget.getLabelColor();
+                if (labelColorArrayList != null) {
+                    for (ColorArray rule : labelColorArrayList.getElements()) {
+                        addItemsFromConditions(items, rule.getConditions());
+                    }
                 }
                 // now scan value color rules
-                for (ColorArray rule : widget.getValueColor()) {
-                    addItemsFromConditions(items, rule.getConditions());
+                ColorArrayList valueColorArrayList = widget.getValueColor();
+                if (valueColorArrayList != null) {
+                    for (ColorArray rule : valueColorArrayList.getElements()) {
+                        addItemsFromConditions(items, rule.getConditions());
+                    }
                 }
                 // now scan icon color rules
-                for (ColorArray rule : widget.getIconColor()) {
-                    addItemsFromConditions(items, rule.getConditions());
+                ColorArrayList iconColorArrayList = widget.getIconColor();
+                if (iconColorArrayList != null) {
+                    for (ColorArray rule : iconColorArrayList.getElements()) {
+                        addItemsFromConditions(items, rule.getConditions());
+                    }
                 }
             }
         }
@@ -231,7 +249,8 @@ public class WidgetsChangeListener implements EventSubscriber {
         event.reloadIcon = widget.getStaticIcon() == null;
         if (widget instanceof Button buttonWidget) {
             // Get the icon from the widget only
-            if (widget.getIcon() == null && widget.getStaticIcon() == null && widget.getIconRules().isEmpty()) {
+            if (widget.getIcon() == null && widget.getStaticIcon() == null
+                    && (widget.getIconRules() == null || widget.getIconRules().getElements().isEmpty())) {
                 event.icon = null;
                 event.reloadIcon = false;
             }
@@ -281,11 +300,16 @@ public class WidgetsChangeListener implements EventSubscriber {
     }
 
     private boolean definesVisibilityOrColorOrIcon(Widget w, String name) {
-        return w.getVisibility().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
-                || w.getLabelColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
-                || w.getValueColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
-                || w.getIconColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
-                || w.getIconRules().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name));
+        return (w.getVisibility() != null && w.getVisibility().getElements().stream()
+                .anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name)))
+                || (w.getLabelColor() != null && w.getLabelColor().getElements().stream()
+                        .anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name)))
+                || (w.getValueColor() != null && w.getValueColor().getElements().stream()
+                        .anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name)))
+                || (w.getIconColor() != null && w.getIconColor().getElements().stream()
+                        .anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name)))
+                || (w.getIconRules() != null && w.getIconRules().getElements().stream()
+                        .anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name)));
     }
 
     private boolean conditionsDependsOnItem(@Nullable EList<Condition> conditions, String name) {

@@ -114,7 +114,7 @@ class SitemapValidator extends AbstractSitemapValidator {
 
     @Check
     def void checkWidgetsInButtongrid(Buttongrid grid) {
-        val nb = grid.getButtons.size()
+        val nb = grid.getButtons !== null ? grid.getButtons.getElements.size() : 0
         if (nb > 0 && grid.item === null) {
             error("To use the \"buttons\" parameter in a Buttongrid, the \"item\" parameter is required",
                 SitemapPackage.Literals.BUTTONGRID.getEStructuralFeature(SitemapPackage.BUTTONGRID__ITEM));

@@ -18,9 +18,11 @@ import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -57,6 +59,9 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.fileconverter.SitemapFileGenerator;
+import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
@@ -92,12 +97,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource and provides different methods to generate file format
- * for existing items and things.
+ * for existing items, things and sitemaps.
  *
  * This resource is registered with the Jersey servlet.
  *
  * @author Laurent Garnier - Initial contribution
  * @author Laurent Garnier - Add YAML output for things
+ * @author Mark Herwege - Add sitemap DSL
  */
 @Component
 @JaxrsResource
@@ -175,6 +181,14 @@ public class FileFormatResource implements RESTResource {
                       param: my param value
             """;
 
+    private static final String DSL_SITEMAPS_EXAMPLE = """
+            sitemap MySitemap label="My Sitemap" {
+                Frame {
+                    Input item=MyItem label="My Input"
+                }
+            }
+            """;
+
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
     private final ItemRegistry itemRegistry;
@@ -184,8 +198,10 @@ public class FileFormatResource implements RESTResource {
     private final Inbox inbox;
     private final ThingTypeRegistry thingTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
+    private final List<SitemapProvider> sitemapProviders = new ArrayList<>();
     private final Map<String, ItemFileGenerator> itemFileGenerators = new ConcurrentHashMap<>();
     private final Map<String, ThingFileGenerator> thingFileGenerators = new ConcurrentHashMap<>();
+    private final Map<String, SitemapFileGenerator> sitemapFileGenerators = new ConcurrentHashMap<>();
 
     @Activate
     public FileFormatResource(//
@@ -225,6 +241,24 @@ public class FileFormatResource implements RESTResource {
 
     protected void removeThingFileGenerator(ThingFileGenerator thingFileGenerator) {
         thingFileGenerators.remove(thingFileGenerator.getFileFormatGenerator());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addSitemapFileGenerator(SitemapFileGenerator sitemapFileGenerator) {
+        sitemapFileGenerators.put(sitemapFileGenerator.getFileFormatGenerator(), sitemapFileGenerator);
+    }
+
+    protected void removeSitemapFileGenerator(SitemapFileGenerator sitemapFileGenerator) {
+        sitemapFileGenerators.remove(sitemapFileGenerator.getFileFormatGenerator());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addSitemapProvider(SitemapProvider sitemapProvider) {
+        sitemapProviders.add(sitemapProvider);
+    }
+
+    protected void removeSitemapProvider(SitemapProvider sitemapProvider) {
+        sitemapProviders.remove(sitemapProvider);
     }
 
     @POST
@@ -302,6 +336,54 @@ public class FileFormatResource implements RESTResource {
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         generator.generateFileFormat(outputStream, things, hideDefaultParameters);
+        return Response.ok(new String(outputStream.toByteArray())).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/sitemaps")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({ "text/vnd.openhab.dsl.sitemap" })
+    @Operation(operationId = "createFileFormatForSitemaps", summary = "Create file format for a list of sitemaps in registry.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = {
+                            @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)) }),
+                    @ApiResponse(responseCode = "404", description = "One or more sitemaps not found in registry."),
+                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
+    public Response createFileFormatForSitemaps(final @Context HttpHeaders httpHeaders,
+            @Parameter(description = "Array of Sitemap UIDs. If empty or omitted, return all Sitemaps from the Registry.") @Nullable List<String> sitemapUIDs) {
+        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
+        logger.debug("createFileFormatForSitemaps: mediaType = {}, sitemapUIDs = {}", acceptHeader, sitemapUIDs);
+        SitemapFileGenerator generator = getSitemapFileGenerator(acceptHeader);
+        if (generator == null) {
+            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                    .entity("Unsupported media type '" + acceptHeader + "'!").build();
+        }
+        Collection<String> sitemapNames;
+        Map<String, SitemapProvider> allSitemapNames = sitemapProviders.stream()
+                .flatMap(provider -> provider.getSitemapNames().stream().map(name -> Map.entry(name, provider)))
+                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing));
+        if (sitemapUIDs == null || sitemapUIDs.isEmpty()) {
+            sitemapNames = allSitemapNames.keySet();
+        } else if (allSitemapNames.keySet().containsAll(sitemapUIDs)) {
+            sitemapNames = sitemapUIDs;
+        } else {
+            String sitemapUID = sitemapUIDs.stream().filter(name -> !allSitemapNames.keySet().contains(name))
+                    .findFirst().get();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Sitemap with UID '" + sitemapUID + "' does not exist!").build();
+        }
+        List<Sitemap> sitemaps = sitemapNames.stream().sorted().map(name -> {
+            SitemapProvider provider = allSitemapNames.get(name);
+            if (provider == null) {
+                return null;
+            }
+            return provider.getSitemap(name);
+        }).filter(Objects::nonNull).toList();
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        generator.generateFileFormat(outputStream, sitemaps);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -461,6 +543,14 @@ public class FileFormatResource implements RESTResource {
         return switch (mediaType) {
             case "text/vnd.openhab.dsl.thing" -> thingFileGenerators.get("DSL");
             case "application/yaml" -> thingFileGenerators.get("YAML");
+            default -> null;
+        };
+    }
+
+    private @Nullable SitemapFileGenerator getSitemapFileGenerator(String mediaType) {
+        return switch (mediaType) {
+            case "text/vnd.openhab.dsl.sitemap" -> sitemapFileGenerators.get("DSL");
+            case "application/yaml" -> sitemapFileGenerators.get("YAML");
             default -> null;
         };
     }

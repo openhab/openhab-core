@@ -24,7 +24,6 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -32,15 +31,15 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
-import org.openhab.core.model.sitemap.sitemap.ButtonDefinition;
-import org.openhab.core.model.sitemap.sitemap.ColorArray;
-import org.openhab.core.model.sitemap.sitemap.IconRule;
+import org.openhab.core.model.sitemap.sitemap.ButtonDefinitionList;
+import org.openhab.core.model.sitemap.sitemap.ColorArrayList;
+import org.openhab.core.model.sitemap.sitemap.IconRuleList;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
-import org.openhab.core.model.sitemap.sitemap.Mapping;
+import org.openhab.core.model.sitemap.sitemap.MappingList;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage;
-import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.model.sitemap.sitemap.impl.ButtonDefinitionImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ButtonImpl;
@@ -385,8 +384,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         }
     }
 
-    private void addWidgetMappings(EList<Mapping> mappings, UIComponent component) {
-        if (component.getConfig() != null && component.getConfig().containsKey("mappings")) {
+    private void addWidgetMappings(@Nullable MappingList mappings, UIComponent component) {
+        if (mappings != null && component.getConfig() != null && component.getConfig().containsKey("mappings")) {
             Object sourceMappings = component.getConfig().get("mappings");
             if (sourceMappings instanceof Collection<?> sourceMappingsCollection) {
                 for (Object sourceMapping : sourceMappingsCollection) {
@@ -408,15 +407,15 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         mapping.setReleaseCmd(releaseCmd);
                         mapping.setLabel(label);
                         mapping.setIcon(icon);
-                        mappings.add(mapping);
+                        mappings.getElements().add(mapping);
                     }
                 }
             }
         }
     }
 
-    private void addWidgetButtons(EList<ButtonDefinition> buttons, UIComponent component) {
-        if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
+    private void addWidgetButtons(@Nullable ButtonDefinitionList buttons, UIComponent component) {
+        if (buttons != null && component.getConfig() != null && component.getConfig().containsKey("buttons")) {
             Object sourceButtons = component.getConfig().get("buttons");
             if (sourceButtons instanceof Collection<?> sourceButtonsCollection) {
                 for (Object sourceButton : sourceButtonsCollection) {
@@ -435,15 +434,15 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         button.setCmd(cmd);
                         button.setLabel(label);
                         button.setIcon(icon);
-                        buttons.add(button);
+                        buttons.getElements().add(button);
                     }
                 }
             }
         }
     }
 
-    private void addWidgetVisibility(EList<VisibilityRule> visibility, UIComponent component) {
-        if (component.getConfig() != null && component.getConfig().containsKey("visibility")) {
+    private void addWidgetVisibility(@Nullable VisibilityRuleList visibility, UIComponent component) {
+        if (visibility != null && component.getConfig() != null && component.getConfig().containsKey("visibility")) {
             Object sourceVisibilities = component.getConfig().get("visibility");
             if (sourceVisibilities instanceof Collection<?> sourceVisibilitiesCollection) {
                 for (Object sourceVisibility : sourceVisibilitiesCollection) {
@@ -453,27 +452,27 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                                 .createVisibilityRule();
                         List<ConditionImpl> conditions = getConditions(conditionsString, component, "visibility");
                         visibilityRule.eSet(SitemapPackage.VISIBILITY_RULE__CONDITIONS, conditions);
-                        visibility.add(visibilityRule);
+                        visibility.getElements().add(visibilityRule);
                     }
                 }
             }
         }
     }
 
-    private void addLabelColor(EList<ColorArray> labelColor, UIComponent component) {
+    private void addLabelColor(@Nullable ColorArrayList labelColor, UIComponent component) {
         addColor(labelColor, component, "labelcolor");
     }
 
-    private void addValueColor(EList<ColorArray> valueColor, UIComponent component) {
+    private void addValueColor(@Nullable ColorArrayList valueColor, UIComponent component) {
         addColor(valueColor, component, "valuecolor");
     }
 
-    private void addIconColor(EList<ColorArray> iconColor, UIComponent component) {
+    private void addIconColor(@Nullable ColorArrayList iconColor, UIComponent component) {
         addColor(iconColor, component, "iconcolor");
     }
 
-    private void addColor(EList<ColorArray> color, UIComponent component, String key) {
-        if (component.getConfig() != null && component.getConfig().containsKey(key)) {
+    private void addColor(@Nullable ColorArrayList color, UIComponent component, String key) {
+        if (color != null && component.getConfig() != null && component.getConfig().containsKey(key)) {
             Object sourceColors = component.getConfig().get(key);
             if (sourceColors instanceof Collection<?> sourceColorsCollection) {
                 for (Object sourceColor : sourceColorsCollection) {
@@ -484,15 +483,15 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         colorArray.setArg(argument);
                         List<ConditionImpl> conditions = getConditions(conditionsString, component, key);
                         colorArray.eSet(SitemapPackage.COLOR_ARRAY__CONDITIONS, conditions);
-                        color.add(colorArray);
+                        color.getElements().add(colorArray);
                     }
                 }
             }
         }
     }
 
-    private void addIconRules(EList<IconRule> icon, UIComponent component) {
-        if (component.getConfig() != null && component.getConfig().containsKey("iconrules")) {
+    private void addIconRules(@Nullable IconRuleList icon, UIComponent component) {
+        if (icon != null && component.getConfig() != null && component.getConfig().containsKey("iconrules")) {
             Object sourceIcons = component.getConfig().get("iconrules");
             if (sourceIcons instanceof Collection<?> sourceIconsCollection) {
                 for (Object sourceIcon : sourceIconsCollection) {
@@ -503,7 +502,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         iconRule.setArg(argument);
                         List<ConditionImpl> conditions = getConditions(conditionsString, component, "iconrules");
                         iconRule.eSet(SitemapPackage.ICON_RULE__CONDITIONS, conditions);
-                        icon.add(iconRule);
+                        icon.getElements().add(iconRule);
                     }
                 }
             }

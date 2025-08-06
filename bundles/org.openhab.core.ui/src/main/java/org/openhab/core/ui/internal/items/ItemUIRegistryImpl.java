@@ -65,16 +65,20 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.ColorArrayList;
 import org.openhab.core.model.sitemap.sitemap.Default;
 import org.openhab.core.model.sitemap.sitemap.Group;
 import org.openhab.core.model.sitemap.sitemap.IconRule;
+import org.openhab.core.model.sitemap.sitemap.IconRuleList;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
+import org.openhab.core.model.sitemap.sitemap.MappingList;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.Slider;
 import org.openhab.core.model.sitemap.sitemap.Switch;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
@@ -323,7 +327,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private Switch createPlayerButtons() {
         final Switch playerItemSwitch = SitemapFactory.eINSTANCE.createSwitch();
-        final List<Mapping> mappings = playerItemSwitch.getMappings();
+        final MappingList mappingList = SitemapFactory.eINSTANCE.createMappingList();
+        final List<Mapping> mappings = mappingList.getElements();
         Mapping commandMapping;
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(NextPreviousType.PREVIOUS.name());
@@ -337,6 +342,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(NextPreviousType.NEXT.name());
         commandMapping.setLabel(">>");
+        playerItemSwitch.setMappings(mappingList);
         return playerItemSwitch;
     }
 
@@ -754,7 +760,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
         } else if (w instanceof Switch sw) {
             StateDescription stateDescr = i.getStateDescription();
-            if (sw.getMappings().isEmpty() && (stateDescr == null || stateDescr.getOptions().isEmpty())) {
+            if ((sw.getMappings() == null || sw.getMappings().getElements().isEmpty())
+                    && (stateDescr == null || stateDescr.getOptions().isEmpty())) {
                 returnState = itemState.as(OnOffType.class);
             }
         }
@@ -853,11 +860,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         target.setIcon(source.getIcon());
         target.setStaticIcon(source.getStaticIcon());
         target.setLabel(source.getLabel());
-        target.getVisibility().addAll(EcoreUtil.copyAll(source.getVisibility()));
-        target.getLabelColor().addAll(EcoreUtil.copyAll(source.getLabelColor()));
-        target.getValueColor().addAll(EcoreUtil.copyAll(source.getValueColor()));
-        target.getIconColor().addAll(EcoreUtil.copyAll(source.getIconColor()));
-        target.getIconRules().addAll(EcoreUtil.copyAll(source.getIconRules()));
+        target.setVisibility(EcoreUtil.copy(source.getVisibility()));
+        target.setLabelColor(EcoreUtil.copy(source.getLabelColor()));
+        target.setValueColor(EcoreUtil.copy(source.getValueColor()));
+        target.setIconColor(EcoreUtil.copy(source.getIconColor()));
+        target.setIconRules(EcoreUtil.copy(source.getIconRules()));
     }
 
     /**
@@ -1207,9 +1214,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return matched;
     }
 
-    private @Nullable String processColorDefinition(Widget w, @Nullable List<ColorArray> colorList, String colorType) {
+    private @Nullable String processColorDefinition(Widget w, @Nullable ColorArrayList colorArrayList,
+            String colorType) {
+        if (colorArrayList == null) {
+            return null;
+        }
+        List<ColorArray> colorList = colorArrayList.getElements();
         // Sanity check
-        if (colorList == null || colorList.isEmpty()) {
+        if (colorList.isEmpty()) {
             return null;
         }
 
@@ -1258,9 +1270,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public boolean getVisiblity(Widget w) {
+        VisibilityRuleList visibilityRuleList = w.getVisibility();
         // Default to visible if parameters not set
-        List<VisibilityRule> ruleList = w.getVisibility();
-        if (ruleList == null || ruleList.isEmpty()) {
+        if (visibilityRuleList == null) {
+            return true;
+        }
+        List<VisibilityRule> ruleList = visibilityRuleList.getElements();
+        if (ruleList.isEmpty()) {
             return true;
         }
 
@@ -1279,9 +1295,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public @Nullable String getConditionalIcon(Widget w) {
-        List<IconRule> ruleList = w.getIconRules();
+        IconRuleList iconRuleList = w.getIconRules();
+        if (iconRuleList == null) {
+            return null;
+        }
+        List<IconRule> ruleList = iconRuleList.getElements();
         // Sanity check
-        if (ruleList == null || ruleList.isEmpty()) {
+        if (ruleList.isEmpty()) {
             return null;
         }
 
