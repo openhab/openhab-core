@@ -25,9 +25,12 @@ import org.openhab.core.model.sitemap.services.SitemapGrammarAccess
  */
 class SitemapFormatter extends AbstractDeclarativeFormatter {
 
-	@Inject extension SitemapGrammarAccess
-	
-	override protected void configureFormatting(FormattingConfig c) {
+    @Inject extension SitemapGrammarAccess
+
+    override protected void configureFormatting(FormattingConfig c) {
+        c.wrappedLineIndentation = 1
+        c.autoLinewrap = 120
+        
         c.setLinewrap(1, 1, 2).before(widgetRule)
 
         c.setIndentationIncrement.after("{")
@@ -43,11 +46,9 @@ class SitemapFormatter extends AbstractDeclarativeFormatter {
         c.setNoSpace().after("url=", "refresh=", "encoding=", "service=", "period=", "legend=", "forceasitem=", "yAxisDecimalPattern=", "interpolation=", "height=")
         c.setNoSpace().after("minValue=", "maxValue=", "step=", "inputHint=", "row=", "column=", "click=", "release=")
         c.setNoSpace().after("labelcolor=", "valuecolor=", "iconcolor=", "visibility=", "mappings=", "buttons=")
-        
+
         c.setNoSpace().before(",")
         c.setNoSpace().around(":", "=")
-        
-        c.autoLinewrap = 400
 
         c.setLinewrap(0, 1, 2).before(SL_COMMENTRule)
         c.setLinewrap(0, 1, 2).before(ML_COMMENTRule)
