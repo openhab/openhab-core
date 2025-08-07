@@ -70,5 +70,4 @@ public class DslSitemapFileConverter extends AbstractSitemapFileGenerator {
             }
         }
     }
-
 }
