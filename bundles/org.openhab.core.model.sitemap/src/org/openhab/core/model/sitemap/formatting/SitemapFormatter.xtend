@@ -28,9 +28,9 @@ class SitemapFormatter extends AbstractDeclarativeFormatter {
     @Inject extension SitemapGrammarAccess
 
     override protected void configureFormatting(FormattingConfig c) {
-        c.wrappedLineIndentation = 1
-        c.autoLinewrap = 120
-        
+        c.wrappedLineIndentation = 4
+        c.autoLinewrap = 200
+
         c.setLinewrap(1, 1, 2).before(widgetRule)
 
         c.setIndentationIncrement.after("{")

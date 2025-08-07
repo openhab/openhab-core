@@ -58,7 +58,7 @@ Image:
 Video:
     'Video' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
     ('icon=' icon=Icon) | ('icon=' IconRules=IconRuleList) | ('staticIcon=' staticIcon=Icon) |
-    ('url=' url=STRING) & ('encoding=' encoding=STRING) |
+    ('url=' url=STRING) | ('encoding=' encoding=STRING) |
     ('labelcolor=' labelColor=ColorArrayList) |
     ('valuecolor=' valueColor=ColorArrayList) |
     ('iconcolor=' iconColor=ColorArrayList) |
@@ -169,8 +169,8 @@ Buttongrid:
 Button:
     'Button' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
     ('icon=' icon=Icon) | ('icon=' IconRules=IconRuleList) | ('staticIcon=' staticIcon=Icon) |
-    ('row=' row=INT) & ('column=' column=INT) & (stateless?='stateless') |
-    ('click=' cmd=Command) & ('release=' releaseCmd=Command) |
+    ('row=' row=INT) | ('column=' column=INT) | (stateless?='stateless') |
+    ('click=' cmd=Command) | ('release=' releaseCmd=Command) |
     ('labelcolor=' labelColor=ColorArrayList) |
     ('valuecolor=' valueColor=ColorArrayList) |
     ('iconcolor=' iconColor=ColorArrayList) |
