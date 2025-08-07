@@ -16,6 +16,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -34,9 +36,11 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.xtext.resource.SaveOptions;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
+import org.eclipse.xtext.serializer.ISerializer;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -233,13 +237,15 @@ public class ModelRepositoryImpl implements ModelRepository {
     }
 
     @Override
-    public void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent) {
+    public void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent,
+            ISerializer serializer) {
+        String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
+        Resource resource = resourceSet.createResource(URI.createURI(name));
         synchronized (resourceSet) {
-            String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
-            Resource resource = resourceSet.createResource(URI.createURI(name));
-            try {
-                resource.getContents().add(modelContent);
-                resource.save(out, Map.of(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name()));
+            resource.getContents().add(modelContent);
+            try (Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
+                String formatted = serializer.serialize(modelContent, SaveOptions.newBuilder().format().getOptions());
+                writer.write(formatted);
             } catch (IOException e) {
                 logger.warn("Exception when saving the model {}", resource.getURI().lastSegment());
             } finally {

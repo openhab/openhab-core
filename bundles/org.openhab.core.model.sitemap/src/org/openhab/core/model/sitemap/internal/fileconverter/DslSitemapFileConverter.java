@@ -17,7 +17,9 @@ import java.io.OutputStream;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.xtext.serializer.ISerializer;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.sitemap.SitemapStandaloneSetup;
 import org.openhab.core.model.sitemap.fileconverter.AbstractSitemapFileGenerator;
 import org.openhab.core.model.sitemap.fileconverter.SitemapFileGenerator;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -41,9 +43,12 @@ public class DslSitemapFileConverter extends AbstractSitemapFileGenerator {
 
     private final ModelRepository modelRepository;
 
+    private final ISerializer serializer;
+
     @Activate
     public DslSitemapFileConverter(final @Reference ModelRepository modelRepository) {
         this.modelRepository = modelRepository;
+        this.serializer = SitemapStandaloneSetup.doSetup().getInstance(ISerializer.class);
     }
 
     @Override
@@ -57,7 +62,7 @@ public class DslSitemapFileConverter extends AbstractSitemapFileGenerator {
             return;
         }
         for (Sitemap sitemap : sitemaps) {
-            modelRepository.generateSyntaxFromModel(out, "sitemap", sitemap);
+            modelRepository.generateSyntaxFromModel(out, "sitemap", sitemap, serializer);
             try {
                 out.write(System.lineSeparator().getBytes());
             } catch (IOException e) {
@@ -65,4 +70,5 @@ public class DslSitemapFileConverter extends AbstractSitemapFileGenerator {
             }
         }
     }
+
 }

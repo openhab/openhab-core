@@ -19,6 +19,7 @@ import java.util.Set;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.xtext.serializer.ISerializer;
 
 /**
  * The model repository stores the configuration files (EMF models).
@@ -102,5 +103,5 @@ public interface ModelRepository {
      * @param modelType the model type
      * @param modelContent the content of the model
      */
-    void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent);
+    void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent, ISerializer serializer);
 }

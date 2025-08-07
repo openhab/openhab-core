@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.xtext.serializer.ISerializer;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -36,6 +37,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.model.ItemsStandaloneSetup;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
@@ -67,11 +69,14 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
     private final ModelRepository modelRepository;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
+    private final ISerializer serializer;
+
     @Activate
     public DslItemFileConverter(final @Reference ModelRepository modelRepository,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.modelRepository = modelRepository;
         this.configDescriptionRegistry = configDescriptionRegistry;
+        this.serializer = ItemsStandaloneSetup.doSetup().getInstance(ISerializer.class);
     }
 
     @Override
@@ -90,7 +95,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
             model.getItems().add(buildModelItem(item, getChannelLinks(metadata, item.getName()),
                     getMetadata(metadata, item.getName()), hideDefaultParameters));
         }
-        modelRepository.generateSyntaxFromModel(out, "items", model);
+        modelRepository.generateSyntaxFromModel(out, "items", model, serializer);
     }
 
     private ModelItem buildModelItem(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
