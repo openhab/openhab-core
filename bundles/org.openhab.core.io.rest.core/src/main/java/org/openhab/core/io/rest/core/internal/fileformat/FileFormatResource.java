@@ -189,6 +189,18 @@ public class FileFormatResource implements RESTResource {
             }
             """;
 
+    private static final String YAML_SITEMAPS_EXAMPLE = """
+            version: 2
+            sitemaps:
+              MySitemap:
+                label: Label
+                widgets:
+                    MyWidget:
+                        type: Switch
+                        label: Label
+                        item: MyItem
+            """;
+
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
     private final ItemRegistry itemRegistry;
@@ -343,11 +355,12 @@ public class FileFormatResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/sitemaps")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({ "text/vnd.openhab.dsl.sitemap" })
+    @Produces({ "text/vnd.openhab.dsl.sitemap", "application/yaml" })
     @Operation(operationId = "createFileFormatForSitemaps", summary = "Create file format for a list of sitemaps in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
-                            @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)) }),
+                            @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)),
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_SITEMAPS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "404", description = "One or more sitemaps not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForSitemaps(final @Context HttpHeaders httpHeaders,
