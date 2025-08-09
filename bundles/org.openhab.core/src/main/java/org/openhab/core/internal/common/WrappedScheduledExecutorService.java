@@ -165,6 +165,6 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
 
     @Override
     public <V> ScheduledFuture<V> schedule(@Nullable Callable<V> callable, long delay, @Nullable TimeUnit unit) {
-        return super.schedule(new TimedCallable<>(callable), delay, unit);
+        return super.schedule(new TimedCallable<V>(callable), delay, unit);
     }
 }
