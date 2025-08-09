@@ -44,6 +44,8 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
 
     final Logger logger = LoggerFactory.getLogger(WrappedScheduledExecutorService.class);
 
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofMillis(5000);
+
     public WrappedScheduledExecutorService(int corePoolSize, ThreadFactory threadFactory) {
         super(corePoolSize, threadFactory);
     }
@@ -53,8 +55,6 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
      * it outputs a log message with the stack trace from whence the task was originally scheduled.
      */
     private abstract class TimedAbstractTask {
-        private static final Duration DEFAULT_TIMEOUT = Duration.ofMillis(5000);
-
         private final Exception stackTraceHolder;
         private Instant timeout;
 
@@ -148,23 +148,27 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
 
     @Override
     public ScheduledFuture<?> schedule(@Nullable Runnable runnable, long delay, @Nullable TimeUnit unit) {
-        return super.schedule(new TimedRunnable(runnable), delay, unit);
+        Runnable r = logger.isDebugEnabled() ? new TimedRunnable(runnable) : runnable;
+        return super.schedule(r, delay, unit);
     }
 
     @Override
     public ScheduledFuture<?> scheduleAtFixedRate(@Nullable Runnable runnable, long initialDelay, long period,
             @Nullable TimeUnit unit) {
-        return super.scheduleAtFixedRate(new TimedRunnable(runnable), initialDelay, period, unit);
+        Runnable r = logger.isDebugEnabled() ? new TimedRunnable(runnable) : runnable;
+        return super.scheduleAtFixedRate(r, initialDelay, period, unit);
     }
 
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(@Nullable Runnable runnable, long initialDelay, long delay,
             @Nullable TimeUnit unit) {
-        return super.scheduleWithFixedDelay(new TimedRunnable(runnable), initialDelay, delay, unit);
+        Runnable r = logger.isDebugEnabled() ? new TimedRunnable(runnable) : runnable;
+        return super.scheduleWithFixedDelay(r, initialDelay, delay, unit);
     }
 
     @Override
     public <V> ScheduledFuture<V> schedule(@Nullable Callable<V> callable, long delay, @Nullable TimeUnit unit) {
-        return super.schedule(new TimedCallable<V>(callable), delay, unit);
+        Callable<V> c = logger.isDebugEnabled() ? new TimedCallable<>(callable) : callable;
+        return super.schedule(c, delay, unit);
     }
 }
