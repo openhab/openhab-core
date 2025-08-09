@@ -12,11 +12,17 @@
  */
 package org.openhab.core.internal.common;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -40,6 +46,77 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
 
     public WrappedScheduledExecutorService(int corePoolSize, ThreadFactory threadFactory) {
         super(corePoolSize, threadFactory);
+    }
+
+    /**
+     * A base class that checks the time a scheduled task takes to complete, and if it takes too long,
+     * it outputs a log message with the stack trace from whence the task was originally scheduled.
+     */
+    private abstract class TimedAbstractTask {
+        private static final Duration DEFAULT_TIMEOUT = Duration.ofMillis(5000);
+
+        private final Exception stackTraceHolder;
+        private Instant timeout;
+
+        protected TimedAbstractTask() {
+            this.stackTraceHolder = new Exception();
+            this.timeout = Instant.MAX;
+        }
+
+        protected void clockStart() {
+            timeout = Instant.now().plus(DEFAULT_TIMEOUT);
+        }
+
+        protected void clockStop() {
+            if (Instant.now().isAfter(timeout)) {
+                logger.debug("Scheduled task took more than {}; it was created here: ", DEFAULT_TIMEOUT,
+                        stackTraceHolder);
+            }
+        }
+    }
+
+    /**
+     * A running time checker for a {@link Runnable}
+     */
+    private class TimedRunnable extends TimedAbstractTask implements Runnable {
+        private final Runnable runnable;
+
+        protected TimedRunnable(@Nullable Runnable runnable) {
+            super();
+            this.runnable = Objects.requireNonNull(runnable);
+        }
+
+        @Override
+        public void run() {
+            try {
+                clockStart();
+                runnable.run();
+            } finally {
+                clockStop();
+            }
+        }
+    }
+
+    /**
+     * A running time checker for a {@link Callable}
+     */
+    private class TimedCallable<V> extends TimedAbstractTask implements Callable<V> {
+        private final Callable<V> callable;
+
+        protected TimedCallable(@Nullable Callable<V> callable) {
+            super();
+            this.callable = Objects.requireNonNull(callable);
+        }
+
+        @Override
+        public V call() throws Exception {
+            try {
+                clockStart();
+                return callable.call();
+            } finally {
+                clockStop();
+            }
+        }
     }
 
     @Override
@@ -67,5 +144,27 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
         if (actualThrowable != null) {
             logger.warn("Scheduled runnable ended with an exception: ", actualThrowable);
         }
+    }
+
+    @Override
+    public ScheduledFuture<?> schedule(@Nullable Runnable runnable, long delay, @Nullable TimeUnit unit) {
+        return super.schedule(new TimedRunnable(runnable), delay, unit);
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleAtFixedRate(@Nullable Runnable runnable, long initialDelay, long period,
+            @Nullable TimeUnit unit) {
+        return super.scheduleAtFixedRate(new TimedRunnable(runnable), initialDelay, period, unit);
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(@Nullable Runnable runnable, long initialDelay, long delay,
+            @Nullable TimeUnit unit) {
+        return super.scheduleWithFixedDelay(new TimedRunnable(runnable), initialDelay, delay, unit);
+    }
+
+    @Override
+    public <V> ScheduledFuture<V> schedule(@Nullable Callable<V> callable, long delay, @Nullable TimeUnit unit) {
+        return super.schedule(new TimedCallable<>(callable), delay, unit);
     }
 }
