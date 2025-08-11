@@ -117,7 +117,7 @@ public class YamlSitemapFileConverter extends AbstractSitemapFileGenerator {
         dto.icon = widget.getStaticIcon() != null ? widget.getStaticIcon()
                 : (widget.getIconRules() == null ? widget.getIcon() : null);
         IconRuleList iconRuleList = widget.getIconRules();
-        if (iconRuleList != null && iconRuleList.getElements() != null && iconRuleList.getElements().size() > 0) {
+        if (iconRuleList != null && iconRuleList.getElements() != null && !iconRuleList.getElements().isEmpty()) {
             dto.iconRules = iconRuleList.getElements().stream().map(e -> buildRuleDTO(e)).toList();
         }
         dto.staticIcon = widget.getStaticIcon() != null ? true : null;
