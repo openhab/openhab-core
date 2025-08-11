@@ -39,6 +39,11 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.persistence</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.storage.json</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -108,6 +113,13 @@
       <groupId>tech.units</groupId>
       <artifactId>indriya</artifactId>
       <version>2.2.2</version>
+    </dependency>
+    <!-- do not remove, required for JavaDoc build, inherited dependency annotations from core.persistence is not provided via runtime bom -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+      <version>1.5.1</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
