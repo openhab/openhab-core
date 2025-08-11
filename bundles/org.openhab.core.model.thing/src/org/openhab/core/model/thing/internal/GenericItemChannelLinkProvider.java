@@ -156,7 +156,9 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
             removedChannelUIDs.removeAll(addedChannelUIDs);
             removedChannelUIDs.forEach(removedChannelUID -> {
                 ItemChannelLink link = links.remove(removedChannelUID);
-                notifyListenersAboutRemovedElement(link);
+                if (link != null) {
+                    notifyListenersAboutRemovedElement(link);
+                }
             });
         });
         addedItemChannels.clear();
