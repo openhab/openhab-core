@@ -71,6 +71,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - add median methods
  * @author Mark Herwege - use item lastChange and lastUpdate methods if not in peristence
  * @author Mark Herwege - add Riemann sum methods
+ * @author Mark Herwege - use base unit for calculations and results
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -1158,6 +1159,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time from which to compute the variance
      * @return the variance between then and now, or <code>null</code> if <code>timestamp</code> is in the future, if
@@ -1171,6 +1176,10 @@ public class PersistenceExtensions {
     /**
      * Gets the variance of the state of the given {@link Item} since a certain point in time.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time from which to compute the variance
@@ -1188,6 +1197,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time to which to compute the variance
      * @return the variance between now and then, or <code>null</code> if <code>timestamp</code> is in the past, if
@@ -1201,6 +1214,10 @@ public class PersistenceExtensions {
     /**
      * Gets the variance of the state of the given {@link Item} until a certain point in time.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time to which to compute the variance
@@ -1217,6 +1234,10 @@ public class PersistenceExtensions {
      * Gets the variance of the state of the given {@link Item} between two points in time.
      * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the variance for
      * @param begin the point in time from which to compute
@@ -1237,6 +1258,10 @@ public class PersistenceExtensions {
      * Gets the variance of the state of the given {@link Item} between two certain point in time.
      * The default {@link PersistenceService} is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the {@link Item} to get the variance for
      * @param begin the point in time from which to compute the variance
      * @param end the end time for the computation
@@ -1256,6 +1281,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time from which to compute the variance
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -1271,6 +1300,10 @@ public class PersistenceExtensions {
     /**
      * Gets the variance of the state of the given {@link Item} since a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time from which to compute the variance
@@ -1291,6 +1324,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time to which to compute the variance
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -1306,6 +1343,10 @@ public class PersistenceExtensions {
     /**
      * Gets the variance of the state of the given {@link Item} until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time to which to compute the variance
@@ -1326,6 +1367,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the {@link Item} to get the variance for
      * @param begin the point in time from which to compute the variance
      * @param end the end time for the computation
@@ -1341,6 +1386,10 @@ public class PersistenceExtensions {
     /**
      * Gets the variance of the state of the given {@link Item} between two points in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the variance for
      * @param begin the point in time from which to compute
@@ -1381,8 +1430,7 @@ public class PersistenceExtensions {
             it = result.iterator();
         }
         Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-        Unit<?> unit = (baseItem instanceof NumberItem numberItem)
-                && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
+        Unit<?> unit = (baseItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
 
         BigDecimal average = average(beginTime, endTime, it, unit, type);
         if (average != null) {
@@ -1417,6 +1465,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
      *
@@ -1434,6 +1486,10 @@ public class PersistenceExtensions {
     /**
      * Gets the standard deviation of the state of the given {@link Item} since a certain point in time.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
@@ -1455,6 +1511,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
      *
@@ -1472,6 +1532,10 @@ public class PersistenceExtensions {
     /**
      * Gets the standard deviation of the state of the given {@link Item} until a certain point in time.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
@@ -1493,6 +1557,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
      *
@@ -1511,6 +1579,10 @@ public class PersistenceExtensions {
     /**
      * Gets the standard deviation of the state of the given {@link Item} between two points in time.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
@@ -1534,6 +1606,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
      *
@@ -1552,6 +1628,10 @@ public class PersistenceExtensions {
     /**
      * Gets the standard deviation of the state of the given {@link Item} since a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
@@ -1575,6 +1655,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
      *
@@ -1593,6 +1677,10 @@ public class PersistenceExtensions {
     /**
      * Gets the standard deviation of the state of the given {@link Item} until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
@@ -1616,6 +1704,10 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
      *
@@ -1637,6 +1729,10 @@ public class PersistenceExtensions {
     /**
      * Gets the standard deviation of the state of the given {@link Item} between two points in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
      * operation. Get the variance only, it is the squared deviation.
@@ -1664,21 +1760,23 @@ public class PersistenceExtensions {
             return null;
         }
         State variance = internalVarianceBetween(item, begin, end, type, effectiveServiceId);
+        if (variance == null) {
+            return null;
+        }
 
-        if (variance != null) {
-            DecimalType dt = variance.as(DecimalType.class);
-            // avoid ArithmeticException if variance is less than zero
-            if (dt != null && DecimalType.ZERO.compareTo(dt) <= 0) {
-                BigDecimal deviation = dt.toBigDecimal().sqrt(MathContext.DECIMAL64);
-                Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-                Unit<?> unit = (baseItem instanceof NumberItem numberItem)
-                        && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit()
-                                : null;
-                if (unit != null) {
-                    return new QuantityType<>(deviation, unit);
-                } else {
-                    return new DecimalType(deviation);
-                }
+        Unit<?> varianceUnit = (variance instanceof QuantityType<?> quantity) ? quantity.getUnit() : null;
+        DecimalType dt = variance.as(DecimalType.class);
+
+        // avoid ArithmeticException if variance is less than zero
+        if (dt != null && DecimalType.ZERO.compareTo(dt) <= 0) {
+            BigDecimal deviation = dt.toBigDecimal().sqrt(MathContext.DECIMAL64);
+
+            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
+            Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+            if (varianceUnit != null && unit != null) {
+                return (new QuantityType<>(deviation, varianceUnit.root(2))).toUnit(unit);
+            } else {
+                return new DecimalType(deviation);
             }
         }
         return null;
@@ -1938,9 +2036,15 @@ public class PersistenceExtensions {
      * Gets the Riemann sum of the states of a given {@link Item} since a certain point in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
      * A left approximation type is used for the Riemann sum.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param timestamp the point in time from which to search for the riemannSum value
@@ -1955,9 +2059,15 @@ public class PersistenceExtensions {
     /**
      * Gets the Riemann sum of the states of a given {@link Item} since a certain point in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param timestamp the point in time from which to search for the riemannSum value
@@ -1974,9 +2084,15 @@ public class PersistenceExtensions {
      * Gets the Riemann sum of the states of a given {@link Item} until a certain point in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
      * A left approximation type is used for the Riemann sum.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param timestamp the point in time to which to search for the riemannSum value
@@ -1991,9 +2107,15 @@ public class PersistenceExtensions {
     /**
      * Gets the Riemann sum of the states of a given {@link Item} until a certain point in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param timestamp the point in time to which to search for the riemannSum value
@@ -2010,9 +2132,15 @@ public class PersistenceExtensions {
      * Gets the Riemann sum of the states of a given {@link Item} between two certain points in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
      * A left approximation type is used for the Riemann sum.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param begin the point in time from which to start the summation
@@ -2028,9 +2156,15 @@ public class PersistenceExtensions {
     /**
      * Gets the Riemann sum of the states of a given {@link Item} between two certain points in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param begin the point in time from which to start the summation
@@ -2049,9 +2183,15 @@ public class PersistenceExtensions {
      * Gets the Riemann sum of the states of a given {@link Item} since a certain point in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
      * A left approximation type is used for the Riemann sum.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param timestamp the point in time from which to search for the riemannSum value
@@ -2068,9 +2208,15 @@ public class PersistenceExtensions {
     /**
      * Gets the Riemann sum of the states of a given {@link Item} since a certain point in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param timestamp the point in time from which to search for the riemannSum value
@@ -2090,9 +2236,15 @@ public class PersistenceExtensions {
      * Gets the Riemann sum of the states of a given {@link Item} until a certain point in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
      * A left approximation type is used for the Riemann sum.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param timestamp the point in time to which to search for the riemannSum value
@@ -2109,9 +2261,15 @@ public class PersistenceExtensions {
     /**
      * Gets the Riemann sum of the states of a given {@link Item} until a certain point in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param timestamp the point in time to which to search for the riemannSum value
@@ -2131,9 +2289,15 @@ public class PersistenceExtensions {
      * Gets the Riemann sum of the states of a given {@link Item} between two certain points in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
      * A left approximation type is used for the Riemann sum.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param begin the point in time from which to start the summation
@@ -2151,9 +2315,15 @@ public class PersistenceExtensions {
     /**
      * Gets the Riemann sum of the states of a given {@link Item} between two certain points in time.
      * This can be used as an approximation for integrating the curve represented by discrete values.
-     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     *
+     * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
+     * you may have to
      * multiply or divide to get the result in the expected scale.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the riemannSum value for
      * @param begin the point in time from which to start the summation
@@ -2193,8 +2363,7 @@ public class PersistenceExtensions {
         }
 
         Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-        Unit<?> unit = (baseItem instanceof NumberItem numberItem)
-                && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
+        Unit<?> unit = (baseItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
         BigDecimal sum = riemannSum(beginTime, endTime, it, unit, type).scaleByPowerOfTen(-3);
         if (unit != null) {
             return new QuantityType<>(sum, unit.multiply(Units.SECOND));
@@ -2443,6 +2612,10 @@ public class PersistenceExtensions {
      * value.
      * The default persistence service is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the item for which we will sum its persisted state values since <code>timestamp</code>
      * @param timestamp the point in time from which to start the summation
      * @return the sum of the state values since <code>timestamp</code>, or null if <code>timestamp</code> is in the
@@ -2458,6 +2631,10 @@ public class PersistenceExtensions {
      * value.
      * The default persistence service is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the item for which we will sum its persisted state values to <code>timestamp</code>
      * @param timestamp the point in time to which to start the summation
      * @return the sum of the state values until <code>timestamp</code>, or null if <code>timestamp</code> is in the
@@ -2472,6 +2649,10 @@ public class PersistenceExtensions {
      * This method does not calculate a Riemann sum and therefore cannot be used as an approximation for the integral
      * value.
      * The default persistence service is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the item for which we will sum its persisted state values between <code>begin</code> and
      *            <code>end</code>
@@ -2491,6 +2672,10 @@ public class PersistenceExtensions {
      * value.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the item for which we will sum its persisted state values since <code>timestamp</code>
      * @param timestamp the point in time from which to start the summation
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -2507,6 +2692,10 @@ public class PersistenceExtensions {
      * value.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the item for which we will sum its persisted state values to <code>timestamp</code>
      * @param timestamp the point in time to which to start the summation
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -2522,6 +2711,10 @@ public class PersistenceExtensions {
      * This method does not calculate a Riemann sum and therefore cannot be used as an approximation for the integral
      * value.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the item for which we will sum its persisted state values between <code>begin</code> and
      *            <code>end</code>
@@ -2547,8 +2740,7 @@ public class PersistenceExtensions {
             Iterator<HistoricItem> it = result.iterator();
 
             Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-            Unit<?> unit = (baseItem instanceof NumberItem numberItem)
-                    && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
+            Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
             BigDecimal sum = BigDecimal.ZERO;
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
@@ -2681,10 +2873,10 @@ public class PersistenceExtensions {
         }
 
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {
-            valueStart = getItemValue(item);
+            valueStart = getItemValue(item, unit);
         }
         if (begin != null && end == null && begin.isBefore(ZonedDateTime.now())) {
-            valueStop = getItemValue(item);
+            valueStop = getItemValue(item, unit);
         }
 
         if (valueStart != null && valueStop != null) {
@@ -2699,6 +2891,10 @@ public class PersistenceExtensions {
      * The default {@link PersistenceService} is used.
      *
      * This method has been deprecated and {@link #evolutionRateSince(Item, ZonedDateTime)} should be used instead.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the item to get the evolution rate value for
      * @param timestamp the point in time from which to compute the evolution rate
@@ -2719,6 +2915,10 @@ public class PersistenceExtensions {
      * Gets the evolution rate of the state of a given {@link Item} since a certain point in time.
      * The default {@link PersistenceService} is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the item to get the evolution rate value for
      * @param timestamp the point in time from which to compute the evolution rate
      * @return the evolution rate in percent (positive and negative) between now and then, or <code>null</code> if
@@ -2734,6 +2934,10 @@ public class PersistenceExtensions {
     /**
      * Gets the evolution rate of the state of a given {@link Item} until a certain point in time.
      * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the item to get the evolution rate value for
      * @param timestamp the point in time to which to compute the evolution rate
@@ -2753,6 +2957,10 @@ public class PersistenceExtensions {
      *
      * This method has been deprecated and {@link #evolutionRateBetween(Item, ZonedDateTime, ZonedDateTime)} should be
      * used instead.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the item to get the evolution rate value for
      * @param begin the beginning point in time
@@ -2774,6 +2982,10 @@ public class PersistenceExtensions {
      * Gets the evolution rate of the state of a given {@link Item} between two points in time.
      * The default {@link PersistenceService} is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the item to get the evolution rate value for
      * @param begin the beginning point in time
      * @param end the end point in time
@@ -2793,6 +3005,10 @@ public class PersistenceExtensions {
      *
      * This method has been deprecated and {@link #evolutionRateSince(Item, ZonedDateTime, String)} should be used
      * instead.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the evolution rate value for
      * @param timestamp the point in time from which to compute the evolution rate
@@ -2815,6 +3031,10 @@ public class PersistenceExtensions {
      * Gets the evolution rate of the state of a given {@link Item} since a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the {@link Item} to get the evolution rate value for
      * @param timestamp the point in time from which to compute the evolution rate
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -2833,6 +3053,10 @@ public class PersistenceExtensions {
     /**
      * Gets the evolution rate of the state of a given {@link Item} until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the evolution rate value for
      * @param timestamp the point in time to which to compute the evolution rate
@@ -2856,6 +3080,10 @@ public class PersistenceExtensions {
      * This method has been deprecated and {@link #evolutionRateBetween(Item, ZonedDateTime, ZonedDateTime, String)}
      * should be used instead.
      *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
+     *
      * @param item the {@link Item} to get the evolution rate value for
      * @param begin the beginning point in time
      * @param end the end point in time
@@ -2878,6 +3106,10 @@ public class PersistenceExtensions {
     /**
      * Gets the evolution rate of the state of a given {@link Item} between two points in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
+     * configured unit.
+     * For temperatures, this will give different results for different configured units.
      *
      * @param item the {@link Item} to get the evolution rate value for
      * @param begin the beginning point in time
@@ -2918,10 +3150,10 @@ public class PersistenceExtensions {
         }
 
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {
-            valueStart = getItemValue(item);
+            valueStart = getItemValue(item, unit);
         }
         if (begin != null && end == null && begin.isBefore(ZonedDateTime.now())) {
-            valueStop = getItemValue(item);
+            valueStop = getItemValue(item, unit);
         }
 
         if (valueStart != null && valueStop != null && !valueStart.equals(DecimalType.ZERO)) {
@@ -3487,16 +3719,12 @@ public class PersistenceExtensions {
         return null;
     }
 
-    private static @Nullable DecimalType getItemValue(Item item) {
-        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-        if (baseItem instanceof NumberItem numberItem) {
-            Unit<?> unit = numberItem.getUnit();
-            if (unit != null) {
-                QuantityType<?> qt = item.getStateAs(QuantityType.class);
-                qt = (qt != null) ? qt.toUnit(unit) : qt;
-                if (qt != null) {
-                    return new DecimalType(qt.toBigDecimal());
-                }
+    private static @Nullable DecimalType getItemValue(Item item, @Nullable Unit<?> unit) {
+        if (unit != null) {
+            QuantityType<?> qt = item.getStateAs(QuantityType.class);
+            qt = (qt != null) ? qt.toUnit(unit) : qt;
+            if (qt != null) {
+                return new DecimalType(qt.toBigDecimal());
             }
         }
         return item.getStateAs(DecimalType.class);
