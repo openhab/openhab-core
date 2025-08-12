@@ -21,6 +21,10 @@ import org.eclipse.xtext.conversion.IValueConverterService
 import org.eclipse.xtext.linking.lazy.LazyURIEncoder
 import com.google.inject.Binder
 import com.google.inject.name.Names
+import org.openhab.core.model.sitemap.formatting.SitemapFormatter
+import org.eclipse.xtext.formatting.IFormatter
+import org.openhab.core.model.sitemap.formatting.SitemapIndentationInformation
+import org.eclipse.xtext.formatting.IIndentationInformation
 
 /** 
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -28,6 +32,15 @@ import com.google.inject.name.Names
 class SitemapRuntimeModule extends org.openhab.core.model.sitemap.AbstractSitemapRuntimeModule {
     override Class<? extends IValueConverterService> bindIValueConverterService() {
         return SitemapConverters
+    }
+
+    override Class<? extends IFormatter> bindIFormatter() {
+        return SitemapFormatter
+    }
+
+    override void configure(Binder binder) {
+        super.configure(binder)
+        binder.bind(IIndentationInformation).to(SitemapIndentationInformation)
     }
 
     override void configureUseIndexFragmentsForLazyLinking(Binder binder) {
