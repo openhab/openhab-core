@@ -51,7 +51,10 @@ import org.yaml.snakeyaml.representer.Representer;
  */
 @NonNullByDefault
 public class YamlPreprocessor {
-    private static final int MAX_INCLUDE_DEPTH = 100; // Stack overflow occurs at 450, depending on system limits
+    // Maximum allowed include depth to prevent stack overflow.
+    // Stack overflow has been observed at around 450 on a large system,
+    // so we use a conservative default of 100 to avoid issues.
+    private static final int MAX_INCLUDE_DEPTH = 100;
 
     private static final String VARIABLES_KEY = "variables";
     private static final String PACKAGES_KEY = "packages";
@@ -192,8 +195,7 @@ public class YamlPreprocessor {
             includeCallback.accept(includeFile);
             return loadedFile;
         } catch (IOException e) {
-            // The exception message includes the file path, so we don't need to log it again
-            LOGGER.warn("Error loading include file {}", e.getMessage());
+            LOGGER.warn("Error loading include file '{}' (included from '{}'): {}", includeObject.fileName(), file, e.getMessage());
             return Map.of();
         }
     }
