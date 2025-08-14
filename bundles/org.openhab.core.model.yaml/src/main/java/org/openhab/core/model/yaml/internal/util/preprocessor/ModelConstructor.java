@@ -142,28 +142,37 @@ class ModelConstructor extends Constructor {
          * @param name - variable name in the template
          * @param separator - separator in the template, can be :-, -
          * @param defaultValue - default value or the error in the template.
-         *   If defaultValue is null, return an empty string.
+         *            If defaultValue is null, return an empty string.
          * @return the value to resolve in the template
          */
-        private String resolveVariable(String name, @Nullable String separator,
-                @Nullable String defaultValue) {
+        private String resolveVariable(String name, @Nullable String separator, @Nullable String defaultValue) {
             String value = variables.get(name);
-            if (value != null && !value.isEmpty()) {
+            if (isSetAndNotEmpty(value)) {
                 return value;
             }
-            // variable is either unset or empty
-            if (separator != null && defaultValue != null) {
-                if (separator.startsWith(":")) {
-                    if (value == null || value.isEmpty()) {
-                        return defaultValue;
-                    }
-                } else {
-                    if (value == null) {
-                        return defaultValue;
-                    }
-                }
+            if (shouldUseDefault(separator, value)) {
+                return getDefaultOrEmpty(defaultValue);
             }
             return "";
+        }
+
+        private boolean isSetAndNotEmpty(@Nullable String value) {
+            return value != null && !value.isEmpty();
+        }
+
+        private boolean shouldUseDefault(@Nullable String separator, @Nullable String value) {
+            if (separator == null) {
+                return false;
+            }
+            if (separator.startsWith(":")) {
+                return value == null || value.isEmpty();
+            } else {
+                return value == null;
+            }
+        }
+
+        private String getDefaultOrEmpty(@Nullable String defaultValue) {
+            return defaultValue != null ? defaultValue : "";
         }
     }
 
