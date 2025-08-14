@@ -250,6 +250,22 @@ public class YamlPreprocessorTest {
         assertThat(getNestedValue(data, "list", "test1"), equalTo(List.of("main1", "package1")));
     }
 
+    @Test
+    void hiddenKeysTest() throws IOException {
+        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("hiddenKeys.yaml"),
+                this::emptyCallback);
+
+        assertThat(getNestedValue(data, ".energy_type"), nullValue());
+        assertThat(getNestedValue(data, "items", "energy_1", "type"), equalTo("number"));
+        assertThat(getNestedValue(data, "items", "energy_1", "dimension"), equalTo("Energy"));
+        assertThat(getNestedValue(data, "items", "energy_1", "unit"), equalTo("kWh"));
+        assertThat(getNestedValue(data, "items", "energy_1", "label"), equalTo("Energy_1"));
+        assertThat(getNestedValue(data, "items", "energy_2", "type"), equalTo("number"));
+        assertThat(getNestedValue(data, "items", "energy_2", "dimension"), equalTo("Energy"));
+        assertThat(getNestedValue(data, "items", "energy_2", "unit"), equalTo("kWh"));
+        assertThat(getNestedValue(data, "items", "energy_2", "label"), equalTo("Energy_2"));
+    }
+
     void emptyCallback(Path includeFile) {
         // This method is intentionally left empty to satisfy the callback interface
         // in the tests where no action is needed on include files.
