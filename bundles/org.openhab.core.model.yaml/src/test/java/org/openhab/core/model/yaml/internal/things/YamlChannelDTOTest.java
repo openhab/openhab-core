@@ -81,28 +81,34 @@ public class YamlChannelDTOTest {
         ch1.type = "channel-type";
         ch2.type = "channel-type";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.type = null;
         ch1.itemType = "String";
         ch2.type = null;
         ch2.itemType = "String";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.kind = "trigger";
         ch2.kind = "TRIGGER";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.label = "A label";
         ch2.label = "A label";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.description = "A description";
         ch2.description = "A description";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         ch2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
     }
 
     @Test
@@ -113,6 +119,7 @@ public class YamlChannelDTOTest {
         ch1.type = "channel-type";
         ch2.type = "channel-type";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
         ch2.type = "channel-type2";
         assertFalse(ch1.equals(ch2));
 
@@ -121,22 +128,27 @@ public class YamlChannelDTOTest {
         ch2.type = null;
         ch2.itemType = "String";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
         ch1.itemType = "String";
         ch2.itemType = "Number";
         assertFalse(ch1.equals(ch2));
         ch1.itemType = "Number";
         ch2.itemType = "Number";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
         ch2.itemType = "number";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
         ch1.itemDimension = "Temperature";
         assertFalse(ch1.equals(ch2));
         ch2.itemDimension = "Humidity";
         assertFalse(ch1.equals(ch2));
         ch2.itemDimension = "Temperature";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
         ch2.itemDimension = "temperature";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.type = "channel-type";
         ch1.itemType = null;
@@ -159,18 +171,22 @@ public class YamlChannelDTOTest {
         ch2.itemType = "Switch";
         ch2.kind = "state";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.kind = "trigger";
         ch2.kind = "trigger";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.kind = "trigger";
         ch2.kind = "Trigger";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.kind = "Trigger";
         ch2.kind = "TRIGGER";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.kind = "state";
         ch2.kind = "trigger";
@@ -191,10 +207,12 @@ public class YamlChannelDTOTest {
         ch1.kind = null;
         ch2.kind = "state";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
 
         ch1.kind = "state";
         ch2.kind = null;
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
     }
 
     @Test
@@ -208,6 +226,7 @@ public class YamlChannelDTOTest {
         ch1.label = null;
         ch2.label = null;
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
         ch1.label = "A label";
         ch2.label = null;
         assertFalse(ch1.equals(ch2));
@@ -220,6 +239,7 @@ public class YamlChannelDTOTest {
         ch1.label = "A label";
         ch2.label = "A label";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
     }
 
     @Test
@@ -233,6 +253,7 @@ public class YamlChannelDTOTest {
         ch1.description = null;
         ch2.description = null;
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
         ch1.description = "A description";
         ch2.description = null;
         assertFalse(ch1.equals(ch2));
@@ -245,6 +266,7 @@ public class YamlChannelDTOTest {
         ch1.description = "A description";
         ch2.description = "A description";
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
     }
 
     @Test
@@ -258,6 +280,7 @@ public class YamlChannelDTOTest {
         ch1.config = null;
         ch2.config = null;
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
         ch1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         ch2.config = null;
         assertFalse(ch1.equals(ch2));
@@ -288,5 +311,6 @@ public class YamlChannelDTOTest {
         ch1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         ch2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         assertTrue(ch1.equals(ch2));
+        assertEquals(ch1.hashCode(), ch2.hashCode());
     }
 }

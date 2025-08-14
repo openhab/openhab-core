@@ -250,9 +250,18 @@ public class YamlItemDTO implements YamlElement, Cloneable {
         return YamlElementUtils.getItemTypeWithDimension(type, dimension);
     }
 
+    public @NonNull List<@NonNull String> getGroups() {
+        return groups == null ? List.of() : groups;
+    }
+
+    public @NonNull Set<@NonNull String> getTags() {
+        return tags == null ? Set.of() : tags;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(name, getType(), label, icon);
+        return Objects.hash(name, getType(), group, label, icon, format, unit, autoupdate, getGroups(), getTags(),
+                channel);
     }
 
     @Override
@@ -267,9 +276,9 @@ public class YamlItemDTO implements YamlElement, Cloneable {
                 && Objects.equals(group, other.group) && Objects.equals(label, other.label)
                 && Objects.equals(icon, other.icon) && Objects.equals(format, other.format)
                 && Objects.equals(unit, other.unit) && Objects.equals(autoupdate, other.autoupdate)
-                && YamlElementUtils.equalsListStrings(groups, other.groups)
-                && YamlElementUtils.equalsSetStrings(tags, other.tags) && Objects.equals(channel, other.channel)
-                && equalsChannels(channels, other.channels) && equalsMetadata(metadata, other.metadata);
+                && Objects.equals(getGroups(), other.getGroups()) && Objects.equals(getTags(), other.getTags())
+                && Objects.equals(channel, other.channel) && equalsChannels(channels, other.channels)
+                && equalsMetadata(metadata, other.metadata);
     }
 
     private boolean equalsChannels(@Nullable Map<@NonNull String, @NonNull Map<@NonNull String, @NonNull Object>> first,
