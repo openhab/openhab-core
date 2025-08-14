@@ -48,10 +48,29 @@ class ModelConstructor extends Constructor {
     private static final Tag INCLUDE_TAG = new Tag("!include");
     private static final int MAX_VAR_NESTING_DEPTH = 10;
 
-    // The valid syntax is a subset of bash variable substitution syntax:
-    // ${var} - if var is not set, return empty string
-    // ${var-default} - if var is set but empty, return empty
-    // ${var:-default} - if var is set but empty, return default
+    /**
+     * Matches variable interpolation patterns in YAML strings.
+     *
+     * Supported syntax (subset of bash variable substitution):
+     *   - ${var}             : Simple variable substitution. If 'var' is not set, returns empty string.
+     *   - ${var-default}     : If 'var' is set but empty, returns empty string. If not set, returns 'default'.
+     *   - ${var:-default}    : If 'var' is set but empty, returns 'default'. If not set, returns 'default'.
+     *   - Default values can be single-quoted, double-quoted, or unquoted.
+     *
+     * Regex breakdown:
+     *   - (?<name>\\w+)           : Captures the variable name (alphanumeric and underscore).
+     *   - (?<separator>:?-)       : Optionally captures the separator (either '-' or ':-').
+     *   - '(?<defaultsq>[^']*)'   : Captures single-quoted default value (inside quotes).
+     *   - "(?<defaultdq>[^"]*)"   : Captures double-quoted default value (inside quotes).
+     *   - (?<default>[^}]*)       : Captures unquoted default value (up to closing brace).
+     *   - All default value groups are optional.
+     *
+     * Additional notes:
+     *   - If no default value is provided, an empty string is returned.
+     *   - Whitespace inside default values is preserved.
+     *   - Nested variable patterns are not matched by this regex (handled separately).
+     *   - Invalid patterns (e.g., missing closing brace) will not match.
+     */
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("""
             \\$\\{
                 (?<name>\\w+)
