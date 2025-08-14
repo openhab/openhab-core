@@ -195,7 +195,8 @@ public class YamlPreprocessor {
             includeCallback.accept(includeFile);
             return loadedFile;
         } catch (IOException e) {
-            LOGGER.warn("Error loading include file '{}' (included from '{}'): {}", includeObject.fileName(), file, e.getMessage());
+            LOGGER.warn("Error loading include file '{}' (included from '{}'): {}", includeObject.fileName(), file,
+                    e.getMessage());
             return Map.of();
         }
     }
