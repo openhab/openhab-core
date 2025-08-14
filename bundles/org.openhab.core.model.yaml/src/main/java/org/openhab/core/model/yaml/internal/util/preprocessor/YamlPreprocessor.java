@@ -102,9 +102,12 @@ public class YamlPreprocessor {
         dataMap = (Map<String, Object>) processIncludes(file, dataMap, combinedVars, includeStackBranch,
                 includeCallback);
         LOGGER.trace("Loaded includes from {}: {}", file, dataMap);
+
         Map<String, Object> packages = (Map<String, Object>) dataMap.remove(PACKAGES_KEY);
         dataMap = mergePackages(dataMap, packages);
         LOGGER.trace("Combined data from {}: {}", file, dataMap);
+
+        dataMap = excludeHiddenKeys(dataMap);
         return dataMap;
     }
 
@@ -239,6 +242,12 @@ public class YamlPreprocessor {
             }
         });
         return mainData;
+    }
+
+    private static Map<String, Object> excludeHiddenKeys(Map<String, Object> dataMap) {
+        // Exclude keys that start with a dot
+        return dataMap.entrySet().stream().filter(entry -> !entry.getKey().startsWith(".")).collect(Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> replacement, LinkedHashMap::new));
     }
 
     static Yaml newYaml(Map<String, String> variables) {
