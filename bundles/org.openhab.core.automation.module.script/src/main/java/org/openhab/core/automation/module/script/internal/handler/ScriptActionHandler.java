@@ -91,7 +91,7 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
             }
             try {
                 setExecutionContext(scriptEngine, context);
-                Object result = eval(scriptEngine, script);
+                Object result = eval(scriptEngine);
                 resultMap.put("result", result);
                 resetExecutionContext(scriptEngine, context);
             } finally { // Make sure that Lock is unlocked regardless of an exception being thrown or not to avoid
