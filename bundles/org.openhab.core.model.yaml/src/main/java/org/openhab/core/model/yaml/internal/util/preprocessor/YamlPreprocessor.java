@@ -12,9 +12,9 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,7 +109,7 @@ public class YamlPreprocessor {
     }
 
     private static Object loadYaml(Path path, Map<String, String> variables) throws IOException {
-        try (InputStream inputStream = new FileInputStream(path.toFile())) {
+        try (InputStream inputStream = Files.newInputStream(path)) {
             Yaml yaml = newYaml(variables);
             return yaml.load(inputStream);
         } // let the caller catch the exception and log a message
