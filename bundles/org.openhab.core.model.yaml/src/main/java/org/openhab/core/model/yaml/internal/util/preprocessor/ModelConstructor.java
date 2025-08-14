@@ -141,17 +141,18 @@ class ModelConstructor extends Constructor {
          *
          * @param name - variable name in the template
          * @param separator - separator in the template, can be :-, -
-         * @param defaultValue - default value or the error in the template
+         * @param defaultValue - default value or the error in the template.
+         *   If defaultValue is null, return an empty string.
          * @return the value to resolve in the template
          */
-        private @Nullable String resolveVariable(String name, @Nullable String separator,
+        private String resolveVariable(String name, @Nullable String separator,
                 @Nullable String defaultValue) {
             String value = variables.get(name);
             if (value != null && !value.isEmpty()) {
                 return value;
             }
             // variable is either unset or empty
-            if (separator != null) {
+            if (separator != null && defaultValue != null) {
                 if (separator.startsWith(":")) {
                     if (value == null || value.isEmpty()) {
                         return defaultValue;
