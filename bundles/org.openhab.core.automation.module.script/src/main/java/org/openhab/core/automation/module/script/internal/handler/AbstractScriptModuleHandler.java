@@ -177,14 +177,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
         // Add the rule's UID to the context and make it available as "ctx".
         // Note: We don't use "context" here as it doesn't work on all JVM versions!
-        final Map<String, Object> contextNew = new HashMap<>(context);
-        contextNew.put("ruleUID", this.ruleUID);
-        executionContext.setAttribute("ctx", contextNew, ScriptContext.ENGINE_SCOPE);
-
-        // Add the rule's UID to the global namespace.
-        executionContext.setAttribute("ruleUID", this.ruleUID, ScriptContext.ENGINE_SCOPE);
-
-        // add the single context entries without their prefix to the scope
+        final Map<String, Object> contextNew = new HashMap<>();
+        // add the single context entries without their prefix to contextNew
         for (Entry<String, ?> entry : context.entrySet()) {
             Object value = entry.getValue();
             String key = entry.getKey();
@@ -192,6 +186,15 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             if (dotIndex != -1) {
                 key = key.substring(dotIndex + 1);
             }
+            contextNew.put(key, value);
+        }
+        contextNew.put("ruleUID", this.ruleUID);
+        executionContext.setAttribute("ctx", contextNew, ScriptContext.ENGINE_SCOPE);
+
+        // add the single contextNew entries to the scope
+        for (Entry<String, ?> entry : contextNew.entrySet()) {
+            Object value = entry.getValue();
+            String key = entry.getKey();
             executionContext.setAttribute(key, value, ScriptContext.ENGINE_SCOPE);
         }
     }
