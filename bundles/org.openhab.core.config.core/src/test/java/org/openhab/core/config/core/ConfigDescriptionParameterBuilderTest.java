@@ -166,11 +166,15 @@ public class ConfigDescriptionParameterBuilderTest {
         assertTrue(param2.getOptions().isEmpty());
     }
 
-    @Test
-    public void assertThatNameMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> ConfigDescriptionParameterBuilder.create(null, Type.BOOLEAN).build());
-    }
+    /*
+     * will not compile anymore due to null for @NonNull parameter
+     * 
+     * @Test
+     * public void assertThatNameMustNotBeNull() {
+     * assertThrows(IllegalArgumentException.class,
+     * () -> ConfigDescriptionParameterBuilder.create(null, Type.BOOLEAN).build());
+     * }
+     */
 
     @Test
     public void assertThatNameMustNotBeEmpty() {
@@ -178,11 +182,15 @@ public class ConfigDescriptionParameterBuilderTest {
                 () -> ConfigDescriptionParameterBuilder.create("", Type.BOOLEAN).build());
     }
 
-    @Test
-    public void assertThatTypeMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> ConfigDescriptionParameterBuilder.create("Dummy", null).build());
-    }
+    /*
+     * will not compile anymore due to null for @NonNull parameter
+     * 
+     * @Test
+     * public void assertThatTypeMustNotBeNull() {
+     * assertThrows(IllegalArgumentException.class,
+     * () -> ConfigDescriptionParameterBuilder.create("Dummy", null).build());
+     * }
+     */
 
     @Test
     public void assertThatUnitForTextParameterIsNotAllowed() {

@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -27,11 +29,12 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("deprecation")
+@NonNullByDefault
 public class HostFragmentMappingUtil {
 
     private static Map<Bundle, List<Bundle>> hostFragmentMapping = new HashMap<>();
 
-    static PackageAdmin pkgAdmin;
+    static @Nullable PackageAdmin pkgAdmin;
 
     /**
      * @return
@@ -47,6 +50,9 @@ public class HostFragmentMappingUtil {
      * @return a list with the hosts of the <code>fragment</code> parameter.
      */
     static List<Bundle> returnHostBundles(Bundle fragment) {
+        if (pkgAdmin == null) {
+            throw new IllegalStateException();
+        }
         List<Bundle> hosts = new ArrayList<>();
         Bundle[] bundles = pkgAdmin.getHosts(fragment);
         if (bundles != null) {

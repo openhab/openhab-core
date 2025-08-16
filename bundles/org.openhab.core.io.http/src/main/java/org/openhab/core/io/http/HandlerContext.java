@@ -15,6 +15,9 @@ package org.openhab.core.io.http;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Handler context represents a present state of all handlers placed in execution chain.
  *
@@ -27,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public interface HandlerContext {
 
     String ERROR_ATTRIBUTE = "handler.error";
@@ -39,14 +43,14 @@ public interface HandlerContext {
      * @param request Request.
      * @param response Response.
      */
-    void execute(HttpServletRequest request, HttpServletResponse response);
+    void execute(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response);
 
     /**
      * Signal that an error occurred during handling of request.
      *
      * Call to this method will break normal execution chain and force handling of error.
      */
-    void error(Exception error);
+    void error(@Nullable Exception error);
 
     /**
      * Checks if has any errors occurred while handling request.

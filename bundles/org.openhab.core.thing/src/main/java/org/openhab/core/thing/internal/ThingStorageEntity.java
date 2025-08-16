@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.dto.ThingDTO;
 
 /**
@@ -20,6 +21,7 @@ import org.openhab.core.thing.dto.ThingDTO;
  * @author Jan N. Klug - Initial contribution
  * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
+@NonNullByDefault
 public class ThingStorageEntity extends ThingDTO {
     public boolean isBridge = false;
 
