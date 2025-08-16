@@ -59,6 +59,7 @@ import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.binding.ThingActions;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
@@ -91,7 +92,8 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
     @Activate
     public DefaultScriptScopeProvider(final @Reference ItemRegistry itemRegistry,
             final @Reference ThingRegistry thingRegistry, final @Reference RuleRegistry ruleRegistry,
-            final @Reference EventPublisher eventPublisher) {
+            final @Reference EventPublisher eventPublisher,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry) {
         this.busEvent = new ScriptBusEventImpl(itemRegistry, eventPublisher);
         this.thingActions = new ScriptThingActionsImpl(thingRegistry);
 
@@ -171,6 +173,7 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         elements.put("items", new ItemRegistryDelegate(itemRegistry));
         elements.put("ir", itemRegistry);
         elements.put("itemRegistry", itemRegistry);
+        elements.put("itemChannelLinkRegistry", itemChannelLinkRegistry);
         elements.put("things", thingRegistry);
         elements.put("rules", ruleRegistry);
         elements.put("events", busEvent);
