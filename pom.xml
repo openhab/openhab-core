@@ -82,7 +82,7 @@
 
     <!-- TEST -->
     <!-- cxf can be updated independently, karaf only uses it in tests -->
-    <cxf.version>3.6.5</cxf.version>
+    <cxf.version>3.6.8</cxf.version>
     <!-- junit 5.12.0 to 5.13.0-M3 fails silently with bnd 7.1.0, not executing itests;
          not sure if this is a bnd/junit issue or due to wrong configuration -->
     <junit.version>5.11.4</junit.version>
