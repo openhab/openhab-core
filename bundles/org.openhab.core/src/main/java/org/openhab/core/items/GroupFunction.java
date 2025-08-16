@@ -28,6 +28,26 @@ import org.openhab.core.types.UnDefType;
  */
 @NonNullByDefault
 public interface GroupFunction {
+    String EQUALITY = "EQUALITY";
+    String AND = "AND";
+    String OR = "OR";
+    String NAND = "NAND";
+    String NOR = "NOR";
+    String XOR = "XOR";
+    String COUNT = "COUNT";
+    String AVG = "AVG";
+    String MEDIAN = "MEDIAN";
+    String SUM = "SUM";
+    String MIN = "MIN";
+    String MAX = "MAX";
+    String LATEST = "LATEST";
+    String EARLIEST = "EARLIEST";
+
+    String DEFAULT = EQUALITY;
+
+    Set<String> VALID_FUNCTIONS = Set.of( //
+            EQUALITY, AND, OR, NAND, NOR, XOR, COUNT, AVG, MEDIAN, SUM, MIN, MAX, LATEST, EARLIEST //
+    );
 
     /**
      * Determines the current state of a group based on a list of items
