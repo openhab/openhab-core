@@ -20,6 +20,13 @@ import java.util.Properties;
 
 import org.eclipse.jetty.http.HttpMethod;
 import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.engine.action.ActionDoc;
+import org.openhab.core.model.script.engine.action.ParamDoc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -297,5 +304,52 @@ public class HTTP {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
         return null;
+    }
+
+    @ActionDoc(text = "downloads an image from a url and updates the Image item's state with it", returns = "true if successful, false otherwise")
+    public static boolean setImage(
+            @ParamDoc(name = "itemName", text = "the name of the target Image Item") String itemName,
+            @ParamDoc(name = "url", text = "the URL of the image") String url) {
+        return setImage(itemName, HttpUtil.downloadImage(url));
+    }
+
+    @ActionDoc(text = "downloads an image from a url and updates the Image item's state with it", returns = "true if successful, false otherwise")
+    public static boolean setImage(
+            @ParamDoc(name = "itemName", text = "the name of the target Image Item") String itemName,
+            @ParamDoc(name = "url", text = "the URL of the image") String url,
+            @ParamDoc(name = "timeout", text = "timeout in milliseconds") int timeout) {
+        return setImage(itemName, HttpUtil.downloadImage(url, timeout));
+    }
+
+    @ActionDoc(text = "downloads an image from a url and updates the Image item's state with it", returns = "true if successful, false otherwise")
+    public static boolean setImage(
+            @ParamDoc(name = "itemName", text = "the name of the target Image Item") String itemName,
+            @ParamDoc(name = "url", text = "the URL of the image") String url,
+            @ParamDoc(name = "maxContentLength", text = "maximum data size in bytes, negative to ignore") long maxContentLength,
+            @ParamDoc(name = "timeout", text = "timeout in milliseconds") int timeout) {
+        return setImage(itemName, HttpUtil.downloadImage(url, true, maxContentLength, timeout));
+    }
+
+    private static boolean setImage(String itemName, RawType raw) {
+        if (raw == null) {
+            logger.error("Image download failed for item '{}'", itemName);
+            return false;
+        }
+        ItemRegistry registry = ScriptServiceUtil.getItemRegistry();
+        if (registry == null) {
+            logger.error("Item registry is not available.");
+            return false;
+        }
+        try {
+            Item item = registry.getItem(itemName);
+            BusEvent.postUpdate(item, raw);
+            return true;
+        } catch (ItemNotFoundException e) {
+            logger.error("Item '{}' does not exist.", itemName);
+            return false;
+        } catch (IllegalArgumentException e) {
+            logger.error("Cannot update item '{}' with image: {}", itemName, e.getMessage());
+            return false;
+        }
     }
 }
