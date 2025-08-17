@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Jan N. Klug - add timeout methods
+ * @author Dan Cunningham - add image download methods
  */
 public class HTTP {
 
