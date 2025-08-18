@@ -20,7 +20,7 @@
     <californium.version>4.0.0-M2</californium.version>
     <jetty.version>9.4.57.v20241219</jetty.version>
     <pax.web.version>8.0.33</pax.web.version>
-    <swagger.version>2.2.28</swagger.version>
+    <swagger.version>2.2.35</swagger.version>
   </properties>
 
   <dependencies>
