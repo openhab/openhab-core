@@ -117,7 +117,7 @@
 	</feature>
 
 	<feature name="openhab.tp-cxf" description="Apache CXF" version="${project.version}">
-		<capability>openhab.tp;feature=cxf;version=3.6.5</capability>
+		<capability>openhab.tp;feature=cxf;version=3.6.8</capability>
 		<feature dependency="true">openhab.tp-jaxws</feature>
 		<bundle dependency="true">mvn:com.fasterxml.woodstox/woodstox-core/6.6.2</bundle>
 		<bundle dependency="true">mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
@@ -126,12 +126,12 @@
 		<bundle dependency="true">mvn:org.apache.aries.spec/org.apache.aries.javax.jax.rs-api/1.0.4</bundle>
 		<bundle dependency="true">mvn:org.apache.ws.xmlschema/xmlschema-core/2.3.1</bundle>
 		<bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/4.2.2</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-core/3.6.5</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-frontend-jaxrs/3.6.5</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-rs-client/3.6.5</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-rs-sse/3.6.5</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-security/3.6.5</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-transports-http/3.6.5</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-core/3.6.8</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-frontend-jaxrs/3.6.8</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-rs-client/3.6.8</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-rs-sse/3.6.8</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-security/3.6.8</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-transports-http/3.6.8</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jbbp" description="Java Binary Block Parser library" version="${project.version}">
