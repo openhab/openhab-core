@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.openhab.core.tools.archetypes</groupId>
     <artifactId>org.openhab.core.reactor.tools.archetypes</artifactId>
-    <version>5.0.1-SNAPSHOT</version>
+    <version>5.0.1</version>
   </parent>
 
   <artifactId>org.openhab.core.tools.archetypes.binding</artifactId>
