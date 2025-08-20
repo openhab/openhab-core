@@ -2258,22 +2258,7 @@ public class PersistenceExtensionsTest {
         assertThat(dt.doubleValue(), is(closeTo((-SWITCH_ON_INTERMEDIATE_21 + SWITCH_ON_INTERMEDIATE_22)
                 / (1.0 * (-SWITCH_ON_INTERMEDIATE_21 + SWITCH_ON_INTERMEDIATE_22)), 0.01)));
 
-        average = PersistenceExtensions.averageSince(switchItem, now, SERVICE_ID);
-        assertNotNull(average);
-        dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(1d, 0.01)));
-
-        average = PersistenceExtensions.averageUntil(switchItem, now.plusMinutes(5), SERVICE_ID);
-        assertNotNull(average);
-        dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(1d, 0.01)));
-
-        average = PersistenceExtensions.averageSince(switchItem, now.plusHours(1), SERVICE_ID);
-        assertNull(average);
-
-        average = PersistenceExtensions.averageUntil(switchItem, now.minusHours(1), SERVICE_ID);
+        average = PersistenceExtensions.averageBetween(switchItem, now.minusHours(1), now.plusHours(1), SERVICE_ID);
         assertNull(average);
     }
 
