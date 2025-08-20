@@ -73,20 +73,21 @@ public class TestPersistenceService implements QueryablePersistenceService {
     static final int SWITCH_END = +15;
     static final OnOffType SWITCH_STATE = OnOffType.ON;
 
-    static final int BEFORE_START = 1940;
-    static final int HISTORIC_START = 1950;
-    static final int HISTORIC_INTERMEDIATE_VALUE_1 = 2005;
-    static final int HISTORIC_INTERMEDIATE_VALUE_2 = 2011;
-    static final int HISTORIC_END = 2012;
-    static final int HISTORIC_INTERMEDIATE_NOVALUE_3 = 2019;
-    static final int HISTORIC_INTERMEDIATE_NOVALUE_4 = 2021;
-    static final int FUTURE_INTERMEDIATE_NOVALUE_1 = 2051;
-    static final int FUTURE_INTERMEDIATE_NOVALUE_2 = 2056;
-    static final int FUTURE_START = 2060;
-    static final int FUTURE_INTERMEDIATE_VALUE_3 = 2070;
-    static final int FUTURE_INTERMEDIATE_VALUE_4 = 2077;
-    static final int FUTURE_END = 2100;
-    static final int AFTER_END = 2110;
+    static final int BASE_VALUE = ZonedDateTime.now().getYear(); // For reference, if year is 2025
+    static final int BEFORE_START = BASE_VALUE - 85; // 1940
+    static final int HISTORIC_START = BASE_VALUE - 75; // 1950
+    static final int HISTORIC_INTERMEDIATE_VALUE_1 = BASE_VALUE - 20; // 2005
+    static final int HISTORIC_INTERMEDIATE_VALUE_2 = BASE_VALUE - 14; // 2011
+    static final int HISTORIC_END = BASE_VALUE - 13; // 2012
+    static final int HISTORIC_INTERMEDIATE_NOVALUE_3 = BASE_VALUE - 6; // 2019
+    static final int HISTORIC_INTERMEDIATE_NOVALUE_4 = BASE_VALUE - 4; // 2021
+    static final int FUTURE_INTERMEDIATE_NOVALUE_1 = BASE_VALUE + 21; // 2051
+    static final int FUTURE_INTERMEDIATE_NOVALUE_2 = BASE_VALUE + 31; // 2056
+    static final int FUTURE_START = BASE_VALUE + 35; // 2060
+    static final int FUTURE_INTERMEDIATE_VALUE_3 = BASE_VALUE + 45; // 2070
+    static final int FUTURE_INTERMEDIATE_VALUE_4 = BASE_VALUE + 52; // 2077
+    static final int FUTURE_END = BASE_VALUE + 75; // 2100
+    static final int AFTER_END = BASE_VALUE + 85; // 2110
     static final DecimalType STATE = new DecimalType(HISTORIC_END);
 
     static final double KELVIN_OFFSET = 273.15;
@@ -430,5 +431,10 @@ public class TestPersistenceService implements QueryablePersistenceService {
         } else {
             return 0.5 * (values[values.length / 2] + values[values.length / 2 - 1]);
         }
+    }
+
+    public static final ZonedDateTime now() {
+        ZonedDateTime now = ZonedDateTime.now();
+        return now;
     }
 }

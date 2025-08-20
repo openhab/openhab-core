@@ -2219,35 +2219,44 @@ public class PersistenceExtensionsTest {
     }
 
     @Test
-    public void testAverageSinceOnOffType() {
+    public void testAverageOnOffType() {
         // switch is 5h ON, 5h OFF, and 5h ON (until now)
+        // switch is 5h ON, 5h OFF, and 5h ON (from now)
 
         ZonedDateTime now = ZonedDateTime.now().truncatedTo(ChronoUnit.MINUTES);
-        State average = PersistenceExtensions.averageSince(switchItem, now.plusHours(SWITCH_START), SERVICE_ID);
+        State average = PersistenceExtensions.averageBetween(switchItem, now.plusHours(SWITCH_START),
+                now.plusHours(SWITCH_END), SERVICE_ID);
         assertNotNull(average);
         DecimalType dt = average.as(DecimalType.class);
         assertNotNull(dt);
         assertThat(dt.doubleValue(),
-                is(closeTo((SWITCH_OFF_1 - SWITCH_ON_1 - SWITCH_ON_2) / (-1.0 * SWITCH_START), 0.01)));
+                is(closeTo((SWITCH_OFF_1 - SWITCH_ON_1 - SWITCH_ON_2 + SWITCH_OFF_3 - SWITCH_ON_3 + SWITCH_OFF_2)
+                        / (1.0 * (-SWITCH_START + SWITCH_END)), 0.01)));
 
-        average = PersistenceExtensions.averageSince(switchItem, now.plusHours(SWITCH_OFF_INTERMEDIATE_1), SERVICE_ID);
+        average = PersistenceExtensions.averageBetween(switchItem, now.plusHours(SWITCH_OFF_INTERMEDIATE_1),
+                now.plusHours(SWITCH_OFF_INTERMEDIATE_2), SERVICE_ID);
         assertNotNull(average);
         dt = average.as(DecimalType.class);
         assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(-SWITCH_ON_2 / (-1.0 * SWITCH_OFF_INTERMEDIATE_1), 0.01)));
+        assertThat(dt.doubleValue(), is(closeTo(
+                (-SWITCH_ON_2 + SWITCH_OFF_2) / (1.0 * (-SWITCH_OFF_INTERMEDIATE_1 + SWITCH_OFF_INTERMEDIATE_2)),
+                0.01)));
 
-        average = PersistenceExtensions.averageSince(switchItem, now.plusHours(SWITCH_ON_2), SERVICE_ID);
-        assertNotNull(average);
-        dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(-SWITCH_ON_2 / (-1.0 * SWITCH_ON_2), 0.01)));
-
-        average = PersistenceExtensions.averageSince(switchItem, now.plusHours(SWITCH_ON_INTERMEDIATE_21), SERVICE_ID);
+        average = PersistenceExtensions.averageBetween(switchItem, now.plusHours(SWITCH_ON_2),
+                now.plusHours(SWITCH_ON_3), SERVICE_ID);
         assertNotNull(average);
         dt = average.as(DecimalType.class);
         assertNotNull(dt);
         assertThat(dt.doubleValue(),
-                is(closeTo(-SWITCH_ON_INTERMEDIATE_21 / (-1.0 * SWITCH_ON_INTERMEDIATE_21), 0.01)));
+                is(closeTo((-SWITCH_ON_2 + SWITCH_OFF_2) / (1.0 * (-SWITCH_ON_2 + SWITCH_ON_3)), 0.01)));
+
+        average = PersistenceExtensions.averageBetween(switchItem, now.plusHours(SWITCH_ON_INTERMEDIATE_21),
+                now.plusHours(SWITCH_ON_INTERMEDIATE_22), SERVICE_ID);
+        assertNotNull(average);
+        dt = average.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo((-SWITCH_ON_INTERMEDIATE_21 + SWITCH_ON_INTERMEDIATE_22)
+                / (1.0 * (-SWITCH_ON_INTERMEDIATE_21 + SWITCH_ON_INTERMEDIATE_22)), 0.01)));
 
         average = PersistenceExtensions.averageSince(switchItem, now, SERVICE_ID);
         assertNotNull(average);
@@ -2255,45 +2264,14 @@ public class PersistenceExtensionsTest {
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo(1d, 0.01)));
 
-        average = PersistenceExtensions.averageSince(switchItem, now.plusHours(1), SERVICE_ID);
-        assertNull(average);
-    }
-
-    @Test
-    public void testAverageUntilOnOffType() {
-        // switch is 5h ON, 5h OFF, and 5h ON (from now)
-
-        ZonedDateTime now = ZonedDateTime.now().truncatedTo(ChronoUnit.MINUTES);
-        State average = PersistenceExtensions.averageUntil(switchItem, now.plusHours(SWITCH_END), SERVICE_ID);
-        assertNotNull(average);
-        DecimalType dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(),
-                is(closeTo((SWITCH_OFF_3 - SWITCH_ON_3 + SWITCH_OFF_2) / (1.0 * SWITCH_END), 0.01)));
-
-        average = PersistenceExtensions.averageUntil(switchItem, now.plusHours(SWITCH_OFF_INTERMEDIATE_2), SERVICE_ID);
-        assertNotNull(average);
-        dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(SWITCH_OFF_2 / (1.0 * SWITCH_OFF_INTERMEDIATE_2), 0.01)));
-
-        average = PersistenceExtensions.averageUntil(switchItem, now.plusHours(SWITCH_ON_3), SERVICE_ID);
-        assertNotNull(average);
-        dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(SWITCH_OFF_2 / (1.0 * SWITCH_ON_3), 0.01)));
-
-        average = PersistenceExtensions.averageUntil(switchItem, now.plusHours(SWITCH_ON_INTERMEDIATE_22), SERVICE_ID);
-        assertNotNull(average);
-        dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(SWITCH_ON_INTERMEDIATE_22 / (1.0 * SWITCH_ON_INTERMEDIATE_22), 0.01)));
-
-        average = PersistenceExtensions.averageUntil(switchItem, now.plusMinutes(1), SERVICE_ID);
+        average = PersistenceExtensions.averageUntil(switchItem, now.plusMinutes(5), SERVICE_ID);
         assertNotNull(average);
         dt = average.as(DecimalType.class);
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo(1d, 0.01)));
+
+        average = PersistenceExtensions.averageSince(switchItem, now.plusHours(1), SERVICE_ID);
+        assertNull(average);
 
         average = PersistenceExtensions.averageUntil(switchItem, now.minusHours(1), SERVICE_ID);
         assertNull(average);
