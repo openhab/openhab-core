@@ -75,6 +75,11 @@ public class TestCachedValuesPersistenceService implements ModifiablePersistence
 
     @Override
     public Iterable<HistoricItem> query(FilterCriteria filter) {
+        // try {
+        // Thread.sleep(60 * 1000);
+        // } catch (InterruptedException e) {
+        // // continue anyway
+        // }
         Stream<HistoricItem> stream = historicItems.stream();
 
         if (filter.getState() != null) {
