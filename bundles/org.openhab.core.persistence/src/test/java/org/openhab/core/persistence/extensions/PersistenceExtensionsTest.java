@@ -1849,12 +1849,12 @@ public class PersistenceExtensionsTest {
     }
 
     @Test
-    public void testRiemannSumSinceDecimalTypeIrregularTimespans() {
+    public void testRiemannSumBetweenDecimalTypeIrregularTimespans() {
         RiemannType type = RiemannType.LEFT;
 
         ZonedDateTime now = ZonedDateTime.now();
         int historicHours = 27;
-        int futureHours = 0;
+        int futureHours = 27;
 
         // Persistence will contain following entries:
         // 0 - 27 hours back in time
@@ -1862,42 +1862,6 @@ public class PersistenceExtensionsTest {
         // 0 - 25 hours back in time
         // 50 - 2 hours back in time
         // 0 - 1 hour back in time
-        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
-
-        // Testing that riemannSum calculates the correct Riemann sum over the last 27 hours
-        State sum = PersistenceExtensions.riemannSumSince(numberItem, now.minusHours(historicHours), type,
-                TestCachedValuesPersistenceService.ID);
-        assertNotNull(sum);
-        DecimalType dt = sum.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(100.0 * 3600 + 50.0 * 3600, 0.01)));
-
-        // Testing that riemannSum calculates the correct Riemann sum over the last 24 hours
-        sum = PersistenceExtensions.riemannSumSince(numberItem, now.minusHours(historicHours).plusHours(3), type,
-                TestCachedValuesPersistenceService.ID);
-        assertNotNull(sum);
-        dt = sum.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(50.0 * 3600, 0.01)));
-
-        // Testing that riemannSum calculates the correct Riemann sum over the last 30 minutes
-        sum = PersistenceExtensions.riemannSumSince(numberItem, now.minusMinutes(30), type,
-                TestCachedValuesPersistenceService.ID);
-        assertNotNull(sum);
-        dt = sum.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(0, 0.01)));
-    }
-
-    @Test
-    public void testRiemannSumUntilDecimalTypeIrregularTimespans() {
-        RiemannType type = RiemannType.LEFT;
-
-        ZonedDateTime now = ZonedDateTime.now();
-        int historicHours = 0;
-        int futureHours = 27;
-
-        // Persistence will contain following entries:
         // 0 - 1 hour forward in time
         // 50 - 2 hours forward in time
         // 0 - 3 hours forward in time
@@ -1905,24 +1869,24 @@ public class PersistenceExtensionsTest {
         // 0 - 26 hour forward in time
         createTestCachedValuesPersistenceService(now, historicHours, futureHours);
 
-        // Testing that riemannSum calculates the correct Riemann sum over the next 27 hours
-        State sum = PersistenceExtensions.riemannSumUntil(numberItem, now.plusHours(futureHours), type,
-                TestCachedValuesPersistenceService.ID);
+        // Testing that riemannSum calculates the correct Riemann sum from the last 27 hours to the next 27 hours
+        State sum = PersistenceExtensions.riemannSumBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), type, TestCachedValuesPersistenceService.ID);
         assertNotNull(sum);
         DecimalType dt = sum.as(DecimalType.class);
         assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(100.0 * 3600 + 50.0 * 3600, 0.01)));
+        assertThat(dt.doubleValue(), is(closeTo(100.0 * 3600 + 50.0 * 3600 + 100.0 * 3600 + 50.0 * 3600, 0.01)));
 
-        // Testing that riemannSum calculates the correct Riemann sum over the next 25 hours
-        sum = PersistenceExtensions.riemannSumUntil(numberItem, now.plusHours(futureHours).minusHours(2), type,
-                TestCachedValuesPersistenceService.ID);
+        // Testing that riemannSum calculates the correct Riemann sum from the last 24 hours to the next 24 hours
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, now.minusHours(historicHours).plusHours(3),
+                now.plusHours(futureHours).minusHours(3), type, TestCachedValuesPersistenceService.ID);
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(50.0 * 3600, 0.01)));
+        assertThat(dt.doubleValue(), is(closeTo(50.0 * 3600 + 50.0 * 3600, 0.01)));
 
-        // Testing that riemannSum calculates the correct Riemann sum over the next 30 minutes hours
-        sum = PersistenceExtensions.riemannSumUntil(numberItem, now.plusMinutes(30), type,
+        // Testing that riemannSum calculates the correct Riemann sum from the last 30 minutes to the next 30 minutes
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, now.minusMinutes(30), now.plusMinutes(30), type,
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
@@ -2223,15 +2187,18 @@ public class PersistenceExtensionsTest {
         assertThat(dt.doubleValue(), is(closeTo((-SWITCH_ON_INTERMEDIATE_21 + SWITCH_ON_INTERMEDIATE_22)
                 / (1.0 * (-SWITCH_ON_INTERMEDIATE_21 + SWITCH_ON_INTERMEDIATE_22)), 0.01)));
 
-        average = PersistenceExtensions.averageBetween(switchItem, now.minusHours(1), now.plusHours(1), SERVICE_ID);
+        average = PersistenceExtensions.averageSince(switchItem, now.plusHours(1), SERVICE_ID);
+        assertNull(average);
+
+        average = PersistenceExtensions.averageUntil(switchItem, now.minusHours(1), SERVICE_ID);
         assertNull(average);
     }
 
     @Test
-    public void testAverageSinceDecimalTypeIrregularTimespans() {
+    public void testAverageBetweenDecimalTypeIrregularTimespans() {
         ZonedDateTime now = ZonedDateTime.now();
         int historicHours = 27;
-        int futureHours = 0;
+        int futureHours = 27;
 
         // Persistence will contain following entries:
         // 0 - 27 hours back in time
@@ -2239,40 +2206,6 @@ public class PersistenceExtensionsTest {
         // 0 - 25 hours back in time
         // 50 - 2 hours back in time
         // 0 - 1 hour back in time
-        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
-
-        // Testing that average calculates the correct average over the last 27 hours
-        State average = PersistenceExtensions.averageSince(numberItem, now.minusHours(historicHours),
-                TestCachedValuesPersistenceService.ID);
-        assertNotNull(average);
-        DecimalType dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0) / historicHours, 0.01)));
-
-        // Testing that average calculates the correct average over the last 24 hours
-        average = PersistenceExtensions.averageSince(numberItem, now.minusHours(historicHours).plusHours(3),
-                TestCachedValuesPersistenceService.ID);
-        assertNotNull(average);
-        dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(50.0 / (historicHours - 3.0), 0.01)));
-
-        // Testing that average calculates the correct average over the last 30 minutes
-        average = PersistenceExtensions.averageSince(numberItem, now.minusMinutes(30),
-                TestCachedValuesPersistenceService.ID);
-        assertNotNull(average);
-        dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(0, 0.01)));
-    }
-
-    @Test
-    public void testAverageUntilDecimalTypeIrregularTimespans() {
-        ZonedDateTime now = ZonedDateTime.now();
-        int historicHours = 0;
-        int futureHours = 27;
-
-        // Persistence will contain following entries:
         // 0 - 1 hour forward in time
         // 50 - 2 hours forward in time
         // 0 - 3 hours forward in time
@@ -2280,24 +2213,24 @@ public class PersistenceExtensionsTest {
         // 0 - 26 hour forward in time
         createTestCachedValuesPersistenceService(now, historicHours, futureHours);
 
-        // Testing that average calculates the correct average over the next 27 hours
-        State average = PersistenceExtensions.averageUntil(numberItem, now.plusHours(futureHours),
-                TestCachedValuesPersistenceService.ID);
+        // Testing that average calculates the correct average from the last 27 hours to the next 27 hours
+        State average = PersistenceExtensions.averageBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
         DecimalType dt = average.as(DecimalType.class);
         assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0) / futureHours, 0.01)));
+        assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0 + 100.0 + 50.0) / (historicHours + futureHours), 0.01)));
 
-        // Testing that average calculates the correct average over the next 25 hours
-        average = PersistenceExtensions.averageUntil(numberItem, now.plusHours(futureHours).minusHours(2),
-                TestCachedValuesPersistenceService.ID);
+        // Testing that average calculates the correct average from the last 24 hours to the next 24 hours
+        average = PersistenceExtensions.averageBetween(numberItem, now.minusHours(historicHours).plusHours(3),
+                now.plusHours(futureHours).minusHours(3), TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
         dt = average.as(DecimalType.class);
         assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(50.0 / (futureHours - 2.0), 0.01)));
+        assertThat(dt.doubleValue(), is(closeTo((50.0 + 50.0) / (historicHours - 3.0 + futureHours - 3.0), 0.01)));
 
-        // Testing that average calculates the correct average over the next 30 minutes hours
-        average = PersistenceExtensions.averageUntil(numberItem, now.plusMinutes(30),
+        // Testing that average calculates the correct average from the last 30 minutes to the next 30 minutes
+        average = PersistenceExtensions.averageBetween(numberItem, now.minusMinutes(30), now.plusMinutes(30),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
         dt = average.as(DecimalType.class);
