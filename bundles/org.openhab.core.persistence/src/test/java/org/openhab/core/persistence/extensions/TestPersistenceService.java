@@ -432,9 +432,4 @@ public class TestPersistenceService implements QueryablePersistenceService {
             return 0.5 * (values[values.length / 2] + values[values.length / 2 - 1]);
         }
     }
-
-    public static final ZonedDateTime now() {
-        ZonedDateTime now = ZonedDateTime.now();
-        return now;
-    }
 }
