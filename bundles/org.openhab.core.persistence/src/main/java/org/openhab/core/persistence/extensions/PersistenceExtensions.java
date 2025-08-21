@@ -2418,7 +2418,7 @@ public class PersistenceExtensions {
             return historicItem != null ? historicItem.getState() : null;
         }
 
-        Iterable<HistoricItem> result = getAllStatesBetween(item, beginTime, endTime, effectiveServiceId);
+        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, beginTime, endTime, effectiveServiceId);
         if (result == null) {
             return null;
         }
