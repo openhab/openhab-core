@@ -1932,7 +1932,6 @@ public class PersistenceExtensions {
             return null;
         }
         return sum.divide(totalDuration, MathContext.DECIMAL64);
-
     }
 
     /**
