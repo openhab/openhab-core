@@ -3391,12 +3391,12 @@ public class PersistenceExtensions {
             if (begin != null) {
                 filter.setBeginDate(begin);
             } else {
-                filter.setBeginDate(ZonedDateTime.now());
+                filter.setBeginDate(now);
             }
             if (end != null) {
                 filter.setEndDate(end);
             } else {
-                filter.setEndDate(ZonedDateTime.now());
+                filter.setEndDate(now);
             }
             String alias = getAlias(item, effectiveServiceId);
             filter.setItemName(item.getName());
