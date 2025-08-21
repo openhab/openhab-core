@@ -1364,27 +1364,32 @@ public class PersistenceExtensions {
         if (effectiveServiceId == null) {
             return null;
         }
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime beginTime = Objects.requireNonNullElse(begin, now);
+        ZonedDateTime endTime = Objects.requireNonNullElse(end, now);
+
         Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
         if (result == null) {
             return null;
         }
-        State averageState = internalAverageBetween(item, begin, end, type, effectiveServiceId);
-
-        if (averageState != null) {
-            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-            Unit<?> unit = (baseItem instanceof NumberItem numberItem)
-                    && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
-            DecimalType dt;
-            if (unit != null && averageState instanceof QuantityType<?> averageQuantity) {
-                averageQuantity = averageQuantity.toUnit(unit);
-                dt = averageQuantity != null ? averageQuantity.as(DecimalType.class) : null;
-            } else {
-                dt = averageState.as(DecimalType.class);
+        Iterator<HistoricItem> it = result.iterator();
+        // Remove initial part of history that does not have any values persisted
+        if (beginTime.isBefore(now)) {
+            if (it.hasNext()) {
+                beginTime = it.next().getTimestamp();
             }
-            BigDecimal average = dt != null ? dt.toBigDecimal() : BigDecimal.ZERO, sum = BigDecimal.ZERO;
-            int count = 0;
+            it = result.iterator();
+        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
+        Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
 
-            Iterator<HistoricItem> it = result.iterator();
+        BigDecimal average = average(beginTime, endTime, it, unit, type);
+        if (average != null) {
+            int count = 0;
+            BigDecimal sum = BigDecimal.ZERO;
+
+            it = result.iterator();
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
                 DecimalType value = getPersistedValue(historicItem, unit);
@@ -1909,16 +1914,25 @@ public class PersistenceExtensions {
         Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
-        BigDecimal sum = riemannSum(beginTime, endTime, it, unit, type);
-        BigDecimal totalDuration = BigDecimal.valueOf(Duration.between(beginTime, endTime).toMillis());
-        if (totalDuration.signum() == 0) {
+        BigDecimal average = average(beginTime, endTime, it, unit, type);
+        if (average == null) {
             return null;
         }
-        BigDecimal average = sum.divide(totalDuration, MathContext.DECIMAL64);
         if (unit != null) {
             return new QuantityType<>(average, unit);
         }
         return new DecimalType(average);
+    }
+
+    private static @Nullable BigDecimal average(ZonedDateTime begin, ZonedDateTime end, Iterator<HistoricItem> it,
+            @Nullable Unit<?> unit, @Nullable RiemannType type) {
+        BigDecimal sum = riemannSum(begin, end, it, unit, type);
+        BigDecimal totalDuration = BigDecimal.valueOf(Duration.between(begin, end).toMillis());
+        if (totalDuration.signum() == 0) {
+            return null;
+        }
+        return sum.divide(totalDuration, MathContext.DECIMAL64);
+
     }
 
     /**
@@ -3260,12 +3274,12 @@ public class PersistenceExtensions {
             if (begin != null) {
                 filter.setBeginDate(begin);
             } else {
-                filter.setBeginDate(ZonedDateTime.now());
+                filter.setBeginDate(now);
             }
             if (end != null) {
                 filter.setEndDate(end);
             } else {
-                filter.setEndDate(ZonedDateTime.now());
+                filter.setEndDate(now);
             }
             String alias = getAlias(item, effectiveServiceId);
             filter.setItemName(item.getName());
