@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * user doesn't catch the error in the runnable itself.
  *
  * @author Hilbrand Bouwkamp - Initial contribution
+ * @author Andrew Fiddian-Green - Added task duration logging
  */
 @NonNullByDefault
 public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor {
@@ -185,6 +186,9 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
         return super.schedule(c, delay, unit);
     }
 
+    /**
+     * On close, log all currently running tasks that have not yet finished.
+     */
     @Override
     public void close() {
         runningTasks.forEach(t -> {
@@ -194,6 +198,13 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
         super.close();
     }
 
+    /**
+     * Logs all currently running tasks that have exceeded the timeout. This method is called when either
+     * a new {@link TimedAbstractTask} is created or when its respective task gets called. e.g. the task
+     * is scheduled via 'scheduleWithFixedDelay()' (say) and its runnable is called repeatedly thereafter.
+     * Using this approach provides more opportunities to log long running tasks. This method extends the
+     * timeout of each logged task to reduce the frequency of messages in the log.
+     */
     private synchronized void logLongRunningTasks() {
         runningTasks.stream().filter(t -> Instant.now().isAfter(t.timeout)).forEach(t -> {
             logger.debug("Scheduled task is taking more than {}; it was created here: ", DEFAULT_TIMEOUT,
