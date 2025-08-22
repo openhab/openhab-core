@@ -181,7 +181,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The context map of a {@link Rule} is cleaned when the execution is completed. The relation is
      * {@link Rule}'s UID to Rule context map.
      */
-    private final Map<String, Map<String, Object>> contextMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, @Nullable Object>> contextMap = new ConcurrentHashMap<>();
 
     /**
      * This field holds reference to {@link ModuleTypeRegistry}. The {@link RuleEngineImpl} needs it to auto-map
@@ -1089,9 +1089,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     @Override
-    public Map<String, Object> runNow(String ruleUID, boolean considerConditions,
+    public Map<String, @Nullable Object> runNow(String ruleUID, boolean considerConditions,
             @Nullable Map<String, Object> context) {
-        Map<String, Object> returnContext = new HashMap<>();
+        Map<String, @Nullable Object> returnContext = new HashMap<>();
         final WrappedRule rule = getManagedRule(ruleUID);
         if (rule == null) {
             logger.warn("Failed to execute rule '{}': Invalid Rule UID", ruleUID);
@@ -1129,7 +1129,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     @Override
-    public Map<String, Object> runNow(String ruleUID) {
+    public Map<String, @Nullable Object> runNow(String ruleUID) {
         return runNow(ruleUID, false, null);
     }
 
@@ -1139,7 +1139,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param ruleUID the UID of the rule whose context must be cleared.
      */
     protected void clearContext(String ruleUID) {
-        Map<String, Object> context = contextMap.get(ruleUID);
+        Map<String, @Nullable Object> context = contextMap.get(ruleUID);
         if (context != null) {
             context.clear();
         }
@@ -1163,7 +1163,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param outputs new output values.
      */
     private void updateContext(String ruleUID, String moduleUID, @Nullable Map<String, ?> outputs) {
-        Map<String, Object> context = getContext(ruleUID, null);
+        Map<String, @Nullable Object> context = getContext(ruleUID, null);
         if (outputs != null) {
             for (Map.Entry<String, ?> entry : outputs.entrySet()) {
                 String key = moduleUID + OUTPUT_SEPARATOR + entry.getKey();
@@ -1175,8 +1175,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     /**
      * @return copy of current context in rule engine
      */
-    private Map<String, Object> getContext(String ruleUID, @Nullable Set<Connection> connections) {
-        Map<String, Object> context = contextMap.computeIfAbsent(ruleUID, k -> new HashMap<>());
+    private Map<String, @Nullable Object> getContext(String ruleUID, @Nullable Set<Connection> connections) {
+        Map<String, @Nullable Object> context = contextMap.computeIfAbsent(ruleUID, k -> new HashMap<>());
         if (context == null) {
             throw new IllegalStateException("context cannot be null at that point - please report a bug.");
         }
@@ -1257,7 +1257,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             }
             final Condition condition = wrappedCondition.unwrap();
             ConditionHandler tHandler = wrappedCondition.getModuleHandler();
-            Map<String, Object> context = getContext(ruleUID, wrappedCondition.getConnections());
+            Map<String, @Nullable Object> context = getContext(ruleUID, wrappedCondition.getConnections());
             if (tHandler != null && !tHandler.isSatisfied(Collections.unmodifiableMap(context))) {
                 logger.debug("The condition '{}' of rule '{}' is unsatisfied.", condition.getId(), ruleUID);
                 return false;
@@ -1312,9 +1312,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             final Action action = wrappedAction.unwrap();
             ActionHandler aHandler = wrappedAction.getModuleHandler();
             if (aHandler != null) {
-                Map<String, Object> context = getContext(ruleUID, wrappedAction.getConnections());
+                Map<String, @Nullable Object> context = getContext(ruleUID, wrappedAction.getConnections());
                 try {
-                    Map<String, ?> outputs = aHandler.execute(Collections.unmodifiableMap(context));
+                    Map<String, @Nullable ?> outputs = aHandler.execute(Collections.unmodifiableMap(context));
                     if (outputs != null) {
                         context = getContext(ruleUID, null);
                         updateContext(ruleUID, action.getId(), outputs);

@@ -254,7 +254,7 @@ public class ThingActionsResource implements RESTResource {
         }
 
         try {
-            Map<String, Object> returnValue = Objects.requireNonNullElse(
+            Map<String, @Nullable Object> returnValue = Objects.requireNonNullElse(
                     handler.execute(actionInputsHelper.mapSerializedInputsToActionInputs(actionType, actionInputs)),
                     Map.of());
             moduleHandlerFactory.ungetHandler(action, ruleUID, handler);
