@@ -71,6 +71,7 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
 
         protected void clockStart() {
             extendTimeout();
+            logLongRunningTasks();
             runningTasks.add(this);
         }
 
@@ -193,7 +194,7 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
         super.close();
     }
 
-    private void logLongRunningTasks() {
+    private synchronized void logLongRunningTasks() {
         runningTasks.stream().filter(t -> Instant.now().isAfter(t.timeout)).forEach(t -> {
             logger.debug("Scheduled task is taking more than {}; it was created here: ", DEFAULT_TIMEOUT,
                     t.stackTraceHolder);
