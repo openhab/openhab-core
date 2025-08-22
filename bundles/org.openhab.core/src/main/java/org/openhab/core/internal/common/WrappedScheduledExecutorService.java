@@ -15,8 +15,10 @@ package org.openhab.core.internal.common;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
@@ -46,8 +48,11 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
 
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMillis(5000);
 
+    private final Set<TimedAbstractTask> runningTasks;;
+
     public WrappedScheduledExecutorService(int corePoolSize, ThreadFactory threadFactory) {
         super(corePoolSize, threadFactory);
+        runningTasks = ConcurrentHashMap.newKeySet(corePoolSize);
     }
 
     /**
@@ -61,10 +66,12 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
         protected TimedAbstractTask() {
             this.stackTraceHolder = new Exception();
             this.timeout = Instant.MAX;
+            logLongRunningTasks();
         }
 
         protected void clockStart() {
-            timeout = Instant.now().plus(DEFAULT_TIMEOUT);
+            extendTimeout();
+            runningTasks.add(this);
         }
 
         protected void clockStop() {
@@ -72,6 +79,11 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
                 logger.debug("Scheduled task took more than {}; it was created here: ", DEFAULT_TIMEOUT,
                         stackTraceHolder);
             }
+            runningTasks.remove(this);
+        }
+
+        protected void extendTimeout() {
+            timeout = Instant.now().plus(DEFAULT_TIMEOUT);
         }
     }
 
@@ -170,5 +182,22 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
     public <V> ScheduledFuture<V> schedule(@Nullable Callable<V> callable, long delay, @Nullable TimeUnit unit) {
         Callable<V> c = logger.isDebugEnabled() ? new TimedCallable<>(callable) : callable;
         return super.schedule(c, delay, unit);
+    }
+
+    @Override
+    public void close() {
+        runningTasks.forEach(t -> {
+            logger.debug("Scheduled task is still running during shutdown; it was created here: ", t.stackTraceHolder);
+        });
+        runningTasks.clear();
+        super.close();
+    }
+
+    private void logLongRunningTasks() {
+        runningTasks.stream().filter(t -> Instant.now().isAfter(t.timeout)).forEach(t -> {
+            logger.debug("Scheduled task is taking more than {}; it was created here: ", DEFAULT_TIMEOUT,
+                    t.stackTraceHolder);
+            t.extendTimeout();
+        });
     }
 }
