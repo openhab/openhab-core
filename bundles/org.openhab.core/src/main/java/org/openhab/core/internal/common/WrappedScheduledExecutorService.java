@@ -48,7 +48,7 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
 
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMillis(5000);
 
-    private final Set<TimedAbstractTask> runningTasks;;
+    private final Set<TimedAbstractTask> runningTasks;
 
     public WrappedScheduledExecutorService(int corePoolSize, ThreadFactory threadFactory) {
         super(corePoolSize, threadFactory);
