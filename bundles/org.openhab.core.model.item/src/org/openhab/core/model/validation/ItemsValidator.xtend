@@ -61,7 +61,7 @@ class ItemsValidator extends AbstractItemsValidator {
     }
 
     def checkBasicItemType(ModelItem item) {
-        if (!CoreItemFactory.SUPPORTED_ITEM_TYPES.contains(item.type)) {
+        if (!CoreItemFactory.VALID_ITEM_TYPES.contains(item.type)) {
             error("Item '" + item.name + "' has an invalid type: '" + item.type + "'", ItemsPackage.Literals.MODEL_ITEM__TYPE)
         }
     }
@@ -78,7 +78,7 @@ class ItemsValidator extends AbstractItemsValidator {
     }
 
     def checkGroupBaseType(ModelItem item, String baseType) {
-        if (!CoreItemFactory.SUPPORTED_ITEM_TYPES.contains(baseType)) {
+        if (!CoreItemFactory.VALID_ITEM_TYPES.contains(baseType)) {
             error("Item '" + item.name + "' has an invalid base item type: '" + baseType + "'", ItemsPackage.Literals.MODEL_ITEM__TYPE)
         }
     }

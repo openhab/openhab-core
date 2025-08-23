@@ -748,7 +748,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testKeywordsInOtherFields() {
-        String itemTypeList = CoreItemFactory.SUPPORTED_ITEM_TYPES.stream().sorted().collect(joining(", "));
+        String itemTypeList = CoreItemFactory.VALID_ITEM_TYPES.stream().sorted().collect(joining(", "));
         String functionList = GroupFunction.VALID_FUNCTIONS.stream().sorted().collect(joining(", "));
         String model = """
                     DateTime DateTime [%s]
