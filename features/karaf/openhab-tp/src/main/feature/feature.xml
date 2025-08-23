@@ -140,22 +140,22 @@
 	</feature>
 
 	<feature name="openhab.tp-netty" description="Netty bundles" version="${project.version}">
-		<capability>openhab.tp;feature=netty;version=4.1.118.Final</capability>
-		<bundle dependency="true">mvn:io.netty/netty-buffer/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-common/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-http/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-http2/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-mqtt/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-socks/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-handler/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-handler-proxy/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-resolver/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-epoll/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-kqueue/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-unix-common/4.1.118.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-classes-epoll/4.1.118.Final</bundle>
+		<capability>openhab.tp;feature=netty;version=4.1.122.Final</capability>
+		<bundle dependency="true">mvn:io.netty/netty-buffer/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-common/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-http/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-http2/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-mqtt/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-socks/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-handler/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-handler-proxy/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-resolver/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-epoll/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-kqueue/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-unix-common/4.1.122.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-classes-epoll/4.1.122.Final</bundle>
 		<bundle dependency="true">mvn:io.netty/netty-tcnative-classes/2.0.70.Final</bundle>
 	</feature>
 
