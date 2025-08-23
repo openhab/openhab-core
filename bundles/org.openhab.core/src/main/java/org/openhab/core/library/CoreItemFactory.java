@@ -60,7 +60,7 @@ public class CoreItemFactory implements ItemFactory {
     public static final String STRING = "String";
     public static final String SWITCH = "Switch";
 
-    public static final Set<String> SUPPORTED_ITEM_TYPES = Set.of( //
+    public static final Set<String> VALID_ITEM_TYPES = Set.of( //
             CALL, COLOR, CONTACT, DATETIME, DIMMER, IMAGE, LOCATION, NUMBER, PLAYER, ROLLERSHUTTER, STRING, SWITCH //
     );
 
@@ -97,6 +97,6 @@ public class CoreItemFactory implements ItemFactory {
 
     @Override
     public String[] getSupportedItemTypes() {
-        return SUPPORTED_ITEM_TYPES.toArray(new String[0]);
+        return VALID_ITEM_TYPES.toArray(new String[0]);
     }
 }
