@@ -330,7 +330,17 @@ public class ModelRepositoryImpl implements ModelRepository {
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
-                        warnings.add(d.getMessage());
+                        if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR) {
+                            criticalErrors.append(d.getMessage() + "\n");
+                        } else {
+                            warnings.add(d.getMessage());
+                        }
+                    }
+                    if (!criticalErrors.isEmpty()) {
+                        return criticalErrors.toString();
+                    } else if (!warnings.isEmpty()) {
+                        logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name,
+                                String.join("\n", warnings));
                     }
                 } catch (NullPointerException e) {
                     // see https://github.com/eclipse/smarthome/issues/3335
