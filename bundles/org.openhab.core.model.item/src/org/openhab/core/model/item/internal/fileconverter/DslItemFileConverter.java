@@ -109,7 +109,6 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
                         model.getArgs().add(parameters[i].toString());
                     }
                 }
-
             }
             model.setType(groupType.stream().collect(Collectors.joining(ItemUtil.EXTENSION_SEPARATOR)));
         } else {
