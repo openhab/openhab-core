@@ -136,13 +136,11 @@ public class ItemChannelLinkTaggingOSGiTest extends JavaOSGiTest {
 
         item = itemRegistry.get("Item_07");
         assertNotNull(item);
-        assertTrue(item.getTags().contains("Power"));
-        assertTrue(item.getTags().contains("Custom"));
+        assertEquals(Set.of("Power", "Custom"), item.getTags());
 
         item = itemRegistry.get("Item_08");
         assertNotNull(item);
-        assertTrue(item.getTags().contains("Power"));
-        assertTrue(item.getTags().contains("Custom"));
+        assertEquals(Set.of("Power", "Custom"), item.getTags());
 
         item = itemRegistry.get("Item_09");
         assertNotNull(item);
