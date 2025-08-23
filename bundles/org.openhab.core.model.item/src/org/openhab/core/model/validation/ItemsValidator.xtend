@@ -72,8 +72,7 @@ class ItemsValidator extends AbstractItemsValidator {
             case 2: checkGroupBaseType(item, segments.get(1))
             case 3: checkGroupWithOneParam(item, segments.get(1), segments.get(2))
             case 4: checkGroupWithTwoParams(item, segments.get(1), segments.get(2), segments.get(3))
-            // The xtext grammar will not allow more than 4 segments for Group types, so the default case will never be reached
-            default: error("Item '" + item.name + "' has an invalid Group type: too many segments: " + item.type, ItemsPackage.Literals.MODEL_ITEM__TYPE)
+            // The xtext grammar will not allow more than 4 segments for Group types, so no default case is needed
         }
     }
 
