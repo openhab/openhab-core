@@ -17,26 +17,66 @@ package org.openhab.core.model.sitemap.formatting
 
 import org.eclipse.xtext.formatting.impl.AbstractDeclarativeFormatter
 import org.eclipse.xtext.formatting.impl.FormattingConfig
-// import com.google.inject.Inject;
-// import org.openhab.core.model.services.SitemapGrammarAccess
+import com.google.inject.Inject
+import org.openhab.core.model.sitemap.services.SitemapGrammarAccess
 
 /**
  * This class contains custom formatting description.
- * 
- * see : http://www.eclipse.org/Xtext/documentation.html#formatting
- * on how and when to use it 
- * 
- * Also see {@link org.eclipse.xtext.xtext.XtextFormatter} as an example
  */
 class SitemapFormatter extends AbstractDeclarativeFormatter {
 
-//	@Inject extension SitemapGrammarAccess
-	
-	override protected void configureFormatting(FormattingConfig c) {
-// It's usually a good idea to activate the following three statements.
-// They will add and preserve newlines around comments
-//		c.setLinewrap(0, 1, 2).before(SL_COMMENTRule)
-//		c.setLinewrap(0, 1, 2).before(ML_COMMENTRule)
-//		c.setLinewrap(0, 1, 1).after(ML_COMMENTRule)
+    @Inject extension SitemapGrammarAccess
+
+    override protected void configureFormatting(FormattingConfig c) {
+        c.wrappedLineIndentation = 4
+        c.autoLinewrap = 200
+
+        c.setLinewrap(1, 1, 2).before(widgetRule)
+
+        c.setIndentationIncrement.after("{")
+        c.setLinewrap().before("}")
+        c.setIndentationDecrement.before("}")
+        c.setLinewrap().after("}")
+
+        c.setNoSpace().withinKeywordPairs("<", ">")
+        c.setNoSpace().withinKeywordPairs("(", ")")
+        c.setNoSpace().withinKeywordPairs("[", "]")
+
+        c.setNoSpace().after("item=", "label=", "icon=", "staticIcon=")
+        c.setNoSpace().after("url=", "refresh=", "encoding=", "service=", "period=", "legend=", "forceasitem=", "yAxisDecimalPattern=", "interpolation=", "height=")
+        c.setNoSpace().after("minValue=", "maxValue=", "step=", "inputHint=", "row=", "column=", "click=", "release=")
+        c.setNoSpace().after("labelcolor=", "valuecolor=", "iconcolor=", "visibility=", "mappings=", "buttons=")
+
+        c.setNoSpace().before(",")
+        c.setNoSpace().around(":", "=")
+
+        c.setLinewrap(0, 1, 2).before(SL_COMMENTRule)
+        c.setLinewrap(0, 1, 2).before(ML_COMMENTRule)
+        c.setLinewrap(0, 1, 1).after(ML_COMMENTRule)
 	}
+
+    def withinKeywordPairs(FormattingConfig.NoSpaceLocator locator, String leftKW, String rightKW) {
+        for (pair : findKeywordPairs(leftKW, rightKW)) {
+            locator.after(pair.first)
+            locator.before(pair.second)
+        }
+    }
+
+    def around(FormattingConfig.ElementLocator locator, String ... listKW) {
+        for (keyword : findKeywords(listKW)) {
+            locator.around(keyword)
+        }
+    }
+
+    def after(FormattingConfig.ElementLocator locator, String ... listKW) {
+        for (keyword : findKeywords(listKW)) {
+            locator.after(keyword)
+        }
+    }
+
+    def before(FormattingConfig.ElementLocator locator, String ... listKW) {
+        for (keyword : findKeywords(listKW)) {
+            locator.before(keyword)
+        }
+    }
 }
