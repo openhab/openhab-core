@@ -507,19 +507,19 @@
     <dependency>
       <groupId>org.openhab.osgiify</groupId>
       <artifactId>si.uom.si-units</artifactId>
-      <version>2.2</version>
+      <version>2.2.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>si.uom</groupId>
-      <artifactId>si-quantity</artifactId>
-      <version>2.2</version>
+      <groupId>org.openhab.osgiify</groupId>
+      <artifactId>si.uom.si-quantity</artifactId>
+      <version>2.2.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>tech.units</groupId>
       <artifactId>indriya</artifactId>
-      <version>2.2.2</version>
+      <version>2.2.3</version>
       <scope>compile</scope>
     </dependency>
 

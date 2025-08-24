@@ -29,9 +29,10 @@
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/1.0.5</bundle>
 		<bundle dependency="true">mvn:javax.measure/unit-api/2.2</bundle>
 		<!-- The si.uom:si-units manifest has no Export-Package entry. As workaround this OSGi-ify bundle is used. -->
-		<bundle dependency="true">mvn:org.openhab.osgiify/si.uom.si-units/2.2</bundle>
-		<bundle dependency="true">mvn:si.uom/si-quantity/2.2</bundle>
-		<bundle dependency="true">mvn:tech.units/indriya/2.2.2</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/si.uom.si-units/2.2.3</bundle>
+		<!-- The si.uom:si-quantity manifest has no Export-Package entry. As workaround this OSGi-ify bundle is used. -->
+		<bundle dependency="true">mvn:org.openhab.osgiify/si.uom.si-quantity/2.2.3</bundle>
+		<bundle dependency="true">mvn:tech.units/indriya/2.2.3</bundle>
 		<bundle dependency="true">mvn:tech.uom.lib/uom-lib-common/2.2</bundle>
 		<bundle dependency="true">mvn:org.apiguardian/apiguardian-api/1.1.2</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.component.annotations/1.5.1</bundle>
