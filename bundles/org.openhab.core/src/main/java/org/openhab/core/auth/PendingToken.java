@@ -37,10 +37,8 @@ public class PendingToken {
     private String redirectUri;
     private String scope;
 
-    @Nullable
-    private String codeChallenge;
-    @Nullable
-    private String codeChallengeMethod;
+    private @Nullable String codeChallenge;
+    private @Nullable String codeChallengeMethod;
 
     /**
      * Constructs a pending token.

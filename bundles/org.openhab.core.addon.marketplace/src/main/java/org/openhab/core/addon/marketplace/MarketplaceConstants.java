@@ -12,11 +12,14 @@
  */
 package org.openhab.core.addon.marketplace;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class contains constants used in marketplace add-on services
  *
  * @author Jan N. Klug - Initial contribution
  */
+@NonNullByDefault
 public class MarketplaceConstants {
     public static final String JAR_CONTENT_TYPE = "application/vnd.openhab.bundle";
     public static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";

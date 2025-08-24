@@ -17,11 +17,14 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Base class for all expressions.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public abstract class Expression {
 
     Expression() {

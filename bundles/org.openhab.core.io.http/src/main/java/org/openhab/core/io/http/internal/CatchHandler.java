@@ -15,6 +15,8 @@ package org.openhab.core.io.http.internal;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.http.Handler;
 import org.openhab.core.io.http.HandlerContext;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public class CatchHandler implements Handler {
 
     private final Logger logger = LoggerFactory.getLogger(CatchHandler.class);
@@ -43,7 +46,8 @@ public class CatchHandler implements Handler {
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, HandlerContext context) {
+    public void handle(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response,
+            HandlerContext context) {
         try {
             delegate.handle(request, response, context);
         } catch (Exception e) {
@@ -56,7 +60,8 @@ public class CatchHandler implements Handler {
     }
 
     @Override
-    public void handleError(HttpServletRequest request, HttpServletResponse response, HandlerContext context) {
+    public void handleError(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response,
+            HandlerContext context) {
         delegate.handleError(request, response, context);
     }
 }
