@@ -96,7 +96,12 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         if (compiledScript.isPresent() || script.isEmpty()) {
             return;
         }
-
+        if (!scriptEngineManager.isSupported(type)) {
+            logger.debug(
+                    "ScriptEngine for language '{}' could not be found, skipping compilation of script for identifier: {}",
+                    type, engineIdentifier);
+            return;
+        }
         Optional<ScriptEngine> engine = getScriptEngine();
         if (engine.isPresent()) {
             ScriptEngine scriptEngine = engine.get();
@@ -123,7 +128,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     /**
      * Gets the unique identifier of the rule this module handler is used for.
-     * 
+     *
      * @return the UID of the rule
      */
     public String getRuleUID() {
@@ -141,7 +146,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     /**
      * Get the script engine instance used by this module handler.
-     * 
+     *
      * @return the script engine instance if available, otherwise Optional.empty()
      */
     protected Optional<ScriptEngine> getScriptEngine() {
@@ -150,7 +155,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     /**
      * Creates a new script engine for the type defined in the module configuration.
-     * 
+     *
      * @return the script engine if available, otherwise Optional.empty()
      */
     private Optional<ScriptEngine> createScriptEngine() {
