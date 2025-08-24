@@ -50,7 +50,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                 return;
             }
             if (w instanceof Button) {
-                error("Frames should not contain Button, Button is allowed only in Buttongrid",
+                warning("Frames should not contain Button, Button is allowed only in Buttongrid",
                     SitemapPackage.Literals.FRAME.getEStructuralFeature(SitemapPackage.FRAME__CHILDREN));
                 return;
             }
@@ -64,7 +64,7 @@ class SitemapValidator extends AbstractSitemapValidator {
 
         for (Widget w : sitemap.children) {
             if (w instanceof Button) {
-                error("Sitemap should not contain Button, Button is allowed only in Buttongrid",
+                warning("Sitemap should not contain Button, Button is allowed only in Buttongrid",
                     SitemapPackage.Literals.SITEMAP.getEStructuralFeature(SitemapPackage.SITEMAP__NAME));
                 return;
             }
@@ -74,7 +74,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                 containsOtherWidgets = true
             }
             if (containsFrames && containsOtherWidgets) {
-                error("Sitemap should contain either only frames or none at all",
+                warning("Sitemap should contain either only frames or none at all",
                     SitemapPackage.Literals.SITEMAP.getEStructuralFeature(SitemapPackage.SITEMAP__NAME));
                 return
             }
@@ -95,7 +95,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         var containsOtherWidgets = false
         for (Widget w : widget.children) {
             if (w instanceof Button) {
-                error("Linkable widget should not contain Button, Button is allowed only in Buttongrid",
+                warning("Linkable widget should not contain Button, Button is allowed only in Buttongrid",
                     SitemapPackage.Literals.FRAME.getEStructuralFeature(SitemapPackage.LINKABLE_WIDGET__CHILDREN));
                 return;
             }
@@ -105,7 +105,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                 containsOtherWidgets = true
             }
             if (containsFrames && containsOtherWidgets) {
-                error("Linkable widget should contain either only frames or none at all",
+                warning("Linkable widget should contain either only frames or none at all",
                     SitemapPackage.Literals.FRAME.getEStructuralFeature(SitemapPackage.LINKABLE_WIDGET__CHILDREN));
                 return
             }
@@ -116,12 +116,12 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkWidgetsInButtongrid(Buttongrid grid) {
         val nb = grid.getButtons.size()
         if (nb > 0 && grid.item === null) {
-            error("To use the \"buttons\" parameter in a Buttongrid, the \"item\" parameter is required",
+            warning("To use the \"buttons\" parameter in a Buttongrid, the \"item\" parameter is required",
                 SitemapPackage.Literals.BUTTONGRID.getEStructuralFeature(SitemapPackage.BUTTONGRID__ITEM));
         }
         for (Widget w : grid.children) {
             if (!(w instanceof Button)) {
-                error("Buttongrid must contain only Button",
+                warning("Buttongrid must contain only Button",
                     SitemapPackage.Literals.BUTTONGRID.getEStructuralFeature(SitemapPackage.BUTTONGRID__CHILDREN));
                 return;
             }
@@ -131,17 +131,17 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkSetpoints(Setpoint sp) {
         if (BigDecimal.ZERO == sp.step) {
-            error("Setpoint on item '" + sp.item + "' has step size of 0",
+            warning("Setpoint on item '" + sp.item + "' has step size of 0",
                 SitemapPackage.Literals.SETPOINT.getEStructuralFeature(SitemapPackage.SETPOINT__STEP));
         }
 
         if (sp.step !== null && sp.step < BigDecimal.ZERO) {
-            error("Setpoint on item '" + sp.item + "' has negative step size",
+            warning("Setpoint on item '" + sp.item + "' has negative step size",
                 SitemapPackage.Literals.SETPOINT.getEStructuralFeature(SitemapPackage.SETPOINT__STEP));
         }
 
         if (sp.minValue !== null && sp.maxValue !== null && sp.minValue > sp.maxValue) {
-            error("Setpoint on item '" + sp.item + "' has larger minValue than maxValue",
+            warning("Setpoint on item '" + sp.item + "' has larger minValue than maxValue",
                 SitemapPackage.Literals.SETPOINT.getEStructuralFeature(SitemapPackage.SETPOINT__MIN_VALUE));
         }
     }
@@ -149,7 +149,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkColortemperaturepicker(Colortemperaturepicker ctp) {
         if (ctp.minValue !== null && ctp.maxValue !== null && ctp.minValue > ctp.maxValue) {
-            error("Colortemperaturepicker on item '" + ctp.item + "' has larger minValue than maxValue",
+            warning("Colortemperaturepicker on item '" + ctp.item + "' has larger minValue than maxValue",
                 SitemapPackage.Literals.COLORTEMPERATUREPICKER.getEStructuralFeature(SitemapPackage.COLORTEMPERATUREPICKER__MIN_VALUE));
         }
     }
@@ -159,7 +159,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (i.inputHint !== null && !ALLOWED_HINTS.contains(i.inputHint)) {
             val node = NodeModelUtils.getNode(i)
             val line = node.getStartLine()
-            error("Input on item '" + i.item + "' has invalid inputHint '" + i.inputHint + "' at line " + line,
+            warning("Input on item '" + i.item + "' has invalid inputHint '" + i.inputHint + "' at line " + line,
                 SitemapPackage.Literals.INPUT.getEStructuralFeature(SitemapPackage.INPUT__INPUT_HINT))
         }
     }
@@ -169,7 +169,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (i.interpolation !== null && !ALLOWED_INTERPOLATION.contains(i.interpolation)) {
             val node = NodeModelUtils.getNode(i)
             val line = node.getStartLine()
-            error("Input on item '" + i.item + "' has invalid interpolation '" + i.interpolation + "' at line " + line,
+            warning("Input on item '" + i.item + "' has invalid interpolation '" + i.interpolation + "' at line " + line,
                 SitemapPackage.Literals.INPUT.getEStructuralFeature(SitemapPackage.CHART__INTERPOLATION))
         }
     }
