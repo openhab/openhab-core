@@ -32,20 +32,20 @@ import org.openhab.core.model.sitemap.sitemap.Chart
 
 //import org.eclipse.xtext.validation.Check
 /**
- * Custom validation rules. 
- * 
+ * Custom validation rules.
+ *
  * see http://www.eclipse.org/Xtext/documentation.html#validation
  */
 class SitemapValidator extends AbstractSitemapValidator {
 
     val ALLOWED_HINTS = #["text", "number", "date", "time", "datetime"]
     val ALLOWED_INTERPOLATION = #["linear", "step"]
-    
+
     @Check
     def void checkFramesInFrame(Frame frame) {
         for (Widget w : frame.children) {
             if (w instanceof Frame) {
-                error("Frames must not contain other frames",
+                warning("Frames must not contain other frames",
                     SitemapPackage.Literals.FRAME.getEStructuralFeature(SitemapPackage.FRAME__CHILDREN));
                 return;
             }
