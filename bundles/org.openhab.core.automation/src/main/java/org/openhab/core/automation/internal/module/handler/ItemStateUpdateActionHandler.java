@@ -55,7 +55,7 @@ public class ItemStateUpdateActionHandler extends BaseActionModuleHandler {
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(Map<String, Object> inputs) {
+    public @Nullable Map<String, @Nullable Object> execute(Map<String, Object> inputs) {
         Configuration config = module.getConfiguration();
         String itemName = (String) config.get(ITEM_NAME);
         String state = (String) config.get(STATE);
