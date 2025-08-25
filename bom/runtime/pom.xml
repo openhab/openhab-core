@@ -462,7 +462,7 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.11.0</version>
+      <version>2.13.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -813,7 +813,7 @@
     <dependency>
       <groupId>io.github.classgraph</groupId>
       <artifactId>classgraph</artifactId>
-      <version>4.8.176</version>
+      <version>4.8.180</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -843,13 +843,13 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.xtend</groupId>
+      <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtend.lib</artifactId>
       <version>${xtext.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.xtend</groupId>
+      <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtend.lib.macro</artifactId>
       <version>${xtext.version}</version>
       <scope>compile</scope>
