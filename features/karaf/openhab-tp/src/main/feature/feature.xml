@@ -51,8 +51,8 @@
 	</feature>
 
 	<feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
-		<capability>openhab.tp;feature=commons-net;version=3.11.1</capability>
-		<bundle dependency="true">mvn:commons-net/commons-net/3.11.1</bundle>
+		<capability>openhab.tp;feature=commons-net;version=3.12.0</capability>
+		<bundle dependency="true">mvn:commons-net/commons-net/3.12.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">
