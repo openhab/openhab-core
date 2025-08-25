@@ -25,6 +25,7 @@ import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataProvider;
+import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -49,8 +50,10 @@ public class YamlMetadataProvider extends AbstractProvider<Metadata> implements 
 
     @Override
     public Collection<Metadata> getAll() {
-        return metadataMap.values().stream().flatMap(m -> m.values().stream()).flatMap(m -> m.values().stream())
-                .toList();
+        // Ignore isolated models
+        return metadataMap.keySet().stream().filter(name -> !YamlModelRepositoryImpl.isIsolatedModel(name))
+                .map(name -> metadataMap.getOrDefault(name, Map.of())).flatMap(m -> m.values().stream())
+                .flatMap(m -> m.values().stream()).toList();
     }
 
     public Collection<Metadata> getAllFromModel(String modelName) {
@@ -76,21 +79,27 @@ public class YamlMetadataProvider extends AbstractProvider<Metadata> implements 
             Metadata oldMd = namespacesMetadataMap.get(namespace);
             if (oldMd == null) {
                 namespacesMetadataMap.put(namespace, md);
-                logger.debug("notify added metadata {}", md.getUID());
-                notifyListenersAboutAddedElement(md);
+                logger.debug("model {} added metadata {}", modelName, namespace);
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutAddedElement(md);
+                }
             } else if (!md.getValue().equals(oldMd.getValue())
                     || !YamlElementUtils.equalsConfig(md.getConfiguration(), oldMd.getConfiguration())) {
                 namespacesMetadataMap.put(namespace, md);
-                logger.debug("notify updated metadata {}", md.getUID());
-                notifyListenersAboutUpdatedElement(oldMd, md);
+                logger.debug("model {} updated metadata {}", modelName, namespace);
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutUpdatedElement(oldMd, md);
+                }
             }
         }
 
         namespaceToBeRemoved.forEach(namespace -> {
             Metadata md = namespacesMetadataMap.remove(namespace);
             if (md != null) {
-                logger.debug("notify removed metadata {}", md.getUID());
-                notifyListenersAboutRemovedElement(md);
+                logger.debug("model {} removed metadata {}", modelName, namespace);
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutRemovedElement(md);
+                }
             }
         });
         if (namespacesMetadataMap.isEmpty()) {
