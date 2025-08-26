@@ -12,7 +12,7 @@
  */
 package org.openhab.core.config.discovery.usbserial.ser2net.internal;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.usbserial.ser2net.internal.Ser2NetUsbSerialDiscovery.*;
 

@@ -13,7 +13,8 @@
 package org.openhab.core.io.transport.upnp.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
