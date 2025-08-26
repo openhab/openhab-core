@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.transport.mqtt;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Map;
