@@ -259,7 +259,7 @@
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.9.0</bundle>
 
 		<!-- Used for feature verification only because this is already provided by Karaf -->
-		<bundle dependency="true" start="false">mvn:org.eclipse.platform/org.eclipse.osgi/3.19.0</bundle>
+		<bundle dependency="true" start="false">mvn:org.eclipse.platform/org.eclipse.osgi/3.18.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-xtext-ide" description="Xtext - IDE Support" version="${project.version}">
