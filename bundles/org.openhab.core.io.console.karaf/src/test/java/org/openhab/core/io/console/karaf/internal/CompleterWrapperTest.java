@@ -13,7 +13,8 @@
 package org.openhab.core.io.console.karaf.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.ArrayList;
 
