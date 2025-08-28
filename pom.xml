@@ -408,7 +408,9 @@ Import-Package: \\
           <version>3.5.3</version>
           <configuration>
             <argLine>--add-opens java.base/java.net=ALL-UNNAMED
-              --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+              --add-opens java.base/java.util=ALL-UNNAMED
+              -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+              -Xshare:off</argLine>
             <systemPropertyVariables>
               <junit.jupiter.execution.timeout.default>15 m</junit.jupiter.execution.timeout.default>
             </systemPropertyVariables>
