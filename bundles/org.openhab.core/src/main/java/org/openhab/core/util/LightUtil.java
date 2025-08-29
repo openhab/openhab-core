@@ -25,7 +25,7 @@ import org.openhab.core.types.Command;
 
 /**
  * The {@link LightUtil} provides helper functions for lights.
- * See also {@link ColorUtils} for more general color conversion utilities.
+ * See also {@link ColorUtil} for more general color conversion utilities.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -44,7 +44,7 @@ public class LightUtil {
 
     /**
      * Default minimum color temperature Kelvin value. Conversions are subject to the caveats mentioned in
-     * {@link ColorUtil#xyToKelvin()} so when converting HSBType values to Kelvin, values below this will
+     * {@link ColorUtil#xyToKelvin(double[])} so when converting HSBType values to Kelvin, values below this will
      * be clamped to this value.
      */
     public static final double DEFAULT_MINIMUM_KELVIN = 2000; // aka 500 mirek
@@ -240,7 +240,7 @@ public class LightUtil {
     /**
      * Returns an approximate color temperature in Kelvin from the given HSBType color state. The brightness component
      * of the HSBType is ignored. The returned value is clamped to a minimum valid Kelvin value. Subject to the caveats
-     * mentioned in {@link ColorUtil#xyToKelvin()}
+     * mentioned in {@link ColorUtil#xyToKelvin(double[])}.
      *
      * @param hsbState the HSBType to convert
      *
@@ -314,7 +314,7 @@ public class LightUtil {
      * minimum brightness is provided, a default value is used.
      *
      * @param hsbState the HSBType to evaluate
-     * @param optionalMinimumBrightnessPovider an optional single object argument that provides the minimum brightness
+     * @param optionalMinimumBrightnessProvider an optional single object argument that provides the minimum brightness
      *
      * @return OnOffType.ON if brightness >= minimum brightness, otherwise OnOffType.OFF
      */
