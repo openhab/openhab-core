@@ -43,14 +43,16 @@ public class LightUtil {
     public static final PercentType DEFAULT_MAXIMUM_BRIGHTNESS = PercentType.HUNDRED;
 
     /**
-     * Minimum valid Kelvin value for conversion to HSB. Values below this will be clamped to this value.
+     * Default minimum color temperature Kelvin value. Conversions are subject to the caveats mentioned in
+     * {@link ColorUtil#xyToKelvin()} so when converting HSBType values to Kelvin, values below this will
+     * be clamped to this value.
      */
-    public static final double DEFAULT_MINIMUM_KELVIN = 2000;
+    public static final double DEFAULT_MINIMUM_KELVIN = 2000; // aka 500 mirek
 
     /**
-     * Maximum valid Kelvin value for conversion to HSB.
+     * Default maximum color temperature Kelvin value.
      */
-    public static final double DEFAULT_MAXIMUM_KELVIN = 10000;
+    public static final double DEFAULT_MAXIMUM_KELVIN = 6500; // aka 153 mirek
 
     /**
      * Step value for IncreaseDecreaseType commands.
@@ -58,14 +60,14 @@ public class LightUtil {
     public static final double INCREASE_DECREASE_STEP = 10.0;
 
     /**
-     * Private helper that returns the PercentType brightness state from the optionally provided brightness
+     * Private helper that returns a PercentType brightness state from the optionally provided brightness
      * provider, or null if no valid brightness provider exists. Valid brightness providers are:
      * <p>
      * <li>a PercentType</li>
      * <li>an HSBType (from which the brightness is extracted)</li>
      * <li>a Number (which is converted to PercentType)</li>
      *
-     * @param optionalBrightnessProvider an optional object argument that provides brightness information
+     * @param optionalBrightnessProvider an optional single object argument that provides the target brightness
      *
      * @return the extracted brightness as PercentType, or null if not found
      */
@@ -100,7 +102,7 @@ public class LightUtil {
      * brightness if no brightness is provided.
      *
      * @param onOffState the OnOffType state
-     * @param optionalOnStateBrightnessProvider an optional object argument that provides brightness information
+     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the on state brightness
      *
      * @return the corresponding PercentType brightness state
      */
@@ -122,7 +124,7 @@ public class LightUtil {
     public static PercentType brightnessStateFrom(PercentType priorBrightness, IncreaseDecreaseType incDec) {
         double brightness = ((IncreaseDecreaseType.INCREASE.equals(incDec) ? 1 : -1) * INCREASE_DECREASE_STEP)
                 + priorBrightness.doubleValue();
-        return new PercentType(new BigDecimal(Math.min(100.0, Math.max(0.0, brightness))));
+        return new PercentType(new BigDecimal(Math.min(Math.max(brightness, 0.0), 100.0)));
     }
 
     /**
@@ -130,7 +132,7 @@ public class LightUtil {
      *
      * @param priorBrightness the prior brightness PercentType
      * @param command the command from OH core
-     * @param optionalOnStateBrightnessProvider an optional object argument that provides brightness information
+     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the on state brightness
      *
      * @return a new PercentType with the adjusted brightness
      *
@@ -153,7 +155,7 @@ public class LightUtil {
      * brightness. If no brightness is provided, the default maximum brightness percent is used.
      *
      * @param kelvin the color temperature in Kelvin
-     * @param optionalBrightnessProvider an optional object argument that provides brightness information
+     * @param optionalBrightnessProvider an optional single object argument that provides the target brightness
      *
      * @return the corresponding HSBType
      */
@@ -169,7 +171,7 @@ public class LightUtil {
      * brightness. If no brightness is provided, the brightness from the original HSBType is retained.
      *
      * @param priorHSBState the original HSBType
-     * @param optionalBrightnessProvider an optional object argument that provides brightness information
+     * @param optionalBrightnessProvider an optional single object argument that provides the target brightness
      *
      * @return a new HSBType with the adjusted brightness
      */
@@ -187,7 +189,7 @@ public class LightUtil {
      *
      * @param priorHSBState the original HSBType
      * @param onOffState the OnOffType state
-     * @param optionalOnStateBrightnessProvider an optional object argument that provides brightness information
+     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the on state brightness
      *
      * @return a new HSBType with the adjusted brightness
      */
@@ -215,7 +217,7 @@ public class LightUtil {
      *
      * @param priorHSBState the prior HSBType state
      * @param command the command from OH core
-     * @param optionalOnStateBrightnessProvider an optional object argument that provides brightness information
+     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the on state brightness
      *
      * @return a new HSBType with the adjusted brightness
      *
@@ -254,7 +256,8 @@ public class LightUtil {
      * used.
      *
      * @param colorTemperaturePercent the PercentType color temperature (0% = coolest, 100% = warmest)
-     * @param optionalMinMaxKelvinProvider an optional object argument that provides minimum and maximum Kelvin values
+     * @param optionalMinMaxKelvinProvider an optional argument of up to two doubles that provide minimum and maximum
+     *            Kelvin values. The first value is the minimum (coolest), the second is the maximum (warmest)
      *
      * @return the corresponding color temperature in Kelvin
      */
@@ -273,18 +276,19 @@ public class LightUtil {
      * used. The returned percent is clamped to the range of 0% to 100%.
      *
      * @param kelvin the color temperature in Kelvin
-     * @param optionalMinMaxKelvinProvider an optional object argument that provides minimum and maximum Kelvin values
+     * @param optionalMinMaxKelvinProvider an optional argument of up to two doubles that provide minimum and maximum
+     *            Kelvin values. The first value is the minimum (coolest), the second is the maximum (warmest)
      *
      * @return the corresponding PercentType color temperature
      */
     public static PercentType colorTemperaturePercentFrom(DecimalType kelvin, double... optionalMinMaxKelvinProvider) {
         double thisMirek = 1000000
-                / Math.max(Math.min(kelvin.doubleValue(), DEFAULT_MAXIMUM_KELVIN), DEFAULT_MINIMUM_KELVIN);
+                / Math.min(Math.max(kelvin.doubleValue(), DEFAULT_MINIMUM_KELVIN), DEFAULT_MAXIMUM_KELVIN);
         double coolMirek = 1000000 / optionalMinMaxKelvinProvider.length > 0 ? optionalMinMaxKelvinProvider[0]
                 : DEFAULT_MINIMUM_KELVIN;
         double warmMirek = 1000000 / optionalMinMaxKelvinProvider.length > 1 ? optionalMinMaxKelvinProvider[1]
                 : DEFAULT_MAXIMUM_KELVIN;
-        double percent = Math.max(0.0, Math.min(100.0, 100.0 * (thisMirek - coolMirek) / (warmMirek - coolMirek)));
+        double percent = Math.min(Math.max(100.0 * (thisMirek - coolMirek) / (warmMirek - coolMirek), 0.0), 100.0);
         return new PercentType(new BigDecimal(percent));
     }
 
@@ -294,7 +298,7 @@ public class LightUtil {
      * provided, a default value is used.
      *
      * @param brightnessState the brightness PercentType to evaluate
-     * @param optionalMinimumBrightnessPovider an optional object argument that provides a minimum brightness
+     * @param optionalMinimumBrightnessPovider an optional single object argument that provides the minimum brightness
      *
      * @return OnOffType.ON if brightness >= minimum brightness, otherwise OnOffType.OFF
      */
@@ -310,7 +314,7 @@ public class LightUtil {
      * minimum brightness is provided, a default value is used.
      *
      * @param hsbState the HSBType to evaluate
-     * @param optionalMinimumBrightnessPovider an optional object argument that provides a minimum brightness
+     * @param optionalMinimumBrightnessPovider an optional single object argument that provides the minimum brightness
      *
      * @return OnOffType.ON if brightness >= minimum brightness, otherwise OnOffType.OFF
      */
