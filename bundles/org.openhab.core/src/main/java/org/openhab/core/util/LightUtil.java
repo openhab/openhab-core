@@ -321,5 +321,4 @@ public class LightUtil {
     public static OnOffType onOffStateFrom(HSBType hsbState, Object... optionalMinimumBrightnessProvider) {
         return onOffStateFrom(hsbState.getBrightness(), optionalMinimumBrightnessProvider);
     }
-
 }
