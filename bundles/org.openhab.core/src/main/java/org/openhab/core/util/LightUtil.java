@@ -13,14 +13,16 @@
 package org.openhab.core.util;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.IncreaseDecreaseType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Command;
 
 /**
@@ -43,16 +45,16 @@ public class LightUtil {
     public static final PercentType DEFAULT_MAXIMUM_BRIGHTNESS = PercentType.HUNDRED;
 
     /**
-     * Default minimum color temperature Kelvin value. Conversions are subject to the caveats mentioned in
-     * {@link ColorUtil#xyToKelvin(double[])} so when converting HSBType values to Kelvin, values below this will
-     * be clamped to this value.
+     * Default 'warmest' white color temperature values.
      */
-    public static final double DEFAULT_MINIMUM_KELVIN = 2000; // aka 500 mirek
+    public static final double DEFAULT_WARMEST_KELVIN = 2000;
+    public static final double DEFAULT_WARMEST_MIRED = 1000000 / DEFAULT_WARMEST_KELVIN;
 
     /**
-     * Default maximum color temperature Kelvin value.
+     * Default 'coolest' white color temperature values.
      */
-    public static final double DEFAULT_MAXIMUM_KELVIN = 6500; // aka 153 mirek
+    public static final double DEFAULT_COOLEST_KELVIN = 6500;
+    public static final double DEFAULT_COOLEST_MIRED = 1000000 / DEFAULT_COOLEST_KELVIN;
 
     /**
      * Step value for IncreaseDecreaseType commands.
@@ -136,7 +138,7 @@ public class LightUtil {
      *
      * @return a new PercentType with the adjusted brightness
      *
-     * @throws IllegalArgumentException if passed an unsopported command
+     * @throws IllegalArgumentException if passed an unsupported command
      */
     public static PercentType brightnessStateFrom(PercentType priorBrightness, Command command,
             Object... optionalOnStateBrightnessProvider) throws IllegalArgumentException {
@@ -151,19 +153,26 @@ public class LightUtil {
     }
 
     /**
-     * Returns an HSBType color state based on the given color temperature in Kelvin using the optionally provided
+     * Returns an HSBType color state based on the given QuantityType color temperature using the optionally provided
      * brightness. If no brightness is provided, the default maximum brightness percent is used.
      *
-     * @param kelvin the color temperature in Kelvin
+     * @param colorTemperature the color temperature; must be in a unit that is convertible to Kelvin
      * @param optionalBrightnessProvider an optional single object argument that provides the target brightness
      *
      * @return the corresponding HSBType
+     * @throws IllegalArgumentException if the color temperature cannot be converted to Kelvin
      */
-    public static HSBType colorStateFrom(double kelvin, Object... optionalBrightnessProvider) {
-        PercentType brightness = brightnessStateFrom(optionalBrightnessProvider) instanceof PercentType percent
-                ? percent
-                : DEFAULT_MAXIMUM_BRIGHTNESS;
-        return colorStateFrom(ColorUtil.xyToHsb(ColorUtil.kelvinToXY(kelvin)), brightness);
+    public static HSBType colorStateFrom(QuantityType<?> colorTemperature, Object... optionalBrightnessProvider)
+            throws IllegalArgumentException {
+        try {
+            QuantityType<?> kelvin = Objects.requireNonNull(colorTemperature.toInvertibleUnit(Units.KELVIN));
+            PercentType brightness = brightnessStateFrom(optionalBrightnessProvider) instanceof PercentType percent
+                    ? percent
+                    : DEFAULT_MAXIMUM_BRIGHTNESS;
+            return colorStateFrom(ColorUtil.xyToHsb(ColorUtil.kelvinToXY(kelvin.doubleValue())), brightness);
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("colorTemperature parameter must be convertible to Kelvin");
+        }
     }
 
     /**
@@ -220,8 +229,7 @@ public class LightUtil {
      * @param optionalOnStateBrightnessProvider an optional single object argument that provides the on state brightness
      *
      * @return a new HSBType with the adjusted brightness
-     *
-     * @throws IllegalArgumentException if passed an unsopported command
+     * @throws IllegalArgumentException if passed an unsupported command
      */
     public static HSBType colorStateFrom(HSBType priorHSBState, Command command,
             Object... optionalOnStateBrightnessProvider) throws IllegalArgumentException {
@@ -238,58 +246,73 @@ public class LightUtil {
     }
 
     /**
-     * Returns an approximate color temperature in Kelvin from the given HSBType color state. The brightness component
-     * of the HSBType is ignored. The returned value is clamped to a minimum valid Kelvin value. Subject to the caveats
-     * mentioned in {@link ColorUtil#xyToKelvin(double[])}.
+     * Returns an approximate QuantityType color temperature in Kelvin from the given HSBType color state. The
+     * brightness component of the HSBType is ignored. The returned value is clamped to the minimum valid Kelvin
+     * value in order to address the the caveats mentioned in {@link ColorUtil#xyToKelvin(double[])}.
      *
      * @param hsbState the HSBType to convert
      *
-     * @return the corresponding color temperature in Kelvin, clamped to a minimum valid value
+     * @return the corresponding color temperature QuantityType in Kelvin, clamped to a minimum valid value
      */
-    public static DecimalType approximateKelvinFrom(HSBType hsbState) {
-        return new DecimalType(Math.max(DEFAULT_MINIMUM_KELVIN, ColorUtil.xyToKelvin(ColorUtil.hsbToXY(hsbState))));
+    public static QuantityType<?> colorTemperatureApproximateFrom(HSBType hsbState) {
+        return QuantityType.valueOf(
+                Math.max(DEFAULT_WARMEST_KELVIN,
+                        ColorUtil.xyToKelvin(ColorUtil.hsbToXY(colorStateFrom(hsbState, PercentType.HUNDRED)))),
+                Units.KELVIN);
     }
 
     /**
-     * Returns a color temperature in Kelvin based on the given PercentType color temperature using the optionally
-     * provided minimum and maximum Kelvin values for scaling. If no min/max values are provided, default values are
-     * used.
+     * Returns a QuantityType color temperature in Kelvin based on the given PercentType color temperature using the
+     * optionally provided minimum and maximum Mired values for scaling. If no min/max values are provided, default
+     * values are used.
      *
      * @param colorTemperaturePercent the PercentType color temperature (0% = coolest, 100% = warmest)
-     * @param optionalMinMaxKelvinProvider an optional argument of up to two doubles that provide minimum and maximum
-     *            Kelvin values. The first value is the minimum (coolest), the second is the maximum (warmest)
+     * @param optionalMinMaxMiredProvider an optional argument of up to two doubles that provide minimum and maximum
+     *            Mired values. The first must be the coolest white (lower Mired), the second must the warmest white
+     *            (higher Mired)
      *
-     * @return the corresponding color temperature in Kelvin
+     * @return the corresponding QuantityType color temperature in Kelvin
+     * @throws IllegalArgumentException if passed invalid minimum or maximum Mired values
      */
-    public static DecimalType kelvinFrom(PercentType colorTemperaturePercent, double... optionalMinMaxKelvinProvider) {
-        double coolMirek = 1000000 / optionalMinMaxKelvinProvider.length > 0 ? optionalMinMaxKelvinProvider[0]
-                : DEFAULT_MINIMUM_KELVIN;
-        double warmMirek = 1000000 / optionalMinMaxKelvinProvider.length > 1 ? optionalMinMaxKelvinProvider[1]
-                : DEFAULT_MAXIMUM_KELVIN;
-        double thisMirek = coolMirek + ((warmMirek - coolMirek) * colorTemperaturePercent.doubleValue() / 100.0);
-        return new DecimalType(1000000 / thisMirek);
+    public static QuantityType<?> colorTemperatureFrom(PercentType colorTemperaturePercent,
+            double... optionalMinMaxMiredProvider) throws IllegalArgumentException {
+        double cool = optionalMinMaxMiredProvider.length > 0 ? optionalMinMaxMiredProvider[0] : DEFAULT_COOLEST_MIRED;
+        double warm = optionalMinMaxMiredProvider.length > 1 ? optionalMinMaxMiredProvider[1] : DEFAULT_WARMEST_MIRED;
+        if (warm <= cool) {
+            throw new IllegalArgumentException("color temperature warm parameter must be greater than cool parameter");
+        }
+        double mired = cool + ((warm - cool) * colorTemperaturePercent.doubleValue() / 100.0);
+        // Mired always converts to Kelvin, so no need to catch NPE here
+        return Objects.requireNonNull(QuantityType.valueOf(mired, Units.MIRED).toInvertibleUnit(Units.KELVIN));
     }
 
     /**
-     * Returns a PercentType color temperature based on the given color temperature in Kelvin using the optionally
-     * provided minimum and maximum Kelvin values for scaling. If no min/max values are provided, default values are
+     * Returns a PercentType color temperature based on the given QuantityType color temperature using the optionally
+     * provided minimum and maximum Mired values for scaling. If no min/max values are provided, default values are
      * used. The returned percent is clamped to the range of 0% to 100%.
      *
-     * @param kelvin the color temperature in Kelvin
-     * @param optionalMinMaxKelvinProvider an optional argument of up to two doubles that provide minimum and maximum
-     *            Kelvin values. The first value is the minimum (coolest), the second is the maximum (warmest)
+     * @param colorTemperature the color temperature; must be in a unit that is convertible to Mired
+     * @param optionalMinMaxMiredProvider an optional argument of up to two doubles that provide minimum and maximum
+     *            Mired values. The first must be the coolest white (lower Mired), the second must the warmest white
+     *            (higher Mired)
      *
      * @return the corresponding PercentType color temperature
+     * @throws IllegalArgumentException if passed an invalid color temperature, or minimum, maximum Mired values
      */
-    public static PercentType colorTemperaturePercentFrom(DecimalType kelvin, double... optionalMinMaxKelvinProvider) {
-        double thisMirek = 1000000
-                / Math.min(Math.max(kelvin.doubleValue(), DEFAULT_MINIMUM_KELVIN), DEFAULT_MAXIMUM_KELVIN);
-        double coolMirek = 1000000 / optionalMinMaxKelvinProvider.length > 0 ? optionalMinMaxKelvinProvider[0]
-                : DEFAULT_MINIMUM_KELVIN;
-        double warmMirek = 1000000 / optionalMinMaxKelvinProvider.length > 1 ? optionalMinMaxKelvinProvider[1]
-                : DEFAULT_MAXIMUM_KELVIN;
-        double percent = Math.min(Math.max(100.0 * (thisMirek - coolMirek) / (warmMirek - coolMirek), 0.0), 100.0);
-        return new PercentType(new BigDecimal(percent));
+    public static PercentType colorTemperaturePercentFrom(QuantityType<?> colorTemperature,
+            double... optionalMinMaxMiredProvider) throws IllegalArgumentException {
+        double cool = optionalMinMaxMiredProvider.length > 0 ? optionalMinMaxMiredProvider[0] : DEFAULT_COOLEST_MIRED;
+        double warm = optionalMinMaxMiredProvider.length > 1 ? optionalMinMaxMiredProvider[1] : DEFAULT_WARMEST_MIRED;
+        if (warm <= cool) {
+            throw new IllegalArgumentException("color temperature warm parameter must be greater than cool parameter");
+        }
+        try {
+            QuantityType<?> mired = Objects.requireNonNull(colorTemperature.toInvertibleUnit(Units.MIRED));
+            double percent = 100.0 * (mired.doubleValue() - cool) / warm - cool;
+            return new PercentType(new BigDecimal(Math.min(Math.max(percent, 0.0), 100.0)));
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("colorTemperature parameter must be convertible to Mired");
+        }
     }
 
     /**
