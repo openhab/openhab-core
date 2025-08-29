@@ -314,7 +314,7 @@ public class LightUtil {
         }
         try {
             QuantityType<?> mired = Objects.requireNonNull(colorTemperature.toInvertibleUnit(Units.MIRED));
-            double percent = 100.0 * (mired.doubleValue() - cool) / warm - cool;
+            double percent = 100.0 * (mired.doubleValue() - cool) / (warm - cool);
             return new PercentType(new BigDecimal(Math.min(Math.max(percent, 0.0), 100.0)));
         } catch (NullPointerException e) {
             throw new IllegalArgumentException("colorTemperature parameter must be convertible to Mired");
