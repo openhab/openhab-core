@@ -104,7 +104,8 @@ public class LightUtil {
      * brightness if no brightness is provided.
      *
      * @param onOffState the OnOffType state
-     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the on state brightness
+     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the 'ON' state
+     *            brightness
      *
      * @return the corresponding PercentType brightness state
      */
@@ -134,7 +135,8 @@ public class LightUtil {
      *
      * @param priorBrightness the prior brightness PercentType
      * @param command the command from OH core
-     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the on state brightness
+     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the 'ON' state
+     *            brightness
      *
      * @return a new PercentType with the adjusted brightness
      *
@@ -198,7 +200,8 @@ public class LightUtil {
      *
      * @param priorHSBState the original HSBType
      * @param onOffState the OnOffType state
-     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the on state brightness
+     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the 'ON' state
+     *            brightness
      *
      * @return a new HSBType with the adjusted brightness
      */
@@ -226,7 +229,8 @@ public class LightUtil {
      *
      * @param priorHSBState the prior HSBType state
      * @param command the command from OH core
-     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the on state brightness
+     * @param optionalOnStateBrightnessProvider an optional single object argument that provides the 'ON' state
+     *            brightness
      *
      * @return a new HSBType with the adjusted brightness
      * @throws IllegalArgumentException if passed an unsupported command
@@ -235,12 +239,14 @@ public class LightUtil {
             Object... optionalOnStateBrightnessProvider) throws IllegalArgumentException {
         if (command instanceof HSBType hsbCommand) {
             return hsbCommand;
-        } else if (command instanceof PercentType percentCommand) {
-            return colorStateFrom(priorHSBState, percentCommand);
-        } else if (command instanceof OnOffType onOffCommand) {
-            return colorStateFrom(priorHSBState, onOffCommand, optionalOnStateBrightnessProvider);
-        } else if (command instanceof IncreaseDecreaseType incDecCommand) {
-            return colorStateFrom(priorHSBState, incDecCommand);
+        } else if (command instanceof PercentType percent) {
+            return colorStateFrom(priorHSBState, percent);
+        } else if (command instanceof OnOffType onOff) {
+            return colorStateFrom(priorHSBState, onOff, optionalOnStateBrightnessProvider);
+        } else if (command instanceof IncreaseDecreaseType incDec) {
+            return colorStateFrom(priorHSBState, incDec);
+        } else if (command instanceof QuantityType<?> quantity) {
+            return colorStateFrom(quantity, priorHSBState.getBrightness());
         }
         throw new IllegalArgumentException("Unsupported command type: " + command.getClass().getName());
     }
@@ -248,13 +254,13 @@ public class LightUtil {
     /**
      * Returns an approximate QuantityType color temperature in Kelvin from the given HSBType color state. The
      * brightness component of the HSBType is ignored. The returned value is clamped to the minimum valid Kelvin
-     * value in order to address the the caveats mentioned in {@link ColorUtil#xyToKelvin(double[])}.
+     * value in order to address the caveats mentioned in {@link ColorUtil#xyToKelvin(double[])}.
      *
      * @param hsbState the HSBType to convert
      *
      * @return the corresponding color temperature QuantityType in Kelvin, clamped to a minimum valid value
      */
-    public static QuantityType<?> colorTemperatureApproximateFrom(HSBType hsbState) {
+    public static QuantityType<?> colorTemperatureApproximationFrom(HSBType hsbState) {
         return QuantityType.valueOf(
                 Math.max(DEFAULT_WARMEST_KELVIN,
                         ColorUtil.xyToKelvin(ColorUtil.hsbToXY(colorStateFrom(hsbState, PercentType.HUNDRED)))),
