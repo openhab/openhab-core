@@ -501,7 +501,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.openhab.core.tools</groupId>
           <artifactId>i18n-maven-plugin</artifactId>
-          <version>4.3.1</version>
+          <version>5.0.1</version>
         </plugin>
 
         <plugin>
