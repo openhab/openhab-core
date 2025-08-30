@@ -164,6 +164,8 @@ public class LightStateMachine {
         } else if (command instanceof QuantityType<?> temperature) {
             setColorTemperature(temperature);
         }
+        throw new IllegalArgumentException(
+                "Command '%s' not supported for color temperatures".formatted(command.getClass().getName()));
     }
 
     /**
@@ -187,35 +189,41 @@ public class LightStateMachine {
         } else if (command instanceof QuantityType<?> temperature) {
             setColorTemperature(temperature);
         }
+        throw new IllegalArgumentException(
+                "Command '%s' not supported for light states".formatted(command.getClass().getName()));
     }
 
     /**
      * Utility method to create a PercentType from a double value, ensuring it is in the range 0.0 to 100.0
      *
      * @param value the input value
+     *
      * @return a PercentType representing the input value, constrained to the range 0.0 to 100.0
+     * @throws IllegalArgumentException if the value is outside the range [0.0 to 100.0]
      */
-    private PercentType percentFrom(double value) {
-        return new PercentType(new BigDecimal(Math.min(Math.max(value, 0.0), 100.0)));
+    private PercentType percentFrom(double value) throws IllegalArgumentException {
+        return new PercentType(new BigDecimal(value));
     }
 
     /**
      * Update the brightness from the remote light, ensuring it is in the range 0.0 to 100.0
      *
      * @param brightness
+     * @throws IllegalArgumentException if the value is outside the range [0.0 to 100.0]
      */
-    public void setBrightness(double brightness) {
+    public void setBrightness(double brightness) throws IllegalArgumentException {
         setBrightness(percentFrom(brightness));
     }
 
     /**
-     * Handle a write increase/decrease command from OH core
+     * Handle a write increase/decrease command from OH core, ensuring it is in the range 0.0 to 100.0
      *
      * @param inceaseDecrease the increase/decrease command
      */
     private void setBrightness(IncreaseDecreaseType inceaseDecrease) {
-        setBrightness(cachedBrightness.doubleValue()
-                + ((IncreaseDecreaseType.INCREASE == inceaseDecrease ? 1 : -1) * stepSize));
+        double brightness = Math.min(Math.max(cachedBrightness.doubleValue()
+                + ((IncreaseDecreaseType.INCREASE == inceaseDecrease ? 1 : -1) * stepSize), 0.0), 100.0);
+        setBrightness(brightness);
     }
 
     /**
@@ -253,8 +261,7 @@ public class LightStateMachine {
      * @param warmness the color temperature warmness to set as a percent
      */
     private void setColorTemperature(PercentType warmness) {
-        cachedMired = coolestMired + ((warmestMired - coolestMired) * warmness.doubleValue() / 100.0);
-
+        cachedMired = coolestMired + (warmness.doubleValue() * (warmestMired - coolestMired) / 100.0);
     }
 
     /**
@@ -268,11 +275,17 @@ public class LightStateMachine {
             QuantityType<?> mired = Objects.requireNonNull(colorTemperature.toInvertibleUnit(Units.MIRED));
             setMired(mired.doubleValue());
         } catch (NullPointerException e) {
-            throw new IllegalArgumentException("colorTemperature parameter must be convertible to Mired");
+            throw new IllegalArgumentException(
+                    "Parameter '%s' not convertible to Mired".formatted(colorTemperature.toFullString()));
         }
     }
 
-    public void setHue(double hue) {
+    /**
+     * Update the hue from the remote light, ensuring it is in the range 0.0 to 360.0
+     *
+     * @throws IllegalArgumentException if the hue parameter is not in the range 0.0 to 360.0
+     */
+    public void setHue(double hue) throws IllegalArgumentException {
         cachedColor = new HSBType(new DecimalType(hue), cachedColor.getSaturation(), cachedColor.getBrightness());
     }
 
@@ -280,9 +293,13 @@ public class LightStateMachine {
      * Update the mired color temperature from the remote light, and update the cached HSB color accordingly.
      * Constrain the mired value to be within the warmest and coolest limits.
      *
-     * @param mired
+     * @throws IllegalArgumentException if the hue parameter is not in the range [coolestMired..warmestMired]
      */
-    public void setMired(double mired) {
+    public void setMired(double mired) throws IllegalArgumentException {
+        if (mired < coolestMired || mired > warmestMired) {
+            throw new IllegalStateException(
+                    "Mired value '%f' out of range [%f..%f]".formatted(mired, coolestMired, warmestMired));
+        }
         cachedMired = Math.min(Math.max(mired, coolestMired), warmestMired);
         HSBType hsb = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / cachedMired));
         cachedColor = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedColor.getBrightness());
@@ -305,6 +322,8 @@ public class LightStateMachine {
      * @param red optional red value in range [0..255], or null to leave unchanged
      * @param green optional green value in range [0..255], or null to leave unchanged
      * @param blue optional blue value in range [0..255], or null to leave unchanged
+     *
+     * @throws IllegalArgumentException if any of the RGB values are out of range [0..255]
      */
     public void setRGB(@Nullable Integer red, @Nullable Integer green, @Nullable Integer blue)
             throws IllegalArgumentException {
@@ -317,9 +336,22 @@ public class LightStateMachine {
     }
 
     /**
+     * Update the color with CIE XY fields from the remote light, and update the cached HSB color accordingly
+     *
+     * @param x the x field in range [0.0..1.0]
+     * @param y the y field in range [0.0..1.0]
+     *
+     * @throws IllegalArgumentException if any of the XY values are out of range [0.0..1.0]
+     */
+    public void setXY(double x, double y) throws IllegalArgumentException {
+        HSBType hsb = ColorUtil.xyToHsb(new double[] { x, y });
+        cachedColor = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedColor.getBrightness());
+    }
+
+    /**
      * Update the saturation from the remote light, ensuring it is in the range 0.0 to 100.0
      *
-     * @param saturation
+     * @param saturation in the range [0..100]
      */
     public void setSaturation(double saturation) {
         cachedColor = new HSBType(cachedColor.getHue(), percentFrom(saturation), cachedColor.getBrightness());
