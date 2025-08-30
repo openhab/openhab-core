@@ -185,8 +185,8 @@
 	</feature>
 
 	<feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
-		<capability>openhab.tp;feature=jmdns;version=3.5.12</capability>
-		<bundle>mvn:org.jmdns/jmdns/3.5.12</bundle>
+		<capability>openhab.tp;feature=jmdns;version=3.6.1</capability>
+		<bundle>mvn:org.jmdns/jmdns/3.6.1</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jose4j" description="jose4j JWT library" version="${project.version}">
