@@ -464,4 +464,9 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             metadataAwareItem.updatedMetadata(oldElement, element);
         }
     }
+
+    @Override
+    public void notifyListenersAboutItemExternalUpdate(Item oldItem, Item newItem) {
+        notifyListenersAboutUpdatedElement(oldItem, newItem);
+    }
 }
