@@ -383,17 +383,18 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * If the linked channel has 'useTags=true' return its default tags, otherwise return an empty set.
+     * Determine if we shall get the default tags from the linked channel. This depends on the global setting 'useTags'
+     * and the per-link setting 'useTags'.
+     *
+     * @param link the ItemChannelLink to be used
+     * @return the default tags from the linked channel or an empty set
      */
     private Set<String> getChannelDefaultTags(ItemChannelLink link) {
-        boolean getChannelTags;
-        if (useTagsGlobally) {
-            getChannelTags = true;
-        } else {
-            Configuration configuration = link.getConfiguration();
-            Object entry = configuration.get(USE_TAGS);
-            getChannelTags = entry != null ? Boolean.parseBoolean(entry.toString()) : false;
-        }
+        Configuration configuration = link.getConfiguration();
+        Object entry = configuration.get(USE_TAGS);
+        Boolean useTagsPerLink = entry != null ? Boolean.parseBoolean(entry.toString()) : null;
+        boolean getChannelTags = useTagsGlobally ? !Boolean.FALSE.equals(useTagsPerLink)
+                : Boolean.TRUE.equals(useTagsPerLink);
 
         if (getChannelTags) {
             ChannelUID channelUID = link.getLinkedUID();
