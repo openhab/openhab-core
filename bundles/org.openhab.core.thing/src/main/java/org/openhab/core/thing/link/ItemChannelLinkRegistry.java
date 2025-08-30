@@ -325,6 +325,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                 assignChannelDefaultTags(link, activeItem);
             }
         } catch (ItemNotFoundException e) {
+            // we don't expect this exception but log it anyway
+            logger.debug("Item '{}' not found when assigning channel default tags.", link.getItemName());
         }
     }
 
@@ -379,6 +381,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                 removeChannelDefaultTags(link, activeItem);
             }
         } catch (ItemNotFoundException e) {
+            // we don't expect this exception but log it anyway
+            logger.debug("Item '{}' not found when assigning channel default tags.", link.getItemName());
         }
     }
 
@@ -429,6 +433,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                 itemRegistry.notifyListenersAboutItemExternalUpdate(fakeOldItem, item);
             }
         } catch (ItemNotFoundException e) {
+            // we don't expect this exception but log it anyway
+            logger.debug("Item '{}' not found when assigning channel default tags.", itemName);
         }
     }
 
