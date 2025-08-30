@@ -100,22 +100,27 @@ public class YamlGroupDTOTest {
         gr1.type = "String";
         gr2.type = "String";
         assertTrue(gr1.equals(gr2));
+        assertEquals(gr1.hashCode(), gr2.hashCode());
         gr1.type = "String";
         gr2.type = "Number";
         assertFalse(gr1.equals(gr2));
         gr1.type = "Number";
         gr2.type = "Number";
         assertTrue(gr1.equals(gr2));
+        assertEquals(gr1.hashCode(), gr2.hashCode());
         gr2.type = "number";
         assertTrue(gr1.equals(gr2));
+        assertEquals(gr1.hashCode(), gr2.hashCode());
         gr1.dimension = "Temperature";
         assertFalse(gr1.equals(gr2));
         gr2.dimension = "Humidity";
         assertFalse(gr1.equals(gr2));
         gr2.dimension = "Temperature";
         assertTrue(gr1.equals(gr2));
+        assertEquals(gr1.hashCode(), gr2.hashCode());
         gr2.dimension = "temperature";
         assertTrue(gr1.equals(gr2));
+        assertEquals(gr1.hashCode(), gr2.hashCode());
 
         gr1.function = "or";
         gr2.function = null;
@@ -126,10 +131,13 @@ public class YamlGroupDTOTest {
         gr1.function = "or";
         gr2.function = "or";
         assertTrue(gr1.equals(gr2));
+        assertEquals(gr1.hashCode(), gr2.hashCode());
         gr2.function = "Or";
         assertTrue(gr1.equals(gr2));
+        assertEquals(gr1.hashCode(), gr2.hashCode());
         gr2.function = "OR";
         assertTrue(gr1.equals(gr2));
+        assertEquals(gr1.hashCode(), gr2.hashCode());
 
         gr1.parameters = List.of("ON", "OFF");
         gr2.parameters = null;
@@ -143,5 +151,6 @@ public class YamlGroupDTOTest {
         assertFalse(gr1.equals(gr2));
         gr1.parameters = List.of("ON", "OFF");
         assertTrue(gr1.equals(gr2));
+        assertEquals(gr1.hashCode(), gr2.hashCode());
     }
 }
