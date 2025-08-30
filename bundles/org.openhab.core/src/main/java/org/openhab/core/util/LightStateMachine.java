@@ -33,6 +33,13 @@ import org.openhab.core.types.UnDefType;
  * The {@link LightStateMachine} provides a state machine with helper functions for controlloing lights.
  * See also {@link ColorUtil} for more general color conversion utilities.
  *
+ * <pre>
+* {@code
+ * Set<String> s;
+ * System.out.println(s);
+ * }
+* </pre>
+ *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
@@ -78,11 +85,11 @@ public class LightStateMachine {
      * Create a LightStateMachine with the given capabilities.
      *
      * @param supportsBrightness true if the light supports brightness control
-     * @param supportsColor true if the light supports color control
      * @param supportsColorTemperature true if the light supports color temperature control
+     * @param supportsColor true if the light supports color control
      */
-    public LightStateMachine(boolean supportsBrightness, boolean supportsColor, boolean supportsColorTemperature) {
-        this(supportsBrightness, supportsColor, supportsColorTemperature, null, null, null, null);
+    public LightStateMachine(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor) {
+        this(supportsBrightness, supportsColorTemperature, supportsColor, null, null, null, null);
     }
 
     /**
@@ -90,14 +97,14 @@ public class LightStateMachine {
      * The parameters can be null to use the default.
      *
      * @param supportsBrightness true if the light supports brightness control
-     * @param supportsColor true if the light supports color control
      * @param supportsColorTemperature true if the light supports color temperature control
+     * @param supportsColor true if the light supports color control
      * @param minimumOnBrightness the minimum brightness percent to consider as light "ON"
      * @param warmestMired the 'warmest' white color temperature in Mired
      * @param coolestMired the 'coolest' white color temperature in Mired
      * @param stepSize the step size for IncreaseDecreaseType commands
      */
-    public LightStateMachine(boolean supportsBrightness, boolean supportsColor, boolean supportsColorTemperature,
+    public LightStateMachine(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
             @Nullable Double minimumOnBrightness, @Nullable Double warmestMired, @Nullable Double coolestMired,
             @Nullable Double stepSize) {
         this.supportsColor = supportsColor;
@@ -107,6 +114,7 @@ public class LightStateMachine {
         this.warmestMired = warmestMired != null ? warmestMired : this.warmestMired;
         this.coolestMired = coolestMired != null ? coolestMired : this.coolestMired;
         this.stepSize = stepSize != null ? stepSize : this.stepSize;
+        validateParameters();
     }
 
     /**
@@ -163,9 +171,10 @@ public class LightStateMachine {
             setColorTemperature(warmness);
         } else if (command instanceof QuantityType<?> temperature) {
             setColorTemperature(temperature);
+        } else {
+            throw new IllegalArgumentException(
+                    "Command '%s' not supported for color temperatures".formatted(command.getClass().getName()));
         }
-        throw new IllegalArgumentException(
-                "Command '%s' not supported for color temperatures".formatted(command.getClass().getName()));
     }
 
     /**
@@ -188,9 +197,10 @@ public class LightStateMachine {
             setBrightness(incDec);
         } else if (command instanceof QuantityType<?> temperature) {
             setColorTemperature(temperature);
+        } else {
+            throw new IllegalArgumentException(
+                    "Command '%s' not supported for light states".formatted(command.getClass().getName()));
         }
-        throw new IllegalArgumentException(
-                "Command '%s' not supported for light states".formatted(command.getClass().getName()));
     }
 
     /**
@@ -221,7 +231,7 @@ public class LightStateMachine {
      * @param inceaseDecrease the increase/decrease command
      */
     private void setBrightness(IncreaseDecreaseType inceaseDecrease) {
-        double brightness = Math.min(Math.max(cachedBrightness.doubleValue()
+        double brightness = Math.min(Math.max(cachedColor.getBrightness().doubleValue()
                 + ((IncreaseDecreaseType.INCREASE == inceaseDecrease ? 1 : -1) * stepSize), 0.0), 100.0);
         setBrightness(brightness);
     }
@@ -281,12 +291,57 @@ public class LightStateMachine {
     }
 
     /**
+     * Set the coolest color temperature in Mired
+     *
+     * @param coolestMired the coolest color temperature in Mired
+     * @throws IllegalArgumentException if the coolestMired parameter is out of range or not less than warmestMired
+     */
+    public void setCoolestMired(double coolestMired) throws IllegalArgumentException {
+        if (coolestMired < 100.0 || coolestMired > 1000.0) {
+            throw new IllegalArgumentException(
+                    "Coolest mired '%f' out of range [100.0..1000.0]".formatted(coolestMired));
+        }
+        if (warmestMired <= coolestMired) {
+            throw new IllegalArgumentException(
+                    "Warmest mired '%f' must be greater than coolest mired '%f'".formatted(warmestMired, coolestMired));
+        }
+        this.coolestMired = coolestMired;
+    }
+
+    /**
      * Update the hue from the remote light, ensuring it is in the range 0.0 to 360.0
      *
      * @throws IllegalArgumentException if the hue parameter is not in the range 0.0 to 360.0
      */
     public void setHue(double hue) throws IllegalArgumentException {
         cachedColor = new HSBType(new DecimalType(hue), cachedColor.getSaturation(), cachedColor.getBrightness());
+    }
+
+    /**
+     * Set the step size for IncreaseDecreaseType commands
+     *
+     * @param stepSize the step size in percent
+     * @throws IllegalArgumentException if the stepSize parameter is out of range
+     */
+    public void setIncreaseDecreaseStep(double stepSize) throws IllegalArgumentException {
+        if (stepSize < 1.0 || stepSize > 50.0) {
+            throw new IllegalArgumentException("Step size '%f' out of range (1.0..50.0]".formatted(stepSize));
+        }
+        this.stepSize = stepSize;
+    }
+
+    /**
+     * Set the minimum brightness percent to consider as light "ON"
+     *
+     * @param minimumOnBrightness the minimum brightness percent
+     * @throws IllegalArgumentException if the minimumBrightness parameter is out of range
+     */
+    public void setMinimumOnBrightness(double minimumOnBrightness) throws IllegalArgumentException {
+        if (minimumOnBrightness < 0.1 || minimumOnBrightness > 10.0) {
+            throw new IllegalArgumentException(
+                    "Minimum brightness '%f' out of range [0.1..10.0]".formatted(minimumOnBrightness));
+        }
+        this.minimumOnBrightness = minimumOnBrightness;
     }
 
     /**
@@ -336,6 +391,61 @@ public class LightStateMachine {
     }
 
     /**
+     * Update the saturation from the remote light, ensuring it is in the range 0.0 to 100.0
+     *
+     * @param saturation in the range [0..100]
+     */
+    public void setSaturation(double saturation) {
+        cachedColor = new HSBType(cachedColor.getHue(), percentFrom(saturation), cachedColor.getBrightness());
+    }
+
+    /**
+     * Set whether brightness control is supported
+     *
+     * @param supportsBrightness true if brightness control is supported
+     */
+    public void setSupportsBrightness(boolean supportsBrightness) {
+        this.supportsBrightness = supportsBrightness;
+    }
+
+    /**
+     * Set whether color control is supported
+     *
+     * @param supportsColor true if color control is supported
+     */
+    public void setSupportsColor(boolean supportsColor) {
+        this.supportsColor = supportsColor;
+    }
+
+    /**
+     * Set whether color temperature control is supported
+     *
+     * @param supportsColorTemperature true if color temperature control is supported
+     */
+    public void setSupportsColorTemperature(boolean supportsColorTemperature) {
+        this.supportsColorTemperature = supportsColorTemperature;
+    }
+
+    /**
+     * Set the warmest color temperature in Mired
+     *
+     * @param warmestMired the warmest color temperature in Mired
+     *
+     * @throws IllegalArgumentException if the warmestMired parameter is out of range or not greater than coolestMired
+     */
+    public void setWarmestMired(double warmestMired) throws IllegalArgumentException {
+        if (warmestMired < 100.0 || warmestMired > 1000.0) {
+            throw new IllegalArgumentException(
+                    "Warmest mired '%f' out of range [100.0..1000.0]".formatted(warmestMired));
+        }
+        if (warmestMired <= coolestMired) {
+            throw new IllegalArgumentException(
+                    "Warmest mired '%f' must be greater than coolest mired '%f'".formatted(warmestMired, coolestMired));
+        }
+        this.warmestMired = warmestMired;
+    }
+
+    /**
      * Update the color with CIE XY fields from the remote light, and update the cached HSB color accordingly
      *
      * @param x the x field in range [0.0..1.0]
@@ -346,15 +456,6 @@ public class LightStateMachine {
     public void setXY(double x, double y) throws IllegalArgumentException {
         HSBType hsb = ColorUtil.xyToHsb(new double[] { x, y });
         cachedColor = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedColor.getBrightness());
-    }
-
-    /**
-     * Update the saturation from the remote light, ensuring it is in the range 0.0 to 100.0
-     *
-     * @param saturation in the range [0..100]
-     */
-    public void setSaturation(double saturation) {
-        cachedColor = new HSBType(cachedColor.getHue(), percentFrom(saturation), cachedColor.getBrightness());
     }
 
     /**
@@ -379,79 +480,45 @@ public class LightStateMachine {
     }
 
     /**
-     * Set whether brightness control is supported
+     * Validate the parameters and throw IllegalArgumentException if any are out of range
      *
-     * @param supportsBrightness true if brightness control is supported
-     * @return this LightStateMachine for method chaining
+     * @throws IllegalArgumentException if any parameters are out of range
      */
-    public LightStateMachine withBrightness(boolean supportsBrightness) {
-        this.supportsBrightness = supportsBrightness;
-        return this;
+    private void validateParameters() throws IllegalArgumentException {
+        if (minimumOnBrightness < 0.1 || minimumOnBrightness > 10.0) {
+            throw new IllegalArgumentException(
+                    "Minimum brightness '%f' out of range [0.1..10.0]".formatted(minimumOnBrightness));
+        }
+        if (coolestMired < 100.0 || coolestMired > 1000.0) {
+            throw new IllegalArgumentException(
+                    "Coolest mired '%f' out of range [100.0..1000.0]".formatted(coolestMired));
+        }
+        if (warmestMired < 100.0 || warmestMired > 1000.0) {
+            throw new IllegalArgumentException(
+                    "Warmest mired '%f' out of range [100.0..1000.0]".formatted(warmestMired));
+        }
+        if (warmestMired <= coolestMired) {
+            throw new IllegalArgumentException(
+                    "Warmest mired '%f' must be greater than coolest mired '%f'".formatted(warmestMired, coolestMired));
+        }
+        if (stepSize < 1.0 || stepSize > 50.0) {
+            throw new IllegalArgumentException("Step size '%f' out of range (1.0..50.0]".formatted(stepSize));
+        }
     }
 
-    /**
-     * Set whether color control is supported
-     *
-     * @param supportsColor true if color control is supported
-     * @return this LightStateMachine for method chaining
-     */
-    public LightStateMachine withColor(boolean supportsColor) {
-        this.supportsColor = supportsColor;
-        return this;
+    public double getIncreaseDecreaseStep() {
+        return stepSize;
     }
 
-    /**
-     * Set whether color temperature control is supported
-     *
-     * @param supportsColorTemperature true if color temperature control is supported
-     * @return this LightStateMachine for method chaining
-     */
-    public LightStateMachine withColorTemperature(boolean supportsColorTemperature) {
-        this.supportsColorTemperature = supportsColorTemperature;
-        return this;
+    public double getWarmestMired() {
+        return warmestMired;
     }
 
-    /**
-     * Set the coolest color temperature in Mired
-     *
-     * @param coolestMired the coolest color temperature in Mired
-     * @return this LightStateMachine for method chaining
-     */
-    public LightStateMachine withCoolestMired(double coolestMired) {
-        this.coolestMired = coolestMired;
-        return this;
+    public double getCoolestMired() {
+        return coolestMired;
     }
 
-    /**
-     * Set the step size for IncreaseDecreaseType commands
-     *
-     * @param stepSize the step size in percent
-     * @return this LightStateMachine for method chaining
-     */
-    public LightStateMachine withIncreaseDecreaseStep(double stepSize) {
-        this.stepSize = stepSize;
-        return this;
-    }
-
-    /**
-     * Set the minimum brightness percent to consider as light "ON"
-     *
-     * @param minimumBrightness the minimum brightness percent
-     * @return this LightStateMachine for method chaining
-     */
-    public LightStateMachine withMinimumBrightness(double minimumBrightness) {
-        this.minimumOnBrightness = minimumBrightness;
-        return this;
-    }
-
-    /**
-     * Set the warmest color temperature in Mired
-     *
-     * @param warmestMired the warmest color temperature in Mired
-     * @return this LightStateMachine for method chaining
-     */
-    public LightStateMachine withWarmestMired(double warmestMired) {
-        this.warmestMired = warmestMired;
-        return this;
+    public double getMinimumOnBrightness() {
+        return minimumOnBrightness;
     }
 }
