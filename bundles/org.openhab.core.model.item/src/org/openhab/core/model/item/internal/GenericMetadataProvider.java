@@ -13,6 +13,7 @@
 package org.openhab.core.model.item.internal;
 
 import static java.util.stream.Collectors.toSet;
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,18 +49,16 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
 
     private final Map<String, Set<Metadata>> metadata = new HashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock(true);
-    private final Set<String> isolatedModels = new HashSet<>();
 
     /**
      * Adds metadata to this provider
      *
      * @param modelName the model name
-     * @param isolated whether the model is an isolated model
      * @param bindingType
      * @param itemName
      * @param configuration
      */
-    public void addMetadata(String modelName, boolean isolated, String bindingType, String itemName, String value,
+    public void addMetadata(String modelName, String bindingType, String itemName, String value,
             @Nullable Map<String, Object> configuration) {
         MetadataKey key = new MetadataKey(bindingType, itemName);
         Metadata md = new Metadata(key, value, configuration);
@@ -67,13 +66,10 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
             lock.writeLock().lock();
             Set<Metadata> mdSet = Objects.requireNonNull(metadata.computeIfAbsent(modelName, k -> new HashSet<>()));
             mdSet.add(md);
-            if (isolated) {
-                isolatedModels.add(modelName);
-            }
         } finally {
             lock.writeLock().unlock();
         }
-        if (!isolated) {
+        if (!isIsolatedModel(modelName)) {
             notifyListenersAboutAddedElement(md);
         }
     }
@@ -90,16 +86,14 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
             toBeNotified = new HashMap<>();
             for (Map.Entry<String, Set<Metadata>> entry : metadata.entrySet()) {
                 String modelName = entry.getKey();
-                boolean notify = !isolatedModels.contains(modelName);
                 Set<Metadata> mdSet = entry.getValue();
                 Set<Metadata> toBeRemoved = mdSet.stream().filter(MetadataPredicates.hasNamespace(namespace))
                         .collect(toSet());
                 mdSet.removeAll(toBeRemoved);
                 if (mdSet.isEmpty()) {
                     metadata.remove(modelName);
-                    isolatedModels.remove(modelName);
                 }
-                if (notify && !toBeRemoved.isEmpty()) {
+                if (!isIsolatedModel(modelName) && !toBeRemoved.isEmpty()) {
                     toBeNotified.put(modelName, toBeRemoved);
                 }
             }
@@ -122,15 +116,13 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
         try {
             lock.writeLock().lock();
             toBeNotified = new HashSet<>();
-            boolean notify = !isolatedModels.contains(modelName);
             Set<Metadata> mdSet = metadata.getOrDefault(modelName, new HashSet<>());
             Set<Metadata> toBeRemoved = mdSet.stream().filter(MetadataPredicates.ofItem(itemName)).collect(toSet());
             mdSet.removeAll(toBeRemoved);
             if (mdSet.isEmpty()) {
                 metadata.remove(modelName);
-                isolatedModels.remove(modelName);
             }
-            if (notify && !toBeRemoved.isEmpty()) {
+            if (!isIsolatedModel(modelName) && !toBeRemoved.isEmpty()) {
                 toBeNotified.addAll(toBeRemoved);
             }
         } finally {
@@ -144,7 +136,7 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
         try {
             lock.readLock().lock();
             // Ignore isolated models
-            Set<Metadata> set = metadata.keySet().stream().filter(name -> !isolatedModels.contains(name))
+            Set<Metadata> set = metadata.keySet().stream().filter(name -> !isIsolatedModel(name))
                     .map(name -> metadata.getOrDefault(name, Set.of())).flatMap(s -> s.stream()).collect(toSet());
             return Set.copyOf(set);
         } finally {

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.core.internal;
 
+import static org.openhab.core.model.core.ModelCoreConstants.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,15 +52,12 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
- * @author Laurent Garnier - Added method generateFileFormat
- * @author Laurent Garnier - Added methods createIsolatedModel and isIsolatedModel + return errors and warnings
- *         when loading a model
+ * @author Laurent Garnier - Added methods generateFileFormat and createIsolatedModel
+ *         + return errors and warnings when loading a model
  */
 @Component(immediate = true)
 @NonNullByDefault
 public class ModelRepositoryImpl implements ModelRepository {
-
-    private static final String PREFIX_TMP_MODEL = "tmp_";
 
     private final Logger logger = LoggerFactory.getLogger(ModelRepositoryImpl.class);
     private final ResourceSet resourceSet;
@@ -263,11 +262,6 @@ public class ModelRepositoryImpl implements ModelRepository {
             List<String> warnings) {
         String name = "%sDSL_model_%d.%s".formatted(PREFIX_TMP_MODEL, ++counter, modelType);
         return addOrRefreshModel(name, inputStream, errors, warnings) ? name : null;
-    }
-
-    @Override
-    public boolean isIsolatedModel(String modelName) {
-        return modelName.startsWith(PREFIX_TMP_MODEL);
     }
 
     @Override

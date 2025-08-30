@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.thing.internal
 
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel
+
 import java.util.ArrayList
 import java.util.Collection
 import java.util.HashSet
@@ -110,7 +112,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
 
     override Collection<Thing> getAll() {
         val things = new ArrayList
-        thingsMap.keySet.filter[!modelRepository.isIsolatedModel(it)].forEach([
+        thingsMap.keySet.filter[!isIsolatedModel(it)].forEach([
             val things2 = thingsMap.get(it)
             if (things2 !== null) {
                 things.addAll(things2)
@@ -482,7 +484,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                         val removedThings = oldThings.filter[!newThingUIDs.contains(it.UID)]
                         removedThings.forEach [
                             logger.debug("Removing thing '{}' from model '{}'.", it.UID, modelName)
-                            if (!modelRepository.isIsolatedModel(modelName)) {
+                            if (!isIsolatedModel(modelName)) {
                                 notifyListenersAboutRemovedElement
                             }
                         ]
@@ -493,7 +495,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                 case org.openhab.core.model.core.EventType.REMOVED: {
                     logger.debug("Removing all things from model '{}'.", modelName)
                     val things = thingsMap.remove(modelName) ?: newArrayList
-                    if (!modelRepository.isIsolatedModel(modelName)) {
+                    if (!isIsolatedModel(modelName)) {
                         things.forEach [
                             notifyListenersAboutRemovedElement
                         ]
@@ -637,14 +639,14 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                     things.remove(oldThing)
                     things.add(newThing)
                     logger.debug("Updating thing '{}' from model '{}'.", newThing.UID, modelName);
-                    if (!modelRepository.isIsolatedModel(modelName)) {
+                    if (!isIsolatedModel(modelName)) {
                         notifyListenersAboutUpdatedElement(oldThing, newThing)
                     }
                 }
             } else {
                 things.add(newThing)
                 logger.debug("Adding thing '{}' from model '{}'.", newThing.UID, modelName);
-                if (!modelRepository.isIsolatedModel(modelName)) {
+                if (!isIsolatedModel(modelName)) {
                     newThing.notifyListenersAboutAddedElement
                 }
             }
@@ -678,7 +680,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                                 thingsMap.get(modelName).remove(oldThing)
                                 thingsMap.get(modelName).add(newThing)
                                 logger.debug("Refreshing thing '{}' after successful retry", newThing.UID)
-                                if (!ThingHelper.equals(oldThing, newThing) && !modelRepository.isIsolatedModel(modelName)) {
+                                if (!ThingHelper.equals(oldThing, newThing) && !isIsolatedModel(modelName)) {
                                     notifyListenersAboutUpdatedElement(oldThing, newThing)
                                 }
                             } else {

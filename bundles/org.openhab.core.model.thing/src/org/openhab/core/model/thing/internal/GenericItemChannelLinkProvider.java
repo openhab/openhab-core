@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.thing.internal;
 
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,6 +51,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         implements BindingConfigReader, ItemChannelLinkProvider {
 
     private final Logger logger = LoggerFactory.getLogger(GenericItemChannelLinkProvider.class);
+
     /** caches binding configurations. maps context to a map mapping itemNames to {@link ItemChannelLink}s */
     protected Map<String, Map<String, Map<ChannelUID, ItemChannelLink>>> itemChannelLinkMap = new ConcurrentHashMap<>();
 
@@ -189,6 +192,6 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
 
     private boolean isValidContextForListeners(String context) {
         // Ignore isolated models
-        return !context.startsWith("tmp_");
+        return !isIsolatedModel(context);
     }
 }

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.item.internal;
 
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -267,7 +269,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 Map<String, String> formatters = Objects
                         .requireNonNull(stateFormattersMap.computeIfAbsent(modelName, k -> new HashMap<>()));
                 formatters.put(modelItem.getName(), format);
-                if (!modelRepository.isIsolatedModel(modelName)) {
+                if (!isIsolatedModel(modelName)) {
                     stateDescriptionFragments.put(modelItem.getName(),
                             StateDescriptionFragmentBuilder.create().withPattern(format).build());
                 }
@@ -279,7 +281,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                         stateFormattersMap.remove(modelName);
                     }
                 }
-                if (!modelRepository.isIsolatedModel(modelName)) {
+                if (!isIsolatedModel(modelName)) {
                     stateDescriptionFragments.remove(modelItem.getName());
                 }
             }
@@ -414,8 +416,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                             bindingType, item.getName(), e);
                 }
             } else {
-                genericMetaDataProvider.addMetadata(modelName, modelRepository.isIsolatedModel(modelName), bindingType,
-                        item.getName(), config, configuration.getProperties());
+                genericMetaDataProvider.addMetadata(modelName, bindingType, item.getName(), config,
+                        configuration.getProperties());
             }
         }
     }
@@ -429,7 +431,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                     Map<String, Item> oldItems = toItemMap(itemsMap.get(modelName));
                     Map<String, Item> newItems = toItemMap(getItemsFromModel(modelName));
                     itemsMap.put(modelName, newItems.values());
-                    if (!modelRepository.isIsolatedModel(modelName)) {
+                    if (!isIsolatedModel(modelName)) {
                         for (Item newItem : newItems.values()) {
                             Item oldItem = oldItems.get(newItem.getName());
                             if (oldItem != null) {
@@ -462,7 +464,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     }
 
     private void notifyAndCleanup(String modelName, Item oldItem) {
-        if (!modelRepository.isIsolatedModel(modelName)) {
+        if (!isIsolatedModel(modelName)) {
             notifyListenersAboutRemovedElement(oldItem);
             this.stateDescriptionFragments.remove(oldItem.getName());
         }

@@ -37,7 +37,7 @@ public class GenericMetadataProviderTest {
     @Test
     public void testAddMetadata() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
-        provider.addMetadata("model", false, "binding", "item", "value", null);
+        provider.addMetadata("model", "binding", "item", "value", null);
         Collection<Metadata> res = provider.getAll();
         assertEquals(1, res.size());
         assertEquals("value", res.iterator().next().getValue());
@@ -52,9 +52,9 @@ public class GenericMetadataProviderTest {
     @Test
     public void testRemoveMetadataByItemName() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
-        provider.addMetadata("model", false, "other", "item", "value", null);
-        provider.addMetadata("model", false, "binding", "item", "value", null);
-        provider.addMetadata("model", false, "binding", "other", "value", null);
+        provider.addMetadata("model", "other", "item", "value", null);
+        provider.addMetadata("model", "binding", "item", "value", null);
+        provider.addMetadata("model", "binding", "other", "value", null);
         assertEquals(3, provider.getAll().size());
 
         provider.removeMetadataByItemName("model", "item");
@@ -64,9 +64,9 @@ public class GenericMetadataProviderTest {
     @Test
     public void testRemoveMetadataByNamespace() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
-        provider.addMetadata("model", false, "other", "item", "value", null);
-        provider.addMetadata("model", false, "binding", "item", "value", null);
-        provider.addMetadata("model", false, "binding", "other", "value", null);
+        provider.addMetadata("model", "other", "item", "value", null);
+        provider.addMetadata("model", "binding", "item", "value", null);
+        provider.addMetadata("model", "binding", "other", "value", null);
         assertEquals(3, provider.getAll().size());
 
         provider.removeMetadataByNamespace("binding");

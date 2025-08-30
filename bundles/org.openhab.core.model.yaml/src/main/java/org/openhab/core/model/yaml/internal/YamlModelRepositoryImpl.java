@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal;
 
+import static org.openhab.core.model.yaml.YamlModelUtils.*;
 import static org.openhab.core.service.WatchService.Kind.CREATE;
 
 import java.io.IOException;
@@ -88,7 +89,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final int DEFAULT_MODEL_VERSION = 1;
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
-    private static final String PREFIX_TMP_MODEL = "tmp_";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
@@ -602,10 +602,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         if (isIsolatedModel(modelName)) {
             removeModel(modelName);
         }
-    }
-
-    public static boolean isIsolatedModel(String modelName) {
-        return modelName.startsWith(PREFIX_TMP_MODEL);
     }
 
     @Override

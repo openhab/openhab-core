@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.yaml.internal.items;
 
+import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,7 +27,6 @@ import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataProvider;
-import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class YamlMetadataProvider extends AbstractProvider<Metadata> implements 
     @Override
     public Collection<Metadata> getAll() {
         // Ignore isolated models
-        return metadataMap.keySet().stream().filter(name -> !YamlModelRepositoryImpl.isIsolatedModel(name))
+        return metadataMap.keySet().stream().filter(name -> !isIsolatedModel(name))
                 .map(name -> metadataMap.getOrDefault(name, Map.of())).flatMap(m -> m.values().stream())
                 .flatMap(m -> m.values().stream()).toList();
     }
@@ -80,14 +81,14 @@ public class YamlMetadataProvider extends AbstractProvider<Metadata> implements 
             if (oldMd == null) {
                 namespacesMetadataMap.put(namespace, md);
                 logger.debug("model {} added metadata {}", modelName, namespace);
-                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                if (!isIsolatedModel(modelName)) {
                     notifyListenersAboutAddedElement(md);
                 }
             } else if (!md.getValue().equals(oldMd.getValue())
                     || !YamlElementUtils.equalsConfig(md.getConfiguration(), oldMd.getConfiguration())) {
                 namespacesMetadataMap.put(namespace, md);
                 logger.debug("model {} updated metadata {}", modelName, namespace);
-                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                if (!isIsolatedModel(modelName)) {
                     notifyListenersAboutUpdatedElement(oldMd, md);
                 }
             }
@@ -97,7 +98,7 @@ public class YamlMetadataProvider extends AbstractProvider<Metadata> implements 
             Metadata md = namespacesMetadataMap.remove(namespace);
             if (md != null) {
                 logger.debug("model {} removed metadata {}", modelName, namespace);
-                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                if (!isIsolatedModel(modelName)) {
                     notifyListenersAboutRemovedElement(md);
                 }
             }
