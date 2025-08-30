@@ -51,22 +51,6 @@ public class YamlElementUtils {
                 : first.equals(second);
     }
 
-    public static boolean equalsListStrings(@Nullable List<String> first, @Nullable List<String> second) {
-        if (first != null && second != null) {
-            return Arrays.equals(first.toArray(), second.toArray());
-        } else {
-            return first == null && second == null;
-        }
-    }
-
-    public static boolean equalsSetStrings(@Nullable Set<String> first, @Nullable Set<String> second) {
-        if (first != null && second != null) {
-            return first.size() != second.size() ? false : first.containsAll(second);
-        } else {
-            return first == null && second == null;
-        }
-    }
-
     public static @Nullable String getAdjustedItemType(@Nullable String type) {
         return type == null ? null : StringUtils.capitalize(type);
     }

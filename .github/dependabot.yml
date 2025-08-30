@@ -37,7 +37,7 @@ updates:
     # automatically generated list of all package dependencies - all shall be ignored for now
     #
     # to generate this list: bash
-    # mvn dependency:tree |grep -v "from "|grep -e "[a-zA-Z\0-9-]\+\:[a-zA-Z\-]\+"|grep -v "dependency:.*:tree"|sed "s/\[[A-Z]*\][|\ +-]*//g"|sed "s/\[INFO\]//"|sed "s/:jar:.*//"|grep -v "The POM"|sort -u|grep -v openhab.core.|sed "s/^/      - dependency-name: \"/"|sed "s/$/\"/" >> .github/dependabot.yml
+    # mvn dependency:tree |grep -v "from "|grep -e "[a-zA-Z\0-9-]\+\:[a-zA-Z\-]\+"|grep -v "dependency:.*:tree"|sed "s/\[[A-Z]*\][|\ +-]*//g"|sed "s/\[INFO\]//"|sed "s/:jar:.*//"|grep -v "The POM"|sort -u|grep -v openhab.core.|grep -v ecj|sed "s/^/      - dependency-name: \"/"|sed "s/$/\"/" >> .github/dependabot.yml
     #
       - dependency-name: "aopalliance:aopalliance"
       - dependency-name: "biz.aQute.bnd:biz.aQute.tester.junit-platform"
@@ -260,7 +260,6 @@ updates:
       - dependency-name: "org.eclipse.emf:org.eclipse.emf.mwe2.launch"
       - dependency-name: "org.eclipse.emf:org.eclipse.emf.mwe2.lib"
       - dependency-name: "org.eclipse.emf:org.eclipse.emf.mwe2.runtime"
-      - dependency-name: "org.eclipse.jdt:ecj"
       - dependency-name: "org.eclipse.jdt:org.eclipse.jdt.annotation"
       - dependency-name: "org.eclipse.jdt:org.eclipse.jdt.core"
       - dependency-name: "org.eclipse.jdt:org.eclipse.jdt.debug"

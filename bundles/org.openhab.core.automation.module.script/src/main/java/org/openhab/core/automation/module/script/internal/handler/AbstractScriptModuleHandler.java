@@ -93,10 +93,10 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
      * {@link Compilable}.
      */
     protected void compileScript() throws ScriptException {
-        if (compiledScript.isPresent()) {
+        if (compiledScript.isPresent() || script.isEmpty()) {
             return;
         }
-        if (!scriptEngineManager.isSupported(this.type)) {
+        if (!scriptEngineManager.isSupported(type)) {
             logger.debug(
                     "ScriptEngine for language '{}' could not be found, skipping compilation of script for identifier: {}",
                     type, engineIdentifier);
@@ -119,11 +119,20 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     /**
      * Reset the script engine to force a script reload
-     *
      */
     public synchronized void resetScriptEngine() {
         scriptEngineManager.removeEngine(engineIdentifier);
         scriptEngine = Optional.empty();
+        compiledScript = Optional.empty();
+    }
+
+    /**
+     * Gets the unique identifier of the rule this module handler is used for.
+     *
+     * @return the UID of the rule
+     */
+    public String getRuleUID() {
+        return ruleUID;
     }
 
     /**
@@ -135,10 +144,20 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         return engineIdentifier;
     }
 
+    /**
+     * Get the script engine instance used by this module handler.
+     *
+     * @return the script engine instance if available, otherwise Optional.empty()
+     */
     protected Optional<ScriptEngine> getScriptEngine() {
         return scriptEngine.isPresent() ? scriptEngine : createScriptEngine();
     }
 
+    /**
+     * Creates a new script engine for the type defined in the module configuration.
+     *
+     * @return the script engine if available, otherwise Optional.empty()
+     */
     private Optional<ScriptEngine> createScriptEngine() {
         ScriptEngineContainer container = scriptEngineManager.createScriptEngine(type, engineIdentifier);
 
@@ -163,14 +182,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
         // Add the rule's UID to the context and make it available as "ctx".
         // Note: We don't use "context" here as it doesn't work on all JVM versions!
-        final Map<String, Object> contextNew = new HashMap<>(context);
-        contextNew.put("ruleUID", this.ruleUID);
-        executionContext.setAttribute("ctx", contextNew, ScriptContext.ENGINE_SCOPE);
-
-        // Add the rule's UID to the global namespace.
-        executionContext.setAttribute("ruleUID", this.ruleUID, ScriptContext.ENGINE_SCOPE);
-
-        // add the single context entries without their prefix to the scope
+        final Map<String, Object> contextNew = new HashMap<>();
+        // add the single context entries without their prefix to contextNew
         for (Entry<String, ?> entry : context.entrySet()) {
             Object value = entry.getValue();
             String key = entry.getKey();
@@ -178,6 +191,15 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             if (dotIndex != -1) {
                 key = key.substring(dotIndex + 1);
             }
+            contextNew.put(key, value);
+        }
+        contextNew.put("ruleUID", this.ruleUID);
+        executionContext.setAttribute("ctx", contextNew, ScriptContext.ENGINE_SCOPE);
+
+        // add the single contextNew entries to the scope
+        for (Entry<String, ?> entry : contextNew.entrySet()) {
+            Object value = entry.getValue();
+            String key = entry.getKey();
             executionContext.setAttribute(key, value, ScriptContext.ENGINE_SCOPE);
         }
     }
@@ -203,13 +225,15 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     }
 
     /**
-     * Evaluates the passed script with the ScriptEngine.
+     * Evaluates the script with the given script engine.
      *
      * @param engine the script engine that is used
-     * @param script the script to evaluate
      * @return the value returned from the execution of the script
      */
-    protected @Nullable Object eval(ScriptEngine engine, String script) {
+    protected @Nullable Object eval(ScriptEngine engine) {
+        if (script.isEmpty()) {
+            return null;
+        }
         try {
             if (compiledScript.isPresent()) {
                 logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);

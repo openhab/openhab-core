@@ -192,9 +192,7 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
                     if (baseItem != null) {
                         GroupFunctionDTO groupFunctionDto = new GroupFunctionDTO();
                         groupFunctionDto.name = groupDTO.getFunction();
-                        groupFunctionDto.params = groupDTO.parameters != null
-                                ? groupDTO.parameters.toArray(new String[0])
-                                : new String[0];
+                        groupFunctionDto.params = groupDTO.getParameters().toArray(new String[0]);
                         item = new GroupItem(name, baseItem, ItemDTOMapper.mapFunction(baseItem, groupFunctionDto));
                     } else {
                         item = new GroupItem(name);
@@ -214,15 +212,11 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
             genericItem.setLabel(itemDTO.label);
             genericItem.setCategory(itemDTO.icon);
 
-            if (itemDTO.tags != null) {
-                for (String tag : itemDTO.tags) {
-                    genericItem.addTag(tag);
-                }
+            for (String tag : itemDTO.getTags()) {
+                genericItem.addTag(tag);
             }
-            if (itemDTO.groups != null) {
-                for (String groupName : itemDTO.groups) {
-                    genericItem.addGroupName(groupName);
-                }
+            for (String groupName : itemDTO.getGroups()) {
+                genericItem.addGroupName(groupName);
             }
         }
 
