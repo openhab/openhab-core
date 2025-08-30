@@ -14,7 +14,8 @@ package org.openhab.core.config.discovery.addon.tests;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.IOException;

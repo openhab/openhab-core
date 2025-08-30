@@ -14,7 +14,8 @@ package org.openhab.core.auth.oauth2client.test.internal.cipher;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
