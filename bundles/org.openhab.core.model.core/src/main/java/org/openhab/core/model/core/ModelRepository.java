@@ -28,8 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * come from.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Laurent Garnier - Added method generateFileFormat
- * @author Laurent Garnier - Added methods createIsolatedModel and isIsolatedModel
+ * @author Laurent Garnier - Added methods generateFileFormat and createIsolatedModel
  */
 @NonNullByDefault
 public interface ModelRepository {
@@ -110,16 +109,6 @@ public interface ModelRepository {
      */
     @Nullable
     String createIsolatedModel(String modelType, InputStream inputStream, List<String> errors, List<String> warnings);
-
-    /**
-     * Indicates if a model is an isolated model
-     *
-     * An isolated model is a temporary model loaded without impacting any object registry.
-     *
-     * @param modelName the model name
-     * @return true if the model identified by the provided name is an isolated model, false otherwise
-     */
-    boolean isIsolatedModel(String modelName);
 
     /**
      * Generate the DSL file format from a provided model type and model content.

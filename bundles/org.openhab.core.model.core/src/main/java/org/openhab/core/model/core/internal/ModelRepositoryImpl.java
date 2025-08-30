@@ -50,9 +50,8 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
- * @author Laurent Garnier - Added method generateFileFormat
- * @author Laurent Garnier - Added methods createIsolatedModel and isIsolatedModel + return errors and warnings
- *         when loading a model
+ * @author Laurent Garnier - Added methods generateFileFormat, createIsolatedModel and isIsolatedModel
+ *         + return errors and warnings when loading a model
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -265,8 +264,15 @@ public class ModelRepositoryImpl implements ModelRepository {
         return addOrRefreshModel(name, inputStream, errors, warnings) ? name : null;
     }
 
-    @Override
-    public boolean isIsolatedModel(String modelName) {
+    /**
+     * Indicates if a model is an isolated model
+     *
+     * An isolated model is a temporary model loaded without impacting any object registry.
+     *
+     * @param modelName the model name
+     * @return true if the model identified by the provided name is an isolated model, false otherwise
+     */
+    public static boolean isIsolatedModel(String modelName) {
         return modelName.startsWith(PREFIX_TMP_MODEL);
     }
 
