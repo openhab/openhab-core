@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -291,7 +292,16 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
 
     @Override
     public Map<String, String> getParsedStateFormatters(String modelName) {
-        return Map.of();
+        Map<String, String> stateFormatters = new HashMap<>();
+        getParsedMetadata(modelName).forEach(md -> {
+            if ("stateDescription".equals(md.getUID().getNamespace())) {
+                Object pattern = md.getConfiguration().get("pattern");
+                if (pattern instanceof String patternStr && !patternStr.isBlank()) {
+                    stateFormatters.put(md.getUID().getItemName(), patternStr);
+                }
+            }
+        });
+        return stateFormatters;
     }
 
     @Override
