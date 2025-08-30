@@ -29,9 +29,10 @@
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/1.0.5</bundle>
 		<bundle dependency="true">mvn:javax.measure/unit-api/2.2</bundle>
 		<!-- The si.uom:si-units manifest has no Export-Package entry. As workaround this OSGi-ify bundle is used. -->
-		<bundle dependency="true">mvn:org.openhab.osgiify/si.uom.si-units/2.2</bundle>
-		<bundle dependency="true">mvn:si.uom/si-quantity/2.2</bundle>
-		<bundle dependency="true">mvn:tech.units/indriya/2.2.2</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/si.uom.si-units/2.2.3</bundle>
+		<!-- The si.uom:si-quantity manifest has no Export-Package entry. As workaround this OSGi-ify bundle is used. -->
+		<bundle dependency="true">mvn:org.openhab.osgiify/si.uom.si-quantity/2.2.3</bundle>
+		<bundle dependency="true">mvn:tech.units/indriya/2.2.3</bundle>
 		<bundle dependency="true">mvn:tech.uom.lib/uom-lib-common/2.2</bundle>
 		<bundle dependency="true">mvn:org.apiguardian/apiguardian-api/1.1.2</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.component.annotations/1.5.1</bundle>
@@ -51,13 +52,15 @@
 	</feature>
 
 	<feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
-		<capability>openhab.tp;feature=commons-net;version=3.11.1</capability>
-		<bundle dependency="true">mvn:commons-net/commons-net/3.11.1</bundle>
+		<capability>openhab.tp;feature=commons-net;version=3.12.0</capability>
+		<bundle dependency="true">mvn:commons-net/commons-net/3.12.0</bundle>
+		<bundle dependency="true">mvn:commons-io/commons-io/2.20.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">
-		<capability>openhab.tp;feature=gson;version=2.11.0</capability>
-		<bundle>mvn:com.google.code.gson/gson/2.11.0</bundle>
+		<capability>openhab.tp;feature=gson;version=2.13.1</capability>
+		<bundle>mvn:com.google.code.gson/gson/2.13.1</bundle>
+		<bundle>mvn:com.google.errorprone/error_prone_annotations/2.38.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-hivemqclient" description="MQTT Client" version="${project.version}">
@@ -242,8 +245,8 @@
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.lib/${xtext.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.smap/${xtext.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.util/${xtext.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib/${xtext.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib.macro/${xtext.version}</bundle>
+		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtend.lib/${xtext.version}</bundle>
+		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtend.lib.macro/${xtext.version}</bundle>
 
 		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.3</bundle>
 		<bundle dependency="true">mvn:com.google.guava/guava/33.4.8-jre</bundle>
@@ -251,7 +254,7 @@
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.1</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.aopalliance/1.0.0.v201105210816</bundle>
-		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.176</bundle>
+		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.180</bundle>
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.antlr.runtime/3.2.0.v201101311130</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.19.0</bundle>
@@ -259,7 +262,7 @@
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.9.0</bundle>
 
 		<!-- Used for feature verification only because this is already provided by Karaf -->
-		<bundle dependency="true" start="false">mvn:org.eclipse.platform/org.eclipse.osgi/3.19.0</bundle>
+		<bundle dependency="true" start="false">mvn:org.eclipse.platform/org.eclipse.osgi/3.18.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-xtext-ide" description="Xtext - IDE Support" version="${project.version}">

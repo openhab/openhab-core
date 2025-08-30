@@ -133,7 +133,7 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.11.0</version>
+      <version>2.13.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -231,13 +231,19 @@
     <dependency>
       <groupId>si.uom</groupId>
       <artifactId>si-units</artifactId>
-      <version>2.2</version>
+      <version>2.2.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>si.uom</groupId>
+      <artifactId>si-quantity</artifactId>
+      <version>2.2.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>tech.units</groupId>
       <artifactId>indriya</artifactId>
-      <version>2.2.2</version>
+      <version>2.2.3</version>
       <scope>compile</scope>
     </dependency>
 
@@ -326,8 +332,14 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.http.servlet-api</artifactId>
-      <version>1.1.2</version>
+      <version>1.2.0</version>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.tomcat</groupId>
+          <artifactId>tomcat-servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.aries.spec</groupId>
