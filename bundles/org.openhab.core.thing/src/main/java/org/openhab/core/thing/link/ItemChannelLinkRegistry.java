@@ -291,19 +291,19 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * And in any case if the item has native custom tags then those tags remain.
      */
     private void assignChannelDefaultTags(ItemChannelLink link, ActiveItem activeItem) {
-        boolean alreadyHasPointOrPropertyTag = false;
+        boolean alreadyHasPointOrPropertySemanticTag = false;
 
         for (String tag : activeItem.getTags()) {
             Class<? extends Tag> type = SemanticTags.getById(tag);
             if ((type != null) && (Point.class.isAssignableFrom(type) || Property.class.isAssignableFrom(type))) {
-                alreadyHasPointOrPropertyTag = true;
+                alreadyHasPointOrPropertySemanticTag = true;
                 break;
             }
         }
 
         Set<String> channelDefaultTags = getChannelDefaultTags(link);
         if (!channelDefaultTags.isEmpty()) {
-            if (alreadyHasPointOrPropertyTag) {
+            if (alreadyHasPointOrPropertySemanticTag) {
                 logger.debug("Item '{}' already tagged; ignoring tags supplied by channel '{}'.", activeItem.getName(),
                         link.getLinkedUID());
             } else {
