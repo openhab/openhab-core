@@ -342,7 +342,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             // remove old link's tags
             Set<String> oldLinkTags = getChannelDefaultTags(oldLink);
             newTags.removeAll(oldLinkTags);
-            // on OH shutdown tagsLinked may be true but oldLinkTags is already empty so do not log
+            // on openHAB shutdown tagsLinked may be true but oldLinkTags is already empty so do not log
             if (startlevel >= STARTLEVEL_COMPLETE) {
                 logger.info("Item '{}' removing tags '{}' supplied by channel '{}'.", activeItem.getName(), oldLinkTags,
                         oldLink.getLinkedUID());
