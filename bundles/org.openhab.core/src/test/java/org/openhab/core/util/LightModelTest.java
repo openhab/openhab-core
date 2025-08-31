@@ -26,19 +26,19 @@ import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.UnDefType;
 
 /**
- * Test for {@link LightStateMachine}.
+ * Test for {@link LightModel}.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class LightStateMachineTest {
+public class LightModelTest {
 
     @Test
     public void testFullColor() {
-        LightStateMachine lsm = new LightStateMachine(true, true, true);
-        assertTrue(lsm.supportsColor());
-        assertTrue(lsm.supportsBrightness());
-        assertTrue(lsm.supportsColorTemperature());
+        LightModel lsm = new LightModel(true, true, true);
+        assertTrue(lsm.configSupportsColor());
+        assertTrue(lsm.configSupportsBrightness());
+        assertTrue(lsm.configSupportsColorTemperature());
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
@@ -94,10 +94,10 @@ public class LightStateMachineTest {
 
     @Test
     public void testColorWithoutColorTemperature() {
-        LightStateMachine lsm = new LightStateMachine(true, false, true);
-        assertTrue(lsm.supportsColor());
-        assertTrue(lsm.supportsBrightness());
-        assertFalse(lsm.supportsColorTemperature());
+        LightModel lsm = new LightModel(true, false, true);
+        assertTrue(lsm.configSupportsColor());
+        assertTrue(lsm.configSupportsBrightness());
+        assertFalse(lsm.configSupportsColorTemperature());
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
@@ -109,8 +109,8 @@ public class LightStateMachineTest {
         assertEquals(PercentType.HUNDRED, lsm.getBrightness());
         assertNull(lsm.getColorTemperature());
         assertNull(lsm.getColorTemperaturePercent());
-        assertEquals(UnDefType.UNDEF, LightStateMachine.requireNonNull(lsm.getColorTemperature()));
-        assertEquals(UnDefType.UNDEF, LightStateMachine.requireNonNull(lsm.getColorTemperaturePercent()));
+        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColorTemperature()));
+        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColorTemperaturePercent()));
 
         lsm.handleCommand(PercentType.ZERO);
         assertEquals(PercentType.ZERO, lsm.getBrightness());
@@ -119,16 +119,16 @@ public class LightStateMachineTest {
 
     @Test
     public void testBrightnessAndColorTemperature() {
-        LightStateMachine lsm = new LightStateMachine(true, true, false);
-        assertFalse(lsm.supportsColor());
-        assertTrue(lsm.supportsBrightness());
-        assertTrue(lsm.supportsColorTemperature());
+        LightModel lsm = new LightModel(true, true, false);
+        assertFalse(lsm.configSupportsColor());
+        assertTrue(lsm.configSupportsBrightness());
+        assertTrue(lsm.configSupportsColorTemperature());
 
         lsm.handleCommand(HSBType.RED);
         assertNull(lsm.getColor());
         assertEquals(PercentType.HUNDRED, lsm.getBrightness());
         assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(UnDefType.UNDEF, LightStateMachine.requireNonNull(lsm.getColor()));
+        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColor()));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
         assertEquals(OnOffType.ON, lsm.getOnOff());
@@ -142,16 +142,16 @@ public class LightStateMachineTest {
 
     @Test
     public void testBrightnessOnly() {
-        LightStateMachine lsm = new LightStateMachine(true, false, false);
-        assertFalse(lsm.supportsColor());
-        assertTrue(lsm.supportsBrightness());
-        assertFalse(lsm.supportsColorTemperature());
+        LightModel lsm = new LightModel(true, false, false);
+        assertFalse(lsm.configSupportsColor());
+        assertTrue(lsm.configSupportsBrightness());
+        assertFalse(lsm.configSupportsColorTemperature());
 
         lsm.handleCommand(HSBType.RED);
         assertNull(lsm.getColor());
         assertEquals(PercentType.HUNDRED, lsm.getBrightness());
         assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(UnDefType.UNDEF, LightStateMachine.requireNonNull(lsm.getColor()));
+        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColor()));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
         assertEquals(OnOffType.ON, lsm.getOnOff());
@@ -165,17 +165,17 @@ public class LightStateMachineTest {
 
     @Test
     public void testOnOffOnly() {
-        LightStateMachine lsm = new LightStateMachine(false, false, false);
-        assertFalse(lsm.supportsColor());
-        assertFalse(lsm.supportsBrightness());
-        assertFalse(lsm.supportsColorTemperature());
+        LightModel lsm = new LightModel(false, false, false);
+        assertFalse(lsm.configSupportsColor());
+        assertFalse(lsm.configSupportsBrightness());
+        assertFalse(lsm.configSupportsColorTemperature());
 
         lsm.handleCommand(HSBType.RED);
         assertNull(lsm.getColor());
         assertNull(lsm.getBrightness());
         assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(UnDefType.UNDEF, LightStateMachine.requireNonNull(lsm.getColor()));
-        assertEquals(UnDefType.UNDEF, LightStateMachine.requireNonNull(lsm.getBrightness()));
+        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColor()));
+        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getBrightness()));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
         assertEquals(OnOffType.ON, lsm.getOnOff());
@@ -188,107 +188,130 @@ public class LightStateMachineTest {
     }
 
     @Test
+    public void testColorTemperatureTracking() {
+        LightModel lsm = new LightModel();
+
+        lsm.handleCommand(HSBType.RED);
+        assertEquals(HSBType.RED, lsm.getColor());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
+        assertEquals(OnOffType.ON, lsm.getOnOff());
+
+        lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
+        assertNotEquals(HSBType.RED, lsm.getColor());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
+        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(QuantityType.valueOf(500, Units.MIRED), lsm.getColorTemperature());
+        assertEquals(PercentType.HUNDRED, lsm.getColorTemperaturePercent());
+
+        lsm.handleCommand(QuantityType.valueOf(153, Units.MIRED));
+        assertEquals(QuantityType.valueOf(153, Units.MIRED), lsm.getColorTemperature());
+        assertEquals(PercentType.ZERO, lsm.getColorTemperaturePercent());
+
+        lsm.handleColorTemperatureCommand(PercentType.HUNDRED);
+        assertEquals(QuantityType.valueOf(500, Units.MIRED), lsm.getColorTemperature());
+        assertEquals(PercentType.HUNDRED, lsm.getColorTemperaturePercent());
+
+        lsm.handleColorTemperatureCommand(PercentType.ZERO);
+        assertEquals(QuantityType.valueOf(153, Units.MIRED), lsm.getColorTemperature());
+        assertEquals(PercentType.ZERO, lsm.getColorTemperaturePercent());
+    }
+
+    @Test
     public void testSimpleConstructor() {
-        LightStateMachine lsm = new LightStateMachine();
-        assertFalse(lsm.supportsColor());
-        assertFalse(lsm.supportsBrightness());
-        assertFalse(lsm.supportsColorTemperature());
-        assertEquals(1.0, lsm.getMinimumOnBrightness());
-        assertEquals(500.0, lsm.getWarmestMired());
-        assertEquals(153.0, lsm.getCoolestMired());
-        assertEquals(10.0, lsm.getIncreaseDecreaseStep());
+        LightModel lsm = new LightModel();
+        assertTrue(lsm.configSupportsColor());
+        assertTrue(lsm.configSupportsBrightness());
+        assertTrue(lsm.configSupportsColorTemperature());
+        assertEquals(1.0, lsm.configGetMinimumOnBrightness());
+        assertEquals(500.0, lsm.configGetMiredWarmest());
+        assertEquals(153.0, lsm.configGetMiredCoolest());
+        assertEquals(10.0, lsm.configGetIncreaseDecreaseStep());
     }
 
     @Test
     public void testComplexConstructor() {
-        LightStateMachine lsm = new LightStateMachine(false, false, false, 2.0, 501.0, 154.0, 11.0);
-        assertFalse(lsm.supportsColor());
-        assertFalse(lsm.supportsBrightness());
-        assertFalse(lsm.supportsColorTemperature());
-        assertEquals(2.0, lsm.getMinimumOnBrightness());
-        assertEquals(501.0, lsm.getWarmestMired());
-        assertEquals(154.0, lsm.getCoolestMired());
-        assertEquals(11.0, lsm.getIncreaseDecreaseStep());
+        LightModel lsm = new LightModel(false, false, false, 2.0, 501.0, 154.0, 11.0);
+        assertFalse(lsm.configSupportsColor());
+        assertFalse(lsm.configSupportsBrightness());
+        assertFalse(lsm.configSupportsColorTemperature());
+        assertEquals(2.0, lsm.configGetMinimumOnBrightness());
+        assertEquals(501.0, lsm.configGetMiredWarmest());
+        assertEquals(154.0, lsm.configGetMiredCoolest());
+        assertEquals(11.0, lsm.configGetIncreaseDecreaseStep());
     }
 
     @Test
     public void testCapabilitySetters() {
-        LightStateMachine lsm = new LightStateMachine();
-        lsm.setSupportsColor(true);
-        lsm.setSupportsBrightness(true);
-        lsm.setSupportsColorTemperature(true);
+        LightModel lsm = new LightModel();
+        lsm.configSetSupportsColor(false);
+        lsm.configSetSupportsBrightness(false);
+        lsm.configSetSupportsColorTemperature(false);
 
-        assertTrue(lsm.supportsColor());
-        assertTrue(lsm.supportsBrightness());
-        assertTrue(lsm.supportsColorTemperature());
+        assertFalse(lsm.configSupportsColor());
+        assertFalse(lsm.configSupportsBrightness());
+        assertFalse(lsm.configSupportsColorTemperature());
     }
 
     @Test
     public void testParameterSetters() {
-        LightStateMachine lsm = new LightStateMachine();
-        assertThrows(IllegalArgumentException.class, () -> lsm.setMinimumOnBrightness(0.0));
-        lsm.setMinimumOnBrightness(2.0);
-        lsm.setWarmestMired(501.0);
-        lsm.setCoolestMired(154.0);
-        lsm.setIncreaseDecreaseStep(11.0);
+        LightModel lsm = new LightModel();
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMinimumOnBrightness(0.0));
+        lsm.configSetMinimumOnBrightness(2.0);
+        lsm.configSetMiredWarmest(501.0);
+        lsm.configSetMiredCoolest(154.0);
+        lsm.configSetIncreaseDecreaseStep(11.0);
 
-        assertEquals(2.0, lsm.getMinimumOnBrightness());
-        assertEquals(501.0, lsm.getWarmestMired());
-        assertEquals(154.0, lsm.getCoolestMired());
-        assertEquals(11.0, lsm.getIncreaseDecreaseStep());
+        assertEquals(2.0, lsm.configGetMinimumOnBrightness());
+        assertEquals(501.0, lsm.configGetMiredWarmest());
+        assertEquals(154.0, lsm.configGetMiredCoolest());
+        assertEquals(11.0, lsm.configGetIncreaseDecreaseStep());
     }
 
     @Test
     public void testParameterSettersBad() {
-        LightStateMachine lsm = new LightStateMachine();
-        assertThrows(IllegalArgumentException.class, () -> lsm.setMinimumOnBrightness(0.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.setMinimumOnBrightness(11.0));
+        LightModel lsm = new LightModel();
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMinimumOnBrightness(0.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMinimumOnBrightness(11.0));
 
-        assertThrows(IllegalArgumentException.class, () -> lsm.setWarmestMired(153.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.setWarmestMired(99.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.setWarmestMired(1001.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredWarmest(153.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredWarmest(99.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredWarmest(1001.0));
 
-        assertThrows(IllegalArgumentException.class, () -> lsm.setCoolestMired(501.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.setCoolestMired(99.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.setCoolestMired(1001.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredCoolest(501.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredCoolest(99.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredCoolest(1001.0));
 
-        assertThrows(IllegalArgumentException.class, () -> lsm.setIncreaseDecreaseStep(0.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.setIncreaseDecreaseStep(51.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetIncreaseDecreaseStep(0.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetIncreaseDecreaseStep(51.0));
     }
 
     @Test
     public void testCommandsBad() {
-        LightStateMachine lsm = new LightStateMachine();
+        LightModel lsm = new LightModel();
         assertThrows(IllegalArgumentException.class, () -> lsm.handleCommand(DecimalType.ZERO));
         assertThrows(IllegalArgumentException.class, () -> lsm.handleCommand(QuantityType.valueOf(5, Units.AMPERE)));
-        assertThrows(IllegalArgumentException.class, () -> lsm.handleColorTemperatureCommand(OnOffType.ON));
         assertThrows(IllegalArgumentException.class,
                 () -> lsm.handleColorTemperatureCommand(QuantityType.valueOf(5, Units.AMPERE)));
+        assertDoesNotThrow(() -> lsm.handleColorTemperatureCommand(OnOffType.ON));
     }
 
     @Test
     public void testComplexConstructorBad() {
+        assertThrows(IllegalArgumentException.class, () -> new LightModel(false, false, false, 0.0, null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> new LightModel(false, false, false, 11.0, null, null, null));
+
+        assertThrows(IllegalArgumentException.class, () -> new LightModel(false, false, false, null, 99.0, null, null));
         assertThrows(IllegalArgumentException.class,
-                () -> new LightStateMachine(false, false, false, 0.0, null, null, null));
+                () -> new LightModel(false, false, false, null, 1001.0, null, null));
+
+        assertThrows(IllegalArgumentException.class, () -> new LightModel(false, false, false, null, null, 99.0, null));
         assertThrows(IllegalArgumentException.class,
-                () -> new LightStateMachine(false, false, false, 11.0, null, null, null));
+                () -> new LightModel(false, false, false, null, null, 1001.0, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightStateMachine(false, false, false, null, 99.0, null, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightStateMachine(false, false, false, null, 1001.0, null, null));
+                () -> new LightModel(false, false, false, null, 300.0, 300.0, null));
 
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightStateMachine(false, false, false, null, null, 99.0, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightStateMachine(false, false, false, null, null, 1001.0, null));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightStateMachine(false, false, false, null, 300.0, 300.0, null));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightStateMachine(false, false, false, null, null, null, 0.0));
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightStateMachine(false, false, false, null, null, null, 51.0));
+        assertThrows(IllegalArgumentException.class, () -> new LightModel(false, false, false, null, null, null, 0.0));
+        assertThrows(IllegalArgumentException.class, () -> new LightModel(false, false, false, null, null, null, 51.0));
     }
 }
