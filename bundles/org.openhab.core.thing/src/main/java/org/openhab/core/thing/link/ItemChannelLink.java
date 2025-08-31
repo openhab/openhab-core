@@ -31,6 +31,7 @@ public class ItemChannelLink extends AbstractLink {
     private final @NonNullByDefault({}) ChannelUID channelUID;
     private final Configuration configuration;
 
+    // this field tracks whether the item's current tags were applied from the linked channel's default tags
     private transient boolean tagsLinked = false;
 
     /**
@@ -76,12 +77,15 @@ public class ItemChannelLink extends AbstractLink {
     }
 
     /**
-     * Indicates if the linked channel is the actual source of the item's tags.
+     * Check if the item's current tags were applied from the linked channel's default tags
      */
     public boolean tagsLinked() {
         return tagsLinked;
     }
 
+    /**
+     * Set the flag that indicates if the item's current tags were applied from the linked channel's default tags
+     */
     public void setTagsLinked(boolean value) {
         tagsLinked = value;
     }
