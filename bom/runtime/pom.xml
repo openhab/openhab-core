@@ -19,7 +19,7 @@
     <californium.version>4.0.0-M2</californium.version>
     <!-- cxf can be updated independently of karaf, only used in karaf tests -->
     <cxf.version>3.6.8</cxf.version>
-    <jackson.version>2.19.2</jackson.version>
+    <jackson.version>2.20.0</jackson.version>
     <jetty.version>9.4.57.v20241219</jetty.version>
     <pax.logging.version>2.3.0</pax.logging.version>
     <pax.web.version>8.0.33</pax.web.version>

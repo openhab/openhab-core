@@ -18,7 +18,7 @@
   <description>A tool for upgrading openHAB</description>
 
   <properties>
-    <jackson.version>2.19.2</jackson.version>
+    <jackson.version>2.20.0</jackson.version>
   </properties>
 
   <dependencies>
