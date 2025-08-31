@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.Win32Exception;
 
 /**
  * This is a {@link UsbSerialDiscovery} implementation component for Windows.
@@ -144,7 +145,7 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
         String[] deviceKeys;
         try {
             deviceKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, USB_REGISTRY_ROOT);
-        } catch (RuntimeException e) {
+        } catch (Win32Exception e) {
             logger.debug("registryGetKeys failed for {}", USB_REGISTRY_ROOT, e);
             return result;
         }
@@ -180,7 +181,7 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
             String[] interfaceNames;
             try {
                 interfaceNames = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, devicePath);
-            } catch (RuntimeException e) {
+            } catch (Win32Exception e) {
                 logger.debug("registryGetKeys failed for {}", devicePath, e);
                 continue;
             }
@@ -193,7 +194,7 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
                 TreeMap<String, Object> values;
                 try {
                     values = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE, interfacePath);
-                } catch (RuntimeException e) {
+                } catch (Win32Exception e) {
                     logger.debug("registryGetValues failed for {}", interfacePath, e);
                     continue;
                 }
@@ -232,7 +233,7 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
                 String[] interfaceSubKeys;
                 try {
                     interfaceSubKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, interfacePath);
-                } catch (RuntimeException e) {
+                } catch (Win32Exception e) {
                     logger.debug("registryGetKeys failed for {}", interfacePath, e);
                     continue;
                 }
@@ -246,7 +247,7 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
                     try {
                         deviceParameterValues = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE,
                                 deviceParametersPath);
-                    } catch (RuntimeException e) {
+                    } catch (Win32Exception e) {
                         logger.debug("registryGetValues failed for {}", deviceParametersPath, e);
                         continue;
                     }
