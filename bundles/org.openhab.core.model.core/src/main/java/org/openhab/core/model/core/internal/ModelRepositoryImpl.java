@@ -179,6 +179,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean removeModel(String name) {
+        logger.info("Unloading DSL model '{}'", name);
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
@@ -267,7 +268,7 @@ public class ModelRepositoryImpl implements ModelRepository {
     @Override
     public void generateFileFormat(OutputStream out, String modelType, EObject modelContent) {
         synchronized (resourceSet) {
-            String name = "%sgenerated_syntax_%d.%s".formatted(PREFIX_TMP_MODEL, ++counter, modelType);
+            String name = "%sgenerated_DSL_%d.%s".formatted(PREFIX_TMP_MODEL, ++counter, modelType);
             Resource resource = resourceSet.createResource(URI.createURI(name));
             try {
                 resource.getContents().add(modelContent);

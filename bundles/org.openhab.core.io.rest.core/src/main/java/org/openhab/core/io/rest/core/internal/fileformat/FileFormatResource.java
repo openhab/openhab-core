@@ -197,6 +197,53 @@ public class FileFormatResource implements RESTResource {
                       param: my param value
             """;
 
+    private static final String YAML_ITEMS_AND_THINGS_EXAMPLE = """
+            version: 1
+            things:
+              binding:typeBridge:idBridge:
+                isBridge: true
+                label: Label bridge
+                location: Location bridge
+                config:
+                  stringParam: my value
+              binding:type:idBridge:id:
+                bridge: binding:typeBridge:idBridge
+                label: Label thing
+                location: Location thing
+                config:
+                  booleanParam: true
+                  decimalParam: 2.5
+            items:
+              Group1:
+                type: Group
+                label: Label
+              Group2:
+                type: Group
+                group:
+                  type: Switch
+                  function: Or
+                  parameters:
+                    - "ON"
+                    - "OFF"
+                label: Label
+              MyItem:
+                type: Switch
+                label: Label
+                icon: icon
+                groups:
+                  - Group1
+                  - Group2
+                tags:
+                  - Tag1
+                  - Tag2
+                channel: binding:type:idBridge:id:channelid
+                metadata:
+                  namespace:
+                    value: my value
+                    config:
+                      param: my param value
+            """;
+
     private static final String GEN_ID_PATTERN = "gen_file_format_%d";
 
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
@@ -379,7 +426,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
                             @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
                             @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
-                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_ITEMS_AND_THINGS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "400", description = "Invalid JSON data."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response create(final @Context HttpHeaders httpHeaders,
@@ -460,7 +507,7 @@ public class FileFormatResource implements RESTResource {
             @RequestBody(description = "file format syntax", required = true, content = {
                     @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
                     @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
-                    @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }) String input) {
+                    @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_ITEMS_AND_THINGS_EXAMPLE)) }) String input) {
         String contentTypeHeader = httpHeaders.getHeaderString(HttpHeaders.CONTENT_TYPE);
         logger.debug("parse: contentType = {}", contentTypeHeader);
 
@@ -532,12 +579,10 @@ public class FileFormatResource implements RESTResource {
                                     .build();
                         }
                     }
-                    items = itemParser
-                            .getParsedItems(modelName != null ? modelName : Objects.requireNonNull(modelName2));
-                    metadata = itemParser
-                            .getParsedMetadata(modelName != null ? modelName : Objects.requireNonNull(modelName2));
-                    stateFormatters = itemParser.getParsedStateFormatters(
-                            modelName != null ? modelName : Objects.requireNonNull(modelName2));
+                    String modelNameToUse = modelName != null ? modelName : Objects.requireNonNull(modelName2);
+                    items = itemParser.getParsedItems(modelNameToUse);
+                    metadata = itemParser.getParsedMetadata(modelNameToUse);
+                    stateFormatters = itemParser.getParsedStateFormatters(modelNameToUse);
                 }
                 break;
             default:
@@ -761,14 +806,14 @@ public class FileFormatResource implements RESTResource {
             List<Metadata> metadata, Map<String, String> stateFormatters, List<String> errors) {
         boolean ok = true;
         if (data.things != null) {
-            for (ThingDTO thingBean : data.things) {
-                ThingUID thingUID = thingBean.UID == null ? null : new ThingUID(thingBean.UID);
-                ThingTypeUID thingTypeUID = new ThingTypeUID(thingBean.thingTypeUID);
+            for (ThingDTO thingData : data.things) {
+                ThingUID thingUID = thingData.UID == null ? null : new ThingUID(thingData.UID);
+                ThingTypeUID thingTypeUID = new ThingTypeUID(thingData.thingTypeUID);
 
                 ThingUID bridgeUID = null;
 
-                if (thingBean.bridgeUID != null) {
-                    bridgeUID = new ThingUID(thingBean.bridgeUID);
+                if (thingData.bridgeUID != null) {
+                    bridgeUID = new ThingUID(thingData.bridgeUID);
                     if (thingUID != null && !thingUID.getBindingId().equals(bridgeUID.getBindingId())) {
                         errors.add("Thing UID '" + thingUID + "' and bridge UID '" + bridgeUID
                                 + "' are from different bindings");
@@ -779,27 +824,27 @@ public class FileFormatResource implements RESTResource {
 
                 // turn the ThingDTO's configuration into a Configuration
                 Configuration configuration = new Configuration(
-                        normalizeConfiguration(thingBean.configuration, thingTypeUID, thingUID));
+                        normalizeConfiguration(thingData.configuration, thingTypeUID, thingUID));
                 if (thingUID != null) {
-                    normalizeChannels(thingBean, thingUID);
+                    normalizeChannels(thingData, thingUID);
                 }
 
-                Thing thing = thingRegistry.createThingOfType(thingTypeUID, thingUID, bridgeUID, thingBean.label,
+                Thing thing = thingRegistry.createThingOfType(thingTypeUID, thingUID, bridgeUID, thingData.label,
                         configuration);
 
                 if (thing != null) {
-                    if (thingBean.properties != null) {
-                        for (Map.Entry<String, String> entry : thingBean.properties.entrySet()) {
+                    if (thingData.properties != null) {
+                        for (Map.Entry<String, String> entry : thingData.properties.entrySet()) {
                             thing.setProperty(entry.getKey(), entry.getValue());
                         }
                     }
-                    if (thingBean.location != null) {
-                        thing.setLocation(thingBean.location);
+                    if (thingData.location != null) {
+                        thing.setLocation(thingData.location);
                     }
-                    if (thingBean.channels != null) {
+                    if (thingData.channels != null) {
                         // The provided channels replace the channels provided by the thing type.
                         ThingDTO thingChannels = new ThingDTO();
-                        thingChannels.channels = thingBean.channels;
+                        thingChannels.channels = thingData.channels;
                         thing = ThingHelper.merge(thing, thingChannels);
                     }
                 } else if (thingUID != null) {
@@ -807,7 +852,7 @@ public class FileFormatResource implements RESTResource {
                     // we create the Thing exactly the way we received it, i.e. we
                     // cannot take its thing type into account for automatically
                     // populating channels and properties.
-                    thing = ThingDTOMapper.map(thingBean,
+                    thing = ThingDTOMapper.map(thingData,
                             thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType);
                 } else {
                     errors.add("A thing UID must be provided, since no binding can create the thing!");

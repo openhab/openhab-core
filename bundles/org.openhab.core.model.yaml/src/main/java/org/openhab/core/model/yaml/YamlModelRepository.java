@@ -23,8 +23,8 @@ import org.eclipse.jdt.annotation.Nullable;
  * The {@link YamlModelRepository} defines methods to update elements in a YAML model.
  *
  * @author Jan N. Klug - Initial contribution
- * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createTemporaryModel and
- *         removeTemporaryModel
+ * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createIsolatedModel and
+ *         removeIsolatedModel
  */
 @NonNullByDefault
 public interface YamlModelRepository {

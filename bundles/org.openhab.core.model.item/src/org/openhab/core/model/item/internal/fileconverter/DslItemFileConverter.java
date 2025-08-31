@@ -100,7 +100,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
         ItemModel model = ItemsFactory.eINSTANCE.createItemModel();
         for (Item item : items) {
             model.getItems().add(buildModelItem(item, getChannelLinks(metadata, item.getName()),
-                    getMetadata(metadata, item.getName()), stateFormatters, hideDefaultParameters));
+                    getMetadata(metadata, item.getName()), stateFormatters.get(item.getName()), hideDefaultParameters));
         }
         elementsToGenerate.put(id, model);
     }
@@ -114,7 +114,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     }
 
     private ModelItem buildModelItem(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
-            Map<String, String> stateFormatters, boolean hideDefaultParameters) {
+            @Nullable String stateFormatter, boolean hideDefaultParameters) {
         ModelItem model;
         if (item instanceof GroupItem groupItem) {
             ModelGroupItem modelGroup = ItemsFactory.eINSTANCE.createModelGroupItem();
@@ -143,8 +143,8 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
         boolean patternInjected = false;
         String defaultPattern = getDefaultStatePattern(item);
         if (label != null && !label.isEmpty()) {
-            String statePattern = stateFormatters.get(item.getName());
-            String patterToInject = statePattern != null && !statePattern.equals(defaultPattern) ? statePattern : null;
+            String patterToInject = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter
+                    : null;
             if (patterToInject != null) {
                 // Inject the pattern in the label
                 patternInjected = true;

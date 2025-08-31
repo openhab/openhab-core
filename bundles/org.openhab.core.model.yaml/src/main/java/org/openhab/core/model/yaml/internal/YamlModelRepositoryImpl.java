@@ -80,8 +80,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Laurent Garnier - Map used instead of table
  * @author Laurent Garnier - Added basic version management
  * @author Laurent Garnier - new parameters to retrieve errors and warnings when loading a file
- * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createTemporaryModel and
- *         removeTemporaryModel
+ * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createIsolatedModel and
+ *         removeIsolatedModel
  */
 @NonNullByDefault
 @Component(immediate = true)

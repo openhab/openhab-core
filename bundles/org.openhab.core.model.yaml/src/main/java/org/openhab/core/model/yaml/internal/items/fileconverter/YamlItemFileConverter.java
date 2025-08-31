@@ -95,7 +95,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
         List<YamlElement> elements = new ArrayList<>();
         items.forEach(item -> {
             elements.add(buildItemDTO(item, getChannelLinks(metadata, item.getName()),
-                    getMetadata(metadata, item.getName()), stateFormatters, hideDefaultParameters));
+                    getMetadata(metadata, item.getName()), stateFormatters.get(item.getName()), hideDefaultParameters));
         });
         modelRepository.addElementsToBeGenerated(id, elements);
     }
@@ -106,7 +106,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
     }
 
     private YamlItemDTO buildItemDTO(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
-            Map<String, String> stateFormatters, boolean hideDefaultParameters) {
+            @Nullable String stateFormatter, boolean hideDefaultParameters) {
         YamlItemDTO dto = new YamlItemDTO();
         dto.name = item.getName();
 
@@ -115,8 +115,8 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
         String defaultPattern = getDefaultStatePattern(item);
         if (label != null && !label.isEmpty()) {
             dto.label = item.getLabel();
-            String statePattern = stateFormatters.get(item.getName());
-            String patterToSet = statePattern != null && !statePattern.equals(defaultPattern) ? statePattern : null;
+            String patterToSet = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter
+                    : null;
             dto.format = patterToSet;
             patternSet = patterToSet != null;
         }
