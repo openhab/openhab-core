@@ -132,7 +132,7 @@ abstract class LightModelAbstractLogicImpl {
      */
     void configSetIncreaseDecreaseStep(double stepSize) throws IllegalArgumentException {
         if (stepSize < 1.0 || stepSize > 50.0) {
-            throw new IllegalArgumentException("Step size '%f' out of range (1.0..50.0]".formatted(stepSize));
+            throw new IllegalArgumentException("Step size '%f' out of range [1.0..50.0]".formatted(stepSize));
         }
         this.stepSize = stepSize;
     }
@@ -534,7 +534,7 @@ abstract class LightModelAbstractLogicImpl {
                     "Warmest mired '%f' must be greater than coolest mired '%f'".formatted(warmestMired, coolestMired));
         }
         if (stepSize < 1.0 || stepSize > 50.0) {
-            throw new IllegalArgumentException("Step size '%f' out of range (1.0..50.0]".formatted(stepSize));
+            throw new IllegalArgumentException("Step size '%f' out of range [1.0..50.0]".formatted(stepSize));
         }
     }
 }

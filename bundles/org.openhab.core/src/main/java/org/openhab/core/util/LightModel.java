@@ -47,7 +47,7 @@ import org.openhab.core.types.UnDefType;
  * {@code
  * public class LightModelHandler extends BaseThingHandler {
  *
- *     // initialize the light model with default cabapilities and parameters
+ *     // initialize the light model with default capabilities and parameters
  *     private final LightModel model = new LightModel();
  *
  *     @Override
