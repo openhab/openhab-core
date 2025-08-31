@@ -18,6 +18,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -34,10 +37,11 @@ import com.google.gson.JsonPrimitive;
  * @author Simon Kaufmann - Initial contribution
  * @author Ana Dimova - added a deserializer for the configuration, conforming to the automation json format
  */
+@NonNullByDefault
 public class ConfigurationDeserializer implements JsonDeserializer<Configuration> {
 
     @Override
-    public Configuration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public @Nullable Configuration deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
         JsonObject configurationObject = json.getAsJsonObject();
         if (configurationObject.get("properties") != null) {

@@ -239,7 +239,7 @@ public class FileFormatResource implements RESTResource {
                             @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_ITEMS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "404", description = "One or more items not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForItems(final @Context HttpHeaders httpHeaders,
+    public @Nullable Response createFileFormatForItems(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @Parameter(description = "Array of item names. If empty or omitted, return all Items.") @Nullable List<String> itemNames) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
@@ -280,7 +280,7 @@ public class FileFormatResource implements RESTResource {
                             @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "404", description = "One or more things not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForThings(final @Context HttpHeaders httpHeaders,
+    public @Nullable Response createFileFormatForThings(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @Parameter(description = "Array of Thing UIDs. If empty or omitted, return all Things from the Registry.") @Nullable List<String> thingUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);

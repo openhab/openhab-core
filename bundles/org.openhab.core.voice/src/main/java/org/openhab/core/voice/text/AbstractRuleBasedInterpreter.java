@@ -680,7 +680,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting expression
      */
     protected Expression tag(@Nullable String name, Object expression, @Nullable Object tag) {
-        return new ExpressionLet(name, exp(expression), null, tag);
+        return new ExpressionLet(name, Objects.requireNonNull(exp(expression)), null, tag);
     }
 
     /**
@@ -747,7 +747,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting expression
      */
     protected ExpressionCardinality opt(Object expression) {
-        return new ExpressionCardinality(exp(expression), false, true);
+        return new ExpressionCardinality(Objects.requireNonNull(exp(expression)), false, true);
     }
 
     /**
@@ -759,7 +759,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting expression
      */
     protected ExpressionCardinality star(Object expression) {
-        return new ExpressionCardinality(exp(expression), false, false);
+        return new ExpressionCardinality(Objects.requireNonNull(exp(expression)), false, false);
     }
 
     /**
@@ -771,7 +771,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting expression
      */
     protected ExpressionCardinality plus(Object expression) {
-        return new ExpressionCardinality(exp(expression), true, false);
+        return new ExpressionCardinality(Objects.requireNonNull(exp(expression)), true, false);
     }
 
     /**
@@ -999,8 +999,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return new ArrayList<>(itemsData.keySet());
     }
 
-    @Nullable
-    private Item filterMatchedItemsByLocation(Map<Item, ItemInterpretationMetadata> itemsData, String locationContext) {
+    private @Nullable Item filterMatchedItemsByLocation(Map<Item, ItemInterpretationMetadata> itemsData,
+            String locationContext) {
         var itemsFilteredByLocation = itemsData.entrySet().stream()
                 .filter(entry -> entry.getValue().locationParentNames.contains(locationContext)).toList();
         if (itemsFilteredByLocation.size() != 1) {
