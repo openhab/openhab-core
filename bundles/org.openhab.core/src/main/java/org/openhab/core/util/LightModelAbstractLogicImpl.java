@@ -315,7 +315,7 @@ abstract class LightModelAbstractLogicImpl {
      * <ul>
      * <li>HSBType for color setting</li>
      * <li>PercentType for brightness setting</li>
-     * <li>OnOffType for pn/off state setting</li>
+     * <li>OnOffType for on/off state setting</li>
      * <li>IncreaseDecreaseType for brightness up/down setting</li>
      * <li>QuantityType for color temperature setting</li>
      * </ul>
@@ -369,7 +369,7 @@ abstract class LightModelAbstractLogicImpl {
      */
     void setMired(double mired) throws IllegalArgumentException {
         if (mired < coolestMired || mired > warmestMired) {
-            throw new IllegalStateException(
+            throw new IllegalArgumentException(
                     "Mired value '%f' out of range [%f..%f]".formatted(mired, coolestMired, warmestMired));
         }
         cachedMired = Math.min(Math.max(mired, coolestMired), warmestMired);
@@ -438,11 +438,11 @@ abstract class LightModelAbstractLogicImpl {
     /**
      * Internal: handle a write increase/decrease command from OH core, ensuring it is in the range 0.0 to 100.0
      *
-     * @param inceaseDecrease the increase/decrease command
+     * @param increaseDecrease the increase/decrease command
      */
-    private void internalHandleIncreaseDecrease(IncreaseDecreaseType inceaseDecrease) {
+    private void internalHandleIncreaseDecrease(IncreaseDecreaseType increaseDecrease) {
         double brightness = Math.min(Math.max(cachedColor.getBrightness().doubleValue()
-                + ((IncreaseDecreaseType.INCREASE == inceaseDecrease ? 1 : -1) * stepSize), 0.0), 100.0);
+                + ((IncreaseDecreaseType.INCREASE == increaseDecrease ? 1 : -1) * stepSize), 0.0), 100.0);
         setBrightness(brightness);
     }
 

@@ -24,7 +24,7 @@ import org.openhab.core.types.UnDefType;
 
 /**
  * The {@link LightModel} provides a state machine model for maintaining and modifying the
- * tate of a light. It supports lights with different capabilities, including:
+ * state of a light. It supports lights with different capabilities, including:
  *
  * <ul>
  * <li>On/Off only
@@ -47,7 +47,7 @@ import org.openhab.core.types.UnDefType;
  * {@code
  * public class LightModelHandler extends BaseThingHandler {
  *
- *     // initialize the light model with default cababilities and parameters
+ *     // initialize the light model with default cabapilities and parameters
  *     private final LightModel model = new LightModel();
  *
  *     @Override
@@ -163,14 +163,14 @@ public class LightModel {
     }
 
     /**
-     * Configuration: get the Mired that coresponds to the coolest white light supported by the light
+     * Configuration: get the Mired that corresponds to the coolest white light supported by the light
      */
     public double configGetMiredCoolest() {
         return logic.cfgGetMiredCoolest();
     }
 
     /**
-     * Configuration: get the Mired that coresponds to the warmest white light supported by the light
+     * Configuration: get the Mired that corresponds to the warmest white light supported by the light
      */
     public double configGetMiredWarmest() {
         return logic.cfgGetMiredWarmest();
@@ -334,7 +334,7 @@ public class LightModel {
      * <ul>
      * <li>HSBType for color setting</li>
      * <li>PercentType for brightness setting</li>
-     * <li>OnOffType for pn/off state setting</li>
+     * <li>OnOffType for on/off state setting</li>
      * <li>IncreaseDecreaseType for brightness up/down setting</li>
      * <li>QuantityType for color temperature setting</li>
      * </ul>
