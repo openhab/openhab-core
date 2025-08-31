@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.Win32Exception;
 
 /**
  * This is a {@link UsbSerialDiscovery} implementation component for Windows.
@@ -141,7 +142,13 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
         }
 
         Set<UsbSerialDeviceInformation> result = new HashSet<>();
-        String[] deviceKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, USB_REGISTRY_ROOT);
+        String[] deviceKeys;
+        try {
+            deviceKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, USB_REGISTRY_ROOT);
+        } catch (Win32Exception e) {
+            logger.debug("registryGetKeys failed for {}", USB_REGISTRY_ROOT, e);
+            return result;
+        }
 
         for (String deviceKey : deviceKeys) {
             logger.trace("{}", deviceKey);
@@ -171,14 +178,26 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
             String serialNumber = ids.length > 2 ? ids[2] : null;
 
             String devicePath = USB_REGISTRY_ROOT + BACKSLASH + deviceKey;
-            String[] interfaceNames = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, devicePath);
+            String[] interfaceNames;
+            try {
+                interfaceNames = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, devicePath);
+            } catch (Win32Exception e) {
+                logger.debug("registryGetKeys failed for {}", devicePath, e);
+                continue;
+            }
 
             int interfaceId = 0;
             for (String interfaceName : interfaceNames) {
                 logger.trace("  interfaceId:{}, interfaceName:{}", interfaceId, interfaceName);
 
                 String interfacePath = devicePath + BACKSLASH + interfaceName;
-                TreeMap<String, Object> values = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE, interfacePath);
+                TreeMap<String, Object> values;
+                try {
+                    values = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE, interfacePath);
+                } catch (Win32Exception e) {
+                    logger.debug("registryGetValues failed for {}", interfacePath, e);
+                    continue;
+                }
 
                 if (logger.isTraceEnabled()) {
                     for (Entry<String, Object> value : values.entrySet()) {
@@ -211,15 +230,27 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
                 }
 
                 String serialPort = "";
-                String[] interfaceSubKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, interfacePath);
+                String[] interfaceSubKeys;
+                try {
+                    interfaceSubKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, interfacePath);
+                } catch (Win32Exception e) {
+                    logger.debug("registryGetKeys failed for {}", interfacePath, e);
+                    continue;
+                }
 
                 for (String interfaceSubKey : interfaceSubKeys) {
                     if (!KEY_DEVICE_PARAMETERS.equals(interfaceSubKey)) {
                         continue;
                     }
                     String deviceParametersPath = interfacePath + BACKSLASH + interfaceSubKey;
-                    TreeMap<String, Object> deviceParameterValues = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE,
-                            deviceParametersPath);
+                    TreeMap<String, Object> deviceParameterValues;
+                    try {
+                        deviceParameterValues = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE,
+                                deviceParametersPath);
+                    } catch (Win32Exception e) {
+                        logger.debug("registryGetValues failed for {}", deviceParametersPath, e);
+                        continue;
+                    }
                     Object serialPortValue = deviceParameterValues.get(KEY_SERIAL_PORT);
                     if (serialPortValue instanceof String serialPortString) {
                         serialPort = serialPortString;
