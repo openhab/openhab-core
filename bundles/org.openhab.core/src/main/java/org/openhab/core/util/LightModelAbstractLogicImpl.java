@@ -297,11 +297,14 @@ abstract class LightModelAbstractLogicImpl {
     /**
      * Runtime State: get the brightness or return null if the capability is not supported.
      *
+     * @param forceChannelVisible if present and true, return a non-null value even when color is supported.
      * @return PercentType, or null if not supported.
      */
     @Nullable
-    PercentType getBrightness() {
-        return supportsBrightness ? cachedColor.getBrightness() : null;
+    PercentType getBrightness(boolean... forceChannelVisible) {
+        return supportsBrightness & (!supportsColor || (forceChannelVisible.length > 0 && forceChannelVisible[0]))
+                ? cachedColor.getBrightness()
+                : null;
     }
 
     /**
@@ -363,10 +366,14 @@ abstract class LightModelAbstractLogicImpl {
     /**
      * Runtime State: get the on/off state.
      *
+     * @param forceChannelVisible if present and true, return a non-null value even if brightness or color are supported.
      * @return OnOffType representing the on/off state.
      */
-    OnOffType getOnOff() {
-        return OnOffType.from(cachedColor.getBrightness().doubleValue() >= minimumOnBrightness);
+    @Nullable
+    OnOffType getOnOff(boolean... forceChannelVisible) {
+        return (!supportsColor && !supportsBrightness) || (forceChannelVisible.length > 0 && forceChannelVisible[0])
+                ? OnOffType.from(cachedColor.getBrightness().doubleValue() >= minimumOnBrightness)
+                : null;
     }
 
     /**

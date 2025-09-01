@@ -42,52 +42,52 @@ public class LightModelTest {
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
-        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
 
         lsm.handleCommand(new PercentType(50));
-        assertEquals(new PercentType(50), lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(new PercentType(50), lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
 
         lsm.handleCommand(PercentType.ZERO);
-        assertEquals(PercentType.ZERO, lsm.getBrightness());
-        assertEquals(OnOffType.OFF, lsm.getOnOff());
+        assertEquals(PercentType.ZERO, lsm.getBrightness(true));
+        assertEquals(OnOffType.OFF, lsm.getOnOff(true));
 
         lsm.handleCommand(IncreaseDecreaseType.INCREASE);
-        assertEquals(new PercentType(10), lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(new PercentType(10), lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
 
         lsm.handleCommand(OnOffType.OFF);
-        assertEquals(OnOffType.OFF, lsm.getOnOff());
-        assertEquals(PercentType.ZERO, lsm.getBrightness());
+        assertEquals(OnOffType.OFF, lsm.getOnOff(true));
+        assertEquals(PercentType.ZERO, lsm.getBrightness(true));
 
         lsm.handleCommand(OnOffType.OFF);
-        assertEquals(OnOffType.OFF, lsm.getOnOff());
-        assertEquals(PercentType.ZERO, lsm.getBrightness());
+        assertEquals(OnOffType.OFF, lsm.getOnOff(true));
+        assertEquals(PercentType.ZERO, lsm.getBrightness(true));
 
         lsm.handleCommand(OnOffType.ON);
-        assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(new PercentType(10), lsm.getBrightness());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+        assertEquals(new PercentType(10), lsm.getBrightness(true));
 
         lsm.handleCommand(OnOffType.ON);
-        assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(new PercentType(10), lsm.getBrightness());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+        assertEquals(new PercentType(10), lsm.getBrightness(true));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
-        assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(new PercentType(10), lsm.getBrightness());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+        assertEquals(new PercentType(10), lsm.getBrightness(true));
         assertEquals(QuantityType.valueOf(500, Units.MIRED), lsm.getColorTemperature());
         assertEquals(PercentType.HUNDRED, lsm.getColorTemperaturePercent());
 
         lsm.handleColorTemperatureCommand(QuantityType.valueOf(500, Units.MIRED));
-        assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(new PercentType(10), lsm.getBrightness());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+        assertEquals(new PercentType(10), lsm.getBrightness(true));
         assertEquals(QuantityType.valueOf(500, Units.MIRED), lsm.getColorTemperature());
         assertEquals(PercentType.HUNDRED, lsm.getColorTemperaturePercent());
 
         lsm.handleColorTemperatureCommand(PercentType.ZERO);
-        assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(new PercentType(10), lsm.getBrightness());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+        assertEquals(new PercentType(10), lsm.getBrightness(true));
         assertEquals(QuantityType.valueOf(153, Units.MIRED), lsm.getColorTemperature());
         assertEquals(PercentType.ZERO, lsm.getColorTemperaturePercent());
     }
@@ -101,20 +101,20 @@ public class LightModelTest {
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
-        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
-        assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
         assertNull(lsm.getColorTemperature());
         assertNull(lsm.getColorTemperaturePercent());
         assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColorTemperature()));
         assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColorTemperaturePercent()));
 
         lsm.handleCommand(PercentType.ZERO);
-        assertEquals(PercentType.ZERO, lsm.getBrightness());
-        assertEquals(OnOffType.OFF, lsm.getOnOff());
+        assertEquals(PercentType.ZERO, lsm.getBrightness(true));
+        assertEquals(OnOffType.OFF, lsm.getOnOff(true));
     }
 
     @Test
@@ -127,17 +127,17 @@ public class LightModelTest {
         lsm.handleCommand(HSBType.RED);
         assertNull(lsm.getColor());
         assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
         assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColor()));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
         assertEquals(QuantityType.valueOf(500, Units.MIRED), lsm.getColorTemperature());
         assertEquals(PercentType.HUNDRED, lsm.getColorTemperaturePercent());
 
         lsm.handleCommand(PercentType.ZERO);
         assertEquals(PercentType.ZERO, lsm.getBrightness());
-        assertEquals(OnOffType.OFF, lsm.getOnOff());
+        assertEquals(OnOffType.OFF, lsm.getOnOff(true));
     }
 
     @Test
@@ -150,17 +150,17 @@ public class LightModelTest {
         lsm.handleCommand(HSBType.RED);
         assertNull(lsm.getColor());
         assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
         assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColor()));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
         assertNull(lsm.getColorTemperature());
         assertNull(lsm.getColorTemperaturePercent());
 
         lsm.handleCommand(PercentType.ZERO);
         assertEquals(PercentType.ZERO, lsm.getBrightness());
-        assertEquals(OnOffType.OFF, lsm.getOnOff());
+        assertEquals(OnOffType.OFF, lsm.getOnOff(true));
     }
 
     @Test
@@ -193,13 +193,13 @@ public class LightModelTest {
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
-        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
         assertNotEquals(HSBType.RED, lsm.getColor());
-        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
         assertEquals(QuantityType.valueOf(500, Units.MIRED), lsm.getColorTemperature());
         assertEquals(PercentType.HUNDRED, lsm.getColorTemperaturePercent());
 
@@ -334,8 +334,8 @@ public class LightModelTest {
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
-        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
 
         double[] rgb = lsm.getRGBx();
         assertEquals(3, rgb.length);
@@ -367,8 +367,8 @@ public class LightModelTest {
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
-        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
 
         double[] rgbw = lsm.getRGBx();
         assertEquals(4, rgbw.length);
@@ -402,8 +402,8 @@ public class LightModelTest {
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
-        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
 
         double[] rgb = lsm.getRGBx();
         assertEquals(3, rgb.length);
@@ -424,7 +424,7 @@ public class LightModelTest {
         assertEquals(0.0, rgb[0]);
         assertEquals(100.0, rgb[1]);
         assertEquals(200.0, rgb[2]);
-        PercentType brightness = lsm.getBrightness();
+        PercentType brightness = lsm.getBrightness(true);
         assertNotNull(brightness);
         assertEquals(78.4, brightness.doubleValue(), 0.1);
     }
@@ -438,8 +438,8 @@ public class LightModelTest {
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
-        assertEquals(PercentType.HUNDRED, lsm.getBrightness());
-        assertEquals(OnOffType.ON, lsm.getOnOff());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
 
         double[] rgbw = lsm.getRGBx();
         assertEquals(4, rgbw.length);
@@ -461,18 +461,50 @@ public class LightModelTest {
         assertEquals(100.0, rgbw[1], 0.1);
         assertEquals(200.0, rgbw[2], 0.1);
         assertEquals(55.0, rgbw[3], 0.1);
-        PercentType brightness = lsm.getBrightness();
+        PercentType brightness = lsm.getBrightness(true);
         assertNotNull(brightness);
         assertEquals(PercentType.HUNDRED, brightness);
 
         lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 0.0 });
-        brightness = lsm.getBrightness();
+        brightness = lsm.getBrightness(true);
         assertNotNull(brightness);
         assertEquals(78.4, brightness.doubleValue(), 0.1);
 
         lsm.setRGBx(new double[] { 0.0, 100.0, 100.0, 100.0 });
-        brightness = lsm.getBrightness();
+        brightness = lsm.getBrightness(true);
         assertNotNull(brightness);
         assertEquals(78.4, brightness.doubleValue(), 0.1);
+    }
+
+    @Test
+    public void testSparseChannelRuleCompliance() {
+        LightModel lsm;
+
+        // supports color
+        lsm = new LightModel(true, false, true, false, false);
+        lsm.handleCommand(HSBType.RED);
+
+        assertEquals(HSBType.RED, lsm.getColor());
+        assertNull(lsm.getBrightness());
+        assertNull(lsm.getOnOff());
+        assertNotNull(lsm.getBrightness(true));
+        assertNotNull(lsm.getOnOff(true));
+
+        // supports brightness
+        lsm = new LightModel(true, false, false, false, false);
+        lsm.handleCommand(HSBType.RED);
+
+        assertNull(lsm.getColor());
+        assertNotNull(lsm.getBrightness());
+        assertNull(lsm.getOnOff());
+        assertNotNull(lsm.getOnOff(true));
+
+        // supports on/off
+        lsm = new LightModel(false, false, false, false, false);
+        lsm.handleCommand(HSBType.RED);
+
+        assertNull(lsm.getColor());
+        assertNull(lsm.getBrightness());
+        assertNotNull(lsm.getOnOff());
     }
 }

@@ -52,7 +52,7 @@ import org.openhab.core.types.UnDefType;
  * <ul>
  * <li>Initialize 'supportsBrightness' to true if the light shall support brightness control.</li>
  * <li>Initialize 'supportsColorTemperature' to true if the light shall support color temperature control.</li>
- * <li>Initialize 'supportsColor' to true if the light shall supports color control.</li>
+ * <li>Initialize 'supportsColor' to true if the light shall support color control.</li>
  * <li>Initialize 'supportsRgbDimming' to true if the light shall support RGB color control with dimming.</li>
  * <li>Initialize 'supportsRgbWhite' to true if the light shall support RGBW rather than RGB color control.</li>
  * </ul>
@@ -418,8 +418,8 @@ public class LightModel {
      *
      * @return PercentType representing the brightness, or null if not supported
      */
-    public @Nullable PercentType getBrightness() {
-        return model.getBrightness();
+    public @Nullable PercentType getBrightness(boolean... forceChannelVisible) {
+        return model.getBrightness(forceChannelVisible);
     }
 
     /**
@@ -472,8 +472,8 @@ public class LightModel {
      *
      * @return OnOffType.ON if brightness > minimumOnBrightness, otherwise OnOffType.OFF
      */
-    public OnOffType getOnOff() {
-        return model.getOnOff();
+    public @Nullable OnOffType getOnOff(boolean... forceChannelVisible) {
+        return model.getOnOff(forceChannelVisible);
     }
 
     /**
