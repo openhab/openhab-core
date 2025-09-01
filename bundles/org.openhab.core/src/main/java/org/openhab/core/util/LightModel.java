@@ -48,28 +48,28 @@ import org.openhab.core.types.UnDefType;
  * <p>
  *
  * To use the model you must initialize the following configuration capabilities (the default constructor initializes
- * '{@link supportsBrightness}', '{@link supportsColorTemperature}' and '{@link supportsBrightness}' to true):
+ * 'supportsBrightness', 'supportsColorTemperature' and 'supportsBrightness' to true):
  * <ul>
- * <li>Initialize '{@link supportsBrightness}' to true if the light shall support brightness control.</li>
- * <li>Initialize '{@link supportsColorTemperature}' to true if the light shall support color temperature control.</li>
- * <li>Initialize '{@link supportsColor}' to true if the light shall supports color control.</li>
- * <li>Initialize '{@link supportsRgbDimming}' to true if the light shall support RGB color control with dimming.</li>
- * <li>Initialize '{@link supportsRgbWhite}' to true if the light shall support RGBW rather than RGB color control.</li>
+ * <li>Initialize 'supportsBrightness' to true if the light shall support brightness control.</li>
+ * <li>Initialize 'supportsColorTemperature' to true if the light shall support color temperature control.</li>
+ * <li>Initialize 'supportsColor' to true if the light shall supports color control.</li>
+ * <li>Initialize 'supportsRgbDimming' to true if the light shall support RGB color control with dimming.</li>
+ * <li>Initialize 'supportsRgbWhite' to true if the light shall support RGBW rather than RGB color control.</li>
  * </ul>
  * <p>
  *
  * You can also override the following configuration parameters during initialization:
  * <ul>
- * <li>Optionally override '{@link minimumOnBrightness}' to a minimum brightness percent in the range [0.1..10.0]
+ * <li>Optionally override 'minimumOnBrightness' to a minimum brightness percent in the range [0.1..10.0]
  * percent, to consider as being "ON". The default is 1 percent.</li>
  *
- * <li>Optionally override '{@link warmestMired}' to a 'warmest' white color temperature in the range
+ * <li>Optionally override 'warmestMired' to a 'warmest' white color temperature in the range
  * [{@link coolestMired}..1000.0] Mired. The default is 500 Mired.</li>
  *
- * <li>Optionally override '{@link coolestMired}' to a 'coolest' white color temperaturein the
+ * <li>Optionally override 'coolestMired' to a 'coolest' white color temperaturein the
  * range[100.0..{@link warmestMired}] Mired. The default is 153 Mired.</li>
  *
- * <li>Optionally override '{@link stepSize}' to a step size for the IncreaseDecreaseType commands in the range
+ * <li>Optionally override 'stepSize' to a step size for the IncreaseDecreaseType commands in the range
  * [1.0..50.0] percent. The default is 10 percent.</li>
  * </ul>
  * <p>
@@ -78,30 +78,30 @@ import org.openhab.core.types.UnDefType;
  * <ol>
  *
  * <li>It handles inter relationships between the brightness PercentType state, the 'B' part of the HSBType state, and
- * the OnOffType state. Where if the brightness goes below the configured '{@link minimumOnBrightness}' level the on/off
+ * the OnOffType state. Where if the brightness goes below the configured 'minimumOnBrightness' level the on/off
  * state changes from ON to OFF, and the brightness is clamped to 0%. And analogously if the on/off state changes from
  * OFF to ON, the brightness changes from 0% to its last non zero value.</li>
  *
  * <li>It handles IncreaseDecreaseType commands to change the brightness up or down by the configured
- * '{@link stepSize}', and ensures that the brightness is clamped in the range [0%..100%].</li>
+ * 'stepSize', and ensures that the brightness is clamped in the range [0%..100%].</li>
  *
  * <li>It handles both color temperature PercentType states and QuantityType states (which may be either in Mired or
  * Kelvin). Where color temperature PercentType values are internally converted to Mired values on the percentage scale
- * between the configured '{@link coolestMired}' and '{@link warmestMired}' Mired values, and vice versa.</li>
+ * between the configured 'coolestMired' and 'warmestMired' Mired values, and vice versa.</li>
  *
  * <li>It handles inter relationships between color temperature states and the 'HS' part of the HSBType state. Where if
  * the color temperature changes then the HS values are adapted to match the corresponding color tempearture point on
  * the Planckian Locus in the CIE color chart.</li>
  *
  * <li>It handles input/output values in RGB format in the range [0..255]. The behavior depends on the
- * '{@link supportsRgbDimming}' setting. If '{@link supportsRgbDimming}' is true the RGB values read/write all three
+ * 'supportsRgbDimming' setting. If 'supportsRgbDimming' is true the RGB values read/write all three
  * parts of the HSBType state. Whereas if it is false the RGB values read/write only the 'HS' parts. NOTE: in the latter
- * case, a '{@link setRGBx()}' call followed by a '{@link getRGBx()}' call do not necessarily return the same values,
+ * case, a 'setRGBx()' call followed by a 'getRGBx()' call do not necessarily return the same values,
  * since the values are normalised to 100%. Neverthless the ratios between the RGB values do remain unchanged.</li>
  *
- * <li>If '{@link supportsRgbWhite}' is configured it handles values in RGBW format. The behavior is similar to the RGB
+ * <li>If 'supportsRgbWhite' is configured it handles values in RGBW format. The behavior is similar to the RGB
  * case above except that the white channel is derived from the lowest of the RGB values and all values are clamped in
- * the range [0..255]. The '{@link supportsRgbDimming}' changes the behavior in relation to 'HS' versus 'HSB' exactly as
+ * the range [0..255]. The 'supportsRgbDimming' changes the behavior in relation to 'HS' versus 'HSB' exactly as
  * in the case of RGB above</li>
  *
  * </ol>
@@ -115,7 +115,7 @@ import org.openhab.core.types.UnDefType;
  *     // initialize the light model with default capabilities and parameters
  *     private final LightModel model = new LightModel();
  *
- *     @Override
+ *     &#x40;Override
  *     public void initialize() {
  *         // adjust the light model capabilities
  *         model.configSetSupportsBrightness(true);
@@ -185,15 +185,15 @@ public class LightModel {
     /**
      * Create a {@link LightModel} with default capabilities and parameters as follows:
      * <ul>
-     * <li>'{@link supportsBrightness}' is true (the light supports brightness control)</li>
-     * <li>'{@link supportsColorTemperature}' is true (the light supports color temperature control)</li>
-     * <li>'{@link supportsColor}' is true (the light supports color control)</li>
-     * <li>'{@link rgbLinkedToBrightness}' is false (the RGB values are not linked to 'B' part of {@link HSBType}))</li>
-     * <li>'{@link supportsRgbWhite}' is false (the light does not support RGB with White)</li>
-     * <li>'{@link minimumOnBrightness}' is 1.0 (the minimum brightness percent to consider as light "ON")</li>
-     * <li>'{@link warmestMired}' is 500 (the 'warmest' white color temperature)</li>
-     * <li>'{@link coolestMired}' is 153 (the 'coolest' white color temperature)</li>
-     * <li>'{@link stepSize}' is 10.0 (the step size for IncreaseDecreaseType commands)</li>
+     * <li>'supportsBrightness' is true (the light supports brightness control)</li>
+     * <li>'supportsColorTemperature' is true (the light supports color temperature control)</li>
+     * <li>'supportsColor' is true (the light supports color control)</li>
+     * <li>'rgbLinkedToBrightness' is false (the RGB values are not linked to 'B' part of {@link HSBType}))</li>
+     * <li>'supportsRgbWhite' is false (the light does not support RGB with White)</li>
+     * <li>'minimumOnBrightness' is 1.0 (the minimum brightness percent to consider as light "ON")</li>
+     * <li>'warmestMired' is 500 (the 'warmest' white color temperature)</li>
+     * <li>'coolestMired' is 153 (the 'coolest' white color temperature)</li>
+     * <li>'stepSize' is 10.0 (the step size for IncreaseDecreaseType commands)</li>
      * </ul>
      */
     public LightModel() {
@@ -477,9 +477,9 @@ public class LightModel {
     }
 
     /**
-     * Runtime State: get the RGB(W) values as an array of doubles in range [0..255]. Depending on the value of '{@link
-     * supportsRgbWhite}', the array length is either 3 (RGB) or 4 for (RGBW). The array is in the order [red, green,
-     * blue, (white)]. Depending on the value of '{@link supportsRgbDimming}', the brightness may or may not be used
+     * Runtime State: get the RGB(W) values as an array of doubles in range [0..255]. Depending on the value of
+     * 'supportsRgbWhite', the array length is either 3 (RGB) or 4 for (RGBW). The array is in the order [red, green,
+     * blue, (white)]. Depending on the value of 'supportsRgbDimming}', the brightness may or may not be used
      * follows:
      *
      * <ul>
@@ -583,7 +583,7 @@ public class LightModel {
      * Runtime State: update the color with RGB(W) fields from the remote light, and update the cached HSB color
      * accordingly. The array must be in the order [red, green, blue, (white)]. If white is present but the light does
      * not support white channel then IllegalArgumentException is thrown. Depending on the value of
-     * '{@link supportsRgbDimming}', the brightness may or may not change as follows:
+     * 'supportsRgbDimming}', the brightness may or may not change as follows:
      *
      * <ul>
      * <li>{@code supportsRgbDimming == false} both [255,0,0] and [127.5,0,0] change the color to RED without a change
