@@ -135,12 +135,24 @@ import org.openhab.core.types.UnDefType;
  *         // or if it is a color temperature command
  *         model.handleColorTemperatureCommand(command);
  *
- *         // send the updated state as a command to the remote light
- *         sendBindingSpecificCommandToUpdateRemoteLight(model.getOnOff(), model.getBrightness(), model.getColor(),
- *                 model.getColorTemperature(), model.getColorTemperaturePercent());
+ *         sendBindingSpecificCommandToUpdateRemoteLight(
+ *              .. model.getOnOff() or
+ *              .. model.getBrightness() or
+ *              .. model.getColor() or
+ *              .. model.getColorTemperature() or
+ *              .. model.getColorTemperaturePercent() or
+ *              .. model.getRGBx() or
+ *              .. model.getXY() or
+ *         );
  *     }
  *
- *     private void receiveBindingSpecificDataFromRemoteLight(int... receivedData) {
+ *     // method that sends the updated state data to the remote light
+ *     private void sendBindingSpecificCommandToUpdateRemoteLight(..) {
+ *       // binding specific code
+ *     }
+ *
+ *     // method that receives data from remote light, and updates the model, and then OH
+ *     private void receiveBindingSpecificDataFromRemoteLight(double... receivedData) {
  *         // update the model state based on the data received from the remote
  *         model.setBrightness(receivedData[0]);
  *         model.setRGB(receivedData[1], receivedData[2], receivedData[3]);
@@ -150,6 +162,7 @@ import org.openhab.core.types.UnDefType;
  *         updateState(onOffChannelUID, model.getOnOff());
  *         updateState(brightnessChannelUID, model.getBrightness());
  *         updateState(colorChannelUID, model.getColor());
+ *         updateState(colorTemperatureChannelUID, model.getColorTemperature());
  *     }
  * }
  * }
