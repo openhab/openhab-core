@@ -48,7 +48,7 @@ import org.openhab.core.types.UnDefType;
  * <p>
  *
  * To use the model you must initialize the following configuration capabilities (the default constructor initializes
- * 'supportsBrightness', 'supportsColorTemperature' and 'supportsBrightness' to true):
+ * 'supportsBrightness', 'supportsColorTemperature' and 'supportsColor' to true):
  * <ul>
  * <li>Initialize 'supportsBrightness' to true if the light shall support brightness control.</li>
  * <li>Initialize 'supportsColorTemperature' to true if the light shall support color temperature control.</li>
