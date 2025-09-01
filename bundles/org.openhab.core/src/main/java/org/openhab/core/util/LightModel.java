@@ -23,15 +23,17 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 
 /**
- * The {@link LightModel} provides a state machine model for maintaining and modifying the
- * state of a light. It supports lights with different capabilities, including:
+ * The {@link LightModel} provides a state machine model for maintaining and modifying the state of a light, which is
+ * intended to be used within the Thing Handler of a lighting binding.
+ * <p>
  *
+ * It supports lights with different capabilities, including:
  * <ul>
- * <li>On/Off only
- * <li>On/Off with Brightness
- * <li>On/Off with Brightness and Color Temperature
- * <li>On/Off with Brightness and Color (HSB, RGB, or CIE XY)
- * <li>On/Off with Brightness, Color Temperature, and Color
+ * <li>On/Off only</li>
+ * <li>On/Off with Brightness</li>
+ * <li>On/Off with Brightness and Color Temperature</li>
+ * <li>On/Off with Brightness and Color (HSB, RGB, or CIE XY)</li>
+ * <li>On/Off with Brightness, Color Temperature, and Color</li>
  * </ul>
  *
  * It maintains an internal representation of the state of the light.
@@ -40,7 +42,70 @@ import org.openhab.core.types.UnDefType;
  * The state machine maintains a consistent state, ensuring that the On/Off state is derived from the
  * brightness, and that the color temperature and color are only set if the capabilities are supported.
  * It also provides utility methods to convert between different color representations.
+ * <p>
+ *
  * See also {@link ColorUtil} for other color conversions.
+ * <p>
+ *
+ * To use the model you must initialize the following configuration capabilities (the default constructor initializes
+ * '{@link supportsBrightness}', '{@link supportsColorTemperature}' and '{@link supportsBrightness}' to true):
+ * <ul>
+ * <li>Initialize '{@link supportsBrightness}' to true if the light shall support brightness control.</li>
+ * <li>Initialize '{@link supportsColorTemperature}' to true if the light shall support color temperature control.</li>
+ * <li>Initialize '{@link supportsColor}' to true if the light shall supports color control.</li>
+ * <li>Initialize '{@link supportsRgbDimming}' to true if the light shall support RGB color control with dimming.</li>
+ * <li>Initialize '{@link supportsRgbWhite}' to true if the light shall support RGBW rather than RGB color control.</li>
+ * </ul>
+ * <p>
+ *
+ * You can also override the following configuration parameters during initialization:
+ * <ul>
+ * <li>Optionally override '{@link minimumOnBrightness}' to a minimum brightness percent in the range [0.1..10.0]
+ * percent, to consider as being "ON". The default is 1 percent.</li>
+ *
+ * <li>Optionally override '{@link warmestMired}' to a 'warmest' white color temperature in the range
+ * [{@link coolestMired}..1000.0] Mired. The default is 500 Mired.</li>
+ *
+ * <li>Optionally override '{@link coolestMired}' to a 'coolest' white color temperaturein the
+ * range[100.0..{@link warmestMired}] Mired. The default is 153 Mired.</li>
+ *
+ * <li>Optionally override '{@link stepSize}' to a step size for the IncreaseDecreaseType commands in the range
+ * [1.0..50.0] percent. The default is 10 percent.</li>
+ * </ul>
+ * <p>
+ *
+ * The model specifically handles the following "exotic" cases:
+ * <ol>
+ *
+ * <li>It handles inter relationships between the brightness PercentType state, the 'B' part of the HSBType state, and
+ * the OnOffType state. Where if the brightness goes below the configured '{@link minimumOnBrightness}' level the on/off
+ * state changes from ON to OFF, and the brightness is clamped to 0%. And analogously if the on/off state changes from
+ * OFF to ON, the brightness changes from 0% to its last non zero value.</li>
+ *
+ * <li>It handles IncreaseDecreaseType commands to change the brightness up or down by the configured
+ * '{@link stepSize}', and ensures that the brightness is clamped in the range [0%..100%].</li>
+ *
+ * <li>It handles both color temperature PercentType states and QuantityType states (which may be either in Mired or
+ * Kelvin). Where color temperature PercentType values are internally converted to Mired values on the percentage scale
+ * between the configured '{@link coolestMired}' and '{@link warmestMired}' Mired values, and vice versa.</li>
+ *
+ * <li>It handles inter relationships between color temperature states and the 'HS' part of the HSBType state. Where if
+ * the color temperature changes then the HS values are adapted to match the corresponding color tempearture point on
+ * the Planckian Locus in the CIE color chart.</li>
+ *
+ * <li>It handles input/output values in RGB format in the range [0..255]. The behavior depends on the
+ * '{@link supportsRgbDimming}' setting. If '{@link supportsRgbDimming}' is true the RGB values read/write all three
+ * parts of the HSBType state. Whereas if it is false the RGB values read/write only the 'HS' parts. NOTE: in the latter
+ * case, a '{@link setRGBx()}' call followed by a '{@link getRGBx()}' call do not necessarily return the same values,
+ * since the values are normalised to 100%. Neverthless the ratios between the RGB values do remain unchanged.</li>
+ *
+ * <li>If '{@link supportsRgbWhite}' is configured it handles values in RGBW format. The behavior is similar to the RGB
+ * case above except that the white channel is derived from the lowest of the RGB values and all values are clamped in
+ * the range [0..255]. The '{@link supportsRgbDimming}' changes the behavior in relation to 'HS' versus 'HSB' exactly as
+ * in the case of RGB above</li>
+ *
+ * </ol>
+ * <p>
  * A typical use case is within in a ThingHandler as follows:
  *
  * <pre>
@@ -95,20 +160,31 @@ import org.openhab.core.types.UnDefType;
 @NonNullByDefault
 public class LightModel {
 
-    /*
+    /**
      * The internal logic is implementated via an instance of this 'hidden' class
      */
-    private final LightModelAbstractLogicImpl logic;
+    private final LightModelAbstractLogicImpl model;
 
     /*********************************************************************************
      * SECTION: Constructors
      *********************************************************************************/
 
     /**
-     * Create a {@link LightModel} with default capabilities and parameters.
+     * Create a {@link LightModel} with default capabilities and parameters as follows:
+     * <ul>
+     * <li>'{@link supportsBrightness}' is true (the light supports brightness control)</li>
+     * <li>'{@link supportsColorTemperature}' is true (the light supports color temperature control)</li>
+     * <li>'{@link supportsColor}' is true (the light supports color control)</li>
+     * <li>'{@link rgbLinkedToBrightness}' is false (the RGB values are not linked to 'B' part of {@link HSBType}))</li>
+     * <li>'{@link supportsRgbWhite}' is false (the light does not support RGB with White)</li>
+     * <li>'{@link minimumOnBrightness}' is 1.0 (the minimum brightness percent to consider as light "ON")</li>
+     * <li>'{@link warmestMired}' is 500 (the 'warmest' white color temperature)</li>
+     * <li>'{@link coolestMired}' is 153 (the 'coolest' white color temperature)</li>
+     * <li>'{@link stepSize}' is 10.0 (the step size for IncreaseDecreaseType commands)</li>
+     * </ul>
      */
     public LightModel() {
-        this(true, true, true, null, null, null, null);
+        this(true, true, true, false, false, null, null, null, null);
     }
 
     /**
@@ -117,9 +193,13 @@ public class LightModel {
      * @param supportsBrightness true if the light supports brightness control
      * @param supportsColorTemperature true if the light supports color temperature control
      * @param supportsColor true if the light supports color control
+     * @param rgbLinkedToBrightness true if RGB vales are linked with the 'B' part of the {@link HSBType}
+     * @param supportsRgbWhite true if the light supports RGBW rather than RGB color control
      */
-    public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor) {
-        this(supportsBrightness, supportsColorTemperature, supportsColor, null, null, null, null);
+    public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
+            boolean rgbLinkedToBrightness, boolean supportsRgbWhite) {
+        this(supportsBrightness, supportsColorTemperature, supportsColor, rgbLinkedToBrightness, supportsRgbWhite, null,
+                null, null, null);
     }
 
     /**
@@ -129,6 +209,8 @@ public class LightModel {
      * @param supportsBrightness true if the light supports brightness control
      * @param supportsColorTemperature true if the light supports color temperature control
      * @param supportsColor true if the light supports color control
+     * @param rgbLinkedToBrightness true if RGB vales are linked with the 'B' part of the {@link HSBType}
+     * @param supportsRgbWhite true if the light supports RGBW rather than RGB color control
      * @param minimumOnBrightness the minimum brightness percent to consider as light "ON"
      * @param warmestMired the 'warmest' white color temperature in Mired
      * @param coolestMired the 'coolest' white color temperature in Mired
@@ -136,11 +218,12 @@ public class LightModel {
      * @throws IllegalArgumentException if any of the parameters are out of range
      */
     public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            @Nullable Double minimumOnBrightness, @Nullable Double warmestMired, @Nullable Double coolestMired,
-            @Nullable Double stepSize) throws IllegalArgumentException {
-        logic = new LightModelAbstractLogicImpl(supportsBrightness, supportsColorTemperature, supportsColor,
-                minimumOnBrightness, warmestMired, coolestMired, stepSize) {
-            // empty implementation of abstract class
+            boolean rgbLinkedToBrightness, boolean supportsRgbWhite, @Nullable Double minimumOnBrightness,
+            @Nullable Double warmestMired, @Nullable Double coolestMired, @Nullable Double stepSize)
+            throws IllegalArgumentException {
+        // instantiate an inline implementation of the abstract logic implementation class
+        model = new LightModelAbstractLogicImpl(supportsBrightness, supportsColorTemperature, supportsColor,
+                rgbLinkedToBrightness, supportsRgbWhite, minimumOnBrightness, warmestMired, coolestMired, stepSize) {
         };
     }
 
@@ -152,28 +235,71 @@ public class LightModel {
      * Configuration: get the step size for IncreaseDecreaseType commands
      */
     public double configGetIncreaseDecreaseStep() {
-        return logic.configGetIncreaseDecreaseStep();
+        return model.configGetIncreaseDecreaseStep();
     }
 
     /**
      * Configuration: get the minimum brightness percent to consider as light "ON"
      */
     public double configGetMinimumOnBrightness() {
-        return logic.configGetMinimumOnBrightness();
+        return model.configGetMinimumOnBrightness();
     }
 
     /**
      * Configuration: get the Mired that corresponds to the coolest white light supported by the light
      */
     public double configGetMiredCoolest() {
-        return logic.cfgGetMiredCoolest();
+        return model.cfgGetMiredCoolest();
     }
 
     /**
      * Configuration: get the Mired that corresponds to the warmest white light supported by the light
      */
     public double configGetMiredWarmest() {
-        return logic.cfgGetMiredWarmest();
+        return model.cfgGetMiredWarmest();
+    }
+
+    /**
+     * Configuration: check whether RGB values are linked to the 'HS' parts or all of the 'HSB' parts of {@link HSBType}
+     * state, as follows:
+     *
+     * <ul>
+     * <li>If false the RGB values only relate to the 'HS' parts and will not influence or depend on the
+     * brightness.</li>
+     * <li>If true, the RGB values relate to all of the 'HSB' parts and will influence and depend on the
+     * brightness.</li>
+     * </ul>
+     */
+    public boolean configGetRgbLinkedToBrightness() {
+        return model.configGetRgbLinkedToBrightness();
+    }
+
+    /**
+     * Configuration: check if brightness control is supported
+     */
+    public boolean configGetSupportsBrightness() {
+        return model.configGetSupportsBrightness();
+    }
+
+    /**
+     * Configuration: check if color control is supported
+     */
+    public boolean configGetSupportsColor() {
+        return model.configGetSupportsColor();
+    }
+
+    /**
+     * Configuration: check if color temperature control is supported
+     */
+    public boolean configGetSupportsColorTemperature() {
+        return model.configGetSupportsColorTemperature();
+    }
+
+    /**
+     * Configuration: check if RGBW color control is supported versus RGB only
+     */
+    public boolean configGetSupportsRgbWhite() {
+        return model.configGetSupportsRgbWhite();
     }
 
     /**
@@ -183,7 +309,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the stepSize parameter is out of range
      */
     public void configSetIncreaseDecreaseStep(double stepSize) throws IllegalArgumentException {
-        logic.configSetIncreaseDecreaseStep(stepSize);
+        model.configSetIncreaseDecreaseStep(stepSize);
     }
 
     /**
@@ -193,7 +319,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the minimumBrightness parameter is out of range
      */
     public void configSetMinimumOnBrightness(double minimumOnBrightness) throws IllegalArgumentException {
-        logic.configSetMinimumOnBrightness(minimumOnBrightness);
+        model.configSetMinimumOnBrightness(minimumOnBrightness);
     }
 
     /**
@@ -203,7 +329,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the coolestMired parameter is out of range or not less than warmestMired
      */
     public void configSetMiredCoolest(double coolestMired) throws IllegalArgumentException {
-        logic.configSetMiredCoolest(coolestMired);
+        model.configSetMiredCoolest(coolestMired);
     }
 
     /**
@@ -214,7 +340,24 @@ public class LightModel {
      * @throws IllegalArgumentException if the warmestMired parameter is out of range or not greater than coolestMired
      */
     public void configSetMiredWarmest(double warmestMired) throws IllegalArgumentException {
-        logic.configSetMiredWarmest(warmestMired);
+        model.configSetMiredWarmest(warmestMired);
+    }
+
+    /**
+     * Configuration: set whether RGB values are linked to the 'HS' parts or all of the 'HSB' parts of {@link HSBType}
+     * state, as follows:
+     *
+     * <ul>
+     * <li>If false the RGB values only relate to the 'HS' parts and will not influence or depend on the
+     * brightness.</li>
+     * <li>If true, the RGB values relate to all of the 'HSB' parts and will influence and depend on the
+     * brightness.</li>
+     * </ul>
+     *
+     * @param rgbLinkedToBrightness true if RGB values are raw
+     */
+    public void configSetRgbLinkedToBrightness(boolean rgbLinkedToBrightness) {
+        model.configSetRgbLinkedToBrightness(rgbLinkedToBrightness);
     }
 
     /**
@@ -223,7 +366,7 @@ public class LightModel {
      * @param supportsBrightness true if brightness control is supported
      */
     public void configSetSupportsBrightness(boolean supportsBrightness) {
-        logic.configSetSupportsBrightness(supportsBrightness);
+        model.configSetSupportsBrightness(supportsBrightness);
     }
 
     /**
@@ -232,7 +375,7 @@ public class LightModel {
      * @param supportsColor true if color control is supported
      */
     public void configSetSupportsColor(boolean supportsColor) {
-        logic.configSetSupportsColor(supportsColor);
+        model.configSetSupportsColor(supportsColor);
     }
 
     /**
@@ -241,32 +384,20 @@ public class LightModel {
      * @param supportsColorTemperature true if color temperature control is supported
      */
     public void configSetSupportsColorTemperature(boolean supportsColorTemperature) {
-        logic.configSetSupportsColorTemperature(supportsColorTemperature);
+        model.configSetSupportsColorTemperature(supportsColorTemperature);
     }
 
     /**
-     * Configuration: check if brightness control is supported
+     * Configuration: set whether RGBW color control is supported versus RGB only
+     *
+     * @param supportsRgbWhite true if RGBW color control is supported
      */
-    public boolean configSupportsBrightness() {
-        return logic.configSupportsBrightness();
-    }
-
-    /**
-     * Configuration: check if color control is supported
-     */
-    public boolean configSupportsColor() {
-        return logic.configSupportsColor();
-    }
-
-    /**
-     * Configuration: check if color temperature control is supported
-     */
-    public boolean configSupportsColorTemperature() {
-        return logic.configSupportsColorTemperature();
+    public void configSetSupportsRgbWhite(boolean supportsRgbWhite) {
+        model.configSetSupportsRgbWhite(supportsRgbWhite);
     }
 
     /*********************************************************************************
-     * SECTION: Light State Getters, Setters, and Handlers. Only used at runtime.
+     * SECTION: Runtime State getters, setters, and handlers. Only used at runtime.
      *********************************************************************************/
 
     /**
@@ -275,7 +406,7 @@ public class LightModel {
      * @return PercentType representing the brightness, or null if not supported
      */
     public @Nullable PercentType getBrightness() {
-        return logic.getBrightness();
+        return model.getBrightness();
     }
 
     /**
@@ -284,7 +415,7 @@ public class LightModel {
      * @return HSBType representing the color, or null if not supported
      */
     public @Nullable HSBType getColor() {
-        return logic.getColor();
+        return model.getColor();
     }
 
     /**
@@ -293,7 +424,7 @@ public class LightModel {
      * @return QuantityType in Mired representing the color temperature, or null if not supported
      */
     public @Nullable QuantityType<?> getColorTemperature() {
-        return logic.getColorTemperature();
+        return model.getColorTemperature();
     }
 
     /**
@@ -302,7 +433,25 @@ public class LightModel {
      * @return PercentType in range [0..100] representing [coolest..warmest], or null if not supported
      */
     public @Nullable PercentType getColorTemperaturePercent() {
-        return logic.getColorTemperaturePercent();
+        return model.getColorTemperaturePercent();
+    }
+
+    /**
+     * Runtime State: get the hue in range [0..360].
+     *
+     * @return double representing the hue in range [0..360].
+     */
+    public double getHue() {
+        return model.getHue();
+    }
+
+    /**
+     * Runtime State: get the color temperature in Mired.
+     *
+     * @return double representing the color temperature in Mired.
+     */
+    public double getMired() {
+        return model.getMired();
     }
 
     /**
@@ -311,7 +460,47 @@ public class LightModel {
      * @return OnOffType.ON if brightness > minimumOnBrightness, otherwise OnOffType.OFF
      */
     public OnOffType getOnOff() {
-        return logic.getOnOff();
+        return model.getOnOff();
+    }
+
+    /**
+     * Runtime State: get the RGB(W) values as an array of doubles in range [0..255]. Depending on the value of '{@link
+     * supportsRgbWhite}', the array length is either 3 (RGB) or 4 for (RGBW). The array is in the order [red, green,
+     * blue, (white)]. Depending on the value of '{@link supportsRgbDimming}', the brightness may or may not be used
+     * follows:
+     *
+     * <ul>
+     * <li>{@code supportsRgbDimming == false}: The return result does not depend on the current brightness. In other
+     * words the values only relate to the 'HS' part of the {@link HSBType} state. Note: this means that in this case a
+     * round trip of setRGBx() followed by getRGBx() will NOT necessarily contain identical values, although the RGB
+     * ratios will certainly be the same.</li>
+     *
+     * <li>{@code supportsRgbDimming == true}: The return result depends on the current brightness. In other words the
+     * values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
+     * <ul>
+     *
+     * @return double[] representing the RGB(W) components in range [0..255.0]
+     */
+    public double[] getRGBx() {
+        return model.getRGBx();
+    }
+
+    /**
+     * Runtime State: get the saturation in range [0..100].
+     *
+     * @return double representing the saturation in range [0..100].
+     */
+    public double getSaturation() {
+        return model.getSaturation();
+    }
+
+    /**
+     * Runtime State: get the CIE XY color values in range [0.0..1.0].
+     *
+     * @return double[] representing the CIE XY color values in range [0.0..1.0].
+     */
+    public double[] getXY() {
+        return model.getXY();
     }
 
     /**
@@ -326,7 +515,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the command type is not supported
      */
     public void handleColorTemperatureCommand(Command command) throws IllegalArgumentException {
-        logic.handleColorTemperatureCommand(command);
+        model.handleColorTemperatureCommand(command);
     }
 
     /**
@@ -343,7 +532,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the command type is not supported
      */
     public void handleCommand(Command command) throws IllegalArgumentException {
-        logic.handleCommand(command);
+        model.handleCommand(command);
     }
 
     /**
@@ -353,7 +542,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the value is outside the range [0.0 to 100.0]
      */
     public void setBrightness(double brightness) throws IllegalArgumentException {
-        logic.setBrightness(brightness);
+        model.setBrightness(brightness);
     }
 
     /**
@@ -363,7 +552,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the hue parameter is not in the range 0.0 to 360.0
      */
     public void setHue(double hue) throws IllegalArgumentException {
-        logic.setHue(hue);
+        model.setHue(hue);
     }
 
     /**
@@ -374,21 +563,30 @@ public class LightModel {
      * @throws IllegalArgumentException if the hue parameter is not in the range [coolestMired..warmestMired]
      */
     public void setMired(double mired) throws IllegalArgumentException {
-        logic.setMired(mired);
+        model.setMired(mired);
     }
 
     /**
-     * Runtime State: update the color with RGB fields from the remote light, and update the cached HSB color
-     * accordingly.
+     * Runtime State: update the color with RGB(W) fields from the remote light, and update the cached HSB color
+     * accordingly. The array must be in the order [red, green, blue, (white)]. If white is present but the light does
+     * not support white channel then IllegalArgumentException is thrown. Depending on the value of
+     * '{@link supportsRgbDimming}', the brightness may or may not change as follows:
      *
-     * @param red optional red value in range [0..255], or null to leave unchanged
-     * @param green optional green value in range [0..255], or null to leave unchanged
-     * @param blue optional blue value in range [0..255], or null to leave unchanged
-     * @throws IllegalArgumentException if any of the RGB values are out of range [0..255]
+     * <ul>
+     * <li>{@code supportsRgbDimming == false} both [255,0,0] and [127.5,0,0] change the color to RED without a change
+     * in brightness. In other words the values only relate to the 'HS' part of the {@link HSBType} state. Note: this
+     * means that in this case a round trip of setRGBx() followed by getRGBx() will NOT necessarily contain identical
+     * values, although the RGB ratios will certainly be the same.</li>
+     *
+     * <li>{@code supportsRgbDimming == true} both [255,0,0] and [127.5,0,0] change the color to RED and the former
+     * changes the brightness to 100 percent, whereas the latter changes it to 50 percent. In other words the values
+     * relate to all the 'HSB' parts of the {@link HSBType} state.</li>
+     * <ul>
+     *
+     * @param rgbx an array of double representing RGB or RGBW values in range [0..255]
      */
-    public void setRGB(@Nullable Integer red, @Nullable Integer green, @Nullable Integer blue)
-            throws IllegalArgumentException {
-        logic.setRGB(red, green, blue);
+    public void setRGBx(double[] rgbx) throws IllegalArgumentException {
+        model.setRGBx(rgbx);
     }
 
     /**
@@ -398,7 +596,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the saturation parameter is not in the range 0.0 to 100.0
      */
     public void setSaturation(double saturation) throws IllegalArgumentException {
-        logic.setSaturation(saturation);
+        model.setSaturation(saturation);
     }
 
     /**
@@ -410,7 +608,7 @@ public class LightModel {
      * @throws IllegalArgumentException if any of the XY values are out of range [0.0..1.0]
      */
     public void setXY(double x, double y) throws IllegalArgumentException {
-        logic.setXY(x, y);
+        model.setXY(x, y);
     }
 
     /**
