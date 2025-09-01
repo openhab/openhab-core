@@ -401,10 +401,9 @@ abstract class LightModelAbstractLogicImpl {
 
     /**
      * Runtime State: get the RGB(C)(W) values as an array of doubles in range [0..255]. Depending on the value of
-     * '{@link supportsRgbWhite}' and {@link supportsRgbColdWarmWhite}, the array length is either 3 (RGB), 4 (RGBW),
-     * or 5 (RGBCW). The array is in the order [red, green, blue, (cold-)(white), (warm-white)].
-     *
-     * Depending on the value of '{@link supportsRgbDimming}', the brightness may or may not be used as follows:
+     * 'supportsRgbWhite' and 'supportsRgbCoolWarmWhite', the array length is either 3 (RGB), 4 (RGBW), or 5 (RGBCW).
+     * The array is in the order [red, green, blue, (cold-)(white), (warm-white)]. Depending on the value of
+     * 'supportsRgbDimming', the brightness may or may not be used as follows:
      *
      * <ul>
      * <li>{@code supportsRgbDimming == false}: The return result does not depend on the current brightness. In other
