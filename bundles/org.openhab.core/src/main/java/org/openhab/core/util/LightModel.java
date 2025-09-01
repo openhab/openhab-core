@@ -189,6 +189,7 @@ public class LightModel {
      * <li>'supportsColor' is true (the light supports color control)</li>
      * <li>'rgbLinkedToBrightness' is false (the RGB values are not linked to 'B' part of {@link HSBType}))</li>
      * <li>'supportsRgbWhite' is false (the light does not support RGB with White)</li>
+     * <li>'supportsRgbCoolWarmWhite' is false (the light does not support RGBCW)</li>
      * <li>'minimumOnBrightness' is 1.0 (the minimum brightness percent to consider as light "ON")</li>
      * <li>'warmestMired' is 500 (the 'warmest' white color temperature)</li>
      * <li>'coolestMired' is 153 (the 'coolest' white color temperature)</li>
@@ -196,7 +197,7 @@ public class LightModel {
      * </ul>
      */
     public LightModel() {
-        this(true, true, true, false, false, null, null, null, null);
+        this(true, true, true, false, false, false, null, null, null, null);
     }
 
     /**
@@ -207,11 +208,12 @@ public class LightModel {
      * @param supportsColor true if the light supports color control
      * @param rgbLinkedToBrightness true if RGB values are linked with the 'B' part of the {@link HSBType}
      * @param supportsRgbWhite true if the light supports RGBW rather than RGB color control
+     * @param supportsRgbCoolWarmWhite true if the light supports RGBCW color control
      */
     public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            boolean rgbLinkedToBrightness, boolean supportsRgbWhite) {
-        this(supportsBrightness, supportsColorTemperature, supportsColor, rgbLinkedToBrightness, supportsRgbWhite, null,
-                null, null, null);
+            boolean rgbLinkedToBrightness, boolean supportsRgbWhite, boolean supportsRgbCoolWarmWhite) {
+        this(supportsBrightness, supportsColorTemperature, supportsColor, rgbLinkedToBrightness, supportsRgbWhite,
+                supportsRgbCoolWarmWhite, null, null, null, null);
     }
 
     /**
@@ -223,6 +225,7 @@ public class LightModel {
      * @param supportsColor true if the light supports color control
      * @param rgbLinkedToBrightness true if RGB values are linked with the 'B' part of the {@link HSBType}
      * @param supportsRgbWhite true if the light supports RGBW rather than RGB color control
+     * @param supportsRgbCoolWarmWhite true if the light supports RGBCW color control
      * @param minimumOnBrightness the minimum brightness percent to consider as light "ON"
      * @param warmestMired the 'warmest' white color temperature in Mired
      * @param coolestMired the 'coolest' white color temperature in Mired
@@ -230,12 +233,13 @@ public class LightModel {
      * @throws IllegalArgumentException if any of the parameters are out of range
      */
     public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            boolean rgbLinkedToBrightness, boolean supportsRgbWhite, @Nullable Double minimumOnBrightness,
-            @Nullable Double warmestMired, @Nullable Double coolestMired, @Nullable Double stepSize)
-            throws IllegalArgumentException {
+            boolean rgbLinkedToBrightness, boolean supportsRgbWhite, boolean supportsRgbCoolWarmWhite,
+            @Nullable Double minimumOnBrightness, @Nullable Double warmestMired, @Nullable Double coolestMired,
+            @Nullable Double stepSize) throws IllegalArgumentException {
         // instantiate an inline implementation of the abstract logic implementation class
         model = new LightModelAbstractLogicImpl(supportsBrightness, supportsColorTemperature, supportsColor,
-                rgbLinkedToBrightness, supportsRgbWhite, minimumOnBrightness, warmestMired, coolestMired, stepSize) {
+                rgbLinkedToBrightness, supportsRgbWhite, supportsRgbCoolWarmWhite, minimumOnBrightness, warmestMired,
+                coolestMired, stepSize) {
         };
     }
 
@@ -478,10 +482,11 @@ public class LightModel {
     }
 
     /**
-     * Runtime State: get the RGB(W) values as an array of doubles in range [0..255]. Depending on the value of
-     * 'supportsRgbWhite', the array length is either 3 (RGB) or 4 for (RGBW). The array is in the order [red, green,
-     * blue, (white)]. Depending on the value of 'supportsRgbDimming}', the brightness may or may not be used
-     * follows:
+     * Runtime State: get the RGB(C)(W) values as an array of doubles in range [0..255]. Depending on the value of
+     * '{@link supportsRgbWhite}' and {@link supportsRgbColdWarmWhite}, the array length is either 3 (RGB), 4 (RGBW),
+     * or 5 (RGBCW). The array is in the order [red, green, blue, (cold-)(white), (warm-white)].
+     *
+     * Depending on the value of '{@link supportsRgbDimming}', the brightness may or may not be used as follows:
      *
      * <ul>
      * <li>{@code supportsRgbDimming == false}: The return result does not depend on the current brightness. In other
@@ -493,7 +498,7 @@ public class LightModel {
      * values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
      * <ul>
      *
-     * @return double[] representing the RGB(W) components in range [0..255.0]
+     * @return double[] representing the RGB(C)(W) components in range [0..255.0]
      */
     public double[] getRGBx() {
         return model.getRGBx();

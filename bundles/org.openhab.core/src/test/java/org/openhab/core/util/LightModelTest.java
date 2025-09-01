@@ -35,7 +35,7 @@ public class LightModelTest {
 
     @Test
     public void testFullColor() {
-        LightModel lsm = new LightModel(true, true, true, false, false);
+        LightModel lsm = new LightModel(true, true, true, false, false, false);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -94,7 +94,7 @@ public class LightModelTest {
 
     @Test
     public void testColorWithoutColorTemperature() {
-        LightModel lsm = new LightModel(true, false, true, false, false);
+        LightModel lsm = new LightModel(true, false, true, false, false, false);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertFalse(lsm.configGetSupportsColorTemperature());
@@ -119,7 +119,7 @@ public class LightModelTest {
 
     @Test
     public void testBrightnessAndColorTemperature() {
-        LightModel lsm = new LightModel(true, true, false, false, false);
+        LightModel lsm = new LightModel(true, true, false, false, false, false);
         assertFalse(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -142,7 +142,7 @@ public class LightModelTest {
 
     @Test
     public void testBrightnessOnly() {
-        LightModel lsm = new LightModel(true, false, false, false, false);
+        LightModel lsm = new LightModel(true, false, false, false, false, false);
         assertFalse(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertFalse(lsm.configGetSupportsColorTemperature());
@@ -165,7 +165,7 @@ public class LightModelTest {
 
     @Test
     public void testOnOffOnly() {
-        LightModel lsm = new LightModel(false, false, false, false, false);
+        LightModel lsm = new LightModel(false, false, false, false, false, false);
         assertFalse(lsm.configGetSupportsColor());
         assertFalse(lsm.configGetSupportsBrightness());
         assertFalse(lsm.configGetSupportsColorTemperature());
@@ -230,7 +230,7 @@ public class LightModelTest {
 
     @Test
     public void testComplexConstructor() {
-        LightModel lsm = new LightModel(false, false, false, false, false, 2.0, 501.0, 154.0, 11.0);
+        LightModel lsm = new LightModel(false, false, false, false, false, false, 2.0, 501.0, 154.0, 11.0);
         assertFalse(lsm.configGetSupportsColor());
         assertFalse(lsm.configGetSupportsBrightness());
         assertFalse(lsm.configGetSupportsColorTemperature());
@@ -298,36 +298,36 @@ public class LightModelTest {
     @Test
     public void testComplexConstructorBad() {
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, 0.0, null, null, null));
+                () -> new LightModel(false, false, false, false, false, false, 0.0, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, 11.0, null, null, null));
+                () -> new LightModel(false, false, false, false, false, false, 11.0, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, null, 99.0, null, null));
+                () -> new LightModel(false, false, false, false, false, false, null, 99.0, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, null, 1001.0, null, null));
+                () -> new LightModel(false, false, false, false, false, false, null, 1001.0, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, null, null, 99.0, null));
+                () -> new LightModel(false, false, false, false, false, false, null, null, 99.0, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, null, null, 1001.0, null));
+                () -> new LightModel(false, false, false, false, false, false, null, null, 1001.0, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, null, 300.0, 300.0, null));
+                () -> new LightModel(false, false, false, false, false, false, null, 300.0, 300.0, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, null, null, null, 0.0));
+                () -> new LightModel(false, false, false, false, false, false, null, null, null, 0.0));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, null, null, null, 51.0));
+                () -> new LightModel(false, false, false, false, false, false, null, null, null, 51.0));
     }
 
     @Test
     public void testRgb() {
-        LightModel lsm = new LightModel(true, true, true, false, false);
+        LightModel lsm = new LightModel(true, true, true, false, false, false);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -360,7 +360,7 @@ public class LightModelTest {
 
     @Test
     public void testRgbWhite() {
-        LightModel lsm = new LightModel(true, true, true, false, true);
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -395,7 +395,7 @@ public class LightModelTest {
 
     @Test
     public void testRgbDimming() {
-        LightModel lsm = new LightModel(true, true, true, true, false);
+        LightModel lsm = new LightModel(true, true, true, true, false, false);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -431,7 +431,7 @@ public class LightModelTest {
 
     @Test
     public void testRgbWhiteDimming() {
-        LightModel lsm = new LightModel(true, true, true, true, true);
+        LightModel lsm = new LightModel(true, true, true, true, true, false);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -481,7 +481,7 @@ public class LightModelTest {
         LightModel lsm;
 
         // supports color
-        lsm = new LightModel(true, false, true, false, false);
+        lsm = new LightModel(true, false, true, false, false, false);
         lsm.handleCommand(HSBType.RED);
 
         assertEquals(HSBType.RED, lsm.getColor());
@@ -491,7 +491,7 @@ public class LightModelTest {
         assertNotNull(lsm.getOnOff(true));
 
         // supports brightness
-        lsm = new LightModel(true, false, false, false, false);
+        lsm = new LightModel(true, false, false, false, false, false);
         lsm.handleCommand(HSBType.RED);
 
         assertNull(lsm.getColor());
@@ -500,11 +500,21 @@ public class LightModelTest {
         assertNotNull(lsm.getOnOff(true));
 
         // supports on/off
-        lsm = new LightModel(false, false, false, false, false);
+        lsm = new LightModel(false, false, false, false, false, false);
         lsm.handleCommand(HSBType.RED);
 
         assertNull(lsm.getColor());
         assertNull(lsm.getBrightness());
         assertNotNull(lsm.getOnOff());
+    }
+
+    @Test
+    public void testRgbCoolWarmWhite() {
+        // TODO
+    }
+
+    @Test
+    public void testRgbCoolWarmWhiteWithDimming() {
+        // TODO
     }
 }

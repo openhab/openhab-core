@@ -54,6 +54,7 @@ abstract class LightModelAbstractLogicImpl {
     private boolean supportsColor = false; // true if the light supports color
     private boolean rgbLinkedToBrightness = false; // true if RGB(W) values are linked to the brightness
     private boolean supportsRgbWhite = false; // true if the light supports RGB with White
+    private boolean supportsRgbCoolWarmWhite = false; // true if the light supports RGB with Cool+Warm White
     private boolean supportsBrightness = false; // true if the light supports brightness
     private boolean supportsColorTemperature = false; // true if the light supports color temperature
 
@@ -79,18 +80,21 @@ abstract class LightModelAbstractLogicImpl {
      * @param supportsColor true if the light supports color control
      * @param rgbLinkedToBrightness true if RGB values are linked with the 'B' part of the {@link HSBType}
      * @param supportsRgbWhite true if the light supports RGBW rather than RGB color control
+     * @param supportsRgbCoolWarmWhite true if the light supports RGBCW rather than RGB or RGBW color control
      * @param minimumOnBrightness the minimum brightness percent to consider as light "ON"
      * @param warmestMired the 'warmest' white color temperature in Mired
      * @param coolestMired the 'coolest' white color temperature in Mired
      * @param stepSize the step size for IncreaseDecreaseType commands
      */
     LightModelAbstractLogicImpl(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            boolean rgbLinkedToBrightness, boolean supportsRgbWhite, @Nullable Double minimumOnBrightness,
-            @Nullable Double warmestMired, @Nullable Double coolestMired, @Nullable Double stepSize) {
+            boolean rgbLinkedToBrightness, boolean supportsRgbWhite, boolean supportsRgbCoolWarmWhite,
+            @Nullable Double minimumOnBrightness, @Nullable Double warmestMired, @Nullable Double coolestMired,
+            @Nullable Double stepSize) {
         this.supportsColor = supportsColor || supportsRgbWhite || rgbLinkedToBrightness;
         this.supportsBrightness = supportsBrightness || supportsColor || supportsRgbWhite || rgbLinkedToBrightness;
         this.supportsColorTemperature = supportsColorTemperature;
         this.supportsRgbWhite = supportsRgbWhite;
+        this.supportsRgbCoolWarmWhite = supportsRgbCoolWarmWhite;
         this.rgbLinkedToBrightness = rgbLinkedToBrightness;
         this.minimumOnBrightness = minimumOnBrightness != null ? minimumOnBrightness : this.minimumOnBrightness;
         this.warmestMired = warmestMired != null ? warmestMired : this.warmestMired;
@@ -165,6 +169,13 @@ abstract class LightModelAbstractLogicImpl {
      */
     boolean configGetSupportsColorTemperature() {
         return supportsColorTemperature;
+    }
+
+    /**
+     * Configuration: check if RGBCW color control is supported
+     */
+    boolean configGetSupportsRgbCoolWarmWhite() {
+        return supportsRgbCoolWarmWhite;
     }
 
     /**
@@ -284,6 +295,15 @@ abstract class LightModelAbstractLogicImpl {
     }
 
     /**
+     * Configuration: set whether RGBCW color control is supported
+     *
+     * @param supportsRgbCoolWarmWhite true if RGBW color control is supported
+     */
+    void configSetSupportsRgbCoolWarmWhite(boolean supportsRgbCoolWarmWhite) {
+        this.supportsRgbCoolWarmWhite = supportsRgbCoolWarmWhite;
+    }
+
+    /**
      * Configuration: set whether RGBW color control is supported versus RGB only
      *
      * @param supportsRgbWhite true if RGBW color control is supported
@@ -380,10 +400,11 @@ abstract class LightModelAbstractLogicImpl {
     }
 
     /**
-     * Runtime State: get the RGB(W) values as an array of doubles in range [0..255]. Depending on the value of '{@link
-     * supportsRgbWhite}', the array length is either 3 (RGB) or 4 for (RGBW). The array is in the order [red, green,
-     * blue, (white)]. Depending on the value of '{@link supportsRgbDimming}', the brightness may or may not be used
-     * follows:
+     * Runtime State: get the RGB(C)(W) values as an array of doubles in range [0..255]. Depending on the value of
+     * '{@link supportsRgbWhite}' and {@link supportsRgbColdWarmWhite}, the array length is either 3 (RGB), 4 (RGBW),
+     * or 5 (RGBCW). The array is in the order [red, green, blue, (cold-)(white), (warm-white)].
+     *
+     * Depending on the value of '{@link supportsRgbDimming}', the brightness may or may not be used as follows:
      *
      * <ul>
      * <li>{@code supportsRgbDimming == false}: The return result does not depend on the current brightness. In other
@@ -395,13 +416,29 @@ abstract class LightModelAbstractLogicImpl {
      * values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
      * <ul>
      *
-     * @return double[] representing the RGB(W) components in range [0..255.0]
+     * @return double[] representing the RGB(C)(W) components in range [0..255.0]
      */
     double[] getRGBx() {
         HSBType hsb = rgbLinkedToBrightness ? cachedColor
                 : new HSBType(cachedColor.getHue(), cachedColor.getSaturation(), PercentType.HUNDRED);
-        PercentType[] rgbw = supportsRgbWhite ? ColorUtil.hsbToRgbwPercent(hsb) : ColorUtil.hsbToRgbPercent(hsb);
-        return Arrays.stream(rgbw).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0).toArray();
+        if (!supportsRgbCoolWarmWhite) {
+            // use ColorUtils to get either RGB or RGBW
+            PercentType[] rgbx = supportsRgbWhite ? ColorUtil.hsbToRgbwPercent(hsb) : ColorUtil.hsbToRgbPercent(hsb);
+            return Arrays.stream(rgbx).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0).toArray();
+        } else {
+            // use own code to get RGBCW (consider moving this to ColorUtils later in a second step)
+            PercentType[] rgbPct = ColorUtil.hsbToRgbPercent(hsb);
+            double[] rgb = Arrays.stream(rgbPct).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0).toArray();
+            double[] rgbcw = new double[5];
+            if (Arrays.stream(rgb).max().orElse(0.0) > 0.0) {
+                double white = Arrays.stream(rgb).min().orElse(0.0);
+                System.arraycopy(Arrays.stream(rgb).map(c -> c - white).toArray(), 0, rgbcw, 0, 3);
+                double cool = (warmestMired - cachedMired) / (warmestMired - coolestMired);
+                rgbcw[3] = cool * white;
+                rgbcw[4] = (1.0 - cool) * white;
+            }
+            return rgbcw;
+        }
     }
 
     /**
@@ -512,10 +549,10 @@ abstract class LightModelAbstractLogicImpl {
     }
 
     /**
-     * Runtime State: update the color with RGB(W) fields from the remote light, and update the cached HSB color
-     * accordingly. The array must be in the order [red, green, blue, (white)]. If white is present but the light does
-     * not support white channel then IllegalArgumentException is thrown. Depending on the value of
-     * '{@link supportsRgbDimming}', the brightness may or may not change as follows:
+     * Runtime State: update the color with RGB(C)(W) fields from the remote light, and update the cached HSB color
+     * accordingly. The array must be in the order [red, green, blue, (cold)(white), (warm-white)]. If white is
+     * present but the light does not support white channelS then IllegalArgumentException is thrown. Depending on
+     * the value of '{@link supportsRgbDimming}', the brightness may or may not change as follows:
      *
      * <ul>
      * <li>{@code supportsRgbDimming == false} both [255,0,0] and [127.5,0,0] change the color to RED without a change
@@ -531,8 +568,24 @@ abstract class LightModelAbstractLogicImpl {
      * @param rgbx an array of double representing RGB or RGBW values in range [0..255]
      */
     void setRGBx(double[] rgbx) throws IllegalArgumentException {
-        if (rgbx.length > 3 && !supportsRgbWhite) {
-            throw new IllegalArgumentException("Light does not support white channel");
+        if (rgbx.length > 5) {
+            throw new IllegalArgumentException("Too many arguments in RGBx array");
+        }
+        if (rgbx.length == 5) {
+            if (!supportsRgbCoolWarmWhite) {
+                throw new IllegalArgumentException("Light does not support RGBCW");
+            }
+            /*
+             * TODO implement RGBCW setting..
+             * This requires a conversion from RGBCW to RGBW and then to HS(B).
+             * This conversion is not entirely straightforward because it affects color temperature too.
+             * Also it is not clear how to handle the 'B' part of HSB in the case of !rgbLinkedToBrightness.
+             * For now, just ignore the cold and warm white channels..
+             */
+            return;
+        }
+        if (rgbx.length == 4 && !supportsRgbWhite) {
+            throw new IllegalArgumentException("Light does not support RGBW");
         }
         HSBType dimmedHSB = ColorUtil.rgbToHsb(Arrays.stream(rgbx).map(d -> d * 100.0 / 255.0)
                 .mapToObj(d -> zInternalPercentTypeOf(d)).toArray(PercentType[]::new));
