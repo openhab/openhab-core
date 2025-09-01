@@ -77,7 +77,7 @@ abstract class LightModelAbstractLogicImpl {
      * @param supportsBrightness true if the light supports brightness control
      * @param supportsColorTemperature true if the light supports color temperature control
      * @param supportsColor true if the light supports color control
-     * @param rgbLinkedToBrightness true if RGB vales are linked with the 'B' part of the {@link HSBType}
+     * @param rgbLinkedToBrightness true if RGB values are linked with the 'B' part of the {@link HSBType}
      * @param supportsRgbWhite true if the light supports RGBW rather than RGB color control
      * @param minimumOnBrightness the minimum brightness percent to consider as light "ON"
      * @param warmestMired the 'warmest' white color temperature in Mired
@@ -248,10 +248,12 @@ abstract class LightModelAbstractLogicImpl {
      * brightness.</li>
      * </ul>
      *
-     * @param supportsRgbDimming true if RGB values are raw
+     * @param rgbLinkedToBrightness true if RGB values are linked to brightness (i.e., relate to all HSB parts and will
+     *            influence and depend on brightness); false if RGB values only relate to hue and saturation and do not
+     *            influence or depend on brightness
      */
-    void configSetRgbLinkedToBrightness(boolean supportsRgbDimming) {
-        this.rgbLinkedToBrightness = supportsRgbDimming;
+    void configSetRgbLinkedToBrightness(boolean rgbLinkedToBrightness) {
+        this.rgbLinkedToBrightness = rgbLinkedToBrightness;
     }
 
     /**
@@ -320,7 +322,7 @@ abstract class LightModelAbstractLogicImpl {
     /**
      * Runtime State: get the color temperature or return null if the capability is not supported
      *
-     * @return QuantityType in Kelvin, or null if not supported
+     * @return QuantityType in Kelvin representing the color temperature, or null if not supported
      */
     @Nullable
     QuantityType<?> getColorTemperature() {
@@ -366,7 +368,8 @@ abstract class LightModelAbstractLogicImpl {
     /**
      * Runtime State: get the on/off state.
      *
-     * @param forceChannelVisible if present and true, return a non-null value even if brightness or color are supported.
+     * @param forceChannelVisible if present and true, return a non-null value even if brightness or color are
+     *            supported.
      * @return OnOffType representing the on/off state.
      */
     @Nullable

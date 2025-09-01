@@ -205,7 +205,7 @@ public class LightModel {
      * @param supportsBrightness true if the light supports brightness control
      * @param supportsColorTemperature true if the light supports color temperature control
      * @param supportsColor true if the light supports color control
-     * @param rgbLinkedToBrightness true if RGB vales are linked with the 'B' part of the {@link HSBType}
+     * @param rgbLinkedToBrightness true if RGB values are linked with the 'B' part of the {@link HSBType}
      * @param supportsRgbWhite true if the light supports RGBW rather than RGB color control
      */
     public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
@@ -221,7 +221,7 @@ public class LightModel {
      * @param supportsBrightness true if the light supports brightness control
      * @param supportsColorTemperature true if the light supports color temperature control
      * @param supportsColor true if the light supports color control
-     * @param rgbLinkedToBrightness true if RGB vales are linked with the 'B' part of the {@link HSBType}
+     * @param rgbLinkedToBrightness true if RGB values are linked with the 'B' part of the {@link HSBType}
      * @param supportsRgbWhite true if the light supports RGBW rather than RGB color control
      * @param minimumOnBrightness the minimum brightness percent to consider as light "ON"
      * @param warmestMired the 'warmest' white color temperature in Mired
@@ -366,7 +366,9 @@ public class LightModel {
      * brightness.</li>
      * </ul>
      *
-     * @param rgbLinkedToBrightness true if RGB values are raw
+     * @param rgbLinkedToBrightness true if RGB values are linked to brightness (i.e., relate to all HSB parts and will
+     *            influence and depend on brightness); false if RGB values only relate to hue and saturation and do not
+     *            influence or depend on brightness
      */
     public void configSetRgbLinkedToBrightness(boolean rgbLinkedToBrightness) {
         model.configSetRgbLinkedToBrightness(rgbLinkedToBrightness);
@@ -433,7 +435,7 @@ public class LightModel {
     /**
      * Runtime State: get the color temperature or return null if the capability is not supported
      *
-     * @return QuantityType in Mired representing the color temperature, or null if not supported
+     * @return QuantityType in Kelvin representing the color temperature, or null if not supported
      */
     public @Nullable QuantityType<?> getColorTemperature() {
         return model.getColorTemperature();
