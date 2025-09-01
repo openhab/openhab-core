@@ -154,7 +154,7 @@ import org.openhab.core.types.UnDefType;
  *     private void receiveBindingSpecificDataFromRemoteLight(double... receivedData) {
  *         // update the model state based on the data received from the remote
  *         model.setBrightness(receivedData[0]);
- *         model.setRGB(receivedData[1], receivedData[2], receivedData[3]);
+ *         model.setRGBx(receivedData[1], receivedData[2], receivedData[3]);
  *         model.setMired(receivedData[4]);
  *
  *         // update the OH channels with the new state values
