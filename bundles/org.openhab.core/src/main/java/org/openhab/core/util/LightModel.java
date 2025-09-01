@@ -89,8 +89,7 @@ import org.openhab.core.types.UnDefType;
  * Kelvin). Where color temperature PercentType values are internally converted to Mired values on the percentage scale
  * between the configured 'coolestMired' and 'warmestMired' Mired values, and vice versa.</li>
  *
- * <li>It handles inter relationships between color temperature states and the 'HS' part of the HSBType state. Where if
- * the color temperature changes then the HS values are adapted to match the corresponding color tempearture point on
+ * the color temperature changes then the HS values are adapted to match the corresponding color temperature point on
  * the Planckian Locus in the CIE color chart.</li>
  *
  * <li>It handles input/output values in RGB format in the range [0..255]. The behavior depends on the
