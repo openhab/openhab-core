@@ -104,20 +104,6 @@ abstract class LightModelAbstractLogicImpl {
      *********************************************************************************/
 
     /**
-     * Configuration: get the coolest color temperature in Mired
-     */
-    double cfgGetMiredCoolest() {
-        return coolestMired;
-    }
-
-    /**
-     * Configuration: get the warmest color temperature in Mired
-     */
-    double cfgGetMiredWarmest() {
-        return warmestMired;
-    }
-
-    /**
      * Configuration: get the step size for IncreaseDecreaseType commands
      */
     double configGetIncreaseDecreaseStep() {
@@ -129,6 +115,20 @@ abstract class LightModelAbstractLogicImpl {
      */
     double configGetMinimumOnBrightness() {
         return minimumOnBrightness;
+    }
+
+    /**
+     * Configuration: get the coolest color temperature in Mired
+     */
+    double configGetMiredCoolest() {
+        return coolestMired;
+    }
+
+    /**
+     * Configuration: get the warmest color temperature in Mired
+     */
+    double configGetMiredWarmest() {
+        return warmestMired;
     }
 
     /**

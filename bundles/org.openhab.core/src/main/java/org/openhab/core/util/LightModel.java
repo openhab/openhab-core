@@ -261,14 +261,14 @@ public class LightModel {
      * Configuration: get the Mired that corresponds to the coolest white light supported by the light
      */
     public double configGetMiredCoolest() {
-        return model.cfgGetMiredCoolest();
+        return model.configGetMiredCoolest();
     }
 
     /**
      * Configuration: get the Mired that corresponds to the warmest white light supported by the light
      */
     public double configGetMiredWarmest() {
-        return model.cfgGetMiredWarmest();
+        return model.configGetMiredWarmest();
     }
 
     /**
