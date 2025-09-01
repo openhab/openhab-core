@@ -63,11 +63,11 @@ import org.openhab.core.types.UnDefType;
  * <li>Optionally override 'minimumOnBrightness' to a minimum brightness percent in the range [0.1..10.0]
  * percent, to consider as being "ON". The default is 1 percent.</li>
  *
- * <li>Optionally override 'warmestMired' to a 'warmest' white color temperature in the range
- * [{@link coolestMired}..1000.0] Mired. The default is 500 Mired.</li>
+ * <li>Optionally override 'warmestMired' to a 'warmest' white color temperature in the range ['coolestMired'..1000.0]
+ * Mired. The default is 500 Mired.</li>
  *
- * <li>Optionally override 'coolestMired' to a 'coolest' white color temperaturein the
- * range[100.0..{@link warmestMired}] Mired. The default is 153 Mired.</li>
+ * <li>Optionally override 'coolestMired' to a 'coolest' white color temperature in the range [100.0..'warmestMired']
+ * Mired. The default is 153 Mired.</li>
  *
  * <li>Optionally override 'stepSize' to a step size for the IncreaseDecreaseType commands in the range
  * [1.0..50.0] percent. The default is 10 percent.</li>
