@@ -70,18 +70,13 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.transform</artifactId>
+      <artifactId>org.openhab.core.sitemap</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.model.sitemap</artifactId>
+      <artifactId>org.openhab.core.transform</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bom</groupId>
-      <artifactId>org.openhab.core.bom.compile-model</artifactId>
-      <type>pom</type>
     </dependency>
   </dependencies>
 

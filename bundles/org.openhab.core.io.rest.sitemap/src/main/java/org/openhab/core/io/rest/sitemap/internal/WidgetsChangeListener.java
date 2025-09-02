@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.common.util.EList;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
@@ -36,15 +36,13 @@ import org.openhab.core.items.events.GroupStateUpdatedEvent;
 import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.model.sitemap.sitemap.Button;
-import org.openhab.core.model.sitemap.sitemap.Buttongrid;
-import org.openhab.core.model.sitemap.sitemap.Chart;
-import org.openhab.core.model.sitemap.sitemap.ColorArray;
-import org.openhab.core.model.sitemap.sitemap.Condition;
-import org.openhab.core.model.sitemap.sitemap.Frame;
-import org.openhab.core.model.sitemap.sitemap.IconRule;
-import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
-import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.sitemap.Button;
+import org.openhab.core.sitemap.Buttongrid;
+import org.openhab.core.sitemap.Chart;
+import org.openhab.core.sitemap.Condition;
+import org.openhab.core.sitemap.Frame;
+import org.openhab.core.sitemap.Rule;
+import org.openhab.core.sitemap.Widget;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
@@ -57,6 +55,7 @@ import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - New widget icon parameter based on conditional rules
  * @author Laurent Garnier - Buttongrid as container for Button elements
+ * @author Mark Herwege - Implement sitemap registry
  */
 public class WidgetsChangeListener implements EventSubscriber {
 
@@ -67,7 +66,7 @@ public class WidgetsChangeListener implements EventSubscriber {
     private final String pageId;
     private final ItemUIRegistry itemUIRegistry;
     private final TimeZoneProvider timeZoneProvider;
-    private EList<Widget> widgets;
+    private List<Widget> widgets;
     private Set<Item> items;
     private final HashSet<String> filterItems = new HashSet<>();
     private final List<SitemapSubscriptionCallback> callbacks = Collections.synchronizedList(new ArrayList<>());
@@ -82,7 +81,7 @@ public class WidgetsChangeListener implements EventSubscriber {
      * @param widgets the list of widgets that are part of the page.
      */
     public WidgetsChangeListener(String sitemapName, String pageId, final ItemUIRegistry itemUIRegistry,
-            final TimeZoneProvider timeZoneProvider, EList<Widget> widgets) {
+            final TimeZoneProvider timeZoneProvider, List<Widget> widgets) {
         this.sitemapName = sitemapName;
         this.pageId = pageId;
         this.itemUIRegistry = itemUIRegistry;
@@ -91,7 +90,7 @@ public class WidgetsChangeListener implements EventSubscriber {
         updateItemsAndWidgets(widgets);
     }
 
-    private void updateItemsAndWidgets(EList<Widget> widgets) {
+    private void updateItemsAndWidgets(List<Widget> widgets) {
         this.widgets = widgets;
         items = getAllItems(widgets);
         filterItems.clear();
@@ -124,34 +123,34 @@ public class WidgetsChangeListener implements EventSubscriber {
      *            the widget list to get the items for added to all bundles containing REST resources
      * @return all items that are represented by the list of widgets
      */
-    private Set<Item> getAllItems(EList<Widget> widgets) {
+    private Set<Item> getAllItems(List<Widget> widgets) {
         Set<Item> items = new HashSet<>();
         if (itemUIRegistry != null) {
             for (Widget widget : widgets) {
                 addItemWithName(items, widget.getItem());
                 if (widget instanceof Frame frame) {
-                    items.addAll(getAllItems(frame.getChildren()));
+                    items.addAll(getAllItems(frame.getWidgets()));
                 } else if (widget instanceof Buttongrid grid) {
-                    items.addAll(getAllItems(grid.getChildren()));
+                    items.addAll(getAllItems(grid.getWidgets()));
                 }
                 // now scan icon rules
-                for (IconRule rule : widget.getIconRules()) {
+                for (Rule rule : widget.getIconRules()) {
                     addItemsFromConditions(items, rule.getConditions());
                 }
                 // now scan visibility rules
-                for (VisibilityRule rule : widget.getVisibility()) {
+                for (Rule rule : widget.getVisibility()) {
                     addItemsFromConditions(items, rule.getConditions());
                 }
                 // now scan label color rules
-                for (ColorArray rule : widget.getLabelColor()) {
+                for (Rule rule : widget.getLabelColor()) {
                     addItemsFromConditions(items, rule.getConditions());
                 }
                 // now scan value color rules
-                for (ColorArray rule : widget.getValueColor()) {
+                for (Rule rule : widget.getValueColor()) {
                     addItemsFromConditions(items, rule.getConditions());
                 }
                 // now scan icon color rules
-                for (ColorArray rule : widget.getIconColor()) {
+                for (Rule rule : widget.getIconColor()) {
                     addItemsFromConditions(items, rule.getConditions());
                 }
             }
@@ -159,7 +158,7 @@ public class WidgetsChangeListener implements EventSubscriber {
         return items;
     }
 
-    private void addItemsFromConditions(Set<Item> items, @Nullable EList<Condition> conditions) {
+    private void addItemsFromConditions(Set<Item> items, @Nullable List<Condition> conditions) {
         if (conditions != null) {
             for (Condition condition : conditions) {
                 addItemWithName(items, condition.getItem());
@@ -206,11 +205,12 @@ public class WidgetsChangeListener implements EventSubscriber {
                 events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren(grid)));
             }
 
-            boolean itemBelongsToWidget = w.getItem() != null && w.getItem().equals(item.getName());
+            boolean itemBelongsToWidget = w.getItem() != null && item.getName().equals(w.getItem());
             boolean skipWidget = !itemBelongsToWidget;
             // We skip the chart widgets having a refresh argument
             if (!skipWidget && w instanceof Chart chartWidget) {
-                skipWidget = chartWidget.getRefresh() > 0;
+                Integer refresh = chartWidget.getRefresh();
+                skipWidget = refresh != null && refresh > 0;
             }
             if (!skipWidget || definesVisibilityOrColorOrIcon(w, item.getName())) {
                 SitemapWidgetEvent event = constructSitemapEventForWidget(item, state, w);
@@ -228,10 +228,10 @@ public class WidgetsChangeListener implements EventSubscriber {
         event.labelSource = itemUIRegistry.getLabelSource(widget).toString();
         event.widgetId = itemUIRegistry.getWidgetId(widget);
         event.icon = itemUIRegistry.getCategory(widget);
-        event.reloadIcon = widget.getStaticIcon() == null;
+        event.reloadIcon = !widget.isStaticIcon();
         if (widget instanceof Button buttonWidget) {
             // Get the icon from the widget only
-            if (widget.getIcon() == null && widget.getStaticIcon() == null && widget.getIconRules().isEmpty()) {
+            if (widget.getIcon() == null && widget.getIconRules().isEmpty()) {
                 event.icon = null;
                 event.reloadIcon = false;
             }
@@ -243,12 +243,11 @@ public class WidgetsChangeListener implements EventSubscriber {
         event.descriptionChanged = false;
         // event.item contains the (potentially changed) data of the item belonging to
         // the widget including its state (in event.item.state)
-        boolean itemBelongsToWidget = widget.getItem() != null && widget.getItem().equals(item.getName());
+        boolean itemBelongsToWidget = widget.getItem() != null && item.getName().equals(widget.getItem());
         final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(widget);
         State stateToBeSent = null;
         if (itemToBeSent != null) {
-            String widgetTypeName = widget.eClass().getInstanceTypeName()
-                    .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
+            String widgetTypeName = widget.getClass().getSimpleName();
             boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
             Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
             event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null,
@@ -256,7 +255,8 @@ public class WidgetsChangeListener implements EventSubscriber {
 
             // event.state is an adjustment of the item state to the widget type.
             stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
-            event.state = itemUIRegistry.convertState(widget, itemToBeSent, stateToBeSent).toFullString();
+            State convertedState = itemUIRegistry.convertState(widget, itemToBeSent, stateToBeSent);
+            event.state = convertedState == null ? null : convertedState.toFullString();
             // In case this state is identical to the item state, its value is set to null.
             if (event.state != null && event.state.equals(event.item.state)) {
                 event.state = null;
@@ -288,12 +288,12 @@ public class WidgetsChangeListener implements EventSubscriber {
                 || w.getIconRules().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name));
     }
 
-    private boolean conditionsDependsOnItem(@Nullable EList<Condition> conditions, String name) {
+    private boolean conditionsDependsOnItem(@Nullable List<Condition> conditions, String name) {
         return conditions != null && conditions.stream().anyMatch(c -> name.equals(c.getItem()));
     }
 
-    public void sitemapContentChanged(EList<Widget> widgets) {
-        updateItemsAndWidgets(widgets);
+    public void sitemapContentChanged(List<@NonNull Widget> widgets2) {
+        updateItemsAndWidgets(widgets2);
 
         SitemapChangedEvent changeEvent = new SitemapChangedEvent();
         changeEvent.pageId = pageId;

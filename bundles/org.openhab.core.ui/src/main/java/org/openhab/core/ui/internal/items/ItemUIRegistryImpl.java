@@ -31,10 +31,6 @@ import java.util.stream.Stream;
 
 import javax.measure.Unit;
 
-import org.eclipse.emf.common.util.BasicEList;
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -64,18 +60,17 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.QuantityType;
-import org.openhab.core.model.sitemap.sitemap.ColorArray;
-import org.openhab.core.model.sitemap.sitemap.Default;
-import org.openhab.core.model.sitemap.sitemap.Group;
-import org.openhab.core.model.sitemap.sitemap.IconRule;
-import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
-import org.openhab.core.model.sitemap.sitemap.Mapping;
-import org.openhab.core.model.sitemap.sitemap.Sitemap;
-import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
-import org.openhab.core.model.sitemap.sitemap.Slider;
-import org.openhab.core.model.sitemap.sitemap.Switch;
-import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
-import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.sitemap.Default;
+import org.openhab.core.sitemap.Group;
+import org.openhab.core.sitemap.LinkableWidget;
+import org.openhab.core.sitemap.Mapping;
+import org.openhab.core.sitemap.Parent;
+import org.openhab.core.sitemap.Rule;
+import org.openhab.core.sitemap.Sitemap;
+import org.openhab.core.sitemap.Slider;
+import org.openhab.core.sitemap.Switch;
+import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
 import org.openhab.core.transform.TransformationService;
@@ -112,6 +107,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - new icon parameter based on conditional rules
  * @author Danny Baumann - widget label source support
  * @author Laurent Garnier - Consider Colortemperaturepicker element as possible default widget
+ * @author Mark Herwege - Implement sitemap registry
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -137,6 +133,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
     private final ItemRegistry itemRegistry;
+    private final SitemapFactory sitemapFactory;
     private final TimeZoneProvider timeZoneProvider;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
@@ -155,8 +152,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Activate
     public ItemUIRegistryImpl(final @Reference ItemRegistry itemRegistry,
-            final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference SitemapFactory sitemapFactory, final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
+        this.sitemapFactory = sitemapFactory;
         this.timeZoneProvider = timeZoneProvider;
     }
 
@@ -276,65 +274,65 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
 
         if (GroupItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createGroup();
+            return sitemapFactory.createWidget("Group");
         } else if (CallItem.class.equals(itemType) //
                 || ContactItem.class.equals(itemType) //
                 || DateTimeItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createText();
+            return sitemapFactory.createWidget("Text");
         } else if (ColorItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createColorpicker();
+            return sitemapFactory.createWidget("Colorpicker");
         } else if (DimmerItem.class.equals(itemType)) {
-            Slider slider = SitemapFactory.eINSTANCE.createSlider();
+            Slider slider = (Slider) sitemapFactory.createWidget("Slider");
             slider.setSwitchEnabled(true);
             slider.setReleaseOnly(true);
             return slider;
         } else if (ImageItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createImage();
+            return sitemapFactory.createWidget("Image");
         } else if (LocationItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createMapview();
+            return sitemapFactory.createWidget("Mapview");
         } else if (NumberItem.class.isAssignableFrom(itemType) //
                 || StringItem.class.equals(itemType)) {
             boolean isReadOnly = isReadOnly(itemName);
             int commandOptionsSize = getCommandOptionsSize(itemName);
             if (!isReadOnly && commandOptionsSize > 0) {
-                return commandOptionsSize <= MAX_BUTTONS ? SitemapFactory.eINSTANCE.createSwitch()
-                        : SitemapFactory.eINSTANCE.createSelection();
+                return commandOptionsSize <= MAX_BUTTONS ? sitemapFactory.createWidget("Switch")
+                        : sitemapFactory.createWidget("Selection");
             }
             if (!isReadOnly && hasStateOptions(itemName)) {
-                return SitemapFactory.eINSTANCE.createSelection();
+                return sitemapFactory.createWidget("Selection");
             }
             if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType) && hasItemTag(itemName, "Setpoint")) {
-                return SitemapFactory.eINSTANCE.createSetpoint();
+                return sitemapFactory.createWidget("Setpoint");
             } else if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType)
                     && hasItemTag(itemName, "ColorTemperature")) {
-                return SitemapFactory.eINSTANCE.createColortemperaturepicker();
+                return sitemapFactory.createWidget("Colortemperaturepicker");
             } else {
-                return SitemapFactory.eINSTANCE.createText();
+                return sitemapFactory.createWidget("Text");
             }
         } else if (PlayerItem.class.equals(itemType)) {
             return createPlayerButtons();
         } else if (RollershutterItem.class.equals(itemType) //
                 || SwitchItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createSwitch();
+            return sitemapFactory.createWidget("Switch");
         }
 
         return null;
     }
 
     private Switch createPlayerButtons() {
-        final Switch playerItemSwitch = SitemapFactory.eINSTANCE.createSwitch();
+        final Switch playerItemSwitch = (Switch) sitemapFactory.createWidget("Switch");
         final List<Mapping> mappings = playerItemSwitch.getMappings();
         Mapping commandMapping;
-        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        mappings.add(commandMapping = sitemapFactory.createMapping());
         commandMapping.setCmd(NextPreviousType.PREVIOUS.name());
         commandMapping.setLabel("<<");
-        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        mappings.add(commandMapping = sitemapFactory.createMapping());
         commandMapping.setCmd(PlayPauseType.PAUSE.name());
         commandMapping.setLabel("||");
-        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        mappings.add(commandMapping = sitemapFactory.createMapping());
         commandMapping.setCmd(PlayPauseType.PLAY.name());
         commandMapping.setLabel(">");
-        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        mappings.add(commandMapping = sitemapFactory.createMapping());
         commandMapping.setCmd(NextPreviousType.NEXT.name());
         commandMapping.setLabel(">>");
         return playerItemSwitch;
@@ -391,7 +389,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 }
             }
         } catch (ItemNotFoundException e) {
-            logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
+            logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.getClass().getSimpleName());
         }
 
         boolean considerTransform = false;
@@ -562,7 +560,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         : pattern.substring(0, pattern.indexOf(unit, matcherEnd) + unit.length());
             }
         } catch (ItemNotFoundException e) {
-            logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
+            logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.getClass().getSimpleName());
         }
 
         return pattern;
@@ -685,8 +683,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public @Nullable String getCategory(Widget w) {
-        String widgetTypeName = w.eClass().getInstanceTypeName()
-                .substring(w.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
+        String widgetTypeName = w.getWidgetType();
 
         // the default is the widget type name, e.g. "switch"
         String category = widgetTypeName.toLowerCase();
@@ -695,8 +692,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         // if an icon is defined for the widget, use it
         if (w.getIcon() != null) {
             category = w.getIcon();
-        } else if (w.getStaticIcon() != null) {
-            category = w.getStaticIcon();
         } else if (conditionalIcon != null) {
             category = conditionalIcon;
         } else {
@@ -720,7 +715,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 Item item = getItem(itemName);
                 return convertState(w, item, item.getState());
             } catch (ItemNotFoundException e) {
-                logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
+                logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.getClass().getSimpleName());
             }
         }
         return UnDefType.UNDEF;
@@ -777,12 +772,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             } else {
                 try {
                     int widgetID = Integer.parseInt(id.substring(0, 2));
-                    if (widgetID < sitemap.getChildren().size()) {
-                        w = sitemap.getChildren().get(widgetID);
+                    if (widgetID < sitemap.getWidgets().size()) {
+                        w = sitemap.getWidgets().get(widgetID);
                         for (int i = 2; i < id.length(); i += 2) {
                             int childWidgetID = Integer.parseInt(id.substring(i, i + 2));
-                            if (childWidgetID < ((LinkableWidget) w).getChildren().size()) {
-                                w = ((LinkableWidget) w).getChildren().get(childWidgetID);
+                            if (childWidgetID < ((LinkableWidget) w).getWidgets().size()) {
+                                w = ((LinkableWidget) w).getWidgets().get(childWidgetID);
                             }
                         }
                     }
@@ -797,25 +792,25 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public EList<Widget> getChildren(Sitemap sitemap) {
-        EList<Widget> widgets = sitemap.getChildren();
+    public List<Widget> getChildren(Sitemap sitemap) {
+        List<Widget> widgets = sitemap.getWidgets();
 
-        EList<Widget> result = new BasicEList<>();
+        List<Widget> result = new ArrayList<>();
         widgets.stream().map(this::resolveDefault).filter(Objects::nonNull).map(Objects::requireNonNull)
                 .forEach(result::add);
         return result;
     }
 
     @Override
-    public EList<Widget> getChildren(LinkableWidget w) {
-        EList<Widget> widgets;
-        if (w instanceof Group group && w.getChildren().isEmpty()) {
+    public List<Widget> getChildren(LinkableWidget w) {
+        List<Widget> widgets;
+        if (w instanceof Group group && w.getWidgets().isEmpty()) {
             widgets = getDynamicGroupChildren(group);
         } else {
-            widgets = w.getChildren();
+            widgets = w.getWidgets();
         }
 
-        EList<Widget> result = new BasicEList<>();
+        List<Widget> result = new ArrayList<>();
         widgets.stream().map(this::resolveDefault).filter(Objects::nonNull).map(Objects::requireNonNull)
                 .forEach(result::add);
 
@@ -823,9 +818,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public @Nullable EObject getParent(Widget w) {
+    public @Nullable Parent getParent(Widget w) {
         Widget w2 = defaultWidgets.get(w);
-        return (w2 == null) ? w.eContainer() : w2.eContainer();
+        return (w2 == null) ? w.getParent() : w2.getParent();
     }
 
     private @Nullable Widget resolveDefault(@Nullable Widget widget) {
@@ -851,13 +846,28 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private void copyProperties(Widget source, Widget target) {
         target.setItem(source.getItem());
         target.setIcon(source.getIcon());
-        target.setStaticIcon(source.getStaticIcon());
+        target.setStaticIcon(source.isStaticIcon());
         target.setLabel(source.getLabel());
-        target.getVisibility().addAll(EcoreUtil.copyAll(source.getVisibility()));
-        target.getLabelColor().addAll(EcoreUtil.copyAll(source.getLabelColor()));
-        target.getValueColor().addAll(EcoreUtil.copyAll(source.getValueColor()));
-        target.getIconColor().addAll(EcoreUtil.copyAll(source.getIconColor()));
-        target.getIconRules().addAll(EcoreUtil.copyAll(source.getIconRules()));
+        target.getVisibility().addAll(copyAll(source.getVisibility()));
+        target.getLabelColor().addAll(copyAll(source.getLabelColor()));
+        target.getValueColor().addAll(copyAll(source.getValueColor()));
+        target.getIconColor().addAll(copyAll(source.getIconColor()));
+        target.getIconRules().addAll(copyAll(source.getIconRules()));
+    }
+
+    private Collection<? extends Rule> copyAll(List<Rule> rules) {
+        return rules.stream().map(rule -> {
+            Rule ruleCopy = sitemapFactory.createRule();
+            ruleCopy.getConditions().addAll(rule.getConditions().stream().map(condition -> {
+                org.openhab.core.sitemap.Condition conditionCopy = sitemapFactory.createCondition();
+                conditionCopy.setItem(condition.getItem());
+                conditionCopy.setCondition(condition.getCondition());
+                conditionCopy.setValue(condition.getValue());
+                return conditionCopy;
+            }).toList());
+            ruleCopy.setArgument(rule.getArgument());
+            return ruleCopy;
+        }).toList();
     }
 
     /**
@@ -868,8 +878,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
      * @param group The group widget to get children for
      * @return a list of default widgets provided for the member items
      */
-    private EList<Widget> getDynamicGroupChildren(Group group) {
-        EList<Widget> children = new BasicEList<>();
+    private List<Widget> getDynamicGroupChildren(Group group) {
+        List<Widget> children = new ArrayList<>();
         String itemName = group.getItem();
         try {
             if (itemName != null) {
@@ -1036,18 +1046,16 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         String id = "";
         Widget w = widget;
-        while (w.eContainer() instanceof Widget) {
-            Widget parent = (Widget) w.eContainer();
-            String index = String.valueOf(((LinkableWidget) parent).getChildren().indexOf(w));
+        while (w.getParent() instanceof LinkableWidget parent) {
+            String index = String.valueOf(parent.getWidgets().indexOf(w));
             if (index.length() == 1) {
                 index = "0" + index; // make it two digits
             }
             id = index + id;
             w = parent;
         }
-        if (w.eContainer() instanceof Sitemap) {
-            Sitemap sitemap = (Sitemap) w.eContainer();
-            String index = String.valueOf(sitemap.getChildren().indexOf(w));
+        if (w.getParent() instanceof Sitemap sitemap) {
+            String index = String.valueOf(sitemap.getWidgets().indexOf(w));
             if (index.length() == 1) {
                 index = "0" + index; // make it two digits
             }
@@ -1056,8 +1064,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         // if the widget is dynamically created and not available in the sitemap,
         // use the item name as the id
-        if (w.eContainer() == null) {
-            id = w.getItem();
+        if (w.getParent() == null) {
+            String item = w.getItem();
+            id = item != null ? item : id;
         }
         return id;
     }
@@ -1207,7 +1216,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return matched;
     }
 
-    private @Nullable String processColorDefinition(Widget w, @Nullable List<ColorArray> colorList, String colorType) {
+    private @Nullable String processColorDefinition(Widget w, @Nullable List<Rule> colorList, String colorType) {
         // Sanity check
         if (colorList == null || colorList.isEmpty()) {
             return null;
@@ -1219,10 +1228,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         // Loop through all elements looking for the definition associated
         // with the supplied value
-        for (ColorArray rule : colorList) {
+        for (Rule rule : colorList) {
             if (allConditionsOk(rule.getConditions(), w)) {
                 // We have the color for this value - break!
-                colorString = rule.getArg();
+                colorString = rule.getArgument();
                 break;
             }
         }
@@ -1259,14 +1268,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public boolean getVisiblity(Widget w) {
         // Default to visible if parameters not set
-        List<VisibilityRule> ruleList = w.getVisibility();
-        if (ruleList == null || ruleList.isEmpty()) {
+        List<Rule> rulList = w.getVisibility();
+        if (rulList.isEmpty()) {
             return true;
         }
 
         logger.debug("Checking visiblity for widget '{}'.", w.getLabel());
 
-        for (VisibilityRule rule : ruleList) {
+        for (Rule rule : rulList) {
             if (allConditionsOk(rule.getConditions(), w)) {
                 return true;
             }
@@ -1279,9 +1288,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public @Nullable String getConditionalIcon(Widget w) {
-        List<IconRule> ruleList = w.getIconRules();
+        List<Rule> rulList = w.getIconRules();
         // Sanity check
-        if (ruleList == null || ruleList.isEmpty()) {
+        if (rulList.isEmpty()) {
             return null;
         }
 
@@ -1291,10 +1300,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         // Loop through all elements looking for the definition associated
         // with the supplied value
-        for (IconRule rule : ruleList) {
+        for (Rule rule : rulList) {
             if (allConditionsOk(rule.getConditions(), w)) {
                 // We have the icon for this value - break!
-                icon = rule.getArg();
+                icon = rule.getArgument();
                 break;
             }
         }
@@ -1313,14 +1322,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return icon;
     }
 
-    private boolean allConditionsOk(@Nullable List<org.openhab.core.model.sitemap.sitemap.Condition> conditions,
-            Widget w) {
+    private boolean allConditionsOk(@Nullable List<org.openhab.core.sitemap.Condition> conditions, Widget w) {
         boolean allConditionsOk = true;
         if (conditions != null) {
             State defaultState = getState(w);
 
             // Go through all AND conditions
-            for (org.openhab.core.model.sitemap.sitemap.Condition condition : conditions) {
+            for (org.openhab.core.sitemap.Condition condition : conditions) {
                 // Use a local state variable in case it gets overridden below
                 State state = defaultState;
 
@@ -1335,18 +1343,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         // Get the item state
                         state = item.getState();
                     } catch (ItemNotFoundException e) {
-                        logger.warn("Cannot retrieve item {} for widget {}", itemName,
-                                w.eClass().getInstanceTypeName());
+                        logger.warn("Cannot retrieve item {} for widget {}", itemName, w.getClass().getSimpleName());
                     }
                 }
 
-                // Handle the sign
-                String value;
-                if (condition.getSign() != null) {
-                    value = condition.getSign() + condition.getState();
-                } else {
-                    value = condition.getState();
-                }
+                String value = condition.getValue();
 
                 if (state == null || !matchStateToValue(state, value, condition.getCondition())) {
                     allConditionsOk = false;
