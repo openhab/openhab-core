@@ -584,19 +584,121 @@ public class LightModelTest {
 
         /*
          * Nota Bene: in this case with rgbLinkedToBrightness == true the round trip setRGBx() followed
-         * by getRGBx MUST return identical values, and the brightness MUST be adjusted.
+         * by getRGBx MUST return (nearly) identical values, and the brightness MUST be adjusted.
          */
         lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 20.0, 35.0 });
         PercentType brightness = lsm.getBrightness(true);
         assertNotNull(brightness);
         rgbcw = lsm.getRGBx();
         assertEquals(5, rgbcw.length);
-        // TODO manually calculate the expected values and apply the assertions below
-        // assertEquals(100.0, brightness.doubleValue(), 0.1);
-        // assertEquals(0.0, rgbcw[0], 0.1);
-        // assertEquals(100.0, rgbcw[1], 0.1);
-        // assertEquals(200.0, rgbcw[2], 0.1);
-        // assertEquals(20.0, rgbcw[3], 0.1);
-        // assertEquals(35.0, rgbcw[4], 0.1);
+
+        // TODO implement the following test case assertions for brightness (B) and RGBCW (r, g, b, c, w)
+        /*
+         * assertEquals(B, brightness.doubleValue(), 0.1);
+         * assertEquals(r, rgbcw[0], 0.1);
+         * assertEquals(g, rgbcw[1], 0.1);
+         * assertEquals(b, rgbcw[2], 0.1);
+         * assertEquals(c, rgbcw[3], 0.1);
+         * assertEquals(w, rgbcw[4], 0.1);
+         *
+         * RGBCW to HSB test cases
+         *
+         * For these tests, we assume RGBCW values are within the range 0–255, and HSB values are within the ranges: Hue
+         * [0,360), Saturation [0, 100], and Brightness [0, 100].
+         *
+         * Standard conversion tests
+         * These cases cover typical color scenarios, with input values for cool white (CW) and warm white (WW) to be
+         * converted to HSB.
+         *
+         * Case: Primary Red
+         * Input (RGBCW): (255, 0, 0, 0, 0)
+         * Expected HSB: (0, 100, 100)
+         *
+         * Case: Bright White (warm)
+         * Input (RGBCW): (0, 0, 0, 0, 255)
+         * Expected HSB: Depends on implementation. Since it is a warm white, the HSB conversion must reflect its
+         * position on the color temperature spectrum.
+         *
+         * Case: Mixed White (neutral)
+         * Input (RGBCW): (0, 0, 0, 255, 255)
+         * Expected HSB: The combined effect of cool and warm white should yield a neutral white, such as (0, 0, 100).
+         *
+         * Case: Pastel Color (low saturation)
+         * Input (RGBCW): (100, 100, 0, 100, 100)
+         * Expected HSB: The high CW and WW values should lead to a desaturated, brighter version of the yellow from the
+         * RGB components. The saturation will be lower and the brightness higher than for a pure RGB yellow.
+         *
+         * Edge case and boundary tests
+         * These cases test the limits of the conversion logic.
+         *
+         * Case: Black
+         * Input (RGBCW): (0, 0, 0, 0, 0)
+         * Expected HSB: (0, 0, 0) (Black). The hue and saturation are undefined, so a value of 0 is standard.
+         *
+         * Case: All channels max
+         * Input (RGBCW): (255, 255, 255, 255, 255)
+         * Expected HSB: (0, 0, 100) (White). The combination of all channels at full brightness should produce the
+         * brightest possible white, with zero saturation.
+         *
+         * Case: Maximum RGB, zero white
+         * Input (RGBCW): (255, 255, 255, 0, 0)
+         * Expected HSB: (0, 0, 100) (White). The RGB channels alone should produce white at full brightness.
+         *
+         * Case: Mixed color with white
+         * Input (RGBCW): (255, 0, 0, 0, 100)
+         * Expected HSB: A less saturated, brighter red than pure RGB red. The Hue should remain at 0, but saturation
+         * will decrease, and brightness will be higher.
+         *
+         * Case: Non-zero RGB with CW only
+         * Input (RGBCW): (255, 0, 0, 100, 0)
+         * Expected HSB: A less saturated, cooler red. Hue remains 0, saturation is lower, and brightness is higher. The
+         * color temperature of the red will shift towards the cool white.
+         *
+         * HSB to RGBCW test cases
+         * These tests confirm that the reverse conversion correctly determines the appropriate mix of RGB, CW, and WW
+         * channels to produce the desired HSB color.
+         *
+         * Standard conversion tests
+         *
+         * Case: Primary Blue
+         * Input (HSB): (240, 100, 100)
+         * Expected RGBCW: (0, 0, 255, 0, 0). A pure, saturated color should only use the RGB channels.
+         *
+         * Case: Gray
+         * Input (HSB): (0, 0, 50)
+         * Expected RGBCW: Assuming the system uses white channels for brightness and desaturation, the gray should be
+         * produced by a mix of CW and WW, with no RGB active: (0, 0, 0, 128, 128).
+         *
+         * Case: Pastel Green
+         * Input (HSB): (120, 50, 75)
+         * Expected RGBCW: The conversion should calculate a mix of green and white to achieve the desired brightness
+         * and saturation. For instance, (0, 191, 0, 64, 64).
+         *
+         * Edge case and boundary tests
+         *
+         * Case: Full Bright White
+         * Input (HSB): (0, 0, 100)
+         * Expected RGBCW: (0, 0, 0, 255, 255). Maximum brightness and zero saturation should be achieved by using only
+         * the white channels.
+         *
+         * Case: Black
+         * Input (HSB): (0, 0, 0)
+         * Expected RGBCW: (0, 0, 0, 0, 0). Black should result in all channels off.
+         *
+         * Case: Low Brightness, High Saturation
+         * Input (HSB): (60, 100, 25)
+         * Expected RGBCW: (64, 64, 0, 0, 0). The low brightness should mean the white channels are not used at all, and
+         * only the RGB channels are used at a scaled-down value.
+         *
+         * Case: HSB with Cool White preference
+         * Input (HSB): A color with a blue tint, e.g., (240, 50, 75).
+         * Expected RGBCW: The conversion might be designed to leverage the cool white LED to create a cooler white
+         * component, resulting in a higher CW value and lower WW. For example, a result like (0, 0, 191, 128, 0).
+         *
+         * Case: HSB with Warm White preference
+         * Input (HSB): A color with a yellow/red tint, e.g., (30, 50, 75).
+         * Expected RGBCW: Similarly, this conversion would prioritize the warm white LED to maintain the warmer color
+         * temperature, possibly leading to a result like (191, 64, 0, 0, 128).
+         */
     }
 }
