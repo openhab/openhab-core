@@ -101,8 +101,8 @@ import org.openhab.core.types.UnDefType;
  * Kelvin). Where color temperature PercentType values are internally converted to Mired values on the percentage scale
  * between the configured {@link #coolestMired} and {@link #warmestMired} Mired values, and vice versa.</li>
  *
- * the color temperature changes then the HS values are adapted to match the corresponding color temperature point on
- * the Planckian Locus in the CIE color chart.</li>
+ * <li>When the color temperature changes then the HS values are adapted to match the corresponding color temperature
+ * point on the Planckian Locus in the CIE color chart.</li>
  *
  * <li>It handles input/output values in RGB format in the range [0..255]. The behavior depends on the
  * {@link #rgbLinkedToBrightness} setting. If {@link #rgbLinkedToBrightness} is true the RGB values read/write all three
@@ -293,7 +293,7 @@ public class LightModel {
      * <li>{@link #warmestMired} is 500 (the 'warmest' white color temperature)</li>
      * <li>{@link #coolestMired} is 153 (the 'coolest' white color temperature)</li>
      * <li>{@link #stepSize} is 10.0 (the step size for IncreaseDecreaseType commands)</li>
-     * <li>{@link #warmBias} is 0,5 (the bias for warm white in RGBCW mode)</li>
+     * <li>{@link #warmBias} is 0.5 (the bias for warm white in RGBCW mode)</li>
      * </ul>
      */
     public LightModel() {
@@ -851,7 +851,7 @@ public class LightModel {
                     "Mired value '%f' out of range [%f..%f]".formatted(mired, coolestMired, warmestMired));
         }
         if (!Double.isNaN(mired)) { // don't update color if Mired is not known
-            HSBType hsb = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / cachedMired));
+            HSBType hsb = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / mired));
             cachedHSB = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedHSB.getBrightness());
         }
         cachedMired = mired;
