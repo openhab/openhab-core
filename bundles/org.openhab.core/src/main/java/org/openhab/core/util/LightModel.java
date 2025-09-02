@@ -601,7 +601,7 @@ public class LightModel {
      * relate to all the 'HSB' parts of the {@link HSBType} state.</li>
      * <ul>
      *
-     * @param rgbxIn an array of double representing RGB or RGBW values in range [0..255]
+     * @param rgbx an array of double representing RGB or RGBW values in range [0..255]
      * @throws IllegalArgumentException if the array length is not 3, 4, or 5 depending on the light's capabilities,
      *             or if any of the values are outside the range [0.0 to 255.0]
      */
