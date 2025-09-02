@@ -298,6 +298,18 @@ public class LightModelTest {
     @Test
     public void testComplexConstructorBad() {
         assertThrows(IllegalArgumentException.class,
+                () -> new LightModel(false, false, false, true, false, false, null, null, null, null));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new LightModel(false, false, false, false, true, false, null, null, null, null));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new LightModel(false, false, true, false, true, false, null, null, null, null));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new LightModel(false, true, true, true, true, false, null, null, null, null));
+
+        assertThrows(IllegalArgumentException.class,
                 () -> new LightModel(false, false, false, false, false, false, 0.0, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
@@ -347,7 +359,7 @@ public class LightModelTest {
         assertEquals(255.0, rgb[0]);
 
         /*
-         * Nota Bene: in the case of supportsRgbDimming == false the round trip setRGBx() followed by
+         * Nota Bene: in the case of rgbLinkedToBrightness == false the round trip setRGBx() followed by
          * getRGBx will NOT return identical values. But the ratio of the RGB values WILL be the same.
          */
         lsm.setRGBx(new double[] { 0.0, 100.0, 200.0 });
@@ -359,8 +371,8 @@ public class LightModelTest {
     }
 
     @Test
-    public void testRgbWhite() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+    public void testRgbw() {
+        LightModel lsm = new LightModel(true, true, true, true, false, false);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -380,11 +392,11 @@ public class LightModelTest {
         assertEquals(255.0, rgbw[0]);
 
         /*
-         * Nota Bene: in this case with supportsRgbDimming == false the round trip setRGBx() followed
+         * Nota Bene: in this case with rgbLinkedToBrightness == false the round trip setRGBx() followed
          * by getRGBx will NOT return identical values. However the ratio of the RGBW values WILL be
          * the same.
          */
-        lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 55.0 });
+        lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 55.0 });// set full brightness 200 + 55 = 255
         rgbw = lsm.getRGBx();
         assertEquals(4, rgbw.length);
         assertEquals(0.0, rgbw[0]);
@@ -395,7 +407,7 @@ public class LightModelTest {
 
     @Test
     public void testRgbDimming() {
-        LightModel lsm = new LightModel(true, true, true, true, false, false);
+        LightModel lsm = new LightModel(true, true, true, false, false, true);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -415,7 +427,7 @@ public class LightModelTest {
         assertEquals(127.5, rgb[0]);
 
         /*
-         * Nota Bene: in this case with supportsRgbDimming == true the round trip setRGBx() followed
+         * Nota Bene: in this case with rgbLinkedToBrightness == true the round trip setRGBx() followed
          * by getRGBx MUST return identical values. And the brightness MUST be adjusted.
          */
         lsm.setRGBx(new double[] { 0.0, 100.0, 200.0 });
@@ -426,12 +438,12 @@ public class LightModelTest {
         assertEquals(200.0, rgb[2]);
         PercentType brightness = lsm.getBrightness(true);
         assertNotNull(brightness);
-        assertEquals(78.4, brightness.doubleValue(), 0.1);
+        assertEquals(78.4, brightness.doubleValue(), 0.1); // 78.4 = 200 / 255
     }
 
     @Test
-    public void testRgbWhiteDimming() {
-        LightModel lsm = new LightModel(true, true, true, true, true, false);
+    public void testRgbwDimming() {
+        LightModel lsm = new LightModel(true, true, true, true, false, true);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -451,10 +463,11 @@ public class LightModelTest {
         assertEquals(127.5, rgbw[0]);
 
         /*
-         * Nota Bene: in this case with supportsRgbDimming == true the round trip setRGBx() followed
+         * Nota Bene: in this case with rgbLinkedToBrightness == true the round trip setRGBx() followed
          * by getRGBx MUST return identical values, and the brightness MUST be adjusted.
          */
-        lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 55.0 });
+        lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 55.0 }); // set full brightness 200 + 55 = 255
+
         rgbw = lsm.getRGBx();
         assertEquals(4, rgbw.length);
         assertEquals(0.0, rgbw[0]);
@@ -468,12 +481,12 @@ public class LightModelTest {
         lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 0.0 });
         brightness = lsm.getBrightness(true);
         assertNotNull(brightness);
-        assertEquals(78.4, brightness.doubleValue(), 0.1);
+        assertEquals(78.4, brightness.doubleValue(), 0.1); // 78.4 = 200 / 255
 
         lsm.setRGBx(new double[] { 0.0, 100.0, 100.0, 100.0 });
         brightness = lsm.getBrightness(true);
         assertNotNull(brightness);
-        assertEquals(78.4, brightness.doubleValue(), 0.1);
+        assertEquals(78.4, brightness.doubleValue(), 0.1); // 78.4 = 200 / 255
     }
 
     @Test
@@ -509,12 +522,76 @@ public class LightModelTest {
     }
 
     @Test
-    public void testRgbCoolWarmWhite() {
-        // TODO
+    public void testRgbcw() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+
+        lsm.handleCommand(HSBType.RED);
+        assertEquals(HSBType.RED, lsm.getColor());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+
+        double[] rgbcw = lsm.getRGBx();
+        assertEquals(5, rgbcw.length);
+        assertEquals(255.0, rgbcw[0]);
+
+        lsm.handleCommand(new PercentType(50));
+        rgbcw = lsm.getRGBx();
+        assertEquals(5, rgbcw.length);
+        assertEquals(255.0, rgbcw[0]);
+
+        /*
+         * Nota Bene: in the case of rgbLinkedToBrightness == false the round trip setRGBx() followed by
+         * getRGBx will NOT return identical values. But the ratio of the RGB values WILL be the same.
+         */
+        lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 20.0, 35.0 }); // set full brightness 200 + 20 + 35 = 255
+        rgbcw = lsm.getRGBx();
+        assertEquals(5, rgbcw.length);
+        assertEquals(0.0, rgbcw[0], 0.1);
+        assertEquals(100.0, rgbcw[1], 0.1);
+        assertEquals(200.0, rgbcw[2], 0.1);
+        assertEquals(20.0, rgbcw[3], 0.1);
+        assertEquals(35.0, rgbcw[4], 0.1);
+
+        PercentType brightness = lsm.getBrightness(true);
+        assertNotNull(brightness);
+        assertEquals(50.0, brightness.doubleValue(), 0.1);
+        assertEquals(374.0, lsm.getMired(), 0.5);
     }
 
     @Test
-    public void testRgbCoolWarmWhiteWithDimming() {
-        // TODO
+    public void testRgbcwDimming() {
+        LightModel lsm = new LightModel(true, true, true, false, true, true);
+
+        lsm.handleCommand(HSBType.RED);
+        assertEquals(HSBType.RED, lsm.getColor());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+
+        double[] rgbcw = lsm.getRGBx();
+        assertEquals(5, rgbcw.length);
+        assertEquals(255.0, rgbcw[0]);
+
+        lsm.handleCommand(new PercentType(50));
+        rgbcw = lsm.getRGBx();
+        assertEquals(5, rgbcw.length);
+        assertEquals(127.5, rgbcw[0]);
+
+        /*
+         * Nota Bene: in this case with rgbLinkedToBrightness == true the round trip setRGBx() followed
+         * by getRGBx MUST return identical values, and the brightness MUST be adjusted.
+         */
+        lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 20.0, 35.0 }); // set full brightness 200 + 20 + 35 = 255
+        rgbcw = lsm.getRGBx();
+        assertEquals(5, rgbcw.length);
+        assertEquals(0.0, rgbcw[0], 0.1);
+        assertEquals(100.0, rgbcw[1], 0.1);
+        assertEquals(200.0, rgbcw[2], 0.1);
+        assertEquals(20.0, rgbcw[3], 0.1);
+        assertEquals(35.0, rgbcw[4], 0.1);
+
+        PercentType brightness = lsm.getBrightness(true);
+        assertNotNull(brightness);
+        assertEquals(100.0, brightness.doubleValue(), 0.1);
+        assertEquals(374.0, lsm.getMired(), 0.5);
     }
 }
