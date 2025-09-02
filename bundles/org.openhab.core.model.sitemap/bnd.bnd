@@ -17,6 +17,7 @@ Import-Package: org.apache.log4j,\
  org.openhab.core.items.dto,\
  org.openhab.core.model.core,\
  org.openhab.core.sitemap, \
+ org.openhab.core.sitemap.fileconverter, \
  org.openhab.core.sitemap.registry, \
  org.eclipse.xtext.xbase.lib,\
  org.osgi.framework,\

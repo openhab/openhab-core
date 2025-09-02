@@ -166,6 +166,9 @@ public class SitemapResource
 
     private static final long TIMEOUT_IN_MS = 30000;
 
+    private final ScheduledExecutorService scheduler = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+
     private SseBroadcaster<SseSinkInfo> broadcaster;
 
     @Context
@@ -191,9 +194,6 @@ public class SitemapResource
     private final TimeZoneProvider timeZoneProvider;
 
     private final WeakValueConcurrentHashMap<String, SseSinkInfo> knownSubscriptions = new WeakValueConcurrentHashMap<>();
-
-    private final ScheduledExecutorService scheduler = ThreadPoolManager
-            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private @Nullable ScheduledFuture<?> cleanSubscriptionsJob;
     private Set<BlockingStateChangeListener> stateChangeListeners = new CopyOnWriteArraySet<>();
@@ -620,22 +620,22 @@ public class SitemapResource
             }
         }
         if (widget instanceof Switch switchWidget) {
-            for (Mapping mapping : switchWidget.getMappings()) {
+            bean.mappings = switchWidget.getMappings().stream().map(mapping -> {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.releaseCommand = mapping.getReleaseCmd();
                 mappingBean.label = mapping.getLabel();
                 mappingBean.icon = mapping.getIcon();
-                bean.mappings.add(mappingBean);
-            }
+                return mappingBean;
+            }).toList();
         }
         if (widget instanceof Selection selectionWidget) {
-            for (Mapping mapping : selectionWidget.getMappings()) {
+            bean.mappings = selectionWidget.getMappings().stream().map(mapping -> {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.label = mapping.getLabel();
-                bean.mappings.add(mappingBean);
-            }
+                return mappingBean;
+            }).toList();
         }
         if (widget instanceof Input inputWidget) {
             bean.inputHint = inputWidget.getInputHint();

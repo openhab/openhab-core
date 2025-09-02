@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.sitemap.internal;
+package org.openhab.core.sitemap.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
