@@ -111,6 +111,7 @@ Fragment-Host: org.openhab.core.model.script
 	org.openhab.core.model.core;version='[5.2.0,5.2.1)',\
 	org.openhab.core.model.item;version='[5.2.0,5.2.1)',\
 	org.openhab.core.model.persistence;version='[5.2.0,5.2.1)',\
+	org.openhab.core.sitemap;version='[5.2.0,5.2.1)',\
 	org.openhab.core.model.rule;version='[5.2.0,5.2.1)',\
 	org.openhab.core.model.rule.runtime;version='[5.2.0,5.2.1)',\
 	org.openhab.core.model.script;version='[5.2.0,5.2.1)',\

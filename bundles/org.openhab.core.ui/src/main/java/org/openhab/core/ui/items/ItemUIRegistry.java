@@ -12,18 +12,19 @@
  */
 package org.openhab.core.ui.items;
 
+import java.util.List;
+
 import javax.measure.Unit;
 
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.QuantityType;
-import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
-import org.openhab.core.model.sitemap.sitemap.Sitemap;
-import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.sitemap.LinkableWidget;
+import org.openhab.core.sitemap.Parent;
+import org.openhab.core.sitemap.Sitemap;
+import org.openhab.core.sitemap.Widget;
 import org.openhab.core.types.State;
 
 /**
@@ -37,6 +38,7 @@ import org.openhab.core.types.State;
  * @author Mark Herwege - new method getFormatPattern
  * @author Laurent Garnier - new method getConditionalIcon
  * @author Danny Baumann - widget label source support
+ * @author Mark Herwege - Implement sitemap registry
  */
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
@@ -129,7 +131,7 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      * @param sitemap the sitemap to retrieve the children for
      * @return the children of the sitemap
      */
-    EList<Widget> getChildren(Sitemap sitemap);
+    List<Widget> getChildren(Sitemap sitemap);
 
     /**
      * this should be used instead of LinkableWidget.getChildren() as there
@@ -139,7 +141,7 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      * @param w the widget to retrieve the children for
      * @return the (dynamically or statically defined) children of the widget
      */
-    EList<Widget> getChildren(LinkableWidget w);
+    List<Widget> getChildren(LinkableWidget w);
 
     /**
      * this should be used instead of Widget.eContainer() as as the concrete
@@ -149,7 +151,7 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      * @return the parent of the widget
      */
     @Nullable
-    EObject getParent(Widget w);
+    Parent getParent(Widget w);
 
     /**
      * Gets the format pattern for the widget value, retrieved from widget label, item label or item state description

@@ -127,6 +127,7 @@ Fragment-Host: org.openhab.core.thing
 	org.eclipse.xtext.util;version='[2.41.0,2.41.1)',\
 	org.eclipse.xtext.xbase;version='[2.41.0,2.41.1)',\
 	org.eclipse.xtext.xbase.lib;version='[2.41.0,2.41.1)',\
+	org.openhab.core.sitemap;version='[5.2.0,5.2.1)',\
 	org.objectweb.asm;version='[9.9.0,9.9.1)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.2,2.3.3)',\
 	org.ops4j.pax.web.pax-web-api;version='[8.0.34,8.0.35)',\
