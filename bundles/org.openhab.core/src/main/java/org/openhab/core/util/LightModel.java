@@ -31,8 +31,8 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 
 /**
- * The {@link LightModel} provides a state machine model for maintaining and modifying the state of a light, which is
- * intended to be used within the Thing Handler of a lighting binding.
+ * The {@link LightModel} provides a state machine model for maintaining and modifying the state of a light,
+ * which is intended to be used within the Thing Handler of a lighting binding.
  * <p>
  *
  * It supports lights with different capabilities, including:
@@ -56,29 +56,33 @@ import org.openhab.core.types.UnDefType;
  * <p>
  *
  * To use the model you must initialize the following configuration capabilities (the default constructor initializes
- * 'supportsBrightness', 'supportsColorTemperature' and 'supportsColor' to true):
+ * {@link #supportsBrightness}, {@link #supportsColorTemperature} and {@link #supportsColor} to true):
  * <ul>
- * <li>Initialize 'supportsBrightness' to true if the light shall support brightness control.</li>
- * <li>Initialize 'supportsColorTemperature' to true if the light shall support color temperature control.</li>
- * <li>Initialize 'supportsColor' to true if the light shall support color control.</li>
- * <li>Initialize 'supportsRgbDimming' to true if the light shall support RGB color control with dimming.</li>
- * <li>Initialize 'supportsRgbWhite' to true if the light shall support RGBW rather than RGB color control.</li>
+ * <li>Initialize {@link #supportsBrightness} to true if the light shall support brightness control.</li>
+ * <li>Initialize {@link #supportsColorTemperature} to true if the light shall support color temperature control.</li>
+ * <li>Initialize {@link #supportsColor} to true if the light shall support color control.</li>
+ * <li>Initialize {@link #supportsRGBW} to true if the light shall support RGBW rather than RGB color control.</li>
+ * <li>Initialize {@link #supportsRGBCW} to true if the light shall support RGBCW color control.</li>
+ * <li>Initialize {@link #rgbLinkedToBrightness} to true if the light shall support RGB color control with dimming.</li>
  * </ul>
  * <p>
  *
  * You can also override the following configuration parameters during initialization:
  * <ul>
- * <li>Optionally override 'minimumOnBrightness' to a minimum brightness percent in the range [0.1..10.0]
+ * <li>Optionally override {@link #minimumOnBrightness} to a minimum brightness percent in the range [0.1..10.0]
  * percent, to consider as being "ON". The default is 1 percent.</li>
  *
- * <li>Optionally override 'warmestMired' to a 'warmest' white color temperature in the range ['coolestMired'..1000.0]
- * Mired. The default is 500 Mired.</li>
+ * <li>Optionally override {@link #warmestMired} to a 'warmest' white color temperature in the range
+ * [{@link #coolestMired}..1000.0] Mired. The default is 500 Mired.</li>
  *
- * <li>Optionally override 'coolestMired' to a 'coolest' white color temperature in the range [100.0..'warmestMired']
- * Mired. The default is 153 Mired.</li>
+ * <li>Optionally override {@link #coolestMired} to a 'coolest' white color temperature in the range
+ * [100.0.. {@link #warmestMired}] Mired. The default is 153 Mired.</li>
  *
- * <li>Optionally override 'stepSize' to a step size for the IncreaseDecreaseType commands in the range
- * [1.0..50.0] percent. The default is 10 percent.</li>
+ * <li>Optionally override {@link #stepSize} to a step size for the IncreaseDecreaseType commands in the range
+ * [1.0..50.0] percent. The default is 10.0 percent.</li>
+ *
+ * <li>Optionally override {@link #warmBias} to a bias for warm white in RGBCW mode in the range
+ * [0.0..1.0]. The default is 0.5</li>
  * </ul>
  * <p>
  *
@@ -86,31 +90,36 @@ import org.openhab.core.types.UnDefType;
  * <ol>
  *
  * <li>It handles inter relationships between the brightness PercentType state, the 'B' part of the HSBType state, and
- * the OnOffType state. Where if the brightness goes below the configured 'minimumOnBrightness' level the on/off
+ * the OnOffType state. Where if the brightness goes below the configured {@link #minimumOnBrightness} level the on/off
  * state changes from ON to OFF, and the brightness is clamped to 0%. And analogously if the on/off state changes from
  * OFF to ON, the brightness changes from 0% to its last non zero value.</li>
  *
  * <li>It handles IncreaseDecreaseType commands to change the brightness up or down by the configured
- * 'stepSize', and ensures that the brightness is clamped in the range [0%..100%].</li>
+ * {@link #stepSize}, and ensures that the brightness is clamped in the range [0%..100%].</li>
  *
  * <li>It handles both color temperature PercentType states and QuantityType states (which may be either in Mired or
  * Kelvin). Where color temperature PercentType values are internally converted to Mired values on the percentage scale
- * between the configured 'coolestMired' and 'warmestMired' Mired values, and vice versa.</li>
+ * between the configured {@link #coolestMired} and {@link #warmestMired} Mired values, and vice versa.</li>
  *
  * the color temperature changes then the HS values are adapted to match the corresponding color temperature point on
  * the Planckian Locus in the CIE color chart.</li>
  *
  * <li>It handles input/output values in RGB format in the range [0..255]. The behavior depends on the
- * 'supportsRgbDimming' setting. If 'supportsRgbDimming' is true the RGB values read/write all three
+ * {@link #rgbLinkedToBrightness} setting. If {@link #rgbLinkedToBrightness} is true the RGB values read/write all three
  * parts of the HSBType state. Whereas if it is false the RGB values read/write only the 'HS' parts. NOTE: in the latter
  * case, a 'setRGBx()' call followed by a 'getRGBx()' call do not necessarily return the same values,
  * since the values are normalized to 100%. Neverthless the ratios between the RGB values do remain unchanged.</li>
  *
- * <li>If 'supportsRgbWhite' is configured it handles values in RGBW format. The behavior is similar to the RGB
- * case above except that the white channel is derived from the lowest of the RGB values and all values are clamped in
- * the range [0..255]. The 'supportsRgbDimming' changes the behavior in relation to 'HS' versus 'HSB' exactly as
- * in the case of RGB above</li>
+ * <li>If {@link #supportsRGBW} is configured it handles values in RGBW format. The behavior is similar to the RGB
+ * case above except that the white channel is derived from the lowest of the RGB values.
+ * The {@link #rgbLinkedToBrightness} changes the behavior in relation to 'HS' versus 'HSB' exactly as in the case of
+ * RGB above</li>
  *
+ * <li>If {@link #supportsRGBCW} is configured it handles values in RGBCW format. The behavior is similar to the RGBW
+ * case above except that the white channel is derived from the RGB values by a custom algorithm.
+ * The {@link #rgbLinkedToBrightness} changes the behavior in relation to 'HS' versus 'HSB' exactly as in the case of
+ * RGBW above</li>
+ **
  * </ol>
  * <p>
  * A typical use case is within in a ThingHandler as follows:
@@ -122,7 +131,7 @@ import org.openhab.core.types.UnDefType;
  *     // initialize the light model with default capabilities and parameters
  *     private final LightModel model = new LightModel();
  *
- *     &#x40;Override
+ *     &#64;Override
  *     public void initialize() {
  *         // adjust the light model capabilities
  *         model.configSetSupportsBrightness(true);
@@ -134,7 +143,7 @@ import org.openhab.core.types.UnDefType;
  *         model.configSetMiredWarmest(500);
  *     }
  *
- *     &#x40;Override
+ *     &#64;Override
  *     public void handleCommand(ChannelUID channelUID, Command command) {
  *         // update the model state based on a command from OpenHAB
  *         model.handleCommand(command);
@@ -184,31 +193,88 @@ public class LightModel {
      * SECTION: Default Parameters. May be modified during initialization.
      *********************************************************************************/
 
-    private double minimumOnBrightness = 1.0; // minimum brightness percent to consider as light "ON"
-    private double warmestMired = 500; // 'warmest' white color temperature
-    private double coolestMired = 153; // 'coolest' white color temperature
+    /**
+     * Minimum brightness percent to consider as light "ON"
+     */
+    private double minimumOnBrightness = 1.0;
+
+    /**
+     * The 'warmest' white color temperature
+     */
+    private double warmestMired = 500;
+
+    /**
+     * The 'coolest' white color temperature
+     */
+    private double coolestMired = 153;
+
+    /*
+     * Step size for IncreaseDecreaseType commands
+     */
     private double stepSize = 10.0; // step size for IncreaseDecreaseType commands
-    private double warmBias = 0.5; // bias for warm white in RGBCW mode [0.0..1.0], default 0.5
+
+    /**
+     * The bias for warm white in RGBCW mode [0.0..1.0], default 0.5
+     */
+    private double warmBias = 0.5;
 
     /*********************************************************************************
      * SECTION: Capabilities. May be modified during initialization.
      *********************************************************************************/
 
-    private boolean supportsColor = false; // true if the light supports color
-    private boolean rgbLinkedToBrightness = false; // true if RGB(C)(W) values are linked to the brightness
-    private boolean supportsRGBW = false; // true if the light supports RGBW
-    private boolean supportsRGBCW = false; // true if the light supports RGBCW
-    private boolean supportsBrightness = false; // true if the light supports brightness
-    private boolean supportsColorTemperature = false; // true if the light supports color temperature
+    /**
+     * True if the light supports color
+     */
+    private boolean supportsColor = false;
+
+    /**
+     * True if RGB(C)(W) values are linked to the brightness
+     */
+    private boolean rgbLinkedToBrightness = false;
+
+    /**
+     * True if the light supports RGBW
+     */
+    private boolean supportsRGBW = false;
+
+    /**
+     * True if the light supports RGBCW
+     */
+    private boolean supportsRGBCW = false;
+
+    /**
+     * True if the light supports brightness
+     */
+    private boolean supportsBrightness = false;
+
+    /**
+     * True if the light supports color temperature
+     */
+    private boolean supportsColorTemperature = false;
 
     /*********************************************************************************
      * SECTION: Light state variables. Used at run time only.
      *********************************************************************************/
 
+    /**
+     * Cached OnOff state, may be empty if not (yet) known
+     */
     private Optional<OnOffType> cachedOnOff = Optional.empty();
+
+    /**
+     * Cached Brightness state, never null
+     */
     private PercentType cachedBrightness = PercentType.ZERO;
+
+    /**
+     * Cached Color state, never null
+     */
     private HSBType cachedHSB = new HSBType();
-    private double cachedMired = Double.NaN; // not (yet) known
+
+    /**
+     * Cached Mired state, may be NaN if not (yet) known
+     */
+    private double cachedMired = Double.NaN;
 
     /*********************************************************************************
      * SECTION: Constructors
@@ -217,17 +283,17 @@ public class LightModel {
     /**
      * Create a {@link LightModel} with default capabilities and parameters as follows:
      * <ul>
-     * <li>'supportsBrightness' is true (the light supports brightness control)</li>
-     * <li>'supportsColorTemperature' is true (the light supports color temperature control)</li>
-     * <li>'supportsColor' is true (the light supports color control)</li>
-     * <li>'rgbLinkedToBrightness' is false (the RGB values are not linked to 'B' part of {@link HSBType}))</li>
-     * <li>'supportsRGBW' is false (the light does not support RGB with White)</li>
-     * <li>'supportsRGBCW' is false (the light does not support RGBCW)</li>
-     * <li>'minimumOnBrightness' is 1.0 (the minimum brightness percent to consider as light "ON")</li>
-     * <li>'warmestMired' is 500 (the 'warmest' white color temperature)</li>
-     * <li>'coolestMired' is 153 (the 'coolest' white color temperature)</li>
-     * <li>'stepSize' is 10.0 (the step size for IncreaseDecreaseType commands)</li>
-     * <li>'warmBias' is 0,5 (the bias for warm white in RGBCW mode)</li>
+     * <li>{@link #supportsBrightness} is true (the light supports brightness control)</li>
+     * <li>{@link #supportsColorTemperature} is true (the light supports color temperature control)</li>
+     * <li>{@link #supportsColor} is true (the light supports color control)</li>
+     * <li>{@link #rgbLinkedToBrightness} is false (the RGB values are not linked to 'B' part of {@link HSBType}))</li>
+     * <li>{@link #supportsRGBW} is false (the light does not support RGB with White)</li>
+     * <li>{@link #supportsRGBCW} is false (the light does not support RGBCW)</li>
+     * <li>{@link #minimumOnBrightness} is 1.0 (the minimum brightness percent to consider as light "ON")</li>
+     * <li>{@link #warmestMired} is 500 (the 'warmest' white color temperature)</li>
+     * <li>{@link #coolestMired} is 153 (the 'coolest' white color temperature)</li>
+     * <li>{@link #stepSize} is 10.0 (the step size for IncreaseDecreaseType commands)</li>
+     * <li>{@link #warmBias} is 0,5 (the bias for warm white in RGBCW mode)</li>
      * </ul>
      */
     public LightModel() {
@@ -633,9 +699,9 @@ public class LightModel {
 
     /**
      * Runtime State: get the RGB(C)(W) values as an array of doubles in range [0..255]. Depending on the value of
-     * 'supportsRGBW' and 'supportsRGBCW', the array length is either 3 (RGB), 4 (RGBW), or 5 (RGBCW). The array is in
-     * the order [red, green, blue, (cold-)(white), (warm-white)]. Depending on the value of 'rgbLinkedToBrightness',
-     * the brightness may or may not be used as follows:
+     * {@link #supportsRGBW} and {@link #supportsRGBCW}, the array length is either 3 (RGB), 4 (RGBW), or 5 (RGBCW). The
+     * array is in the order [red, green, blue, (cold-)(white), (warm-white)]. Depending on the value of
+     * {@link #rgbLinkedToBrightness}, the brightness may or may not be used as follows:
      *
      * <ul>
      * <li>{@code supportsRgbDimming == false}: The return result does not depend on the current brightness. In other
@@ -660,7 +726,7 @@ public class LightModel {
             // estimate total white from saturation and brightness
             double totalWhite = (1.0 - (hsb.getSaturation().doubleValue() / 100.0))
                     * (hsb.getBrightness().doubleValue() / 100.0);
-            // split total white into warm and cold parts based on 'warmBias' setting
+            // split total white into warm and cold parts based on warmBias setting
             double[] rgbcw = new double[] { rgb[0], rgb[1], rgb[2], totalWhite * (1.0 - warmBias),
                     totalWhite * warmBias };
             // normalize so nothing exceeds 1.0
@@ -700,8 +766,8 @@ public class LightModel {
     /**
      * Runtime State: handle a command to change the light's color temperature state. Commands may be one of:
      * <ul>
-     * <li>PercentType for color temperature setting</li>
-     * <li>QuantityType for color temperature setting</li>
+     * <li>{@link PercentType} for color temperature setting</li>
+     * <li>{@link QuantityType} for color temperature setting</li>
      * </ul>
      * Other commands are deferred to {@link #handleCommand(Command)} for processing just-in-case.
      *
@@ -722,11 +788,11 @@ public class LightModel {
     /**
      * Runtime State: handle a command to change the light's state. Commands may be one of:
      * <ul>
-     * <li>HSBType for color setting</li>
-     * <li>PercentType for brightness setting</li>
-     * <li>OnOffType for on/off state setting</li>
-     * <li>IncreaseDecreaseType for brightness up/down setting</li>
-     * <li>QuantityType for color temperature setting</li>
+     * <li>{@link HSBType} for color setting</li>
+     * <li>{@link PercentType} for brightness setting</li>
+     * <li>{@link OnOffType} for on/off state setting</li>
+     * <li>{@link IncreaseDecreaseType} for brightness up/down setting</li>
+     * <li>{@link QuantityType} for color temperature setting</li>
      * </ul>
      *
      * @param command the command to handle
@@ -750,7 +816,7 @@ public class LightModel {
     }
 
     /**
-     * Runtime State: update the brightness from the remote light, ensuring it is in the range 0.0 to 100.0
+     * Runtime State: update the brightness from the remote light, ensuring it is in the range [0.0..100.0]
      *
      * @param brightness in the range [0..100]
      * @throws IllegalArgumentException if the value is outside the range [0.0 to 100.0]
@@ -760,7 +826,7 @@ public class LightModel {
     }
 
     /**
-     * Runtime State: update the hue from the remote light, ensuring it is in the range 0.0 to 360.0
+     * Runtime State: update the hue from the remote light, ensuring it is in the range [0.0..360.0]
      *
      * @param hue in the range [0..360]
      * @throws IllegalArgumentException if the hue parameter is not in the range 0.0 to 360.0
@@ -800,7 +866,7 @@ public class LightModel {
      * <ul>
      * <li>{@code rgbLinkedToBrightness == false} both [255,0,0] and [127.5,0,0] change the color to RED without a
      * change in brightness. In other words the values only relate to the 'HS' part of the {@link HSBType} state. Note:
-     * this means that in this case a round trip of setRGBx() followed by getRGBx() will NOT necessarily contain
+     * this means that in this case a round trip of 'setRGBx()' followed by 'getRGBx()' will NOT necessarily contain
      * identical values, although the RGB ratios will certainly be the same.</li>
      *
      * <li>{@code rgbLinkedToBrightness == true} both [255,0,0] and [127.5,0,0] change the color to RED and the former
@@ -808,7 +874,7 @@ public class LightModel {
      * relate to all the 'HSB' parts of the {@link HSBType} state.</li>
      * <ul>
      *
-     * @param rgbxIn an array of double representing RGB or RGBW values in range [0..255]
+     * @param rgbxIn an array of double representing RGB or RGBW values in range [0.0..255.0]
      * @throws IllegalArgumentException if the array length is not 3, 4, or 5 depending on the light's capabilities,
      *             or if any of the values are outside the range [0.0 to 255.0]
      */
@@ -885,12 +951,12 @@ public class LightModel {
     }
 
     /**
-     * Runtime State: convert a nullable State to a non-null State, using UnDefType.UNDEF if the input is null.
+     * Runtime State: convert a nullable State to a non-null State, using {@link UnDefType}.UNDEF if the input is null.
      * <p>
      * {@code State state = xyz.toNonNull(xyz.getColor())} is a common usage.
      *
      * @param state the input State, which may be null
-     * @return the input State if it is not null, otherwise UnDefType.UNDEF
+     * @return the input State if it is not null, otherwise 'UnDefType.UNDEF'
      */
     public State toNonNull(@Nullable State state) {
         return state != null ? state : UnDefType.UNDEF;
@@ -903,7 +969,7 @@ public class LightModel {
     /**
      * Internal: handle a write brightness command from OH core
      *
-     * @param brightness the brightness to set
+     * @param brightness the brightness {@link PercentType} to set
      */
     private void zInternalHandleBrightness(PercentType brightness) {
         if (brightness.doubleValue() >= minimumOnBrightness) {
@@ -922,7 +988,7 @@ public class LightModel {
     /**
      * Internal: handle a write color temperature command from OH core
      *
-     * @param warmness the color temperature warmness to set as a percent
+     * @param warmness the color temperature warmness {@link PercentType} to set
      */
     private void zInternalHandleColorTemperature(PercentType warmness) {
         setMired(coolestMired + ((warmestMired - coolestMired) * warmness.doubleValue() / 100.0));
@@ -931,7 +997,7 @@ public class LightModel {
     /**
      * Internal: handle a write color temperature command from OH core
      *
-     * @param colorTemperature the color temperature to set as a QuantityType
+     * @param colorTemperature the color temperature {@link QuantityType} to set
      * @throws IllegalArgumentException if the colorTemperature parameter is not convertible to Mired
      */
     private void zInternalHandleColorTemperature(QuantityType<?> colorTemperature) throws IllegalArgumentException {
@@ -947,7 +1013,7 @@ public class LightModel {
     /**
      * Internal: handle a write color command from OH core
      *
-     * @param hsb the color to set
+     * @param hsb the color {@link HSBType} to set
      */
     private void zInternalHandleHSBType(HSBType hsb) {
         cachedBrightness = hsb.getBrightness();
@@ -958,7 +1024,7 @@ public class LightModel {
     /**
      * Internal: handle a write increase/decrease command from OH core, ensuring it is in the range 0.0 to 100.0
      *
-     * @param increaseDecrease the increase/decrease command
+     * @param increaseDecrease the {@link IncreaseDecreaseType} command
      */
     private void zInternalHandleIncreaseDecrease(IncreaseDecreaseType increaseDecrease) {
         double bri = Math.min(Math.max(cachedHSB.getBrightness().doubleValue()
@@ -969,7 +1035,7 @@ public class LightModel {
     /**
      * Internal: handle a write on/off command from OH core
      *
-     * @param onOff the on/off command
+     * @param onOff the {@link OnOffType} command
      */
     private void zInternalHandleOnOff(OnOffType onOff) {
         if (getOnOff() != onOff) {
@@ -978,10 +1044,10 @@ public class LightModel {
     }
 
     /**
-     * Internal: return the Mired value from the given HSBType color. The Mired value is constrained to be within the
-     * warmest and coolest limits.
+     * Internal: return the Mired value from the given {@link HSBType} color. The Mired value is constrained to be
+     * within the warmest and coolest limits.
      *
-     * @param hsb the HSBType color to use to determine the Mired value
+     * @param hsb the {@link HSBType} color to use to determine the Mired value
      */
     private double zInternalMiredFrom(HSBType hsb) {
         double[] xyY = ColorUtil.hsbToXY(new HSBType(hsb.getHue(), hsb.getSaturation(), PercentType.HUNDRED));
@@ -990,10 +1056,10 @@ public class LightModel {
     }
 
     /**
-     * Internal: create a PercentType from a double value, ensuring it is in the range 0.0 to 100.0
+     * Internal: create a {@link PercentType} from a double value, ensuring it is in the range 0.0 to 100.0
      *
      * @param value the input value
-     * @return a PercentType representing the input value, constrained to the range 0.0 to 100.0
+     * @return a {@link PercentType} representing the input value, constrained to the range 0.0 to 100.0
      * @throws IllegalArgumentException if the value is outside the range [0.0 to 100.0]
      */
     private PercentType zInternalPercentTypeFrom(double value) throws IllegalArgumentException {
