@@ -82,13 +82,16 @@ import org.openhab.core.library.types.HSBType;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Button;
 import org.openhab.core.model.sitemap.sitemap.ButtonDefinition;
+import org.openhab.core.model.sitemap.sitemap.ButtonDefinitionList;
 import org.openhab.core.model.sitemap.sitemap.Buttongrid;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.ColorArrayList;
 import org.openhab.core.model.sitemap.sitemap.Colortemperaturepicker;
 import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Frame;
 import org.openhab.core.model.sitemap.sitemap.IconRule;
+import org.openhab.core.model.sitemap.sitemap.IconRuleList;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Input;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
@@ -101,6 +104,7 @@ import org.openhab.core.model.sitemap.sitemap.Slider;
 import org.openhab.core.model.sitemap.sitemap.Switch;
 import org.openhab.core.model.sitemap.sitemap.Video;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.Webview;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.types.State;
@@ -614,7 +618,8 @@ public class SitemapResource
         }
         bean.widgetId = widgetId;
         bean.icon = itemUIRegistry.getCategory(widget);
-        bean.staticIcon = widget.getStaticIcon() != null || !widget.getIconRules().isEmpty();
+        bean.staticIcon = widget.getStaticIcon() != null
+                || (widget.getIconRules() != null && !widget.getIconRules().getElements().isEmpty());
         bean.labelcolor = convertItemValueColor(itemUIRegistry.getLabelColor(widget), itemState);
         bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
         bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
@@ -642,8 +647,8 @@ public class SitemapResource
                         isLeaf(children), uri, locale, false, evenIfHidden);
             }
         }
-        if (widget instanceof Switch switchWidget) {
-            for (Mapping mapping : switchWidget.getMappings()) {
+        if (widget instanceof Switch switchWidget && switchWidget.getMappings() != null) {
+            for (Mapping mapping : switchWidget.getMappings().getElements()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.releaseCommand = mapping.getReleaseCmd();
@@ -652,8 +657,8 @@ public class SitemapResource
                 bean.mappings.add(mappingBean);
             }
         }
-        if (widget instanceof Selection selectionWidget) {
-            for (Mapping mapping : selectionWidget.getMappings()) {
+        if (widget instanceof Selection selectionWidget && selectionWidget.getMappings() != null) {
+            for (Mapping mapping : selectionWidget.getMappings().getElements()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.label = mapping.getLabel();
@@ -714,19 +719,23 @@ public class SitemapResource
             bean.maxValue = colortemperaturepickerWidget.getMaxValue();
         }
         if (widget instanceof Buttongrid buttonGridWidget) {
-            for (ButtonDefinition button : buttonGridWidget.getButtons()) {
-                MappingDTO mappingBean = new MappingDTO();
-                mappingBean.row = button.getRow();
-                mappingBean.column = button.getColumn();
-                mappingBean.command = button.getCmd();
-                mappingBean.label = button.getLabel();
-                mappingBean.icon = button.getIcon();
-                bean.mappings.add(mappingBean);
+            ButtonDefinitionList buttonDefinitionList = buttonGridWidget.getButtons();
+            if (buttonDefinitionList != null) {
+                for (ButtonDefinition button : buttonDefinitionList.getElements()) {
+                    MappingDTO mappingBean = new MappingDTO();
+                    mappingBean.row = button.getRow();
+                    mappingBean.column = button.getColumn();
+                    mappingBean.command = button.getCmd();
+                    mappingBean.label = button.getLabel();
+                    mappingBean.icon = button.getIcon();
+                    bean.mappings.add(mappingBean);
+                }
             }
         }
         if (widget instanceof Button buttonWidget) {
             // Get the icon from the widget only
-            if (widget.getIcon() == null && widget.getStaticIcon() == null && widget.getIconRules().isEmpty()) {
+            if (widget.getIcon() == null && widget.getStaticIcon() == null
+                    && (widget.getIconRules() == null || widget.getIconRules().getElements().isEmpty())) {
                 bean.icon = null;
                 bean.staticIcon = null;
             }
@@ -877,26 +886,32 @@ public class SitemapResource
         return items;
     }
 
-    private Set<GenericItem> getItemsInVisibilityCond(EList<VisibilityRule> ruleList) {
+    private Set<GenericItem> getItemsInVisibilityCond(@Nullable VisibilityRuleList ruleList) {
         Set<GenericItem> items = new HashSet<>();
-        for (VisibilityRule rule : ruleList) {
-            getItemsInConditions(rule.getConditions(), items);
+        if (ruleList != null) {
+            for (VisibilityRule rule : ruleList.getElements()) {
+                getItemsInConditions(rule.getConditions(), items);
+            }
         }
         return items;
     }
 
-    private Set<GenericItem> getItemsInColorCond(EList<ColorArray> colorList) {
+    private Set<GenericItem> getItemsInColorCond(@Nullable ColorArrayList colorList) {
         Set<GenericItem> items = new HashSet<>();
-        for (ColorArray rule : colorList) {
-            getItemsInConditions(rule.getConditions(), items);
+        if (colorList != null) {
+            for (ColorArray rule : colorList.getElements()) {
+                getItemsInConditions(rule.getConditions(), items);
+            }
         }
         return items;
     }
 
-    private Set<GenericItem> getItemsInIconCond(EList<IconRule> ruleList) {
+    private Set<GenericItem> getItemsInIconCond(@Nullable IconRuleList ruleList) {
         Set<GenericItem> items = new HashSet<>();
-        for (IconRule rule : ruleList) {
-            getItemsInConditions(rule.getConditions(), items);
+        if (ruleList != null) {
+            for (IconRule rule : ruleList.getElements()) {
+                getItemsInConditions(rule.getConditions(), items);
+            }
         }
         return items;
     }

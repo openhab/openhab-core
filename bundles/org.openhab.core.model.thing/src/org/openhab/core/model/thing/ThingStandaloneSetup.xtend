@@ -15,20 +15,25 @@ package org.openhab.core.model.thing
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.resource.IResourceServiceProvider
+import com.google.inject.Injector
 
 /** 
  * Initialization support for running Xtext languages
  * without equinox extension registry
  */
 class ThingStandaloneSetup extends ThingStandaloneSetupGenerated {
-    def static void doSetup() {
-        new ThingStandaloneSetup().createInjectorAndDoEMFRegistration()
+    static Injector injector;
+
+    def static Injector doSetup() {
+        if (injector === null) {
+            injector = new ThingStandaloneSetup().createInjectorAndDoEMFRegistration();
+        }
+        return injector;
     }
-    
+
     def static void unregister() {
         EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Thing");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("things");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("things");
     }
-    
 }

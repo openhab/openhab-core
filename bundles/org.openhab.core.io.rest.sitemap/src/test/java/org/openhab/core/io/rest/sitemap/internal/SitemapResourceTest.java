@@ -16,8 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -53,11 +52,14 @@ import org.openhab.core.library.types.OpenClosedType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.ColorArrayList;
 import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Group;
 import org.openhab.core.model.sitemap.sitemap.IconRule;
+import org.openhab.core.model.sitemap.sitemap.IconRuleList;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.types.Command;
@@ -621,11 +623,21 @@ public class SitemapResourceTest extends JavaTest {
         when(w.getLabel()).thenReturn(widgetLabel);
         when(w.getIcon()).thenReturn(widgetIcon);
         when(w.getStaticIcon()).thenReturn(widgetStaticIcon);
-        when(w.getIconRules()).thenReturn(iconRules1);
-        when(w.getVisibility()).thenReturn(visibilityRules1);
-        when(w.getLabelColor()).thenReturn(labelColors1);
-        when(w.getValueColor()).thenReturn(valueColors1);
-        when(w.getIconColor()).thenReturn(iconColors1);
+        IconRuleList iconRuleList = mock(IconRuleList.class);
+        when(w.getIconRules()).thenReturn(iconRuleList);
+        when(iconRuleList.getElements()).thenReturn(iconRules1);
+        VisibilityRuleList visibilityRuleList = mock(VisibilityRuleList.class);
+        when(w.getVisibility()).thenReturn(visibilityRuleList);
+        when(visibilityRuleList.getElements()).thenReturn(visibilityRules1);
+        ColorArrayList labelColorArrayList = mock(ColorArrayList.class);
+        when(w.getLabelColor()).thenReturn(labelColorArrayList);
+        when(labelColorArrayList.getElements()).thenReturn(labelColors1);
+        ColorArrayList valueColorArrayList = mock(ColorArrayList.class);
+        when(w.getValueColor()).thenReturn(valueColorArrayList);
+        when(valueColorArrayList.getElements()).thenReturn(valueColors1);
+        ColorArrayList iconColorArrayList = mock(ColorArrayList.class);
+        when(w.getIconColor()).thenReturn(iconColorArrayList);
+        when(iconColorArrayList.getElements()).thenReturn(iconColors1);
     }
 
     private void configureSitemapMock() {
