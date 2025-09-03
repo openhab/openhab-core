@@ -53,7 +53,7 @@ public interface Chart extends NonLinkableWidget {
     void setRefresh(@Nullable Integer refresh);
 
     /**
-     * Get the configured chart time period. See {@link setPeriod()}.
+     * Get the configured chart time period. See {@link #setPeriod(String)}.
      *
      * @return period
      */
@@ -119,7 +119,7 @@ public interface Chart extends NonLinkableWidget {
     void setYAxisDecimalPattern(@Nullable String yAxisDecimalPattern);
 
     /**
-     * Gets the interpolation parameter. See {@link setInterpolation()}.
+     * Gets the interpolation parameter. See {@link #setInterpolation(String)}.
      *
      * @return interpolation
      */

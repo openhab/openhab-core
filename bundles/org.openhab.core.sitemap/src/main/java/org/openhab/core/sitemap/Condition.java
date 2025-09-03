@@ -50,7 +50,7 @@ public interface Condition {
     String getCondition();
 
     /**
-     * Set the condition comparator, see {@link getCondition()}.
+     * Set the condition comparator, see {@link #getCondition()}.
      *
      * @param condition
      */
