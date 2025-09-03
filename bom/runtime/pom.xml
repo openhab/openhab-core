@@ -93,7 +93,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.metatype</artifactId>
-      <version>1.4.500</version>
+      <version>1.6.400</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -107,7 +107,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.event</artifactId>
-      <version>1.6.200</version>
+      <version>1.6.300</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -127,7 +127,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.log.stream</artifactId>
-      <version>1.1.100</version>
+      <version>1.1.200</version>
       <scope>compile</scope>
     </dependency>
 
@@ -268,7 +268,7 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.pushstream</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
       <scope>compile</scope>
     </dependency>
 
