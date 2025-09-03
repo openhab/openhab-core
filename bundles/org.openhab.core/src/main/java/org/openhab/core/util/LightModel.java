@@ -63,7 +63,8 @@ import org.openhab.core.types.UnDefType;
  * <li>Initialize {@link #supportsColor} to true if the light shall support color control.</li>
  * <li>Initialize {@link #supportsRGBW} to true if the light shall support RGBW rather than RGB color control.</li>
  * <li>Initialize {@link #supportsRGBCW} to true if the light shall support RGBCW color control.</li>
- * <li>Initialize {@link #rgbLinkedToBrightness} to true if the light shall support RGB color control with dimming.</li>
+ * <li>Initialize {@link #rgbIgnoreBrightness} to true if the light shall support RGB color control without
+ * dimming.</li>
  * </ul>
  * <p>
  *
@@ -105,19 +106,19 @@ import org.openhab.core.types.UnDefType;
  * point on the Planckian Locus in the CIE color chart.</li>
  *
  * <li>It handles input/output values in RGB format in the range [0..255]. The behavior depends on the
- * {@link #rgbLinkedToBrightness} setting. If {@link #rgbLinkedToBrightness} is true the RGB values read/write all three
- * parts of the HSBType state. Whereas if it is false the RGB values read/write only the 'HS' parts. NOTE: in the latter
+ * {@link #rgbIgnoreBrightness} setting. If {@link #rgbIgnoreBrightness} is false the RGB values read/write all three
+ * parts of the HSBType state. Whereas if it is true the RGB values read/write only the 'HS' parts. NOTE: in the latter
  * case, a 'setRGBx()' call followed by a 'getRGBx()' call do not necessarily return the same values,
  * since the values are normalized to 100%. Neverthless the ratios between the RGB values do remain unchanged.</li>
  *
  * <li>If {@link #supportsRGBW} is configured it handles values in RGBW format. The behavior is similar to the RGB
  * case above except that the white channel is derived from the lowest of the RGB values.
- * The {@link #rgbLinkedToBrightness} changes the behavior in relation to 'HS' versus 'HSB' exactly as in the case of
+ * The {@link #rgbIgnoreBrightness} changes the behavior in relation to 'HS' versus 'HSB' exactly as in the case of
  * RGB above</li>
  *
  * <li>If {@link #supportsRGBCW} is configured it handles values in RGBCW format. The behavior is similar to the RGBW
  * case above except that the white channel is derived from the RGB values by a custom algorithm.
- * The {@link #rgbLinkedToBrightness} changes the behavior in relation to 'HS' versus 'HSB' exactly as in the case of
+ * The {@link #rgbIgnoreBrightness} changes the behavior in relation to 'HS' versus 'HSB' exactly as in the case of
  * RGBW above</li>
  **
  * </ol>
@@ -213,11 +214,6 @@ public class LightModel {
      */
     private double stepSize = 10.0; // step size for IncreaseDecreaseType commands
 
-    /**
-     * The bias for warm white in RGBCW mode [0.0..1.0], default 0.5
-     */
-    private double warmBias = 0.5;
-
     /*********************************************************************************
      * SECTION: Capabilities. May be modified during initialization.
      *********************************************************************************/
@@ -228,9 +224,9 @@ public class LightModel {
     private boolean supportsColor = false;
 
     /**
-     * True if RGB(C)(W) values are linked to the brightness
+     * True if RGB(C)(W) values are not linked to the brightness
      */
-    private boolean rgbLinkedToBrightness = false;
+    private boolean rgbIgnoreBrightness = false;
 
     /**
      * True if the light supports RGBW
@@ -286,18 +282,17 @@ public class LightModel {
      * <li>{@link #supportsBrightness} is true (the light supports brightness control)</li>
      * <li>{@link #supportsColorTemperature} is true (the light supports color temperature control)</li>
      * <li>{@link #supportsColor} is true (the light supports color control)</li>
-     * <li>{@link #rgbLinkedToBrightness} is false (the RGB values are not linked to 'B' part of {@link HSBType}))</li>
+     * <li>{@link #rgbIgnoreBrightness} is false (the RGB values are linked to 'B' part of {@link HSBType}))</li>
      * <li>{@link #supportsRGBW} is false (the light does not support RGB with White)</li>
      * <li>{@link #supportsRGBCW} is false (the light does not support RGBCW)</li>
      * <li>{@link #minimumOnBrightness} is 1.0 (the minimum brightness percent to consider as light "ON")</li>
      * <li>{@link #warmestMired} is 500 (the 'warmest' white color temperature)</li>
      * <li>{@link #coolestMired} is 153 (the 'coolest' white color temperature)</li>
      * <li>{@link #stepSize} is 10.0 (the step size for IncreaseDecreaseType commands)</li>
-     * <li>{@link #warmBias} is 0.5 (the bias for warm white in RGBCW mode)</li>
      * </ul>
      */
     public LightModel() {
-        this(true, true, true, false, false, false, null, null, null, null, null);
+        this(true, true, true, false, false, false, null, null, null, null);
     }
 
     /**
@@ -308,12 +303,12 @@ public class LightModel {
      * @param supportsColor true if the light supports color control
      * @param supportsRGBW true if the light supports RGBW rather than RGB color control
      * @param supportsRGBCW true if the light supports RGBCW color control
-     * @param rgbLinkedToBrightness true if RGB values are linked with the 'B' part of the {@link HSBType}
+     * @param rgbIgnoreBrightness true if RGB values are not linked with the 'B' part of the {@link HSBType}
      */
     public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            boolean supportsRGBW, boolean supportsRGBCW, boolean rgbLinkedToBrightness) {
+            boolean supportsRGBW, boolean supportsRGBCW, boolean rgbIgnoreBrightness) {
         this(supportsBrightness, supportsColorTemperature, supportsColor, supportsRGBW, supportsRGBCW,
-                rgbLinkedToBrightness, null, null, null, null, null);
+                rgbIgnoreBrightness, null, null, null, null);
     }
 
     /**
@@ -325,7 +320,7 @@ public class LightModel {
      * @param supportsColor true if the light supports color control
      * @param supportsRGBW true if the light supports RGBW rather than RGB color control
      * @param supportsRGBCW true if the light supports RGBCW color control
-     * @param rgbLinkedToBrightness true if RGB values are linked with the 'B' part of the {@link HSBType}
+     * @param rgbIgnoreBrightness true if RGB values are not linked with the 'B' part of the {@link HSBType}
      * @param minimumOnBrightness the minimum brightness percent to consider as light "ON"
      * @param warmestMired the 'warmest' white color temperature in Mired
      * @param coolestMired the 'coolest' white color temperature in Mired
@@ -333,15 +328,15 @@ public class LightModel {
      * @throws IllegalArgumentException if any of the parameters are out of range
      */
     public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            boolean supportsRGBW, boolean supportsRGBCW, boolean rgbLinkedToBrightness,
+            boolean supportsRGBW, boolean supportsRGBCW, boolean rgbIgnoreBrightness,
             @Nullable Double minimumOnBrightness, @Nullable Double warmestMired, @Nullable Double coolestMired,
-            @Nullable Double stepSize, @Nullable Double warmBias) throws IllegalArgumentException {
+            @Nullable Double stepSize) throws IllegalArgumentException {
         configSetSupportsBrightness(supportsBrightness);
         configSetSupportsColorTemperature(supportsColorTemperature);
         configSetSupportsColor(supportsColor);
         configSetSupportsRGBW(supportsRGBW);
         configSetSupportsRGBCW(supportsRGBCW);
-        configSetRgbLinkedToBrightness(rgbLinkedToBrightness);
+        configSetRgbIgnoreBrightness(rgbIgnoreBrightness);
         if (minimumOnBrightness != null) {
             configSetMinimumOnBrightness(minimumOnBrightness);
         }
@@ -353,9 +348,6 @@ public class LightModel {
         }
         if (stepSize != null) {
             configSetIncreaseDecreaseStep(stepSize);
-        }
-        if (warmBias != null) {
-            configSetWarmBias(warmBias);
         }
     }
 
@@ -396,14 +388,14 @@ public class LightModel {
      * state, as follows:
      *
      * <ul>
-     * <li>If false the RGB values only relate to the 'HS' parts and will not influence or depend on the
+     * <li>If true the RGB values only relate to the 'HS' parts and will not influence or depend on the
      * brightness.</li>
-     * <li>If true, the RGB values relate to all of the 'HSB' parts and will influence and depend on the
+     * <li>If false, the RGB values relate to all of the 'HSB' parts and will influence and depend on the
      * brightness.</li>
      * </ul>
      */
-    public boolean configGetRgbLinkedToBrightness() {
-        return rgbLinkedToBrightness;
+    public boolean configGetRgbIgnoreBrightness() {
+        return rgbIgnoreBrightness;
     }
 
     /**
@@ -439,13 +431,6 @@ public class LightModel {
      */
     public boolean configGetSupportsRGBW() {
         return supportsRGBW;
-    }
-
-    /**
-     * Configuration: get the bias for warm white in RGBCW mode [0.0..1.0], default 0.5
-     */
-    public double configGetWarmBias() {
-        return warmBias;
     }
 
     /**
@@ -516,18 +501,21 @@ public class LightModel {
      * state, as follows:
      *
      * <ul>
-     * <li>If false the RGB values only relate to the 'HS' parts and will not influence or depend on the
+     * <li>If true the RGB values only relate to the 'HS' parts and will not influence or depend on the
      * brightness.</li>
-     * <li>If true, the RGB values relate to all of the 'HSB' parts and will influence and depend on the
+     * <li>If false the RGB values relate to all of the 'HSB' parts and will influence and depend on the
      * brightness.</li>
      * </ul>
      *
-     * @param rgbLinkedToBrightness true if RGB values are linked to brightness (i.e., relate to all HSB parts and will
-     *            influence and depend on brightness); false if RGB values only relate to hue and saturation and do not
-     *            influence or depend on brightness
+     * @param rgbIgnoreBrightness true if RGB values are not linked to brightness
+     * @throws IllegalArgumentException if rgbIgnoreBrightness is set true when RGBW or RGBCW are supported
      */
-    public void configSetRgbLinkedToBrightness(boolean rgbLinkedToBrightness) {
-        this.rgbLinkedToBrightness = rgbLinkedToBrightness;
+    public void configSetRgbIgnoreBrightness(boolean rgbIgnoreBrightness) throws IllegalArgumentException {
+        if (rgbIgnoreBrightness && (supportsRGBW || supportsRGBCW)) {
+            throw new IllegalArgumentException(
+                    "Setting rgbIgnoreBrightness to true makes no sense if the light supports RGBW or RGBCW");
+        }
+        this.rgbIgnoreBrightness = rgbIgnoreBrightness;
     }
 
     /**
@@ -596,19 +584,6 @@ public class LightModel {
             throw new IllegalArgumentException("Light cannot support RGBW without supporting color");
         }
         this.supportsRGBW = supportsRGBW;
-    }
-
-    /**
-     * Configuration: set the bias for warm white in RGBCW mode [0.0..1.0], default 0.5
-     *
-     * @param warmBias the bias for warm white in RGBCW mode
-     * @throws IllegalArgumentException if the warmBias parameter is out of range
-     */
-    public void configSetWarmBias(double warmBias) {
-        if (warmBias < 0.0 || warmBias > 1.0) {
-            throw new IllegalArgumentException("Warm bias '%f' out of range [0.0..1.0]".formatted(warmBias));
-        }
-        this.warmBias = warmBias;
     }
 
     /*********************************************************************************
@@ -701,7 +676,7 @@ public class LightModel {
      * Runtime State: get the RGB(C)(W) values as an array of doubles in range [0..255]. Depending on the value of
      * {@link #supportsRGBW} and {@link #supportsRGBCW}, the array length is either 3 (RGB), 4 (RGBW), or 5 (RGBCW). The
      * array is in the order [red, green, blue, (cold-)(white), (warm-white)]. Depending on the value of
-     * {@link #rgbLinkedToBrightness}, the brightness may or may not be used as follows:
+     * {@link #rgbIgnoreBrightness}, the brightness may or may not be used as follows:
      *
      * <ul>
      * <li>{@code supportsRgbDimming == false}: The return result does not depend on the current brightness. In other
@@ -716,33 +691,31 @@ public class LightModel {
      * @return double[] representing the RGB(C)(W) components in range [0..255.0]
      */
     public double[] getRGBx() {
-        HSBType hsb = rgbLinkedToBrightness ? cachedHSB
-                : new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.HUNDRED);
-
-        if (supportsRGBCW) {
-            // get current RGB
-            double[] rgb = Arrays.stream(ColorUtil.hsbToRgbPercent(hsb)).mapToDouble(p -> p.doubleValue() / 100.0)
-                    .toArray();
-            // estimate total white from saturation and brightness
-            double totalWhite = (1.0 - (hsb.getSaturation().doubleValue() / 100.0))
-                    * (hsb.getBrightness().doubleValue() / 100.0);
-            // split total white into warm and cold parts based on warmBias setting
-            double[] rgbcw = new double[] { rgb[0], rgb[1], rgb[2], totalWhite * (1.0 - warmBias),
-                    totalWhite * warmBias };
-            // normalize so nothing exceeds 1.0
-            double max = Arrays.stream(rgbcw).max().orElse(1.0);
-            if (max > 1.0) {
-                rgbcw = Arrays.stream(rgbcw).map(v -> v / max).toArray();
+        HSBType hsb = rgbIgnoreBrightness
+                ? new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.HUNDRED)
+                : cachedHSB;
+        PercentType[] rgbx;
+        if (supportsRGBW || supportsRGBCW) {
+            rgbx = ColorUtil.hsbToRgbwPercent(hsb);
+            if (supportsRGBCW) {
+                double hue = hsb.getHue().doubleValue();
+                /*
+                 * Simple model to split RGBW white value into RGBCW cool/ warm based on hue.
+                 * This is probably not physically accurate, but is not that bad either.
+                 *
+                 * The model is:
+                 * - Red => Green => Blue: increasing cool bias (0.0 @0°, 0.25 @60°, 0.5 @120°, 0.75 @180°, 1.0 @240°)
+                 * - Blue => Magenta => Red: decreasing cool bias (1.0 @240°, 0.75 @300°, 0.0 @360°)
+                 */
+                double coolBias = hue < 240 ? hue / 240 : 1.0 + ((240 - hue) / 120);
+                rgbx = new PercentType[] { rgbx[0], rgbx[1], rgbx[2],
+                        zPercentTypeFrom(rgbx[3].doubleValue() * coolBias),
+                        zPercentTypeFrom(rgbx[3].doubleValue() * (1.0 - coolBias)) };
             }
-            // scale to [0..255.0]
-            return Arrays.stream(rgbcw).map(v -> v * 255.0).toArray();
-        } else if (supportsRGBW) {
-            return Arrays.stream(ColorUtil.hsbToRgbwPercent(hsb)).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0)
-                    .toArray();
-        } else { // default to RGB only
-            return Arrays.stream(ColorUtil.hsbToRgbPercent(hsb)).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0)
-                    .toArray();
+        } else {
+            rgbx = ColorUtil.hsbToRgbPercent(hsb);
         }
+        return Arrays.stream(rgbx).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0).toArray();
     }
 
     /**
@@ -776,9 +749,9 @@ public class LightModel {
      */
     public void handleColorTemperatureCommand(Command command) throws IllegalArgumentException {
         if (command instanceof PercentType warmness) {
-            zInternalHandleColorTemperature(warmness);
+            zzHandleColorTemperature(warmness);
         } else if (command instanceof QuantityType<?> temperature) {
-            zInternalHandleColorTemperature(temperature);
+            zzHandleColorTemperature(temperature);
         } else {
             // defer to the main handler for other command types just-in-case
             handleCommand(command);
@@ -800,15 +773,15 @@ public class LightModel {
      */
     public void handleCommand(Command command) throws IllegalArgumentException {
         if (command instanceof HSBType color) {
-            zInternalHandleHSBType(color);
+            zzHandleHSBType(color);
         } else if (command instanceof PercentType brightness) {
-            zInternalHandleBrightness(brightness);
+            zzHandleBrightness(brightness);
         } else if (command instanceof OnOffType onOff) {
-            zInternalHandleOnOff(onOff);
+            zzHandleOnOff(onOff);
         } else if (command instanceof IncreaseDecreaseType incDec) {
-            zInternalHandleIncreaseDecrease(incDec);
+            zzHandleIncreaseDecrease(incDec);
         } else if (command instanceof QuantityType<?> temperature) {
-            zInternalHandleColorTemperature(temperature);
+            zzHandleColorTemperature(temperature);
         } else {
             throw new IllegalArgumentException(
                     "Command '%s' not supported for light states".formatted(command.getClass().getName()));
@@ -822,7 +795,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the value is outside the range [0.0 to 100.0]
      */
     public void setBrightness(double brightness) throws IllegalArgumentException {
-        zInternalHandleBrightness(zInternalPercentTypeFrom(brightness));
+        zzHandleBrightness(zPercentTypeFrom(brightness));
     }
 
     /**
@@ -834,7 +807,7 @@ public class LightModel {
     public void setHue(double hue) throws IllegalArgumentException {
         HSBType hsb = new HSBType(new DecimalType(hue), cachedHSB.getSaturation(), cachedHSB.getBrightness());
         cachedHSB = hsb;
-        cachedMired = zInternalMiredFrom(hsb);
+        cachedMired = zzMiredFrom(hsb);
     }
 
     /**
@@ -888,38 +861,27 @@ public class LightModel {
         if (Arrays.stream(rgbxIn).anyMatch(v -> v < 0.0 || v > 255.0)) {
             throw new IllegalArgumentException("RGBx value out of range [0.0..255.0]");
         }
-
         double[] rgbxOut;
-        if (!supportsRGBCW) {
-            // RGB or RGBW - pass straight through
-            rgbxOut = rgbxIn;
-        } else {
-            // RGBCW - reconstruct RGB and process that
-            rgbxOut = new double[] { //
-                    rgbxIn[0] + (rgbxIn[4] * warmBias), //
-                    rgbxIn[1] + (((rgbxIn[4] * warmBias) + (rgbxIn[3] * (1.0 - warmBias))) / 2.0), //
-                    rgbxIn[2] + (rgbxIn[3] * (1.0 - warmBias)) //
-            };
-            // normalize so nothing exceeds 255.0
+        if (supportsRGBCW) {
+            // simple merge RGBCW to RGBW and normalize if necessary
+            rgbxOut = new double[] { rgbxIn[0], rgbxIn[1], rgbxIn[2], rgbxIn[3] + rgbxIn[4] };
             double max = Arrays.stream(rgbxOut).max().orElse(255.0);
             if (max > 255.0) {
-                rgbxOut = Arrays.stream(rgbxOut).map(v -> v / max).toArray();
+                rgbxOut = Arrays.stream(rgbxOut).map(v -> v * 255.0 / max).toArray();
             }
+        } else {
+            rgbxOut = rgbxIn;
         }
-
         HSBType hsb = ColorUtil.rgbToHsb(Arrays.stream(rgbxOut).map(d -> d * 100.0 / 255.0)
-                .mapToObj(d -> zInternalPercentTypeFrom(d)).toArray(PercentType[]::new));
+                .mapToObj(d -> zPercentTypeFrom(d)).toArray(PercentType[]::new));
         PercentType bri = hsb.getBrightness();
-
-        if (!rgbLinkedToBrightness) {
+        if (rgbIgnoreBrightness) {
             hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedHSB.getBrightness());
         }
-
         cachedHSB = hsb;
-        cachedMired = zInternalMiredFrom(hsb);
-
-        if (rgbLinkedToBrightness) {
-            zInternalHandleBrightness(bri);
+        cachedMired = zzMiredFrom(hsb);
+        if (!rgbIgnoreBrightness) {
+            zzHandleBrightness(bri);
         }
     }
 
@@ -930,9 +892,9 @@ public class LightModel {
      * @throws IllegalArgumentException if the value is outside the range [0.0 to 100.0]
      */
     public void setSaturation(double saturation) throws IllegalArgumentException {
-        HSBType hsb = new HSBType(cachedHSB.getHue(), zInternalPercentTypeFrom(saturation), cachedHSB.getBrightness());
+        HSBType hsb = new HSBType(cachedHSB.getHue(), zPercentTypeFrom(saturation), cachedHSB.getBrightness());
         cachedHSB = hsb;
-        cachedMired = zInternalMiredFrom(hsb);
+        cachedMired = zzMiredFrom(hsb);
     }
 
     /**
@@ -971,7 +933,7 @@ public class LightModel {
      *
      * @param brightness the brightness {@link PercentType} to set
      */
-    private void zInternalHandleBrightness(PercentType brightness) {
+    private void zzHandleBrightness(PercentType brightness) {
         if (brightness.doubleValue() >= minimumOnBrightness) {
             cachedBrightness = brightness;
             cachedHSB = new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), brightness);
@@ -990,7 +952,7 @@ public class LightModel {
      *
      * @param warmness the color temperature warmness {@link PercentType} to set
      */
-    private void zInternalHandleColorTemperature(PercentType warmness) {
+    private void zzHandleColorTemperature(PercentType warmness) {
         setMired(coolestMired + ((warmestMired - coolestMired) * warmness.doubleValue() / 100.0));
     }
 
@@ -1000,7 +962,7 @@ public class LightModel {
      * @param colorTemperature the color temperature {@link QuantityType} to set
      * @throws IllegalArgumentException if the colorTemperature parameter is not convertible to Mired
      */
-    private void zInternalHandleColorTemperature(QuantityType<?> colorTemperature) throws IllegalArgumentException {
+    private void zzHandleColorTemperature(QuantityType<?> colorTemperature) throws IllegalArgumentException {
         try {
             QuantityType<?> mired = Objects.requireNonNull(colorTemperature.toInvertibleUnit(Units.MIRED));
             setMired(mired.doubleValue());
@@ -1015,10 +977,10 @@ public class LightModel {
      *
      * @param hsb the color {@link HSBType} to set
      */
-    private void zInternalHandleHSBType(HSBType hsb) {
+    private void zzHandleHSBType(HSBType hsb) {
         cachedBrightness = hsb.getBrightness();
         cachedHSB = hsb;
-        cachedMired = zInternalMiredFrom(hsb);
+        cachedMired = zzMiredFrom(hsb);
     }
 
     /**
@@ -1026,7 +988,7 @@ public class LightModel {
      *
      * @param increaseDecrease the {@link IncreaseDecreaseType} command
      */
-    private void zInternalHandleIncreaseDecrease(IncreaseDecreaseType increaseDecrease) {
+    private void zzHandleIncreaseDecrease(IncreaseDecreaseType increaseDecrease) {
         double bri = Math.min(Math.max(cachedHSB.getBrightness().doubleValue()
                 + ((IncreaseDecreaseType.INCREASE == increaseDecrease ? 1 : -1) * stepSize), 0.0), 100.0);
         setBrightness(bri);
@@ -1037,9 +999,9 @@ public class LightModel {
      *
      * @param onOff the {@link OnOffType} command
      */
-    private void zInternalHandleOnOff(OnOffType onOff) {
+    private void zzHandleOnOff(OnOffType onOff) {
         if (getOnOff() != onOff) {
-            zInternalHandleBrightness(OnOffType.OFF == onOff ? PercentType.ZERO : cachedBrightness);
+            zzHandleBrightness(OnOffType.OFF == onOff ? PercentType.ZERO : cachedBrightness);
         }
     }
 
@@ -1049,7 +1011,7 @@ public class LightModel {
      *
      * @param hsb the {@link HSBType} color to use to determine the Mired value
      */
-    private double zInternalMiredFrom(HSBType hsb) {
+    private double zzMiredFrom(HSBType hsb) {
         double[] xyY = ColorUtil.hsbToXY(new HSBType(hsb.getHue(), hsb.getSaturation(), PercentType.HUNDRED));
         double mired = 1000000 / ColorUtil.xyToKelvin(new double[] { xyY[0], xyY[1] });
         return Math.min(Math.max(mired, coolestMired), warmestMired);
@@ -1062,7 +1024,7 @@ public class LightModel {
      * @return a {@link PercentType} representing the input value, constrained to the range 0.0 to 100.0
      * @throws IllegalArgumentException if the value is outside the range [0.0 to 100.0]
      */
-    private PercentType zInternalPercentTypeFrom(double value) throws IllegalArgumentException {
+    private PercentType zPercentTypeFrom(double value) throws IllegalArgumentException {
         return new PercentType(new BigDecimal(value));
     }
 }
