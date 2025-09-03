@@ -45,11 +45,10 @@ import org.openhab.core.sitemap.internal.TextImpl;
 import org.openhab.core.sitemap.internal.VideoImpl;
 import org.openhab.core.sitemap.internal.WebviewImpl;
 import org.openhab.core.sitemap.registry.SitemapFactory;
-import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * The {@link SitemapFactoryImpl} implements the {@link SitemapRegistry}
+ * The {@link SitemapFactoryImpl} implements the {@link SitemapFactory}
  *
  * @author Mark Herwege - Initial contribution
  */
