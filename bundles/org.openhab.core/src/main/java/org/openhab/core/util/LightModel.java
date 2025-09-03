@@ -117,7 +117,7 @@ import org.openhab.core.types.UnDefType;
  * case above except that the white channel is derived from the RGB values by a custom algorithm.
  * The {@link #rgbIgnoreBrightness} changes the behavior in relation to 'HS' versus 'HSB' exactly as in the case of
  * RGBW above</li>
- **
+ *
  * </ol>
  * <p>
  * A typical use case is within in a ThingHandler as follows:
