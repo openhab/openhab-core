@@ -13,7 +13,8 @@
 package org.openhab.core.io.net.http;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;

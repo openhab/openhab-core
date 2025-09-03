@@ -14,7 +14,8 @@ package org.openhab.core.automation.internal.module;
 
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Collections;
