@@ -136,4 +136,5 @@ Fragment-Host: org.openhab.core.model.thing
 	com.fasterxml.jackson.core.jackson-databind;version='[2.19.2,2.19.3)',\
 	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.19.2,2.19.3)',\
 	com.fasterxml.jackson.dataformat.jackson-dataformat-yaml;version='[2.19.2,2.19.3)',\
-	org.yaml.snakeyaml;version='[2.4.0,2.4.1)'
+	org.yaml.snakeyaml;version='[2.4.0,2.4.1)',\
+	org.osgi.service.cm;version='[1.6.1,1.6.2)'
