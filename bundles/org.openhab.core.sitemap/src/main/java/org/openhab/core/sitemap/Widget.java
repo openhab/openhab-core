@@ -174,7 +174,7 @@ public interface Widget {
      *
      * @param visibility
      */
-    void setVisibility(List<Rule> visiblity);
+    void setVisibility(List<Rule> visibility);
 
     /**
      * Get type of widget.

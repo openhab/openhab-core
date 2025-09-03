@@ -41,8 +41,9 @@ public interface Condition {
     void setItem(@Nullable String item);
 
     /**
-     * Get the condition comparator. Valid values are: "==", ">", "<", ">=", "<=", "!=". The item in the condition will
-     * be compared against the value using this comparator. If no condition comparator is set, "==" is assumed.
+     * Get the condition comparator. Valid values are: "==", "&gt;", "&lt;", "&gt;=", "&lt;=", "!=". The item in the
+     * condition will be compared against the value using this comparator. If no condition comparator is set, "==" is
+     * assumed.
      *
      * @return condition comparator
      */
