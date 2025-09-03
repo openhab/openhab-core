@@ -81,9 +81,6 @@ import org.openhab.core.types.UnDefType;
  *
  * <li>Optionally override {@link #stepSize} to a step size for the IncreaseDecreaseType commands in the range
  * [1.0..50.0] percent. The default is 10.0 percent.</li>
- *
- * <li>Optionally override {@link #warmBias} to a bias for warm white in RGBCW mode in the range
- * [0.0..1.0]. The default is 0.5</li>
  * </ul>
  * <p>
  *
