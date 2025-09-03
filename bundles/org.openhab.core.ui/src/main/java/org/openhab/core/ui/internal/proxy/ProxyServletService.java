@@ -258,7 +258,7 @@ public class ProxyServletService extends HttpServlet {
             }
 
             try {
-                uri = createURIFromString(uriString != null ? uriString : "");
+                uri = createURIFromString(uriString);
                 request.setAttribute(ATTR_URI, uri);
                 return uri;
             } catch (MalformedURLException | URISyntaxException ex) {
@@ -275,7 +275,10 @@ public class ProxyServletService extends HttpServlet {
         return sitemapRegistry.get(sitemapName);
     }
 
-    private URI createURIFromString(String url) throws MalformedURLException, URISyntaxException {
+    private URI createURIFromString(@Nullable String url) throws MalformedURLException, URISyntaxException {
+        if (url == null) {
+            throw new MalformedURLException();
+        }
         URI uri = new URI(url);
         // URI in this context should be valid URL. Therefore before returning URI, create URL,
         // which validates the string.
