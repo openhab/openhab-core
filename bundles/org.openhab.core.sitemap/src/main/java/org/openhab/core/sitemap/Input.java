@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 public interface Input extends NonLinkableWidget {
 
     /**
-     * Get the input hint. This can be used by a UI to tailor the representation. See {@link setInputHint()}.
+     * Get the input hint. This can be used by a UI to tailor the representation. See {@link #setInputHint(String)}.
      *
      * @return input hint
      */
