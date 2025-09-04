@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -30,6 +31,7 @@ import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.net.CidrAddress;
 import org.openhab.core.net.NetUtil;
+import org.openhab.core.util.StringUtils;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -67,8 +69,10 @@ public class NetworkConfigOptionProvider implements ConfigOptionProvider {
                 Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
                 while (networkInterfaces.hasMoreElements()) {
                     NetworkInterface networkInterface = networkInterfaces.nextElement();
-                    options.add(new ParameterOption(networkInterface.getName(),
-                            getNetworkInterfaceLabel(networkInterface)));
+                    if (networkInterface.isUp()) {
+                        options.add(new ParameterOption(networkInterface.getName(),
+                                getNetworkInterfaceLabel(networkInterface)));
+                    }
                 }
                 return options;
             } catch (SocketException e) {
@@ -80,18 +84,19 @@ public class NetworkConfigOptionProvider implements ConfigOptionProvider {
     }
 
     private String getNetworkInterfaceLabel(NetworkInterface networkInterface) {
-        Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-        String hostName = null;
-        while (inetAddresses.hasMoreElements()) {
-            InetAddress inetAddress = inetAddresses.nextElement();
-            if (inetAddress instanceof Inet4Address) {
-                hostName = inetAddress.getHostName();
-                break;
-            } else if (hostName == null) {
-                hostName = inetAddress.getHostName();
-            }
+        StringBuilder result = new StringBuilder(Objects
+                .requireNonNull(StringUtils.capitalizeByWhitespace(networkInterface.getName().replace('_', ' '))));
+
+        // Sort IPv4 before IPv6
+        List<InetAddress> addresses = networkInterface.inetAddresses().sorted((ia1, ia2) -> {
+            return (ia1 instanceof Inet4Address) == (ia2 instanceof Inet4Address) ? 0
+                    : ia1 instanceof Inet4Address ? -1 : 1;
+        }).toList();
+
+        if (!addresses.isEmpty()) {
+            result.append(" (").append(addresses.get(0).getHostAddress()).append(')');
         }
-        return hostName == null ? networkInterface.getName()
-                : String.format("%s (%s)", networkInterface.getName(), hostName);
+
+        return result.toString();
     }
 }
