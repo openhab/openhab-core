@@ -29,7 +29,6 @@ public class TileDTO {
     public String imageUrl;
 
     public TileDTO(String name, String url, @Nullable String overlay, String imageUrl) {
-        super();
         this.name = name;
         this.url = url;
         this.overlay = overlay;

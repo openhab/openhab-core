@@ -35,7 +35,6 @@ public class BasicWriteTask implements WriteTask {
 
     public BasicWriteTask(ModbusSlaveEndpoint endpoint, ModbusWriteRequestBlueprint request,
             ModbusWriteCallback resultCallback, ModbusFailureCallback<ModbusWriteRequestBlueprint> failureCallback) {
-        super();
         this.endpoint = endpoint;
         this.request = request;
         this.resultCallback = resultCallback;

@@ -43,7 +43,6 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
     public static final String CONDITION_TYPE = "conditionTypeUID";
 
     public TestModuleTypeProvider() {
-        super();
     }
 
     private TriggerType createTriggerType() {

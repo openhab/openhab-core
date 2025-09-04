@@ -39,7 +39,6 @@ public class ChannelUID extends UID {
      * class by reflection. Not intended to be used for normal instantiation.
      */
     ChannelUID() {
-        super();
     }
 
     /**
