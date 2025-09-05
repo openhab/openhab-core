@@ -30,7 +30,6 @@ public class ConditionBuilder extends ModuleBuilder<ConditionBuilder, Condition>
     private @Nullable Map<String, String> inputs;
 
     protected ConditionBuilder() {
-        super();
     }
 
     protected ConditionBuilder(final Condition condition) {

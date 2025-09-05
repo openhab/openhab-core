@@ -42,7 +42,6 @@ public class TokenResponseDTO {
      */
     public TokenResponseDTO(String access_token, String token_type, Integer expires_in, String refresh_token,
             String scope, User user) {
-        super();
         this.access_token = access_token;
         this.token_type = token_type;
         this.expires_in = expires_in;

@@ -32,7 +32,6 @@ final class ExpressionAlternatives extends Expression {
      * @param subExpressions the sub expressions that are tried/parsed as alternatives in the given order
      */
     public ExpressionAlternatives(Expression... subExpressions) {
-        super();
         this.subExpressions = List.of(Arrays.copyOf(subExpressions, subExpressions.length));
     }
 

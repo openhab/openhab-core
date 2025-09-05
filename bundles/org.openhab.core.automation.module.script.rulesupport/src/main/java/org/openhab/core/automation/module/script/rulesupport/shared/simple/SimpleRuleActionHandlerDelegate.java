@@ -27,7 +27,6 @@ public class SimpleRuleActionHandlerDelegate extends SimpleActionHandler {
     private SimpleRuleActionHandler handler;
 
     public SimpleRuleActionHandlerDelegate(SimpleRuleActionHandler handler) {
-        super();
         this.handler = handler;
     }
 

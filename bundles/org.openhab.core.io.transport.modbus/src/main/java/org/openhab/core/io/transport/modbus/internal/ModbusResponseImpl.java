@@ -28,7 +28,6 @@ public class ModbusResponseImpl implements ModbusResponse {
     private int responseFunctionCode;
 
     public ModbusResponseImpl(ModbusMessage response) {
-        super();
         this.responseFunctionCode = response.getFunctionCode();
     }
 

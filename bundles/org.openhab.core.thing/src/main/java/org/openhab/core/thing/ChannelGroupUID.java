@@ -30,7 +30,6 @@ public class ChannelGroupUID extends UID {
      * class by reflection. Not intended to be used for normal instantiation.
      */
     ChannelGroupUID() {
-        super();
     }
 
     /**

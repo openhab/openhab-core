@@ -82,7 +82,6 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
         private final Runnable runnable;
 
         protected TimedRunnable(@Nullable Runnable runnable) {
-            super();
             this.runnable = Objects.requireNonNull(runnable);
         }
 
@@ -104,7 +103,6 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
         private final Callable<V> callable;
 
         protected TimedCallable(@Nullable Callable<V> callable) {
-            super();
             this.callable = Objects.requireNonNull(callable);
         }
 

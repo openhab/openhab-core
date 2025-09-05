@@ -54,7 +54,6 @@ public class PendingToken {
      */
     public PendingToken(String authorizationCode, String clientId, String redirectUri, String scope,
             @Nullable String codeChallenge, @Nullable String codeChallengeMethod) {
-        super();
         this.authorizationCode = authorizationCode;
         this.clientId = clientId;
         this.redirectUri = redirectUri;

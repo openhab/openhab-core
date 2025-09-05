@@ -26,7 +26,6 @@ public class UserDTO {
     public Collection<String> roles;
 
     public UserDTO(User user) {
-        super();
         this.name = user.getName();
         this.roles = user.getRoles();
     }

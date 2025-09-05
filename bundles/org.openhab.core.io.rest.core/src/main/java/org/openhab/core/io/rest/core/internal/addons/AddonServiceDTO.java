@@ -29,7 +29,6 @@ public class AddonServiceDTO {
     Set<AddonType> addonTypes;
 
     public AddonServiceDTO(String id, String name, Set<AddonType> addonTypes) {
-        super();
         this.id = id;
         this.name = name;
         this.addonTypes = addonTypes;

@@ -65,7 +65,6 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator {
     @Activate
     public YamlItemFileConverter(final @Reference YamlModelRepository modelRepository,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
-        super();
         this.modelRepository = modelRepository;
         this.configDescriptionRegistry = configDescRegistry;
     }
