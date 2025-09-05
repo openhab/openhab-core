@@ -58,7 +58,7 @@ public class ItemCommandActionHandler extends BaseActionModuleHandler {
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(Map<String, Object> inputs) {
+    public @Nullable Map<String, @Nullable Object> execute(Map<String, Object> inputs) {
         String itemName = (String) module.getConfiguration().get(ITEM_NAME);
         String command = (String) module.getConfiguration().get(COMMAND);
 

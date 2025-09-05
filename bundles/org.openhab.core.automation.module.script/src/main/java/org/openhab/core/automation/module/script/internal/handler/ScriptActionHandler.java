@@ -71,8 +71,8 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(final Map<String, Object> context) {
-        Map<String, Object> resultMap = new HashMap<>();
+    public @Nullable Map<String, @Nullable Object> execute(final Map<String, Object> context) {
+        Map<String, @Nullable Object> resultMap = new HashMap<>();
 
         if (script.isEmpty()) {
             return resultMap;
