@@ -1,0 +1,113 @@
+version: 1
+ruleTemplates:
+  test:full-rule-template:
+    label: Full Rule Template
+    description: The description of the template-based full rule
+    configDescriptions:
+      - name: textParam
+        label: Text parameter
+        description: This is a text parameter.
+        default: A text
+        type: TEXT
+        required: false
+        readOnly: false
+        multiple: true
+        multipleLimit: 3
+        advanced: true
+        verify: true
+        limitToOptions: false
+        options:
+          - label: First Option
+            value: Welcome
+          - label: Second Option
+            value: Willkommen
+        filterCriteria:
+          - name: filter1
+            value: .*
+          - name: filter2
+            value: a.*
+      - name: integerParam
+        label: Integer parameter
+        description: This is an integer parameter.
+        default: 70
+        type: INTEGER
+        required: true
+        min: 60
+        max: 100
+        stepsize: 1
+        readOnly: false
+        unit: "%"
+        unitLabel: Start Level
+      - name: itemParam
+        label: Item parameter
+        description: This is an item parameter
+        default: CurrentPower
+        context: item
+        type: TEXT
+        required: true
+        readOnly: false
+      - name: decimalParam
+        label: Decimal parameter
+        description: This is a decimal parameter.
+        default: 3.25
+        type: DECIMAL
+        min: 0.5
+        max: 11
+        stepsize: 0.25
+        advanced: true
+        verify: true
+      - name: booleanParam
+        label: Boolean parameter
+        description: This is a boolean parameter.
+        default: true
+        type: BOOLEAN
+        readOnly: false
+    tags:
+      - First Tag
+      - Second Tag
+    triggers:
+      - id: first
+        label: First Trigger
+        description: The first trigger.
+        type: StartLevel
+        config:
+          startlevel: '{{integerParam}}'
+      - label: Second Trigger
+        description: The second trigger.
+        type: Cron
+        config:
+          cronExpression: 0 3/30 8 * * ? *
+    conditions:
+      - id: holiday
+        label: Is Holiday
+        description: It must be a holiday.
+        type: Holiday
+      - id: weekday
+        type: Weekday
+      - type: TimeOfDay
+        label: Work Hours
+        config:
+          startTime: 08:00
+          endTime: 16:00
+      - type: ItemState
+        label: Heating Power Sufficient
+        config:
+          itemName: '{{itemParam}}'
+          operator: ">"
+          state: "50"
+    actions:
+      - id: greet
+        label: Greet
+        description: Greets the person.
+        config:
+          volume: 100
+          sink: enhancedjavasound
+          text: '{{textParam}}'
+        type: Say
+      - label: Print
+        description: Gives a warm welcome.
+        config:
+          type: Ruby
+          script: |
+            puts "Hello and welcome"
+        type: Script
