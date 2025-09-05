@@ -34,7 +34,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -657,7 +656,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     private Map<String, ? extends YamlElement> listToMap(List<? extends YamlElement> elements) {
-        return elements.stream().collect(Collectors.toMap(YamlElement::getId, e -> e));
+        LinkedHashMap<String, YamlElement> result = new LinkedHashMap<>(elements.size());
+        for (YamlElement element : elements) {
+            result.put(element.getId(), element);
+        }
+        return result;
     }
 
     private <T extends YamlElement> List<T> parseJsonMapNode(@Nullable JsonNode mapNode, Class<T> elementClass,
