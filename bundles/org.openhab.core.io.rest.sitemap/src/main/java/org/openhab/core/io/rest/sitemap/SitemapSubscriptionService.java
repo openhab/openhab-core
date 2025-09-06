@@ -24,10 +24,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.emf.common.util.BasicEList;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.i18n.TimeZoneProvider;
@@ -36,12 +35,10 @@ import org.openhab.core.io.rest.sitemap.internal.WidgetsChangeListener;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.events.ItemStatePredictedEvent;
-import org.openhab.core.model.core.EventType;
-import org.openhab.core.model.core.ModelRepositoryChangeListener;
-import org.openhab.core.model.sitemap.SitemapProvider;
-import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
-import org.openhab.core.model.sitemap.sitemap.Sitemap;
-import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.sitemap.LinkableWidget;
+import org.openhab.core.sitemap.Sitemap;
+import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.thing.events.ChannelDescriptionChangedEvent;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.framework.BundleContext;
@@ -51,8 +48,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,11 +61,12 @@ import org.slf4j.LoggerFactory;
  * Subscribing to whole sitemaps is discouraged, since a large number of item updates may result in a high SSE traffic.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Mark Herwege - Implement sitemap registry
  */
 @Component(service = { SitemapSubscriptionService.class,
         EventSubscriber.class }, configurationPid = "org.openhab.sitemapsubscription")
 @NonNullByDefault
-public class SitemapSubscriptionService implements ModelRepositoryChangeListener, EventSubscriber {
+public class SitemapSubscriptionService implements RegistryChangeListener<Sitemap>, EventSubscriber {
 
     private static final String SITEMAP_PAGE_SEPARATOR = "#";
     private static final String SITEMAP_SUFFIX = ".sitemap";
@@ -88,9 +84,8 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     private final ItemUIRegistry itemUIRegistry;
+    private final SitemapRegistry sitemapRegistry;
     private final TimeZoneProvider timeZoneProvider;
-
-    private final List<SitemapProvider> sitemapProviders = new ArrayList<>();
 
     /* subscription id -> sitemap+page */
     private final Map<String, String> scopeOfSubscription = new ConcurrentHashMap<>();
@@ -109,15 +104,19 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
 
     @Activate
     public SitemapSubscriptionService(Map<String, Object> config, final @Reference ItemUIRegistry itemUIRegistry,
-            final @Reference TimeZoneProvider timeZoneProvider, BundleContext bundleContext) {
+            final @Reference SitemapRegistry sitemapRegistry, final @Reference TimeZoneProvider timeZoneProvider,
+            BundleContext bundleContext) {
         this.itemUIRegistry = itemUIRegistry;
+        this.sitemapRegistry = sitemapRegistry;
         this.timeZoneProvider = timeZoneProvider;
         this.bundleContext = bundleContext;
         applyConfig(config);
+        sitemapRegistry.addRegistryChangeListener(this);
     }
 
     @Deactivate
     protected void deactivate() {
+        sitemapRegistry.removeRegistryChangeListener(this);
         scopeOfSubscription.clear();
         callbacks.clear();
         creationInstants.clear();
@@ -142,17 +141,6 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
                 logger.debug("Setting 'maxSubscriptions' must be a number; value '{}' ignored.", max);
             }
         }
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addSitemapProvider(SitemapProvider provider) {
-        sitemapProviders.add(provider);
-        provider.addModelChangeListener(this);
-    }
-
-    public void removeSitemapProvider(SitemapProvider provider) {
-        sitemapProviders.remove(provider);
-        provider.removeModelChangeListener(this);
     }
 
     /**
@@ -275,8 +263,8 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         listener.widgetsChangeListener().addCallback(callback);
     }
 
-    public EList<Widget> collectWidgets(String sitemapName, @Nullable String pageId) {
-        EList<Widget> widgets = new BasicEList<>();
+    public List<Widget> collectWidgets(String sitemapName, @Nullable String pageId) {
+        List<Widget> widgets = new ArrayList<>();
 
         Sitemap sitemap = getSitemap(sitemapName);
         if (sitemap == null) {
@@ -329,28 +317,28 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     private @Nullable Sitemap getSitemap(String sitemapName) {
-        for (SitemapProvider provider : sitemapProviders) {
-            Sitemap sitemap = provider.getSitemap(sitemapName);
-            if (sitemap != null) {
-                return sitemap;
-            }
-        }
-        return null;
+        return sitemapRegistry.get(sitemapName);
     }
 
     @Override
-    public void modelChanged(String modelName, EventType type) {
-        if (type != EventType.MODIFIED || !modelName.endsWith(SITEMAP_SUFFIX)) {
-            return; // we process only sitemap modifications here
-        }
+    public void added(Sitemap element) {
+        // Nothing to do
+    }
 
-        String changedSitemapName = modelName.substring(0, modelName.length() - SITEMAP_SUFFIX.length());
+    @Override
+    public void removed(Sitemap element) {
+        // Nothing to do
+    }
+
+    @Override
+    public void updated(Sitemap oldElement, Sitemap element) {
+        String changedSitemapName = oldElement.getName();
 
         for (Entry<String, ListenerRecord> listenerEntry : pageChangeListeners.entrySet()) {
             String sitemapWithPage = listenerEntry.getKey();
             String sitemapName = extractSitemapName(sitemapWithPage);
 
-            EList<Widget> widgets;
+            List<Widget> widgets;
             if (sitemapName.equals(changedSitemapName)) {
                 if (isPageListener(sitemapWithPage)) {
                     String pageId = extractPageId(sitemapWithPage);

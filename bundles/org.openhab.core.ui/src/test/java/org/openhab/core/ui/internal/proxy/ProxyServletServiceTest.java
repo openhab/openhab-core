@@ -34,11 +34,11 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.model.sitemap.SitemapProvider;
-import org.openhab.core.model.sitemap.sitemap.Image;
-import org.openhab.core.model.sitemap.sitemap.Sitemap;
-import org.openhab.core.model.sitemap.sitemap.Switch;
-import org.openhab.core.model.sitemap.sitemap.Video;
+import org.openhab.core.sitemap.Image;
+import org.openhab.core.sitemap.Sitemap;
+import org.openhab.core.sitemap.Switch;
+import org.openhab.core.sitemap.Video;
+import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.service.http.HttpService;
@@ -47,6 +47,7 @@ import org.osgi.service.http.HttpService;
  * Unit tests for the {@link ProxyServletService} class.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Mark Herwege - Implement sitemap registry
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -76,7 +77,7 @@ public class ProxyServletServiceTest {
 
     private @Mock @NonNullByDefault({}) ItemUIRegistry itemUIRegistryMock;
     private @Mock @NonNullByDefault({}) HttpService httpServiceMock;
-    private @Mock @NonNullByDefault({}) SitemapProvider sitemapProviderMock;
+    private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistryMock;
     private @Mock @NonNullByDefault({}) Sitemap sitemapMock;
     private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
     private @Mock @NonNullByDefault({}) Switch switchWidgetMock;
@@ -85,11 +86,10 @@ public class ProxyServletServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new ProxyServletService(httpServiceMock, itemUIRegistryMock, Map.of());
-        service.sitemapProviders.add(sitemapProviderMock);
+        service = new ProxyServletService(httpServiceMock, itemUIRegistryMock, sitemapRegistryMock, Map.of());
 
         sitemapMock = mock(Sitemap.class);
-        when(sitemapProviderMock.getSitemap(eq(SITEMAP_NAME))).thenReturn(sitemapMock);
+        when(sitemapRegistryMock.get(eq(SITEMAP_NAME))).thenReturn(sitemapMock);
 
         when(itemUIRegistryMock.getWidget(eq(sitemapMock), eq(SWITCH_WIDGET_ID))).thenReturn(switchWidgetMock);
         when(itemUIRegistryMock.getWidget(eq(sitemapMock), eq(IMAGE_WIDGET_ID))).thenReturn(imageWidgetMock);
