@@ -24,6 +24,8 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.LightModel.RgbcwMath;
+import org.openhab.core.util.LightModel.WhiteLED;
 
 /**
  * Unit tests for {@link LightModel}.
@@ -32,6 +34,10 @@ import org.openhab.core.types.UnDefType;
  */
 @NonNullByDefault
 public class LightModelTest {
+
+    private static final double EPSILON = 1e-6;
+    private final WhiteLED coolWhiteLed = new WhiteLED(153);
+    private final WhiteLED warmWhiteLed = new WhiteLED(500);
 
     @Test
     public void testFullColor() {
@@ -230,7 +236,7 @@ public class LightModelTest {
 
     @Test
     public void testComplexConstructor() {
-        LightModel lsm = new LightModel(false, false, false, false, false, false, 2.0, 501.0, 154.0, 11.0);
+        LightModel lsm = new LightModel(false, false, false, false, false, false, 2.0, 501.0, 154.0, 11.0, null, null);
         assertFalse(lsm.configGetSupportsColor());
         assertFalse(lsm.configGetSupportsBrightness());
         assertFalse(lsm.configGetSupportsColorTemperature());
@@ -298,48 +304,55 @@ public class LightModelTest {
     @Test
     public void testComplexConstructorBad() {
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, true, false, false, null, null, null, null));
+                () -> new LightModel(false, false, false, true, false, false, null, null, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, true, false, null, null, null, null));
+                () -> new LightModel(false, false, false, false, true, false, null, null, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, true, false, true, false, null, null, null, null));
+                () -> new LightModel(false, false, true, false, true, false, null, null, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, true, true, true, true, false, null, null, null, null));
+                () -> new LightModel(false, true, true, true, true, false, null, null, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, 0.0, null, null, null));
+                () -> new LightModel(false, false, false, false, false, false, 0.0, null, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, 11.0, null, null, null));
+                () -> new LightModel(false, false, false, false, false, false, 11.0, null, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, 99.0, null, null));
+                () -> new LightModel(false, false, false, false, false, false, null, 99.0, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, 1001.0, null, null));
+                () -> new LightModel(false, false, false, false, false, false, null, 1001.0, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, null, 99.0, null));
+                () -> new LightModel(false, false, false, false, false, false, null, null, 99.0, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, null, 1001.0, null));
+                () -> new LightModel(false, false, false, false, false, false, null, null, 1001.0, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, 300.0, 300.0, null));
+                () -> new LightModel(false, false, false, false, false, false, null, 300.0, 300.0, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, null, null, 0.0));
+                () -> new LightModel(false, false, false, false, false, false, null, null, null, 0.0, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, null, null, 51.0));
+                () -> new LightModel(false, false, false, false, false, false, null, null, null, 51.0, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, true, false, true, null, null, null, null));
+                () -> new LightModel(false, false, false, true, false, true, null, null, null, null, null, null));
+
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, true, true, null, null, null, null));
+                () -> new LightModel(false, false, false, false, true, true, null, null, null, null, null, null));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new LightModel(false, false, false, false, true, true, null, null, null, null, 99.0, null));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new LightModel(false, false, false, false, true, true, null, null, null, null, null, 10001.0));
     }
 
     @Test
@@ -484,6 +497,39 @@ public class LightModelTest {
     }
 
     @Test
+    public void testRgbToRgbcwToRgb_RoundTrip() {
+        double[] originalRgb = { 0.8, 0.7, 0.6 };
+        double[] rgbcw = RgbcwMath.rgb2rgbcw(originalRgb, coolWhiteLed, warmWhiteLed);
+        double[] reconstructedRgb = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed, warmWhiteLed);
+        assertArrayEquals(originalRgb, reconstructedRgb, EPSILON, "RGB → RGBCW → RGB should match original");
+    }
+
+    @Test
+    public void testRgbcwToRgbToRgbcw_RoundTrip() {
+        double[] originalRgbcw = { 0.5, 0.4, 0.3, 0.2, 0.1 };
+        double[] rgb = RgbcwMath.rgbcw2rgb(originalRgbcw, coolWhiteLed, warmWhiteLed);
+        double[] reconstructedRgbcw = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed, warmWhiteLed);
+        double[] rgb2 = RgbcwMath.rgbcw2rgb(reconstructedRgbcw, coolWhiteLed, warmWhiteLed);
+        assertArrayEquals(rgb, rgb2, EPSILON, "RGB reconstructed from RGBCW should remain visually consistent");
+    }
+
+    @Test
+    public void testEdgeCase_FullWhite() {
+        double[] white = { 1.0, 1.0, 1.0 };
+        double[] rgbcw = RgbcwMath.rgb2rgbcw(white, coolWhiteLed, warmWhiteLed);
+        double[] reconstructed = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed, warmWhiteLed);
+        assertArrayEquals(white, reconstructed, EPSILON, "Full white RGB should round-trip cleanly");
+    }
+
+    @Test
+    public void testEdgeCase_Black() {
+        double[] black = { 0.0, 0.0, 0.0 };
+        double[] rgbcw = RgbcwMath.rgb2rgbcw(black, coolWhiteLed, warmWhiteLed);
+        double[] reconstructed = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed, warmWhiteLed);
+        assertArrayEquals(black, reconstructed, EPSILON, "Black RGB should round-trip cleanly");
+    }
+
+    @Test
     public void testRgbcw() {
         LightModel lsm = new LightModel(true, true, true, false, true, false);
 
@@ -531,35 +577,243 @@ public class LightModelTest {
     /**
      * Case: Bright White (warm)
      * Input (RGBCW): (0, 0, 0, 0, 255)
-     * Expected HSB: Depends on implementation. Since it is a warm white, the HSB conversion must reflect its position
-     * on the color temperature spectrum.
+     * Expected HSB: Depends on implementation. Expect it to match the color temperature of the warm white LED.
      */
     @Test
     public void testRgbcwBrightWhiteWarm() {
         LightModel lsm = new LightModel(true, true, true, false, true, false);
-        // expect hue near 30-60, low saturation, high brightness.
+        HSBType warm = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / lsm.configGetMiredWarmWhiteLed()));
         lsm.setRGBx(new double[] { 0, 0, 0, 0, 255 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
-        assertEquals(30.0, hsb.getHue().doubleValue(), 30); // hue should be in the warm spectrum (e.g., ~30)
-        assertTrue(hsb.getSaturation().doubleValue() < 10); // low saturation
-        assertTrue(hsb.getBrightness().doubleValue() > 90); // high brightness
+        assertEquals(30.0, hsb.getHue().doubleValue(), 30); // in the warm spectrum (e.g., ~30)
+        assertEquals(warm.getHue().doubleValue(), hsb.getHue().doubleValue(), 1); // same as warm LED
+        assertEquals(warm.getSaturation().doubleValue(), hsb.getSaturation().doubleValue(), 1); // same as warm LED
+        assertEquals(warm.getBrightness().doubleValue(), hsb.getBrightness().doubleValue(), 1); // same as warm LED
+    }
+
+    /**
+     * Case: Bright White (warm)
+     * Input (RGBCW): (0, 0, 0, 255, 0)
+     * Expected HSB: Depends on implementation. Expect it to match the color temperature of the cool white LED.
+     */
+    @Test
+    public void testRgbcwBrightWhiteCool() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        HSBType cool = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / lsm.configGetMiredCoolWhiteLed()));
+        lsm.setRGBx(new double[] { 0, 0, 0, 255, 0 });
+        HSBType hsb = lsm.getColor();
+        assertNotNull(hsb);
+        assertEquals(240.0, hsb.getHue().doubleValue(), 30); // in the cool spectrum (e.g., ~240)
+        assertEquals(cool.getHue().doubleValue(), hsb.getHue().doubleValue(), 5); // same as cool LED
+        assertEquals(cool.getSaturation().doubleValue(), hsb.getSaturation().doubleValue(), 5); // same as cool LED
+        assertEquals(cool.getBrightness().doubleValue(), hsb.getBrightness().doubleValue(), 5); // same as cool LED
     }
 
     /**
      * Case: Mixed White (neutral)
      * Input (RGBCW): (0, 0, 0, 255, 255)
-     * Expected HSB: The combined effect of cool and warm white should yield a neutral white, such as (0, 0, 100)
+     * Expected HSB: The combined effect of cool and warm white should yield a neutral white. The resulting
+     * hue is not really relevant, so long as the saturation is very low, and the point in HSB space lies
+     * between the cool and warm white levels.
      */
     @Test
     public void testRgbcwMixedWhiteNeutral() {
         LightModel lsm = new LightModel(true, true, true, false, true, false);
+        /*
+         * for the purposes of this test we force
+         * - the cool white led must have a blue hue and ~20% saturation
+         * - the cool warm led must have a yellow hue and ~20% saturation
+         * - so the mix should have ~0% saturation (an the hue is undefined)
+         */
+        lsm.configSetMiredCoolWhiteLED(100); // 10'000 K
+        lsm.configSetMiredWarmWhiteLED(230); // 4'347 K
+
         lsm.setRGBx(new double[] { 0, 0, 0, 255, 255 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
-        assertEquals(0.0, hsb.getHue().doubleValue(), 1);
-        assertEquals(0.0, hsb.getSaturation().doubleValue(), 1);
+        assertEquals(180.0, hsb.getHue().doubleValue(), 180); // hue is not relevant
+        assertEquals(0.0, hsb.getSaturation().doubleValue(), 5); // saturation very low
+        assertEquals(100.0, hsb.getBrightness().doubleValue(), 1); // 100% brightness
+    }
+
+    /**
+     * Case: Black
+     * Input (RGBCW): (0, 0, 0, 0, 0)
+     * Expected HSB: Black. The hue and saturation are undefined, and the brightness shall be zero.
+     */
+    @Test
+    public void testRgbcwBlack() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.setRGBx(new double[] { 0, 0, 0, 0, 0 });
+        HSBType hsb = lsm.getColor();
+        assertNotNull(hsb);
+        assertEquals(180.0, hsb.getHue().doubleValue(), 180); // hue is not relevant
+        assertEquals(180.0, hsb.getSaturation().doubleValue(), 180); // saturation not relevant
+        assertEquals(0.0, hsb.getBrightness().doubleValue(), 1); // 0% brightness (black)
+    }
+
+    /**
+     * Case: All channels max
+     * Input (RGBCW): (255, 255, 255, 255, 255)
+     * Expected HSB: White. The combination of all channels at full brightness should produce the brightest possible
+     * white, with zero saturation.
+     */
+    @Test
+    public void testRgbcwAllChannelsMax() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.setRGBx(new double[] { 255, 255, 255, 255, 255 });
+        HSBType hsb = lsm.getColor();
+        assertNotNull(hsb);
+        assertEquals(180.0, hsb.getHue().doubleValue(), 180); // hue is not relevant
+        assertEquals(0.0, hsb.getSaturation().doubleValue(), 1); // zero saturation
         assertEquals(100.0, hsb.getBrightness().doubleValue(), 1); // white at full brightness
+    }
+
+    /**
+     * Case: Maximum RGB, zero white
+     * Input (RGBCW): (255, 255, 255, 0, 0)
+     * Expected HSB: White. The RGB channels alone should produce white at full brightness.
+     */
+    @Test
+    public void testRgbcwMaxRgbZeroWhite() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.setRGBx(new double[] { 255, 255, 255, 0, 0 });
+        HSBType hsb = lsm.getColor();
+        assertNotNull(hsb);
+        assertEquals(180.0, hsb.getHue().doubleValue(), 180); // hue is not relevant
+        assertEquals(0.0, hsb.getSaturation().doubleValue(), 1); // zero saturation
+        assertEquals(100.0, hsb.getBrightness().doubleValue(), 1); // white at full brightness
+    }
+
+    /**
+     * Case: Mixed color with white
+     * Input (RGBCW): (255, 0, 0, 0, 100)
+     * Expected HSB: A less saturated, warmer red. The Hue is in the positive red sector, saturation is lower,
+     * and brightness is 100%.
+     */
+    @Test
+    public void testRgbcwMixedColorWithWhite() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.setRGBx(new double[] { 255, 0, 0, 0, 100 });
+        HSBType hsb = lsm.getColor();
+        assertNotNull(hsb);
+        assertEquals(15.0, hsb.getHue().doubleValue(), 15); // positive red
+        assertTrue(100.0 > hsb.getSaturation().doubleValue()); // less saturated
+        assertEquals(100.0, hsb.getBrightness().doubleValue()); // 100%
+    }
+
+    /**
+     * Case: Non-zero RGB with CW only
+     * Input (RGBCW): (255, 0, 0, 100, 0)
+     * Expected HSB: A less saturated, cooler red. Hue is in the negative red sector, saturation is lower,
+     * and brightness is 100%.
+     */
+    @Test
+    public void testRgbcwNonZeroRgbWithCoolWhiteOnly() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        // force cool white led for this test
+        lsm.configSetMiredCoolWhiteLED(100); // 10'000 K
+        lsm.setRGBx(new double[] { 255, 0, 0, 100, 0 });
+        HSBType hsb = lsm.getColor();
+        assertNotNull(hsb);
+        assertEquals(345.0, hsb.getHue().doubleValue(), 15); // negative red
+        assertTrue(100.0 > hsb.getSaturation().doubleValue()); // less saturated
+        assertEquals(100.0, hsb.getBrightness().doubleValue()); // 100%
+    }
+
+    /**
+     * Case: Primary Blue
+     * Input (HSB): (240, 100, 100)
+     * Expected RGBCW: (0, 0, 255, 0, 0). A pure, saturated color should only use the RGB channels.
+     */
+    @Test
+    public void testRgbcwPrimaryBlue() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.handleCommand(new HSBType("240,100,100"));
+        double[] rgbx = lsm.getRGBx();
+        assertEquals(5, rgbx.length);
+        assertEquals(0.0, rgbx[0], 1); // no red
+        assertEquals(0.0, rgbx[1], 1); // no green
+        assertEquals(255.0, rgbx[2], 1); // full blue
+        assertEquals(0.0, rgbx[3], 1); // no cool white
+        assertEquals(0.0, rgbx[4], 1); // no warm white
+    }
+
+    /**
+     * Case: Black #2
+     * Input (HSB): (0, 0, 0)
+     * Expected RGBCW: Black should result in all channels off.
+     */
+    @Test
+    public void testRgbcwBlack2() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.handleCommand(new HSBType("0,0,0"));
+        double[] rgbx = lsm.getRGBx();
+        assertEquals(5, rgbx.length);
+        assertEquals(0.0, rgbx[0], 1); // no red
+        assertEquals(0.0, rgbx[1], 1); // no green
+        assertEquals(0.0, rgbx[2], 1); // no blue
+        assertEquals(0.0, rgbx[3], 1); // no cool white
+        assertEquals(0.0, rgbx[4], 1); // no warm white
+    }
+
+    /**
+     * Case: Low Brightness, High Saturation
+     * Input (HSB): (60, 100, 25)
+     * Expected RGBCW: The low brightness should mean the white channels are not used at all, and only the RGB channels
+     * are used at a scaled-down value.
+     */
+    @Test
+    public void testRgbcwLowBrightnessHighSaturation() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.handleCommand(new HSBType("60,100,25"));
+        double[] rgbx = lsm.getRGBx();
+        assertEquals(5, rgbx.length);
+        assertEquals(64.0, rgbx[0], 1); // 25% of 255 red => yellow
+        assertEquals(64.0, rgbx[1], 1); // 25% of 255 green => yellow
+        assertEquals(0.0, rgbx[2], 1); // no blue
+        assertEquals(0.0, rgbx[3], 1); // no cool white
+        assertEquals(0.0, rgbx[4], 1); // no warm white
+    }
+
+    /**
+     * Case: Gray
+     * Input (HSB): (0, 0, 50)
+     * Expected RGBCW: The gray should be produced by the cool or white LED, with minimal RGB to fine tune the color.
+     */
+    @Test
+    public void testRgbcwGray() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.handleCommand(new HSBType("0,0,50"));
+        double[] rgbx = lsm.getRGBx();
+        assertEquals(5, rgbx.length);
+        assertEquals(0.0, rgbx[0], 10); // red fine tuning up to 10.0
+        assertEquals(0.0, rgbx[1], 10); // green fine tuning up to 10.0
+        assertEquals(0.0, rgbx[2], 10); // blue fine tuning up to 10.0
+        assertEquals(128.0, rgbx[3], 10); // cool white close to 50%
+        assertEquals(0.0, rgbx[4], 1); // warm white off
+    }
+
+    /**
+     * Case: Pastel Green
+     * Input (HSB): (120, 50, 75)
+     * Expected RGBCW: The conversion should calculate a mix of green and white to achieve the desired brightness and
+     * saturation. The green channel should be prominent, with some contribution from the cool white LED to reduce
+     * saturation and increase brightness.
+     */
+    @Test
+    public void testRgbcwPastelGreen() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.handleCommand(new HSBType("120,50,75"));
+        double[] rgbx = lsm.getRGBx();
+        assertEquals(5, rgbx.length);
+        assertEquals(0.0, rgbx[0], 10); // red channel minimal
+        assertTrue(rgbx[1] > Math.max(rgbx[0], rgbx[2])); // green channel dominant
+        assertEquals(0.0, rgbx[2], 10); // blue channel minimal
+        assertEquals(0.0, Math.min(rgbx[0], Math.min(rgbx[2], rgbx[2])), 1); // red or blue should be zero
+        assertEquals(0.0, rgbx[4], 0); // warm white zero
+        assertEquals(191.0, rgbx[1] + rgbx[3], 1); // green + cool white should be ~75% brightness
     }
 
     /**
@@ -571,256 +825,70 @@ public class LightModelTest {
     @Test
     public void testRgbcwPastelYellowLowSaturation() {
         LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("60, 100, 99")); // pure RGB yellow
-        HSBType reference = lsm.getColor();
-        assertNotNull(reference);
-
         lsm.setRGBx(new double[] { 100, 100, 0, 100, 100 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
-        assertEquals(60.0, hsb.getHue().doubleValue(), 1); // yellow
-        assertTrue(reference.getSaturation().doubleValue() > hsb.getSaturation().doubleValue()); // less saturated
-        assertTrue(reference.getBrightness().doubleValue() < hsb.getBrightness().doubleValue()); // brighter
-    }
-
-    /**
-     * Case: Black
-     * Input (RGBCW): (0, 0, 0, 0, 0)
-     * Expected HSB: (0, 0, 0) (Black). The hue and saturation are undefined, so a value of 0 is standard
-     */
-    @Test
-    public void testRgbcwBlack() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.setRGBx(new double[] { 0, 0, 0, 0, 0 });
-        HSBType hsb = lsm.getColor();
-        assertNotNull(hsb);
-        assertEquals(0.0, hsb.getHue().doubleValue(), 1);
-        assertEquals(0.0, hsb.getSaturation().doubleValue(), 1);
-        assertEquals(0.0, hsb.getBrightness().doubleValue(), 1);
-    }
-
-    /**
-     * Case: All channels max
-     * Input (RGBCW): (255, 255, 255, 255, 255)
-     * Expected HSB: (0, 0, 100) (White). The combination of all channels at full brightness should produce the
-     * brightest possible white, with zero saturation.
-     */
-    @Test
-    public void testRgbcwAllChannelsMax() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.setRGBx(new double[] { 255, 255, 255, 255, 255 });
-        HSBType hsb = lsm.getColor();
-        assertNotNull(hsb);
-        assertEquals(0.0, hsb.getHue().doubleValue(), 1);
-        assertEquals(0.0, hsb.getSaturation().doubleValue(), 1);
-        assertEquals(100.0, hsb.getBrightness().doubleValue(), 1); // white at full brightness
-    }
-
-    /**
-     * Case: Maximum RGB, zero white
-     * Input (RGBCW): (255, 255, 255, 0, 0)
-     * Expected HSB: (0, 0, 100) (White). The RGB channels alone should produce white at full brightness.
-     */
-    @Test
-    public void testRgbcwMaxRgbZeroWhite() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.setRGBx(new double[] { 255, 255, 255, 0, 0 });
-        HSBType hsb = lsm.getColor();
-        assertNotNull(hsb);
-        assertEquals(0.0, hsb.getHue().doubleValue(), 1);
-        assertEquals(0.0, hsb.getSaturation().doubleValue(), 1);
-        assertEquals(100.0, hsb.getBrightness().doubleValue(), 1); // white at full brightness
-    }
-
-    /**
-     * Case: Mixed color with white
-     * Input (RGBCW): (255, 0, 0, 0, 100)
-     * Expected HSB: A less saturated, brighter red than pure RGB red. The Hue should remain at 0, but saturation will
-     * decrease, and brightness will be higher.
-     */
-    @Test
-    public void testRgbcwMixedColorWithWhite() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("0, 100, 99")); // pure RGB red
-        HSBType reference = lsm.getColor();
-        assertNotNull(reference);
-
-        lsm.setRGBx(new double[] { 255, 0, 0, 0, 100 });
-        HSBType hsb = lsm.getColor();
-        assertNotNull(hsb);
-        assertEquals(0.0, hsb.getHue().doubleValue(), 1);
-        assertTrue(reference.getBrightness().doubleValue() < hsb.getBrightness().doubleValue()); // brighter
-        // TODO the following test fails - maybe due to error in ColorUtil RGBW method ??
-        // assertTrue(reference.getSaturation().doubleValue() > hsb.getSaturation().doubleValue()); // less saturated
-    }
-
-    /**
-     * Case: Non-zero RGB with CW only
-     * Input (RGBCW): (255, 0, 0, 100, 0)
-     * Expected HSB: A less saturated, cooler red. Hue remains 0, saturation is lower, and brightness is higher. The
-     * color temperature of the red will shift towards the cool white.
-     */
-    @Test
-    public void testRgbcwNonZeroRgbWithCoolWhiteOnly() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("0, 100, 99")); // pure RGB red
-        HSBType reference = lsm.getColor();
-        assertNotNull(reference);
-
-        lsm.setRGBx(new double[] { 255, 0, 0, 100, 0 });
-        HSBType hsb = lsm.getColor();
-        assertNotNull(hsb);
-        assertEquals(0.0, hsb.getHue().doubleValue(), 1);
-        assertTrue(reference.getBrightness().doubleValue() < hsb.getBrightness().doubleValue()); // brighter
-        // TODO the following test fails - maybe due to error in ColorUtil RGBW method ??
-        // assertTrue(reference.getSaturation().doubleValue() > hsb.getSaturation().doubleValue()); // less saturated
-    }
-
-    /**
-     * Case: Primary Blue
-     * Input (HSB): (240, 100, 100)
-     * Expected RGBCW: (0, 0, 255, 0, 0). A pure, saturated color should only use the RGB channels.
-     */
-    @Test
-    public void testRgbcwPrimaryBlue() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("240, 100, 100"));
-        double[] rgbx = lsm.getRGBx();
-        assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 1);
-        assertEquals(0.0, rgbx[1], 1);
-        assertEquals(255.0, rgbx[2], 1); // full blue
-        assertEquals(0.0, rgbx[3], 1);
-        assertEquals(0.0, rgbx[4], 1);
-    }
-
-    /**
-     * Case: Gray
-     * Input (HSB): (0, 0, 50)
-     * Expected RGBCW: Assuming the system uses white channels for brightness and desaturation, the gray should be
-     * produced by a mix of CW and WW, with no RGB active: (0, 0, 0, 128, 128).
-     */
-    @Test
-    public void testRgbcwGray() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("0, 0, 50"));
-        double[] rgbx = lsm.getRGBx();
-        assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 1);
-        assertEquals(0.0, rgbx[1], 1);
-        assertEquals(0.0, rgbx[2], 1);
-        assertEquals(127.5, rgbx[3] + rgbx[4], 1); // 75% brightness mix of CW and WW
-    }
-
-    /**
-     * Case: Pastel Green
-     * Input (HSB): (120, 50, 75)
-     * Expected RGBCW: The conversion should calculate a mix of green and white to achieve the desired brightness and
-     * saturation. For instance, (0, 191, 0, 64, 64)
-     */
-    @Test
-    public void testRgbcwPastelGreen() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("120, 50, 75"));
-        double[] rgbx = lsm.getRGBx();
-        assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 1); //
-        assertEquals(191.0, rgbx[1] + rgbx[3] + rgbx[4], 1); // 75% brightness green
-        assertEquals(0.0, rgbx[2], 1);
-        assertEquals(rgbx[3], rgbx[4], 1); // equal parts CW and WW
-    }
-
-    /**
-     * Case: Full Bright White
-     * Input (HSB): (0, 0, 100)
-     * Expected RGBCW: (0, 0, 0, 255, 255). Maximum brightness and zero saturation should be achieved by using only the
-     * white channels.
-     */
-    @Test
-    public void testRgbcwFullBrightWhite() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("0, 0, 100"));
-        double[] rgbx = lsm.getRGBx();
-        assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 1);
-        assertEquals(0.0, rgbx[1], 1);
-        assertEquals(0.0, rgbx[2], 1);
-        assertEquals(255.0, rgbx[3] + rgbx[4], 1); // 100% brightness mix of CW and WW
-    }
-
-    /**
-     * Case: Black #2
-     * Input (HSB): (0, 0, 0)
-     * Expected RGBCW: (0, 0, 0, 0, 0). Black should result in all channels off.
-     */
-    @Test
-    public void testRgbcwBlack2() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("0, 0, 0"));
-        double[] rgbx = lsm.getRGBx();
-        assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 1);
-        assertEquals(0.0, rgbx[1], 1);
-        assertEquals(0.0, rgbx[2], 1);
-        assertEquals(0.0, rgbx[3], 1);
-        assertEquals(0.0, rgbx[4], 1);
-    }
-
-    /**
-     * Case: Low Brightness, High Saturation
-     * Input (HSB): (60, 100, 25)
-     * Expected RGBCW: (64, 64, 0, 0, 0). The low brightness should mean the white channels are not used at all, and
-     * only the RGB channels are used at a scaled-down value.
-     */
-    @Test
-    public void testRgbcwLowBrightnessHighSaturation() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("60, 100, 25"));
-        double[] rgbx = lsm.getRGBx();
-        assertEquals(5, rgbx.length);
-        assertEquals(64.0, rgbx[0], 1); // 25% of 255 red
-        assertEquals(64.0, rgbx[1], 1); // 25% of 255 green => yellow
-        assertEquals(0.0, rgbx[2], 1);
-        assertEquals(0.0, rgbx[3], 1);
-        assertEquals(0.0, rgbx[4], 1);
+        assertEquals(60.0, hsb.getHue().doubleValue(), 1); // hue 60 (yellow)
+        assertEquals(50.0, hsb.getSaturation().doubleValue(), 10); // lower saturation than full yellow
+        assertEquals(100.0, hsb.getBrightness().doubleValue(), 1); // 100% brightness
     }
 
     /**
      * Case: HSB with Cool White preference
      * Input (HSB): A color with a blue tint, e.g., (240, 50, 75).
-     * Expected RGBCW: The conversion might be designed to leverage the cool white LED to create a cooler white
-     * component, resulting in a higher CW value and lower WW. For example, a result like (0, 0, 191, 128, 0).
+     * Expected RGBCW: The conversion should prioritize the cool white LED to create a cooler white component, resulting
+     * in a higher CW value and lower WW.
      */
     @Test
     public void testRgbcwHsbWithCoolWhitePreference() {
-        // assume conversion prefers cool white for cooler hues
         LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("240, 50, 75"));
+        lsm.handleCommand(new HSBType("240,50,75"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0]);
-        assertEquals(0.0, rgbx[1]);
-        assertEquals(191.0, rgbx[2] + rgbx[3] + rgbx[4], 1); // blue 75% brightness
-        assertTrue(rgbx[3] > rgbx[4]); // using cooler white
+        assertEquals(0.0, rgbx[0], 10); // red channel fine tuning up to 10.0
+        assertEquals(0.0, rgbx[1], 10); // green channel fine tuning up to 10.0
+        assertEquals(192.0, rgbx[2] + rgbx[3], 5); // blue and cool white channel shall be ~75% brightness
+        assertEquals(96.0, rgbx[2], 5); // blue channel shall contribute ~37.5% brightness
+        assertEquals(96.0, rgbx[3], 5); // cool white channel shall contribute ~37.5% brightness
+        assertEquals(0.0, rgbx[4], 1); // warm white channel should zero
     }
 
     /**
      * Case: HSB with Warm White preference
-     * Input (HSB): A color with a yellow/red tint, e.g., (30, 50, 75).
-     * Expected RGBCW: Similarly, this conversion would prioritize the warm white LED to maintain the warmer color
-     * temperature, possibly leading to a result like (191, 64, 0, 0, 128)
-     *
+     * Input (HSB): A color with a yellow/red tint, e.g., (30, 70, 75).
+     * Expected RGBCW: The conversion should prioritize the warm white LED to maintain the warmer color temperature,
+     * resulting in a higher WW value and lower CW.
      */
     @Test
     public void testRgbcwHsbWithWarmWhitePreference() {
-        // assume conversion prefers warm white for warmer hues
         LightModel lsm = new LightModel(true, true, true, false, true, false);
-        lsm.handleCommand(new HSBType("30, 50, 75"));
+        lsm.handleCommand(new HSBType("30,70,75"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
-        assertEquals(191.0, rgbx[0] + rgbx[3] + rgbx[4], 1); // red 75% brightness
-        assertTrue(rgbx[0] > rgbx[1]); // green contribution is less than the red
-        assertEquals(0.0, rgbx[2], 1);
-        assertTrue(rgbx[4] > rgbx[3]); // using warmer white
+        assertEquals(0.0, rgbx[0], 15); // red channel fine tuning up to 15.0
+        assertEquals(0.0, rgbx[1], 15); // green channel fine tuning up to 15.0
+        assertEquals(0.0, rgbx[2], 15); // blue channel fine tuning up to 15.0
+        assertEquals(0.0, rgbx[3], 10); // cool white channel should be zero
+        assertTrue(rgbx[0] > Math.max(rgbx[1], rgbx[2])); // red channel dominant
+        assertEquals(192.0, rgbx[0] + rgbx[4], 10); // red + warm white channel should be ~75% brightness
+    }
+
+    /**
+     * Case: Full Bright White
+     * Input (HSB): (0, 0, 100)
+     * Expected RGBCW: (0, 0, 0, 255, 255). Maximum brightness and zero saturation should be achieved by using mainly
+     * the white channels, with small RGB values for color fine tuning.
+     */
+    @Test
+    public void testRgbcwFullBrightWhite() {
+        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        lsm.handleCommand(new HSBType("0,0,100"));
+        double[] rgbx = lsm.getRGBx();
+        assertEquals(5, rgbx.length);
+        assertEquals(0.0, rgbx[0], 15); // red channel fine tuning up to 15.0
+        assertEquals(0.0, rgbx[1], 15); // green channel fine tuning up to 15.0
+        assertEquals(0.0, rgbx[2], 15); // blue channel fine tuning up to 15.0
+        assertEquals(255.0, rgbx[3], 10); // cool white channel should be maximal
+        assertEquals(0.0, rgbx[4], 10); // warm white channel should be zero
     }
 }
