@@ -128,13 +128,10 @@ public class ProfileTypeResource implements RESTResource {
             // requested to filter against an unknown channel type -> do not return a ProfileType
             return t -> false;
         }
-        switch (channelType.getKind()) {
-            case STATE:
-                return t -> stateProfileMatchesProfileType(t, channelType);
-            case TRIGGER:
-                return t -> triggerProfileMatchesProfileType(t, channelType);
-        }
-        return t -> false;
+        return switch (channelType.getKind()) {
+            case STATE -> t -> stateProfileMatchesProfileType(t, channelType);
+            case TRIGGER -> t -> triggerProfileMatchesProfileType(t, channelType);
+        };
     }
 
     private Predicate<ProfileType> matchesItemType(@Nullable String itemType) {
