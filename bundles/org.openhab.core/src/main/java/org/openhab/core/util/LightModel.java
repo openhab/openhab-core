@@ -61,10 +61,7 @@ import org.openhab.core.types.UnDefType;
  * <li>Initialize {@link #supportsBrightness} to true if the light shall support brightness control.</li>
  * <li>Initialize {@link #supportsColorTemperature} to true if the light shall support color temperature control.</li>
  * <li>Initialize {@link #supportsColor} to true if the light shall support color control.</li>
- * <li>Initialize {@link #supportsRGBW} to true if the light shall support RGBW rather than RGB color control.</li>
- * <li>Initialize {@link #supportsRGBCW} to true if the light shall support RGBCW color control.</li>
- * <li>Initialize {@link #rgbIgnoreBrightness} to true if the light shall support RGB color control without
- * dimming.</li>
+ * <li>Initialize {@link #rgbDataType} to the chosen RGB data type RGB, RGBW, RGBCW etc.</li>
  * </ul>
  * <p>
  *
@@ -103,20 +100,17 @@ import org.openhab.core.types.UnDefType;
  * point on the Planckian Locus in the CIE color chart.</li>
  *
  * <li>It handles input/output values in RGB format in the range [0..255]. The behavior depends on the
- * {@link #rgbIgnoreBrightness} setting. If {@link #rgbIgnoreBrightness} is false the RGB values read/write all three
- * parts of the HSBType state. Whereas if it is true the RGB values read/write only the 'HS' parts. NOTE: in the latter
- * case, a 'setRGBx()' call followed by a 'getRGBx()' call do not necessarily return the same values,
- * since the values are normalized to 100%. Neverthless the ratios between the RGB values do remain unchanged.</li>
+ * {@link #rgbDataType} setting. If {@link #rgbDataType} is DEFAULT the RGB values read/write all three parts of the
+ * HSBType state. Whereas if it is {@link #rgbDataType} is RGB_NO_BRIGHTNESS the RGB values read/write only
+ * the 'HS' parts. NOTE: in the latter case, a 'setRGBx()' call followed by a 'getRGBx()' call do not necessarily return
+ * the same values, since the values are normalized to 100%. Neverthless the ratios between the RGB values do remain
+ * unchanged.</li>
  *
- * <li>If {@link #supportsRGBW} is configured it handles values in RGBW format. The behavior is similar to the RGB
- * case above except that the white channel is derived from the lowest of the RGB values.
- * The {@link #rgbIgnoreBrightness} changes the behavior in relation to 'HS' versus 'HSB' exactly as in the case of
- * RGB above</li>
+ * <li>If {@link #rgbDataType} is RGB_W it handles values in RGBW format. The behavior is similar to the RGB case above
+ * except that the white channel is derived from the lowest of the RGB values.</li>
  *
- * <li>If {@link #supportsRGBCW} is configured it handles values in RGBCW format. The behavior is similar to the RGBW
- * case above except that the white channel is derived from the RGB values by a custom algorithm.
- * The {@link #rgbIgnoreBrightness} changes the behavior in relation to 'HS' versus 'HSB' exactly as in the case of
- * RGBW above</li>
+ * <li>If {@link #rgbDataType} is RGB_C_W it handles values in RGBCW format. The behavior is similar to the RGBW case
+ * above except that the white channel is derived from the RGB values by a custom algorithm.</li>
  *
  * </ol>
  * <p>
@@ -649,18 +643,18 @@ public class LightModel {
 
     /**
      * Runtime State: get the RGB(C)(W) values as an array of doubles in range [0..255]. Depending on the value of
-     * {@link #supportsRGBW} and {@link #supportsRGBCW}, the array length is either 3 (RGB), 4 (RGBW), or 5 (RGBCW). The
-     * array is in the order [red, green, blue, (cold-)(white), (warm-white)]. Depending on the value of
-     * {@link #rgbIgnoreBrightness}, the brightness may or may not be used as follows:
+     * {@link #rgbDataType}, the array length is either 3 (RGB), 4 (RGBW), or 5 (RGBCW). The array is in the order [red,
+     * green, blue, (cold-)(white), (warm-white)]. Depending on the value, the brightness may or may not be used as
+     * follows:
      *
      * <ul>
-     * <li>{@code supportsRgbDimming == false}: The return result does not depend on the current brightness. In other
-     * words the values only relate to the 'HS' part of the {@link HSBType} state. Note: this means that in this case a
-     * round trip of setRGBx() followed by getRGBx() will NOT necessarily contain identical values, although the RGB
-     * ratios will certainly be the same.</li>
+     * <li>{@code #rgbDataType == RGB_NO_BRIGHTNESS}: The return result does not depend on the current brightness. In
+     * other words the values only relate to the 'HS' part of the {@link HSBType} state. Note: this means that in this
+     * case a round trip of setRGBx() followed by getRGBx() will NOT necessarily contain identical values, although the
+     * RGB ratios will certainly be the same.</li>
      *
-     * <li>{@code supportsRgbDimming == true}: The return result depends on the current brightness. In other words the
-     * values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
+     * <li>For all other values of {@link #rgbDataType} the return result depends on the current brightness. In other
+     * words the values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
      * <ul>
      *
      * @return double[] representing the RGB(C)(W) components in range [0..255.0]
