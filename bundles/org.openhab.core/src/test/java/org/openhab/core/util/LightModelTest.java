@@ -624,7 +624,7 @@ public class LightModelTest {
          * for the purposes of this test we force
          * - the cool white led must have a blue hue and ~20% saturation
          * - the cool warm led must have a yellow hue and ~20% saturation
-         * - so the mix should have ~0% saturation (an the hue is undefined)
+         * - so the mix should have ~0% saturation (and the hue is undefined)
          */
         lsm.configSetMiredCoolWhiteLED(100); // 10'000 K
         lsm.configSetMiredWarmWhiteLED(230); // 4'347 K

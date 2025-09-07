@@ -1151,20 +1151,22 @@ public class LightModel {
         private static final double[] WARM_PROFILE = new double[] { 1.0, 0.695614289308524, 0.25572 }; // 500 Mired
 
         /**
-         * Composes an RGBCW from the given RGB. The result depends on the main input RGB values and the RGB
-         * sub- component contributions of the cold and warm white LEDs. It uses a greedy solver to find the
-         * maximum usable C and W pair without any RGB channel. It solves for C and W such that:
+         * Composes an RGBCW from the given RGB. The result depends on the main input RGB values and the RGB sub-
+         * component contributions of the cold and warm white LEDs. It uses a binary search solver to find the maximum
+         * usable C or W value whereby at least one of the RGB channels is zero and the remaining non- zero RGB channels
+         * have smallish values for color fine tuning. It solves for C or W such that:
          * <p>
          * {@code RGB ≈ C * coolProfile + W * warmProfile + RGB'} where {@code RGB'} is the remaining RGB after
-         * subtracting scaled cool/warm LED contributions.
+         * subtracting scaled cool or warm LED contributions.
          * <p>
          *
          * @param rgb a 3-element array of double: [R,G,B].
          * @param ledProfiles variable argument list of LED profiles, where the first element (if present) is the cool
          *            white LED profile, and the second element (if present) is the warm white LED profile. If not
-         *            present, then default profiles are used.
+         *            present, then default profiles are used. Note: the LED profiles are normalized 3- element [R,G,B]
+         *            arrays in the range [0.0..1.0]. For examples see {@link #COOL_PROFILE} and {@link WARM_PROFILE}.
          *
-         * @return a 5-element array of double: [R', G', B', C, W], where R', G', B' are the remaining RGB values
+         * @return a 5-element array of double: [R',G',B',C,W], where R', G', B' are the remaining RGB values
          *         and C and W are the calculated cold and warm white values.
          * @throws IllegalArgumentException if the input array length is not 3, or if any of its values are outside
          *             the range [0.0..1.0]
@@ -1211,15 +1213,16 @@ public class LightModel {
         }
 
         /**
-         * Decomposes the given RGBCW to an RGB. The result comprises the main input RGB values plus
-         * the RGB sub- component contributions of the cold and warm white LEDs.
+         * Decomposes the given RGBCW to an RGB. The result comprises the main input RGB values plus the RGB sub-
+         * component contributions of the cold and warm white LEDs.
          *
-         * @param rgbcw a 5-element array of double: [R, G, B, C, W].
+         * @param rgbcw a 5-element array of double: [R,G,B,C,W].
          * @param ledProfiles variable argument list of LED profiles, where the first element (if present) is the cool
          *            white LED profile, and the second element (if present) is the warm white LED profile. If not
-         *            present, then default profiles are used.
+         *            present, then default profiles are used. Note: the LED profiles are normalized 3- element [R,G,B]
+         *            arrays in the range [0.0..1.0]. For examples see {@link #COOL_PROFILE} and {@link WARM_PROFILE}.
          *
-         * @return double[] a 3-element array of double: [R, G, B].
+         * @return double[] a 3-element array of double: [R,G,B].
          * @throws IllegalArgumentException if the input array length is not 5, or if any its values are
          *             outside the range [0.0..1.0]
          */
