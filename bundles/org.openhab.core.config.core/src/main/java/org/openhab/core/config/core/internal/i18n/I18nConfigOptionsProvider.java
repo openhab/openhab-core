@@ -60,10 +60,12 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
     private @Nullable Collection<ParameterOption> processParamType(String param, @Nullable Locale locale,
             Locale translation) {
         return switch (param) {
-            case LANGUAGE -> getAvailable(locale,
-                        l -> new ParameterOption(l.getLanguage(), l.getDisplayLanguage(translation)));
-            case REGION -> getAvailable(locale, l -> new ParameterOption(l.getCountry(), l.getDisplayCountry(translation)));
-            case VARIANT -> getAvailable(locale, l -> new ParameterOption(l.getVariant(), l.getDisplayVariant(translation)));
+            case LANGUAGE ->
+                getAvailable(locale, l -> new ParameterOption(l.getLanguage(), l.getDisplayLanguage(translation)));
+            case REGION ->
+                getAvailable(locale, l -> new ParameterOption(l.getCountry(), l.getDisplayCountry(translation)));
+            case VARIANT ->
+                getAvailable(locale, l -> new ParameterOption(l.getVariant(), l.getDisplayVariant(translation)));
             case TIMEZONE -> processTimeZoneParam();
             default -> null;
         };
