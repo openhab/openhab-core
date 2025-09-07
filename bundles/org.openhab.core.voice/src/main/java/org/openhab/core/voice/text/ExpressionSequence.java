@@ -32,7 +32,6 @@ public final class ExpressionSequence extends Expression {
      * @param subExpressions the sub expressions that are parsed in the given order
      */
     public ExpressionSequence(Expression... subExpressions) {
-        super();
         this.subExpressions = List.of(Arrays.copyOf(subExpressions, subExpressions.length));
     }
 

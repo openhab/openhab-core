@@ -55,7 +55,6 @@ public class BlockingProxyServlet extends HttpServlet {
     private static final int TIMEOUT = 15000;
 
     BlockingProxyServlet(ProxyServletService service) {
-        super();
         this.service = service;
         if (!httpClient.isStarted()) {
             try {

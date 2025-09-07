@@ -35,7 +35,6 @@ public abstract class UID extends AbstractUID {
      * Constructor must be public, otherwise it cannot be called by subclasses from another package.
      */
     public UID() {
-        super();
     }
 
     /**

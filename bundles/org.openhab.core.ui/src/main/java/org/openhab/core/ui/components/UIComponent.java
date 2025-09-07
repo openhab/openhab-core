@@ -50,7 +50,6 @@ public class UIComponent {
      * @param componentType type of the component as known to the frontend
      */
     public UIComponent(String componentType) {
-        super();
         this.component = componentType;
         this.config = new HashMap<>();
     }
