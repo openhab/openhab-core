@@ -78,14 +78,14 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
         Object urlObject = addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY);
-        if (!(urlObject instanceof String)) {
+        if (!(urlObject instanceof String urlString)) {
             logger.error("Bundle {} has no JAR download URL", addon.getUid());
             throw new MarketplaceHandlerException("Bundle has no JAR download URL", null);
         }
 
         URL sourceUrl;
         try {
-            sourceUrl = new URI((String) urlObject).toURL();
+            sourceUrl = new URI(urlString).toURL();
         } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
