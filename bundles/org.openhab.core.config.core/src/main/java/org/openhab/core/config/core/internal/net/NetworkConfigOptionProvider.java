@@ -94,7 +94,7 @@ public class NetworkConfigOptionProvider implements ConfigOptionProvider {
         }).toList();
 
         if (!addresses.isEmpty()) {
-            result.append(" (").append(addresses.get(0).getHostAddress()).append(')');
+            result.append(" (").append(addresses.getFirst().getHostAddress()).append(')');
         }
 
         return result.toString();
