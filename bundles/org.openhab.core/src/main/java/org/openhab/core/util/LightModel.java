@@ -187,6 +187,16 @@ import org.openhab.core.types.UnDefType;
 @NonNullByDefault
 public class LightModel {
 
+    /**
+     * Enum for the different types of RGB data
+     */
+    public static enum RgbDataType {
+        DEFAULT, // plain RGB with brightness (i.e. full HSBType)
+        RGB_NO_BRIGHTNESS, // plain RGB but ignore brightness (i.e. only HS parts of HSBType)
+        RGB_W, // 4- element RGB with white channel
+        RGB_C_W // 5-element RGB with cold and warm white channels
+    }
+
     /*********************************************************************************
      * SECTION: Default Parameters. May be modified during initialization.
      *********************************************************************************/
@@ -221,19 +231,9 @@ public class LightModel {
     private boolean supportsColor = false;
 
     /**
-     * True if RGB(C)(W) values are not linked to the brightness
+     * The RGB data type supported
      */
-    private boolean rgbIgnoreBrightness = false;
-
-    /**
-     * True if the light supports RGBW
-     */
-    private boolean supportsRGBW = false;
-
-    /**
-     * True if the light supports RGBCW
-     */
-    private boolean supportsRGBCW = false;
+    private RgbDataType rgbDataType = RgbDataType.DEFAULT;
 
     /**
      * True if the light supports brightness
@@ -289,9 +289,7 @@ public class LightModel {
      * <li>{@link #supportsBrightness} is true (the light supports brightness control)</li>
      * <li>{@link #supportsColorTemperature} is true (the light supports color temperature control)</li>
      * <li>{@link #supportsColor} is true (the light supports color control)</li>
-     * <li>{@link #supportsRGBW} is false (the light does not support RGB with White)</li>
-     * <li>{@link #supportsRGBCW} is false (the light does not support RGBCW)</li>
-     * <li>{@link #rgbIgnoreBrightness} is false (the RGB values are linked to 'B' part of {@link HSBType}))</li>
+     * <li>{@link #rgbDataType} is DEFAULT (the light supports plain RGB)</li>
      * <li>{@link #minimumOnBrightness} is 1.0 (the minimum brightness percent to consider as light "ON")</li>
      * <li>{@link #warmestMired} is 500 (the 'warmest' white color temperature)</li>
      * <li>{@link #coolestMired} is 153 (the 'coolest' white color temperature)</li>
@@ -301,7 +299,7 @@ public class LightModel {
      * </ul>
      */
     public LightModel() {
-        this(true, true, true, false, false, false, null, null, null, null, null, null);
+        this(true, true, true, RgbDataType.DEFAULT, null, null, null, null, null, null);
     }
 
     /**
@@ -310,14 +308,12 @@ public class LightModel {
      * @param supportsBrightness true if the light supports brightness control
      * @param supportsColorTemperature true if the light supports color temperature control
      * @param supportsColor true if the light supports color control
-     * @param supportsRGBW true if the light supports RGBW rather than RGB color control
-     * @param supportsRGBCW true if the light supports RGBCW color control
-     * @param rgbIgnoreBrightness true if RGB values are not linked with the 'B' part of the {@link HSBType}
+     * @param rgbDataType the RGB data type
      */
     public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            boolean supportsRGBW, boolean supportsRGBCW, boolean rgbIgnoreBrightness) {
-        this(supportsBrightness, supportsColorTemperature, supportsColor, supportsRGBW, supportsRGBCW,
-                rgbIgnoreBrightness, null, null, null, null, null, null);
+            RgbDataType rgbDataType) {
+        this(supportsBrightness, supportsColorTemperature, supportsColor, rgbDataType, null, null, null, null, null,
+                null);
     }
 
     /**
@@ -327,9 +323,7 @@ public class LightModel {
      * @param supportsBrightness true if the light supports brightness control
      * @param supportsColorTemperature true if the light supports color temperature control
      * @param supportsColor true if the light supports color control
-     * @param supportsRGBW true if the light supports RGBW rather than RGB color control
-     * @param supportsRGBCW true if the light supports RGBCW color control
-     * @param rgbIgnoreBrightness true if RGB values are not linked with the 'B' part of the {@link HSBType}
+     * @param rgbDataType the RGB type
      * @param minimumOnBrightness the minimum brightness percent to consider as light "ON"
      * @param warmestMired the 'warmest' white color temperature in Mired
      * @param coolestMired the 'coolest' white color temperature in Mired
@@ -337,16 +331,13 @@ public class LightModel {
      * @throws IllegalArgumentException if any of the parameters are out of range
      */
     public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            boolean supportsRGBW, boolean supportsRGBCW, boolean rgbIgnoreBrightness,
-            @Nullable Double minimumOnBrightness, @Nullable Double warmestMired, @Nullable Double coolestMired,
-            @Nullable Double stepSize, @Nullable Double coolWhiteLedMired, @Nullable Double warmWhiteLedMired)
-            throws IllegalArgumentException {
+            RgbDataType rgbDataType, @Nullable Double minimumOnBrightness, @Nullable Double warmestMired,
+            @Nullable Double coolestMired, @Nullable Double stepSize, @Nullable Double coolWhiteLedMired,
+            @Nullable Double warmWhiteLedMired) throws IllegalArgumentException {
         configSetSupportsBrightness(supportsBrightness);
         configSetSupportsColorTemperature(supportsColorTemperature);
         configSetSupportsColor(supportsColor);
-        configSetSupportsRGBW(supportsRGBW);
-        configSetSupportsRGBCW(supportsRGBCW);
-        configSetRgbIgnoreBrightness(rgbIgnoreBrightness);
+        configSetRgbDataType(rgbDataType);
         if (minimumOnBrightness != null) {
             configSetMinimumOnBrightness(minimumOnBrightness);
         }
@@ -418,21 +409,6 @@ public class LightModel {
     }
 
     /**
-     * Configuration: check whether RGB values are linked to the 'HS' parts or all of the 'HSB' parts of {@link HSBType}
-     * state, as follows:
-     *
-     * <ul>
-     * <li>If true the RGB values only relate to the 'HS' parts and will not influence or depend on the
-     * brightness.</li>
-     * <li>If false, the RGB values relate to all of the 'HSB' parts and will influence and depend on the
-     * brightness.</li>
-     * </ul>
-     */
-    public boolean configGetRgbIgnoreBrightness() {
-        return rgbIgnoreBrightness;
-    }
-
-    /**
      * Configuration: check if brightness control is supported.
      */
     public boolean configGetSupportsBrightness() {
@@ -454,17 +430,10 @@ public class LightModel {
     }
 
     /**
-     * Configuration: check if RGBCW color control is supported.
+     * Configuration: get the supported RGB data type.
      */
-    public boolean configGetSupportsRGBCW() {
-        return supportsRGBCW;
-    }
-
-    /**
-     * Configuration: check if RGBW color control is supported versus RGB only.
-     */
-    public boolean configGetSupportsRGBW() {
-        return supportsRGBW;
+    public RgbDataType configGetRgbDataType() {
+        return rgbDataType;
     }
 
     /**
@@ -557,28 +526,6 @@ public class LightModel {
     }
 
     /**
-     * Configuration: set whether RGB values are linked to the 'HS' parts or all of the 'HSB' parts of {@link HSBType}
-     * state, as follows:
-     *
-     * <ul>
-     * <li>If true the RGB values only relate to the 'HS' parts and will not influence or depend on the
-     * brightness.</li>
-     * <li>If false the RGB values relate to all of the 'HSB' parts and will influence and depend on the
-     * brightness.</li>
-     * </ul>
-     *
-     * @param rgbIgnoreBrightness true if RGB values are not linked to brightness.
-     * @throws IllegalArgumentException if rgbIgnoreBrightness is set true when RGBW or RGBCW are supported.
-     */
-    public void configSetRgbIgnoreBrightness(boolean rgbIgnoreBrightness) throws IllegalArgumentException {
-        if (rgbIgnoreBrightness && (supportsRGBW || supportsRGBCW)) {
-            throw new IllegalArgumentException(
-                    "Setting rgbIgnoreBrightness to true makes no sense if the light supports RGBW or RGBCW");
-        }
-        this.rgbIgnoreBrightness = rgbIgnoreBrightness;
-    }
-
-    /**
      * Configuration: set whether brightness control is supported.
      *
      * @param supportsBrightness true if brightness control is supported.
@@ -591,12 +538,8 @@ public class LightModel {
      * Configuration: set whether color control is supported.
      *
      * @param supportsColor true if color control is supported.
-     * @throws IllegalArgumentException if color is set false but RGBW or RGBCW are supported.
      */
-    public void configSetSupportsColor(boolean supportsColor) throws IllegalArgumentException {
-        if (!supportsColor && (supportsRGBW || supportsRGBCW)) {
-            throw new IllegalArgumentException("Light cannot support RGBCW or RGBW without supporting color");
-        }
+    public void configSetSupportsColor(boolean supportsColor) {
         this.supportsColor = supportsColor;
     }
 
@@ -604,46 +547,18 @@ public class LightModel {
      * Configuration: set whether color temperature control is supported.
      *
      * @param supportsColorTemperature true if color temperature control is supported.
-     * @throws IllegalArgumentException if color temperature is set false but RGBCW is supported.
      */
-    public void configSetSupportsColorTemperature(boolean supportsColorTemperature) throws IllegalArgumentException {
-        if (!supportsColorTemperature && supportsRGBCW) {
-            throw new IllegalArgumentException("Light cannot support RGBCW without supporting color temperature");
-        }
+    public void configSetSupportsColorTemperature(boolean supportsColorTemperature) {
         this.supportsColorTemperature = supportsColorTemperature;
     }
 
     /**
-     * Configuration: set whether RGBCW color control is supported.
+     * Configuration: set the supported RGB type.
      *
-     * @param supportsRGBCW true if RGBCW color control is supported.
-     * @throws IllegalArgumentException if RGBCW is set true but color or color temperature are not supported, or if
-     *             RGBW is also supported.
+     * @param rgbType the supported RGB type.
      */
-    public void configSetSupportsRGBCW(boolean supportsRGBCW) throws IllegalArgumentException {
-        if (supportsRGBCW) {
-            if (!supportsColor || !supportsColorTemperature) {
-                throw new IllegalArgumentException(
-                        "Light cannot support RGBCW without supporting both color and color temperature");
-            }
-            if (supportsRGBW) {
-                throw new IllegalArgumentException("Light cannot support both RGBCW  and RGBW color control");
-            }
-        }
-        this.supportsRGBCW = supportsRGBCW;
-    }
-
-    /**
-     * Configuration: set whether RGBW color control is supported versus RGB only.
-     *
-     * @param supportsRGBW true if RGBW color control is supported.
-     * @throws IllegalArgumentException if RGBW is set true but color is not supported.
-     */
-    public void configSetSupportsRGBW(boolean supportsRGBW) throws IllegalArgumentException {
-        if (supportsRGBW && !supportsColor) {
-            throw new IllegalArgumentException("Light cannot support RGBW without supporting color");
-        }
-        this.supportsRGBW = supportsRGBW;
+    public void configSetRgbDataType(RgbDataType rgbType) {
+        this.rgbDataType = rgbType;
     }
 
     /*********************************************************************************
@@ -751,18 +666,18 @@ public class LightModel {
      * @return double[] representing the RGB(C)(W) components in range [0..255.0]
      */
     public double[] getRGBx() {
-        HSBType hsb = rgbIgnoreBrightness
+        HSBType hsb = RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType
                 ? new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.HUNDRED)
                 : cachedHSB;
 
-        if (supportsRGBCW) {
+        if (RgbDataType.RGB_C_W == rgbDataType) {
             // RGBCW - convert HSB to RGB, normalize it, then convert to RGBCW, then scale to [0..255]
             PercentType[] rgbp = ColorUtil.hsbToRgbPercent(hsb);
             double[] rgb = Arrays.stream(rgbp).mapToDouble(p -> p.doubleValue() / 100.0).toArray();
             rgb = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
             rgb = Arrays.stream(rgb).map(d -> Math.round(d * 25500) / 100).toArray();
             return rgb;
-        } else if (supportsRGBW) {
+        } else if (RgbDataType.RGB_W == rgbDataType) {
             // RGBW - convert HSB to RGBW, then scale to [0..255]
             PercentType[] rgbwP = ColorUtil.hsbToRgbwPercent(hsb);
             double[] rgbw = Arrays.stream(rgbwP).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0).toArray();
@@ -912,8 +827,8 @@ public class LightModel {
         if (rgbxParameter.length > 5) {
             throw new IllegalArgumentException("Too many arguments in RGBx array");
         }
-        if (rgbxParameter.length < 3 || (supportsRGBW && rgbxParameter.length < 4)
-                || (supportsRGBCW && rgbxParameter.length < 5)) {
+        if (rgbxParameter.length < 3 || (RgbDataType.RGB_W == rgbDataType && rgbxParameter.length < 4)
+                || (RgbDataType.RGB_C_W == rgbDataType && rgbxParameter.length < 5)) {
             throw new IllegalArgumentException("Too few arguments in RGBx array");
         }
         if (Arrays.stream(rgbxParameter).anyMatch(d -> d < 0.0 || d > 255.0)) {
@@ -921,7 +836,7 @@ public class LightModel {
         }
 
         double[] rgbx;
-        if (supportsRGBCW) {
+        if (RgbDataType.RGB_C_W == rgbDataType) {
             // RGBCW - normalize, convert to RGB, then scale back to [0..255]
             rgbx = Arrays.stream(rgbxParameter).map(d -> d / 255.0).toArray();
             rgbx = RgbcwMath.rgbcw2rgb(rgbx, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
@@ -935,12 +850,12 @@ public class LightModel {
                 .mapToObj(d -> zPercentTypeFrom(d)).toArray(PercentType[]::new));
 
         PercentType brightness = hsb.getBrightness();
-        if (rgbIgnoreBrightness) {
+        if (RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType) {
             hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedHSB.getBrightness());
         }
         cachedHSB = hsb;
         cachedMired = zMiredFrom(hsb);
-        if (!rgbIgnoreBrightness) {
+        if (RgbDataType.RGB_NO_BRIGHTNESS != rgbDataType) {
             zHandleBrightness(brightness);
         }
     }

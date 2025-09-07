@@ -24,6 +24,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.LightModel.RgbDataType;
 import org.openhab.core.util.LightModel.RgbcwMath;
 import org.openhab.core.util.LightModel.WhiteLED;
 
@@ -41,7 +42,7 @@ public class LightModelTest {
 
     @Test
     public void testFullColor() {
-        LightModel lsm = new LightModel(true, true, true, false, false, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.DEFAULT);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -100,7 +101,7 @@ public class LightModelTest {
 
     @Test
     public void testColorWithoutColorTemperature() {
-        LightModel lsm = new LightModel(true, false, true, false, false, false);
+        LightModel lsm = new LightModel(true, false, true, RgbDataType.DEFAULT);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertFalse(lsm.configGetSupportsColorTemperature());
@@ -125,7 +126,7 @@ public class LightModelTest {
 
     @Test
     public void testBrightnessAndColorTemperature() {
-        LightModel lsm = new LightModel(true, true, false, false, false, false);
+        LightModel lsm = new LightModel(true, true, false, RgbDataType.DEFAULT);
         assertFalse(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -148,7 +149,7 @@ public class LightModelTest {
 
     @Test
     public void testBrightnessOnly() {
-        LightModel lsm = new LightModel(true, false, false, false, false, false);
+        LightModel lsm = new LightModel(true, false, false, RgbDataType.DEFAULT);
         assertFalse(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertFalse(lsm.configGetSupportsColorTemperature());
@@ -171,7 +172,7 @@ public class LightModelTest {
 
     @Test
     public void testOnOffOnly() {
-        LightModel lsm = new LightModel(false, false, false, false, false, false);
+        LightModel lsm = new LightModel(false, false, false, RgbDataType.DEFAULT);
         assertFalse(lsm.configGetSupportsColor());
         assertFalse(lsm.configGetSupportsBrightness());
         assertFalse(lsm.configGetSupportsColorTemperature());
@@ -236,10 +237,11 @@ public class LightModelTest {
 
     @Test
     public void testComplexConstructor() {
-        LightModel lsm = new LightModel(false, false, false, false, false, false, 2.0, 501.0, 154.0, 11.0, null, null);
+        LightModel lsm = new LightModel(false, false, false, RgbDataType.RGB_C_W, 2.0, 501.0, 154.0, 11.0, null, null);
         assertFalse(lsm.configGetSupportsColor());
         assertFalse(lsm.configGetSupportsBrightness());
         assertFalse(lsm.configGetSupportsColorTemperature());
+        assertEquals(RgbDataType.RGB_C_W, lsm.configGetRgbDataType());
         assertEquals(2.0, lsm.configGetMinimumOnBrightness());
         assertEquals(501.0, lsm.configGetMiredWarmest());
         assertEquals(154.0, lsm.configGetMiredCoolest());
@@ -304,60 +306,42 @@ public class LightModelTest {
     @Test
     public void testComplexConstructorBad() {
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, true, false, false, null, null, null, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, 0.0, null, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, true, false, null, null, null, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, 11.0, null, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, true, false, true, false, null, null, null, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, null, 99.0, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, true, true, true, true, false, null, null, null, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, null, 1001.0, null, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, 0.0, null, null, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, null, null, 99.0, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, 11.0, null, null, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, null, null, 1001.0, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, 99.0, null, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, null, 300.0, 300.0, null, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, 1001.0, null, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, null, null, null, 0.0, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, null, 99.0, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, null, null, null, 51.0, null, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, null, 1001.0, null, null, null));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, null, null, null, null, 99.0, null));
 
         assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, 300.0, 300.0, null, null, null));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, null, null, 0.0, null, null));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, false, false, null, null, null, 51.0, null, null));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, true, false, true, null, null, null, null, null, null));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, true, true, null, null, null, null, null, null));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, true, true, null, null, null, null, 99.0, null));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new LightModel(false, false, false, false, true, true, null, null, null, null, null, 10001.0));
+                () -> new LightModel(false, false, false, RgbDataType.DEFAULT, null, null, null, null, null, 10001.0));
     }
 
     @Test
     public void testRgbIgnoreBrightness() {
-        LightModel lsm = new LightModel(true, true, true, false, false, true);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_NO_BRIGHTNESS);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -390,7 +374,7 @@ public class LightModelTest {
 
     @Test
     public void testRgb() {
-        LightModel lsm = new LightModel(true, true, true, false, false, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.DEFAULT);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -422,7 +406,7 @@ public class LightModelTest {
 
     @Test
     public void testRgbwDimming() {
-        LightModel lsm = new LightModel(true, true, true, true, false, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_W);
         assertTrue(lsm.configGetSupportsColor());
         assertTrue(lsm.configGetSupportsBrightness());
         assertTrue(lsm.configGetSupportsColorTemperature());
@@ -469,7 +453,7 @@ public class LightModelTest {
         LightModel lsm;
 
         // supports color
-        lsm = new LightModel(true, false, true, false, false, false);
+        lsm = new LightModel(true, false, true, RgbDataType.DEFAULT);
         lsm.handleCommand(HSBType.RED);
 
         assertEquals(HSBType.RED, lsm.getColor());
@@ -479,7 +463,7 @@ public class LightModelTest {
         assertNotNull(lsm.getOnOff(true));
 
         // supports brightness
-        lsm = new LightModel(true, false, false, false, false, false);
+        lsm = new LightModel(true, false, false, RgbDataType.DEFAULT);
         lsm.handleCommand(HSBType.RED);
 
         assertNull(lsm.getColor());
@@ -488,7 +472,7 @@ public class LightModelTest {
         assertNotNull(lsm.getOnOff(true));
 
         // supports on/off
-        lsm = new LightModel(false, false, false, false, false, false);
+        lsm = new LightModel(false, false, false, RgbDataType.DEFAULT);
         lsm.handleCommand(HSBType.RED);
 
         assertNull(lsm.getColor());
@@ -531,7 +515,7 @@ public class LightModelTest {
 
     @Test
     public void testRgbcw() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
 
         lsm.handleCommand(HSBType.RED);
         assertEquals(HSBType.RED, lsm.getColor());
@@ -565,7 +549,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwPrimaryRed() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.setRGBx(new double[] { 255, 0, 0, 0, 0 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
@@ -581,7 +565,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwBrightWhiteWarm() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         HSBType warm = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / lsm.configGetMiredWarmWhiteLed()));
         lsm.setRGBx(new double[] { 0, 0, 0, 0, 255 });
         HSBType hsb = lsm.getColor();
@@ -599,7 +583,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwBrightWhiteCool() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         HSBType cool = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / lsm.configGetMiredCoolWhiteLed()));
         lsm.setRGBx(new double[] { 0, 0, 0, 255, 0 });
         HSBType hsb = lsm.getColor();
@@ -619,7 +603,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwMixedWhiteNeutral() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         /*
          * for the purposes of this test we force
          * - the cool white led must have a blue hue and ~20% saturation
@@ -644,7 +628,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwBlack() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.setRGBx(new double[] { 0, 0, 0, 0, 0 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
@@ -661,7 +645,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwAllChannelsMax() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.setRGBx(new double[] { 255, 255, 255, 255, 255 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
@@ -677,7 +661,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwMaxRgbZeroWhite() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.setRGBx(new double[] { 255, 255, 255, 0, 0 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
@@ -694,7 +678,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwMixedColorWithWhite() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.setRGBx(new double[] { 255, 0, 0, 0, 100 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
@@ -711,7 +695,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwNonZeroRgbWithCoolWhiteOnly() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         // force cool white led for this test
         lsm.configSetMiredCoolWhiteLED(100); // 10'000 K
         lsm.setRGBx(new double[] { 255, 0, 0, 100, 0 });
@@ -729,7 +713,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwPrimaryBlue() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.handleCommand(new HSBType("240,100,100"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
@@ -747,7 +731,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwBlack2() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.handleCommand(new HSBType("0,0,0"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
@@ -766,7 +750,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwLowBrightnessHighSaturation() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.handleCommand(new HSBType("60,100,25"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
@@ -784,7 +768,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwGray() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.handleCommand(new HSBType("0,0,50"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
@@ -804,7 +788,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwPastelGreen() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.handleCommand(new HSBType("120,50,75"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
@@ -824,7 +808,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwPastelYellowLowSaturation() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.setRGBx(new double[] { 100, 100, 0, 100, 100 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
@@ -841,7 +825,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwHsbWithCoolWhitePreference() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.handleCommand(new HSBType("240,50,75"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
@@ -861,7 +845,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwHsbWithWarmWhitePreference() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.handleCommand(new HSBType("30,70,75"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
@@ -881,7 +865,7 @@ public class LightModelTest {
      */
     @Test
     public void testRgbcwFullBrightWhite() {
-        LightModel lsm = new LightModel(true, true, true, false, true, false);
+        LightModel lsm = new LightModel(true, true, true, RgbDataType.RGB_C_W);
         lsm.handleCommand(new HSBType("0,0,100"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
