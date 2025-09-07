@@ -27,7 +27,6 @@ public class UserSessionDTO {
     public String scope;
 
     public UserSessionDTO(String sessionId, Date createdTime, Date lastRefreshTime, String clientId, String scope) {
-        super();
         this.sessionId = sessionId;
         this.createdTime = createdTime;
         this.lastRefreshTime = lastRefreshTime;

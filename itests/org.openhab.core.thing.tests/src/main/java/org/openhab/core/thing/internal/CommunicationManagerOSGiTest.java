@@ -176,13 +176,10 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
                 itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock);
 
         doAnswer(invocation -> {
-            switch (((Channel) invocation.getArguments()[0]).getKind()) {
-                case STATE:
-                    return new ProfileTypeUID("test:state");
-                case TRIGGER:
-                    return new ProfileTypeUID("test:trigger");
-            }
-            return null;
+            return switch (((Channel) invocation.getArguments()[0]).getKind()) {
+                case STATE -> new ProfileTypeUID("test:state");
+                case TRIGGER -> new ProfileTypeUID("test:trigger");
+            };
         }).when(profileAdvisorMock).getSuggestedProfileTypeUID(isA(Channel.class), isA(String.class));
         doAnswer(invocation -> {
             switch (((ProfileTypeUID) invocation.getArguments()[0]).toString()) {

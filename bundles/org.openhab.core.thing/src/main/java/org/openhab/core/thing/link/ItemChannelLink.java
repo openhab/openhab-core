@@ -36,7 +36,6 @@ public class ItemChannelLink extends AbstractLink {
      * class by reflection. Not intended to be used for normal instantiation.
      */
     ItemChannelLink() {
-        super();
         this.channelUID = null;
         this.configuration = new Configuration();
     }

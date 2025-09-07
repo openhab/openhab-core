@@ -30,7 +30,6 @@ public final class ExpressionMatch extends Expression {
      * @param pattern the token that has to match for successful parsing
      */
     public ExpressionMatch(String pattern) {
-        super();
         this.pattern = pattern;
     }
 

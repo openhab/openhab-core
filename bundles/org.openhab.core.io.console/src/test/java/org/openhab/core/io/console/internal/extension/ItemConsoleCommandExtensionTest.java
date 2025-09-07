@@ -110,14 +110,11 @@ public class ItemConsoleCommandExtensionTest {
         var item4 = new SwitchItem("Item4");
         item3.addTag("Tag1");
         when(managedItemProviderMock.get(anyString())).thenAnswer(invocation -> {
-            switch ((String) invocation.getArguments()[0]) {
-                case "Item3":
-                    return item3;
-                case "Item4":
-                    return item4;
-                default:
-                    return null;
-            }
+            return switch ((String) invocation.getArguments()[0]) {
+                case "Item3" -> item3;
+                case "Item4" -> item4;
+                default -> null;
+            };
         });
         var candidates = new ArrayList<String>();
 

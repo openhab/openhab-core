@@ -28,7 +28,7 @@
 
 		<feature dependency="true">openhab.tp-gson</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.39.0)(!(version&gt;=2.40.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.40.0)(!(version&gt;=2.41.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
 		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
@@ -46,7 +46,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.process/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
-		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.18.0</bundle>
+		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.19.1</bundle>
 		<feature dependency="true">openhab-core-storage-json</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
@@ -406,7 +406,7 @@
 
 	<feature name="openhab-core-model-lsp" version="${project.version}">
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.39.0)(!(version&gt;=2.40.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.40.0)(!(version&gt;=2.41.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
 		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.24.0)(!(version&gt;=0.24.1)))"</requirement>

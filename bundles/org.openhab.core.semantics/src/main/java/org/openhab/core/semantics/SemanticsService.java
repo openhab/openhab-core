@@ -87,5 +87,5 @@ public interface SemanticsService {
      */
     default List<ItemSemanticsProblem> getItemSemanticsProblems(Item item) {
         return List.of();
-    };
+    }
 }

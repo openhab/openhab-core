@@ -76,7 +76,6 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
             final @Reference YamlItemProvider itemProvider, final @Reference YamlMetadataProvider metadataProvider,
             final @Reference YamlChannelLinkProvider channelLinkProvider,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
-        super();
         this.modelRepository = modelRepository;
         this.itemProvider = itemProvider;
         this.metadataProvider = metadataProvider;
