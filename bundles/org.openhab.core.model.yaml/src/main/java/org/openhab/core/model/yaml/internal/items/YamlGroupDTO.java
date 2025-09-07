@@ -14,10 +14,10 @@ package org.openhab.core.model.yaml.internal.items;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.items.GroupFunction;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 
 /**
@@ -27,10 +27,6 @@ import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
  * @author Laurent Garnier - Initial contribution
  */
 public class YamlGroupDTO {
-
-    private static final String DEFAULT_FUNCTION = "EQUALITY";
-    private static final Set<String> VALID_FUNCTIONS = Set.of("AND", "OR", "NAND", "NOR", "XOR", "COUNT", "AVG",
-            "MEDIAN", "SUM", "MIN", "MAX", "LATEST", "EARLIEST", DEFAULT_FUNCTION);
 
     public String type;
     public String dimension;
@@ -53,7 +49,7 @@ public class YamlGroupDTO {
         } else if (dimension != null) {
             warnings.add("\"dimension\" field in group ignored as type is not Number");
         }
-        if (!VALID_FUNCTIONS.contains(getFunction())) {
+        if (!GroupFunction.VALID_FUNCTIONS.contains(getFunction())) {
             errors.add("invalid value \"%s\" for \"function\" field".formatted(function));
             ok = false;
         }
@@ -65,7 +61,7 @@ public class YamlGroupDTO {
     }
 
     public String getFunction() {
-        return function != null ? function.toUpperCase() : DEFAULT_FUNCTION;
+        return function != null ? function.toUpperCase() : GroupFunction.DEFAULT;
     }
 
     public @NonNull List<@NonNull String> getParameters() {
