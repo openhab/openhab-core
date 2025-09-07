@@ -438,7 +438,7 @@ public class LightModel {
      */
     public void configSetIncreaseDecreaseStep(double stepSize) throws IllegalArgumentException {
         if (stepSize < 1.0 || stepSize > 50.0) {
-            throw new IllegalArgumentException("Step size '%f' out of range [1.0..50.0]".formatted(stepSize));
+            throw new IllegalArgumentException("Step size '%.1f' out of range [1.0..50.0]".formatted(stepSize));
         }
         this.stepSize = stepSize;
     }
@@ -452,7 +452,7 @@ public class LightModel {
     public void configSetMinimumOnBrightness(double minimumOnBrightness) throws IllegalArgumentException {
         if (minimumOnBrightness < 0.1 || minimumOnBrightness > 10.0) {
             throw new IllegalArgumentException(
-                    "Minimum brightness '%f' out of range [0.1..10.0]".formatted(minimumOnBrightness));
+                    "Minimum brightness '%.1f' out of range [0.1..10.0]".formatted(minimumOnBrightness));
         }
         this.minimumOnBrightness = minimumOnBrightness;
     }
@@ -466,11 +466,11 @@ public class LightModel {
     public void configSetMiredCoolest(double coolestMired) throws IllegalArgumentException {
         if (coolestMired < 100.0 || coolestMired > 1000.0) {
             throw new IllegalArgumentException(
-                    "Coolest mired '%f' out of range [100.0..1000.0]".formatted(coolestMired));
+                    "Coolest mired '%.1f' out of range [100.0..1000.0]".formatted(coolestMired));
         }
         if (warmestMired <= coolestMired) {
-            throw new IllegalArgumentException(
-                    "Warmest Mired '%f' must be greater than coolest Mired '%f'".formatted(warmestMired, coolestMired));
+            throw new IllegalArgumentException("Warmest Mired '%.1f' must be greater than coolest Mired '%.1f'"
+                    .formatted(warmestMired, coolestMired));
         }
         this.coolestMired = coolestMired;
     }
@@ -483,7 +483,7 @@ public class LightModel {
     public void configSetMiredCoolWhiteLED(double coolLedMired) {
         if (coolLedMired < 100.0 || coolLedMired > 1000.0) {
             throw new IllegalArgumentException(
-                    "Cool LED Mired '%f' out of range [100.0..1000.0]".formatted(coolLedMired));
+                    "Cool LED Mired '%.1f' out of range [100.0..1000.0]".formatted(coolLedMired));
         }
         coolWhiteLed = new WhiteLED(coolLedMired);
     }
@@ -497,11 +497,11 @@ public class LightModel {
     public void configSetMiredWarmest(double warmestMired) throws IllegalArgumentException {
         if (warmestMired < 100.0 || warmestMired > 1000.0) {
             throw new IllegalArgumentException(
-                    "Warmest Mired '%f' out of range [100.0..1000.0]".formatted(warmestMired));
+                    "Warmest Mired '%.1f' out of range [100.0..1000.0]".formatted(warmestMired));
         }
         if (warmestMired <= coolestMired) {
-            throw new IllegalArgumentException(
-                    "Warmest Mired '%f' must be greater than coolest mired '%f'".formatted(warmestMired, coolestMired));
+            throw new IllegalArgumentException("Warmest Mired '%.1f' must be greater than coolest mired '%f'"
+                    .formatted(warmestMired, coolestMired));
         }
         this.warmestMired = warmestMired;
     }
@@ -514,7 +514,7 @@ public class LightModel {
     public void configSetMiredWarmWhiteLED(double warmLedMired) {
         if (warmLedMired < 100.0 || warmLedMired > 1000.0) {
             throw new IllegalArgumentException(
-                    "Warm LED Mired '%f' out of range [100.0..1000.0]".formatted(warmLedMired));
+                    "Warm LED Mired '%.1f' out of range [100.0..1000.0]".formatted(warmLedMired));
         }
         warmWhiteLed = new WhiteLED(warmLedMired);
     }
@@ -566,7 +566,7 @@ public class LightModel {
      * @return PercentType, or null if not supported.
      */
     public @Nullable PercentType getBrightness(boolean... forceChannelVisible) {
-        return supportsBrightness & (!supportsColor || (forceChannelVisible.length > 0 && forceChannelVisible[0]))
+        return supportsBrightness && (!supportsColor || (forceChannelVisible.length > 0 && forceChannelVisible[0]))
                 ? cachedHSB.getBrightness()
                 : null;
     }
@@ -787,7 +787,7 @@ public class LightModel {
     public void setMired(double mired) throws IllegalArgumentException {
         if (mired < coolestMired || mired > warmestMired) { // NaN is not less than or greater than anything
             throw new IllegalArgumentException(
-                    "Mired value '%f' out of range [%f..%f]".formatted(mired, coolestMired, warmestMired));
+                    "Mired value '%.1f' out of range [%.1f..%.1f]".formatted(mired, coolestMired, warmestMired));
         }
         if (!Double.isNaN(mired)) { // don't update color if Mired is not known
             HSBType hsb = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / mired));
