@@ -50,31 +50,23 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
     @Override
     public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
             @Nullable Locale locale) {
-        switch (uri.toString()) {
-            case "system:i18n":
-                return processParamType(param, locale, locale != null ? locale : Locale.getDefault());
-            case "profile:system:timestamp-offset":
-                return TIMEZONE.equals(param) ? processTimeZoneParam() : null;
-            default:
-                return null;
-        }
+        return switch (uri.toString()) {
+            case "system:i18n" -> processParamType(param, locale, locale != null ? locale : Locale.getDefault());
+            case "profile:system:timestamp-offset" -> TIMEZONE.equals(param) ? processTimeZoneParam() : null;
+            default -> null;
+        };
     }
 
     private @Nullable Collection<ParameterOption> processParamType(String param, @Nullable Locale locale,
             Locale translation) {
-        switch (param) {
-            case LANGUAGE:
-                return getAvailable(locale,
+        return switch (param) {
+            case LANGUAGE -> getAvailable(locale,
                         l -> new ParameterOption(l.getLanguage(), l.getDisplayLanguage(translation)));
-            case REGION:
-                return getAvailable(locale, l -> new ParameterOption(l.getCountry(), l.getDisplayCountry(translation)));
-            case VARIANT:
-                return getAvailable(locale, l -> new ParameterOption(l.getVariant(), l.getDisplayVariant(translation)));
-            case TIMEZONE:
-                return processTimeZoneParam();
-            default:
-                return null;
-        }
+            case REGION -> getAvailable(locale, l -> new ParameterOption(l.getCountry(), l.getDisplayCountry(translation)));
+            case VARIANT -> getAvailable(locale, l -> new ParameterOption(l.getVariant(), l.getDisplayVariant(translation)));
+            case TIMEZONE -> processTimeZoneParam();
+            default -> null;
+        };
     }
 
     private Collection<ParameterOption> processTimeZoneParam() {

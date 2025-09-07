@@ -212,16 +212,12 @@ public interface Rule extends Identifiable<String> {
                 return NO_TEMPLATE;
             }
             String s = templateState.trim().toLowerCase(Locale.ROOT);
-            switch (s) {
-                case "instantiated":
-                    return INSTANTIATED;
-                case "pending":
-                    return PENDING;
-                case "template-missing":
-                    return TEMPLATE_MISSING;
-                default:
-                    return NO_TEMPLATE;
-            }
+            return switch (s) {
+                case "instantiated" -> INSTANTIATED;
+                case "pending" -> PENDING;
+                case "template-missing" -> TEMPLATE_MISSING;
+                default -> NO_TEMPLATE;
+            };
         }
     }
 }

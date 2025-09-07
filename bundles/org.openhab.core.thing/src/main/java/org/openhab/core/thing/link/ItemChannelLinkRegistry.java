@@ -227,6 +227,6 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     public enum ItemChannelLinkProblem {
         THING_CHANNEL_MISSING,
         ITEM_MISSING,
-        ITEM_AND_THING_CHANNEL_MISSING;
+        ITEM_AND_THING_CHANNEL_MISSING
     }
 }

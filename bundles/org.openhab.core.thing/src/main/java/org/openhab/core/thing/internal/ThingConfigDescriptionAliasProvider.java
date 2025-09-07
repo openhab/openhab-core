@@ -66,14 +66,11 @@ public class ThingConfigDescriptionAliasProvider implements ConfigDescriptionAli
             return null;
         }
 
-        switch (uri.getScheme()) {
-            case "thing":
-                return getThingConfigDescriptionURI(uri);
-            case "channel":
-                return getChannelConfigDescriptionURI(uri);
-            default:
-                return null;
-        }
+        return switch (uri.getScheme()) {
+            case "thing" -> getThingConfigDescriptionURI(uri);
+            case "channel" -> getChannelConfigDescriptionURI(uri);
+            default -> null;
+        };
     }
 
     private @Nullable URI getThingConfigDescriptionURI(URI uri) {
