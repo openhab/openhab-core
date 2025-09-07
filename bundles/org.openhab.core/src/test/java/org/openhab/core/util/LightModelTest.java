@@ -499,33 +499,33 @@ public class LightModelTest {
     @Test
     public void testRgbToRgbcwToRgb_RoundTrip() {
         double[] originalRgb = { 0.8, 0.7, 0.6 };
-        double[] rgbcw = RgbcwMath.rgb2rgbcw(originalRgb, coolWhiteLed, warmWhiteLed);
-        double[] reconstructedRgb = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed, warmWhiteLed);
+        double[] rgbcw = RgbcwMath.rgb2rgbcw(originalRgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
+        double[] reconstructedRgb = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
         assertArrayEquals(originalRgb, reconstructedRgb, EPSILON, "RGB → RGBCW → RGB should match original");
     }
 
     @Test
     public void testRgbcwToRgbToRgbcw_RoundTrip() {
         double[] originalRgbcw = { 0.5, 0.4, 0.3, 0.2, 0.1 };
-        double[] rgb = RgbcwMath.rgbcw2rgb(originalRgbcw, coolWhiteLed, warmWhiteLed);
-        double[] reconstructedRgbcw = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed, warmWhiteLed);
-        double[] rgb2 = RgbcwMath.rgbcw2rgb(reconstructedRgbcw, coolWhiteLed, warmWhiteLed);
+        double[] rgb = RgbcwMath.rgbcw2rgb(originalRgbcw, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
+        double[] reconstructedRgbcw = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
+        double[] rgb2 = RgbcwMath.rgbcw2rgb(reconstructedRgbcw, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
         assertArrayEquals(rgb, rgb2, EPSILON, "RGB reconstructed from RGBCW should remain visually consistent");
     }
 
     @Test
     public void testEdgeCase_FullWhite() {
         double[] white = { 1.0, 1.0, 1.0 };
-        double[] rgbcw = RgbcwMath.rgb2rgbcw(white, coolWhiteLed, warmWhiteLed);
-        double[] reconstructed = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed, warmWhiteLed);
+        double[] rgbcw = RgbcwMath.rgb2rgbcw(white, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
+        double[] reconstructed = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
         assertArrayEquals(white, reconstructed, EPSILON, "Full white RGB should round-trip cleanly");
     }
 
     @Test
     public void testEdgeCase_Black() {
         double[] black = { 0.0, 0.0, 0.0 };
-        double[] rgbcw = RgbcwMath.rgb2rgbcw(black, coolWhiteLed, warmWhiteLed);
-        double[] reconstructed = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed, warmWhiteLed);
+        double[] rgbcw = RgbcwMath.rgb2rgbcw(black, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
+        double[] reconstructed = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
         assertArrayEquals(black, reconstructed, EPSILON, "Black RGB should round-trip cleanly");
     }
 

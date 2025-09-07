@@ -759,7 +759,7 @@ public class LightModel {
             // RGBCW - convert HSB to RGB, normalize it, then convert to RGBCW, then scale to [0..255]
             PercentType[] rgbp = ColorUtil.hsbToRgbPercent(hsb);
             double[] rgb = Arrays.stream(rgbp).mapToDouble(p -> p.doubleValue() / 100.0).toArray();
-            rgb = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed, warmWhiteLed);
+            rgb = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
             rgb = Arrays.stream(rgb).map(d -> Math.round(d * 25500) / 100).toArray();
             return rgb;
         } else if (supportsRGBW) {
@@ -924,7 +924,7 @@ public class LightModel {
         if (supportsRGBCW) {
             // RGBCW - normalize, convert to RGB, then scale back to [0..255]
             rgbx = Arrays.stream(rgbxParameter).map(d -> d / 255.0).toArray();
-            rgbx = RgbcwMath.rgbcw2rgb(rgbx, coolWhiteLed, warmWhiteLed);
+            rgbx = RgbcwMath.rgbcw2rgb(rgbx, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
             rgbx = Arrays.stream(rgbx).map(d -> Math.round(d * 25500) / 100).toArray();
         } else {
             // RGB or RGBW - pass through RGB(W) values unchanged
@@ -1140,8 +1140,15 @@ public class LightModel {
     /**
      * Internal: a class containing mathematical utility methods that convert between RGB and RGBCW color arrays
      * based on the RGB main values and the RGB sub- component values of the cool and warm white LEDs.
+     *
+     * TODO it is intended to move this class to the {@link ColorUtil} utility class, but we let's keep it here
+     * for the time being in order to simplify testing and code review.
      */
     public static class RgbcwMath {
+
+        // default cool and warm white LED RGB profiles used if nothing else is provided in the variable argument lists
+        private static final double[] COOL_PROFILE = new double[] { 0.95562, 0.976449753, 1.0 }; // 153 Mired
+        private static final double[] WARM_PROFILE = new double[] { 1.0, 0.695614289308524, 0.25572 }; // 500 Mired
 
         /**
          * Composes an RGBCW from the given RGB. The result depends on the main input RGB values and the RGB
@@ -1153,16 +1160,16 @@ public class LightModel {
          * <p>
          *
          * @param rgb a 3-element array of double: [R,G,B].
-         * @param coolLed the cool white LED profile model.
-         * @param warmLed the warm white LED profile model.
+         * @param ledProfiles variable argument list of LED profiles, where the first element (if present) is the cool
+         *            white LED profile, and the second element (if present) is the warm white LED profile. If not
+         *            present, then default profiles are used.
          *
          * @return a 5-element array of double: [R', G', B', C, W], where R', G', B' are the remaining RGB values
          *         and C and W are the calculated cold and warm white values.
          * @throws IllegalArgumentException if the input array length is not 3, or if any of its values are outside
          *             the range [0.0..1.0]
          */
-        public static double[] rgb2rgbcw(double[] rgb, WhiteLED coolLed, WhiteLED warmLed)
-                throws IllegalArgumentException {
+        public static double[] rgb2rgbcw(double[] rgb, double[]... ledProfiles) throws IllegalArgumentException {
             if (rgb.length != 3 || Arrays.stream(rgb).anyMatch(d -> d < 0.0 || d > 1.0)) {
                 throw new IllegalArgumentException("RGB invalid length, or value out of range");
             }
@@ -1172,9 +1179,11 @@ public class LightModel {
                 return new double[] { rgb[0], rgb[1], rgb[2], 0.0, 0.0 };
             }
 
-            // use warm LED if red is the dominant channel, otherwise use cool LED
+            // use warm LED if red is the dominant channel (otherwise use cool LED)
             boolean useWarmLed = rgb[0] > Math.max(rgb[1], rgb[2]);
-            double[] profile = useWarmLed ? warmLed.getProfile() : coolLed.getProfile();
+            double[] profile = useWarmLed //
+                    ? ledProfiles.length > 1 ? ledProfiles[1] : WARM_PROFILE
+                    : ledProfiles.length > 0 ? ledProfiles[0] : COOL_PROFILE;
             double profileScalar = 0.0;
 
             // execute binary search to determine the maximum LED profile scalar that does not exceed the RGB
@@ -1206,21 +1215,22 @@ public class LightModel {
          * the RGB sub- component contributions of the cold and warm white LEDs.
          *
          * @param rgbcw a 5-element array of double: [R, G, B, C, W].
-         * @param coolLed the cool white LED profile model.
-         * @param warmLed the warm white LED profile model.
+         * @param ledProfiles variable argument list of LED profiles, where the first element (if present) is the cool
+         *            white LED profile, and the second element (if present) is the warm white LED profile. If not
+         *            present, then default profiles are used.
          *
          * @return double[] a 3-element array of double: [R, G, B].
          * @throws IllegalArgumentException if the input array length is not 5, or if any its values are
          *             outside the range [0.0..1.0]
          */
-        public static double[] rgbcw2rgb(double[] rgbcw, WhiteLED coolLed, WhiteLED warmLed)
-                throws IllegalArgumentException {
+        public static double[] rgbcw2rgb(double[] rgbcw, double[]... ledProfiles) throws IllegalArgumentException {
             if (rgbcw.length != 5 || Arrays.stream(rgbcw).anyMatch(d -> d < 0.0 || d > 1.0)) {
                 throw new IllegalArgumentException("RGB invalid length, or value out of range");
             }
 
+            double[] coolProfile = ledProfiles.length > 0 ? ledProfiles[0] : COOL_PROFILE;
+            double[] warmProfile = ledProfiles.length > 1 ? ledProfiles[1] : WARM_PROFILE;
             double coolScalar = rgbcw[3], warmScalar = rgbcw[4];
-            double[] coolProfile = coolLed.getProfile(), warmProfile = warmLed.getProfile();
 
             // add c/w contributions to rgb and clamp to 1.0
             return new double[] { //
