@@ -648,30 +648,30 @@ public class LightModel {
      * follows:
      *
      * <ul>
-     * <li>{@code #rgbDataType == RGB_NO_BRIGHTNESS}: The return result does not depend on the current brightness. In
+     * <li>'RGB_NO_BRIGHTNESS': The return result does not depend on the current brightness. In
      * other words the values only relate to the 'HS' part of the {@link HSBType} state. Note: this means that in this
      * case a round trip of setRGBx() followed by getRGBx() will NOT necessarily contain identical values, although the
      * RGB ratios will certainly be the same.</li>
      *
-     * <li>For all other values of {@link #rgbDataType} the return result depends on the current brightness. In other
+     * <li>All other values of {@link #rgbDataType}: The return result depends on the current brightness. In other
      * words the values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
      * <ul>
      *
      * @return double[] representing the RGB(C)(W) components in range [0..255.0]
      */
     public double[] getRGBx() {
-        HSBType hsb = RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType
+        HSBType hsb = RgbDataType.RGB_NO_BRIGHTNESS.equals(rgbDataType)
                 ? new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.HUNDRED)
                 : cachedHSB;
 
-        if (RgbDataType.RGB_C_W == rgbDataType) {
+        if (RgbDataType.RGB_C_W.equals(rgbDataType)) {
             // RGBCW - convert HSB to RGB, normalize it, then convert to RGBCW, then scale to [0..255]
             PercentType[] rgbp = ColorUtil.hsbToRgbPercent(hsb);
             double[] rgb = Arrays.stream(rgbp).mapToDouble(p -> p.doubleValue() / 100.0).toArray();
             rgb = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
             rgb = Arrays.stream(rgb).map(d -> Math.round(d * 25500) / 100).toArray();
             return rgb;
-        } else if (RgbDataType.RGB_W == rgbDataType) {
+        } else if (RgbDataType.RGB_W.equals(rgbDataType)) {
             // RGBW - convert HSB to RGBW, then scale to [0..255]
             PercentType[] rgbwP = ColorUtil.hsbToRgbwPercent(hsb);
             double[] rgbw = Arrays.stream(rgbwP).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0).toArray();
@@ -800,17 +800,17 @@ public class LightModel {
      * Runtime State: update the color with RGB(C)(W) fields from the remote light, and update the cached HSB color
      * accordingly. The array must be in the order [red, green, blue, (cold-)(white), (warm-white)]. If white is
      * present but the light does not support white channel(s) then IllegalArgumentException is thrown. Depending
-     * on the value of 'rgbLinkedToBrightness', the brightness may or may not change as follows:
+     * on the value of {@link #rgbDataType} the brightness may or may not change as follows:
      *
      * <ul>
-     * <li>{@code rgbLinkedToBrightness == false} both [255,0,0] and [127.5,0,0] change the color to RED without a
-     * change in brightness. In other words the values only relate to the 'HS' part of the {@link HSBType} state. Note:
-     * this means that in this case a round trip of 'setRGBx()' followed by 'getRGBx()' will NOT necessarily contain
-     * identical values, although the RGB ratios will certainly be the same.</li>
+     * <li>'RGB_NO_BRIGHTNESS' both [255,0,0] and [127.5,0,0] change the color to RED without a change in brightness.
+     * In other words the values only relate to the 'HS' part of the {@link HSBType} state. Note: this means that in
+     * this case a round trip of 'setRGBx()' followed by 'getRGBx()' will NOT necessarily contain identical values,
+     * although the RGB ratios will certainly be the same.</li>
      *
-     * <li>{@code rgbLinkedToBrightness == true} both [255,0,0] and [127.5,0,0] change the color to RED and the former
-     * changes the brightness to 100 percent, whereas the latter changes it to 50 percent. In other words the values
-     * relate to all the 'HSB' parts of the {@link HSBType} state.</li>
+     * <li>All other values of {@link #rgbDataType}: both [255,0,0] and [127.5,0,0] change the color to RED and the
+     * former changes the brightness to 100 percent, whereas the latter changes it to 50 percent. In other words the
+     * values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
      * <ul>
      *
      * @param rgbxParameter an array of double representing RGB or RGBW values in range [0.0..255.0]
@@ -821,8 +821,8 @@ public class LightModel {
         if (rgbxParameter.length > 5) {
             throw new IllegalArgumentException("Too many arguments in RGBx array");
         }
-        if (rgbxParameter.length < 3 || (RgbDataType.RGB_W == rgbDataType && rgbxParameter.length < 4)
-                || (RgbDataType.RGB_C_W == rgbDataType && rgbxParameter.length < 5)) {
+        if (rgbxParameter.length < 3 || (RgbDataType.RGB_W.equals(rgbDataType) && rgbxParameter.length < 4)
+                || (RgbDataType.RGB_C_W.equals(rgbDataType) && rgbxParameter.length < 5)) {
             throw new IllegalArgumentException("Too few arguments in RGBx array");
         }
         if (Arrays.stream(rgbxParameter).anyMatch(d -> d < 0.0 || d > 255.0)) {
@@ -830,7 +830,7 @@ public class LightModel {
         }
 
         double[] rgbx;
-        if (RgbDataType.RGB_C_W == rgbDataType) {
+        if (RgbDataType.RGB_C_W.equals(rgbDataType)) {
             // RGBCW - normalize, convert to RGB, then scale back to [0..255]
             rgbx = Arrays.stream(rgbxParameter).map(d -> d / 255.0).toArray();
             rgbx = RgbcwMath.rgbcw2rgb(rgbx, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
@@ -844,12 +844,12 @@ public class LightModel {
                 .mapToObj(d -> zPercentTypeFrom(d)).toArray(PercentType[]::new));
 
         PercentType brightness = hsb.getBrightness();
-        if (RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType) {
+        if (RgbDataType.RGB_NO_BRIGHTNESS.equals(rgbDataType)) {
             hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedHSB.getBrightness());
         }
         cachedHSB = hsb;
         cachedMired = zMiredFrom(hsb);
-        if (RgbDataType.RGB_NO_BRIGHTNESS != rgbDataType) {
+        if (RgbDataType.RGB_NO_BRIGHTNESS.equals(rgbDataType)) {
             zHandleBrightness(brightness);
         }
     }
@@ -908,7 +908,7 @@ public class LightModel {
             cachedHSB = new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), brightness);
             cachedOnOff = Optional.of(OnOffType.ON);
         } else {
-            if (!cachedOnOff.isPresent() || OnOffType.ON == cachedOnOff.get()) {
+            if (!cachedOnOff.isPresent() || OnOffType.ON.equals(cachedOnOff.get())) {
                 cachedBrightness = cachedHSB.getBrightness();
             }
             cachedHSB = new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.ZERO);
@@ -959,7 +959,7 @@ public class LightModel {
      */
     private void zHandleIncreaseDecrease(IncreaseDecreaseType increaseDecrease) {
         double bri = Math.min(Math.max(cachedHSB.getBrightness().doubleValue()
-                + ((IncreaseDecreaseType.INCREASE == increaseDecrease ? 1 : -1) * stepSize), 0.0), 100.0);
+                + ((IncreaseDecreaseType.INCREASE.equals(increaseDecrease) ? 1 : -1) * stepSize), 0.0), 100.0);
         setBrightness(bri);
     }
 
@@ -969,8 +969,8 @@ public class LightModel {
      * @param onOff the {@link OnOffType} command.
      */
     private void zHandleOnOff(OnOffType onOff) {
-        if (getOnOff() != onOff) {
-            zHandleBrightness(OnOffType.OFF == onOff ? PercentType.ZERO : cachedBrightness);
+        if (!onOff.equals(getOnOff())) {
+            zHandleBrightness(OnOffType.OFF.equals(onOff) ? PercentType.ZERO : cachedBrightness);
         }
     }
 

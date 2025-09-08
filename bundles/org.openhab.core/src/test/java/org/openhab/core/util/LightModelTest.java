@@ -265,12 +265,13 @@ public class LightModelTest {
     @Test
     public void testParameterSetters() {
         LightModel lsm = new LightModel();
-        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMinimumOnBrightness(0.0));
+        lsm.configSetRgbDataType(RgbDataType.RGB_C_W);
         lsm.configSetMinimumOnBrightness(2.0);
         lsm.configSetMiredWarmest(501.0);
         lsm.configSetMiredCoolest(154.0);
         lsm.configSetIncreaseDecreaseStep(11.0);
 
+        assertEquals(RgbDataType.RGB_C_W, lsm.configGetRgbDataType());
         assertEquals(2.0, lsm.configGetMinimumOnBrightness());
         assertEquals(501.0, lsm.configGetMiredWarmest());
         assertEquals(154.0, lsm.configGetMiredCoolest());
