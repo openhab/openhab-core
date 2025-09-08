@@ -1050,7 +1050,7 @@ public class LightModel {
      * Internal: a class containing mathematical utility methods that convert between RGB and RGBCW color arrays
      * based on the RGB main values and the RGB sub- component values of the cool and warm white LEDs.
      *
-     * TODO it is intended to move this class to the {@link ColorUtil} utility class, but we let's keep it here
+     * TODO it is intended to move this class to the {@link ColorUtil} utility class, but let's keep it here
      * for the time being in order to simplify testing and code review.
      */
     public static class RgbcwMath {
