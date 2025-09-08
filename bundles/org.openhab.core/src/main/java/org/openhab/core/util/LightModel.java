@@ -267,11 +267,6 @@ public class LightModel {
      *********************************************************************************/
 
     /**
-     * Cached OnOff state, may be empty if not (yet) known
-     */
-    private Optional<OnOffType> cachedOnOff = Optional.empty();
-
-    /**
      * Cached Brightness state, never null
      */
     private PercentType cachedBrightness = PercentType.ZERO;
@@ -285,6 +280,11 @@ public class LightModel {
      * Cached Mired state, may be NaN if not (yet) known
      */
     private double cachedMired = Double.NaN;
+
+    /**
+     * Cached OnOff state, may be empty if not (yet) known
+     */
+    private Optional<OnOffType> cachedOnOff = Optional.empty();
 
     /*********************************************************************************
      * SECTION: Constructors
@@ -475,7 +475,7 @@ public class LightModel {
     }
 
     /**
-     * Configuration: set the color temperature of the cool white LED, and thus set the wightings of its
+     * Configuration: set the color temperature of the cool white LED, and thus set the weightings of its
      * individual RGB sub- components.
      *
      * @param coolLedMired the color temperature in Mired of the cool white LED.
@@ -868,6 +868,23 @@ public class LightModel {
      */
     public State toNonNull(@Nullable State state) {
         return state != null ? state : UnDefType.UNDEF;
+    }
+
+    /**
+     * Runtime State: create and return a copy of this LightModel. The copy has the same configuration and
+     * runtime state as this instance.
+     *
+     * @return a copy of this LightModel.
+     */
+    public LightModel copy() {
+        LightModel copy = new LightModel(lightCapabilities, rgbDataType, minimumOnBrightness, miredControlCoolest,
+                miredControlWarmest, stepSize, coolWhiteLed.getMired(), warmWhiteLed.getMired());
+        copy.cachedBrightness = PercentType.valueOf(cachedBrightness.toFullString());
+        copy.cachedHSB = HSBType.valueOf(cachedHSB.toFullString());
+        copy.cachedMired = cachedMired;
+        copy.cachedOnOff = !cachedOnOff.isPresent() ? Optional.empty()
+                : Optional.of(OnOffType.valueOf(cachedOnOff.get().toFullString()));
+        return copy;
     }
 
     /*********************************************************************************

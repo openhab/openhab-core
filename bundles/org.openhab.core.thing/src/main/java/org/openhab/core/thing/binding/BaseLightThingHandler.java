@@ -35,15 +35,28 @@ public abstract class BaseLightThingHandler extends BaseThingHandler {
         super(thing);
     }
 
+    /**
+     * Override this method to handle commands from OH core.
+     * <p>
+     * Example: (implementation will depend on the specific binding and device).
+     *
+     * <pre>
+     * {@code
+     *
+     * // update the model state based on the command from OpenHAB
+     * model.handleCommand(command);
+     *
+     * // or if it is a color temperature command
+     * model.handleColorTemperatureCommand(command);
+     *
+     * // and transmit the appropriate command to the remote light device based on the model state
+     * doTransmitBindingSpecificRemoteLightData(model);
+     *
+     * }
+     * </pre>
+     */
     @Override
-    public void handleCommand(ChannelUID channelUID, Command command) {
-        // update the model state based on the command from OpenHAB
-        model.handleCommand(command);
-        // or if it is a color temperature command
-        model.handleColorTemperatureCommand(command);
-        // and transmit the appropriate command to the remote light device based on the model state
-        doTransmitBindingSpecificRemoteLightData(model);
-    }
+    public abstract void handleCommand(ChannelUID channelUID, Command command);
 
     /**
      * Override this method to provide initialization of the light state machine capabilities and configuration
