@@ -187,7 +187,7 @@ public class LightModel {
     public static enum RgbDataType {
         DEFAULT, // plain RGB with brightness (i.e. full HSBType)
         RGB_NO_BRIGHTNESS, // plain RGB but ignore brightness (i.e. only HS parts of HSBType)
-        RGB_W, // 4- element RGB with white channel
+        RGB_W, // 4-element RGB with white channel
         RGB_C_W // 5-element RGB with cold and warm white channels
     }
 
@@ -1061,18 +1061,17 @@ public class LightModel {
 
         /**
          * Composes an RGBCW from the given RGB. The result depends on the main input RGB values and the RGB sub-
-         * component contributions of the cold and warm white LEDs. It uses a binary search solver to find the maximum
-         * usable C or W value whereby at least one of the RGB channels is zero and the remaining non- zero RGB channels
-         * have smallish values for color fine tuning. It solves for C or W such that:
+         * component contributions of the cold and warm white LEDs. It solves to find the maximum usable C and W scalar
+         * values such that none of the RGB' channels become negative. It solves for C and W such that:
          * <p>
          * {@code RGB ≈ C * coolProfile + W * warmProfile + RGB'} where {@code RGB'} is the remaining RGB after
-         * subtracting scaled cool or warm LED contributions.
+         * subtracting the scaled cool and warm LED contributions.
          * <p>
          *
          * @param rgb a 3-element array of double: [R,G,B].
          * @param ledProfiles variable argument list of LED profiles, where the first element (if present) is the cool
          *            white LED profile, and the second element (if present) is the warm white LED profile. If not
-         *            present, then default profiles are used. Note: the LED profiles are normalized 3- element [R,G,B]
+         *            present, then default profiles are used. Note: the LED profiles are normalized 3-element [R,G,B]
          *            arrays in the range [0.0..1.0]. For examples see {@link #COOL_PROFILE} and {@link WARM_PROFILE}.
          *
          * @return a 5-element array of double: [R',G',B',C,W], where R', G', B' are the remaining RGB values
@@ -1085,40 +1084,49 @@ public class LightModel {
                 throw new IllegalArgumentException("RGB invalid length, or value out of range");
             }
 
+            double[] rgbcw = new double[] { rgb[0], rgb[1], rgb[2], 0.0, 0.0 };
+
             // cool/warm contribution is only possible if all rgb values are non- zero
             if (rgb[0] < 0.01 || rgb[1] < 0.01 || rgb[2] < 0.01) {
-                return new double[] { rgb[0], rgb[1], rgb[2], 0.0, 0.0 };
+                return rgbcw;
             }
 
-            // use warm LED if red is the dominant channel (otherwise use cool LED)
-            boolean useWarmLed = rgb[0] > Math.max(rgb[1], rgb[2]);
-            double[] profile = useWarmLed //
-                    ? ledProfiles.length > 1 ? ledProfiles[1] : WARM_PROFILE
-                    : ledProfiles.length > 0 ? ledProfiles[0] : COOL_PROFILE;
-            double profileScalar = 0.0;
+            double[] coolProfile = ledProfiles.length > 0 ? ledProfiles[0] : COOL_PROFILE;
+            double[] warmProfile = ledProfiles.length > 1 ? ledProfiles[1] : WARM_PROFILE;
 
-            // execute binary search to determine the maximum LED profile scalar that does not exceed the RGB
-            double min = 0.0, max = 1.0;
-            while (max - min > 0.005) { // precision of 0.5%
-                double mid = (min + max) / 2.0;
-                // check if the use of the mid candidate does not exceed any RGB channel
-                if (profile[0] * mid <= rgb[0] && profile[1] * mid <= rgb[1] && profile[2] * mid <= rgb[2]) {
-                    if (mid > profileScalar) {
-                        profileScalar = mid;
-                    }
-                    min = mid; // continue to evaluate higher candidates
-                } else {
-                    max = mid; // continue to evaluate lower candidates
+            double lowestDelta = 3.0; // lowest total of RGB' elements found so far; starting with the worst case
+
+            // get maximmum C scalar such that RGB' channels can't become negative
+            double coolScalarMax = getMaxScalarForRgbWithProfile(rgb, coolProfile);
+
+            // iterate downwards over C scalar values to solve for the best combination of C and W scalars
+            for (double coolScalar = coolScalarMax; coolScalar >= 0.0; coolScalar -= 0.01) {
+                // subtract cool LED profile contributions from RGB to create RGB'
+                double[] rgbPrime = new double[] { //
+                        rgb[0] - coolProfile[0] * coolScalar, //
+                        rgb[1] - coolProfile[1] * coolScalar, //
+                        rgb[2] - coolProfile[2] * coolScalar, //
+                        Double.NaN, Double.NaN }; // scalar values are dropped in when a new best solution is found
+
+                // get maximmum W scalar such that RGB' channels can't become negative
+                double warmScalar = getMaxScalarForRgbWithProfile(rgbPrime, warmProfile);
+
+                // also subtract warm LED profile contributions from RGB'
+                rgbPrime[0] = rgbPrime[0] - warmProfile[0] * warmScalar;
+                rgbPrime[1] = rgbPrime[1] - warmProfile[1] * warmScalar;
+                rgbPrime[2] = rgbPrime[2] - warmProfile[2] * warmScalar;
+
+                // select the best solution so far that minimizes the total of the RGB' elements
+                double thisDelta = rgbPrime[0] + rgbPrime[1] + rgbPrime[2];
+                if (thisDelta < lowestDelta) {
+                    lowestDelta = thisDelta;
+                    rgbcw = rgbPrime;
+                    rgbcw[3] = coolScalar; // drop in the current C and W scalar values
+                    rgbcw[4] = warmScalar;
                 }
             }
 
-            // subtract scaled white LED profile contributions from RGB and clamp to 0.0
-            return new double[] { //
-                    Math.max(0, rgb[0] - profile[0] * profileScalar), //
-                    Math.max(0, rgb[1] - profile[1] * profileScalar), //
-                    Math.max(0, rgb[2] - profile[2] * profileScalar), //
-                    useWarmLed ? 0.0 : profileScalar, //
-                    useWarmLed ? profileScalar : 0.0 };
+            return rgbcw;
         }
 
         /**
@@ -1128,7 +1136,7 @@ public class LightModel {
          * @param rgbcw a 5-element array of double: [R,G,B,C,W].
          * @param ledProfiles variable argument list of LED profiles, where the first element (if present) is the cool
          *            white LED profile, and the second element (if present) is the warm white LED profile. If not
-         *            present, then default profiles are used. Note: the LED profiles are normalized 3- element [R,G,B]
+         *            present, then default profiles are used. Note: the LED profiles are normalized 3-element [R,G,B]
          *            arrays in the range [0.0..1.0]. For examples see {@link #COOL_PROFILE} and {@link WARM_PROFILE}.
          *
          * @return double[] a 3-element array of double: [R,G,B].
@@ -1149,6 +1157,23 @@ public class LightModel {
                     Math.min(1, rgbcw[0] + coolProfile[0] * coolScalar + warmProfile[0] * warmScalar), //
                     Math.min(1, rgbcw[1] + coolProfile[1] * coolScalar + warmProfile[1] * warmScalar), //
                     Math.min(1, rgbcw[2] + coolProfile[2] * coolScalar + warmProfile[2] * warmScalar) };
+        }
+
+        /**
+         * Internal: Returns the maximmum scalar value for the given RGB and LED profile such that none of
+         * the resulting RGB' channels can become negative. Used to determine how much of a given white LED
+         * profile can be applied. It checks for zero profile values to avoid divide-by-zero errors.
+         *
+         * @param rgb a 3-element array of double: [R,G,B].
+         * @param profile a 3-element array of double representing an LED profile: [R,G,B].
+         * @return double representing the highest scalar value that can be applied to the given RGB LED profile values
+         *         without any of the resulting RGB' channel values becoming negative.
+         */
+        private static double getMaxScalarForRgbWithProfile(double[] rgb, double[] profile) {
+            return Math.min(Math.min( //
+                    profile[0] > 0 ? rgb[0] / profile[0] : 1, //
+                    profile[1] > 0 ? rgb[1] / profile[1] : 1), //
+                    profile[2] > 0 ? rgb[2] / profile[2] : 1);
         }
     }
 }

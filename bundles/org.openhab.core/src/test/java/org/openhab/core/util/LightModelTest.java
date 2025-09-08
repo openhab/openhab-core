@@ -14,6 +14,8 @@ package org.openhab.core.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.DecimalType;
@@ -772,11 +774,10 @@ public class LightModelTest {
         lsm.handleCommand(new HSBType("0,0,50"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 10); // red fine tuning up to 10.0
-        assertEquals(0.0, rgbx[1], 10); // green fine tuning up to 10.0
-        assertEquals(0.0, rgbx[2], 10); // blue fine tuning up to 10.0
-        assertEquals(128.0, rgbx[3], 10); // cool white close to 50%
-        assertEquals(0.0, rgbx[4], 1); // warm white off
+        assertEquals(0.0, rgbx[0], 1); // red zero
+        assertEquals(0.0, rgbx[1], 1); // green zero
+        assertEquals(0.0, rgbx[2], 1); // blue zero
+        assertEquals(128.0, rgbx[3] + rgbx[4], 5); // ~50% brightness from cool + warm white
     }
 
     /**
@@ -792,12 +793,11 @@ public class LightModelTest {
         lsm.handleCommand(new HSBType("120,50,75"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 10); // red channel minimal
+        assertEquals(0.0, rgbx[0], 1); // red channel minimal
         assertTrue(rgbx[1] > Math.max(rgbx[0], rgbx[2])); // green channel dominant
-        assertEquals(0.0, rgbx[2], 10); // blue channel minimal
+        assertEquals(0.0, rgbx[2], 1); // blue channel minimal
         assertEquals(0.0, Math.min(rgbx[0], Math.min(rgbx[2], rgbx[2])), 1); // red or blue should be zero
-        assertEquals(0.0, rgbx[4], 0); // warm white zero
-        assertEquals(191.0, rgbx[1] + rgbx[3], 1); // green + cool white should be ~75% brightness
+        assertEquals(192.0, Arrays.stream(rgbx).sum(), 5); // ~75% brightness
     }
 
     /**
@@ -829,12 +829,11 @@ public class LightModelTest {
         lsm.handleCommand(new HSBType("240,50,75"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 10); // red channel fine tuning up to 10.0
-        assertEquals(0.0, rgbx[1], 10); // green channel fine tuning up to 10.0
-        assertEquals(192.0, rgbx[2] + rgbx[3], 5); // blue and cool white channel shall be ~75% brightness
-        assertEquals(96.0, rgbx[2], 5); // blue channel shall contribute ~37.5% brightness
-        assertEquals(96.0, rgbx[3], 5); // cool white channel shall contribute ~37.5% brightness
-        assertEquals(0.0, rgbx[4], 1); // warm white channel should zero
+        assertEquals(0.0, rgbx[0], 5); // red channel fine tuning up to 5.0
+        assertEquals(0.0, rgbx[1], 5); // green channel fine tuning up to 5.0
+        assertTrue(rgbx[2] > Math.max(rgbx[0], rgbx[1])); // blue channel dominant
+        assertTrue(rgbx[3] > rgbx[4]); // cool channel dominant over warm
+        assertEquals(192.0, Arrays.stream(rgbx).sum(), 5); // ~75% brightness
     }
 
     /**
@@ -849,12 +848,11 @@ public class LightModelTest {
         lsm.handleCommand(new HSBType("30,70,75"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 15); // red channel fine tuning up to 15.0
-        assertEquals(0.0, rgbx[1], 15); // green channel fine tuning up to 15.0
-        assertEquals(0.0, rgbx[2], 15); // blue channel fine tuning up to 15.0
-        assertEquals(0.0, rgbx[3], 10); // cool white channel should be zero
         assertTrue(rgbx[0] > Math.max(rgbx[1], rgbx[2])); // red channel dominant
-        assertEquals(192.0, rgbx[0] + rgbx[4], 10); // red + warm white channel should be ~75% brightness
+        assertEquals(0.0, rgbx[1], 5); // green channel fine tuning up to 5.0
+        assertEquals(0.0, rgbx[2], 5); // blue channel fine tuning up to 5.0
+        assertTrue(rgbx[4] > rgbx[3]); // warm white channel dominant
+        assertEquals(192.0, Arrays.stream(rgbx).sum(), 10); // ~75% brightness
     }
 
     /**
@@ -869,10 +867,9 @@ public class LightModelTest {
         lsm.handleCommand(new HSBType("0,0,100"));
         double[] rgbx = lsm.getRGBx();
         assertEquals(5, rgbx.length);
-        assertEquals(0.0, rgbx[0], 15); // red channel fine tuning up to 15.0
-        assertEquals(0.0, rgbx[1], 15); // green channel fine tuning up to 15.0
-        assertEquals(0.0, rgbx[2], 15); // blue channel fine tuning up to 15.0
-        assertEquals(255.0, rgbx[3], 10); // cool white channel should be maximal
-        assertEquals(0.0, rgbx[4], 10); // warm white channel should be zero
+        assertEquals(0.0, rgbx[0], 5); // red channel fine tuning up to 5.0
+        assertEquals(0.0, rgbx[1], 5); // green channel fine tuning up to 5.0
+        assertEquals(0.0, rgbx[2], 5); // blue channel fine tuning up to 5.0
+        assertTrue(rgbx[3] > rgbx[4]); // cool white channel dominant
     }
 }
