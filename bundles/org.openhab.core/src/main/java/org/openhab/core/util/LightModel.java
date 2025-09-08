@@ -507,7 +507,7 @@ public class LightModel {
     }
 
     /**
-     * Configuration: set the color temperature of the arem white LED, and thus set the wightings of its
+     * Configuration: set the color temperature of the warm white LED, and thus set the weightings of its
      * individual RGB sub- components.
      *
      * @param warmLedMired the color temperature in Mired of the warm white LED.
