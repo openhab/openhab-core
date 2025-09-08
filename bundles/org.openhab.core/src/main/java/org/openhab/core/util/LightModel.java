@@ -669,7 +669,7 @@ public class LightModel {
             PercentType[] rgbp = ColorUtil.hsbToRgbPercent(hsb);
             double[] rgb = Arrays.stream(rgbp).mapToDouble(p -> p.doubleValue() / 100.0).toArray();
             rgb = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
-            rgb = Arrays.stream(rgb).map(d -> Math.round(d * 255 * 100) / 100).toArray(); // round to 2 places
+            rgb = Arrays.stream(rgb).map(d -> Math.round(d * 255 * 10) / 10).toArray(); // // round to 1 decimal place
             return rgb;
         } else if (RgbDataType.RGB_W.equals(rgbDataType)) {
             // RGBW - convert HSB to RGBW, then scale to [0..255]
@@ -834,7 +834,7 @@ public class LightModel {
             // RGBCW - normalize, convert to RGB, then scale back to [0..255]
             rgbx = Arrays.stream(rgbxParameter).map(d -> d / 255.0).toArray();
             rgbx = RgbcwMath.rgbcw2rgb(rgbx, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
-            rgbx = Arrays.stream(rgbx).map(d -> Math.round(d * 255 * 100) / 100).toArray(); // round to 2 places
+            rgbx = Arrays.stream(rgbx).map(d -> Math.round(d * 255 * 10) / 10).toArray(); // round to 1 decimal place
         } else {
             // RGB or RGBW - pass through RGB(W) values unchanged
             rgbx = rgbxParameter;
