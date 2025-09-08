@@ -70,11 +70,11 @@ import org.openhab.core.types.UnDefType;
  * <li>Optionally override {@link #minimumOnBrightness} to a minimum brightness percent in the range [0.1..10.0]
  * percent, to consider as being "ON". The default is 1 percent.</li>
  *
- * <li>Optionally override {@link #warmestMired} to a 'warmest' white color temperature in the range
- * [{@link #coolestMired}..1000.0] Mired. The default is 500 Mired.</li>
+ * <li>Optionally override {@link #miredControlWarmest} to a 'warmest' white color temperature in the range
+ * [{@link #miredControlCoolest}..1000.0] Mired. The default is 500 Mired.</li>
  *
- * <li>Optionally override {@link #coolestMired} to a 'coolest' white color temperature in the range
- * [100.0.. {@link #warmestMired}] Mired. The default is 153 Mired.</li>
+ * <li>Optionally override {@link #miredControlCoolest} to a 'coolest' white color temperature in the range
+ * [100.0.. {@link #miredControlWarmest}] Mired. The default is 153 Mired.</li>
  *
  * <li>Optionally override {@link #stepSize} to a step size for the IncreaseDecreaseType commands in the range
  * [1.0..50.0] percent. The default is 10.0 percent.</li>
@@ -94,7 +94,8 @@ import org.openhab.core.types.UnDefType;
  *
  * <li>It handles both color temperature PercentType states and QuantityType states (which may be either in Mired or
  * Kelvin). Where color temperature PercentType values are internally converted to Mired values on the percentage scale
- * between the configured {@link #coolestMired} and {@link #warmestMired} Mired values, and vice versa.</li>
+ * between the configured {@link #miredControlCoolest} and {@link #miredControlWarmest} Mired values, and vice
+ * versa.</li>
  *
  * <li>When the color temperature changes then the HS values are adapted to match the corresponding color temperature
  * point on the Planckian Locus in the CIE color chart.</li>
@@ -125,14 +126,24 @@ import org.openhab.core.types.UnDefType;
  *
  *     &#64;Override
  *     public void initialize() {
- *         // adjust the light model capabilities
- *         model.configSetSupportsBrightness(true);
- *         model.configSetSupportsColorTemperature(true);
- *         model.configSetSupportsColor(true);
+ *       // Set up the light state machine capabilities.
+ *       model.configSetLightCapabilities(LightCapabilities.COLOR_WITH_COLOR_TEMPERATURE);
  *
- *         // adjust the light model configuration parameters
- *         model.configSetMiredCoolest(153);
- *         model.configSetMiredWarmest(500);
+ *       // Optionally: set up the light state machine configuration parameters.
+ *       // These would typically be read from the thing configuration or read from the remote device.
+ *       model.configSetRgbDataType(RgbDataType.RGB_NO_BRIGHTNESS); // RGB data type
+ *       model.configSetMinimumOnBrightness(2); // minimum brightness level when on 2%
+ *       model.configSetIncreaseDecreaseStep(10); // step size for increase/decrease commands
+ *       model.configSetMiredControlCoolest(153); // color temperature control range
+ *       model.configSetMiredControlWarmest(500); // color temperature control range
+ *
+ *       // Optionally: if the light has warm and cool white LEDS then set up their LED color temperatures.
+ *       // These would typically be read from the thing configuration or read from the remote device.
+ *       model.configSetMiredCoolWhiteLED(153);
+ *       model.configSetMiredWarmWhiteLED(500);
+ *
+ *       // now set the status to UNKNOWN to indicate that we are initialized
+ *       updateStatus(ThingStatus.UNKNOWN);
  *     }
  *
  *     &#64;Override
@@ -181,14 +192,41 @@ import org.openhab.core.types.UnDefType;
 @NonNullByDefault
 public class LightModel {
 
+    /*********************************************************************************
+     * SECTION: Common Enumerators for light capabilities.
+     *********************************************************************************/
+
+    /**
+     * Enum for the capabilities of different types of lights
+     */
+    public static enum LightCapabilities {
+        ON_OFF, // on-off only
+        BRIGHTNESS, // on-off with brightness
+        BRIGHTNESS_WITH_COLOR_TEMPERATURE, // on-off with brightness and color temperature
+        COLOR, // on-off with brightness and color
+        COLOR_WITH_COLOR_TEMPERATURE; // on-off with brightness, color and color temperature
+
+        public boolean supportsBrightness() {
+            return !this.equals(ON_OFF);
+        }
+
+        public boolean supportsColor() {
+            return this.equals(COLOR) || this.equals(COLOR_WITH_COLOR_TEMPERATURE);
+        }
+
+        public boolean supportsColorTemperature() {
+            return this.equals(BRIGHTNESS_WITH_COLOR_TEMPERATURE) || this.equals(COLOR_WITH_COLOR_TEMPERATURE);
+        }
+    }
+
     /**
      * Enum for the different types of RGB data
      */
     public static enum RgbDataType {
-        DEFAULT, // plain RGB with brightness (i.e. full HSBType)
-        RGB_NO_BRIGHTNESS, // plain RGB but ignore brightness (i.e. only HS parts of HSBType)
-        RGB_W, // 4-element RGB with white channel
-        RGB_C_W // 5-element RGB with cold and warm white channels
+        DEFAULT, // supports plain RGB with brightness (i.e. full HSBType)
+        RGB_NO_BRIGHTNESS, // supports plain RGB but ignore brightness (i.e. only HS parts of HSBType)
+        RGB_W, // supports 4-element RGB with white channel
+        RGB_C_W // supports 5-element RGB with cold and warm white channels
     }
 
     /*********************************************************************************
@@ -201,14 +239,14 @@ public class LightModel {
     private double minimumOnBrightness = 1.0;
 
     /**
-     * The 'warmest' white color temperature
-     */
-    private double warmestMired = 500;
-
-    /**
      * The 'coolest' white color temperature
      */
-    private double coolestMired = 153;
+    private double miredControlCoolest = 153;
+
+    /**
+     * The 'warmest' white color temperature
+     */
+    private double miredControlWarmest = 500;
 
     /*
      * Step size for IncreaseDecreaseType commands
@@ -222,7 +260,7 @@ public class LightModel {
     /**
      * True if the light supports color
      */
-    private boolean supportsColor = false;
+    private LightCapabilities lightCapabilities = LightCapabilities.COLOR_WITH_COLOR_TEMPERATURE;
 
     /**
      * The RGB data type supported
@@ -230,24 +268,14 @@ public class LightModel {
     private RgbDataType rgbDataType = RgbDataType.DEFAULT;
 
     /**
-     * True if the light supports brightness
-     */
-    private boolean supportsBrightness = false;
-
-    /**
-     * True if the light supports color temperature
-     */
-    private boolean supportsColorTemperature = false;
-
-    /**
      * The capabilities of the cool white LED
      */
-    private WhiteLED coolWhiteLed = new WhiteLED(coolestMired);
+    private WhiteLED coolWhiteLed = new WhiteLED(miredControlCoolest);
 
     /**
      * The capabilities of warm white LED
      */
-    private WhiteLED warmWhiteLed = new WhiteLED(warmestMired);
+    private WhiteLED warmWhiteLed = new WhiteLED(miredControlWarmest);
 
     /*********************************************************************************
      * SECTION: Light state variables. Used at run time only.
@@ -280,66 +308,59 @@ public class LightModel {
     /**
      * Create a {@link LightModel} with default capabilities and parameters as follows:
      * <ul>
-     * <li>{@link #supportsBrightness} is true (the light supports brightness control)</li>
-     * <li>{@link #supportsColorTemperature} is true (the light supports color temperature control)</li>
-     * <li>{@link #supportsColor} is true (the light supports color control)</li>
+     * <li>{@link #lightCapabilities} is COLOR_WITH_COLOR_TEMPERATURE (the light supports brightness control, color
+     * control, and color temperature control)</li>
      * <li>{@link #rgbDataType} is DEFAULT (the light supports plain RGB)</li>
      * <li>{@link #minimumOnBrightness} is 1.0 (the minimum brightness percent to consider as light "ON")</li>
-     * <li>{@link #warmestMired} is 500 (the 'warmest' white color temperature)</li>
-     * <li>{@link #coolestMired} is 153 (the 'coolest' white color temperature)</li>
+     * <li>{@link #miredControlCoolest} is 153 (the 'coolest' white color temperature)</li>
+     * <li>{@link #miredControlWarmest} is 500 (the 'warmest' white color temperature)</li>
      * <li>{@link #stepSize} is 10.0 (the step size for IncreaseDecreaseType commands)</li>
      * <li>coolWhiteLedMired is 153 Mired (the color temperature of the cool white LED)</li>
      * <li>warmWhiteLedMired is 500 Mired (the color temperature of the warm white LED)</li>
      * </ul>
      */
     public LightModel() {
-        this(true, true, true, RgbDataType.DEFAULT, null, null, null, null, null, null);
+        this(LightCapabilities.COLOR_WITH_COLOR_TEMPERATURE, RgbDataType.DEFAULT, null, null, null, null, null, null);
     }
 
     /**
      * Create a {@link LightModel} with the given capabilities. The parameters are set to the default.
      *
-     * @param supportsBrightness true if the light supports brightness control
-     * @param supportsColorTemperature true if the light supports color temperature control
-     * @param supportsColor true if the light supports color control
-     * @param rgbDataType the RGB data type
+     * @param lightCapabilities the capabilities of the light
+     * @param rgbDataType the type of RGB data used
      */
-    public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            RgbDataType rgbDataType) {
-        this(supportsBrightness, supportsColorTemperature, supportsColor, rgbDataType, null, null, null, null, null,
-                null);
+    public LightModel(LightCapabilities lightCapabilities, RgbDataType rgbDataType) {
+        this(lightCapabilities, rgbDataType, null, null, null, null, null, null);
     }
 
     /**
      * Create a {@link LightModel} with the given capabilities and parameters. The parameters can be
      * null to use the default.
      *
-     * @param supportsBrightness true if the light supports brightness control
-     * @param supportsColorTemperature true if the light supports color temperature control
-     * @param supportsColor true if the light supports color control
-     * @param rgbDataType the RGB type
+     * @param lightCapabilities the capabilities of the light
+     * @param rgbDataType the type of RGB data supported
      * @param minimumOnBrightness the minimum brightness percent to consider as light "ON"
-     * @param warmestMired the 'warmest' white color temperature in Mired
-     * @param coolestMired the 'coolest' white color temperature in Mired
+     * @param miredControlCoolest the 'coolest' white color temperature control value in Mired
+     * @param miredControlWarmest the 'warmest' white color temperature control value in Mired
      * @param stepSize the step size for IncreaseDecreaseType commands
+     * @param coolWhiteLedMired the color temperature of the cool white LED
+     * @param warmWhiteLedMired the color temperature of the warm white LED
      * @throws IllegalArgumentException if any of the parameters are out of range
      */
-    public LightModel(boolean supportsBrightness, boolean supportsColorTemperature, boolean supportsColor,
-            RgbDataType rgbDataType, @Nullable Double minimumOnBrightness, @Nullable Double warmestMired,
-            @Nullable Double coolestMired, @Nullable Double stepSize, @Nullable Double coolWhiteLedMired,
+    public LightModel(LightCapabilities lightCapabilities, RgbDataType rgbDataType,
+            @Nullable Double minimumOnBrightness, @Nullable Double miredControlCoolest,
+            @Nullable Double miredControlWarmest, @Nullable Double stepSize, @Nullable Double coolWhiteLedMired,
             @Nullable Double warmWhiteLedMired) throws IllegalArgumentException {
-        configSetSupportsBrightness(supportsBrightness);
-        configSetSupportsColorTemperature(supportsColorTemperature);
-        configSetSupportsColor(supportsColor);
+        configSetLightCapabilities(lightCapabilities);
         configSetRgbDataType(rgbDataType);
         if (minimumOnBrightness != null) {
             configSetMinimumOnBrightness(minimumOnBrightness);
         }
-        if (warmestMired != null) {
-            configSetMiredWarmest(warmestMired);
+        if (miredControlWarmest != null) {
+            configSetMiredControlWarmest(miredControlWarmest);
         }
-        if (coolestMired != null) {
-            configSetMiredCoolest(coolestMired);
+        if (miredControlCoolest != null) {
+            configSetMiredControlCoolest(miredControlCoolest);
         }
         if (stepSize != null) {
             configSetIncreaseDecreaseStep(stepSize);
@@ -364,6 +385,13 @@ public class LightModel {
     }
 
     /**
+     * Configuration: get the light capabilities.
+     */
+    public LightCapabilities configGetLightCapabilities() {
+        return lightCapabilities;
+    }
+
+    /**
      * Configuration: get the minimum brightness percent to consider as light "ON".
      */
     public double configGetMinimumOnBrightness() {
@@ -373,8 +401,8 @@ public class LightModel {
     /**
      * Configuration: get the coolest color temperature in Mired.
      */
-    public double configGetMiredCoolest() {
-        return coolestMired;
+    public double configGetMiredControlCoolest() {
+        return miredControlCoolest;
     }
 
     /**
@@ -389,8 +417,8 @@ public class LightModel {
     /**
      * Configuration: get the warmest color temperature in Mired.
      */
-    public double configGetMiredWarmest() {
-        return warmestMired;
+    public double configGetMiredControlWarmest() {
+        return miredControlWarmest;
     }
 
     /**
@@ -400,27 +428,6 @@ public class LightModel {
      */
     public double configGetMiredWarmWhiteLed() {
         return warmWhiteLed.getMired();
-    }
-
-    /**
-     * Configuration: check if brightness control is supported.
-     */
-    public boolean configGetSupportsBrightness() {
-        return supportsBrightness;
-    }
-
-    /**
-     * Configuration: check if color control is supported.
-     */
-    public boolean configGetSupportsColor() {
-        return supportsColor;
-    }
-
-    /**
-     * Configuration: check if color temperature control is supported.
-     */
-    public boolean configGetSupportsColorTemperature() {
-        return supportsColorTemperature;
     }
 
     /**
@@ -444,6 +451,13 @@ public class LightModel {
     }
 
     /**
+     * Configuration: set the light capabilities.
+     */
+    public void configSetLightCapabilities(LightCapabilities lightCapabilities) {
+        this.lightCapabilities = lightCapabilities;
+    }
+
+    /**
      * Configuration: set the minimum brightness percent to consider as light "ON".
      *
      * @param minimumOnBrightness the minimum brightness percent.
@@ -460,19 +474,19 @@ public class LightModel {
     /**
      * Configuration: set the coolest color temperature in Mired.
      *
-     * @param coolestMired the coolest supported color temperature in Mired.
+     * @param miredControlCoolest the coolest supported color temperature in Mired.
      * @throws IllegalArgumentException if the coolestMired parameter is out of range or not less than warmestMired.
      */
-    public void configSetMiredCoolest(double coolestMired) throws IllegalArgumentException {
-        if (coolestMired < 100.0 || coolestMired > 1000.0) {
+    public void configSetMiredControlCoolest(double miredControlCoolest) throws IllegalArgumentException {
+        if (miredControlCoolest < 100.0 || miredControlCoolest > 1000.0) {
             throw new IllegalArgumentException(
-                    "Coolest mired '%.1f' out of range [100.0..1000.0]".formatted(coolestMired));
+                    "Coolest mired '%.1f' out of range [100.0..1000.0]".formatted(miredControlCoolest));
         }
-        if (warmestMired <= coolestMired) {
+        if (miredControlWarmest <= miredControlCoolest) {
             throw new IllegalArgumentException("Warmest Mired '%.1f' must be greater than coolest Mired '%.1f'"
-                    .formatted(warmestMired, coolestMired));
+                    .formatted(miredControlWarmest, miredControlCoolest));
         }
-        this.coolestMired = coolestMired;
+        this.miredControlCoolest = miredControlCoolest;
     }
 
     /**
@@ -491,19 +505,19 @@ public class LightModel {
     /**
      * Configuration: set the warmest color temperature in Mired.
      *
-     * @param warmestMired the warmest supported color temperature in Mired.
+     * @param miredControlWarmest the warmest supported color temperature in Mired.
      * @throws IllegalArgumentException if the warmestMired parameter is out of range or not greater than coolestMired.
      */
-    public void configSetMiredWarmest(double warmestMired) throws IllegalArgumentException {
-        if (warmestMired < 100.0 || warmestMired > 1000.0) {
+    public void configSetMiredControlWarmest(double miredControlWarmest) throws IllegalArgumentException {
+        if (miredControlWarmest < 100.0 || miredControlWarmest > 1000.0) {
             throw new IllegalArgumentException(
-                    "Warmest Mired '%.1f' out of range [100.0..1000.0]".formatted(warmestMired));
+                    "Warmest Mired '%.1f' out of range [100.0..1000.0]".formatted(miredControlWarmest));
         }
-        if (warmestMired <= coolestMired) {
+        if (miredControlWarmest <= miredControlCoolest) {
             throw new IllegalArgumentException("Warmest Mired '%.1f' must be greater than coolest mired '%.1f'"
-                    .formatted(warmestMired, coolestMired));
+                    .formatted(miredControlWarmest, miredControlCoolest));
         }
-        this.warmestMired = warmestMired;
+        this.miredControlWarmest = miredControlWarmest;
     }
 
     /**
@@ -517,33 +531,6 @@ public class LightModel {
                     "Warm LED Mired '%.1f' out of range [100.0..1000.0]".formatted(warmLedMired));
         }
         warmWhiteLed = new WhiteLED(warmLedMired);
-    }
-
-    /**
-     * Configuration: set whether brightness control is supported.
-     *
-     * @param supportsBrightness true if brightness control is supported.
-     */
-    public void configSetSupportsBrightness(boolean supportsBrightness) {
-        this.supportsBrightness = supportsBrightness;
-    }
-
-    /**
-     * Configuration: set whether color control is supported.
-     *
-     * @param supportsColor true if color control is supported.
-     */
-    public void configSetSupportsColor(boolean supportsColor) {
-        this.supportsColor = supportsColor;
-    }
-
-    /**
-     * Configuration: set whether color temperature control is supported.
-     *
-     * @param supportsColorTemperature true if color temperature control is supported.
-     */
-    public void configSetSupportsColorTemperature(boolean supportsColorTemperature) {
-        this.supportsColorTemperature = supportsColorTemperature;
     }
 
     /**
@@ -566,9 +553,10 @@ public class LightModel {
      * @return PercentType, or null if not supported.
      */
     public @Nullable PercentType getBrightness(boolean... forceChannelVisible) {
-        return supportsBrightness && (!supportsColor || (forceChannelVisible.length > 0 && forceChannelVisible[0]))
-                ? cachedHSB.getBrightness()
-                : null;
+        return lightCapabilities.supportsBrightness()
+                && (!lightCapabilities.supportsColor() || (forceChannelVisible.length > 0 && forceChannelVisible[0]))
+                        ? cachedHSB.getBrightness()
+                        : null;
     }
 
     /**
@@ -577,7 +565,7 @@ public class LightModel {
      * @return HSBType, or null if not supported.
      */
     public @Nullable HSBType getColor() {
-        return supportsColor ? cachedHSB : null;
+        return lightCapabilities.supportsColor() ? cachedHSB : null;
     }
 
     /**
@@ -588,7 +576,7 @@ public class LightModel {
      *         or the Mired value is not known.
      */
     public @Nullable QuantityType<?> getColorTemperature() {
-        if (supportsColorTemperature && !Double.isNaN(cachedMired)) {
+        if (lightCapabilities.supportsColorTemperature() && !Double.isNaN(cachedMired)) {
             return Objects.requireNonNull( // Mired always converts to Kelvin
                     QuantityType.valueOf(cachedMired, Units.MIRED).toInvertibleUnit(Units.KELVIN));
         }
@@ -603,8 +591,8 @@ public class LightModel {
      *         or the Mired value is not known.
      */
     public @Nullable PercentType getColorTemperaturePercent() {
-        if (supportsColorTemperature && !Double.isNaN(cachedMired)) {
-            double percent = 100 * (cachedMired - coolestMired) / (warmestMired - coolestMired);
+        if (lightCapabilities.supportsColorTemperature() && !Double.isNaN(cachedMired)) {
+            double percent = 100 * (cachedMired - miredControlCoolest) / (miredControlWarmest - miredControlCoolest);
             return new PercentType(new BigDecimal(Math.min(Math.max(percent, 0.0), 100.0)));
         }
         return null;
@@ -636,9 +624,10 @@ public class LightModel {
      * @return OnOffType representing the on/off state.
      */
     public @Nullable OnOffType getOnOff(boolean... forceChannelVisible) {
-        return (!supportsColor && !supportsBrightness) || (forceChannelVisible.length > 0 && forceChannelVisible[0])
-                ? OnOffType.from(cachedHSB.getBrightness().doubleValue() >= minimumOnBrightness)
-                : null;
+        return (!lightCapabilities.supportsColor() && !lightCapabilities.supportsBrightness())
+                || (forceChannelVisible.length > 0 && forceChannelVisible[0])
+                        ? OnOffType.from(cachedHSB.getBrightness().doubleValue() >= minimumOnBrightness)
+                        : null;
     }
 
     /**
@@ -785,9 +774,10 @@ public class LightModel {
      * @throws IllegalArgumentException if the mired parameter is not in the range [coolestMired..warmestMired]
      */
     public void setMired(double mired) throws IllegalArgumentException {
-        if (mired < coolestMired || mired > warmestMired) { // NaN is not less than or greater than anything
-            throw new IllegalArgumentException(
-                    "Mired value '%.1f' out of range [%.1f..%.1f]".formatted(mired, coolestMired, warmestMired));
+        if (mired < miredControlCoolest || mired > miredControlWarmest) { // NaN is not less than or greater than
+                                                                          // anything
+            throw new IllegalArgumentException("Mired value '%.1f' out of range [%.1f..%.1f]".formatted(mired,
+                    miredControlCoolest, miredControlWarmest));
         }
         if (!Double.isNaN(mired)) { // don't update color if Mired is not known
             HSBType hsb = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / mired));
@@ -922,7 +912,7 @@ public class LightModel {
      * @param warmness the color temperature warmness {@link PercentType} to set.
      */
     private void zHandleColorTemperature(PercentType warmness) {
-        setMired(coolestMired + ((warmestMired - coolestMired) * warmness.doubleValue() / 100.0));
+        setMired(miredControlCoolest + ((miredControlWarmest - miredControlCoolest) * warmness.doubleValue() / 100.0));
     }
 
     /**
@@ -983,7 +973,7 @@ public class LightModel {
     private double zMiredFrom(HSBType hsb) {
         double[] xyY = ColorUtil.hsbToXY(new HSBType(hsb.getHue(), hsb.getSaturation(), PercentType.HUNDRED));
         double mired = 1000000 / ColorUtil.xyToKelvin(new double[] { xyY[0], xyY[1] });
-        return Math.min(Math.max(mired, coolestMired), warmestMired);
+        return Math.min(Math.max(mired, miredControlCoolest), miredControlWarmest);
     }
 
     /**
