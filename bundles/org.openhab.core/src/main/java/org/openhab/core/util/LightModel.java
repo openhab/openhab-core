@@ -994,6 +994,9 @@ public class LightModel {
      * @throws IllegalArgumentException if the value is outside the range [0.0..100.0]
      */
     private PercentType zPercentTypeFrom(double value) throws IllegalArgumentException {
+        if (value < 0.0 || value > 100.0) {
+            throw new IllegalArgumentException("PercentType value must be in range [0.0..100.0]: " + value);
+        }
         return new PercentType(new BigDecimal(value));
     }
 
