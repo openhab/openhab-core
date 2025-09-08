@@ -43,7 +43,6 @@ import org.openhab.core.types.UnDefType;
  * <li>On/Off with Brightness and Color (HSB, RGB, or CIE XY)</li>
  * <li>On/Off with Brightness, Color Temperature, and Color</li>
  * </ul>
- *
  * It maintains an internal representation of the state of the light.
  * It provides methods to handle commands from openHAB and to update the state from the remote light.
  * It also provides configuration methods to set the capabilities and parameters of the light.
@@ -51,68 +50,54 @@ import org.openhab.core.types.UnDefType;
  * brightness, and that the color temperature and color are only set if the capabilities are supported.
  * It also provides utility methods to convert between different color representations.
  * <p>
- *
  * See also {@link ColorUtil} for other color conversions.
  * <p>
- *
- * To use the model you must initialize the following configuration capabilities (the default constructor initializes
- * {@link #supportsBrightness}, {@link #supportsColorTemperature} and {@link #supportsColor} to true):
+ * To use the model you must initialize the {@link #lightCapabilities} during initialization as follows:
  * <ul>
- * <li>Initialize {@link #supportsBrightness} to true if the light shall support brightness control.</li>
- * <li>Initialize {@link #supportsColorTemperature} to true if the light shall support color temperature control.</li>
- * <li>Initialize {@link #supportsColor} to true if the light shall support color control.</li>
- * <li>Initialize {@link #rgbDataType} to the chosen RGB data type RGB, RGBW, RGBCW etc.</li>
+ * <li>ON_OFF: if the light is on-off only.</li>
+ * <li>BRIGHTNESS: if the light is on-off with brightness.</li>
+ * <li>BRIGHTNESS_WITH_COLOR_TEMPERATURE: if the light is on-off with color temperature control.</li>
+ * <li>COLOR: if the light is on-off with brightness and full and color control.</li>
+ * <li>COLOR_WITH_COLOR_TEMPERATURE: if the light is on-off with brightness, full color, and color temperature
+ * control.</li>
  * </ul>
- * <p>
- *
- * You can also override the following configuration parameters during initialization:
+ * Also set {@link #rgbDataType} to the chosen RGB data type RGB, RGBW, RGBCW etc.
+ * And optionally set the following configuration parameters:
  * <ul>
  * <li>Optionally override {@link #minimumOnBrightness} to a minimum brightness percent in the range [0.1..10.0]
  * percent, to consider as being "ON". The default is 1 percent.</li>
- *
  * <li>Optionally override {@link #miredControlWarmest} to a 'warmest' white color temperature in the range
  * [{@link #miredControlCoolest}..1000.0] Mired. The default is 500 Mired.</li>
- *
  * <li>Optionally override {@link #miredControlCoolest} to a 'coolest' white color temperature in the range
  * [100.0.. {@link #miredControlWarmest}] Mired. The default is 153 Mired.</li>
- *
  * <li>Optionally override {@link #stepSize} to a step size for the IncreaseDecreaseType commands in the range
  * [1.0..50.0] percent. The default is 10.0 percent.</li>
  * </ul>
  * <p>
- *
  * The model specifically handles the following "exotic" cases:
  * <ol>
- *
  * <li>It handles inter relationships between the brightness PercentType state, the 'B' part of the HSBType state, and
  * the OnOffType state. Where if the brightness goes below the configured {@link #minimumOnBrightness} level the on/off
  * state changes from ON to OFF, and the brightness is clamped to 0%. And analogously if the on/off state changes from
  * OFF to ON, the brightness changes from 0% to its last non zero value.</li>
- *
  * <li>It handles IncreaseDecreaseType commands to change the brightness up or down by the configured
  * {@link #stepSize}, and ensures that the brightness is clamped in the range [0%..100%].</li>
- *
  * <li>It handles both color temperature PercentType states and QuantityType states (which may be either in Mired or
  * Kelvin). Where color temperature PercentType values are internally converted to Mired values on the percentage scale
  * between the configured {@link #miredControlCoolest} and {@link #miredControlWarmest} Mired values, and vice
  * versa.</li>
- *
  * <li>When the color temperature changes then the HS values are adapted to match the corresponding color temperature
  * point on the Planckian Locus in the CIE color chart.</li>
- *
  * <li>It handles input/output values in RGB format in the range [0..255]. The behavior depends on the
  * {@link #rgbDataType} setting. If {@link #rgbDataType} is DEFAULT the RGB values read/write all three parts of the
  * HSBType state. Whereas if it is {@link #rgbDataType} is RGB_NO_BRIGHTNESS the RGB values read/write only
  * the 'HS' parts. NOTE: in the latter case, a 'setRGBx()' call followed by a 'getRGBx()' call do not necessarily return
  * the same values, since the values are normalized to 100%. Neverthless the ratios between the RGB values do remain
  * unchanged.</li>
- *
  * <li>If {@link #rgbDataType} is RGB_W it handles values in RGBW format. The behavior is similar to the RGB case above
  * except that the white channel is derived from the lowest of the RGB values.</li>
- *
  * <li>If {@link #rgbDataType} is RGB_C_W it handles values in RGBCW format. The behavior is similar to the RGBW case
  * above except that the white channel is derived from the RGB values by a custom algorithm.</li>
- *
  * </ol>
  * <p>
  * A typical use case is within in a ThingHandler as follows:
@@ -490,9 +475,10 @@ public class LightModel {
     }
 
     /**
-     * Configuration: set the weightings of the cool white LED RGB sub- components.
+     * Configuration: set the color temperature of the cool white LED, and thus set the wightings of its
+     * individual RGB sub- components.
      *
-     * @param coolLedMired the color temperature of the cool white LED.
+     * @param coolLedMired the color temperature in Mired of the cool white LED.
      */
     public void configSetMiredCoolWhiteLED(double coolLedMired) {
         if (coolLedMired < 100.0 || coolLedMired > 1000.0) {
@@ -521,9 +507,10 @@ public class LightModel {
     }
 
     /**
-     * Configuration: set the weightings of the warm white LED RGB sub- components.
+     * Configuration: set the color temperature of the arem white LED, and thus set the wightings of its
+     * individual RGB sub- components.
      *
-     * @param warmLedMired the color temperature of the warm white LED.
+     * @param warmLedMired the color temperature in Mired of the warm white LED.
      */
     public void configSetMiredWarmWhiteLED(double warmLedMired) {
         if (warmLedMired < 100.0 || warmLedMired > 1000.0) {
@@ -1095,7 +1082,7 @@ public class LightModel {
 
             double lowestDelta = 3.0; // lowest total of RGB' elements found so far; starting with the worst case
 
-            // get maximmum C scalar such that RGB' channels can't become negative
+            // get maximum C scalar such that RGB' channels can't become negative
             double coolScalarMax = getMaxScalarForRgbWithProfile(rgb, coolProfile);
 
             // iterate downwards over C scalar values to solve for the best combination of C and W scalars
@@ -1107,7 +1094,7 @@ public class LightModel {
                         rgb[2] - coolProfile[2] * coolScalar, //
                         Double.NaN, Double.NaN }; // scalar values are dropped in when a new best solution is found
 
-                // get maximmum W scalar such that RGB' channels can't become negative
+                // get maximum W scalar such that RGB' channels can't become negative
                 double warmScalar = getMaxScalarForRgbWithProfile(rgbPrime, warmProfile);
 
                 // also subtract warm LED profile contributions from RGB'
@@ -1159,7 +1146,7 @@ public class LightModel {
         }
 
         /**
-         * Internal: Returns the maximmum scalar value for the given RGB and LED profile such that none of
+         * Internal: Returns the maximum scalar value for the given RGB and LED profile such that none of
          * the resulting RGB' channels can become negative. Used to determine how much of a given white LED
          * profile can be applied. It checks for zero profile values to avoid divide-by-zero errors.
          *
