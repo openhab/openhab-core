@@ -500,7 +500,7 @@ public class LightModel {
                     "Warmest Mired '%.1f' out of range [100.0..1000.0]".formatted(warmestMired));
         }
         if (warmestMired <= coolestMired) {
-            throw new IllegalArgumentException("Warmest Mired '%.1f' must be greater than coolest mired '%f'"
+            throw new IllegalArgumentException("Warmest Mired '%.1f' must be greater than coolest mired '%.1f'"
                     .formatted(warmestMired, coolestMired));
         }
         this.warmestMired = warmestMired;
