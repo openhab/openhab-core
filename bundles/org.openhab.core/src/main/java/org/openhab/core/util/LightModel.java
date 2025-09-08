@@ -669,7 +669,7 @@ public class LightModel {
             PercentType[] rgbp = ColorUtil.hsbToRgbPercent(hsb);
             double[] rgb = Arrays.stream(rgbp).mapToDouble(p -> p.doubleValue() / 100.0).toArray();
             rgb = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
-            rgb = Arrays.stream(rgb).map(d -> Math.round(d * 25500) / 100).toArray();
+            rgb = Arrays.stream(rgb).map(d -> Math.round(d * 255 * 100) / 100).toArray(); // round to 2 places
             return rgb;
         } else if (RgbDataType.RGB_W.equals(rgbDataType)) {
             // RGBW - convert HSB to RGBW, then scale to [0..255]
@@ -834,7 +834,7 @@ public class LightModel {
             // RGBCW - normalize, convert to RGB, then scale back to [0..255]
             rgbx = Arrays.stream(rgbxParameter).map(d -> d / 255.0).toArray();
             rgbx = RgbcwMath.rgbcw2rgb(rgbx, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
-            rgbx = Arrays.stream(rgbx).map(d -> Math.round(d * 25500) / 100).toArray();
+            rgbx = Arrays.stream(rgbx).map(d -> Math.round(d * 255 * 100) / 100).toArray(); // round to 2 places
         } else {
             // RGB or RGBW - pass through RGB(W) values unchanged
             rgbx = rgbxParameter;
@@ -969,7 +969,7 @@ public class LightModel {
      * @param onOff the {@link OnOffType} command.
      */
     private void zHandleOnOff(OnOffType onOff) {
-        if (!onOff.equals(getOnOff())) {
+        if (!Objects.equals(onOff, getOnOff())) {
             zHandleBrightness(OnOffType.OFF.equals(onOff) ? PercentType.ZERO : cachedBrightness);
         }
     }
@@ -1058,6 +1058,12 @@ public class LightModel {
      */
     public static class RgbcwMath {
 
+        // below this value no RGB -> RGBCW conversion attempted (see method rgb2rgbcw)
+        private static final double CONVERSION_THRESHOLD = 0.01;
+
+        // step size when iterating over C scalar values for RGB -> RGBCW conversion (see method rgb2rgbcw)
+        private static final double CONVERSION_ITERATOR_STEP_SIZE = 0.01;
+
         // default cool and warm white LED RGB profiles used if nothing else is provided in the variable argument lists
         private static final double[] COOL_PROFILE = new double[] { 0.95562, 0.976449753, 1.0 }; // 153 Mired
         private static final double[] WARM_PROFILE = new double[] { 1.0, 0.695614289308524, 0.25572 }; // 500 Mired
@@ -1090,7 +1096,7 @@ public class LightModel {
             double[] rgbcw = new double[] { rgb[0], rgb[1], rgb[2], 0.0, 0.0 };
 
             // cool/warm contribution is only possible if all rgb values are non- zero
-            if (rgb[0] < 0.01 || rgb[1] < 0.01 || rgb[2] < 0.01) {
+            if (rgb[0] < CONVERSION_THRESHOLD || rgb[1] < CONVERSION_THRESHOLD || rgb[2] < CONVERSION_THRESHOLD) {
                 return rgbcw;
             }
 
@@ -1103,7 +1109,7 @@ public class LightModel {
             double coolScalarMax = getMaxScalarForRgbWithProfile(rgb, coolProfile);
 
             // iterate downwards over C scalar values to solve for the best combination of C and W scalars
-            for (double coolScalar = coolScalarMax; coolScalar >= 0.0; coolScalar -= 0.01) {
+            for (double coolScalar = coolScalarMax; coolScalar >= 0.0; coolScalar -= CONVERSION_ITERATOR_STEP_SIZE) {
                 // subtract cool LED profile contributions from RGB to create RGB'
                 double[] rgbPrime = new double[] { //
                         rgb[0] - coolProfile[0] * coolScalar, //
