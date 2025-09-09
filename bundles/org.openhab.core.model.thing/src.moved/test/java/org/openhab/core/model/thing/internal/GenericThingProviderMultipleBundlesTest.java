@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.thing.internal;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.eclipse.emf.common.util.BasicEList;

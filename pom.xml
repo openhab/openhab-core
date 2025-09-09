@@ -83,10 +83,8 @@
     <!-- TEST -->
     <!-- cxf can be updated independently, karaf only uses it in tests -->
     <cxf.version>3.6.8</cxf.version>
-    <!-- junit 5.12.0 to 5.13.0-M3 fails silently with bnd 7.1.0, not executing itests;
-         not sure if this is a bnd/junit issue or due to wrong configuration -->
-    <junit.version>5.11.4</junit.version>
-    <mockito.version>4.11.0</mockito.version>
+    <junit.version>5.13.4</junit.version>
+    <mockito.version>5.19.0</mockito.version>
   </properties>
 
   <dependencyManagement>
@@ -410,7 +408,9 @@ Import-Package: \\
           <version>3.5.3</version>
           <configuration>
             <argLine>--add-opens java.base/java.net=ALL-UNNAMED
-              --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+              --add-opens java.base/java.util=ALL-UNNAMED
+              -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+              -Xshare:off</argLine>
             <systemPropertyVariables>
               <junit.jupiter.execution.timeout.default>15 m</junit.jupiter.execution.timeout.default>
             </systemPropertyVariables>
