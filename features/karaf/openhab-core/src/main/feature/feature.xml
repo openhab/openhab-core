@@ -58,6 +58,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.audio/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.voice/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.hli/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.console/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.monitor/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.net/${project.version}</bundle>
