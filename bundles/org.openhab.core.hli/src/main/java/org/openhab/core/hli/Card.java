@@ -228,7 +228,7 @@ public class Card extends Component implements Identifiable<String> {
     }
 
     /**
-     * Updates the timestamp of the card to the current date & time.
+     * Updates the timestamp of the card to the current date &amp; time.
      */
     public void updateTimestamp() {
         this.timestamp = new Date();

@@ -161,8 +161,7 @@ public class ChatReply {
 
     /**
      * Sets the {@link Card} to present with the answer
-     *
-     * @return the card
+     * @param card the card
      */
     public void setCard(Card card) {
         this.card = card;
