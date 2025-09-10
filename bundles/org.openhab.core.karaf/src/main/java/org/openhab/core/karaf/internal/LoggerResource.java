@@ -71,7 +71,7 @@ public class LoggerResource implements RESTResource {
     public static final String PATH_LOGGING = "logging";
 
     private static final Set<String> LOG_LEVELS = Set.of(Level.strings());
-    private static final Pattern BUNDLE_REGEX = Pattern.compile("[\\w.]+");
+    private static final Pattern BUNDLE_REGEX = Pattern.compile("\\w[\\w. -]*");
 
     private final LogService logService;
 
@@ -91,7 +91,7 @@ public class LoggerResource implements RESTResource {
     }
 
     @PUT
-    @Path("/{loggerName: [a-zA-Z0-9.]+}")
+    @Path("/{loggerName: \\w(%20|[\\w.-])*}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(operationId = "putLogger", summary = "Modify or add logger", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -108,7 +108,7 @@ public class LoggerResource implements RESTResource {
     }
 
     @GET
-    @Path("/{loggerName: [a-zA-Z0-9.]+}")
+    @Path("/{loggerName: \\w(%20|[\\w.-])*}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getLogger", summary = "Get a single logger.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoggerBean.LoggerInfo.class))) })
@@ -119,7 +119,7 @@ public class LoggerResource implements RESTResource {
     }
 
     @DELETE
-    @Path("/{loggerName: [a-zA-Z0-9.]+}")
+    @Path("/{loggerName: \\w(%20|[\\w.-])*}")
     @Operation(operationId = "removeLogger", summary = "Remove a single logger.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
     public Response removeLogger(@PathParam("loggerName") @Parameter(description = "logger name") String loggerName,
