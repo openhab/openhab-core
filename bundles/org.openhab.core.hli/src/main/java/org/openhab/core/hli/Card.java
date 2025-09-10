@@ -130,7 +130,7 @@ public class Card extends Component implements Identifiable<String> {
      * @return the card location attributes
      */
     public Set<String> getLocationAttributes() {
-        return tags;
+        return locations;
     }
 
     /**
