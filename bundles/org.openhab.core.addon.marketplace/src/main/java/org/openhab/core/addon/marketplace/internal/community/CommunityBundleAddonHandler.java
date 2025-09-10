@@ -30,6 +30,8 @@ import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles add-ons as jar files (specifically, OSGi
@@ -47,6 +49,7 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
     private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "misc", "persistence",
             "transformation", "ui", "voice");
 
+    private final Logger logger = LoggerFactory.getLogger(CommunityBundleAddonHandler.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private final BundleContext bundleContext;
@@ -74,9 +77,15 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
+        Object urlObject = addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY);
+        if (!(urlObject instanceof String urlString)) {
+            logger.error("Bundle {} has no JAR download URL", addon.getUid());
+            throw new MarketplaceHandlerException("Bundle has no JAR download URL", null);
+        }
+
         URL sourceUrl;
         try {
-            sourceUrl = (new URI((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY))).toURL();
+            sourceUrl = new URI(urlString).toURL();
         } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
