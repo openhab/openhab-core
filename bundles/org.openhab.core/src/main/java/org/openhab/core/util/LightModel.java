@@ -1172,21 +1172,23 @@ public class LightModel {
          * LED profiles. The result comprises the main input RGB values plus the RGB sub- component contributions of
          * the cold and warm white LEDs.
          *
-         * @param rgb a 3-element array of double: [R,G,B].
+         * @param rgbcw a 5-element array of double: [R,G,B,C,W], where R, G, B are the RGB values and C and W are
+         *            the cold and warm white LED RGB profile contributions.
          *
          * @return double[] a 3-element array of double: [R,G,B].
          * @throws IllegalArgumentException if the input array length is not 5, or if any its values are
          *             outside the range [0.0..1.0]
          */
-        public static double[] rgbcw2rgb(double[] rgb) throws IllegalArgumentException {
-            return rgbcw2rgb(rgb, COOL_PROFILE, WARM_PROFILE);
+        public static double[] rgbcw2rgb(double[] rgbcw) throws IllegalArgumentException {
+            return rgbcw2rgb(rgbcw, COOL_PROFILE, WARM_PROFILE);
         }
 
         /**
          * Decomposes the given RGBCW to an RGB. The result comprises the main input RGB values plus the RGB sub-
          * component contributions of the cold and warm white LEDs.
          *
-         * @param rgb a 3-element array of double: [R,G,B].
+         * @param rgbcw a 5-element array of double: [R,G,B,C,W], where R, G, B are the RGB values and C and W are
+         *            the cold and warm white LED RGB profile contributions.
          * @param coolProfile the cool white LED RGB profile, a normalized 3-element [R,G,B] array in the range
          *            [0.0..1.0]. For example see {@link #COOL_PROFILE}.
          * @param warmProfile the warm white LED RGB profile, a normalized 3-element [R,G,B] array in the range
