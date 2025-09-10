@@ -44,7 +44,6 @@ public class Component {
      * @param componentName name of the component as known to the frontend
      */
     public Component(String componentName) {
-        super();
         this.component = componentName;
         this.config = new HashMap<>();
     }
