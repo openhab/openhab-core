@@ -10,20 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.core;
+package org.openhab.core.model.yaml;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This class holds all important constants relevant for this bundle.
+ * Static utility constants and methods that are helpful when dealing with YAML models.
  *
- * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public class ModelCoreConstants {
-
-    /** The service pid used for the managed service (without the "org.openhab.core" prefix */
-    public static final String SERVICE_PID = "folder";
+public class YamlModelUtils {
 
     public static final String PREFIX_TMP_MODEL = "tmp_";
 

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.yaml.internal.items;
 
+import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -51,7 +53,9 @@ public class YamlChannelLinkProvider extends AbstractProvider<ItemChannelLink> i
 
     @Override
     public Collection<ItemChannelLink> getAll() {
-        return itemsChannelLinksMap.values().stream().flatMap(m -> m.values().stream())
+        // Ignore isolated models
+        return itemsChannelLinksMap.keySet().stream().filter(name -> !isIsolatedModel(name))
+                .map(name -> itemsChannelLinksMap.getOrDefault(name, Map.of())).flatMap(m -> m.values().stream())
                 .flatMap(m -> m.values().stream()).toList();
     }
 
@@ -99,21 +103,27 @@ public class YamlChannelLinkProvider extends AbstractProvider<ItemChannelLink> i
             ItemChannelLink oldLink = links.get(channelUIDObject);
             if (oldLink == null) {
                 links.put(channelUIDObject, itemChannelLink);
-                logger.debug("notify added item channel link {}", itemChannelLink.getUID());
-                notifyListenersAboutAddedElement(itemChannelLink);
+                logger.debug("model {} added channel link {}", modelName, itemChannelLink.getUID());
+                if (!isIsolatedModel(modelName)) {
+                    notifyListenersAboutAddedElement(itemChannelLink);
+                }
             } else if (!YamlElementUtils.equalsConfig(configuration.getProperties(),
                     oldLink.getConfiguration().getProperties())) {
                 links.put(channelUIDObject, itemChannelLink);
-                logger.debug("notify updated item channel link {}", itemChannelLink.getUID());
-                notifyListenersAboutUpdatedElement(oldLink, itemChannelLink);
+                logger.debug("model {} updated channel link {}", modelName, itemChannelLink.getUID());
+                if (!isIsolatedModel(modelName)) {
+                    notifyListenersAboutUpdatedElement(oldLink, itemChannelLink);
+                }
             }
         }
 
         linksToBeRemoved.forEach(uid -> {
             ItemChannelLink link = links.remove(uid);
             if (link != null) {
-                logger.debug("notify removed item channel link {}", link.getUID());
-                notifyListenersAboutRemovedElement(link);
+                logger.debug("model {} removed channel link {}", modelName, link.getUID());
+                if (!isIsolatedModel(modelName)) {
+                    notifyListenersAboutRemovedElement(link);
+                }
             }
         });
         if (links.isEmpty()) {
