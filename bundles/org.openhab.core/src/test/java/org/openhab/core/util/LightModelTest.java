@@ -233,8 +233,8 @@ public class LightModelTest {
         assertTrue(lsm.configGetLightCapabilities().supportsBrightness());
         assertTrue(lsm.configGetLightCapabilities().supportsColorTemperature());
         assertEquals(1.0, lsm.configGetMinimumOnBrightness());
-        assertEquals(500.0, lsm.configGetMiredControlWarmest());
-        assertEquals(153.0, lsm.configGetMiredControlCoolest());
+        assertEquals(500.0, lsm.configGetMirekControlWarmest());
+        assertEquals(153.0, lsm.configGetMirekControlCoolest());
         assertEquals(10.0, lsm.configGetIncreaseDecreaseStep());
     }
 
@@ -247,8 +247,8 @@ public class LightModelTest {
         assertFalse(lsm.configGetLightCapabilities().supportsColorTemperature());
         assertEquals(RgbDataType.RGB_C_W, lsm.configGetRgbDataType());
         assertEquals(2.0, lsm.configGetMinimumOnBrightness());
-        assertEquals(501.0, lsm.configGetMiredControlWarmest());
-        assertEquals(154.0, lsm.configGetMiredControlCoolest());
+        assertEquals(501.0, lsm.configGetMirekControlWarmest());
+        assertEquals(154.0, lsm.configGetMirekControlCoolest());
         assertEquals(11.0, lsm.configGetIncreaseDecreaseStep());
     }
 
@@ -271,14 +271,14 @@ public class LightModelTest {
         LightModel lsm = new LightModel();
         lsm.configSetRgbDataType(RgbDataType.RGB_C_W);
         lsm.configSetMinimumOnBrightness(2.0);
-        lsm.configSetMiredControlWarmest(501.0);
-        lsm.configSetMiredControlCoolest(154.0);
+        lsm.configSetMirekControlWarmest(501.0);
+        lsm.configSetMirekControlCoolest(154.0);
         lsm.configSetIncreaseDecreaseStep(11.0);
 
         assertEquals(RgbDataType.RGB_C_W, lsm.configGetRgbDataType());
         assertEquals(2.0, lsm.configGetMinimumOnBrightness());
-        assertEquals(501.0, lsm.configGetMiredControlWarmest());
-        assertEquals(154.0, lsm.configGetMiredControlCoolest());
+        assertEquals(501.0, lsm.configGetMirekControlWarmest());
+        assertEquals(154.0, lsm.configGetMirekControlCoolest());
         assertEquals(11.0, lsm.configGetIncreaseDecreaseStep());
     }
 
@@ -288,13 +288,13 @@ public class LightModelTest {
         assertThrows(IllegalArgumentException.class, () -> lsm.configSetMinimumOnBrightness(0.0));
         assertThrows(IllegalArgumentException.class, () -> lsm.configSetMinimumOnBrightness(11.0));
 
-        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredControlWarmest(153.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredControlWarmest(99.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredControlWarmest(1001.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMirekControlWarmest(153.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMirekControlWarmest(99.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMirekControlWarmest(1001.0));
 
-        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredControlCoolest(501.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredControlCoolest(99.0));
-        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMiredControlCoolest(1001.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMirekControlCoolest(501.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMirekControlCoolest(99.0));
+        assertThrows(IllegalArgumentException.class, () -> lsm.configSetMirekControlCoolest(1001.0));
 
         assertThrows(IllegalArgumentException.class, () -> lsm.configSetIncreaseDecreaseStep(0.0));
         assertThrows(IllegalArgumentException.class, () -> lsm.configSetIncreaseDecreaseStep(51.0));
@@ -584,7 +584,7 @@ public class LightModelTest {
     @Test
     public void testRgbcwBrightWhiteWarm() {
         LightModel lsm = new LightModel(LightCapabilities.COLOR_WITH_COLOR_TEMPERATURE, RgbDataType.RGB_C_W);
-        HSBType warm = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / lsm.configGetMiredWarmWhiteLed()));
+        HSBType warm = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / lsm.configGetMirekWarmWhiteLed()));
         lsm.setRGBx(new double[] { 0, 0, 0, 0, 255 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
@@ -602,7 +602,7 @@ public class LightModelTest {
     @Test
     public void testRgbcwBrightWhiteCool() {
         LightModel lsm = new LightModel(LightCapabilities.COLOR_WITH_COLOR_TEMPERATURE, RgbDataType.RGB_C_W);
-        HSBType cool = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / lsm.configGetMiredCoolWhiteLed()));
+        HSBType cool = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / lsm.configGetMirekCoolWhiteLed()));
         lsm.setRGBx(new double[] { 0, 0, 0, 255, 0 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
@@ -628,8 +628,8 @@ public class LightModelTest {
          * - the cool warm led must have a yellow hue and ~20% saturation
          * - so the mix should have ~0% saturation (and the hue is undefined)
          */
-        lsm.configSetMiredCoolWhiteLED(100); // 10'000 K
-        lsm.configSetMiredWarmWhiteLED(230); // 4'347 K
+        lsm.configSetMirekCoolWhiteLED(100); // 10'000 K
+        lsm.configSetMirekWarmWhiteLED(230); // 4'347 K
 
         lsm.setRGBx(new double[] { 0, 0, 0, 255, 255 });
         HSBType hsb = lsm.getColor();
@@ -715,7 +715,7 @@ public class LightModelTest {
     public void testRgbcwNonZeroRgbWithCoolWhiteOnly() {
         LightModel lsm = new LightModel(LightCapabilities.COLOR_WITH_COLOR_TEMPERATURE, RgbDataType.RGB_C_W);
         // force cool white led for this test
-        lsm.configSetMiredCoolWhiteLED(100); // 10'000 K
+        lsm.configSetMirekCoolWhiteLED(100); // 10'000 K
         lsm.setRGBx(new double[] { 255, 0, 0, 100, 0 });
         HSBType hsb = lsm.getColor();
         assertNotNull(hsb);
