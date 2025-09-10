@@ -326,7 +326,7 @@ public class Card extends Component implements Identifiable<String> {
     /**
      * Returns whether the card has the specified object attribute (case insensitive)
      *
-     * @param object
+     * @param object the object to check
      */
     public boolean hasObjectAttribute(@Nullable String object) {
         if (this.objects == null || object == null || object.isEmpty()) {
