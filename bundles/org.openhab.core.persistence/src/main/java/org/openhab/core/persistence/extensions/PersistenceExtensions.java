@@ -482,41 +482,38 @@ public class PersistenceExtensions {
             int startPage = 0;
             filter.setPageNumber(startPage);
 
-            Iterable<HistoricItem> items = qService.query(filter, alias);
-            while (items != null) {
-                Iterator<HistoricItem> itemIterator = items.iterator();
-                int itemCount = 0;
-                State state = item.getState();
-                if (itemIterator.hasNext()) {
-                    if (!skipEqual) {
-                        HistoricItem historicItem = itemIterator.next();
-                        if (!forward && !historicItem.getState().equals(state)) {
-                            // Last persisted state value different from current state value, so it must have updated
-                            // since last persist. We do not know when from persistence, so get it from the item.
-                            return item.getLastStateUpdate();
-                        }
-                        return historicItem.getTimestamp();
-                    } else {
-                        HistoricItem historicItem = itemIterator.next();
-                        if (!historicItem.getState().equals(state)) {
-                            // Persisted state value different from current state value, so it must have changed, but we
-                            // do not know when looking backward in persistence. Get it from the item.
-                            return forward ? historicItem.getTimestamp() : item.getLastStateChange();
-                        }
-                        while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
-                            HistoricItem nextHistoricItem = itemIterator.next();
-                            itemCount++;
-                            if (!nextHistoricItem.getState().equals(state)) {
-                                return forward ? nextHistoricItem.getTimestamp() : historicItem.getTimestamp();
-                            }
-                            historicItem = nextHistoricItem;
-                        }
-                        if (itemCount == filter.getPageSize()) {
-                            filter.setPageNumber(++startPage);
-                            items = qService.query(filter, alias);
-                        } else {
-                            items = null;
-                        }
+            Iterator<HistoricItem> itemIterator = qService.query(filter, alias).iterator();
+            if (!itemIterator.hasNext()) {
+                return null;
+            }
+            int itemCount = 0;
+            State state = item.getState();
+            if (!skipEqual) {
+                HistoricItem historicItem = itemIterator.next();
+                if (!forward && !historicItem.getState().equals(state)) {
+                    // Last persisted state value different from current state value, so it must have updated
+                    // since last persist. We do not know when from persistence, so get it from the item.
+                    return item.getLastStateUpdate();
+                }
+                return historicItem.getTimestamp();
+            } else {
+                HistoricItem historicItem = itemIterator.next();
+                if (!historicItem.getState().equals(state)) {
+                    // Persisted state value different from current state value, so it must have changed, but we
+                    // do not know when looking backward in persistence. Get it from the item.
+                    return forward ? historicItem.getTimestamp() : item.getLastStateChange();
+                }
+                while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
+                    HistoricItem nextHistoricItem = itemIterator.next();
+                    itemCount++;
+                    if (!nextHistoricItem.getState().equals(state)) {
+                        return forward ? nextHistoricItem.getTimestamp() : historicItem.getTimestamp();
+                    }
+                    historicItem = nextHistoricItem;
+                    if (itemCount == filter.getPageSize()) {
+                        itemCount = 0;
+                        filter.setPageNumber(++startPage);
+                        itemIterator = qService.query(filter, alias).iterator();
                     }
                 }
             }
@@ -655,22 +652,18 @@ public class PersistenceExtensions {
             int startPage = 0;
             filter.setPageNumber(startPage);
 
-            Iterable<HistoricItem> items = qService.query(filter, alias);
-            while (items != null) {
-                Iterator<HistoricItem> itemIterator = items.iterator();
-                int itemCount = 0;
-                while (itemIterator.hasNext()) {
-                    HistoricItem historicItem = itemIterator.next();
-                    itemCount++;
-                    if (!skipEqual || !historicItem.getState().equals(item.getState())) {
-                        return historicItem;
-                    }
+            Iterator<HistoricItem> itemIterator = qService.query(filter, alias).iterator();
+            int itemCount = 0;
+            while (itemIterator.hasNext()) {
+                HistoricItem historicItem = itemIterator.next();
+                itemCount++;
+                if (!skipEqual || !historicItem.getState().equals(item.getState())) {
+                    return historicItem;
                 }
                 if (itemCount == filter.getPageSize()) {
+                    itemCount = 0;
                     filter.setPageNumber(++startPage);
-                    items = qService.query(filter, alias);
-                } else {
-                    items = null;
+                    itemIterator = qService.query(filter, alias).iterator();
                 }
             }
         } else {
