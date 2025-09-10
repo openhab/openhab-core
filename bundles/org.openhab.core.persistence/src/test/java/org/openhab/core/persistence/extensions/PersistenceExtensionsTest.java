@@ -1864,11 +1864,20 @@ public class PersistenceExtensionsTest {
         // 0 - 1 hour back in time
         createTestCachedValuesPersistenceService(now, historicHours, futureHours);
 
-        // Testing that riemannSum calculates the correct Riemann sum over the last 27 hours
-        State sum = PersistenceExtensions.riemannSumSince(numberItem, now.minusHours(historicHours), type,
+        // Testing that riemannSum calculates the correct Riemann sum for the last half hour without persisted value in
+        // that horizon
+        State sum = PersistenceExtensions.riemannSumSince(numberItem, now.minusMinutes(30), type,
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(sum);
         DecimalType dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(0.0, 0.01)));
+
+        // Testing that riemannSum calculates the correct Riemann sum over the last 27 hours
+        sum = PersistenceExtensions.riemannSumSince(numberItem, now.minusHours(historicHours), type,
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo(100.0 * 3600 + 50.0 * 3600, 0.01)));
 
@@ -1928,6 +1937,32 @@ public class PersistenceExtensionsTest {
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo(0, 0.01)));
+    }
+
+    @Test
+    public void testRiemannSumBetweenNoPersistedValues() {
+        RiemannType type = RiemannType.LEFT;
+
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 27;
+        int futureHours = 0;
+
+        // Persistence will contain following entries:
+        // 0 - 27 hours back in time
+        // 100 - 26 hours back in time
+        // 0 - 25 hours back in time
+        // 50 - 2 hours back in time
+        // 0 - 1 hour back in time
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+
+        // Testing that average calculates the correct average for the half hour without persisted values in
+        // that horizon
+        State sum = PersistenceExtensions.riemannSumBetween(numberItem, now.minusMinutes(105), now.minusMinutes(75),
+                type, TestCachedValuesPersistenceService.ID);
+        assertNotNull(sum);
+        DecimalType dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(50.0 * 1800, 0.01)));
     }
 
     @Test
@@ -2278,11 +2313,20 @@ public class PersistenceExtensionsTest {
         // 0 - 1 hour back in time
         createTestCachedValuesPersistenceService(now, historicHours, futureHours);
 
-        // Testing that average calculates the correct average over the last 27 hours
-        State average = PersistenceExtensions.averageSince(numberItem, now.minusHours(historicHours),
+        // Testing that average calculates the correct average for the last half hour without persisted value in
+        // that horizon
+        State average = PersistenceExtensions.averageSince(numberItem, now.minusMinutes(30),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
         DecimalType dt = average.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(0.0, 0.01)));
+
+        // Testing that average calculates the correct average over the last 27 hours
+        average = PersistenceExtensions.averageSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(average);
+        dt = average.as(DecimalType.class);
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0) / historicHours, 0.01)));
 
@@ -2293,14 +2337,6 @@ public class PersistenceExtensionsTest {
         dt = average.as(DecimalType.class);
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo(50.0 / (historicHours - 3.0), 0.01)));
-
-        // Testing that average calculates the correct average over the last 30 minutes
-        average = PersistenceExtensions.averageSince(numberItem, now.minusMinutes(30),
-                TestCachedValuesPersistenceService.ID);
-        assertNotNull(average);
-        dt = average.as(DecimalType.class);
-        assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(0, 0.01)));
     }
 
     @Test
@@ -2340,6 +2376,30 @@ public class PersistenceExtensionsTest {
         dt = average.as(DecimalType.class);
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo(0, 0.01)));
+    }
+
+    @Test
+    public void testAverageBetweenNoPersistedValues() {
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 27;
+        int futureHours = 0;
+
+        // Persistence will contain following entries:
+        // 0 - 27 hours back in time
+        // 100 - 26 hours back in time
+        // 0 - 25 hours back in time
+        // 50 - 2 hours back in time
+        // 0 - 1 hour back in time
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+
+        // Testing that average calculates the correct average for the half hour without persisted values in
+        // that horizon
+        State average = PersistenceExtensions.averageBetween(numberItem, now.minusMinutes(105), now.minusMinutes(75),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(average);
+        DecimalType dt = average.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(50.0, 0.01)));
     }
 
     @Test
@@ -2871,6 +2931,14 @@ public class PersistenceExtensionsTest {
         // default persistence service
         lastUpdate = PersistenceExtensions.lastUpdate(numberItem);
         assertNull(lastUpdate);
+
+        // last update on empty persistence
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 0;
+        int futureHours = 0;
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+        lastUpdate = PersistenceExtensions.lastUpdate(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNull(lastUpdate);
     }
 
     @Test
@@ -2892,6 +2960,14 @@ public class PersistenceExtensionsTest {
 
         // default persistence service
         lastChange = PersistenceExtensions.lastChange(numberItem);
+        assertNull(lastChange);
+
+        // last change on empty persistence
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 0;
+        int futureHours = 0;
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+        lastChange = PersistenceExtensions.lastChange(numberItem, TestCachedValuesPersistenceService.ID);
         assertNull(lastChange);
     }
 
@@ -3300,6 +3376,22 @@ public class PersistenceExtensionsTest {
 
         // default persistence service
         prevStateItem = PersistenceExtensions.previousState(groupQuantityItem, true);
+        assertNull(prevStateItem);
+    }
+
+    @Test
+    public void testPreviousStateEmptyPersistence() {
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 0;
+        int futureHours = 0;
+
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+
+        HistoricItem prevStateItem = PersistenceExtensions.previousState(numberItem, false,
+                TestCachedValuesPersistenceService.ID);
+        assertNull(prevStateItem);
+
+        prevStateItem = PersistenceExtensions.previousState(numberItem, true, TestCachedValuesPersistenceService.ID);
         assertNull(prevStateItem);
     }
 
