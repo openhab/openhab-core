@@ -30,7 +30,7 @@ public class Intent {
     /**
      * Gets the intent's name (identifier of the type of intent)
      *
-     * @return
+     * @return the intent's name
      */
     public String getName() {
         return name;
