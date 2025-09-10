@@ -10,11 +10,11 @@ RuleModel:
 	importSection = XImportSection?
 	(variables+=VariableDeclaration)*
 	(rules += Rule)*;
-	
+
 //Import:
 //	'import' importedNamespace=QualifiedNameWithWildcard
 //;
-		
+
 VariableDeclaration:
 	(writeable?='var'|'val') (=>(type=JvmTypeReference name=ValidID) | name=ValidID) ('=' right=XExpression)?
 ;
@@ -63,7 +63,7 @@ ChangedEventTrigger:
 
 GroupMemberChangedEventTrigger:
 	'Member of' group=ItemName 'changed' ('from' oldState=ValidState)? ('to' newState=ValidState)?
-;		
+;
 
 EventEmittedTrigger:
 	'Channel' channel=(STRING|ID) 'triggered' (trigger=ValidTrigger)?
@@ -76,7 +76,7 @@ TimerTrigger:
 ;
 
 DateTimeTrigger:
-    'Time' 'is' item=ItemName (timeOnly?='timeOnly')? ('offset' offset=INT)?
+    'Time' 'is' item=ItemName (timeOnly?='timeOnly')? ('offset' '='? offset=SIGNED_INT)?
 ;
 
 SystemTrigger:
@@ -107,7 +107,7 @@ ThingStateUpdateEventTrigger:
 ThingStateChangedEventTrigger:
     'Thing' thing=STRING 'changed' ('from' oldState=ThingValidState)? ('to' newState=ThingValidState)?
 ;
-	
+
 ItemName :
 	ID
 ;
@@ -168,4 +168,8 @@ ThingValidState:
     'OFFLINE' |
     'REMOVING' |
     'REMOVED'
+;
+
+SIGNED_INT:
+	'-'? INT
 ;
