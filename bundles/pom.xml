@@ -53,6 +53,7 @@
     <module>org.openhab.core.id</module>
     <module>org.openhab.core.persistence</module>
     <module>org.openhab.core.semantics</module>
+    <module>org.openhab.core.sitemap</module>
     <module>org.openhab.core.thing</module>
     <module>org.openhab.core.transform</module>
     <module>org.openhab.core.voice</module>
