@@ -374,7 +374,7 @@ public class Card extends Component implements Identifiable<String> {
     /**
      * Returns whether the card has the specified location attribute
      *
-     * @param location
+     * @param location the location to check
      */
     public boolean hasLocationAttribute(@Nullable String location) {
         if (this.locations == null || location == null || location.isEmpty()) {
