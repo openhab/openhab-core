@@ -43,8 +43,8 @@ public class ChatReply {
     /**
      * Constructs a ChatReply for the specified {@link Locale} and query
      *
-     * @param locale
-     * @param query
+     * @param locale the locale
+     * @param query the user query
      */
     public ChatReply(Locale locale, String query) {
         this.language = locale.getLanguage();
