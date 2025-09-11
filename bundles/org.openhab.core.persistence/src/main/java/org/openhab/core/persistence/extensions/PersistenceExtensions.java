@@ -629,22 +629,18 @@ public class PersistenceExtensions {
             int startPage = 0;
             filter.setPageNumber(startPage);
 
-            Iterable<HistoricItem> items = qService.query(filter);
-            while (items != null) {
-                Iterator<HistoricItem> itemIterator = items.iterator();
-                int itemCount = 0;
-                while (itemIterator.hasNext()) {
-                    HistoricItem historicItem = itemIterator.next();
-                    itemCount++;
-                    if (!skipEqual || !historicItem.getState().equals(item.getState())) {
-                        return historicItem;
-                    }
+            Iterator<HistoricItem> itemIterator = qService.query(filter).iterator();
+            int itemCount = 0;
+            while (itemIterator.hasNext()) {
+                HistoricItem historicItem = itemIterator.next();
+                itemCount++;
+                if (!skipEqual || !historicItem.getState().equals(item.getState())) {
+                    return historicItem;
                 }
                 if (itemCount == filter.getPageSize()) {
+                    itemCount = 0;
                     filter.setPageNumber(++startPage);
-                    items = qService.query(filter);
-                } else {
-                    items = null;
+                    itemIterator = qService.query(filter).iterator();
                 }
             }
         } else {
