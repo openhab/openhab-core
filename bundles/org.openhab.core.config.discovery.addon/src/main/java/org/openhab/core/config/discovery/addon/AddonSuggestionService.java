@@ -81,7 +81,8 @@ public class AddonSuggestionService implements AutoCloseable {
         this.localeProvider = localeProvider;
 
         SUGGESTION_FINDERS.forEach(f -> baseFinderConfig.put(f, false));
-        modified(config);
+        Map<String, Object> cfg = getConfiguration();
+        modified(cfg != null ? cfg : config);
 
         // Changes to the configuration are expected to call the {@link modified} method. This works well when running
         // in Eclipse. Running in Karaf, the method was not consistently called. Therefore regularly check for changes
@@ -99,7 +100,8 @@ public class AddonSuggestionService implements AutoCloseable {
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     protected void addAddonFinderService(AddonFinderService addonFinderService) {
         this.addonFinderService = addonFinderService;
-        modified(config);
+        Map<String, Object> cfg = getConfiguration();
+        modified(cfg != null ? cfg : config);
     }
 
     protected void removeAddonFinderService(AddonFinderService addonFinderService) {
@@ -121,6 +123,8 @@ public class AddonSuggestionService implements AutoCloseable {
                     String type = SUGGESTION_FINDER_TYPES.get(finder);
                     AddonFinderService finderService = addonFinderService;
                     if (type != null && finderService != null) {
+                        logger.debug("baseFinderConfig {} {} = {} => updating from {} to {}", finder, cfgParam,
+                                config == null ? "null config" : config.get(cfgParam), cfg, enabled);
                         baseFinderConfig.put(finder, enabled);
                         if (enabled) {
                             finderService.install(type);
@@ -136,18 +140,26 @@ public class AddonSuggestionService implements AutoCloseable {
 
     private void syncConfiguration() {
         try {
-            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(CONFIG_PID).getProperties();
-            if (cfg == null) {
-                return;
+            final Map<String, Object> cfg = getConfiguration();
+            if (cfg != null && !cfg.equals(config)) {
+                modified(cfg);
             }
-            List<String> keys = Collections.list(cfg.keys());
-            final Map<String, Object> cfgMap = keys.stream().collect(Collectors.toMap(Function.identity(), cfg::get));
-            if (!cfgMap.equals(config)) {
-                modified(cfgMap);
-            }
-        } catch (IOException | IllegalStateException e) {
+        } catch (IllegalStateException e) {
             logger.debug("Exception occurred while trying to sync the configuration: {}", e.getMessage());
         }
+    }
+
+    private @Nullable Map<String, Object> getConfiguration() {
+        try {
+            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(CONFIG_PID).getProperties();
+            if (cfg != null) {
+                List<String> keys = Collections.list(cfg.keys());
+                return keys.stream().collect(Collectors.toMap(Function.identity(), cfg::get));
+            }
+        } catch (IOException | IllegalStateException e) {
+            logger.debug("Exception occurred while trying to get the configuration: {}", e.getMessage());
+        }
+        return null;
     }
 
     private boolean isFinderEnabled(AddonFinder finder) {
