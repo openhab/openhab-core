@@ -18,10 +18,11 @@ import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.IOException;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,7 @@ import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.AddonFinderConstants;
+import org.openhab.core.config.discovery.addon.AddonFinderService;
 import org.openhab.core.config.discovery.addon.AddonSuggestionService;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.service.cm.Configuration;
@@ -55,6 +57,7 @@ public class AddonSuggestionServiceTests {
 
     public static final String MDNS_SERVICE_TYPE = "mdnsServiceType";
 
+    private @NonNullByDefault({}) AddonFinderService addonFinderService;
     private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
     private @NonNullByDefault({}) LocaleProvider localeProvider;
     private @NonNullByDefault({}) AddonInfoProvider addonInfoProvider;
@@ -62,8 +65,17 @@ public class AddonSuggestionServiceTests {
     private @NonNullByDefault({}) AddonFinder upnpAddonFinder;
     private @NonNullByDefault({}) AddonSuggestionService addonSuggestionService;
 
-    private final Map<String, Object> config = Map.of(AddonFinderConstants.CFG_FINDER_MDNS, true,
-            AddonFinderConstants.CFG_FINDER_UPNP, true);
+    private final Hashtable<String, Object> config = new Hashtable<>() {
+        private static final long serialVersionUID = 1L;
+
+        {
+            put(AddonFinderConstants.CFG_FINDER_MDNS, true);
+            put(AddonFinderConstants.CFG_FINDER_UPNP, true);
+            put(AddonFinderConstants.CFG_FINDER_IP, false);
+            put(AddonFinderConstants.CFG_FINDER_SDDP, false);
+            put(AddonFinderConstants.CFG_FINDER_USB, false);
+        }
+    };
 
     @AfterAll
     public void cleanUp() {
@@ -86,8 +98,9 @@ public class AddonSuggestionServiceTests {
     }
 
     private AddonSuggestionService createAddonSuggestionService() {
-        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(configurationAdmin, localeProvider,
-                config);
+        addonFinderService = mock(AddonFinderService.class);
+        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(addonFinderService,
+                configurationAdmin, localeProvider);
         assertNotNull(addonSuggestionService);
 
         addonSuggestionService.addAddonFinder(mdnsAddonFinder);
@@ -104,12 +117,19 @@ public class AddonSuggestionServiceTests {
             when(configurationAdmin.getConfiguration(any())).thenReturn(configuration);
         } catch (IOException e) {
         }
-        when(configuration.getProperties()).thenReturn(null);
+        when(configuration.getProperties()).thenReturn(config);
 
         // check that it works
         assertNotNull(configurationAdmin);
         try {
-            assertNull(configurationAdmin.getConfiguration(AddonSuggestionService.CONFIG_PID).getProperties());
+            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(AddonSuggestionService.CONFIG_PID)
+                    .getProperties();
+            assertNotNull(cfg);
+            assertEquals(true, cfg.get(AddonFinderConstants.CFG_FINDER_MDNS));
+            assertEquals(true, cfg.get(AddonFinderConstants.CFG_FINDER_UPNP));
+            assertEquals(false, cfg.get(AddonFinderConstants.CFG_FINDER_IP));
+            assertEquals(false, cfg.get(AddonFinderConstants.CFG_FINDER_SDDP));
+            assertEquals(false, cfg.get(AddonFinderConstants.CFG_FINDER_USB));
         } catch (IOException e) {
         }
     }
