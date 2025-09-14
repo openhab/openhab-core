@@ -800,6 +800,8 @@ Consider using JDK 21 for building and testing.
     <profile>
       <id>with-bnd-resolver-resolve</id>
       <activation>
+        <!-- TODO remove automatic activation once upgrade from bnd 7.1.0 to 7.2.0 is done -->
+        <jdk>[25.0,26.0)</jdk>
         <property>
           <name>withResolver</name>
         </property>
@@ -823,6 +825,40 @@ Consider using JDK 21 for building and testing.
           </plugins>
         </pluginManagement>
       </build>
+    </profile>
+    <!-- TODO remove this profile once upgrade from bnd 7.1.0 to 7.2.0 is done -->
+    <profile>
+      <id>jdk25</id>
+      <activation>
+        <jdk>[25.0,26.0)</jdk>
+      </activation>
+      <properties>
+        <bnd.version>7.2.0-SNAPSHOT</bnd.version>
+      </properties>
+      <repositories>
+        <repository>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+          <id>bnd-snapshots</id>
+          <url>https://bndtools.jfrog.io/bndtools/update-snapshot</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+          <id>bnd-snapshots-plugins</id>
+          <url>https://bndtools.jfrog.io/bndtools/update-snapshot</url>
+        </pluginRepository>
+      </pluginRepositories>
     </profile>
   </profiles>
 </project>
