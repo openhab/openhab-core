@@ -22,8 +22,10 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.xtext.serializer.ISerializer;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.thing.ThingStandaloneSetup;
 import org.openhab.core.model.thing.thing.ModelBridge;
 import org.openhab.core.model.thing.thing.ModelChannel;
 import org.openhab.core.model.thing.thing.ModelProperty;
@@ -60,6 +62,8 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
 
     private final ModelRepository modelRepository;
 
+    private final ISerializer serializer;
+
     @Activate
     public DslThingFileConverter(final @Reference ModelRepository modelRepository,
             final @Reference ThingTypeRegistry thingTypeRegistry,
@@ -67,6 +71,7 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
         super(thingTypeRegistry, channelTypeRegistry, configDescRegistry);
         this.modelRepository = modelRepository;
+        this.serializer = ThingStandaloneSetup.doSetup().getInstance(ISerializer.class);
     }
 
     @Override
@@ -91,7 +96,7 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
         // Double quotes are unexpectedly generated in thing UID when the segment contains a -.
         // Fix that by removing these double quotes. Requires to first build the generated syntax as a String
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        modelRepository.generateSyntaxFromModel(outputStream, "things", model);
+        modelRepository.generateSyntaxFromModel(outputStream, "things", model, serializer);
         String syntax = new String(outputStream.toByteArray()).replaceAll(":\"([a-zA-Z0-9_][a-zA-Z0-9_-]*)\"", ":$1");
         try {
             out.write(syntax.getBytes());

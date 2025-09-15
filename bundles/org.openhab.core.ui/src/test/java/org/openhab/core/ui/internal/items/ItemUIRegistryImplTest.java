@@ -62,12 +62,15 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.ColorArrayList;
 import org.openhab.core.model.sitemap.sitemap.Colorpicker;
 import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Group;
 import org.openhab.core.model.sitemap.sitemap.IconRule;
+import org.openhab.core.model.sitemap.sitemap.IconRuleList;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
+import org.openhab.core.model.sitemap.sitemap.MappingList;
 import org.openhab.core.model.sitemap.sitemap.Mapview;
 import org.openhab.core.model.sitemap.sitemap.Selection;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -76,6 +79,7 @@ import org.openhab.core.model.sitemap.sitemap.Slider;
 import org.openhab.core.model.sitemap.sitemap.Switch;
 import org.openhab.core.model.sitemap.sitemap.Text;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
@@ -591,7 +595,9 @@ public class ItemUIRegistryImplTest {
 
         Switch switchWidget = mock(Switch.class);
         when(switchWidget.getItem()).thenReturn("myItem");
-        when(switchWidget.getMappings()).thenReturn(new BasicEList<>());
+        MappingList mappingList = mock(MappingList.class);
+        when(switchWidget.getMappings()).thenReturn(mappingList);
+        when(switchWidget.getMappings().getElements()).thenReturn(new BasicEList<>());
 
         State stateForSwitch = uiRegistry.getState(switchWidget);
 
@@ -614,7 +620,9 @@ public class ItemUIRegistryImplTest {
         Mapping mapping = mock(Mapping.class);
         BasicEList<Mapping> mappings = new BasicEList<>();
         mappings.add(mapping);
-        when(switchWidget.getMappings()).thenReturn(mappings);
+        MappingList mappingList = mock(MappingList.class);
+        when(switchWidget.getMappings()).thenReturn(mappingList);
+        when(switchWidget.getMappings().getElements()).thenReturn(mappings);
 
         State stateForSwitch = uiRegistry.getState(switchWidget);
 
@@ -868,7 +876,9 @@ public class ItemUIRegistryImplTest {
         when(rule.getArg()).thenReturn("yellow");
         BasicEList<ColorArray> rules = new BasicEList<>();
         rules.add(rule);
-        when(widgetMock.getLabelColor()).thenReturn(rules);
+        ColorArrayList colorArrayList = mock(ColorArrayList.class);
+        when(widgetMock.getLabelColor()).thenReturn(colorArrayList);
+        when(widgetMock.getLabelColor().getElements()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new DecimalType(10f / 3f));
 
@@ -897,7 +907,9 @@ public class ItemUIRegistryImplTest {
         when(rule.getArg()).thenReturn("yellow");
         BasicEList<ColorArray> rules = new BasicEList<>();
         rules.add(rule);
-        when(widgetMock.getLabelColor()).thenReturn(rules);
+        ColorArrayList colorArrayList = mock(ColorArrayList.class);
+        when(widgetMock.getLabelColor()).thenReturn(colorArrayList);
+        when(widgetMock.getLabelColor().getElements()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new QuantityType<>("20 °C"));
 
@@ -940,7 +952,7 @@ public class ItemUIRegistryImplTest {
 
         defaultWidget = uiRegistry.getDefaultWidget(PlayerItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Switch.class)));
-        assertThat(((Switch) defaultWidget).getMappings(), hasSize(4));
+        assertThat(((Switch) defaultWidget).getMappings().getElements(), hasSize(4));
 
         defaultWidget = uiRegistry.getDefaultWidget(RollershutterItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Switch.class)));
@@ -1098,7 +1110,9 @@ public class ItemUIRegistryImplTest {
         when(rule3.getConditions()).thenReturn(conditions5);
         when(rule3.getArg()).thenReturn("blue");
         rules.add(rule3);
-        when(widgetMock.getLabelColor()).thenReturn(rules);
+        ColorArrayList colorArrayList = mock(ColorArrayList.class);
+        when(widgetMock.getLabelColor()).thenReturn(colorArrayList);
+        when(widgetMock.getLabelColor().getElements()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new DecimalType(20.9));
 
@@ -1165,7 +1179,9 @@ public class ItemUIRegistryImplTest {
         when(rule3.getConditions()).thenReturn(conditions5);
         when(rule3.getArg()).thenReturn("blue");
         rules.add(rule3);
-        when(widgetMock.getValueColor()).thenReturn(rules);
+        ColorArrayList colorArrayList = mock(ColorArrayList.class);
+        when(widgetMock.getValueColor()).thenReturn(colorArrayList);
+        when(widgetMock.getValueColor().getElements()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new DecimalType(20.9));
 
@@ -1232,7 +1248,9 @@ public class ItemUIRegistryImplTest {
         when(rule3.getConditions()).thenReturn(conditions5);
         when(rule3.getArg()).thenReturn("blue");
         rules.add(rule3);
-        when(widgetMock.getIconColor()).thenReturn(rules);
+        ColorArrayList colorArrayList = mock(ColorArrayList.class);
+        when(widgetMock.getIconColor()).thenReturn(colorArrayList);
+        when(widgetMock.getIconColor().getElements()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new DecimalType(20.9));
 
@@ -1280,7 +1298,9 @@ public class ItemUIRegistryImplTest {
         when(rule.getConditions()).thenReturn(conditions);
         BasicEList<VisibilityRule> rules = new BasicEList<>();
         rules.add(rule);
-        when(widgetMock.getVisibility()).thenReturn(rules);
+        VisibilityRuleList visibilityRuleList = mock(VisibilityRuleList.class);
+        when(widgetMock.getVisibility()).thenReturn(visibilityRuleList);
+        when(widgetMock.getVisibility().getElements()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new DecimalType(20.9));
 
@@ -1340,7 +1360,9 @@ public class ItemUIRegistryImplTest {
         when(rule2.getConditions()).thenReturn(conditions2);
         when(rule2.getArg()).thenReturn("humidity");
         rules.add(rule2);
-        when(widgetMock.getIconRules()).thenReturn(rules);
+        IconRuleList iconRuleList = mock(IconRuleList.class);
+        when(widgetMock.getIconRules()).thenReturn(iconRuleList);
+        when(widgetMock.getIconRules().getElements()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new DecimalType(20.9));
 
