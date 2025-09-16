@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javax.measure.Unit;
+import javax.script.ScriptException;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
@@ -672,8 +673,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                                 "Transformation service of type '" + type + "' is not available.");
                     }
                 } catch (TransformationException e) {
+                    Throwable cause = e.getCause();
                     logger.warn("Failed transforming the value '{}' with pattern '{}': {}", value, formatPattern,
-                            e.getMessage());
+                            cause instanceof ScriptException ? cause.getMessage() : e.getMessage());
                     ret = insertInLabel(label, failbackValue);
                 }
             } else if (labelMappedOption != null) {
