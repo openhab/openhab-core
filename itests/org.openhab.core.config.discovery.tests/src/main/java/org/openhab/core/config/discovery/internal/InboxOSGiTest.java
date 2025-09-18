@@ -15,7 +15,8 @@ package org.openhab.core.config.discovery.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
 import java.math.BigDecimal;

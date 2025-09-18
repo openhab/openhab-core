@@ -14,7 +14,8 @@ package org.openhab.core.automation.internal.module.handler;
 
 import static java.util.Map.entry;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
 import java.time.ZoneOffset;

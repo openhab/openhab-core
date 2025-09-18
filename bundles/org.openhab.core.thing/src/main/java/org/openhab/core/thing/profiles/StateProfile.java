@@ -13,6 +13,7 @@
 package org.openhab.core.thing.profiles;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 
@@ -30,6 +31,16 @@ public interface StateProfile extends Profile {
      * @param command
      */
     void onCommandFromItem(Command command);
+
+    /**
+     * Will be called if a command should be forwarded to the binding.
+     *
+     * @param command
+     * @param source the source of the command event
+     */
+    default void onCommandFromItem(Command command, @Nullable String source) {
+        onCommandFromItem(command);
+    }
 
     /**
      * If a binding issued a command to a channel, this method will be called for each linked item.

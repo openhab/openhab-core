@@ -82,6 +82,10 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
                 marketplaceRuleTemplateProvider.addTemplateAsJSON(addon.getUid(), jsonContent);
             } else if (yamlContent != null) {
                 marketplaceRuleTemplateProvider.addTemplateAsYAML(addon.getUid(), yamlContent);
+            } else {
+                logger.error("Rule template {} has neither download URL nor embedded content", addon.getUid());
+                throw new MarketplaceHandlerException("Rule template has neither download URL nor embedded content",
+                        null);
             }
         } catch (IOException e) {
             logger.error("Rule template from marketplace cannot be downloaded: {}", e.getMessage());

@@ -15,7 +15,6 @@ package org.openhab.core.automation.module.script.rulesupport.loader;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.OpenHAB.CONFIG_DIR_PROG_ARGUMENT;
 import static org.openhab.core.service.WatchService.Kind.*;
