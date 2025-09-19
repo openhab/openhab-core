@@ -41,6 +41,14 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a {@link SddpAddonFinder} for finding suggested Addons via SDDP.
  * <p>
+ * Simple Device Discovery Protocol (SDDP) is a simple multicast discovery protocol implemented
+ * by many "smart home" devices to allow a controlling agent to easily discover and connect to
+ * devices on a local subnet.
+ * <p>
+ * SDDP was created by Control4, and is quite similar to UPnP's standard Simple Service Discovery
+ * Protocol (SSDP), and it serves a virtually identical purpose. SDDP is not a standard protocol
+ * and it is not publicly documented.
+ * <p>
  * It checks the binding's addon.xml 'match-property' elements for the following SDDP properties:
  * <li>driver</li>
  * <li>host</li>
@@ -53,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * <li>proxies</li>
  * <li>type</li>
  * <p>
- * 
+ *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
