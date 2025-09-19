@@ -45,6 +45,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,21 +68,19 @@ public class AddonSuggestionService implements AutoCloseable {
     private final List<AddonFinder> addonFinders = Collections.synchronizedList(new ArrayList<>());
     private final ConfigurationAdmin configurationAdmin;
     private final LocaleProvider localeProvider;
-    private final AddonFinderService addonFinderService;
+    private @Nullable AddonFinderService addonFinderService;
     private @Nullable Map<String, Object> config;
     private final ScheduledExecutorService scheduler;
     private final Map<String, Boolean> baseFinderConfig = new ConcurrentHashMap<>();
     private final ScheduledFuture<?> cfgRefreshTask;
 
     @Activate
-    public AddonSuggestionService(final @Reference AddonFinderService addonFinderService,
-            final @Reference ConfigurationAdmin configurationAdmin, @Reference LocaleProvider localeProvider) {
-        this.addonFinderService = addonFinderService;
+    public AddonSuggestionService(final @Reference ConfigurationAdmin configurationAdmin,
+            @Reference LocaleProvider localeProvider) {
         this.configurationAdmin = configurationAdmin;
         this.localeProvider = localeProvider;
 
         SUGGESTION_FINDERS.forEach(f -> baseFinderConfig.put(f, false));
-        modified(getConfiguration());
 
         // Changes to the configuration are expected to call the {@link modified} method. This works well when running
         // in Eclipse. Running in Karaf, the method was not consistently called. Therefore regularly check for changes
@@ -96,6 +95,21 @@ public class AddonSuggestionService implements AutoCloseable {
         cfgRefreshTask.cancel(true);
     }
 
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    protected void addAddonFinderService(AddonFinderService addonFinderService) {
+        this.addonFinderService = addonFinderService;
+        // We retrieve the configuration at this time so that it contains all the user settings defining what finder to
+        // enable. When the service is started, the valid configuration is not yet loaded.
+        modified(getConfiguration());
+    }
+
+    protected void removeAddonFinderService(AddonFinderService addonFinderService) {
+        AddonFinderService finderService = this.addonFinderService;
+        if ((finderService != null) && addonFinderService.getClass().isAssignableFrom(finderService.getClass())) {
+            this.addonFinderService = null;
+        }
+    }
+
     @Modified
     public void modified(@Nullable final Map<String, Object> config) {
         baseFinderConfig.forEach((finder, cfg) -> {
@@ -106,14 +120,15 @@ public class AddonSuggestionService implements AutoCloseable {
                         : cfg;
                 if (cfg != enabled) {
                     String type = SUGGESTION_FINDER_TYPES.get(finder);
-                    if (type != null) {
+                    AddonFinderService finderService = addonFinderService;
+                    if (type != null && finderService != null) {
                         logger.debug("baseFinderConfig {} {} = {} => updating from {} to {}", finder, cfgParam,
                                 config == null ? "null config" : config.get(cfgParam), cfg, enabled);
                         baseFinderConfig.put(finder, enabled);
                         if (enabled) {
-                            addonFinderService.install(type);
+                            finderService.install(type);
                         } else {
-                            addonFinderService.uninstall(type);
+                            finderService.uninstall(type);
                         }
                     }
                 }

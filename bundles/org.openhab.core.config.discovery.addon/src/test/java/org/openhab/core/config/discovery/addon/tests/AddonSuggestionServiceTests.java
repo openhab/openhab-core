@@ -14,8 +14,7 @@ package org.openhab.core.config.discovery.addon.tests;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.IOException;
@@ -40,7 +39,6 @@ import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.AddonFinderConstants;
-import org.openhab.core.config.discovery.addon.AddonFinderService;
 import org.openhab.core.config.discovery.addon.AddonSuggestionService;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.service.cm.Configuration;
@@ -58,7 +56,6 @@ public class AddonSuggestionServiceTests {
 
     public static final String MDNS_SERVICE_TYPE = "mdnsServiceType";
 
-    private @NonNullByDefault({}) AddonFinderService addonFinderService;
     private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
     private @NonNullByDefault({}) LocaleProvider localeProvider;
     private @NonNullByDefault({}) AddonInfoProvider addonInfoProvider;
@@ -99,9 +96,7 @@ public class AddonSuggestionServiceTests {
     }
 
     private AddonSuggestionService createAddonSuggestionService() {
-        addonFinderService = mock(AddonFinderService.class);
-        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(addonFinderService,
-                configurationAdmin, localeProvider);
+        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(configurationAdmin, localeProvider);
         assertNotNull(addonSuggestionService);
 
         addonSuggestionService.addAddonFinder(mdnsAddonFinder);
