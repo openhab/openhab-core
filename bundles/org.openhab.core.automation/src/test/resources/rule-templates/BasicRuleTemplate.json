@@ -1,0 +1,82 @@
+{
+  "label": "Basic JSON Rule Template",
+  "uid": "basic:json-rule-template",
+  "tags": [
+    "Basic"
+  ],
+  "description": "A basic JSON rule template.",
+  "visibility": "VISIBLE",
+  "configDescriptions": [
+    {
+      "default": "80",
+      "description": "The start level which will trigger the rule.",
+      "label": "Start Level",
+      "name": "startLevel",
+      "required": true,
+      "type": "INTEGER",
+      "min": 40,
+      "max": 100,
+      "readOnly": false,
+      "multiple": false,
+      "advanced": false,
+      "verify": false,
+      "limitToOptions": true,
+      "options": [],
+      "filterCriteria": []
+    }
+  ],
+  "triggers": [
+    {
+      "id": "3",
+      "configuration": {
+        "startlevel": "{{startLevel}}"
+      },
+      "type": "core.SystemStartlevelTrigger"
+    },
+    {
+      "id": "timeofday",
+      "configuration": {
+        "time": "14:05"
+      },
+      "type": "timer.TimeOfDayTrigger"
+    }
+  ],
+  "conditions": [
+    {
+      "inputs": {},
+      "id": "4",
+      "configuration": {
+        "offset": 0
+      },
+      "type": "ephemeris.WeekdayCondition"
+    },
+    {
+      "inputs": {},
+      "id": "5",
+      "configuration": {
+        "offset": 2
+      },
+      "type": "ephemeris.WeekdayCondition"
+    }
+  ],
+  "actions": [
+    {
+      "inputs": {},
+      "id": "1",
+      "configuration": {
+        "itemName": "SleepSetTemperature",
+        "command": "21.0"
+      },
+      "type": "core.ItemCommandAction"
+    },
+    {
+      "inputs": {},
+      "id": "2",
+      "configuration": {
+        "sink": "webaudio",
+        "text": "The sleep temperature has been set"
+      },
+      "type": "media.SayAction"
+    }
+  ]
+}
