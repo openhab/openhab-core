@@ -53,6 +53,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.sitemap/${project.version}</bundle>
 		<feature dependency="true">asm</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
@@ -201,7 +202,6 @@
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-ui</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sitemap/${project.version}</bundle>
-		<feature dependency="true">openhab-core-model-sitemap</feature>
 	</feature>
 
 	<feature name="openhab-core-io-rest-swagger" version="${project.version}">
@@ -436,8 +436,6 @@
 
 	<feature name="openhab-core-ui" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature>openhab-core-model-item</feature>
-		<feature>openhab-core-model-sitemap</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ui/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.ui/${project.version}</bundle>
 	</feature>
