@@ -127,7 +127,7 @@ public interface Widget {
     /**
      * Replace the widget label color rules with a new list of label color rules.
      *
-     * @param labelColor
+     * @param labelColorRules
      */
     void setLabelColor(List<Rule> labelColorRules);
 
@@ -142,7 +142,7 @@ public interface Widget {
     /**
      * Replace the widget value color rules with a new list of value color rules.
      *
-     * @param valueColor
+     * @param valueColorRules
      */
     void setValueColor(List<Rule> valueColorRules);
 
@@ -157,7 +157,7 @@ public interface Widget {
     /**
      * Replace the widget icon color rules with a new list of icon color rules.
      *
-     * @param iconColor
+     * @param iconColorRules
      */
     void setIconColor(List<Rule> iconColorRules);
 
@@ -172,7 +172,7 @@ public interface Widget {
     /**
      * Replace the widget visibility rules with a new list of visibility rules.
      *
-     * @param visibility
+     * @param visibilityRules
      */
     void setVisibility(List<Rule> visibilityRules);
 
