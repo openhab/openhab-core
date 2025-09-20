@@ -12,8 +12,9 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -53,9 +55,6 @@ import javax.ws.rs.sse.OutboundSseEvent;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
@@ -79,30 +78,29 @@ import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.HSBType;
-import org.openhab.core.model.sitemap.SitemapProvider;
-import org.openhab.core.model.sitemap.sitemap.Button;
-import org.openhab.core.model.sitemap.sitemap.ButtonDefinition;
-import org.openhab.core.model.sitemap.sitemap.Buttongrid;
-import org.openhab.core.model.sitemap.sitemap.Chart;
-import org.openhab.core.model.sitemap.sitemap.ColorArray;
-import org.openhab.core.model.sitemap.sitemap.Colortemperaturepicker;
-import org.openhab.core.model.sitemap.sitemap.Condition;
-import org.openhab.core.model.sitemap.sitemap.Frame;
-import org.openhab.core.model.sitemap.sitemap.IconRule;
-import org.openhab.core.model.sitemap.sitemap.Image;
-import org.openhab.core.model.sitemap.sitemap.Input;
-import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
-import org.openhab.core.model.sitemap.sitemap.Mapping;
-import org.openhab.core.model.sitemap.sitemap.Mapview;
-import org.openhab.core.model.sitemap.sitemap.Selection;
-import org.openhab.core.model.sitemap.sitemap.Setpoint;
-import org.openhab.core.model.sitemap.sitemap.Sitemap;
-import org.openhab.core.model.sitemap.sitemap.Slider;
-import org.openhab.core.model.sitemap.sitemap.Switch;
-import org.openhab.core.model.sitemap.sitemap.Video;
-import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
-import org.openhab.core.model.sitemap.sitemap.Webview;
-import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.sitemap.Button;
+import org.openhab.core.sitemap.ButtonDefinition;
+import org.openhab.core.sitemap.Buttongrid;
+import org.openhab.core.sitemap.Chart;
+import org.openhab.core.sitemap.Colortemperaturepicker;
+import org.openhab.core.sitemap.Condition;
+import org.openhab.core.sitemap.Frame;
+import org.openhab.core.sitemap.Image;
+import org.openhab.core.sitemap.Input;
+import org.openhab.core.sitemap.LinkableWidget;
+import org.openhab.core.sitemap.Mapping;
+import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.Parent;
+import org.openhab.core.sitemap.Rule;
+import org.openhab.core.sitemap.Selection;
+import org.openhab.core.sitemap.Setpoint;
+import org.openhab.core.sitemap.Sitemap;
+import org.openhab.core.sitemap.Slider;
+import org.openhab.core.sitemap.Switch;
+import org.openhab.core.sitemap.Video;
+import org.openhab.core.sitemap.Webview;
+import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
@@ -111,8 +109,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -120,8 +116,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.MapMaker;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -150,6 +144,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Added releaseCmd field for mappings used for switch element
  * @author Laurent Garnier - Added support for Buttongrid as container for Button elements
  * @author Laurent Garnier - Added support for new sitemap element Colortemperaturepicker
+ * @author Mark Herwege - Implement sitemap registry, remove Guava dependency
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
@@ -171,7 +166,7 @@ public class SitemapResource
 
     private static final long TIMEOUT_IN_MS = 30000;
 
-    private SseBroadcaster<@NonNull SseSinkInfo> broadcaster;
+    private SseBroadcaster<SseSinkInfo> broadcaster;
 
     @Context
     @NonNullByDefault({})
@@ -190,13 +185,12 @@ public class SitemapResource
     Sse sse;
 
     private final ItemUIRegistry itemUIRegistry;
+    private final SitemapRegistry sitemapRegistry;
     private final SitemapSubscriptionService subscriptions;
     private final LocaleService localeService;
     private final TimeZoneProvider timeZoneProvider;
 
-    private final java.util.List<SitemapProvider> sitemapProviders = new ArrayList<>();
-
-    private final Map<String, SseSinkInfo> knownSubscriptions = new MapMaker().weakValues().makeMap();
+    private final WeakValueConcurrentHashMap<String, SseSinkInfo> knownSubscriptions = new WeakValueConcurrentHashMap<>();
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
@@ -207,10 +201,12 @@ public class SitemapResource
     @Activate
     public SitemapResource( //
             final @Reference ItemUIRegistry itemUIRegistry, //
+            final @Reference SitemapRegistry sitemapRegistry, //
             final @Reference LocaleService localeService, //
             final @Reference TimeZoneProvider timeZoneProvider, //
             final @Reference SitemapSubscriptionService subscriptions) {
         this.itemUIRegistry = itemUIRegistry;
+        this.sitemapRegistry = sitemapRegistry;
         this.localeService = localeService;
         this.timeZoneProvider = timeZoneProvider;
         this.subscriptions = subscriptions;
@@ -240,15 +236,6 @@ public class SitemapResource
         }
         broadcaster.removeListener(this);
         broadcaster.close();
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addSitemapProvider(SitemapProvider provider) {
-        sitemapProviders.add(provider);
-    }
-
-    public void removeSitemapProvider(SitemapProvider provider) {
-        sitemapProviders.remove(provider);
     }
 
     @GET
@@ -429,6 +416,7 @@ public class SitemapResource
 
     private void getSitemapEvents(SseEventSink sseEventSink, HttpServletResponse response, String subscriptionId,
             @Nullable String sitemapname, @Nullable String pageId, boolean subscribeToWholeSitemap) {
+        // Clean up stale subscriptions
         final SseSinkInfo sinkInfo = knownSubscriptions.get(subscriptionId);
         if (sinkInfo == null) {
             logger.debug("Subscription id {} does not exist.", subscriptionId);
@@ -460,19 +448,19 @@ public class SitemapResource
         Sitemap sitemap = getSitemap(sitemapName);
         if (sitemap != null) {
             if (pageId.equals(sitemap.getName())) {
-                EList<Widget> children = itemUIRegistry.getChildren(sitemap);
+                List<Widget> children = itemUIRegistry.getChildren(sitemap);
                 return createPageBean(sitemapName, sitemap.getLabel(), sitemap.getIcon(), sitemap.getName(), children,
                         false, isLeaf(children), uri, locale, timeout, includeHidden);
             } else {
                 Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
                 if (pageWidget instanceof LinkableWidget widget) {
-                    EList<Widget> children = itemUIRegistry.getChildren(widget);
+                    List<Widget> children = itemUIRegistry.getChildren(widget);
                     PageDTO pageBean = createPageBean(sitemapName, itemUIRegistry.getLabel(pageWidget),
                             itemUIRegistry.getCategory(pageWidget), pageId, children, false, isLeaf(children), uri,
                             locale, timeout, includeHidden);
-                    EObject parentPage = pageWidget.eContainer();
-                    while (parentPage instanceof Frame) {
-                        parentPage = parentPage.eContainer();
+                    Parent parentPage = widget.getParent();
+                    while (parentPage instanceof Frame frameParent) {
+                        parentPage = frameParent.getParent();
                     }
                     if (parentPage instanceof Widget parentPageWidget) {
                         String parentId = itemUIRegistry.getWidgetId(parentPageWidget);
@@ -507,28 +495,16 @@ public class SitemapResource
 
     public Collection<SitemapDTO> getSitemapBeans(URI uri) {
         Collection<SitemapDTO> beans = new LinkedList<>();
-        Set<String> names = new HashSet<>();
         logger.debug("Received HTTP GET request at '{}'.", UriBuilder.fromUri(uri).build().toASCIIString());
-        for (SitemapProvider provider : sitemapProviders) {
-            for (String modelName : provider.getSitemapNames()) {
-                Sitemap sitemap = provider.getSitemap(modelName);
-                if (sitemap != null) {
-                    if (!names.contains(modelName)) {
-                        names.add(modelName);
-                        SitemapDTO bean = new SitemapDTO();
-                        bean.name = modelName;
-                        bean.icon = sitemap.getIcon();
-                        bean.label = sitemap.getLabel();
-                        bean.link = UriBuilder.fromUri(uri).path(bean.name).build().toASCIIString();
-                        bean.homepage = new PageDTO();
-                        bean.homepage.link = bean.link + "/" + sitemap.getName();
-                        beans.add(bean);
-                    } else {
-                        logger.warn("Found duplicate sitemap name '{}' - ignoring it. Please check your configuration.",
-                                modelName);
-                    }
-                }
-            }
+        for (Sitemap sitemap : sitemapRegistry.getAll()) {
+            SitemapDTO bean = new SitemapDTO();
+            bean.name = sitemap.getName();
+            bean.icon = sitemap.getIcon();
+            bean.label = sitemap.getLabel();
+            bean.link = UriBuilder.fromUri(uri).path(bean.name).build().toASCIIString();
+            bean.homepage = new PageDTO();
+            bean.homepage.link = bean.link + "/" + sitemap.getName();
+            beans.add(bean);
         }
         return beans;
     }
@@ -560,8 +536,8 @@ public class SitemapResource
     }
 
     private PageDTO createPageBean(String sitemapName, @Nullable String title, @Nullable String icon, String pageId,
-            @Nullable EList<Widget> children, boolean drillDown, boolean isLeaf, URI uri, Locale locale,
-            boolean timeout, boolean includeHiddenWidgets) {
+            @Nullable List<Widget> children, boolean drillDown, boolean isLeaf, URI uri, Locale locale, boolean timeout,
+            boolean includeHiddenWidgets) {
         PageDTO bean = new PageDTO();
         bean.timeout = timeout;
         bean.id = pageId;
@@ -593,17 +569,18 @@ public class SitemapResource
 
         WidgetDTO bean = new WidgetDTO();
         State itemState = null;
-        if (widget.getItem() != null) {
+        String itemName = widget.getItem();
+        if (itemName != null) {
             try {
-                Item item = itemUIRegistry.getItem(widget.getItem());
+                Item item = itemUIRegistry.getItem(itemName);
                 itemState = item.getState();
-                String widgetTypeName = widget.eClass().getInstanceTypeName()
-                        .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
+                String widgetTypeName = widget.getWidgetType();
                 boolean isMapview = "mapview".equalsIgnoreCase(widgetTypeName);
                 Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
                 bean.item = EnrichedItemDTOMapper.map(item, isMapview, itemFilter,
                         UriBuilder.fromUri(uri).path("items/{itemName}"), locale, timeZoneProvider.getTimeZone());
-                bean.state = itemUIRegistry.getState(widget).toFullString();
+                State widgetState = itemUIRegistry.getState(widget);
+                bean.state = widgetState != null ? widgetState.toFullString() : null;
                 // In case the widget state is identical to the item state, its value is set to null.
                 if (bean.state != null && bean.state.equals(bean.item.state)) {
                     bean.state = null;
@@ -614,7 +591,7 @@ public class SitemapResource
         }
         bean.widgetId = widgetId;
         bean.icon = itemUIRegistry.getCategory(widget);
-        bean.staticIcon = widget.getStaticIcon() != null || !widget.getIconRules().isEmpty();
+        bean.staticIcon = widget.isStaticIcon() || !widget.getIconRules().isEmpty();
         bean.labelcolor = convertItemValueColor(itemUIRegistry.getLabelColor(widget), itemState);
         bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
         bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
@@ -622,10 +599,10 @@ public class SitemapResource
         bean.labelSource = itemUIRegistry.getLabelSource(widget).toString();
         bean.pattern = itemUIRegistry.getFormatPattern(widget);
         bean.unit = itemUIRegistry.getUnitForWidget(widget);
-        bean.type = widget.eClass().getName();
+        bean.type = widget.getWidgetType();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
         if (widget instanceof LinkableWidget linkableWidget) {
-            EList<Widget> children = itemUIRegistry.getChildren(linkableWidget);
+            List<Widget> children = itemUIRegistry.getChildren(linkableWidget);
             if (widget instanceof Frame || widget instanceof Buttongrid) {
                 for (Widget child : children) {
                     String wID = itemUIRegistry.getWidgetId(child);
@@ -680,7 +657,8 @@ public class SitemapResource
             if (videoWidget.getEncoding() != null) {
                 bean.encoding = videoWidget.getEncoding();
             }
-            if (videoWidget.getEncoding() != null && videoWidget.getEncoding().toLowerCase().contains("hls")) {
+            String encoding = videoWidget.getEncoding();
+            if (encoding != null && encoding.toLowerCase().contains("hls")) {
                 bean.url = videoWidget.getUrl();
             } else {
                 bean.url = buildProxyUrl(sitemapName, videoWidget, uri);
@@ -696,8 +674,8 @@ public class SitemapResource
         if (widget instanceof Chart chartWidget) {
             bean.service = chartWidget.getService();
             bean.period = chartWidget.getPeriod();
-            bean.legend = chartWidget.getLegend();
-            bean.forceAsItem = chartWidget.getForceAsItem();
+            bean.legend = chartWidget.hasLegend();
+            bean.forceAsItem = chartWidget.forceAsItem();
             bean.yAxisDecimalPattern = chartWidget.getYAxisDecimalPattern();
             bean.interpolation = chartWidget.getInterpolation();
             if (chartWidget.getRefresh() > 0) {
@@ -726,7 +704,7 @@ public class SitemapResource
         }
         if (widget instanceof Button buttonWidget) {
             // Get the icon from the widget only
-            if (widget.getIcon() == null && widget.getStaticIcon() == null && widget.getIconRules().isEmpty()) {
+            if (widget.getIcon() == null && widget.getIconRules().isEmpty()) {
                 bean.icon = null;
                 bean.staticIcon = null;
             }
@@ -765,14 +743,14 @@ public class SitemapResource
         return sb.toString();
     }
 
-    private boolean isLeaf(EList<Widget> children) {
+    private boolean isLeaf(List<Widget> children) {
         for (Widget w : children) {
             if (w instanceof Frame frame) {
-                if (isLeaf(frame.getChildren())) {
+                if (isLeaf(frame.getWidgets())) {
                     return false;
                 }
             } else if (w instanceof Buttongrid grid) {
-                if (isLeaf(grid.getChildren())) {
+                if (isLeaf(grid.getWidgets())) {
                     return false;
                 }
             } else if (w instanceof LinkableWidget linkableWidget) {
@@ -785,18 +763,11 @@ public class SitemapResource
     }
 
     private @Nullable Sitemap getSitemap(String sitemapname) {
-        for (SitemapProvider provider : sitemapProviders) {
-            Sitemap sitemap = provider.getSitemap(sitemapname);
-            if (sitemap != null) {
-                return sitemap;
-            }
-        }
-
-        return null;
+        return sitemapRegistry.get(sitemapname);
     }
 
     private boolean blockUntilChangeOccurs(String sitemapname, @Nullable String pageId) {
-        EList<Widget> widgets = subscriptions.collectWidgets(sitemapname, pageId);
+        List<Widget> widgets = subscriptions.collectWidgets(sitemapname, pageId);
         if (widgets.isEmpty()) {
             return false;
         }
@@ -862,46 +833,30 @@ public class SitemapResource
             }
             // Consider all items inside the frame
             if (widget instanceof Frame frame) {
-                items.addAll(getAllItems(frame.getChildren()));
+                items.addAll(getAllItems(frame.getWidgets()));
             } else if (widget instanceof Buttongrid grid) {
-                items.addAll(getAllItems(grid.getChildren()));
+                items.addAll(getAllItems(grid.getWidgets()));
             }
             // Consider items involved in any icon condition
-            items.addAll(getItemsInIconCond(widget.getIconRules()));
+            items.addAll(getItemsInRuleConditions(widget.getIconRules()));
             // Consider items involved in any visibility, labelcolor, valuecolor and iconcolor condition
-            items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
-            items.addAll(getItemsInColorCond(widget.getLabelColor()));
-            items.addAll(getItemsInColorCond(widget.getValueColor()));
-            items.addAll(getItemsInColorCond(widget.getIconColor()));
+            items.addAll(getItemsInRuleConditions(widget.getVisibility()));
+            items.addAll(getItemsInRuleConditions(widget.getLabelColor()));
+            items.addAll(getItemsInRuleConditions(widget.getValueColor()));
+            items.addAll(getItemsInRuleConditions(widget.getIconColor()));
         }
         return items;
     }
 
-    private Set<GenericItem> getItemsInVisibilityCond(EList<VisibilityRule> ruleList) {
+    private Set<GenericItem> getItemsInRuleConditions(List<Rule> ruleList) {
         Set<GenericItem> items = new HashSet<>();
-        for (VisibilityRule rule : ruleList) {
+        for (Rule rule : ruleList) {
             getItemsInConditions(rule.getConditions(), items);
         }
         return items;
     }
 
-    private Set<GenericItem> getItemsInColorCond(EList<ColorArray> colorList) {
-        Set<GenericItem> items = new HashSet<>();
-        for (ColorArray rule : colorList) {
-            getItemsInConditions(rule.getConditions(), items);
-        }
-        return items;
-    }
-
-    private Set<GenericItem> getItemsInIconCond(EList<IconRule> ruleList) {
-        Set<GenericItem> items = new HashSet<>();
-        for (IconRule rule : ruleList) {
-            getItemsInConditions(rule.getConditions(), items);
-        }
-        return items;
-    }
-
-    private void getItemsInConditions(@Nullable EList<Condition> conditions, Set<GenericItem> items) {
+    private void getItemsInConditions(@Nullable List<Condition> conditions, Set<GenericItem> items) {
         if (conditions != null) {
             for (Condition condition : conditions) {
                 String itemName = condition.getItem();
@@ -973,6 +928,52 @@ public class SitemapResource
         logger.debug("SSE connection for subscription {} has been closed.", info.subscriptionId);
         subscriptions.removeSubscription(info.subscriptionId);
         knownSubscriptions.remove(info.subscriptionId);
+    }
+
+    /**
+     * This is a replacement implementation for Google Guava <code>new MapMaker().weakValues().makeMap()</code>, to
+     * avoid pulling in a Guava dependency in this class.
+     *
+     * @param <K> key
+     * @param <V> value
+     */
+    private class WeakValueConcurrentHashMap<K, V> {
+        // Map from key → WeakReference to value
+        private final Map<K, WeakValueRef<K, V>> backingMap = new ConcurrentHashMap<>();
+        private final ReferenceQueue<V> refQueue = new ReferenceQueue<>();
+
+        // Custom WeakReference that remembers its key
+        private static class WeakValueRef<K, V> extends WeakReference<V> {
+            final K key;
+
+            WeakValueRef(K key, V value, ReferenceQueue<V> queue) {
+                super(value, queue);
+                this.key = key;
+            }
+        }
+
+        public void put(K key, V value) {
+            processQueue();
+            backingMap.put(key, new WeakValueRef<>(key, value, refQueue));
+        }
+
+        public @Nullable V get(K key) {
+            processQueue();
+            WeakValueRef<K, V> ref = backingMap.get(key);
+            return ref != null ? ref.get() : null;
+        }
+
+        public void remove(K key) {
+            processQueue();
+            backingMap.remove(key);
+        }
+
+        private void processQueue() {
+            WeakValueRef<K, V> ref;
+            while ((ref = (WeakValueRef<K, V>) refQueue.poll()) != null) {
+                backingMap.remove(ref.key, ref); // remove only if still mapped
+            }
+        }
     }
 
     private static class BlockingStateChangeListener {

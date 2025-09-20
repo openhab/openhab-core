@@ -19,10 +19,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -36,19 +34,17 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.model.sitemap.SitemapProvider;
-import org.openhab.core.model.sitemap.sitemap.Image;
-import org.openhab.core.model.sitemap.sitemap.Sitemap;
-import org.openhab.core.model.sitemap.sitemap.Video;
-import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.sitemap.Image;
+import org.openhab.core.sitemap.Sitemap;
+import org.openhab.core.sitemap.Video;
+import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -78,6 +74,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author John Cocula - added optional Image/Video item= support; refactored to allow use of later spec servlet
+ * @author Mark Herwege - Implement sitemap registry
  */
 @NonNullByDefault
 @Component(immediate = true, property = { "service.pid=org.openhab.proxy" })
@@ -99,13 +96,14 @@ public class ProxyServletService extends HttpServlet {
 
     protected final HttpService httpService;
     protected final ItemUIRegistry itemUIRegistry;
-    protected final List<SitemapProvider> sitemapProviders = new CopyOnWriteArrayList<>();
+    protected final SitemapRegistry sitemapRegistry;
 
     @Activate
     public ProxyServletService(@Reference HttpService httpService, @Reference ItemUIRegistry itemUIRegistry,
-            Map<String, Object> config) {
+            @Reference SitemapRegistry sitemapRegistry, Map<String, Object> config) {
         this.httpService = httpService;
         this.itemUIRegistry = itemUIRegistry;
+        this.sitemapRegistry = sitemapRegistry;
 
         Servlet servlet = getImpl();
 
@@ -125,15 +123,6 @@ public class ProxyServletService extends HttpServlet {
         } catch (IllegalArgumentException e) {
             // ignore, had not been registered before
         }
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addSitemapProvider(SitemapProvider provider) {
-        sitemapProviders.add(provider);
-    }
-
-    protected void removeSitemapProvider(SitemapProvider provider) {
-        sitemapProviders.remove(provider);
     }
 
     /**
@@ -283,17 +272,13 @@ public class ProxyServletService extends HttpServlet {
     }
 
     private @Nullable Sitemap getSitemap(String sitemapName) {
-        Sitemap sitemap = null;
-        for (SitemapProvider sitemapProvider : sitemapProviders) {
-            sitemap = sitemapProvider.getSitemap(sitemapName);
-            if (sitemap != null) {
-                break;
-            }
-        }
-        return sitemap;
+        return sitemapRegistry.get(sitemapName);
     }
 
-    private URI createURIFromString(String url) throws MalformedURLException, URISyntaxException {
+    private URI createURIFromString(@Nullable String url) throws MalformedURLException, URISyntaxException {
+        if (url == null) {
+            throw new MalformedURLException();
+        }
         URI uri = new URI(url);
         // URI in this context should be valid URL. Therefore before returning URI, create URL,
         // which validates the string.

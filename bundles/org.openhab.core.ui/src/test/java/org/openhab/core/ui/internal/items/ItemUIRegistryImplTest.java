@@ -27,8 +27,6 @@ import java.util.TimeZone;
 
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.emf.common.util.BasicEList;
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,22 +59,20 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.model.sitemap.sitemap.ColorArray;
-import org.openhab.core.model.sitemap.sitemap.Colorpicker;
-import org.openhab.core.model.sitemap.sitemap.Condition;
-import org.openhab.core.model.sitemap.sitemap.Group;
-import org.openhab.core.model.sitemap.sitemap.IconRule;
-import org.openhab.core.model.sitemap.sitemap.Image;
-import org.openhab.core.model.sitemap.sitemap.Mapping;
-import org.openhab.core.model.sitemap.sitemap.Mapview;
-import org.openhab.core.model.sitemap.sitemap.Selection;
-import org.openhab.core.model.sitemap.sitemap.Sitemap;
-import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
-import org.openhab.core.model.sitemap.sitemap.Slider;
-import org.openhab.core.model.sitemap.sitemap.Switch;
-import org.openhab.core.model.sitemap.sitemap.Text;
-import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
-import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.sitemap.Colorpicker;
+import org.openhab.core.sitemap.Condition;
+import org.openhab.core.sitemap.Group;
+import org.openhab.core.sitemap.Image;
+import org.openhab.core.sitemap.Mapping;
+import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.Rule;
+import org.openhab.core.sitemap.Selection;
+import org.openhab.core.sitemap.Sitemap;
+import org.openhab.core.sitemap.Slider;
+import org.openhab.core.sitemap.Switch;
+import org.openhab.core.sitemap.Text;
+import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
@@ -92,6 +88,7 @@ import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Tests updated to consider multiple AND conditions + tests added for getVisiblity
  * @author Laurent Garnier - Tests added for getCategory
+ * @author Mark Herwege - Implement sitemap registry
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -101,24 +98,51 @@ public class ItemUIRegistryImplTest {
     // we need to get the decimal separator of the default locale for our tests
     private static final char SEP = (new DecimalFormatSymbols().getDecimalSeparator());
     private static final String ITEM_NAME = "Item";
+    private static final String SITEMAP_NAME = "Sitemap";
     private static final String DEFAULT_TIME_ZONE = "GMT-6";
 
     private @NonNullByDefault({}) ItemUIRegistryImpl uiRegistry;
 
     private @Mock @NonNullByDefault({}) ItemRegistry registryMock;
+    private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactoryMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) Widget widgetMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
 
+    private @Mock @NonNullByDefault({}) Group groupMock;
+    private @Mock @NonNullByDefault({}) Text textMock;
+    private @Mock @NonNullByDefault({}) Colorpicker colorpickerMock;
+    private @Mock @NonNullByDefault({}) Image imageMock;
+    private @Mock @NonNullByDefault({}) Mapview mapviewMock;
+    private @Mock @NonNullByDefault({}) Slider sliderMock;
+    private @Mock @NonNullByDefault({}) Switch switchMock;
+    private @Mock @NonNullByDefault({}) Selection selectionMock;
+    private @Mock @NonNullByDefault({}) Mapping mappingMock;
+
     @BeforeEach
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registryMock, timeZoneProviderMock);
+        uiRegistry = new ItemUIRegistryImpl(registryMock, sitemapFactoryMock, timeZoneProviderMock);
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
         when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.of(DEFAULT_TIME_ZONE));
 
         TimeZone.setDefault(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
+
+        setupSitemapFactoryMock();
+    }
+
+    private void setupSitemapFactoryMock() {
+        when(sitemapFactoryMock.createWidget("Group")).thenReturn(groupMock);
+        when(sitemapFactoryMock.createWidget("Text")).thenReturn(textMock);
+        when(sitemapFactoryMock.createWidget("Colorpicker")).thenReturn(colorpickerMock);
+        when(sitemapFactoryMock.createWidget("Image")).thenReturn(imageMock);
+        when(sitemapFactoryMock.createWidget("Mapview")).thenReturn(mapviewMock);
+        when(sitemapFactoryMock.createWidget("Slider")).thenReturn(sliderMock);
+        when(sitemapFactoryMock.createWidget("Switch")).thenReturn(switchMock);
+        when(sitemapFactoryMock.createWidget("Selection")).thenReturn(selectionMock);
+
+        when(sitemapFactoryMock.createMapping()).thenReturn(mappingMock);
     }
 
     @Test
@@ -535,7 +559,7 @@ public class ItemUIRegistryImplTest {
         String testLabel = "Label [%s]";
 
         when(widgetMock.getLabel()).thenReturn(testLabel);
-        when(widgetMock.eClass()).thenReturn(SitemapFactory.eINSTANCE.createText().eClass());
+        when(widgetMock.getWidgetType()).thenReturn("Text");
         when(registryMock.getItem(ITEM_NAME)).thenThrow(new ItemNotFoundException(ITEM_NAME));
         String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [-]", label);
@@ -564,7 +588,7 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getWidgetUnknownPageId() throws ItemNotFoundException {
-        Sitemap sitemap = SitemapFactory.eINSTANCE.createSitemap();
+        Sitemap sitemap = sitemapFactoryMock.createSitemap(SITEMAP_NAME);
         when(registryMock.getItem("unknown")).thenThrow(new ItemNotFoundException("unknown"));
         Widget w = uiRegistry.getWidget(sitemap, "unknown");
         assertNull(w);
@@ -591,7 +615,7 @@ public class ItemUIRegistryImplTest {
 
         Switch switchWidget = mock(Switch.class);
         when(switchWidget.getItem()).thenReturn("myItem");
-        when(switchWidget.getMappings()).thenReturn(new BasicEList<>());
+        when(switchWidget.getMappings()).thenReturn(new ArrayList<>());
 
         State stateForSwitch = uiRegistry.getState(switchWidget);
 
@@ -612,7 +636,7 @@ public class ItemUIRegistryImplTest {
         when(switchWidget.getItem()).thenReturn("myItem");
 
         Mapping mapping = mock(Mapping.class);
-        BasicEList<Mapping> mappings = new BasicEList<>();
+        List<Mapping> mappings = new ArrayList<>();
         mappings.add(mapping);
         when(switchWidget.getMappings()).thenReturn(mappings);
 
@@ -859,14 +883,14 @@ public class ItemUIRegistryImplTest {
         when(widgetMock.getLabel()).thenReturn(testLabel);
 
         Condition condition = mock(Condition.class);
-        when(condition.getState()).thenReturn("21");
+        when(condition.getValue()).thenReturn("21");
         when(condition.getCondition()).thenReturn("<");
-        BasicEList<Condition> conditions = new BasicEList<>();
+        List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
-        ColorArray rule = mock(ColorArray.class);
+        Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> rules = new BasicEList<>();
+        when(rule.getArgument()).thenReturn("yellow");
+        List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         when(widgetMock.getLabelColor()).thenReturn(rules);
 
@@ -888,14 +912,14 @@ public class ItemUIRegistryImplTest {
         when(widgetMock.getLabel()).thenReturn(testLabel);
 
         Condition condition = mock(Condition.class);
-        when(condition.getState()).thenReturn("20");
+        when(condition.getValue()).thenReturn("20");
         when(condition.getCondition()).thenReturn("==");
-        BasicEList<Condition> conditions = new BasicEList<>();
+        List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
-        ColorArray rule = mock(ColorArray.class);
+        Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> rules = new BasicEList<>();
+        when(rule.getArgument()).thenReturn("yellow");
+        List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         when(widgetMock.getLabelColor()).thenReturn(rules);
 
@@ -929,8 +953,8 @@ public class ItemUIRegistryImplTest {
 
         defaultWidget = uiRegistry.getDefaultWidget(DimmerItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Slider.class)));
-        assertThat(((Slider) defaultWidget).isSwitchEnabled(), is(true));
-        assertThat(((Slider) defaultWidget).isReleaseOnly(), is(true));
+        verify(sliderMock).setSwitchEnabled(true);
+        verify(sliderMock).setReleaseOnly(true);
 
         defaultWidget = uiRegistry.getDefaultWidget(ImageItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Image.class)));
@@ -938,15 +962,16 @@ public class ItemUIRegistryImplTest {
         defaultWidget = uiRegistry.getDefaultWidget(LocationItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Mapview.class)));
 
-        defaultWidget = uiRegistry.getDefaultWidget(PlayerItem.class, ITEM_NAME);
-        assertThat(defaultWidget, is(instanceOf(Switch.class)));
-        assertThat(((Switch) defaultWidget).getMappings(), hasSize(4));
-
         defaultWidget = uiRegistry.getDefaultWidget(RollershutterItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Switch.class)));
 
         defaultWidget = uiRegistry.getDefaultWidget(SwitchItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Switch.class)));
+
+        when(switchMock.getMappings()).thenReturn(new ArrayList<Mapping>());
+        defaultWidget = uiRegistry.getDefaultWidget(PlayerItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
+        assertThat(((Switch) defaultWidget).getMappings(), hasSize(4));
     }
 
     @Test
@@ -1067,36 +1092,36 @@ public class ItemUIRegistryImplTest {
         when(widgetMock.getLabel()).thenReturn(testLabel);
 
         Condition condition = mock(Condition.class);
-        when(condition.getState()).thenReturn("18");
+        when(condition.getValue()).thenReturn("18");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getState()).thenReturn("21");
+        when(condition2.getValue()).thenReturn("21");
         when(condition2.getCondition()).thenReturn("<");
-        BasicEList<Condition> conditions = new BasicEList<>();
+        List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         conditions.add(condition2);
-        ColorArray rule = mock(ColorArray.class);
+        Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> rules = new BasicEList<>();
+        when(rule.getArgument()).thenReturn("yellow");
+        List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         Condition condition3 = mock(Condition.class);
-        when(condition3.getState()).thenReturn("21");
+        when(condition3.getValue()).thenReturn("21");
         when(condition3.getCondition()).thenReturn(">=");
         Condition condition4 = mock(Condition.class);
-        when(condition4.getState()).thenReturn("24");
+        when(condition4.getValue()).thenReturn("24");
         when(condition4.getCondition()).thenReturn("<");
-        BasicEList<Condition> conditions2 = new BasicEList<>();
+        List<Condition> conditions2 = new ArrayList<>();
         conditions2.add(condition3);
         conditions2.add(condition4);
-        ColorArray rule2 = mock(ColorArray.class);
+        Rule rule2 = mock(Rule.class);
         when(rule2.getConditions()).thenReturn(conditions2);
-        when(rule2.getArg()).thenReturn("red");
+        when(rule2.getArgument()).thenReturn("red");
         rules.add(rule2);
-        BasicEList<Condition> conditions5 = new BasicEList<>();
-        ColorArray rule3 = mock(ColorArray.class);
+        List<Condition> conditions5 = new ArrayList<>();
+        Rule rule3 = mock(Rule.class);
         when(rule3.getConditions()).thenReturn(conditions5);
-        when(rule3.getArg()).thenReturn("blue");
+        when(rule3.getArgument()).thenReturn("blue");
         rules.add(rule3);
         when(widgetMock.getLabelColor()).thenReturn(rules);
 
@@ -1134,36 +1159,36 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getValueColor() {
         Condition condition = mock(Condition.class);
-        when(condition.getState()).thenReturn("18");
+        when(condition.getValue()).thenReturn("18");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getState()).thenReturn("21");
+        when(condition2.getValue()).thenReturn("21");
         when(condition2.getCondition()).thenReturn("<");
-        BasicEList<Condition> conditions = new BasicEList<>();
+        List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         conditions.add(condition2);
-        ColorArray rule = mock(ColorArray.class);
+        Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> rules = new BasicEList<>();
+        when(rule.getArgument()).thenReturn("yellow");
+        List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         Condition condition3 = mock(Condition.class);
-        when(condition3.getState()).thenReturn("21");
+        when(condition3.getValue()).thenReturn("21");
         when(condition3.getCondition()).thenReturn(">=");
         Condition condition4 = mock(Condition.class);
-        when(condition4.getState()).thenReturn("24");
+        when(condition4.getValue()).thenReturn("24");
         when(condition4.getCondition()).thenReturn("<");
-        BasicEList<Condition> conditions2 = new BasicEList<>();
+        List<Condition> conditions2 = new ArrayList<>();
         conditions2.add(condition3);
         conditions2.add(condition4);
-        ColorArray rule2 = mock(ColorArray.class);
+        Rule rule2 = mock(Rule.class);
         when(rule2.getConditions()).thenReturn(conditions2);
-        when(rule2.getArg()).thenReturn("red");
+        when(rule2.getArgument()).thenReturn("red");
         rules.add(rule2);
-        BasicEList<Condition> conditions5 = new BasicEList<>();
-        ColorArray rule3 = mock(ColorArray.class);
+        List<Condition> conditions5 = new ArrayList<>();
+        Rule rule3 = mock(Rule.class);
         when(rule3.getConditions()).thenReturn(conditions5);
-        when(rule3.getArg()).thenReturn("blue");
+        when(rule3.getArgument()).thenReturn("blue");
         rules.add(rule3);
         when(widgetMock.getValueColor()).thenReturn(rules);
 
@@ -1201,36 +1226,36 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getIconColor() {
         Condition condition = mock(Condition.class);
-        when(condition.getState()).thenReturn("18");
+        when(condition.getValue()).thenReturn("18");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getState()).thenReturn("21");
+        when(condition2.getValue()).thenReturn("21");
         when(condition2.getCondition()).thenReturn("<");
-        BasicEList<Condition> conditions = new BasicEList<>();
+        List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         conditions.add(condition2);
-        ColorArray rule = mock(ColorArray.class);
+        Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> rules = new BasicEList<>();
+        when(rule.getArgument()).thenReturn("yellow");
+        List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         Condition condition3 = mock(Condition.class);
-        when(condition3.getState()).thenReturn("21");
+        when(condition3.getValue()).thenReturn("21");
         when(condition3.getCondition()).thenReturn(">=");
         Condition condition4 = mock(Condition.class);
-        when(condition4.getState()).thenReturn("24");
+        when(condition4.getValue()).thenReturn("24");
         when(condition4.getCondition()).thenReturn("<");
-        BasicEList<Condition> conditions2 = new BasicEList<>();
+        List<Condition> conditions2 = new ArrayList<>();
         conditions2.add(condition3);
         conditions2.add(condition4);
-        ColorArray rule2 = mock(ColorArray.class);
+        Rule rule2 = mock(Rule.class);
         when(rule2.getConditions()).thenReturn(conditions2);
-        when(rule2.getArg()).thenReturn("red");
+        when(rule2.getArgument()).thenReturn("red");
         rules.add(rule2);
-        BasicEList<Condition> conditions5 = new BasicEList<>();
-        ColorArray rule3 = mock(ColorArray.class);
+        List<Condition> conditions5 = new ArrayList<>();
+        Rule rule3 = mock(Rule.class);
         when(rule3.getConditions()).thenReturn(conditions5);
-        when(rule3.getArg()).thenReturn("blue");
+        when(rule3.getArgument()).thenReturn("blue");
         rules.add(rule3);
         when(widgetMock.getIconColor()).thenReturn(rules);
 
@@ -1268,17 +1293,17 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getVisibility() {
         Condition condition = mock(Condition.class);
-        when(condition.getState()).thenReturn("21");
+        when(condition.getValue()).thenReturn("21");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getState()).thenReturn("24");
+        when(condition2.getValue()).thenReturn("24");
         when(condition2.getCondition()).thenReturn("<");
-        BasicEList<Condition> conditions = new BasicEList<>();
+        List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         conditions.add(condition2);
-        VisibilityRule rule = mock(VisibilityRule.class);
+        Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        BasicEList<VisibilityRule> rules = new BasicEList<>();
+        List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         when(widgetMock.getVisibility()).thenReturn(rules);
 
@@ -1301,13 +1326,10 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getCategoryWhenIconSetWithoutRules() {
-        EClass textEClass = mock(EClass.class);
-        when(textEClass.getName()).thenReturn("text");
-        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
-        when(widgetMock.eClass()).thenReturn(textEClass);
+        when(widgetMock.getWidgetType()).thenReturn("Text");
         when(widgetMock.getIcon()).thenReturn("temperature");
-        when(widgetMock.getStaticIcon()).thenReturn(null);
-        when(widgetMock.getIconRules()).thenReturn(null);
+        when(widgetMock.isStaticIcon()).thenReturn(false);
+        when(widgetMock.getIconRules()).thenReturn(List.of());
 
         String icon = uiRegistry.getCategory(widgetMock);
         assertEquals("temperature", icon);
@@ -1315,30 +1337,27 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getCategoryWhenIconSetWithRules() {
-        EClass textEClass = mock(EClass.class);
-        when(textEClass.getName()).thenReturn("text");
-        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
-        when(widgetMock.eClass()).thenReturn(textEClass);
+        when(widgetMock.getWidgetType()).thenReturn("Text");
         when(widgetMock.getIcon()).thenReturn(null);
-        when(widgetMock.getStaticIcon()).thenReturn(null);
+        when(widgetMock.isStaticIcon()).thenReturn(false);
         Condition condition = mock(Condition.class);
-        when(condition.getState()).thenReturn("21");
+        when(condition.getValue()).thenReturn("21");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getState()).thenReturn("24");
+        when(condition2.getValue()).thenReturn("24");
         when(condition2.getCondition()).thenReturn("<");
-        BasicEList<Condition> conditions = new BasicEList<>();
+        List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         conditions.add(condition2);
-        IconRule rule = mock(IconRule.class);
+        Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArg()).thenReturn("temperature");
-        BasicEList<IconRule> rules = new BasicEList<>();
+        when(rule.getArgument()).thenReturn("temperature");
+        List<Rule> rules = new ArrayList<>();
         rules.add(rule);
-        BasicEList<Condition> conditions2 = new BasicEList<>();
-        IconRule rule2 = mock(IconRule.class);
+        List<Condition> conditions2 = new ArrayList<>();
+        Rule rule2 = mock(Rule.class);
         when(rule2.getConditions()).thenReturn(conditions2);
-        when(rule2.getArg()).thenReturn("humidity");
+        when(rule2.getArgument()).thenReturn("humidity");
         rules.add(rule2);
         when(widgetMock.getIconRules()).thenReturn(rules);
 
@@ -1365,13 +1384,10 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getCategoryWhenStaticIconSet() {
-        EClass textEClass = mock(EClass.class);
-        when(textEClass.getName()).thenReturn("text");
-        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
-        when(widgetMock.eClass()).thenReturn(textEClass);
-        when(widgetMock.getIcon()).thenReturn(null);
-        when(widgetMock.getStaticIcon()).thenReturn("temperature");
-        when(widgetMock.getIconRules()).thenReturn(null);
+        when(widgetMock.getWidgetType()).thenReturn("Text");
+        when(widgetMock.getIcon()).thenReturn("temperature");
+        when(widgetMock.isStaticIcon()).thenReturn(true);
+        when(widgetMock.getIconRules()).thenReturn(List.of());
 
         String icon = uiRegistry.getCategory(widgetMock);
         assertEquals("temperature", icon);
@@ -1379,13 +1395,10 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getCategoryWhenIconSetOnItem() {
-        EClass textEClass = mock(EClass.class);
-        when(textEClass.getName()).thenReturn("text");
-        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
-        when(widgetMock.eClass()).thenReturn(textEClass);
+        when(widgetMock.getWidgetType()).thenReturn("Text");
         when(widgetMock.getIcon()).thenReturn(null);
-        when(widgetMock.getStaticIcon()).thenReturn(null);
-        when(widgetMock.getIconRules()).thenReturn(null);
+        when(widgetMock.isStaticIcon()).thenReturn(false);
+        when(widgetMock.getIconRules()).thenReturn(List.of());
 
         when(itemMock.getCategory()).thenReturn("temperature");
 
@@ -1395,13 +1408,10 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getCategoryDefaultIcon() {
-        EClass textEClass = mock(EClass.class);
-        when(textEClass.getName()).thenReturn("text");
-        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
-        when(widgetMock.eClass()).thenReturn(textEClass);
+        when(widgetMock.getWidgetType()).thenReturn("Text");
         when(widgetMock.getIcon()).thenReturn(null);
-        when(widgetMock.getStaticIcon()).thenReturn(null);
-        when(widgetMock.getIconRules()).thenReturn(null);
+        when(widgetMock.isStaticIcon()).thenReturn(false);
+        when(widgetMock.getIconRules()).thenReturn(List.of());
 
         when(itemMock.getCategory()).thenReturn(null);
 
