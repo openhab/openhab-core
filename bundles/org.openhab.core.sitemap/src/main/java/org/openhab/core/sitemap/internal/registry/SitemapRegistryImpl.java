@@ -12,13 +12,9 @@
  */
 package org.openhab.core.sitemap.internal.registry;
 
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.Provider;
-import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.registry.SitemapProvider;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
@@ -35,35 +31,6 @@ public class SitemapRegistryImpl extends AbstractRegistry<Sitemap, String, Sitem
 
     public SitemapRegistryImpl() {
         super(null);
-    }
-
-    private final Set<RegistryChangeListener<Sitemap>> registryChangeListeners = new CopyOnWriteArraySet<>();
-
-    @Override
-    protected void notifyListenersAboutAddedElement(Sitemap element) {
-        registryChangeListeners.forEach(listener -> listener.added(element));
-        super.notifyListenersAboutAddedElement(element);
-    }
-
-    @Override
-    protected void notifyListenersAboutRemovedElement(Sitemap element) {
-        registryChangeListeners.forEach(listener -> listener.removed(element));
-        super.notifyListenersAboutRemovedElement(element);
-    }
-
-    @Override
-    protected void notifyListenersAboutUpdatedElement(Sitemap oldElement, Sitemap element) {
-        registryChangeListeners.forEach(listener -> listener.updated(oldElement, element));
-    }
-
-    @Override
-    public void addRegistryChangeListener(RegistryChangeListener<Sitemap> listener) {
-        registryChangeListeners.add(listener);
-    }
-
-    @Override
-    public void removeRegistryChangeListener(RegistryChangeListener<Sitemap> listener) {
-        registryChangeListeners.remove(listener);
     }
 
     @Override

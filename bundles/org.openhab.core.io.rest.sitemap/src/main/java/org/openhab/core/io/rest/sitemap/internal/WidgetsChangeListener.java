@@ -247,7 +247,7 @@ public class WidgetsChangeListener implements EventSubscriber {
         final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(widget);
         State stateToBeSent = null;
         if (itemToBeSent != null) {
-            String widgetTypeName = widget.getClass().getSimpleName();
+            String widgetTypeName = widget.getWidgetType();
             boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
             Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
             event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null,

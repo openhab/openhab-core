@@ -47,6 +47,7 @@ import org.openhab.core.sitemap.Selection;
 import org.openhab.core.sitemap.Setpoint;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Slider;
+import org.openhab.core.sitemap.Switch;
 import org.openhab.core.sitemap.Video;
 import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
@@ -172,6 +173,9 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 case Webview webviewWidget:
                     setWidgetPropertyFromComponentConfig(webviewWidget, component, "height");
                     setWidgetPropertyFromComponentConfig(webviewWidget, component, "url");
+                    break;
+                case Switch switchWidget:
+                    addWidgetMappings(switchWidget.getMappings(), component);
                     break;
                 case Mapview mapviewWidget:
                     setWidgetPropertyFromComponentConfig(mapviewWidget, component, "height");
@@ -299,9 +303,13 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                         String label = stripQuotes(splitMapping[1].trim());
                         String icon = splitMapping.length < 3 ? null : stripQuotes(splitMapping[2].trim());
                         Mapping mapping = sitemapFactory.createMapping();
-                        mapping.setCmd(cmd != null ? cmd : "");
+                        if (cmd != null) {
+                            mapping.setCmd(cmd);
+                        }
                         mapping.setReleaseCmd(releaseCmd);
-                        mapping.setLabel(label != null ? label : "");
+                        if (label != null) {
+                            mapping.setLabel(label);
+                        }
                         mapping.setIcon(icon);
                         mappings.add(mapping);
                     }

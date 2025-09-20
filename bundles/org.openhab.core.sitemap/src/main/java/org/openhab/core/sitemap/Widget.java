@@ -129,7 +129,7 @@ public interface Widget {
      *
      * @param labelColor
      */
-    void setLabelColor(List<Rule> labelColor);
+    void setLabelColor(List<Rule> labelColorRules);
 
     /**
      * Get the widget value color rules. This method should return a modifiable list, allowing updates to the value
@@ -144,7 +144,7 @@ public interface Widget {
      *
      * @param valueColor
      */
-    void setValueColor(List<Rule> valueColor);
+    void setValueColor(List<Rule> valueColorRules);
 
     /**
      * Get the widget icon color rules. This method should return a modifiable list, allowing updates to the icon
@@ -159,7 +159,7 @@ public interface Widget {
      *
      * @param iconColor
      */
-    void setIconColor(List<Rule> iconColor);
+    void setIconColor(List<Rule> iconColorRules);
 
     /**
      * Get the widget visibility rules. This method should return a modifiable list, allowing updates to the visibility
@@ -174,7 +174,7 @@ public interface Widget {
      *
      * @param visibility
      */
-    void setVisibility(List<Rule> visibility);
+    void setVisibility(List<Rule> visibilityRules);
 
     /**
      * Get type of widget.

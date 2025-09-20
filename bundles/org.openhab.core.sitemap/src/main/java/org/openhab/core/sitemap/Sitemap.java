@@ -30,7 +30,6 @@ public interface Sitemap extends Identifiable<String>, Parent {
      * Returns the sitemap name.
      *
      * @return sitemap name.
-     * @see #setName(String)
      */
     String getName();
 
@@ -38,7 +37,6 @@ public interface Sitemap extends Identifiable<String>, Parent {
      * Sets the sitemap name.
      *
      * @param name the new sitemap name.
-     * @see #getName()
      */
     void setName(String name);
 
@@ -46,7 +44,6 @@ public interface Sitemap extends Identifiable<String>, Parent {
      * Returns the sitemap label.
      *
      * @return sitemap label.
-     * @see #setLabel(String)
      */
     @Nullable
     String getLabel();
@@ -55,7 +52,6 @@ public interface Sitemap extends Identifiable<String>, Parent {
      * Sets the sitemap label.
      *
      * @param label the new sitemap label.
-     * @see #getLabel()
      */
     void setLabel(@Nullable String label);
 
@@ -63,7 +59,6 @@ public interface Sitemap extends Identifiable<String>, Parent {
      * Returns the sitemap icon.
      *
      * @return sitemap icon.
-     * @see #setIcon(String)
      */
     @Nullable
     String getIcon();
@@ -72,7 +67,6 @@ public interface Sitemap extends Identifiable<String>, Parent {
      * Sets the sitemap icon.
      *
      * @param icon the new sitemap icon.
-     * @see #getIcon()
      */
     void setIcon(@Nullable String icon);
 

@@ -33,7 +33,7 @@ public interface Buttongrid extends LinkableWidget {
     List<ButtonDefinition> getButtons();
 
     /**
-     * Replace the button grid buttons a new list of buttons.
+     * Replace the button grid buttons with a new list of buttons.
      *
      * @param buttons
      */

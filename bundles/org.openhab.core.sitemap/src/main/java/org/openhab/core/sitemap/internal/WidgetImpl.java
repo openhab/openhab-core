@@ -36,10 +36,10 @@ public class WidgetImpl implements Widget {
     private List<Rule> iconRules = new CopyOnWriteArrayList<>();
     private @Nullable Boolean staticIcon;
 
-    private List<Rule> labelColor = new CopyOnWriteArrayList<>();
-    private List<Rule> valueColor = new CopyOnWriteArrayList<>();
-    private List<Rule> iconColor = new CopyOnWriteArrayList<>();
-    private List<Rule> visibility = new CopyOnWriteArrayList<>();
+    private List<Rule> labelColorRules = new CopyOnWriteArrayList<>();
+    private List<Rule> valueColorRules = new CopyOnWriteArrayList<>();
+    private List<Rule> iconColorRules = new CopyOnWriteArrayList<>();
+    private List<Rule> visibilityRules = new CopyOnWriteArrayList<>();
 
     public WidgetImpl() {
     }
@@ -110,42 +110,42 @@ public class WidgetImpl implements Widget {
 
     @Override
     public List<Rule> getLabelColor() {
-        return labelColor;
+        return labelColorRules;
     }
 
     @Override
-    public void setLabelColor(List<Rule> labelColor) {
-        this.labelColor = new CopyOnWriteArrayList<>(labelColor);
+    public void setLabelColor(List<Rule> labelColorRules) {
+        this.labelColorRules = new CopyOnWriteArrayList<>(labelColorRules);
     }
 
     @Override
     public List<Rule> getValueColor() {
-        return valueColor;
+        return valueColorRules;
     }
 
     @Override
-    public void setValueColor(List<Rule> valueColor) {
-        this.valueColor = new CopyOnWriteArrayList<>(valueColor);
+    public void setValueColor(List<Rule> valueColorRules) {
+        this.valueColorRules = new CopyOnWriteArrayList<>(valueColorRules);
     }
 
     @Override
     public List<Rule> getIconColor() {
-        return iconColor;
+        return iconColorRules;
     }
 
     @Override
-    public void setIconColor(List<Rule> iconColor) {
-        this.iconColor = new CopyOnWriteArrayList<>(iconColor);
+    public void setIconColor(List<Rule> iconColorRules) {
+        this.iconColorRules = new CopyOnWriteArrayList<>(iconColorRules);
     }
 
     @Override
     public List<Rule> getVisibility() {
-        return visibility;
+        return visibilityRules;
     }
 
     @Override
-    public void setVisibility(List<Rule> visibility) {
-        this.visibility = new CopyOnWriteArrayList<>(visibility);
+    public void setVisibility(List<Rule> visibilityRules) {
+        this.visibilityRules = new CopyOnWriteArrayList<>(visibilityRules);
     }
 
     @Override

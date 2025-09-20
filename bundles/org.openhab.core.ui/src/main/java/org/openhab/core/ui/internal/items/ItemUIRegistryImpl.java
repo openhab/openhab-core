@@ -1268,14 +1268,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public boolean getVisiblity(Widget w) {
         // Default to visible if parameters not set
-        List<Rule> rulList = w.getVisibility();
-        if (rulList.isEmpty()) {
+        List<Rule> ruleList = w.getVisibility();
+        if (ruleList.isEmpty()) {
             return true;
         }
 
         logger.debug("Checking visiblity for widget '{}'.", w.getLabel());
 
-        for (Rule rule : rulList) {
+        for (Rule rule : ruleList) {
             if (allConditionsOk(rule.getConditions(), w)) {
                 return true;
             }
