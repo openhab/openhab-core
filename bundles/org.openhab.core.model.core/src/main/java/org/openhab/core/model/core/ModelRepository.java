@@ -14,6 +14,7 @@ package org.openhab.core.model.core;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
@@ -27,7 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * come from.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Laurent Garnier - Added method generateSyntaxFromModel
+ * @author Laurent Garnier - Added methods generateFileFormat and createIsolatedModel
  */
 @NonNullByDefault
 public interface ModelRepository {
@@ -96,11 +97,25 @@ public interface ModelRepository {
     void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
 
     /**
-     * Generate the syntax from a provided model content.
+     * Creates an isolated model in the repository
+     *
+     * An isolated model is a temporary model loaded without impacting any object registry.
+     *
+     * @param modelType the model type
+     * @param inputStream an input stream with the model's content
+     * @param errors the list to be used to fill the errors
+     * @param warnings the list to be used to fill the warnings
+     * @return the created model name if it was successfully processed, null otherwise
+     */
+    @Nullable
+    String createIsolatedModel(String modelType, InputStream inputStream, List<String> errors, List<String> warnings);
+
+    /**
+     * Generate the DSL file format from a provided model type and model content.
      *
      * @param out the output stream to write the generated syntax to
      * @param modelType the model type
      * @param modelContent the content of the model
      */
-    void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent);
+    void generateFileFormat(OutputStream out, String modelType, EObject modelContent);
 }
