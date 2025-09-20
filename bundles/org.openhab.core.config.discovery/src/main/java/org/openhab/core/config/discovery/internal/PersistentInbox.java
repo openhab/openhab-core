@@ -194,7 +194,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         }
         DiscoveryResult result = results.getFirst();
         final Map<String, String> properties = new HashMap<>();
-        final Map<String, Object> configParams = new HashMap<>();
+        final Map<String, @Nullable Object> configParams = new HashMap<>();
         getPropsAndConfigParams(result, properties, configParams);
         final Configuration config = new Configuration(configParams);
         ThingTypeUID thingTypeUID = result.getThingTypeUID();
@@ -569,7 +569,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
      * @param configParams the location the configuration parameters should be stored to.
      */
     private void getPropsAndConfigParams(final DiscoveryResult discoveryResult, final Map<String, String> props,
-            final Map<String, Object> configParams) {
+            final Map<String, @Nullable Object> configParams) {
         final List<ConfigDescriptionParameter> configDescParams = getConfigDescParams(discoveryResult);
         final Set<String> paramNames = getConfigDescParamNames(configDescParams);
         final Map<String, Object> resultProps = discoveryResult.getProperties();
