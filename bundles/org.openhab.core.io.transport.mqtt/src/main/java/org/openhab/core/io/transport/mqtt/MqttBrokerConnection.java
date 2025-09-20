@@ -91,7 +91,7 @@ public class MqttBrokerConnection {
     protected final boolean secure;
     protected final boolean hostnameValidated;
     protected final MqttVersion mqttVersion;
-    private boolean cleanSessionStart;
+    private boolean cleanSessionStart = true;
 
     private @Nullable TrustManagerFactory trustManagerFactory = InsecureTrustManagerFactory.INSTANCE;
     protected final String clientId;
@@ -517,7 +517,7 @@ public class MqttBrokerConnection {
     }
 
     /**
-     * Return MQTT3 cleanSession or MQTT5 cleanStart parameter, null if not set and default is used
+     * Return MQTT3 cleanSession or MQTT5 cleanStart parameter
      */
     public boolean getCleanSessionStart() {
         return cleanSessionStart;
