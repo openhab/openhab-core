@@ -64,9 +64,8 @@ public class AddonSuggestionServiceTests {
     private @NonNullByDefault({}) AddonFinder upnpAddonFinder;
     private @NonNullByDefault({}) AddonSuggestionService addonSuggestionService;
 
-    private final Hashtable<String, Object> config = new Hashtable<>(Map.of(AddonFinderConstants.CFG_FINDER_MDNS, true,
-            AddonFinderConstants.CFG_FINDER_UPNP, true, AddonFinderConstants.CFG_FINDER_IP, false,
-            AddonFinderConstants.CFG_FINDER_SDDP, false, AddonFinderConstants.CFG_FINDER_USB, false));
+    private final Hashtable<String, Object> config = new Hashtable<>(
+            Map.of(AddonFinderConstants.CFG_FINDER_MDNS, true, AddonFinderConstants.CFG_FINDER_UPNP, true));
 
     @AfterAll
     public void cleanUp() {
@@ -118,12 +117,7 @@ public class AddonSuggestionServiceTests {
             assertTrue((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_MDNS));
             assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_UPNP) instanceof Boolean);
             assertTrue((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_UPNP));
-            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_IP) instanceof Boolean);
-            assertFalse((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_IP));
-            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_SDDP) instanceof Boolean);
-            assertFalse((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_SDDP));
-            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_USB) instanceof Boolean);
-            assertFalse((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_USB));
+            assertNull(cfg.get(AddonFinderConstants.CFG_FINDER_USB));
         } catch (IOException e) {
         }
     }
