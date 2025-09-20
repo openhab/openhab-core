@@ -112,20 +112,20 @@ public class AddonSuggestionService implements AutoCloseable {
 
     @Modified
     public void modified(@Nullable final Map<String, Object> config) {
-        baseFinderConfig.forEach((finder, cfg) -> {
+        baseFinderConfig.forEach((finder, currentEnabled) -> {
             String cfgParam = SUGGESTION_FINDER_CONFIGS.get(finder);
             if (cfgParam != null) {
-                boolean enabled = (config != null)
+                boolean newEnabled = (config != null)
                         ? ConfigParser.valueAsOrElse(config.get(cfgParam), Boolean.class, true)
-                        : cfg;
-                if (cfg != enabled) {
+                        : currentEnabled;
+                if (currentEnabled != newEnabled) {
                     String type = SUGGESTION_FINDER_TYPES.get(finder);
                     AddonFinderService finderService = addonFinderService;
                     if (type != null && finderService != null) {
                         logger.debug("baseFinderConfig {} {} = {} => updating from {} to {}", finder, cfgParam,
-                                config == null ? "null config" : config.get(cfgParam), cfg, enabled);
-                        baseFinderConfig.put(finder, enabled);
-                        if (enabled) {
+                                config == null ? "null config" : config.get(cfgParam), currentEnabled, newEnabled);
+                        baseFinderConfig.put(finder, newEnabled);
+                        if (newEnabled) {
                             finderService.install(type);
                         } else {
                             finderService.uninstall(type);
@@ -138,13 +138,9 @@ public class AddonSuggestionService implements AutoCloseable {
     }
 
     private void syncConfiguration() {
-        try {
-            final Map<String, Object> cfg = getConfiguration();
-            if (cfg != null && !cfg.equals(config)) {
-                modified(cfg);
-            }
-        } catch (IllegalStateException e) {
-            logger.debug("Exception occurred while trying to sync the configuration: {}", e.getMessage());
+        final Map<String, Object> cfg = getConfiguration();
+        if (cfg != null && !cfg.equals(config)) {
+            modified(cfg);
         }
     }
 

@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,17 +64,9 @@ public class AddonSuggestionServiceTests {
     private @NonNullByDefault({}) AddonFinder upnpAddonFinder;
     private @NonNullByDefault({}) AddonSuggestionService addonSuggestionService;
 
-    private final Hashtable<String, Object> config = new Hashtable<>() {
-        private static final long serialVersionUID = 1L;
-
-        {
-            put(AddonFinderConstants.CFG_FINDER_MDNS, true);
-            put(AddonFinderConstants.CFG_FINDER_UPNP, true);
-            put(AddonFinderConstants.CFG_FINDER_IP, false);
-            put(AddonFinderConstants.CFG_FINDER_SDDP, false);
-            put(AddonFinderConstants.CFG_FINDER_USB, false);
-        }
-    };
+    private final Hashtable<String, Object> config = new Hashtable<>(Map.of(AddonFinderConstants.CFG_FINDER_MDNS, true,
+            AddonFinderConstants.CFG_FINDER_UPNP, true, AddonFinderConstants.CFG_FINDER_IP, false,
+            AddonFinderConstants.CFG_FINDER_SDDP, false, AddonFinderConstants.CFG_FINDER_USB, false));
 
     @AfterAll
     public void cleanUp() {
@@ -121,11 +114,16 @@ public class AddonSuggestionServiceTests {
             Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(AddonSuggestionService.CONFIG_PID)
                     .getProperties();
             assertNotNull(cfg);
-            assertEquals(true, cfg.get(AddonFinderConstants.CFG_FINDER_MDNS));
-            assertEquals(true, cfg.get(AddonFinderConstants.CFG_FINDER_UPNP));
-            assertEquals(false, cfg.get(AddonFinderConstants.CFG_FINDER_IP));
-            assertEquals(false, cfg.get(AddonFinderConstants.CFG_FINDER_SDDP));
-            assertEquals(false, cfg.get(AddonFinderConstants.CFG_FINDER_USB));
+            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_MDNS) instanceof Boolean);
+            assertTrue((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_MDNS));
+            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_UPNP) instanceof Boolean);
+            assertTrue((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_UPNP));
+            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_IP) instanceof Boolean);
+            assertFalse((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_IP));
+            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_SDDP) instanceof Boolean);
+            assertFalse((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_SDDP));
+            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_USB) instanceof Boolean);
+            assertFalse((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_USB));
         } catch (IOException e) {
         }
     }
