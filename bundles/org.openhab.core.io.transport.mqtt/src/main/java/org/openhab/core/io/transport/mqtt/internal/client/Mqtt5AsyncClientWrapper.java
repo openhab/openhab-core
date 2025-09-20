@@ -39,6 +39,7 @@ import com.hivemq.client.mqtt.mqtt5.message.unsubscribe.Mqtt5Unsubscribe;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Mark Herwege - Added flag for hostname validation
+ * @author Mark Herwege - Added parameter for cleanStart
  */
 @NonNullByDefault
 public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
@@ -93,12 +94,15 @@ public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
 
     @Override
     public CompletableFuture<?> connect(@Nullable MqttWillAndTestament lwt, int keepAliveInterval,
-            @Nullable String username, @Nullable String password) {
+            @Nullable String username, @Nullable String password, @Nullable Boolean cleanStart) {
         Mqtt5ConnectBuilder connectMessageBuilder = Mqtt5Connect.builder().keepAlive(keepAliveInterval);
         if (lwt != null) {
             Mqtt5Publish willPublish = Mqtt5Publish.builder().topic(lwt.getTopic()).payload(lwt.getPayload())
                     .retain(lwt.isRetain()).qos(getMqttQosFromInt(lwt.getQos())).build();
             connectMessageBuilder.willPublish(willPublish);
+        }
+        if (cleanStart != null) {
+            connectMessageBuilder.cleanStart(cleanStart);
         }
 
         if (username != null && !username.isBlank() && password != null && !password.isBlank()) {
