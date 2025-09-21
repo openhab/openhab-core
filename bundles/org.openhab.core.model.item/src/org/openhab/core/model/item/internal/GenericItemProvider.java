@@ -47,10 +47,7 @@ import org.openhab.core.model.item.BindingConfigParseException;
 import org.openhab.core.model.item.BindingConfigReader;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ModelBinding;
-import org.openhab.core.model.items.ModelGroupFunction;
-import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
-import org.openhab.core.model.items.ModelNormalItem;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateDescriptionFragmentProvider;
@@ -234,62 +231,54 @@ public class GenericItemProvider extends AbstractProvider<Item>
     }
 
     private @Nullable Item createItemFromModelItem(ModelItem modelItem, String modelName) {
-        Item item;
-        if (modelItem instanceof ModelGroupItem modelGroupItem) {
-            Item baseItem;
-            try {
-                baseItem = createItemOfType(modelGroupItem.getType(), modelGroupItem.getName());
-            } catch (IllegalArgumentException e) {
-                logger.debug("Error creating base item for group item '{}', item will be ignored: {}",
-                        modelGroupItem.getName(), e.getMessage());
-                return null;
-            }
-            if (baseItem != null) {
-                // if the user did not specify a function the first value of the enum in xtext (EQUAL) will be used
-                ModelGroupFunction function = modelGroupItem.getFunction();
-                item = applyGroupFunction(baseItem, modelGroupItem, function);
-            } else {
-                item = new GroupItem(modelGroupItem.getName());
-            }
-        } else {
-            ModelNormalItem normalItem = (ModelNormalItem) modelItem;
-            try {
-                item = createItemOfType(normalItem.getType(), normalItem.getName());
-            } catch (IllegalArgumentException e) {
-                logger.debug("Error creating item '{}', item will be ignored: {}", normalItem.getName(),
-                        e.getMessage());
-                return null;
-            }
+        String itemType = modelItem.getType();
+        if (itemType == null || itemType.isBlank()) {
+            logger.warn("Item '{}' has no type defined, ignoring it.", modelItem.getName());
+            return null;
         }
-        if (item instanceof ActiveItem activeItem) {
-            String label = modelItem.getLabel();
-            String format = extractFormat(label);
-            if (format != null) {
-                label = label.substring(0, label.indexOf("[")).trim();
-                Map<String, String> formatters = Objects
-                        .requireNonNull(stateFormattersMap.computeIfAbsent(modelName, k -> new HashMap<>()));
-                formatters.put(modelItem.getName(), format);
-                if (!isIsolatedModel(modelName)) {
-                    stateDescriptionFragments.put(modelItem.getName(),
-                            StateDescriptionFragmentBuilder.create().withPattern(format).build());
-                }
-            } else {
-                Map<String, String> formatters = stateFormattersMap.get(modelName);
-                if (formatters != null) {
-                    formatters.remove(modelItem.getName());
-                    if (formatters.isEmpty()) {
-                        stateFormattersMap.remove(modelName);
+
+        try {
+            String[] itemTypeSegments = itemType.split(ItemUtil.EXTENSION_SEPARATOR);
+            String mainItemType = itemTypeSegments[0];
+
+            Item item = switch (mainItemType) {
+                case "Group" -> createGroupItem(modelItem, itemTypeSegments);
+                default -> createItemOfType(itemType, modelItem.getName());
+            };
+
+            if (item instanceof ActiveItem activeItem) {
+                String label = modelItem.getLabel();
+                String format = extractFormat(label);
+                if (format != null) {
+                    label = label.substring(0, label.indexOf("[")).trim();
+                    Map<String, String> formatters = Objects
+                            .requireNonNull(stateFormattersMap.computeIfAbsent(modelName, k -> new HashMap<>()));
+                    formatters.put(modelItem.getName(), format);
+                    if (!isIsolatedModel(modelName)) {
+                        stateDescriptionFragments.put(modelItem.getName(),
+                                StateDescriptionFragmentBuilder.create().withPattern(format).build());
+                    }
+                } else {
+                    Map<String, String> formatters = stateFormattersMap.get(modelName);
+                    if (formatters != null) {
+                        formatters.remove(modelItem.getName());
+                        if (formatters.isEmpty()) {
+                            stateFormattersMap.remove(modelName);
+                        }
+                    }
+                    if (!isIsolatedModel(modelName)) {
+                        stateDescriptionFragments.remove(modelItem.getName());
                     }
                 }
-                if (!isIsolatedModel(modelName)) {
-                    stateDescriptionFragments.remove(modelItem.getName());
-                }
+                activeItem.setLabel(label);
+                activeItem.setCategory(modelItem.getIcon());
+                assignTags(modelItem, activeItem);
+                return item;
+            } else {
+                return null;
             }
-            activeItem.setLabel(label);
-            activeItem.setCategory(modelItem.getIcon());
-            assignTags(modelItem, activeItem);
-            return item;
-        } else {
+        } catch (IllegalArgumentException e) {
+            logger.debug("Error creating item '{}', item will be ignored: {}", modelItem.getName(), e.getMessage());
             return null;
         }
     }
@@ -312,14 +301,14 @@ public class GenericItemProvider extends AbstractProvider<Item>
         }
     }
 
-    private GroupItem applyGroupFunction(Item baseItem, ModelGroupItem modelGroupItem, ModelGroupFunction function) {
+    private GroupItem applyGroupFunction(Item baseItem, ModelItem modelItem, String function) {
         GroupFunctionDTO dto = new GroupFunctionDTO();
-        dto.name = function.getName();
-        dto.params = modelGroupItem.getArgs().toArray(new String[0]);
+        dto.name = function;
+        dto.params = modelItem.getArgs().toArray(new String[0]);
 
         GroupFunction groupFunction = ItemDTOMapper.mapFunction(baseItem, dto);
 
-        return new GroupItem(modelGroupItem.getName(), baseItem, groupFunction);
+        return new GroupItem(modelItem.getName(), baseItem, groupFunction);
     }
 
     private void dispatchBindingsPerItemType(String[] itemTypes) {
@@ -527,6 +516,47 @@ public class GenericItemProvider extends AbstractProvider<Item>
             ret.put(item.getName(), item);
         }
         return ret;
+    }
+
+    /**
+     * Creates a new GroupItem based on the given ModelItem and item type segments.
+     *
+     * @param modelItem The ModelItem to create the GroupItem from.
+     * @param itemTypeSegments The segments of the item type.
+     * @return A new GroupItem or null if the item type is invalid.
+     */
+    private @Nullable GroupItem createGroupItem(ModelItem modelItem, String[] itemTypeSegments) {
+        if (itemTypeSegments.length == 1) {
+            // Just plain "Group" with no base type
+            return new GroupItem(modelItem.getName());
+        }
+
+        String function = GroupFunction.DEFAULT;
+
+        String baseItemType = switch (itemTypeSegments.length) {
+            case 2 -> itemTypeSegments[1];
+            case 3 -> {
+                // 3 segments could either be Group:Type:Function, or Group:Number:Dimension -> Find out which one it is
+                if (!modelItem.getArgs().isEmpty() || GroupFunction.VALID_FUNCTIONS.contains(itemTypeSegments[2])) {
+                    // It's Group:Type:Function because there are arguments or the third segment is a valid function
+                    function = itemTypeSegments[2];
+                    yield itemTypeSegments[1];
+                } else {
+                    // Otherwise, it must be Group:Number:Dimension
+                    yield itemTypeSegments[1] + ItemUtil.EXTENSION_SEPARATOR + itemTypeSegments[2];
+                }
+            }
+            case 4 -> {
+                // 4 segments: "Group:Number:Dimension:Function"
+                function = itemTypeSegments[3];
+                yield itemTypeSegments[1] + ItemUtil.EXTENSION_SEPARATOR + itemTypeSegments[2];
+            }
+            default -> throw new IllegalArgumentException("Invalid group item type: " + modelItem.getType()
+                    + ". Expected formats are 'Group', 'Group:Type', 'Group:Type:Function', or 'Group:Number:Dimension:Function' with a maximum of 4 segments.");
+        };
+
+        Item baseItem = createItemOfType(baseItemType, modelItem.getName());
+        return applyGroupFunction(baseItem, modelItem, function);
     }
 
     /**

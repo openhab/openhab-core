@@ -22,6 +22,7 @@ Import-Package: javax.measure,\
  org.openhab.core.items,\
  org.openhab.core.items.dto,\
  org.openhab.core.items.fileconverter,\
+ org.openhab.core.library,\
  org.openhab.core.library.items,\
  org.openhab.core.library.types,\
  org.openhab.core.thing.util,\
