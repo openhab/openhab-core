@@ -251,24 +251,24 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 String format = extractFormat(label);
                 if (format != null) {
                     label = label.substring(0, label.indexOf("[")).trim();
-                Map<String, String> formatters = Objects
-                        .requireNonNull(stateFormattersMap.computeIfAbsent(modelName, k -> new HashMap<>()));
-                formatters.put(modelItem.getName(), format);
-                if (!isIsolatedModel(modelName)) {
+                    Map<String, String> formatters = Objects
+                            .requireNonNull(stateFormattersMap.computeIfAbsent(modelName, k -> new HashMap<>()));
+                    formatters.put(modelItem.getName(), format);
+                    if (!isIsolatedModel(modelName)) {
                         stateDescriptionFragments.put(modelItem.getName(),
                                 StateDescriptionFragmentBuilder.create().withPattern(format).build());
-                }
-                } else {
-                Map<String, String> formatters = stateFormattersMap.get(modelName);
-                if (formatters != null) {
-                    formatters.remove(modelItem.getName());
-                    if (formatters.isEmpty()) {
-                        stateFormattersMap.remove(modelName);
                     }
-                }
-                if (!isIsolatedModel(modelName)) {
+                } else {
+                    Map<String, String> formatters = stateFormattersMap.get(modelName);
+                    if (formatters != null) {
+                        formatters.remove(modelItem.getName());
+                        if (formatters.isEmpty()) {
+                            stateFormattersMap.remove(modelName);
+                        }
+                    }
+                    if (!isIsolatedModel(modelName)) {
                         stateDescriptionFragments.remove(modelItem.getName());
-                }
+                    }
                 }
                 activeItem.setLabel(label);
                 activeItem.setCategory(modelItem.getIcon());
