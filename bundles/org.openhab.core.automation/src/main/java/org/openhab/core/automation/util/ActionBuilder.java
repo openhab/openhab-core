@@ -30,7 +30,6 @@ public class ActionBuilder extends ModuleBuilder<ActionBuilder, Action> {
     private @Nullable Map<String, String> inputs;
 
     protected ActionBuilder() {
-        super();
     }
 
     protected ActionBuilder(final Action action) {

@@ -24,6 +24,8 @@ import org.eclipse.xtext.ide.server.IProjectDescriptionFactory;
 import org.eclipse.xtext.ide.server.LanguageServerImpl;
 import org.eclipse.xtext.ide.server.MultiRootWorkspaceConfigFactory;
 import org.eclipse.xtext.ide.server.UriExtensions;
+import org.eclipse.xtext.ide.server.concurrent.IRequestManager;
+import org.eclipse.xtext.ide.server.concurrent.RequestManager;
 import org.eclipse.xtext.resource.IContainer;
 import org.eclipse.xtext.resource.IResourceServiceProvider;
 import org.eclipse.xtext.resource.containers.ProjectDescriptionBasedContainerManager;
@@ -54,6 +56,7 @@ public class RuntimeServerModule extends AbstractModule {
         binder().bind(ExecutorService.class).toProvider(ExecutorServiceProvider.class);
 
         bind(UriExtensions.class).toInstance(new MappingUriExtensions(OpenHAB.getConfigFolder()));
+        bind(IRequestManager.class).to(RequestManager.class);
         bind(LanguageServer.class).to(LanguageServerImpl.class);
         bind(IResourceServiceProvider.Registry.class).toProvider(new RegistryProvider(scriptServiceUtil, scriptEngine));
         bind(IMultiRootWorkspaceConfigFactory.class).to(MultiRootWorkspaceConfigFactory.class);

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.item.internal.fileconverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -33,19 +35,20 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.item.internal.GenericItemProvider;
+import org.openhab.core.model.item.internal.GenericMetadataProvider;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
 import org.openhab.core.model.items.ModelBinding;
-import org.openhab.core.model.items.ModelGroupFunction;
-import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
 import org.openhab.core.model.items.ModelProperty;
 import org.openhab.core.types.State;
-import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -59,18 +62,26 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemFileGenerator.class)
-public class DslItemFileConverter extends AbstractItemFileGenerator {
+@Component(immediate = true, service = { ItemFileGenerator.class, ItemFileParser.class })
+public class DslItemFileConverter extends AbstractItemFileGenerator implements ItemFileParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslItemFileConverter.class);
 
+    private final Map<String, ItemModel> elementsToGenerate = new ConcurrentHashMap<>();
+
     private final ModelRepository modelRepository;
+    private final GenericItemProvider itemProvider;
+    private final GenericMetadataProvider metadataProvider;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
     public DslItemFileConverter(final @Reference ModelRepository modelRepository,
+            final @Reference GenericItemProvider itemProvider,
+            final @Reference GenericMetadataProvider metadataProvider,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.modelRepository = modelRepository;
+        this.itemProvider = itemProvider;
+        this.metadataProvider = metadataProvider;
         this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
@@ -80,41 +91,47 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
     }
 
     @Override
-    public synchronized void generateFileFormat(OutputStream out, List<Item> items, Collection<Metadata> metadata,
-            boolean hideDefaultParameters) {
+    public void setItemsToBeGenerated(String id, List<Item> items, Collection<Metadata> metadata,
+            Map<String, String> stateFormatters, boolean hideDefaultParameters) {
         if (items.isEmpty()) {
             return;
         }
         ItemModel model = ItemsFactory.eINSTANCE.createItemModel();
         for (Item item : items) {
             model.getItems().add(buildModelItem(item, getChannelLinks(metadata, item.getName()),
-                    getMetadata(metadata, item.getName()), hideDefaultParameters));
+                    getMetadata(metadata, item.getName()), stateFormatters.get(item.getName()), hideDefaultParameters));
         }
-        modelRepository.generateSyntaxFromModel(out, "items", model);
+        elementsToGenerate.put(id, model);
+    }
+
+    @Override
+    public void generateFileFormat(String id, OutputStream out) {
+        ItemModel model = elementsToGenerate.remove(id);
+        if (model != null) {
+            modelRepository.generateFileFormat(out, "items", model);
+        }
     }
 
     private ModelItem buildModelItem(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
-            boolean hideDefaultParameters) {
-        ModelItem model;
+            @Nullable String stateFormatter, boolean hideDefaultParameters) {
+        ModelItem model = ItemsFactory.eINSTANCE.createModelItem();
         if (item instanceof GroupItem groupItem) {
-            ModelGroupItem modelGroup = ItemsFactory.eINSTANCE.createModelGroupItem();
-            model = modelGroup;
             Item baseItem = groupItem.getBaseItem();
+            List<String> groupType = new ArrayList<>();
+            groupType.add(groupItem.getType());
             if (baseItem != null) {
-                modelGroup.setType(baseItem.getType());
+                groupType.add(baseItem.getType());
                 GroupFunction function = groupItem.getFunction();
                 if (function != null) {
-                    ModelGroupFunction modelFunction = ModelGroupFunction
-                            .getByName(function.getClass().getSimpleName().toUpperCase());
-                    modelGroup.setFunction(modelFunction);
+                    groupType.add(function.getClass().getSimpleName().toUpperCase());
                     State[] parameters = function.getParameters();
                     for (int i = 0; i < parameters.length; i++) {
-                        modelGroup.getArgs().add(parameters[i].toString());
+                        model.getArgs().add(parameters[i].toString());
                     }
                 }
             }
+            model.setType(groupType.stream().collect(Collectors.joining(ItemUtil.EXTENSION_SEPARATOR)));
         } else {
-            model = ItemsFactory.eINSTANCE.createModelNormalItem();
             model.setType(item.getType());
         }
 
@@ -123,9 +140,8 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
         boolean patternInjected = false;
         String defaultPattern = getDefaultStatePattern(item);
         if (label != null && !label.isEmpty()) {
-            StateDescription stateDescr = item.getStateDescription();
-            String statePattern = stateDescr == null ? null : stateDescr.getPattern();
-            String patterToInject = statePattern != null && !statePattern.equals(defaultPattern) ? statePattern : null;
+            String patterToInject = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter
+                    : null;
             if (patterToInject != null) {
                 // Inject the pattern in the label
                 patternInjected = true;
@@ -278,5 +294,36 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
             handledNames.add(paramName);
         }
         return parameters;
+    }
+
+    @Override
+    public String getFileFormatParser() {
+        return "DSL";
+    }
+
+    @Override
+    public @Nullable String startParsingFileFormat(String syntax, List<String> errors, List<String> warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        return modelRepository.createIsolatedModel("items", inputStream, errors, warnings);
+    }
+
+    @Override
+    public Collection<Item> getParsedItems(String modelName) {
+        return itemProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Collection<Metadata> getParsedMetadata(String modelName) {
+        return metadataProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Map<String, String> getParsedStateFormatters(String modelName) {
+        return itemProvider.getStateFormattersFromModel(modelName);
+    }
+
+    @Override
+    public void finishParsingFileFormat(String modelName) {
+        modelRepository.removeModel(modelName);
     }
 }

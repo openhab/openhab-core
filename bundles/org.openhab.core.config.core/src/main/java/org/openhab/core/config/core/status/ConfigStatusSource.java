@@ -32,7 +32,6 @@ public abstract class ConfigStatusSource {
      * @param entityId the id of the entity whose new configuration status is to be propagated
      */
     public ConfigStatusSource(String entityId) {
-        super();
         this.entityId = entityId;
     }
 

@@ -44,7 +44,6 @@ public class UserSession {
      * @param scope the granted scope provided when the client was authorized by the user
      */
     public UserSession(String sessionId, String refreshToken, String clientId, String redirectUri, String scope) {
-        super();
         this.sessionId = sessionId;
         this.refreshToken = refreshToken;
         this.createdTime = new Date();

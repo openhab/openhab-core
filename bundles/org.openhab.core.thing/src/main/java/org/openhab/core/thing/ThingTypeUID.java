@@ -28,7 +28,6 @@ public class ThingTypeUID extends UID {
      * class by reflection. Not intended to be used for normal instantiation.
      */
     ThingTypeUID() {
-        super();
     }
 
     public ThingTypeUID(String uid) {

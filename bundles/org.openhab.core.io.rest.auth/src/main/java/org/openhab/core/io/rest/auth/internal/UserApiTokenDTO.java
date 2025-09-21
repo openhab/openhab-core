@@ -25,7 +25,6 @@ public class UserApiTokenDTO {
     public String scope;
 
     public UserApiTokenDTO(String name, Date createdTime, String scope) {
-        super();
         this.name = name;
         this.createdTime = createdTime;
         this.scope = scope;

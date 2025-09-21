@@ -43,7 +43,6 @@ public class ModbusWriteRegisterRequestBlueprint extends ModbusWriteRequestBluep
      */
     public ModbusWriteRegisterRequestBlueprint(int slaveId, int reference, ModbusRegisterArray registers,
             boolean writeMultiple, int maxTries) throws IllegalArgumentException {
-        super();
         this.slaveId = slaveId;
         this.reference = reference;
         this.registers = registers;

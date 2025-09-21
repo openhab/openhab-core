@@ -44,7 +44,6 @@ public class ManagedUser implements User {
      * @param passwordHash the result of the hashing of the salted password
      */
     public ManagedUser(String name, String passwordSalt, String passwordHash) {
-        super();
         this.name = name;
         this.passwordSalt = passwordSalt;
         this.passwordHash = passwordHash;

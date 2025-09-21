@@ -58,7 +58,6 @@ public final class ExpressionLet extends Expression {
      * @param tag the tag that should be set on the node. Null, if the node's tag should not be changed.
      */
     public ExpressionLet(String name, Expression subExpression, Object value, Object tag) {
-        super();
         if (name != null) {
             this.name = name;
         }

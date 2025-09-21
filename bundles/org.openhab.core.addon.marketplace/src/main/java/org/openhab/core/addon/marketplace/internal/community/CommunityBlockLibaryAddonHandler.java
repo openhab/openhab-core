@@ -84,7 +84,9 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
             } else if (yamlContent != null) {
                 addWidgetAsYAML(addon.getUid(), yamlContent);
             } else {
-                throw new IllegalArgumentException("Couldn't find the block library in the add-on entry");
+                logger.error("Block library {} has neither download URL nor embedded content", addon.getUid());
+                throw new MarketplaceHandlerException("Block library has neither download URL nor embedded content",
+                        null);
             }
         } catch (IOException e) {
             logger.error("Block library from marketplace cannot be downloaded: {}", e.getMessage());

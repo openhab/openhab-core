@@ -27,7 +27,6 @@ public class ScriptEngineContainer {
     private String identifier;
 
     public ScriptEngineContainer(ScriptEngine scriptEngine, ScriptEngineFactory factory, String identifier) {
-        super();
         this.scriptEngine = scriptEngine;
         this.factory = factory;
         this.identifier = identifier;

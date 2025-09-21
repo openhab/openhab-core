@@ -38,7 +38,6 @@ public final class ConfigStatusInfo {
      * Creates a new {@link ConfigStatusInfo}.
      */
     public ConfigStatusInfo() {
-        super();
     }
 
     /**

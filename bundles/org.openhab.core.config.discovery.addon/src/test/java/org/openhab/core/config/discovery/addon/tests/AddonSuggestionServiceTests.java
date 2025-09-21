@@ -18,7 +18,9 @@ import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.IOException;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -62,8 +64,8 @@ public class AddonSuggestionServiceTests {
     private @NonNullByDefault({}) AddonFinder upnpAddonFinder;
     private @NonNullByDefault({}) AddonSuggestionService addonSuggestionService;
 
-    private final Map<String, Object> config = Map.of(AddonFinderConstants.CFG_FINDER_MDNS, true,
-            AddonFinderConstants.CFG_FINDER_UPNP, true);
+    private final Hashtable<String, Object> config = new Hashtable<>(
+            Map.of(AddonFinderConstants.CFG_FINDER_MDNS, true, AddonFinderConstants.CFG_FINDER_UPNP, true));
 
     @AfterAll
     public void cleanUp() {
@@ -86,8 +88,7 @@ public class AddonSuggestionServiceTests {
     }
 
     private AddonSuggestionService createAddonSuggestionService() {
-        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(configurationAdmin, localeProvider,
-                config);
+        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(configurationAdmin, localeProvider);
         assertNotNull(addonSuggestionService);
 
         addonSuggestionService.addAddonFinder(mdnsAddonFinder);
@@ -104,12 +105,19 @@ public class AddonSuggestionServiceTests {
             when(configurationAdmin.getConfiguration(any())).thenReturn(configuration);
         } catch (IOException e) {
         }
-        when(configuration.getProperties()).thenReturn(null);
+        when(configuration.getProperties()).thenReturn(config);
 
         // check that it works
         assertNotNull(configurationAdmin);
         try {
-            assertNull(configurationAdmin.getConfiguration(AddonSuggestionService.CONFIG_PID).getProperties());
+            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(AddonSuggestionService.CONFIG_PID)
+                    .getProperties();
+            assertNotNull(cfg);
+            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_MDNS) instanceof Boolean);
+            assertTrue((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_MDNS));
+            assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_UPNP) instanceof Boolean);
+            assertTrue((Boolean) cfg.get(AddonFinderConstants.CFG_FINDER_UPNP));
+            assertNull(cfg.get(AddonFinderConstants.CFG_FINDER_USB));
         } catch (IOException e) {
         }
     }

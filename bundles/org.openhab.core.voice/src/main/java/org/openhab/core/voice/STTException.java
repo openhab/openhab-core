@@ -31,7 +31,6 @@ public class STTException extends Exception {
      * Constructs a new exception with null as its detail message.
      */
     public STTException() {
-        super();
     }
 
     /**

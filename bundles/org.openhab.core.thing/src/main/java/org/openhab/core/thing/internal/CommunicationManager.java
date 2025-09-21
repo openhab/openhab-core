@@ -346,10 +346,10 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     @FunctionalInterface
     private interface ProfileAction<T extends Type> {
-        void applyProfile(Profile profile, Thing thing, T type);
+        void applyProfile(Profile profile, Thing thing, T type, @Nullable String source);
     }
 
-    private void applyProfileForUpdate(Profile profile, Thing thing, State convertedState) {
+    private void applyProfileForUpdate(Profile profile, Thing thing, State convertedState, @Nullable String source) {
         CacheKey key = new CacheKey("UPDATE", profile, thing);
         Profile p = profileSafeCallCache.computeIfAbsent(key, (k) -> safeCaller.create(k.profile, Profile.class) //
                 .withAsync() //
@@ -363,7 +363,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         }
     }
 
-    private void applyProfileForCommand(Profile profile, Thing thing, Command convertedCommand) {
+    private void applyProfileForCommand(Profile profile, Thing thing, Command convertedCommand,
+            @Nullable String source) {
         if (profile instanceof StateProfile) {
             CacheKey key = new CacheKey("COMMAND", profile, thing);
             Profile p = profileSafeCallCache.computeIfAbsent(key,
@@ -373,7 +374,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                             .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
                             .build());
             if (p instanceof StateProfile profileP) {
-                profileP.onCommandFromItem(convertedCommand);
+                profileP.onCommandFromItem(convertedCommand, source);
             } else {
                 throw new IllegalStateException("ExpiringCache didn't provide a StateProfile instance!");
             }
@@ -404,7 +405,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                         @Nullable
                         T uomType = fixUoM(type, channel, item);
                         Profile profile = getProfile(link, item, thing);
-                        action.applyProfile(profile, thing, uomType != null ? uomType : type);
+                        action.applyProfile(profile, thing, uomType != null ? uomType : type, source);
                     }
                 } else {
                     logger.debug("Received  event '{}' for non-existing channel '{}', not forwarding it to the handler",
