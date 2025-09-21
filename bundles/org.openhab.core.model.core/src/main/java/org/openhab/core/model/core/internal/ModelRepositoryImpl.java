@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.core.internal;
 
+import static org.openhab.core.model.core.ModelCoreConstants.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,8 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
- * @author Laurent Garnier - Added method generateSyntaxFromModel
+ * @author Laurent Garnier - Added methods generateFileFormat and createIsolatedModel
+ *         + return errors and warnings when loading a model
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -87,12 +89,12 @@ public class ModelRepositoryImpl implements ModelRepository {
                 if (!resource.getContents().isEmpty()) {
                     return resource.getContents().getFirst();
                 } else {
-                    logger.warn("Configuration model '{}' is either empty or cannot be parsed correctly!", name);
+                    logger.warn("DSL model '{}' is either empty or cannot be parsed correctly!", name);
                     resourceSet.getResources().remove(resource);
                     return null;
                 }
             } else {
-                logger.trace("Configuration model '{}' can not be found", name);
+                logger.trace("DSL model '{}' can not be found", name);
                 return null;
             }
         }
@@ -100,19 +102,39 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
-        logger.info("Loading model '{}'", name);
+        return addOrRefreshModel(name, originalInputStream, null, null);
+    }
+
+    public boolean addOrRefreshModel(String name, final InputStream originalInputStream, @Nullable List<String> errors,
+            @Nullable List<String> warnings) {
+        logger.info("Loading DSL model '{}'", name);
         Resource resource = null;
         byte[] bytes;
         try (InputStream inputStream = originalInputStream) {
             bytes = inputStream.readAllBytes();
-            String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
-            if (validationResult != null) {
-                logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name, validationResult);
+            List<String> newErrors = new ArrayList<>();
+            List<String> newWarnings = new ArrayList<>();
+            boolean valid = validateModel(name, new ByteArrayInputStream(bytes), newErrors, newWarnings);
+            if (errors != null) {
+                errors.addAll(newErrors);
+            }
+            if (warnings != null) {
+                warnings.addAll(newWarnings);
+            }
+            if (!valid) {
+                logger.warn("DSL model '{}' has errors, therefore ignoring it: {}", name, String.join("\n", newErrors));
                 removeModel(name);
                 return false;
             }
+            if (!newWarnings.isEmpty()) {
+                logger.info("Validation issues found in DSL model '{}', using it anyway:\n{}", name,
+                        String.join("\n", newWarnings));
+            }
         } catch (IOException e) {
-            logger.warn("Configuration model '{}' cannot be parsed correctly!", name, e);
+            if (errors != null) {
+                errors.add("Model cannot be parsed correctly: %s".formatted(e.getMessage()));
+            }
+            logger.warn("DSL model '{}' cannot be parsed correctly!", name, e);
             return false;
         }
         try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
@@ -144,7 +166,10 @@ public class ModelRepositoryImpl implements ModelRepository {
                 }
             }
         } catch (IOException e) {
-            logger.warn("Configuration model '{}' cannot be parsed correctly!", name, e);
+            if (errors != null) {
+                errors.add("Model cannot be parsed correctly: %s".formatted(e.getMessage()));
+            }
+            logger.warn("DSL model '{}' cannot be parsed correctly!", name, e);
             if (resource != null) {
                 resourceSet.getResources().remove(resource);
             }
@@ -154,6 +179,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean removeModel(String name) {
+        logger.info("Unloading DSL model '{}'", name);
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
@@ -176,7 +202,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             return resourceListCopy.stream()
                     .filter(input -> input.getURI().lastSegment().contains(".") && input.isLoaded()
                             && modelType.equalsIgnoreCase(input.getURI().fileExtension())
-                            && !input.getURI().lastSegment().startsWith("tmp_"))
+                            && !isIsolatedModel(input.getURI().lastSegment()))
                     .map(from -> from.getURI().path()).toList();
         }
     }
@@ -189,7 +215,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             for (Resource resource : resourceListCopy) {
                 if (resource.getURI().lastSegment().contains(".") && resource.isLoaded()
                         && modelType.equalsIgnoreCase(resource.getURI().fileExtension())
-                        && !resource.getURI().lastSegment().startsWith("tmp_")) {
+                        && !isIsolatedModel(resource.getURI().lastSegment())) {
                     XtextResource xtextResource = (XtextResource) resource;
                     // It's not sufficient to discard the derived state.
                     // The quick & dirts solution is to reparse the whole resource.
@@ -211,7 +237,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             for (Resource resource : resourceListCopy) {
                 if (resource.getURI().lastSegment().contains(".") && resource.isLoaded()
                         && modelType.equalsIgnoreCase(resource.getURI().fileExtension())
-                        && !resource.getURI().lastSegment().startsWith("tmp_")) {
+                        && !isIsolatedModel(resource.getURI().lastSegment())) {
                     logger.debug("Removing resource '{}'", resource.getURI().lastSegment());
                     ret.add(resource.getURI().lastSegment());
                     resourceSet.getResources().remove(resource);
@@ -233,15 +259,22 @@ public class ModelRepositoryImpl implements ModelRepository {
     }
 
     @Override
-    public void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent) {
+    public @Nullable String createIsolatedModel(String modelType, InputStream inputStream, List<String> errors,
+            List<String> warnings) {
+        String name = "%sDSL_model_%d.%s".formatted(PREFIX_TMP_MODEL, ++counter, modelType);
+        return addOrRefreshModel(name, inputStream, errors, warnings) ? name : null;
+    }
+
+    @Override
+    public void generateFileFormat(OutputStream out, String modelType, EObject modelContent) {
         synchronized (resourceSet) {
-            String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
+            String name = "%sgenerated_DSL_%d.%s".formatted(PREFIX_TMP_MODEL, ++counter, modelType);
             Resource resource = resourceSet.createResource(URI.createURI(name));
             try {
                 resource.getContents().add(modelContent);
                 resource.save(out, Map.of(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name()));
             } catch (IOException e) {
-                logger.warn("Exception when saving the model {}", resource.getURI().lastSegment());
+                logger.warn("Exception when saving DSL model {}", resource.getURI().lastSegment());
             } finally {
                 resourceSet.getResources().remove(resource);
             }
@@ -268,28 +301,28 @@ public class ModelRepositoryImpl implements ModelRepository {
      * Validation will be done on a separate resource, in order to keep the original one intact in case its content
      * needs to be removed because of syntactical errors.
      *
-     * @param name
-     * @param inputStream
-     * @return error messages as a String if any syntactical error were found, <code>null</code> otherwise
+     * @param name the model name
+     * @param inputStream an input stream with the model's content
+     * @param errors the list to be used to fill the errors
+     * @param warnings the list to be used to fill the warnings
+     * @return false if any syntactical error were found, false otherwise
      * @throws IOException if there was an error with the given {@link InputStream}, loading the resource from there
      */
-    private @Nullable String validateModel(String name, InputStream inputStream) throws IOException {
+    private boolean validateModel(String name, InputStream inputStream, List<String> errors, List<String> warnings)
+            throws IOException {
         // use another resource for validation in order to keep the original one for emergency-removal in case of errors
-        Resource resource = resourceSet.createResource(URI.createURI("tmp_" + name));
+        Resource resource = resourceSet.createResource(URI.createURI(PREFIX_TMP_MODEL + name));
         try {
             resource.load(inputStream, resourceOptions);
-            StringBuilder criticalErrors = new StringBuilder();
-            List<String> warnings = new LinkedList<>();
 
             if (!resource.getContents().isEmpty()) {
                 // Check for syntactical errors
                 for (Diagnostic diagnostic : resource.getErrors()) {
-                    criticalErrors
-                            .append(MessageFormat.format("[{0},{1}]: {2}\n", Integer.toString(diagnostic.getLine()),
-                                    Integer.toString(diagnostic.getColumn()), diagnostic.getMessage()));
+                    errors.add(MessageFormat.format("[{0},{1}]: {2}", Integer.toString(diagnostic.getLine()),
+                            Integer.toString(diagnostic.getColumn()), diagnostic.getMessage()));
                 }
-                if (!criticalErrors.isEmpty()) {
-                    return criticalErrors.toString();
+                if (!resource.getErrors().isEmpty()) {
+                    return false;
                 }
 
                 // Check for validation errors, but log them only
@@ -299,10 +332,6 @@ public class ModelRepositoryImpl implements ModelRepository {
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
                         warnings.add(d.getMessage());
                     }
-                    if (!warnings.isEmpty()) {
-                        logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name,
-                                String.join("\n", warnings));
-                    }
                 } catch (NullPointerException e) {
                     // see https://github.com/eclipse/smarthome/issues/3335
                     logger.debug("Validation of '{}' skipped due to internal errors.", name);
@@ -311,7 +340,7 @@ public class ModelRepositoryImpl implements ModelRepository {
         } finally {
             resourceSet.getResources().remove(resource);
         }
-        return null;
+        return true;
     }
 
     private void notifyListeners(String name, EventType type) {
