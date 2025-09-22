@@ -135,4 +135,7 @@ Fragment-Host: org.openhab.core.model.script
 	com.fasterxml.jackson.core.jackson-databind;version='[2.19.2,2.19.3)',\
 	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.19.2,2.19.3)',\
 	com.fasterxml.jackson.dataformat.jackson-dataformat-yaml;version='[2.19.2,2.19.3)',\
-	org.yaml.snakeyaml;version='[2.4.0,2.4.1)'
+	org.yaml.snakeyaml;version='[2.4.0,2.4.1)',\
+	org.openhab.core.model.persistence.runtime;version='[5.1.0,5.1.1)',\
+	de.focus_shift.jollyday-core;version='[1.5.4,1.5.5)',\
+	de.focus_shift.jollyday-jackson;version='[1.5.4,1.5.5)'
