@@ -58,6 +58,7 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
  * @author Markus Rathgeb - added connection state callback
  * @author Jan N. Klug - changed from PAHO to HiveMQ client
  * @author Mark Herwege - Added flag for hostname validation
+ * @author Mark Herwege - Added parameter for cleanSession/cleanStart
  */
 @NonNullByDefault
 public class MqttBrokerConnection {
@@ -90,6 +91,7 @@ public class MqttBrokerConnection {
     protected final boolean secure;
     protected final boolean hostnameValidated;
     protected final MqttVersion mqttVersion;
+    private boolean cleanSessionStart = true;
 
     private @Nullable TrustManagerFactory trustManagerFactory = InsecureTrustManagerFactory.INSTANCE;
     protected final String clientId;
@@ -506,6 +508,22 @@ public class MqttBrokerConnection {
     }
 
     /**
+     * Sets the MQTT3 cleanSession or MQTT5 cleanStart configuration.
+     *
+     * @param cleanSessionStart
+     */
+    public void setCleanSessionStart(boolean cleanSessionStart) {
+        this.cleanSessionStart = cleanSessionStart;
+    }
+
+    /**
+     * Return MQTT3 cleanSession or MQTT5 cleanStart parameter
+     */
+    public boolean getCleanSessionStart() {
+        return cleanSessionStart;
+    }
+
+    /**
      * Return true if there are subscribers registered via {@link #subscribe(String, MqttMessageSubscriber)}.
      * Call {@link #unsubscribe(String, MqttMessageSubscriber)} or {@link #unsubscribeAll()} if necessary.
      */
@@ -695,7 +713,7 @@ public class MqttBrokerConnection {
         this.client = client;
 
         // connect
-        client.connect(lastWill, keepAliveInterval, user, password);
+        client.connect(lastWill, keepAliveInterval, user, password, cleanSessionStart);
 
         logger.info("Starting MQTT broker connection to '{}' with clientid {}", host, getClientId());
 
