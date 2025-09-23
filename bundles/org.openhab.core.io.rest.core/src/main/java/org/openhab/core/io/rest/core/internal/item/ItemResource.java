@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.core.internal.item;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -50,6 +51,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -57,6 +59,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.registry.RegistryChangedRunnableListener;
+import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.DTOMapper;
@@ -153,6 +156,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = ItemResource.PATH_ITEMS)
 @NonNullByDefault
 public class ItemResource implements RESTResource {
+    private static final String REST_SOURCE = "org.openhab.core.io.rest";
 
     /** The URI path to this resource */
     public static final String PATH_ITEMS = "items";
@@ -456,15 +460,17 @@ public class ItemResource implements RESTResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "updateItemState", summary = "Updates the state of an item.", requestBody = @RequestBody(description = "Valid item state (e.g., ON, OFF) either as plain text or JSON", required = true, content = {
             @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(type = "string", example = "ON")),
-            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string", example = "{ \"value\": \"ON\" }")) }), responses = {
+            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string", example = "{ \"value\": \"ON\", \"source\": null }")) }), responses = {
                     @ApiResponse(responseCode = "202", description = "Accepted"),
                     @ApiResponse(responseCode = "404", description = "Item not found"),
                     @ApiResponse(responseCode = "400", description = "State cannot be parsed") })
     public Response putItemStatePlain(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
-            @Parameter(description = "valid item state (e.g. ON, OFF)", required = true) String value) {
-        return sendItemStateInternal(language, itemname, value);
+            @Parameter(description = "valid item state (e.g. ON, OFF)", required = true) String value,
+            @QueryParam("source") @Parameter(description = "the source of the event") @Nullable String source,
+            @Context SecurityContext securityContext) {
+        return sendItemStateInternal(language, itemname, value, source, securityContext);
     }
 
     @PUT
@@ -472,13 +478,18 @@ public class ItemResource implements RESTResource {
     @Path("/{itemname: [a-zA-Z_0-9]+}/state")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response putItemStateJson(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Nullable String language,
-            @PathParam("itemname") String itemname, ValueContainer valueContainer) {
-        return sendItemStateInternal(language, itemname, valueContainer.value());
+            @PathParam("itemname") String itemname, @Context SecurityContext securityContext,
+            ValueContainer valueContainer) {
+        return sendItemStateInternal(language, itemname, valueContainer.value(), valueContainer.source(),
+                securityContext);
     }
 
-    private Response sendItemStateInternal(@Nullable String language, String itemname, String value) {
+    private Response sendItemStateInternal(@Nullable String language, String itemname, String value,
+            @Nullable String source, SecurityContext securityContext) {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
+
+        source = buildSource(source, securityContext);
 
         // get Item
         Item item = getItem(itemname);
@@ -490,7 +501,7 @@ public class ItemResource implements RESTResource {
 
             if (state != null) {
                 // set State and report OK
-                eventPublisher.post(ItemEventFactory.createStateEvent(itemname, state));
+                eventPublisher.post(ItemEventFactory.createStateEvent(itemname, state, source));
                 return getItemResponse(null, Status.ACCEPTED, null, locale, zoneId, null);
             } else {
                 // State could not be parsed
@@ -508,26 +519,31 @@ public class ItemResource implements RESTResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "sendItemCommand", summary = "Sends a command to an item.", requestBody = @RequestBody(description = "Valid item command (e.g., ON, OFF) either as plain text or JSON", required = true, content = {
             @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(type = "string", example = "ON")),
-            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string", example = "{ \"value\": \"ON\" }")) }), responses = {
+            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string", example = "{ \"value\": \"ON\", \"source\": \"org.openhab.ios\" }")) }), responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found"),
                     @ApiResponse(responseCode = "400", description = "Command cannot be parsed") })
     public Response postItemCommandPlain(@PathParam("itemname") @Parameter(description = "item name") String itemname,
-            @Parameter(description = "valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)", required = true) String value) {
-        return sendItemCommandInternal(itemname, value);
+            @Parameter(description = "valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)", required = true) String value,
+            @QueryParam("source") @Parameter(description = "the source of the command") @Nullable String source,
+            @Context SecurityContext securityContext) {
+        return sendItemCommandInternal(itemname, value, source, securityContext);
     }
 
     @POST
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response postItemCommandJson(@PathParam("itemname") String itemname, ValueContainer valueContainer) {
-        return sendItemCommandInternal(itemname, valueContainer.value());
+    public Response postItemCommandJson(@PathParam("itemname") String itemname,
+            @Context SecurityContext securityContext, ValueContainer valueContainer) {
+        return sendItemCommandInternal(itemname, valueContainer.value(), valueContainer.source(), securityContext);
     }
 
-    private Response sendItemCommandInternal(String itemname, String value) {
+    private Response sendItemCommandInternal(String itemname, String value, @Nullable String source,
+            SecurityContext securityContext) {
         Item item = getItem(itemname);
         Command command = null;
+        source = buildSource(source, securityContext);
         if (item != null) {
             if ("toggle".equalsIgnoreCase(value) && (item instanceof SwitchItem || item instanceof RollershutterItem)) {
                 if (OnOffType.ON.equals(item.getStateAs(OnOffType.class))) {
@@ -546,7 +562,7 @@ public class ItemResource implements RESTResource {
                 command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), value);
             }
             if (command != null) {
-                eventPublisher.post(ItemEventFactory.createCommandEvent(itemname, command));
+                eventPublisher.post(ItemEventFactory.createCommandEvent(itemname, command, source));
                 ResponseBuilder resbuilder = Response.ok();
                 resbuilder.type(MediaType.TEXT_PLAIN);
                 return resbuilder.build();
@@ -1108,6 +1124,17 @@ public class ItemResource implements RESTResource {
         return managedMetadataProvider.get(metadataKey) != null;
     }
 
-    private record ValueContainer(String value) {
+    private String buildSource(@Nullable String source, SecurityContext securityContext) {
+        String username;
+        Principal principal = securityContext.getUserPrincipal();
+        if (principal != null) {
+            username = principal.getName();
+        } else {
+            username = null;
+        }
+        return AbstractEvent.buildDelegatedSource(source, REST_SOURCE, username);
+    }
+
+    private record ValueContainer(String value, @Nullable String source) {
     }
 }
