@@ -14,21 +14,14 @@ package org.openhab.core.config.discovery.addon;
 
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Dictionary;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -36,10 +29,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
-import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.i18n.LocaleProvider;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -66,35 +57,22 @@ public class AddonSuggestionService {
     private final Logger logger = LoggerFactory.getLogger(AddonSuggestionService.class);
 
     private final Set<AddonInfoProvider> addonInfoProviders = ConcurrentHashMap.newKeySet();
-    private final List<AddonFinder> addonFinders = Collections.synchronizedList(new ArrayList<>());
-    private final ConfigurationAdmin configurationAdmin;
+
+    // All access must be guarded by "addonFinders"
+    private final List<AddonFinder> addonFinders = new ArrayList<>();
     private final LocaleProvider localeProvider;
     private volatile @Nullable AddonFinderService addonFinderService;
-    private @Nullable Map<String, Object> config;
-    private final ScheduledExecutorService scheduler;
     private final Map<String, Boolean> baseFinderConfig = new ConcurrentHashMap<>();
-    private final ScheduledFuture<?> cfgRefreshTask;
 
     @Activate
-    public AddonSuggestionService(final @Reference ConfigurationAdmin configurationAdmin,
-            @Reference LocaleProvider localeProvider, Map<String, Object> config) {
-        this.configurationAdmin = configurationAdmin;
+    public AddonSuggestionService(@Reference LocaleProvider localeProvider, Map<String, Object> config) {
         this.localeProvider = localeProvider;
-
         SUGGESTION_FINDERS.forEach(f -> baseFinderConfig.put(f, false));
-
-        // Changes to the configuration are expected to call the {@link modified} method. This works well when running
-        // in Eclipse. Running in Karaf, the method was not consistently called. Therefore regularly check for changes
-        // in configuration.
-        // This pattern and code was re-used from {@link org.openhab.core.karaf.internal.FeatureInstaller}
         modified(config);
-        scheduler = ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
-        cfgRefreshTask = scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES);
     }
 
     @Deactivate
     public void deactivate() {
-        cfgRefreshTask.cancel(true);
         synchronized (addonFinders) {
             addonFinders.clear();
         }
@@ -142,14 +120,6 @@ public class AddonSuggestionService {
                     }
                 }
             });
-            this.config = config;
-        }
-    }
-
-    private void syncConfiguration() {
-        final Map<String, Object> cfg = getConfiguration();
-        if (cfg != null && !cfg.equals(config)) {
-            modified(cfg);
         }
     }
 
@@ -174,20 +144,6 @@ public class AddonSuggestionService {
                 logger.warn("Failed to resolve addon suggestion finder type for suggestion finder {}", entry.getKey());
             }
         }
-    }
-
-    private @Nullable Map<String, Object> getConfiguration() {
-        try {
-            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID)
-                    .getProperties();
-            if (cfg != null) {
-                List<String> keys = Collections.list(cfg.keys());
-                return keys.stream().collect(Collectors.toMap(Function.identity(), cfg::get));
-            }
-        } catch (IOException | IllegalStateException e) {
-            logger.debug("Exception occurred while trying to get the configuration: {}", e.getMessage());
-        }
-        return null;
     }
 
     private boolean isFinderEnabled(AddonFinder finder) {
@@ -224,7 +180,8 @@ public class AddonSuggestionService {
     }
 
     private void changed() {
-        List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(localeProvider.getLocale()))
+        Locale locale = localeProvider.getLocale();
+        List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(locale))
                 .flatMap(Collection::stream).toList();
         synchronized (addonFinders) {
             addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
