@@ -15,6 +15,7 @@ package org.openhab.core.library.items;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.DateTimeType;
@@ -53,7 +54,11 @@ public class DateTimeItem extends GenericItem {
     }
 
     public void send(DateTimeType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(DateTimeType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override

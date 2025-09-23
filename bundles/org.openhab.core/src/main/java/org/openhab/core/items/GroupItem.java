@@ -279,20 +279,24 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     }
 
     public void send(Command command) {
+        send(command, null);
+    }
+
+    public void send(Command command, @Nullable String source) {
         if (getAcceptedCommandTypes().contains(command.getClass())) {
-            internalSend(command);
+            internalSend(command, source);
         } else {
             logger.warn("Command '{}' has been ignored for group '{}' as it is not accepted.", command, getName());
         }
     }
 
     @Override
-    protected void internalSend(Command command) {
+    protected void internalSend(Command command, @Nullable String source) {
         EventPublisher eventPublisher = this.eventPublisher;
         if (eventPublisher != null) {
             for (Item member : members) {
                 // try to send the command to the bus
-                eventPublisher.post(ItemEventFactory.createCommandEvent(member.getName(), command));
+                eventPublisher.post(ItemEventFactory.createCommandEvent(member.getName(), command, source));
             }
         }
     }

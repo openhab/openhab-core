@@ -211,10 +211,10 @@ public abstract class GenericItem implements ActiveItem {
         this.itemStateConverter = itemStateConverter;
     }
 
-    protected void internalSend(Command command) {
+    protected void internalSend(Command command, @Nullable String source) {
         // try to send the command to the bus
         if (eventPublisher instanceof EventPublisher publisher) {
-            publisher.post(ItemEventFactory.createCommandEvent(this.getName(), command));
+            publisher.post(ItemEventFactory.createCommandEvent(this.getName(), command, source));
         }
     }
 
@@ -339,7 +339,11 @@ public abstract class GenericItem implements ActiveItem {
     }
 
     public void send(RefreshType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(RefreshType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     protected void notifyListeners(final State oldState, final State newState) {

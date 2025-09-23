@@ -99,15 +99,23 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     }
 
     public void send(DecimalType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(DecimalType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     public void send(QuantityType<?> command) {
+        send(command, null);
+    }
+
+    public void send(QuantityType<?> command, @Nullable String source) {
         if (dimension == null) {
             DecimalType strippedCommand = new DecimalType(command);
-            internalSend(strippedCommand);
+            internalSend(strippedCommand, source);
         } else if (command.getUnit().isCompatible(unit) || command.getUnit().inverse().isCompatible(unit)) {
-            internalSend(command);
+            internalSend(command, source);
         } else {
             logger.warn("Command '{}' to item '{}' was rejected because it is incompatible with the item unit '{}'",
                     command, name, unit);

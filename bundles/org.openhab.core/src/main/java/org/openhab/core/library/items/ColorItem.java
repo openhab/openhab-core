@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
@@ -46,7 +47,11 @@ public class ColorItem extends DimmerItem {
     }
 
     public void send(HSBType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(HSBType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override

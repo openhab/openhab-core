@@ -15,6 +15,7 @@ package org.openhab.core.library.items;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.PercentType;
@@ -56,15 +57,27 @@ public class RollershutterItem extends GenericItem {
     }
 
     public void send(UpDownType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(UpDownType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     public void send(StopMoveType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(StopMoveType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     public void send(PercentType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(PercentType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override
