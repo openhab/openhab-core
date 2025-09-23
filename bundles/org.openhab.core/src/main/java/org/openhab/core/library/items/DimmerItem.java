@@ -15,6 +15,7 @@ package org.openhab.core.library.items;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.IncreaseDecreaseType;
 import org.openhab.core.library.types.OnOffType;
@@ -49,11 +50,19 @@ public class DimmerItem extends SwitchItem {
     }
 
     public void send(PercentType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(PercentType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     public void send(IncreaseDecreaseType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(IncreaseDecreaseType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override
