@@ -371,7 +371,9 @@ public class ThingEventFactoryTest {
 
         assertEquals(ChannelTriggeredEvent.TYPE, event.getType());
         assertEquals(CHANNEL_TRIGGERED_EVENT_TOPIC, event.getTopic());
-        assertEquals(CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD, event.getPayload());
+        Gson gson = new Gson();
+        assertEquals(gson.fromJson(CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD, Object.class),
+                gson.fromJson(event.getPayload(), Object.class));
         assertNotNull(event.getEvent());
         assertEquals(CommonTriggerEvents.PRESSED, event.getEvent());
         assertEquals(CHANNEL_UID, event.getChannel());
