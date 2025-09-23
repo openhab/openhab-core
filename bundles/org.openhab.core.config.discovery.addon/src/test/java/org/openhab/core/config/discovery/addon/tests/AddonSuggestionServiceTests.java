@@ -33,6 +33,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
@@ -71,7 +72,7 @@ public class AddonSuggestionServiceTests {
     public void cleanUp() {
         assertNotNull(addonSuggestionService);
         try {
-            addonSuggestionService.close();
+            addonSuggestionService.deactivate();
         } catch (Exception e) {
             fail(e);
         }
@@ -88,7 +89,8 @@ public class AddonSuggestionServiceTests {
     }
 
     private AddonSuggestionService createAddonSuggestionService() {
-        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(configurationAdmin, localeProvider);
+        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(configurationAdmin, localeProvider,
+                Map.of());
         assertNotNull(addonSuggestionService);
 
         addonSuggestionService.addAddonFinder(mdnsAddonFinder);
@@ -110,7 +112,7 @@ public class AddonSuggestionServiceTests {
         // check that it works
         assertNotNull(configurationAdmin);
         try {
-            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(AddonSuggestionService.CONFIG_PID)
+            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID)
                     .getProperties();
             assertNotNull(cfg);
             assertTrue(cfg.get(AddonFinderConstants.CFG_FINDER_MDNS) instanceof Boolean);

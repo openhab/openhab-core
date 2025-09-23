@@ -22,6 +22,7 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.common.ThreadPoolManager;
@@ -56,11 +58,10 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Install/remove finders
  */
 @NonNullByDefault
-@Component(immediate = true, service = AddonSuggestionService.class, name = AddonSuggestionService.SERVICE_NAME, configurationPid = AddonSuggestionService.CONFIG_PID)
-public class AddonSuggestionService implements AutoCloseable {
+@Component(immediate = true, service = AddonSuggestionService.class, name = AddonSuggestionService.SERVICE_NAME, configurationPid = OpenHAB.ADDONS_SERVICE_PID)
+public class AddonSuggestionService {
 
     public static final String SERVICE_NAME = "addon-suggestion-service";
-    public static final String CONFIG_PID = "org.openhab.addons";
 
     private final Logger logger = LoggerFactory.getLogger(AddonSuggestionService.class);
 
@@ -68,7 +69,7 @@ public class AddonSuggestionService implements AutoCloseable {
     private final List<AddonFinder> addonFinders = Collections.synchronizedList(new ArrayList<>());
     private final ConfigurationAdmin configurationAdmin;
     private final LocaleProvider localeProvider;
-    private @Nullable AddonFinderService addonFinderService;
+    private volatile @Nullable AddonFinderService addonFinderService;
     private @Nullable Map<String, Object> config;
     private final ScheduledExecutorService scheduler;
     private final Map<String, Boolean> baseFinderConfig = new ConcurrentHashMap<>();
@@ -76,7 +77,7 @@ public class AddonSuggestionService implements AutoCloseable {
 
     @Activate
     public AddonSuggestionService(final @Reference ConfigurationAdmin configurationAdmin,
-            @Reference LocaleProvider localeProvider) {
+            @Reference LocaleProvider localeProvider, Map<String, Object> config) {
         this.configurationAdmin = configurationAdmin;
         this.localeProvider = localeProvider;
 
@@ -86,21 +87,24 @@ public class AddonSuggestionService implements AutoCloseable {
         // in Eclipse. Running in Karaf, the method was not consistently called. Therefore regularly check for changes
         // in configuration.
         // This pattern and code was re-used from {@link org.openhab.core.karaf.internal.FeatureInstaller}
+        modified(config);
         scheduler = ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
         cfgRefreshTask = scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES);
     }
 
     @Deactivate
-    protected void deactivate() {
+    public void deactivate() {
         cfgRefreshTask.cancel(true);
+        synchronized (addonFinders) {
+            addonFinders.clear();
+        }
+        addonInfoProviders.clear();
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     protected void addAddonFinderService(AddonFinderService addonFinderService) {
         this.addonFinderService = addonFinderService;
-        // We retrieve the configuration at this time so that it contains all the user settings defining what finder to
-        // enable. When the service is started, the valid configuration is not yet loaded.
-        modified(getConfiguration());
+        initAddonFinderService();
     }
 
     protected void removeAddonFinderService(AddonFinderService addonFinderService) {
@@ -112,29 +116,34 @@ public class AddonSuggestionService implements AutoCloseable {
 
     @Modified
     public void modified(@Nullable final Map<String, Object> config) {
-        baseFinderConfig.forEach((finder, currentEnabled) -> {
-            String cfgParam = SUGGESTION_FINDER_CONFIGS.get(finder);
-            if (cfgParam != null) {
-                boolean newEnabled = (config != null)
-                        ? ConfigParser.valueAsOrElse(config.get(cfgParam), Boolean.class, true)
-                        : currentEnabled;
-                if (currentEnabled != newEnabled) {
-                    String type = SUGGESTION_FINDER_TYPES.get(finder);
-                    AddonFinderService finderService = addonFinderService;
-                    if (type != null && finderService != null) {
-                        logger.debug("baseFinderConfig {} {} = {} => updating from {} to {}", finder, cfgParam,
-                                config == null ? "null config" : config.get(cfgParam), currentEnabled, newEnabled);
-                        baseFinderConfig.put(finder, newEnabled);
-                        if (newEnabled) {
-                            finderService.install(type);
+        if (config != null) {
+            AddonFinderService finderService = addonFinderService;
+            baseFinderConfig.forEach((finder, currentEnabled) -> {
+                String cfgParam = SUGGESTION_FINDER_CONFIGS.get(finder);
+                if (cfgParam != null) {
+                    boolean newEnabled = ConfigParser.valueAsOrElse(config.get(cfgParam), Boolean.class, true);
+                    if (currentEnabled != newEnabled) {
+                        String type = SUGGESTION_FINDER_TYPES.get(finder);
+                        if (type != null) {
+                            logger.debug("baseFinderConfig {} {} = {} => updating from {} to {}", finder, cfgParam,
+                                    config.get(cfgParam), currentEnabled, newEnabled);
+                            baseFinderConfig.put(finder, newEnabled);
+                            if (finderService != null) {
+                                if (newEnabled) {
+                                    finderService.install(type);
+                                } else {
+                                    finderService.uninstall(type);
+                                }
+                            }
                         } else {
-                            finderService.uninstall(type);
+                            logger.warn("Failed to resolve addon suggestion finder type for suggestion finder {}",
+                                    finder);
                         }
                     }
                 }
-            }
-        });
-        this.config = config;
+            });
+            this.config = config;
+        }
     }
 
     private void syncConfiguration() {
@@ -144,9 +153,33 @@ public class AddonSuggestionService implements AutoCloseable {
         }
     }
 
+    private void initAddonFinderService() {
+        AddonFinderService finderService = this.addonFinderService;
+        if (finderService == null) {
+            return;
+        }
+
+        String type;
+        for (Entry<String, Boolean> entry : baseFinderConfig.entrySet()) {
+            type = SUGGESTION_FINDER_TYPES.get(entry.getKey());
+            if (type != null) {
+                if (entry.getValue() instanceof Boolean enabled) {
+                    if (enabled) {
+                        finderService.install(type);
+                    } else {
+                        finderService.uninstall(type);
+                    }
+                }
+            } else {
+                logger.warn("Failed to resolve addon suggestion finder type for suggestion finder {}", entry.getKey());
+            }
+        }
+    }
+
     private @Nullable Map<String, Object> getConfiguration() {
         try {
-            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(CONFIG_PID).getProperties();
+            Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID)
+                    .getProperties();
             if (cfg != null) {
                 List<String> keys = Collections.list(cfg.keys());
                 return keys.stream().collect(Collectors.toMap(Function.identity(), cfg::get));
@@ -196,15 +229,6 @@ public class AddonSuggestionService implements AutoCloseable {
         synchronized (addonFinders) {
             addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
         }
-    }
-
-    @Deactivate
-    @Override
-    public void close() throws Exception {
-        synchronized (addonFinders) {
-            addonFinders.clear();
-        }
-        addonInfoProviders.clear();
     }
 
     public Set<AddonInfo> getSuggestedAddons(@Nullable Locale locale) {
