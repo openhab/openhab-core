@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.firmware.Firmware;
@@ -26,6 +27,7 @@ import org.openhab.core.thing.binding.firmware.FirmwareBuilder;
 /**
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public class Constants {
 
     public static final String UNKNOWN = "unknown";

@@ -338,7 +338,7 @@ public class FileFormatResource implements RESTResource {
                             @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_ITEMS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "404", description = "One or more items not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForItems(final @Context HttpHeaders httpHeaders,
+    public @Nullable Response createFileFormatForItems(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @Parameter(description = "Array of item names. If empty or omitted, return all Items.") @Nullable List<String> itemNames) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
@@ -389,7 +389,7 @@ public class FileFormatResource implements RESTResource {
                             @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "404", description = "One or more things not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForThings(final @Context HttpHeaders httpHeaders,
+    public @Nullable Response createFileFormatForThings(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @Parameter(description = "Array of Thing UIDs. If empty or omitted, return all Things from the Registry.") @Nullable List<String> thingUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
@@ -916,9 +916,8 @@ public class FileFormatResource implements RESTResource {
         return dto;
     }
 
-    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
-            @Nullable Map<String, @Nullable Object> properties, ThingTypeUID thingTypeUID,
-            @Nullable ThingUID thingUID) {
+    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
+            ThingTypeUID thingTypeUID, @Nullable ThingUID thingUID) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -953,7 +952,7 @@ public class FileFormatResource implements RESTResource {
         return ConfigUtil.normalizeTypes(properties, configDescriptions);
     }
 
-    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(Map<String, @Nullable Object> properties,
+    private @Nullable Map<String, Object> normalizeConfiguration(Map<String, Object> properties,
             ChannelTypeUID channelTypeUID, ChannelUID channelUID) {
         if (properties == null || properties.isEmpty()) {
             return properties;
