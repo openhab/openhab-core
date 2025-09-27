@@ -84,6 +84,7 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
         try {
             lock.writeLock().lock();
             toBeNotified = new HashMap<>();
+            Set<String> modelsToRemove = new HashSet<>();
             for (Map.Entry<String, Set<Metadata>> entry : metadata.entrySet()) {
                 String modelName = entry.getKey();
                 Set<Metadata> mdSet = entry.getValue();
@@ -91,12 +92,14 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
                         .collect(toSet());
                 mdSet.removeAll(toBeRemoved);
                 if (mdSet.isEmpty()) {
-                    metadata.remove(modelName);
+                    modelsToRemove.add(modelName);
                 }
                 if (!isIsolatedModel(modelName) && !toBeRemoved.isEmpty()) {
                     toBeNotified.put(modelName, toBeRemoved);
                 }
             }
+            // Remove empty model entries after iteration to avoid ConcurrentModificationException
+            modelsToRemove.forEach(metadata::remove);
         } finally {
             lock.writeLock().unlock();
         }
