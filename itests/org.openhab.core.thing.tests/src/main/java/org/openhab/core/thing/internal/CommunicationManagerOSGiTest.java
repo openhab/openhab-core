@@ -34,6 +34,7 @@ import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.items.Metadata;
@@ -78,6 +79,7 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.TimeSeries;
+import org.osgi.framework.BundleContext;
 
 /**
  *
@@ -89,8 +91,9 @@ import org.openhab.core.types.TimeSeries;
 public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private static class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
-        public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry) {
-            super(thingRegistry, itemRegistry);
+        public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry,
+                ItemBuilderFactory itemBuilderFactory, BundleContext bundleContext) {
+            super(null, thingRegistry, itemRegistry, itemBuilderFactory, bundleContext);
         }
 
         @Override
@@ -152,15 +155,19 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ThingHandler thingHandlerMock;
     private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
     private @Mock @NonNullByDefault({}) TriggerProfile triggerProfileMock;
+    private @Mock @NonNullByDefault({}) ItemBuilderFactory itemBuilderFactoryMock;
 
     private @NonNullByDefault({}) CommunicationManager manager;
     private @NonNullByDefault({}) SafeCaller safeCaller;
-
-    private ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock,
-            itemRegistryMock);
+    private @NonNullByDefault({}) ItemChannelLinkRegistryAdvanced iclRegistry;
 
     @BeforeEach
     public void beforeEach() {
+        registerVolatileStorageService();
+
+        iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock, itemRegistryMock, itemBuilderFactoryMock,
+                bundleContext);
+
         when(UNIT_PROVIDER_MOCK.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
         item5 = new NumberItem("Number:Temperature", ITEM_NAME_5, UNIT_PROVIDER_MOCK);
 
