@@ -38,6 +38,7 @@ import com.hivemq.client.mqtt.mqtt3.message.unsubscribe.Mqtt3Unsubscribe;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Mark Herwege - Added flag for hostname validation
+ * @author Mark Herwege - Added parameter for cleanSession
  */
 @NonNullByDefault
 public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
@@ -92,12 +93,15 @@ public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
 
     @Override
     public CompletableFuture<?> connect(@Nullable MqttWillAndTestament lwt, int keepAliveInterval,
-            @Nullable String username, @Nullable String password) {
+            @Nullable String username, @Nullable String password, @Nullable Boolean cleanSession) {
         Mqtt3ConnectBuilder connectMessageBuilder = Mqtt3Connect.builder().keepAlive(keepAliveInterval);
         if (lwt != null) {
             Mqtt3Publish willPublish = Mqtt3Publish.builder().topic(lwt.getTopic()).payload(lwt.getPayload())
                     .retain(lwt.isRetain()).qos(getMqttQosFromInt(lwt.getQos())).build();
             connectMessageBuilder.willPublish(willPublish);
+        }
+        if (cleanSession != null) {
+            connectMessageBuilder.cleanSession(cleanSession);
         }
 
         if (username != null && !username.isBlank() && password != null && !password.isBlank()) {
