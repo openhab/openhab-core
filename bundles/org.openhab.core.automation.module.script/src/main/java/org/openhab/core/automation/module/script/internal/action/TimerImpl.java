@@ -29,9 +29,12 @@ import org.openhab.core.scheduler.SchedulerRunnable;
 @NonNullByDefault
 public class TimerImpl implements Timer {
 
+    // All access must be guarded by "this"
     private final Scheduler scheduler;
     private final SchedulerRunnable runnable;
     private final @Nullable String identifier;
+
+    // All access must be guarded by "this"
     private ScheduledCompletableFuture<?> future;
 
     public TimerImpl(Scheduler scheduler, ZonedDateTime startTime, SchedulerRunnable runnable) {
@@ -48,7 +51,7 @@ public class TimerImpl implements Timer {
     }
 
     @Override
-    public boolean cancel() {
+    public synchronized boolean cancel() {
         return future.cancel(true);
     }
 
@@ -60,27 +63,27 @@ public class TimerImpl implements Timer {
     }
 
     @Override
-    public @Nullable ZonedDateTime getExecutionTime() {
+    public synchronized @Nullable ZonedDateTime getExecutionTime() {
         return future.isCancelled() ? null : future.getScheduledTime();
     }
 
     @Override
-    public boolean isActive() {
+    public synchronized boolean isActive() {
         return !future.isDone();
     }
 
     @Override
-    public boolean isCancelled() {
+    public synchronized boolean isCancelled() {
         return future.isCancelled();
     }
 
     @Override
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
         return isActive() && ZonedDateTime.now().isAfter(future.getScheduledTime());
     }
 
     @Override
-    public boolean hasTerminated() {
+    public synchronized boolean hasTerminated() {
         return future.isDone();
     }
 }
