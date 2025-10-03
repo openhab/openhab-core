@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.config.core.Configuration;
@@ -40,9 +41,10 @@ import org.slf4j.LoggerFactory;
  * @author Dennis Nobel - Initial contribution
  */
 @Component(service = ConfigurationService.class)
+@NonNullByDefault
 public class ConfigurationService {
 
-    private ConfigurationAdmin configurationAdmin;
+    private @Nullable ConfigurationAdmin configurationAdmin;
 
     private final Logger logger = LoggerFactory.getLogger(ConfigurationService.class);
 
@@ -67,11 +69,11 @@ public class ConfigurationService {
      * @return old config or null if no old config existed
      * @throws IOException if configuration can not be stored
      */
-    public Configuration update(String configId, Configuration newConfiguration) throws IOException {
+    public @Nullable Configuration update(String configId, Configuration newConfiguration) throws IOException {
         return update(configId, newConfiguration, false);
     }
 
-    public String getProperty(String servicePID, String key) {
+    public @Nullable String getProperty(String servicePID, String key) {
         try {
             org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration(servicePID, null);
             if (configuration != null && configuration.getProperties() != null) {
@@ -93,7 +95,8 @@ public class ConfigurationService {
      * @return old config or null if no old config existed
      * @throws IOException if configuration can not be stored
      */
-    public Configuration update(String configId, Configuration newConfiguration, boolean override) throws IOException {
+    public @Nullable Configuration update(String configId, Configuration newConfiguration, boolean override)
+            throws IOException {
         org.osgi.service.cm.Configuration configuration = null;
         if (newConfiguration.containsKey(OpenHAB.SERVICE_CONTEXT)) {
             try {
@@ -133,7 +136,7 @@ public class ConfigurationService {
         return oldConfiguration;
     }
 
-    private org.osgi.service.cm.Configuration getConfigurationWithContext(String serviceId)
+    private org.osgi.service.cm.@Nullable Configuration getConfigurationWithContext(String serviceId)
             throws IOException, InvalidSyntaxException {
         org.osgi.service.cm.Configuration[] configs = configurationAdmin
                 .listConfigurations("(&(" + Constants.SERVICE_PID + "=" + serviceId + "))");
@@ -162,7 +165,7 @@ public class ConfigurationService {
         return oldConfiguration;
     }
 
-    private @Nullable Configuration toConfiguration(Dictionary<String, Object> dictionary) {
+    private @Nullable Configuration toConfiguration(@Nullable Dictionary<String, Object> dictionary) {
         if (dictionary == null) {
             return null;
         }
@@ -183,11 +186,11 @@ public class ConfigurationService {
     }
 
     @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+    protected void setConfigurationAdmin(@Nullable ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
 
-    protected void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+    protected void unsetConfigurationAdmin(@Nullable ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
 }

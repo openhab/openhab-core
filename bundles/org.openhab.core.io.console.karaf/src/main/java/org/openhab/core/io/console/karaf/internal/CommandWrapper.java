@@ -14,6 +14,7 @@ package org.openhab.core.io.console.karaf.internal;
 
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.felix.service.command.Process;
 import org.apache.karaf.shell.api.action.Action;
@@ -24,6 +25,8 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.ConsoleInterpreter;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
@@ -35,6 +38,7 @@ import org.openhab.core.io.console.karaf.OSGiConsole;
  * @author Markus Rathgeb - Initial contribution
  * @author Henning Treu - implement help command
  */
+@NonNullByDefault
 @Service
 @org.apache.karaf.shell.api.action.Command(name = "help", scope = "openhab", description = "Print the full usage information of the 'openhab' commands.")
 public class CommandWrapper implements Command, Action {
@@ -42,13 +46,14 @@ public class CommandWrapper implements Command, Action {
     // Define a scope for all commands.
     public static final String SCOPE = "openhab";
 
-    private final ConsoleCommandExtension command;
+    private final @Nullable ConsoleCommandExtension command;
 
     /**
      * The registry is injected when a CommandWrapper is instantiated by Karaf (see {@link CommandWrapper} default
      * constructor).
      */
     @Reference
+    @NonNullByDefault({})
     private Registry registry;
 
     /**
@@ -61,11 +66,12 @@ public class CommandWrapper implements Command, Action {
         this(null);
     }
 
-    public CommandWrapper(final ConsoleCommandExtension command) {
+    public CommandWrapper(final @Nullable ConsoleCommandExtension command) {
         this.command = command;
     }
 
     @Override
+    @NonNullByDefault({})
     public Object execute(Session session, List<Object> argList) throws Exception {
         String[] args = argList.stream().map(Object::toString).toArray(String[]::new);
         PrintStream out = Process.Utils.current().out();
@@ -76,7 +82,7 @@ public class CommandWrapper implements Command, Action {
                 console.printUsage(usage);
             }
         } else {
-            ConsoleInterpreter.execute(console, command, args);
+            ConsoleInterpreter.execute(console, Objects.requireNonNull(command), args);
         }
         return null;
     }
@@ -97,7 +103,7 @@ public class CommandWrapper implements Command, Action {
     }
 
     @Override
-    public Parser getParser() {
+    public @Nullable Parser getParser() {
         return null;
     }
 
@@ -111,7 +117,7 @@ public class CommandWrapper implements Command, Action {
      * {@link CommandWrapper} default constructor).
      */
     @Override
-    public Object execute() throws Exception {
+    public @Nullable Object execute() throws Exception {
         List<Command> commands = registry.getCommands();
         for (Command command : commands) {
             if (SCOPE.equals(command.getScope()) && command instanceof CommandWrapper) {

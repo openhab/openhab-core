@@ -29,8 +29,7 @@ import org.osgi.service.component.annotations.Component;
 public class BundleResolverImpl implements BundleResolver {
 
     @Override
-    @Nullable
-    public Bundle resolveBundle(Class<?> clazz) {
+    public @Nullable Bundle resolveBundle(Class<?> clazz) {
         return FrameworkUtil.getBundle(clazz);
     }
 }

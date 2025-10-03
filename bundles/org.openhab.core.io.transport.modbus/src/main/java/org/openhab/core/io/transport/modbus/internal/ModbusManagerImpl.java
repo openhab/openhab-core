@@ -32,7 +32,6 @@ import javax.imageio.IIOException;
 import org.apache.commons.pool2.KeyedObjectPool;
 import org.apache.commons.pool2.SwallowedExceptionListener;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
@@ -308,7 +307,7 @@ public class ModbusManagerImpl implements ModbusManager {
             .accept(new ModbusSlaveEndpointVisitor<EndpointPoolConfiguration>() {
 
                 @Override
-                public @NonNull EndpointPoolConfiguration visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
+                public @Nullable EndpointPoolConfiguration visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
                     EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
                     endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
                     endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
@@ -317,7 +316,8 @@ public class ModbusManagerImpl implements ModbusManager {
                 }
 
                 @Override
-                public @NonNull EndpointPoolConfiguration visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
+                public @Nullable EndpointPoolConfiguration visit(
+                        ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
                     EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
                     // never "disconnect" (close/open serial port) serial connection between borrows
                     endpointPoolConfig.setReconnectAfterMillis(-1);
@@ -328,7 +328,7 @@ public class ModbusManagerImpl implements ModbusManager {
                 }
 
                 @Override
-                public @NonNull EndpointPoolConfiguration visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
+                public @Nullable EndpointPoolConfiguration visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
                     EndpointPoolConfiguration endpointPoolConfig = new EndpointPoolConfiguration();
                     endpointPoolConfig.setInterTransactionDelayMillis(DEFAULT_TCP_INTER_TRANSACTION_DELAY_MILLIS);
                     endpointPoolConfig.setConnectMaxTries(Modbus.DEFAULT_RETRIES);
@@ -458,7 +458,7 @@ public class ModbusManagerImpl implements ModbusManager {
      * @throws PollTaskUnregistered
      */
     private <R, C extends ModbusResultCallback, F extends ModbusFailureCallback<R>, T extends TaskWithEndpoint<R, C, F>> Optional<ModbusSlaveConnection> getConnection(
-            AggregateStopWatch timer, boolean oneOffTask, @NonNull T task) throws PollTaskUnregistered {
+            AggregateStopWatch timer, boolean oneOffTask, T task) throws PollTaskUnregistered {
         KeyedObjectPool<ModbusSlaveEndpoint, @Nullable ModbusSlaveConnection> connectionPool = this.connectionPool;
         if (connectionPool == null) {
             return Optional.empty();

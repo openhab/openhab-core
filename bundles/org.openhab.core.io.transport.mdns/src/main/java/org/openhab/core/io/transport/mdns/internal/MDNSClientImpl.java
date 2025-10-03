@@ -30,6 +30,7 @@ import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.io.transport.mdns.ServiceDescription;
 import org.openhab.core.net.CidrAddress;
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Gary Tse - Add NetworkAddressChangeListener to handle interface changes
  */
 @Component(immediate = true, service = MDNSClient.class)
+@NonNullByDefault
 public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener {
     private final Logger logger = LoggerFactory.getLogger(MDNSClientImpl.class);
 
