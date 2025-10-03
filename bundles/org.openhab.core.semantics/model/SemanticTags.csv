@@ -141,7 +141,7 @@ Equipment,HotWaterFaucet,DrinkingWater,Hot Water Faucet,"Hot Water Tap, Boiling 
 Equipment,WaterFilter,DrinkingWater,Water Filter,,
 Equipment,WaterSoftener,DrinkingWater,Water Softener,,
 Equipment,HVAC,,HVAC,,"Heating, Ventilation, and Air Conditioning"
-Equipment,AirConditioner,HVAC,"Air Conditioner, Air Conditioning, A/C, AC, A/Cs",,
+Equipment,AirConditioner,HVAC,Air Conditioner,"Air Conditioning, A/C, AC, A/Cs",,
 Equipment,AirFilter,HVAC,Air Filter,,
 Equipment,Boiler,HVAC,Boiler,Boilers,
 Equipment,Dehumidifier,HVAC,Dehumidifier,,
