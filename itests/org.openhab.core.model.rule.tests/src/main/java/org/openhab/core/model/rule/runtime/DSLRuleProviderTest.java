@@ -119,8 +119,8 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(firstRule.getName(), is("RuleNumberOne"));
         assertThat(firstRule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
         assertThat(firstRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
-        assertThat(firstRule.getActions().getFirst().getConfiguration().get(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE),
-                is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
+        assertThat(firstRule.getActions().getFirst().getConfiguration()
+                .get(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE), is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
 
         Rule secondRule = it.next();
 
@@ -130,8 +130,8 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(secondRule.getTriggers().getFirst().getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME),
                 is("X"));
         assertThat(secondRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
-        assertThat(secondRule.getActions().getFirst().getConfiguration().get(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE),
-                is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
+        assertThat(secondRule.getActions().getFirst().getConfiguration()
+                .get(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE), is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
     }
 
     @Test
