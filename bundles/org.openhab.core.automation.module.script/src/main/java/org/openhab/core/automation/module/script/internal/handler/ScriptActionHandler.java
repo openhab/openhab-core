@@ -66,6 +66,11 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
     }
 
     @Override
+    public String getTypeId() {
+        return TYPE_ID;
+    }
+
+    @Override
     public void compile() throws ScriptException {
         super.compileScript();
     }
