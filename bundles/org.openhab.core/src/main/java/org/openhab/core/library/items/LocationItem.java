@@ -44,7 +44,11 @@ public class LocationItem extends GenericItem {
     }
 
     public void send(PointType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(PointType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override

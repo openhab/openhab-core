@@ -15,6 +15,7 @@ package org.openhab.core.library.items;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.NextPreviousType;
@@ -58,15 +59,27 @@ public class PlayerItem extends GenericItem {
     }
 
     public void send(PlayPauseType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(PlayPauseType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     public void send(RewindFastforwardType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(RewindFastforwardType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     public void send(NextPreviousType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(NextPreviousType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override

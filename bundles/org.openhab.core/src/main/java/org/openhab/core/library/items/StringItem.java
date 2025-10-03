@@ -49,7 +49,11 @@ public class StringItem extends GenericItem {
     }
 
     public void send(StringType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    public void send(StringType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override
