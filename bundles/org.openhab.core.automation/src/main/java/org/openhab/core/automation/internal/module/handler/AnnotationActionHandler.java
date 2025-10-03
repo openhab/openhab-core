@@ -70,8 +70,8 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
-        Map<String, Object> output = new HashMap<>();
+    public @Nullable Map<String, @Nullable Object> execute(Map<String, Object> context) {
+        Map<String, @Nullable Object> output = new HashMap<>();
 
         Annotation[][] annotations = method.getParameterAnnotations();
         List<@Nullable Object> args = new ArrayList<>();
