@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
+import org.openhab.core.automation.module.script.rulesupport.shared.ObjectCache;
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache;
 import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Component;
@@ -49,6 +50,7 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
     static final String PRESET_NAME = "cache";
     static final String SHARED_CACHE_NAME = "sharedCache";
     static final String PRIVATE_CACHE_NAME = "privateCache";
+    static final String OBJECT_CACHE_NAME = "objectCache";
 
     private final Logger logger = LoggerFactory.getLogger(CacheScriptExtension.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager
@@ -56,6 +58,7 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
 
     private final Lock cacheLock = new ReentrantLock();
     private final Map<String, Object> sharedCache = new HashMap<>();
+    private final ObjectCache objectCache = new ObjectCacheImpl();
     private final Map<String, Set<String>> sharedCacheKeyAccessors = new ConcurrentHashMap<>();
 
     private final Map<String, ValueCacheImpl> privateCaches = new ConcurrentHashMap<>();
@@ -75,18 +78,21 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getTypes() {
-        return Set.of(PRIVATE_CACHE_NAME, SHARED_CACHE_NAME);
+        return Set.of(PRIVATE_CACHE_NAME, SHARED_CACHE_NAME, OBJECT_CACHE_NAME);
     }
 
     @Override
     public @Nullable Object get(String scriptIdentifier, String type) throws IllegalArgumentException {
-        if (SHARED_CACHE_NAME.equals(type)) {
-            return new TrackingValueCacheImpl(scriptIdentifier);
-        } else if (PRIVATE_CACHE_NAME.equals(type)) {
-            return privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new);
+        switch (type) {
+            case SHARED_CACHE_NAME:
+                return new TrackingValueCacheImpl(scriptIdentifier);
+            case PRIVATE_CACHE_NAME:
+                return privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new);
+            case OBJECT_CACHE_NAME:
+                return objectCache;
+            default:
+                return null;
         }
-
-        return null;
     }
 
     @Override
@@ -95,7 +101,7 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
             Object privateCache = Objects
                     .requireNonNull(privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new));
             return Map.of(SHARED_CACHE_NAME, new TrackingValueCacheImpl(scriptIdentifier), PRIVATE_CACHE_NAME,
-                    privateCache);
+                    privateCache, OBJECT_CACHE_NAME, objectCache);
         }
 
         return Map.of();
@@ -272,6 +278,47 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         private void rememberAccessToKey(String key) {
             Objects.requireNonNull(sharedCacheKeyAccessors.computeIfAbsent(key, k -> new HashSet<>()))
                     .add(scriptIdentifier);
+        }
+    }
+
+    private static class ObjectCacheImpl implements ObjectCache {
+        // All access must be guarded by "cache"
+        private final Map<String, String> cache = new HashMap<>();
+
+        @Override
+        public @Nullable String put(String key, String serializedObject) {
+            synchronized (cache) {
+                return cache.put(key, serializedObject);
+            }
+        }
+
+        @Override
+        public @Nullable String remove(String key) {
+            synchronized (cache) {
+                return cache.remove(key);
+            }
+        }
+
+        @Override
+        public @Nullable String get(String key) {
+            synchronized (cache) {
+                return cache.get(key);
+            }
+        }
+
+        @Override
+        public String get(String key, Supplier<String> supplier) {
+            synchronized (cache) {
+                return Objects.requireNonNull(cache.computeIfAbsent(key, k -> supplier.get()));
+            }
+        }
+
+        @Override
+        public @Nullable String compute(String key,
+                BiFunction<String, @Nullable String, @Nullable String> remappingFunction) {
+            synchronized (cache) {
+                return cache.compute(key, (k, v) -> remappingFunction.apply(k, v));
+            }
         }
     }
 }
