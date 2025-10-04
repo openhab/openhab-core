@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
+import org.openhab.core.automation.module.script.rulesupport.shared.LockingCache;
 import org.openhab.core.automation.module.script.rulesupport.shared.ObjectCache;
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache;
 import org.openhab.core.common.ThreadPoolManager;
@@ -319,6 +320,110 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
             synchronized (cache) {
                 return cache.compute(key, (k, v) -> remappingFunction.apply(k, v));
             }
+        }
+    }
+
+    private static class LockingCacheImpl implements LockingCache {
+
+        // All access must be guarded by "cache"
+        private final Map<String, LockingCacheValue> cache = new HashMap<>();
+
+        @Override
+        public @Nullable Object put(String key, Object object) {
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = Objects.requireNonNull(cache.putIfAbsent(key, new LockingCacheValue()));
+            }
+            Object result;
+            value.lock.lock();
+            try {
+                result = value.object;
+                value.object = object;
+            } finally {
+                value.lock.unlock();
+            }
+
+            return result;
+        }
+
+        @Override
+        public @Nullable Object lockAndPut(String key, Object object) {
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = Objects.requireNonNull(cache.putIfAbsent(key, new LockingCacheValue()));
+            }
+            Object result;
+            value.lock.lock();
+            result = value.object;
+            value.object = object;
+            return result;
+        }
+
+        @Override
+        public @Nullable Object remove(String key) {
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = cache.remove(key);
+            }
+            if (value == null) {
+                return null;
+            }
+            Object result;
+            value.lock.lock();
+            try {
+                result = value.object;
+            } finally {
+                // Release all holds on this lock, since we can't reacquire the lock in the future
+                int holdCount = value.lock.getHoldCount();
+                for (int i = 0; i < holdCount; i++) {
+                    try {
+                        value.lock.unlock();
+                    } catch (IllegalMonitorStateException e) {
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
+        @Override
+        public @Nullable Object lockAndGet(String key) {
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = cache.get(key);
+            }
+            if (value == null) {
+                return null;
+            }
+            value.lock.lock();
+            return value.object;
+        }
+
+        @Override
+        public Object lockAndGet(String key, Supplier<Object> supplier) {
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = Objects.requireNonNull(cache.computeIfAbsent(key, k -> new LockingCacheValue(supplier.get())));
+            }
+            value.lock.lock();
+            return Objects.requireNonNull(value.object);
+        }
+
+        @Override
+        public void unlock(String key) {
+            // TODO Auto-generated method stub
+        }
+    }
+
+    private static class LockingCacheValue {
+        public final ReentrantLock lock = new ReentrantLock();
+        public @Nullable Object object;
+
+        public LockingCacheValue() {
+        }
+
+        public LockingCacheValue(@Nullable Object object) {
+            this.object = object;
         }
     }
 }
