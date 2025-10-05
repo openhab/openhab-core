@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.internal;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,6 +54,7 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
     static final String SHARED_CACHE_NAME = "sharedCache";
     static final String PRIVATE_CACHE_NAME = "privateCache";
     static final String OBJECT_CACHE_NAME = "objectCache";
+    static final String LOCKING_CACHE_NAME = "lockingCache";
 
     private final Logger logger = LoggerFactory.getLogger(CacheScriptExtension.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager
@@ -60,6 +63,7 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
     private final Lock cacheLock = new ReentrantLock();
     private final Map<String, Object> sharedCache = new HashMap<>();
     private final ObjectCache objectCache = new ObjectCacheImpl();
+    private final LockingCache lockingCache = new LockingCacheImpl();
     private final Map<String, Set<String>> sharedCacheKeyAccessors = new ConcurrentHashMap<>();
 
     private final Map<String, ValueCacheImpl> privateCaches = new ConcurrentHashMap<>();
@@ -79,7 +83,7 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getTypes() {
-        return Set.of(PRIVATE_CACHE_NAME, SHARED_CACHE_NAME, OBJECT_CACHE_NAME);
+        return Set.of(PRIVATE_CACHE_NAME, SHARED_CACHE_NAME, OBJECT_CACHE_NAME, LOCKING_CACHE_NAME);
     }
 
     @Override
@@ -91,6 +95,8 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
                 return privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new);
             case OBJECT_CACHE_NAME:
                 return objectCache;
+            case LOCKING_CACHE_NAME:
+                return lockingCache;
             default:
                 return null;
         }
@@ -102,7 +108,7 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
             Object privateCache = Objects
                     .requireNonNull(privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new));
             return Map.of(SHARED_CACHE_NAME, new TrackingValueCacheImpl(scriptIdentifier), PRIVATE_CACHE_NAME,
-                    privateCache, OBJECT_CACHE_NAME, objectCache);
+                    privateCache, OBJECT_CACHE_NAME, objectCache, LOCKING_CACHE_NAME, lockingCache);
         }
 
         return Map.of();
@@ -345,33 +351,6 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         private final Map<String, LockingCacheValue> cache = new HashMap<>();
 
         @Override
-        public @Nullable Object put(String key, Object object) {
-            LockingCacheValue value;
-            boolean created = false;
-            synchronized (cache) {
-                value = cache.get(key);
-                if (value == null || value.removed) {
-                    created = true;
-                    value = new LockingCacheValue();
-                    value.lock.lock();
-                    cache.put(key, value);
-                }
-            }
-            Object result;
-            if (!created) {
-                value.lock.lock();
-            }
-            try {
-                result = value.object;
-                value.object = object;
-            } finally {
-                value.lock.unlock();
-            }
-
-            return result;
-        }
-
-        @Override
         public @Nullable Object lockAndPut(String key, Object object) {
             LockingCacheValue value;
             boolean created = false;
@@ -453,13 +432,13 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         }
 
         @Override
-        public void unlock(String key) {
+        public @Nullable Object unlock(String key) {
             LockingCacheValue value;
             synchronized (cache) {
                 value = cache.get(key);
             }
             if (value == null) {
-                return;
+                return null;
             }
             if (value.removed) {
                 unlockAll(value);
@@ -470,6 +449,18 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
                     // Ignore
                 }
             }
+            if (value.object instanceof Cloneable c) {
+                try {
+                    Method method = c.getClass().getMethod("clone");
+                    if (method.canAccess(c)) {
+                        return method.invoke(c);
+                    }
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException
+                        | InvocationTargetException e) {
+                    // Ignore, just return null
+                }
+            }
+            return null;
         }
 
         private void unlockAll(LockingCacheValue value) {
