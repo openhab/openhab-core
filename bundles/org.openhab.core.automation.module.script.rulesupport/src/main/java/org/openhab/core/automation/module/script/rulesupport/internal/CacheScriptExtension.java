@@ -323,6 +323,22 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         }
     }
 
+    /**
+     * A locking cache where individual entries can be locked for exclusive access for the duration
+     * of an operation. This requires explicit unlocking when the operation is over, and the potential
+     * to cause deadlocks if unlocking isn't done for certain code paths.
+     *
+     * @implNote Getting the locking right is a bit of a challenge, especially in relation to removal
+     *           of cache entries. Then an entry is removed, the lock instance is also removed, making it unavailable
+     *           for further unlocks. To avoid locks remaining locked with no way to unlock,
+     *           {@link LockingCacheValue#removed}
+     *           is used to track removal. As soon as the entry has been removed from the cache, this flag is set.
+     *           Any code that acquires locks are required to check this flag immediately after acquiring the lock,
+     *           and if it's set, immediately unlock all lock levels held by that thread. Because the thread
+     *           that performs the removal must acquire the lock to complete the removal operation, any queued
+     *           threads waiting for the lock should thus abort and release immediately if they happen to acquire
+     *           the lock after the entry has been removed.
+     */
     private static class LockingCacheImpl implements LockingCache {
 
         // All access must be guarded by "cache"
@@ -331,11 +347,20 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         @Override
         public @Nullable Object put(String key, Object object) {
             LockingCacheValue value;
+            boolean created = false;
             synchronized (cache) {
-                value = Objects.requireNonNull(cache.putIfAbsent(key, new LockingCacheValue()));
+                value = cache.get(key);
+                if (value == null || value.removed) {
+                    created = true;
+                    value = new LockingCacheValue();
+                    value.lock.lock();
+                    cache.put(key, value);
+                }
             }
             Object result;
-            value.lock.lock();
+            if (!created) {
+                value.lock.lock();
+            }
             try {
                 result = value.object;
                 value.object = object;
@@ -349,11 +374,20 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         @Override
         public @Nullable Object lockAndPut(String key, Object object) {
             LockingCacheValue value;
+            boolean created = false;
             synchronized (cache) {
-                value = Objects.requireNonNull(cache.putIfAbsent(key, new LockingCacheValue()));
+                value = cache.get(key);
+                if (value == null || value.removed) {
+                    created = true;
+                    value = new LockingCacheValue();
+                    value.lock.lock();
+                    cache.put(key, value);
+                }
             }
             Object result;
-            value.lock.lock();
+            if (!created) {
+                value.lock.lock();
+            }
             result = value.object;
             value.object = object;
             return result;
@@ -364,9 +398,10 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
             LockingCacheValue value;
             synchronized (cache) {
                 value = cache.remove(key);
-            }
-            if (value == null) {
-                return null;
+                if (value == null) {
+                    return null;
+                }
+                value.removed = true;
             }
             Object result;
             value.lock.lock();
@@ -374,14 +409,7 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
                 result = value.object;
             } finally {
                 // Release all holds on this lock, since we can't reacquire the lock in the future
-                int holdCount = value.lock.getHoldCount();
-                for (int i = 0; i < holdCount; i++) {
-                    try {
-                        value.lock.unlock();
-                    } catch (IllegalMonitorStateException e) {
-                        break;
-                    }
-                }
+                unlockAll(value);
             }
             return result;
         }
@@ -396,6 +424,10 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
                 return null;
             }
             value.lock.lock();
+            if (value.removed) {
+                unlockAll(value);
+                return null;
+            }
             return value.object;
         }
 
@@ -406,18 +438,56 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
                 value = Objects.requireNonNull(cache.computeIfAbsent(key, k -> new LockingCacheValue(supplier.get())));
             }
             value.lock.lock();
+            if (value.removed) {
+                unlockAll(value);
+                synchronized (cache) {
+                    value = cache.get(key);
+                    if (value == null || value.removed) {
+                        value = new LockingCacheValue(supplier.get());
+                        cache.put(key, value);
+                    }
+                }
+                value.lock.lock();
+            }
             return Objects.requireNonNull(value.object);
         }
 
         @Override
         public void unlock(String key) {
-            // TODO Auto-generated method stub
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = cache.get(key);
+            }
+            if (value == null) {
+                return;
+            }
+            if (value.removed) {
+                unlockAll(value);
+            } else {
+                try {
+                    value.lock.unlock();
+                } catch (IllegalMonitorStateException e) {
+                    // Ignore
+                }
+            }
+        }
+
+        private void unlockAll(LockingCacheValue value) {
+            int holdCount = value.lock.getHoldCount();
+            for (int i = 0; i < holdCount; i++) {
+                try {
+                    value.lock.unlock();
+                } catch (IllegalMonitorStateException e) {
+                    break;
+                }
+            }
         }
     }
 
     private static class LockingCacheValue {
         public final ReentrantLock lock = new ReentrantLock();
         public @Nullable Object object;
+        public volatile boolean removed;
 
         public LockingCacheValue() {
         }
