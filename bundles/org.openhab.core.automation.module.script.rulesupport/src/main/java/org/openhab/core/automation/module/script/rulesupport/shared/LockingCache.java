@@ -29,15 +29,16 @@ import org.eclipse.jdt.annotation.Nullable;
 public interface LockingCache {// TODO: (Nad) Redo JavaDocs
 
     /**
-     * Add a new key-value-pair to the cache. If the key is already present, the old value is replaces by the new value.
+     * Add a new key-value-pair to the cache or replace an existing value.
+     * <p>
+     * When returning,a lock is held on the object, which <b>must</b> be released with a subsequent call
+     * to {@link #unlock(String)} with the same key. Failure to do so will result in a deadlock if this
+     * entry is attempted accessed in the future.
      *
-     * @param key a {@link String} used as key
-     * @param object the {@code Object} to store with the key
-     * @return the old object associated with this key or {@code null} if the key didn't exist
+     * @param key the {@link String} used as a key.
+     * @param object the object to store with the key
+     * @return The old object associated with the key or {@code null}.
      */
-    @Nullable
-    Object put(String key, Object object);
-
     @Nullable
     Object lockAndPut(String key, Object object);
 
@@ -51,22 +52,53 @@ public interface LockingCache {// TODO: (Nad) Redo JavaDocs
     Object remove(String key);
 
     /**
-     * Get a object from the cache
+     * Get an object from the cache.
+     * <p>
+     * When returning,a lock is held on the object, which <b>must</b> be released with a subsequent call
+     * to {@link #unlock(String)} with the same key. Failure to do so will result in a deadlock if this
+     * entry is attempted accessed in the future.
      *
-     * @param key the key of the requested object
-     * @return the object associated with the key or {@code null}.
+     * @param key the {@link String} used as a key.
+     * @return The object associated with the key or {@code null}.
      */
     @Nullable
     Object lockAndGet(String key);
 
     /**
-     * Get a serialized object from the cache or create a new key-value-pair from the given supplier
+     * Get an object from the cache or create a one for the key with the given supplier.
+     * <p>
+     * When returning,a lock is held on the object, which <b>must</b> be released with a subsequent call
+     * to {@link #unlock(String)} with the same key. Failure to do so will result in a deadlock if this
+     * entry is attempted accessed in the future.
      *
-     * @param key the key of the requested serialized object
-     * @param supplier a supplier that returns a non-null serialized object to be used if the key isn't present
-     * @return the serialized object associated with the key
+     * @param key the {@link String} used as a key.
+     * @param supplier the supplier that returns a non-{@code null} object to be used if the key isn't present.
+     * @return The object associated with the key.
      */
     Object lockAndGet(String key, Supplier<Object> supplier);
 
-    void unlock(String key);
+    /**
+     * Unlock the value for the specified key and release the local reference to the cached instance.
+     * <p>
+     * To make sure that no reference is held to the cached instance, this method should always be used
+     * like this:
+     * 
+     * <pre>
+     * <code>
+     * object = cache.lockAndGet("key");
+     * try {
+     *   ..
+     *   (do something with the object)
+     *   ..
+     * } finally {
+     *   object = cache.release("key");
+     * }
+     * </code>
+     * </pre>
+     *
+     * @param key
+     * @return
+     */
+    @Nullable
+    Object unlock(String key);
 }
