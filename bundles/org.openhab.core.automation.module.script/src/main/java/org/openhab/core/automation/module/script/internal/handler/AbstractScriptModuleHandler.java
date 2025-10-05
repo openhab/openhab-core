@@ -175,6 +175,16 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
         if (container != null) {
             scriptEngine = Optional.ofNullable(container.getScriptEngine());
+            // Inject the module type id into the script context early, so engines can access it before script
+            // invocation.
+            ScriptContext scriptContext = container.getScriptEngine().getContext();
+            if (scriptContext == null) {
+                logger.error(
+                        "Script context is null for script engine '{}' of rule with UID '{}'. Please report this bug.",
+                        engineIdentifier, ruleUID);
+            } else {
+                scriptContext.setAttribute(CONTEXT_KEY_MODULE_TYPE_ID, getTypeId(), ScriptContext.ENGINE_SCOPE);
+            }
             return scriptEngine;
         } else {
             logger.debug("No engine available for script type '{}' in action '{}'.", type, module.getId());
@@ -206,7 +216,6 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             contextNew.put(key, value);
         }
         contextNew.put("ruleUID", this.ruleUID);
-        contextNew.put(CONTEXT_KEY_MODULE_TYPE_ID, this.getTypeId());
         executionContext.setAttribute("ctx", contextNew, ScriptContext.ENGINE_SCOPE);
 
         // add the single contextNew entries to the scope
