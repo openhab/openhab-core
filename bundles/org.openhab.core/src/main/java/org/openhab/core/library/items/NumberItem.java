@@ -98,18 +98,42 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         return ACCEPTED_COMMAND_TYPES;
     }
 
+    /**
+     * Send a DecimalType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(DecimalType command) {
         internalSend(command, null);
     }
 
+    /**
+     * Send a DecimalType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
     public void send(DecimalType command, @Nullable String source) {
         internalSend(command, source);
     }
 
+    /**
+     * Send a QuantityType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(QuantityType<?> command) {
         send(command, null);
     }
 
+    /**
+     * Send a QuantityType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
     public void send(QuantityType<?> command, @Nullable String source) {
         if (dimension == null) {
             DecimalType strippedCommand = new DecimalType(command);

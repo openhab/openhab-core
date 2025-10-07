@@ -338,10 +338,20 @@ public abstract class GenericItem implements ActiveItem {
         }
     }
 
+    /**
+     * Send a REFRESH command to the item.
+     */
     public void send(RefreshType command) {
         internalSend(command, null);
     }
 
+    /**
+     * Send a REFRESH command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
     public void send(RefreshType command, @Nullable String source) {
         internalSend(command, source);
     }

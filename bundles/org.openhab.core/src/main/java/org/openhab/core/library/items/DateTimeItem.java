@@ -53,10 +53,22 @@ public class DateTimeItem extends GenericItem {
         return ACCEPTED_COMMAND_TYPES;
     }
 
+    /**
+     * Send a DateTimeType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(DateTimeType command) {
         internalSend(command, null);
     }
 
+    /**
+     * Send a DateTimeType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
     public void send(DateTimeType command, @Nullable String source) {
         internalSend(command, source);
     }

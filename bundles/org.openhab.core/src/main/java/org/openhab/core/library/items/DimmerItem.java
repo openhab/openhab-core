@@ -49,18 +49,42 @@ public class DimmerItem extends SwitchItem {
         super(type, name);
     }
 
+    /**
+     * Send a PercentType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(PercentType command) {
         internalSend(command, null);
     }
 
+    /**
+     * Send a PercentType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
     public void send(PercentType command, @Nullable String source) {
         internalSend(command, source);
     }
 
+    /**
+     * Send an INCREASE/DECREASE command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(IncreaseDecreaseType command) {
         internalSend(command, null);
     }
 
+    /**
+     * Send an INCREASE/DECREASE command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
     public void send(IncreaseDecreaseType command, @Nullable String source) {
         internalSend(command, source);
     }
