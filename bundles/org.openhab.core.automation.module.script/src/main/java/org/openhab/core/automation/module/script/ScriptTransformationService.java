@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -134,7 +135,8 @@ public class ScriptTransformationService implements TransformationService, Confi
             params = configMatcher.group("params");
         }
 
-        ScriptRecord scriptRecord = scriptCache.computeIfAbsent(scriptUid, k -> new ScriptRecord());
+        ScriptRecord scriptRecord = Objects
+                .requireNonNull(scriptCache.computeIfAbsent(scriptUid, k -> new ScriptRecord()));
         scriptRecord.lock.lock();
         try {
             if (scriptRecord.script.isBlank()) {
