@@ -1,0 +1,197 @@
+{
+  "label": "JSON Full Rule Template",
+  "uid": "test:json-full-rule-template",
+  "tags": [
+    "Second Tag",
+    "First Tag"
+  ],
+  "description": "The description of the JSON template-based full rule",
+  "visibility": "VISIBLE",
+  "configDescriptions": [
+    {
+      "default": "A text",
+      "description": "This is a text parameter.",
+      "label": "Text parameter",
+      "name": "textParam",
+      "required": false,
+      "type": "TEXT",
+      "readOnly": false,
+      "multiple": true,
+      "multipleLimit": 3,
+      "advanced": true,
+      "verify": true,
+      "limitToOptions": false,
+      "options": [
+        {
+          "label": "First Option",
+          "value": "Welcome"
+        },
+        {
+          "label": "Second Option",
+          "value": "Willkommen"
+        }
+      ],
+      "filterCriteria": [
+        {
+          "value": ".*",
+          "name": "filter1"
+        },
+        {
+          "value": "a.*",
+          "name": "filter2"
+        }
+      ]
+    },
+    {
+      "default": "70",
+      "description": "This is an integer parameter.",
+      "label": "Integer parameter",
+      "name": "integerParam",
+      "required": true,
+      "type": "INTEGER",
+      "min": 60,
+      "max": 100,
+      "stepsize": 1,
+      "readOnly": false,
+      "multiple": false,
+      "advanced": false,
+      "verify": false,
+      "limitToOptions": true,
+      "unit": "%",
+      "unitLabel": "Start Level",
+      "options": [],
+      "filterCriteria": []
+    },
+    {
+      "context": "item",
+      "default": "CurrentPower",
+      "description": "This is an item parameter",
+      "label": "Item parameter",
+      "name": "itemParam",
+      "required": true,
+      "type": "TEXT",
+      "readOnly": false,
+      "multiple": false,
+      "advanced": false,
+      "verify": false,
+      "limitToOptions": true,
+      "options": [],
+      "filterCriteria": []
+    },
+    {
+      "default": "3.25",
+      "description": "This is a decimal parameter.",
+      "label": "Decimal parameter",
+      "name": "decimalParam",
+      "required": false,
+      "type": "DECIMAL",
+      "min": 0.5,
+      "max": 11,
+      "stepsize": 0.25,
+      "readOnly": false,
+      "multiple": false,
+      "advanced": true,
+      "verify": true,
+      "limitToOptions": true,
+      "options": [],
+      "filterCriteria": []
+    },
+    {
+      "default": "true",
+      "description": "This is a boolean parameter.",
+      "label": "Boolean parameter",
+      "name": "booleanParam",
+      "required": false,
+      "type": "BOOLEAN",
+      "readOnly": false,
+      "multiple": false,
+      "advanced": false,
+      "verify": false,
+      "limitToOptions": true,
+      "options": [],
+      "filterCriteria": []
+    }
+  ],
+  "triggers": [
+    {
+      "id": "first",
+      "label": "First Trigger",
+      "description": "The first trigger.",
+      "configuration": {
+        "startlevel": "{{integerParam}}"
+      },
+      "type": "core.SystemStartlevelTrigger"
+    },
+    {
+      "id": "1",
+      "label": "Second Trigger",
+      "description": "The second trigger.",
+      "configuration": {
+        "cronExpression": "0 3/30 8 * * ? *"
+      },
+      "type": "timer.GenericCronTrigger"
+    }
+  ],
+  "conditions": [
+    {
+      "inputs": {},
+      "id": "holiday",
+      "label": "Is Holiday",
+      "description": "It must be a holiday.",
+      "configuration": {},
+      "type": "ephemeris.HolidayCondition"
+    },
+    {
+      "inputs": {},
+      "id": "weekday",
+      "configuration": {},
+      "type": "ephemeris.WeekdayCondition"
+    },
+    {
+      "inputs": {},
+      "id": "2",
+      "label": "Work Hours",
+      "configuration": {
+        "startTime": "08:00",
+        "endTime": "16:00"
+      },
+      "type": "core.TimeOfDayCondition"
+    },
+    {
+      "inputs": {},
+      "id": "3",
+      "label": "Heating Power Sufficient",
+      "configuration": {
+        "itemName": "{{itemParam}}",
+        "operator": ">",
+        "state": "50"
+      },
+      "type": "core.ItemStateCondition"
+    }
+  ],
+  "actions": [
+    {
+      "inputs": {},
+      "id": "greet",
+      "label": "Greet",
+      "description": "Greets the person.",
+      "configuration": {
+        "volume": 100,
+        "sink": "enhancedjavasound",
+        "text": "{{textParam}}"
+      },
+      "type": "media.SayAction"
+    },
+    {
+      "inputs": {},
+      "id": "4",
+      "label": "Print",
+      "description": "Gives a warm welcome.",
+      "configuration": {
+        "type": "application/x-ruby",
+        "script": "puts \"Hello and welcome\"\n"
+      },
+      "type": "script.ScriptAction"
+    }
+  ]
+}

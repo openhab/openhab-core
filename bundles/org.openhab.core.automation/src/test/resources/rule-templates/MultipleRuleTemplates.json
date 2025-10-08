@@ -1,0 +1,430 @@
+[
+  {
+    "label": "Energy Meter JSON",
+    "uid": "kaikreuzer:energymeter-json",
+    "tags": [],
+    "description": "Visualizes the current energy consumption.",
+    "visibility": "VISIBLE",
+    "configDescriptions": [
+      {
+        "context": "item",
+        "description": "Data source for current consumption",
+        "label": "Consumption Item",
+        "name": "consumption",
+        "required": true,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": [
+          {
+            "value": "Number",
+            "name": "type"
+          }
+        ]
+      },
+      {
+        "context": "item",
+        "description": "Color light to use for visualisation",
+        "label": "Color Item",
+        "name": "light",
+        "required": true,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": [
+          {
+            "value": "Color",
+            "name": "type"
+          }
+        ]
+      },
+      {
+        "default": "1500",
+        "description": "Maximum value for red light",
+        "label": "Max. consumption",
+        "name": "max",
+        "required": true,
+        "type": "INTEGER",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      }
+    ],
+    "triggers": [
+      {
+        "id": "trigger",
+        "label": "Current consumption changes",
+        "description": "Triggers whenever the current consumption changes its value",
+        "configuration": {
+          "itemName": "{{consumption}}"
+        },
+        "type": "core.ItemStateChangeTrigger"
+      }
+    ],
+    "conditions": [],
+    "actions": [
+      {
+        "inputs": {},
+        "id": "setcolor",
+        "label": "Change the light color",
+        "description": "Sets the color to a value in the range from green (low consumption) to red (high consumption)",
+        "configuration": {
+          "type": "application/vnd.openhab.dsl.rule",
+          "script": "var power = (newState as Number).intValue\nvar percent = power / (30.0 / 100.0)\nif(percent < 0) percent = 0\nvar hue = 120 - percent * 1.2\nsendCommand({{light}}, hue +',100,100')"
+        },
+        "type": "script.ScriptAction"
+      }
+    ]
+  },
+  {
+    "label": "Simulate Sunrise JSON",
+    "uid": "ysc:simulate_sunrise_json",
+    "tags": [
+      "Astro"
+    ],
+    "description": "This rule will gradually increase a Dimmer or Color item to the target brightness and time over a configurable period.",
+    "visibility": "EXPERT",
+    "configDescriptions": [
+      {
+        "context": "item",
+        "default": "",
+        "description": "DateTime Item that holds the target time (for instance, linked to the Sunrise End Time channel of an Astro Sun Thing). Set either this or a fixed target time below.",
+        "label": "Target Time (DateTime Item)",
+        "name": "itemTargetTime",
+        "required": false,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "context": "time",
+        "description": "Set a fixed target time - ignored if Target Time (DateTime Item) is set above.",
+        "label": "Fixed Target Time",
+        "name": "fixedTargetTime",
+        "required": false,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "default": "100",
+        "description": "Brightness to reach at the target time.",
+        "label": "Target Brightness",
+        "name": "targetBrightness",
+        "required": true,
+        "type": "INTEGER",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "default": "60",
+        "description": "Duration of the sunrise in minutes (The brightness will be set to 0 at the start of the period and gradually every minute to the target brightness until the end).",
+        "label": "Sunrise Duration",
+        "name": "sunriseDuration",
+        "required": true,
+        "type": "INTEGER",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "context": "item",
+        "description": "Dimmer or Color Item to use to control the brightness.",
+        "label": "Brightness Item",
+        "name": "brightnessItem",
+        "required": true,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "default": "",
+        "description": "In case of a Color Item set above, prefix the command with the comma-separated Hue,Saturation components to send to the item (a separator comma and the brightness will be appended).",
+        "label": "Color Prefix",
+        "name": "colorPrefix",
+        "required": false,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      }
+    ],
+    "triggers": [
+      {
+        "id": "1",
+        "configuration": {
+          "cronExpression": "0 * * * * ? *"
+        },
+        "type": "timer.GenericCronTrigger"
+      }
+    ],
+    "conditions": [],
+    "actions": [
+      {
+        "inputs": {},
+        "id": "2",
+        "label": "Calculate & set the target brightness",
+        "description": "Sets the brightness appropriately or do nothing if outside the sunrise time",
+        "configuration": {
+          "type": "application/javascript",
+          "script": "// set by the rule template\nvar itemTargetTime = \"{{itemTargetTime}}\";\nvar fixedTargetTime = \"{{fixedTargetTime}}\";\nvar sunriseDuration = {{sunriseDuration}};\nvar targetBrightness = {{targetBrightness}};\nvar brightnessItem = \"{{brightnessItem}}\";\nvar colorPrefix = \"{{colorPrefix}}\";\n\nvar openhab = (typeof(require) === \"function\") ? require(\"@runtime\") : {\n  ir: ir, events: events\n};\n\nvar logger = Java.type(\"org.slf4j.LoggerFactory\").getLogger(\"org.openhab.rule.\" + this.ctx.ruleUID);\n\n// returns the number of minutes past midnight for a Date object\nfunction getMinutesPastMidnight(date) {\n  return date.getHours() * 60 + date.getMinutes();\n}\n\n\n// returns the brightness to set at the current time (Date), given the target time (Date),\n// target brightness (int) & desired sunrise duration (int)\n\nfunction getBrightnessAtTime(currentTime, targetTime, targetBrightness, sunriseDuration) {\n  var currentMinutes = getMinutesPastMidnight(now);\n  var targetMinutes = getMinutesPastMidnight(targetTime);\n  if (currentMinutes > targetMinutes) return null;\n  if (currentMinutes < targetMinutes - sunriseDuration) return null;\n  var minutesToGo = targetMinutes - currentMinutes;\n  return parseInt(parseInt(targetBrightness) * ((sunriseDuration - minutesToGo) / sunriseDuration));\n}\n\nvar now = new Date();\nvar targetTime = null;\n\nif (itemTargetTime) {\n  targetTime = new Date(openhab.ir.getItem(itemTargetTime).getState());\n} else if (fixedTargetTime.match(/\\d\\d:\\d\\d/)) {\n  targetTime = new Date();\n  targetTime.setHours(parseInt(fixedTargetTime.split(\":\")[0]));\n  targetTime.setMinutes(parseInt(fixedTargetTime.split(\":\")[1]));\n  targetTime.setSeconds(0);\n} else {\n  logger.warn(\"Invalid target time\");\n}\n\nif (targetTime != null) {\n  var brightness = getBrightnessAtTime(now, targetTime, targetBrightness, sunriseDuration);\n  if (brightness != null) {\n    openhab.events.sendCommand(brightnessItem, (colorPrefix ? colorPrefix + \",\" : \"\") + brightness.toString());\n  }\n}\n"
+        },
+        "type": "script.ScriptAction"
+      }
+    ]
+  },
+  {
+    "label": "Energy Meter JSON",
+    "uid": "kaikreuzer:energymeter-json",
+    "tags": [],
+    "description": "Visualizes the current energy consumption.",
+    "visibility": "VISIBLE",
+    "configDescriptions": [
+      {
+        "context": "item",
+        "description": "Data source for current consumption",
+        "label": "Consumption Item",
+        "name": "consumption",
+        "required": true,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": [
+          {
+            "value": "Number",
+            "name": "type"
+          }
+        ]
+      },
+      {
+        "context": "item",
+        "description": "Color light to use for visualisation",
+        "label": "Color Item",
+        "name": "light",
+        "required": true,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": [
+          {
+            "value": "Color",
+            "name": "type"
+          }
+        ]
+      },
+      {
+        "default": "1500",
+        "description": "Maximum value for red light",
+        "label": "Max. consumption",
+        "name": "max",
+        "required": true,
+        "type": "INTEGER",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      }
+    ],
+    "triggers": [
+      {
+        "id": "trigger",
+        "label": "Current consumption changes",
+        "description": "Triggers whenever the current consumption changes its value",
+        "configuration": {
+          "itemName": "{{consumption}}"
+        },
+        "type": "core.ItemStateChangeTrigger"
+      }
+    ],
+    "conditions": [],
+    "actions": [
+      {
+        "inputs": {},
+        "id": "setcolor",
+        "label": "Change the light color",
+        "description": "Sets the color to a value in the range from green (low consumption) to red (high consumption)",
+        "configuration": {
+          "type": "application/vnd.openhab.dsl.rule",
+          "script": "var power = (newState as Number).intValue\nvar percent = power / (30.0 / 100.0)\nif(percent < 0) percent = 0\nvar hue = 120 - percent * 1.2\nsendCommand({{light}}, hue +',100,100')"
+        },
+        "type": "script.ScriptAction"
+      }
+    ]
+  },
+  {
+    "label": "Simulate Sunrise JSON",
+    "uid": "ysc:simulate_sunrise_json",
+    "tags": [
+      "Astro"
+    ],
+    "description": "This rule will gradually increase a Dimmer or Color item to the target brightness and time over a configurable period.",
+    "visibility": "EXPERT",
+    "configDescriptions": [
+      {
+        "context": "item",
+        "default": "",
+        "description": "DateTime Item that holds the target time (for instance, linked to the Sunrise End Time channel of an Astro Sun Thing). Set either this or a fixed target time below.",
+        "label": "Target Time (DateTime Item)",
+        "name": "itemTargetTime",
+        "required": false,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "context": "time",
+        "description": "Set a fixed target time - ignored if Target Time (DateTime Item) is set above.",
+        "label": "Fixed Target Time",
+        "name": "fixedTargetTime",
+        "required": false,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "default": "100",
+        "description": "Brightness to reach at the target time.",
+        "label": "Target Brightness",
+        "name": "targetBrightness",
+        "required": true,
+        "type": "INTEGER",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "default": "60",
+        "description": "Duration of the sunrise in minutes (The brightness will be set to 0 at the start of the period and gradually every minute to the target brightness until the end).",
+        "label": "Sunrise Duration",
+        "name": "sunriseDuration",
+        "required": true,
+        "type": "INTEGER",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "context": "item",
+        "description": "Dimmer or Color Item to use to control the brightness.",
+        "label": "Brightness Item",
+        "name": "brightnessItem",
+        "required": true,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      },
+      {
+        "default": "",
+        "description": "In case of a Color Item set above, prefix the command with the comma-separated Hue,Saturation components to send to the item (a separator comma and the brightness will be appended).",
+        "label": "Color Prefix",
+        "name": "colorPrefix",
+        "required": false,
+        "type": "TEXT",
+        "readOnly": false,
+        "multiple": false,
+        "advanced": false,
+        "verify": false,
+        "limitToOptions": true,
+        "options": [],
+        "filterCriteria": []
+      }
+    ],
+    "triggers": [
+      {
+        "id": "1",
+        "configuration": {
+          "cronExpression": "0 * * * * ? *"
+        },
+        "type": "timer.GenericCronTrigger"
+      }
+    ],
+    "conditions": [],
+    "actions": [
+      {
+        "inputs": {},
+        "id": "2",
+        "label": "Calculate & set the target brightness",
+        "description": "Sets the brightness appropriately or do nothing if outside the sunrise time",
+        "configuration": {
+          "type": "application/javascript",
+          "script": "// set by the rule template\nvar itemTargetTime = \"{{itemTargetTime}}\";\nvar fixedTargetTime = \"{{fixedTargetTime}}\";\nvar sunriseDuration = {{sunriseDuration}};\nvar targetBrightness = {{targetBrightness}};\nvar brightnessItem = \"{{brightnessItem}}\";\nvar colorPrefix = \"{{colorPrefix}}\";\n\nvar openhab = (typeof(require) === \"function\") ? require(\"@runtime\") : {\n  ir: ir, events: events\n};\n\nvar logger = Java.type(\"org.slf4j.LoggerFactory\").getLogger(\"org.openhab.rule.\" + this.ctx.ruleUID);\n\n// returns the number of minutes past midnight for a Date object\nfunction getMinutesPastMidnight(date) {\n  return date.getHours() * 60 + date.getMinutes();\n}\n\n\n// returns the brightness to set at the current time (Date), given the target time (Date),\n// target brightness (int) & desired sunrise duration (int)\n\nfunction getBrightnessAtTime(currentTime, targetTime, targetBrightness, sunriseDuration) {\n  var currentMinutes = getMinutesPastMidnight(now);\n  var targetMinutes = getMinutesPastMidnight(targetTime);\n  if (currentMinutes > targetMinutes) return null;\n  if (currentMinutes < targetMinutes - sunriseDuration) return null;\n  var minutesToGo = targetMinutes - currentMinutes;\n  return parseInt(parseInt(targetBrightness) * ((sunriseDuration - minutesToGo) / sunriseDuration));\n}\n\nvar now = new Date();\nvar targetTime = null;\n\nif (itemTargetTime) {\n  targetTime = new Date(openhab.ir.getItem(itemTargetTime).getState());\n} else if (fixedTargetTime.match(/\\d\\d:\\d\\d/)) {\n  targetTime = new Date();\n  targetTime.setHours(parseInt(fixedTargetTime.split(\":\")[0]));\n  targetTime.setMinutes(parseInt(fixedTargetTime.split(\":\")[1]));\n  targetTime.setSeconds(0);\n} else {\n  logger.warn(\"Invalid target time\");\n}\n\nif (targetTime != null) {\n  var brightness = getBrightnessAtTime(now, targetTime, targetBrightness, sunriseDuration);\n  if (brightness != null) {\n    openhab.events.sendCommand(brightnessItem, (colorPrefix ? colorPrefix + \",\" : \"\") + brightness.toString());\n  }\n}\n"
+        },
+        "type": "script.ScriptAction"
+      }
+    ]
+  }
+]

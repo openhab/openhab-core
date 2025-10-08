@@ -1,0 +1,209 @@
+{
+  "uid": "test:full-json-rule",
+  "name": "Full JSON Rule",
+  "description": "The description of the full JSON rule",
+  "templateUID": "template:non-existing",
+  "tags": [
+    "First Tag",
+    "Second Tag"
+  ],
+  "triggers": [
+    {
+      "id": "first",
+      "label": "First Trigger",
+      "description": "The first trigger.",
+      "configuration": {
+        "startlevel": 80
+      },
+      "type": "core.SystemStartlevelTrigger"
+    },
+    {
+      "id": "1",
+      "label": "Second Trigger",
+      "description": "The second trigger.",
+      "configuration": {
+        "cronExpression": "0 3/30 8 * * ? *"
+      },
+      "type": "timer.GenericCronTrigger"
+    }
+  ],
+  "conditions": [
+    {
+      "inputs": {},
+      "id": "holiday",
+      "label": "Is Holiday",
+      "description": "It must be a holiday.",
+      "configuration": {},
+      "type": "ephemeris.HolidayCondition"
+    },
+    {
+      "inputs": {},
+      "id": "weekday",
+      "configuration": {},
+      "type": "ephemeris.WeekdayCondition"
+    },
+    {
+      "inputs": {},
+      "id": "2",
+      "label": "Work Hours",
+      "configuration": {
+        "startTime": "08:00",
+        "endTime": "16:00"
+      },
+      "type": "core.TimeOfDayCondition"
+    },
+    {
+      "inputs": {},
+      "id": "3",
+      "label": "Heating Power Sufficient",
+      "configuration": {
+        "itemName": "CurrentPower",
+        "operator": ">",
+        "state": "50"
+      },
+      "type": "core.ItemStateCondition"
+    }
+  ],
+  "actions": [
+    {
+      "inputs": {},
+      "id": "greet",
+      "label": "Greet",
+      "description": "Greets the person.",
+      "configuration": {
+        "volume": 100,
+        "sink": "enhancedjavasound",
+        "text": "Welcome"
+      },
+      "type": "media.SayAction"
+    },
+    {
+      "inputs": {},
+      "id": "4",
+      "label": "Print",
+      "description": "Gives a warm welcome.",
+      "configuration": {
+        "type": "application/x-ruby",
+        "script": "puts \"Hello and welcome\"\n"
+      },
+      "type": "script.ScriptAction"
+    }
+  ],
+  "configuration": {
+    "decimalParam": 6.75,
+    "booleanParam": true,
+    "integerParam": 5,
+    "textParam": " text"
+  },
+  "configDescriptions": [
+    {
+      "default": "A text",
+      "description": "This is a text parameter.",
+      "label": "Text parameter",
+      "name": "textParam",
+      "required": false,
+      "type": "TEXT",
+      "pattern": "\\s\\w+",
+      "readOnly": true,
+      "multiple": true,
+      "multipleLimit": 3,
+      "groupName": "Group Name",
+      "advanced": true,
+      "verify": true,
+      "limitToOptions": false,
+      "options": [
+        {
+          "label": "First Option",
+          "value": "1st"
+        },
+        {
+          "label": "Second Option",
+          "value": "2nd"
+        }
+      ],
+      "filterCriteria": [
+        {
+          "value": ".*",
+          "name": "filter1"
+        },
+        {
+          "value": "a.*",
+          "name": "filter2"
+        }
+      ]
+    },
+    {
+      "default": "4",
+      "description": "This is an integer parameter.",
+      "label": "Integer parameter",
+      "name": "integerParam",
+      "required": true,
+      "type": "INTEGER",
+      "min": 2,
+      "max": 8,
+      "stepsize": 1,
+      "readOnly": false,
+      "multiple": false,
+      "groupName": "Group Name",
+      "advanced": false,
+      "verify": false,
+      "limitToOptions": true,
+      "unit": "rpm",
+      "unitLabel": "Rounds per Minute",
+      "options": [],
+      "filterCriteria": []
+    },
+    {
+      "context": "item",
+      "description": "This is an item parameter",
+      "label": "Item parameter",
+      "name": "itemParam",
+      "required": false,
+      "type": "TEXT",
+      "readOnly": false,
+      "multiple": false,
+      "groupName": "Group Name",
+      "advanced": false,
+      "verify": false,
+      "limitToOptions": true,
+      "options": [],
+      "filterCriteria": []
+    },
+    {
+      "default": "3.25",
+      "description": "This is a decimal parameter.",
+      "label": "Decimal parameter",
+      "name": "decimalParam",
+      "required": false,
+      "type": "DECIMAL",
+      "min": 0.5,
+      "max": 11,
+      "stepsize": 0.25,
+      "readOnly": false,
+      "multiple": false,
+      "groupName": "Group Name",
+      "advanced": true,
+      "verify": true,
+      "limitToOptions": true,
+      "options": [],
+      "filterCriteria": []
+    },
+    {
+      "default": "true",
+      "description": "This is a boolean parameter.",
+      "label": "Boolean parameter",
+      "name": "booleanParam",
+      "required": false,
+      "type": "BOOLEAN",
+      "readOnly": false,
+      "multiple": false,
+      "groupName": "Group Name",
+      "advanced": false,
+      "verify": false,
+      "limitToOptions": true,
+      "options": [],
+      "filterCriteria": []
+    }
+  ],
+  "visibility": "VISIBLE"
+}

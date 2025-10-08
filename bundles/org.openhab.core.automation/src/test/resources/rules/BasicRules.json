@@ -1,0 +1,76 @@
+[
+  {
+    "uid": "test:basic-json-rule-stub",
+    "name": "Basic JSON Rule Stub",
+    "templateUID": "basic:json-rule-template",
+    "configuration": {
+      "startLevel": 60
+    },
+    "tags": [
+      "Basic"
+    ],
+    "visibility": "HIDDEN"
+  },
+  {
+    "uid": "test:basic-json-rule",
+    "name": "Basic JSON Rule",
+    "tags": [],
+    "triggers": [
+      {
+        "id": "2",
+        "configuration": {
+          "startlevel": 100
+        },
+        "type": "core.SystemStartlevelTrigger"
+      },
+      {
+        "id": "22",
+        "configuration": {
+          "time": "14:05"
+        },
+        "type": "timer.TimeOfDayTrigger"
+      }
+    ],
+    "conditions": [
+      {
+        "inputs": {},
+        "id": "3",
+        "configuration": {
+          "offset": 0
+        },
+        "type": "ephemeris.WeekdayCondition"
+      },
+      {
+        "inputs": {},
+        "id": "4",
+        "configuration": {
+          "offset": 2
+        },
+        "type": "ephemeris.WeekdayCondition"
+      }
+    ],
+    "actions": [
+      {
+        "inputs": {},
+        "id": "1",
+        "configuration": {
+          "itemName": "SleepSetTemperature",
+          "command": "21.0"
+        },
+        "type": "core.ItemCommandAction"
+      },
+      {
+        "inputs": {},
+        "id": "11",
+        "configuration": {
+          "sink": "webaudio",
+          "text": "The sleep temperature has been set"
+        },
+        "type": "media.SayAction"
+      }
+    ],
+    "configuration": {},
+    "configDescriptions": [],
+    "visibility": "VISIBLE"
+  }
+]
