@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.AbstractUID;
 import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.ItemUtil;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
@@ -88,9 +89,10 @@ public class YamlItemDTO implements YamlElement, Cloneable {
             return false;
         }
         boolean ok = true;
-        if (!ID_PATTERN.matcher(name).matches()) {
-            addToList(errors, "invalid item: name \"%s\" not matching the expected syntax %s".formatted(name,
-                    ID_PATTERN.pattern()));
+        if (!ItemUtil.isValidItemName(name)) {
+            addToList(errors,
+                    "invalid item \"%s\": \"name\" must begin with a letter or underscore followed by alphanumeric characters and underscores, and must not contain any other symbols."
+                            .formatted(name));
             ok = false;
         }
         List<String> subErrors = new ArrayList<>();
