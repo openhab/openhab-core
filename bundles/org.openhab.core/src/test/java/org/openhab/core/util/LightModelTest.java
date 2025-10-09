@@ -26,6 +26,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.LightModel.LedOperatingMode;
 import org.openhab.core.util.LightModel.LightCapabilities;
 import org.openhab.core.util.LightModel.RgbDataType;
 import org.openhab.core.util.LightModel.RgbcwMath;
@@ -887,5 +888,32 @@ public class LightModelTest {
         assertEquals(0.0, rgbx[1], 5); // green channel fine tuning up to 5.0
         assertEquals(0.0, rgbx[2], 5); // blue channel fine tuning up to 5.0
         assertTrue(rgbx[3] > rgbx[4]); // cool white channel dominant
+    }
+
+    /**
+     * Case: Switch LED operation mode at runtime
+     */
+    @Test
+    public void testSwitchLedOperationMode() {
+        LightModel lsm = new LightModel(LightCapabilities.COLOR_WITH_COLOR_TEMPERATURE, RgbDataType.RGB_C_W);
+        lsm.handleCommand(new HSBType("0,0,100"));
+        double[] rgbx = lsm.getRGBx();
+        assertEquals(5, rgbx.length);
+
+        lsm.setLedOperatingMode(LedOperatingMode.RGB_ONLY);
+        rgbx = lsm.getRGBx();
+        assertEquals(5, rgbx.length);
+        assertEquals(0.0, rgbx[3], 0.01);
+        assertEquals(0.0, rgbx[4], 0.01);
+        // TODO RGB value mix tests
+
+        lsm.setLedOperatingMode(LedOperatingMode.WHITE_ONLY);
+        rgbx = lsm.getRGBx();
+        assertEquals(5, rgbx.length);
+        assertEquals(0.0, rgbx[0], 0.01);
+        assertEquals(0.0, rgbx[1], 0.01);
+        assertEquals(0.0, rgbx[2], 0.01);
+        assertEquals(255.0, rgbx[3] + rgbx[4], 0.01);
+        // TODO WHITE value mix tests
     }
 }
