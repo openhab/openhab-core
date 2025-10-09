@@ -47,6 +47,11 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
     }
 
     @Override
+    public String getTypeId() {
+        return TYPE_ID;
+    }
+
+    @Override
     public void compile() throws ScriptException {
         super.compileScript();
     }

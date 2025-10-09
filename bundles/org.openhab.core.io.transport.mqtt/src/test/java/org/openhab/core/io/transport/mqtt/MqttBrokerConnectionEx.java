@@ -69,7 +69,7 @@ public class MqttBrokerConnectionEx extends MqttBrokerConnection {
                 return CompletableFuture.completedFuture(null);
             }
             return new CompletableFuture<Boolean>();
-        }).when(mockedClient).connect(any(), anyInt(), any(), any());
+        }).when(mockedClient).connect(any(), anyInt(), any(), any(), any());
         doAnswer(i -> {
             if (disconnectSuccess) {
                 connectionCallback.onDisconnected(new Throwable("disconnect"));

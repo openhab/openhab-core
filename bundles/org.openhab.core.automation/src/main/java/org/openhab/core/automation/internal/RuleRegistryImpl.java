@@ -597,18 +597,13 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      * @return <code>true</code> if the type and value matching or <code>false</code> in the opposite.
      */
     private boolean checkType(Type type, Object configValue) {
-        switch (type) {
-            case TEXT:
-                return configValue instanceof String;
-            case BOOLEAN:
-                return configValue instanceof Boolean;
-            case INTEGER:
-                return configValue instanceof BigDecimal || configValue instanceof Integer
-                        || configValue instanceof Double doubleValue && doubleValue.intValue() == doubleValue;
-            case DECIMAL:
-                return configValue instanceof BigDecimal || configValue instanceof Double;
-        }
-        return false;
+        return switch (type) {
+            case TEXT -> configValue instanceof String;
+            case BOOLEAN -> configValue instanceof Boolean;
+            case INTEGER -> configValue instanceof BigDecimal || configValue instanceof Integer
+                    || configValue instanceof Double doubleValue && doubleValue.intValue() == doubleValue;
+            case DECIMAL -> configValue instanceof BigDecimal || configValue instanceof Double;
+        };
     }
 
     /**

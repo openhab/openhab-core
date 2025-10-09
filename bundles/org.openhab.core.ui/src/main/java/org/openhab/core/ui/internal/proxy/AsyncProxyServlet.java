@@ -37,7 +37,6 @@ public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet
     private final ProxyServletService service;
 
     AsyncProxyServlet(ProxyServletService service) {
-        super();
         this.service = service;
     }
 

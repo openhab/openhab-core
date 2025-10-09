@@ -13,10 +13,13 @@
 package org.openhab.core.model.item.internal;
 
 import static java.util.stream.Collectors.toSet;
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -38,32 +41,37 @@ import org.osgi.service.component.annotations.Component;
  * methods.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Store metadata per model + do not notify the registry for isolated models
  */
 @Component(service = { MetadataProvider.class, GenericMetadataProvider.class })
 @NonNullByDefault
 public class GenericMetadataProvider extends AbstractProvider<Metadata> implements MetadataProvider {
 
-    private final Set<Metadata> metadata = new HashSet<>();
+    private final Map<String, Set<Metadata>> metadata = new HashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock(true);
 
     /**
      * Adds metadata to this provider
      *
+     * @param modelName the model name
      * @param bindingType
      * @param itemName
      * @param configuration
      */
-    public void addMetadata(String bindingType, String itemName, String value,
+    public void addMetadata(String modelName, String bindingType, String itemName, String value,
             @Nullable Map<String, Object> configuration) {
         MetadataKey key = new MetadataKey(bindingType, itemName);
         Metadata md = new Metadata(key, value, configuration);
         try {
             lock.writeLock().lock();
-            metadata.add(md);
+            Set<Metadata> mdSet = Objects.requireNonNull(metadata.computeIfAbsent(modelName, k -> new HashSet<>()));
+            mdSet.add(md);
         } finally {
             lock.writeLock().unlock();
         }
-        notifyListenersAboutAddedElement(md);
+        if (!isIsolatedModel(modelName)) {
+            notifyListenersAboutAddedElement(md);
+        }
     }
 
     /**
@@ -72,41 +80,78 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
      * @param namespace the namespace
      */
     public void removeMetadataByNamespace(String namespace) {
-        Set<Metadata> toBeRemoved;
+        Map<String, Set<Metadata>> toBeNotified;
         try {
             lock.writeLock().lock();
-            toBeRemoved = metadata.stream().filter(MetadataPredicates.hasNamespace(namespace)).collect(toSet());
-            metadata.removeAll(toBeRemoved);
+            toBeNotified = new HashMap<>();
+            Set<String> modelsToRemove = new HashSet<>();
+            for (Map.Entry<String, Set<Metadata>> entry : metadata.entrySet()) {
+                String modelName = entry.getKey();
+                Set<Metadata> mdSet = entry.getValue();
+                Set<Metadata> toBeRemoved = mdSet.stream().filter(MetadataPredicates.hasNamespace(namespace))
+                        .collect(toSet());
+                mdSet.removeAll(toBeRemoved);
+                if (mdSet.isEmpty()) {
+                    modelsToRemove.add(modelName);
+                }
+                if (!isIsolatedModel(modelName) && !toBeRemoved.isEmpty()) {
+                    toBeNotified.put(modelName, toBeRemoved);
+                }
+            }
+            // Remove empty model entries after iteration to avoid ConcurrentModificationException
+            modelsToRemove.forEach(metadata::remove);
         } finally {
             lock.writeLock().unlock();
         }
-        toBeRemoved.forEach(this::notifyListenersAboutRemovedElement);
+        toBeNotified.values().forEach((set) -> {
+            set.forEach(this::notifyListenersAboutRemovedElement);
+        });
     }
 
     /**
      * Removes all meta-data for a given item
      *
+     * @param modelName the model name
      * @param itemName the item name
      */
-    public void removeMetadataByItemName(String itemName) {
-        Set<Metadata> toBeRemoved;
+    public void removeMetadataByItemName(String modelName, String itemName) {
+        Set<Metadata> toBeNotified;
         try {
             lock.writeLock().lock();
-            toBeRemoved = metadata.stream().filter(MetadataPredicates.ofItem(itemName)).collect(toSet());
-            metadata.removeAll(toBeRemoved);
+            toBeNotified = new HashSet<>();
+            Set<Metadata> mdSet = metadata.getOrDefault(modelName, new HashSet<>());
+            Set<Metadata> toBeRemoved = mdSet.stream().filter(MetadataPredicates.ofItem(itemName)).collect(toSet());
+            mdSet.removeAll(toBeRemoved);
+            if (mdSet.isEmpty()) {
+                metadata.remove(modelName);
+            }
+            if (!isIsolatedModel(modelName) && !toBeRemoved.isEmpty()) {
+                toBeNotified.addAll(toBeRemoved);
+            }
         } finally {
             lock.writeLock().unlock();
         }
-        for (Metadata m : toBeRemoved) {
-            notifyListenersAboutRemovedElement(m);
-        }
+        toBeNotified.forEach(this::notifyListenersAboutRemovedElement);
     }
 
     @Override
     public Collection<Metadata> getAll() {
         try {
             lock.readLock().lock();
-            return Set.copyOf(metadata);
+            // Ignore isolated models
+            Set<Metadata> set = metadata.keySet().stream().filter(name -> !isIsolatedModel(name))
+                    .map(name -> metadata.getOrDefault(name, Set.of())).flatMap(s -> s.stream()).collect(toSet());
+            return Set.copyOf(set);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public Collection<Metadata> getAllFromModel(String modelName) {
+        try {
+            lock.readLock().lock();
+            Set<Metadata> set = metadata.getOrDefault(modelName, Set.of());
+            return Set.copyOf(set);
         } finally {
             lock.readLock().unlock();
         }

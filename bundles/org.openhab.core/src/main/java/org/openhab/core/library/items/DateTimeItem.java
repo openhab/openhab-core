@@ -15,6 +15,7 @@ package org.openhab.core.library.items;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.DateTimeType;
@@ -52,8 +53,24 @@ public class DateTimeItem extends GenericItem {
         return ACCEPTED_COMMAND_TYPES;
     }
 
+    /**
+     * Send a DateTimeType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(DateTimeType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    /**
+     * Send a DateTimeType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(DateTimeType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override

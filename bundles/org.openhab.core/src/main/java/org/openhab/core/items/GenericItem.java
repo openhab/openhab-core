@@ -211,10 +211,10 @@ public abstract class GenericItem implements ActiveItem {
         this.itemStateConverter = itemStateConverter;
     }
 
-    protected void internalSend(Command command) {
+    protected void internalSend(Command command, @Nullable String source) {
         // try to send the command to the bus
         if (eventPublisher instanceof EventPublisher publisher) {
-            publisher.post(ItemEventFactory.createCommandEvent(this.getName(), command));
+            publisher.post(ItemEventFactory.createCommandEvent(this.getName(), command, source));
         }
     }
 
@@ -338,8 +338,22 @@ public abstract class GenericItem implements ActiveItem {
         }
     }
 
+    /**
+     * Send a REFRESH command to the item.
+     */
     public void send(RefreshType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    /**
+     * Send a REFRESH command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(RefreshType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     protected void notifyListeners(final State oldState, final State newState) {

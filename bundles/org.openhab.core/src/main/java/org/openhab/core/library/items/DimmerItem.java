@@ -15,6 +15,7 @@ package org.openhab.core.library.items;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.IncreaseDecreaseType;
 import org.openhab.core.library.types.OnOffType;
@@ -48,12 +49,44 @@ public class DimmerItem extends SwitchItem {
         super(type, name);
     }
 
+    /**
+     * Send a PercentType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(PercentType command) {
-        internalSend(command);
+        internalSend(command, null);
     }
 
+    /**
+     * Send a PercentType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(PercentType command, @Nullable String source) {
+        internalSend(command, source);
+    }
+
+    /**
+     * Send an INCREASE/DECREASE command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(IncreaseDecreaseType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    /**
+     * Send an INCREASE/DECREASE command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(IncreaseDecreaseType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override

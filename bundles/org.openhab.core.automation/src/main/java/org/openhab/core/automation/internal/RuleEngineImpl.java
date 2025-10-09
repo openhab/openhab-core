@@ -858,9 +858,14 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return false;
         }
 
-        // Compile the conditions and actions and so check if they are valid.
-        if (!compileRule(rule)) {
-            return false;
+        if (started) {
+            // compile the conditions and actions and so check if they are valid
+            if (!compileRule(rule)) {
+                return false;
+            }
+        } else {
+            // script engines are not available yet, so skip compilation
+            logger.debug("Rule engine not yet started - skipping compilation of rule '{}'", ruleUID);
         }
 
         // Register the rule and set idle status.
@@ -888,7 +893,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @return true if compilation succeeded, otherwise false
      */
     private boolean compileRule(final WrappedRule rule) {
-        logger.debug("Compiling rule {}", rule.getUID());
+        logger.debug("Compiling rule '{}' ...", rule.getUID());
         try {
             compileConditions(rule);
             compileActions(rule);
@@ -1050,7 +1055,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return;
         }
         if (!started) {
-            logger.debug("Rule engine not yet started - not executing rule '{}',", ruleUID);
+            logger.debug("Rule engine not yet started - not executing rule '{}'", ruleUID);
             return;
         }
         synchronized (this) {

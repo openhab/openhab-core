@@ -48,8 +48,24 @@ public class StringItem extends GenericItem {
         super(CoreItemFactory.STRING, name);
     }
 
+    /**
+     * Send a StringType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(StringType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    /**
+     * Send a StringType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(StringType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override

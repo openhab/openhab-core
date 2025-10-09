@@ -207,7 +207,7 @@
     <dependency>
       <groupId>org.jmdns</groupId>
       <artifactId>jmdns</artifactId>
-      <version>3.6.1</version>
+      <version>3.6.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -251,7 +251,7 @@
     <dependency>
       <groupId>com.hivemq</groupId>
       <artifactId>hivemq-mqtt-client</artifactId>
-      <version>1.3.7</version>
+      <version>1.3.9</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -439,7 +439,7 @@
     <dependency>
       <groupId>org.openhab.osgiify</groupId>
       <artifactId>io.methvin.directory-watcher</artifactId>
-      <version>0.18.0</version>
+      <version>0.19.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

@@ -108,17 +108,12 @@ public class MissingServiceAnalyzer {
     }
 
     private String getState(int state) {
-        switch (state) {
-            case ComponentConfigurationDTO.UNSATISFIED_CONFIGURATION:
-                return "UNSATISFIED_CONFIGURATION";
-            case ComponentConfigurationDTO.UNSATISFIED_REFERENCE:
-                return "UNSATISFIED_REFERENCE";
-            case ComponentConfigurationDTO.SATISFIED:
-                return "SATISFIED";
-            case ComponentConfigurationDTO.ACTIVE:
-                return "ACTIVE";
-            default:
-                return state + "";
-        }
+        return switch (state) {
+            case ComponentConfigurationDTO.UNSATISFIED_CONFIGURATION -> "UNSATISFIED_CONFIGURATION";
+            case ComponentConfigurationDTO.UNSATISFIED_REFERENCE -> "UNSATISFIED_REFERENCE";
+            case ComponentConfigurationDTO.SATISFIED -> "SATISFIED";
+            case ComponentConfigurationDTO.ACTIVE -> "ACTIVE";
+            default -> state + "";
+        };
     }
 }

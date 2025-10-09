@@ -58,7 +58,6 @@ public class ModbusWriteCoilRequestBlueprint extends ModbusWriteRequestBlueprint
      */
     public ModbusWriteCoilRequestBlueprint(int slaveId, int reference, BitArray data, boolean writeMultiple,
             int maxTries) {
-        super();
         this.slaveId = slaveId;
         this.reference = reference;
         this.bits = data;

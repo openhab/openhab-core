@@ -482,41 +482,38 @@ public class PersistenceExtensions {
             int startPage = 0;
             filter.setPageNumber(startPage);
 
-            Iterable<HistoricItem> items = qService.query(filter, alias);
-            while (items != null) {
-                Iterator<HistoricItem> itemIterator = items.iterator();
-                int itemCount = 0;
-                State state = item.getState();
-                if (itemIterator.hasNext()) {
-                    if (!skipEqual) {
-                        HistoricItem historicItem = itemIterator.next();
-                        if (!forward && !historicItem.getState().equals(state)) {
-                            // Last persisted state value different from current state value, so it must have updated
-                            // since last persist. We do not know when from persistence, so get it from the item.
-                            return item.getLastStateUpdate();
-                        }
-                        return historicItem.getTimestamp();
-                    } else {
-                        HistoricItem historicItem = itemIterator.next();
-                        if (!historicItem.getState().equals(state)) {
-                            // Persisted state value different from current state value, so it must have changed, but we
-                            // do not know when looking backward in persistence. Get it from the item.
-                            return forward ? historicItem.getTimestamp() : item.getLastStateChange();
-                        }
-                        while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
-                            HistoricItem nextHistoricItem = itemIterator.next();
-                            itemCount++;
-                            if (!nextHistoricItem.getState().equals(state)) {
-                                return forward ? nextHistoricItem.getTimestamp() : historicItem.getTimestamp();
-                            }
-                            historicItem = nextHistoricItem;
-                        }
-                        if (itemCount == filter.getPageSize()) {
-                            filter.setPageNumber(++startPage);
-                            items = qService.query(filter, alias);
-                        } else {
-                            items = null;
-                        }
+            Iterator<HistoricItem> itemIterator = qService.query(filter, alias).iterator();
+            if (!itemIterator.hasNext()) {
+                return null;
+            }
+            int itemCount = 0;
+            State state = item.getState();
+            if (!skipEqual) {
+                HistoricItem historicItem = itemIterator.next();
+                if (!forward && !historicItem.getState().equals(state)) {
+                    // Last persisted state value different from current state value, so it must have updated
+                    // since last persist. We do not know when from persistence, so get it from the item.
+                    return item.getLastStateUpdate();
+                }
+                return historicItem.getTimestamp();
+            } else {
+                HistoricItem historicItem = itemIterator.next();
+                if (!historicItem.getState().equals(state)) {
+                    // Persisted state value different from current state value, so it must have changed, but we
+                    // do not know when looking backward in persistence. Get it from the item.
+                    return forward ? historicItem.getTimestamp() : item.getLastStateChange();
+                }
+                while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
+                    HistoricItem nextHistoricItem = itemIterator.next();
+                    itemCount++;
+                    if (!nextHistoricItem.getState().equals(state)) {
+                        return forward ? nextHistoricItem.getTimestamp() : historicItem.getTimestamp();
+                    }
+                    historicItem = nextHistoricItem;
+                    if (itemCount == filter.getPageSize()) {
+                        itemCount = 0;
+                        filter.setPageNumber(++startPage);
+                        itemIterator = qService.query(filter, alias).iterator();
                     }
                 }
             }
@@ -655,22 +652,18 @@ public class PersistenceExtensions {
             int startPage = 0;
             filter.setPageNumber(startPage);
 
-            Iterable<HistoricItem> items = qService.query(filter, alias);
-            while (items != null) {
-                Iterator<HistoricItem> itemIterator = items.iterator();
-                int itemCount = 0;
-                while (itemIterator.hasNext()) {
-                    HistoricItem historicItem = itemIterator.next();
-                    itemCount++;
-                    if (!skipEqual || !historicItem.getState().equals(item.getState())) {
-                        return historicItem;
-                    }
+            Iterator<HistoricItem> itemIterator = qService.query(filter, alias).iterator();
+            int itemCount = 0;
+            while (itemIterator.hasNext()) {
+                HistoricItem historicItem = itemIterator.next();
+                itemCount++;
+                if (!skipEqual || !historicItem.getState().equals(item.getState())) {
+                    return historicItem;
                 }
                 if (itemCount == filter.getPageSize()) {
+                    itemCount = 0;
                     filter.setPageNumber(++startPage);
-                    items = qService.query(filter, alias);
-                } else {
-                    items = null;
+                    itemIterator = qService.query(filter, alias).iterator();
                 }
             }
         } else {
@@ -1371,27 +1364,32 @@ public class PersistenceExtensions {
         if (effectiveServiceId == null) {
             return null;
         }
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime beginTime = Objects.requireNonNullElse(begin, now);
+        ZonedDateTime endTime = Objects.requireNonNullElse(end, now);
+
         Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
         if (result == null) {
             return null;
         }
-        State averageState = internalAverageBetween(item, begin, end, type, effectiveServiceId);
-
-        if (averageState != null) {
-            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-            Unit<?> unit = (baseItem instanceof NumberItem numberItem)
-                    && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
-            DecimalType dt;
-            if (unit != null && averageState instanceof QuantityType<?> averageQuantity) {
-                averageQuantity = averageQuantity.toUnit(unit);
-                dt = averageQuantity != null ? averageQuantity.as(DecimalType.class) : null;
-            } else {
-                dt = averageState.as(DecimalType.class);
+        Iterator<HistoricItem> it = result.iterator();
+        // Remove initial part of history that does not have any values persisted
+        if (beginTime.isBefore(now)) {
+            if (it.hasNext()) {
+                beginTime = it.next().getTimestamp();
             }
-            BigDecimal average = dt != null ? dt.toBigDecimal() : BigDecimal.ZERO, sum = BigDecimal.ZERO;
-            int count = 0;
+            it = result.iterator();
+        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
+        Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
 
-            Iterator<HistoricItem> it = result.iterator();
+        BigDecimal average = average(beginTime, endTime, it, unit, type);
+        if (average != null) {
+            int count = 0;
+            BigDecimal sum = BigDecimal.ZERO;
+
+            it = result.iterator();
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
                 DecimalType value = getPersistedValue(historicItem, unit);
@@ -1916,16 +1914,24 @@ public class PersistenceExtensions {
         Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
-        BigDecimal sum = riemannSum(beginTime, endTime, it, unit, type);
-        BigDecimal totalDuration = BigDecimal.valueOf(Duration.between(beginTime, endTime).toMillis());
-        if (totalDuration.signum() == 0) {
+        BigDecimal average = average(beginTime, endTime, it, unit, type);
+        if (average == null) {
             return null;
         }
-        BigDecimal average = sum.divide(totalDuration, MathContext.DECIMAL64);
         if (unit != null) {
             return new QuantityType<>(average, unit);
         }
         return new DecimalType(average);
+    }
+
+    private static @Nullable BigDecimal average(ZonedDateTime begin, ZonedDateTime end, Iterator<HistoricItem> it,
+            @Nullable Unit<?> unit, @Nullable RiemannType type) {
+        BigDecimal sum = riemannSum(begin, end, it, unit, type);
+        BigDecimal totalDuration = BigDecimal.valueOf(Duration.between(begin, end).toMillis());
+        if (totalDuration.signum() == 0) {
+            return null;
+        }
+        return sum.divide(totalDuration, MathContext.DECIMAL64);
     }
 
     /**
@@ -2404,7 +2410,7 @@ public class PersistenceExtensions {
             return historicItem != null ? historicItem.getState() : null;
         }
 
-        Iterable<HistoricItem> result = getAllStatesBetween(item, beginTime, endTime, effectiveServiceId);
+        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, beginTime, endTime, effectiveServiceId);
         if (result == null) {
             return null;
         }
@@ -3267,12 +3273,12 @@ public class PersistenceExtensions {
             if (begin != null) {
                 filter.setBeginDate(begin);
             } else {
-                filter.setBeginDate(ZonedDateTime.now());
+                filter.setBeginDate(now);
             }
             if (end != null) {
                 filter.setEndDate(end);
             } else {
-                filter.setEndDate(ZonedDateTime.now());
+                filter.setEndDate(now);
             }
             String alias = getAlias(item, effectiveServiceId);
             filter.setItemName(item.getName());
@@ -3384,12 +3390,12 @@ public class PersistenceExtensions {
             if (begin != null) {
                 filter.setBeginDate(begin);
             } else {
-                filter.setBeginDate(ZonedDateTime.now());
+                filter.setBeginDate(now);
             }
             if (end != null) {
                 filter.setEndDate(end);
             } else {
-                filter.setEndDate(ZonedDateTime.now());
+                filter.setEndDate(now);
             }
             String alias = getAlias(item, effectiveServiceId);
             filter.setItemName(item.getName());

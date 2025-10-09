@@ -12,11 +12,13 @@
  */
 package org.openhab.core.model.yaml.internal.items.fileconverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -26,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -38,14 +41,17 @@ import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlModelRepository;
+import org.openhab.core.model.yaml.internal.items.YamlChannelLinkProvider;
 import org.openhab.core.model.yaml.internal.items.YamlGroupDTO;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
+import org.openhab.core.model.yaml.internal.items.YamlItemProvider;
 import org.openhab.core.model.yaml.internal.items.YamlMetadataDTO;
+import org.openhab.core.model.yaml.internal.items.YamlMetadataProvider;
 import org.openhab.core.types.State;
-import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -56,17 +62,24 @@ import org.osgi.service.component.annotations.Reference;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemFileGenerator.class)
-public class YamlItemFileConverter extends AbstractItemFileGenerator {
+@Component(immediate = true, service = { ItemFileGenerator.class, ItemFileParser.class })
+public class YamlItemFileConverter extends AbstractItemFileGenerator implements ItemFileParser {
 
     private final YamlModelRepository modelRepository;
+    private final YamlItemProvider itemProvider;
+    private final YamlMetadataProvider metadataProvider;
+    private final YamlChannelLinkProvider channelLinkProvider;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
     public YamlItemFileConverter(final @Reference YamlModelRepository modelRepository,
+            final @Reference YamlItemProvider itemProvider, final @Reference YamlMetadataProvider metadataProvider,
+            final @Reference YamlChannelLinkProvider channelLinkProvider,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
-        super();
         this.modelRepository = modelRepository;
+        this.itemProvider = itemProvider;
+        this.metadataProvider = metadataProvider;
+        this.channelLinkProvider = channelLinkProvider;
         this.configDescriptionRegistry = configDescRegistry;
     }
 
@@ -76,18 +89,23 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator {
     }
 
     @Override
-    public void generateFileFormat(OutputStream out, List<Item> items, Collection<Metadata> metadata,
-            boolean hideDefaultParameters) {
+    public void setItemsToBeGenerated(String id, List<Item> items, Collection<Metadata> metadata,
+            Map<String, String> stateFormatters, boolean hideDefaultParameters) {
         List<YamlElement> elements = new ArrayList<>();
         items.forEach(item -> {
             elements.add(buildItemDTO(item, getChannelLinks(metadata, item.getName()),
-                    getMetadata(metadata, item.getName()), hideDefaultParameters));
+                    getMetadata(metadata, item.getName()), stateFormatters.get(item.getName()), hideDefaultParameters));
         });
-        modelRepository.generateSyntaxFromElements(out, elements);
+        modelRepository.addElementsToBeGenerated(id, elements);
+    }
+
+    @Override
+    public void generateFileFormat(String id, OutputStream out) {
+        modelRepository.generateFileFormat(id, out);
     }
 
     private YamlItemDTO buildItemDTO(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
-            boolean hideDefaultParameters) {
+            @Nullable String stateFormatter, boolean hideDefaultParameters) {
         YamlItemDTO dto = new YamlItemDTO();
         dto.name = item.getName();
 
@@ -96,9 +114,8 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator {
         String defaultPattern = getDefaultStatePattern(item);
         if (label != null && !label.isEmpty()) {
             dto.label = item.getLabel();
-            StateDescription stateDescr = item.getStateDescription();
-            String statePattern = stateDescr == null ? null : stateDescr.getPattern();
-            String patterToSet = statePattern != null && !statePattern.equals(defaultPattern) ? statePattern : null;
+            String patterToSet = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter
+                    : null;
             dto.format = patterToSet;
             patternSet = patterToSet != null;
         }
@@ -249,5 +266,45 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator {
             handledNames.add(paramName);
         }
         return parameters;
+    }
+
+    @Override
+    public String getFileFormatParser() {
+        return "YAML";
+    }
+
+    @Override
+    public @Nullable String startParsingFileFormat(String syntax, List<String> errors, List<String> warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        return modelRepository.createIsolatedModel(inputStream, errors, warnings);
+    }
+
+    @Override
+    public Collection<Item> getParsedItems(String modelName) {
+        return itemProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Collection<Metadata> getParsedMetadata(String modelName) {
+        return metadataProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Map<String, String> getParsedStateFormatters(String modelName) {
+        Map<String, String> stateFormatters = new HashMap<>();
+        getParsedMetadata(modelName).forEach(md -> {
+            if ("stateDescription".equals(md.getUID().getNamespace())) {
+                Object pattern = md.getConfiguration().get("pattern");
+                if (pattern instanceof String patternStr && !patternStr.isBlank()) {
+                    stateFormatters.put(md.getUID().getItemName(), patternStr);
+                }
+            }
+        });
+        return stateFormatters;
+    }
+
+    @Override
+    public void finishParsingFileFormat(String modelName) {
+        modelRepository.removeIsolatedModel(modelName);
     }
 }

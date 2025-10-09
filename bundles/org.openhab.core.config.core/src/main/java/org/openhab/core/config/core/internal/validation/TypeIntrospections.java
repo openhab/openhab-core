@@ -33,7 +33,6 @@ final class TypeIntrospections {
     );
 
     private TypeIntrospections() {
-        super();
     }
 
     /**

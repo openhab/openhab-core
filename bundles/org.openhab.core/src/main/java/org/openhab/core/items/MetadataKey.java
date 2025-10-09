@@ -29,7 +29,6 @@ public final class MetadataKey extends AbstractUID {
      * !!! DO NOT REMOVE - Gson needs it !!!
      */
     MetadataKey() {
-        super();
     }
 
     /**

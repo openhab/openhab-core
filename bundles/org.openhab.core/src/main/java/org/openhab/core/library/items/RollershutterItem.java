@@ -15,6 +15,7 @@ package org.openhab.core.library.items;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.PercentType;
@@ -55,16 +56,64 @@ public class RollershutterItem extends GenericItem {
         return ACCEPTED_COMMAND_TYPES;
     }
 
+    /**
+     * Send an UP/DOWN command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(UpDownType command) {
-        internalSend(command);
+        internalSend(command, null);
     }
 
+    /**
+     * Send an UP/DOWN command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(UpDownType command, @Nullable String source) {
+        internalSend(command, source);
+    }
+
+    /**
+     * Send a STOP/MOVE command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(StopMoveType command) {
-        internalSend(command);
+        internalSend(command, null);
     }
 
+    /**
+     * Send a STOP/MOVE command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(StopMoveType command, @Nullable String source) {
+        internalSend(command, source);
+    }
+
+    /**
+     * Send a PercentType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(PercentType command) {
-        internalSend(command);
+        internalSend(command, null);
+    }
+
+    /**
+     * Send a PercentType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(PercentType command, @Nullable String source) {
+        internalSend(command, source);
     }
 
     @Override

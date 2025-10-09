@@ -37,7 +37,7 @@ public class GenericMetadataProviderTest {
     @Test
     public void testAddMetadata() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
-        provider.addMetadata("binding", "item", "value", null);
+        provider.addMetadata("model", "binding", "item", "value", null);
         Collection<Metadata> res = provider.getAll();
         assertEquals(1, res.size());
         assertEquals("value", res.iterator().next().getValue());
@@ -46,27 +46,27 @@ public class GenericMetadataProviderTest {
     @Test
     public void testRemoveMetadataNonExistentItem() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
-        provider.removeMetadataByItemName("nonExistentItem");
+        provider.removeMetadataByItemName("model", "nonExistentItem");
     }
 
     @Test
     public void testRemoveMetadataByItemName() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
-        provider.addMetadata("other", "item", "value", null);
-        provider.addMetadata("binding", "item", "value", null);
-        provider.addMetadata("binding", "other", "value", null);
+        provider.addMetadata("model", "other", "item", "value", null);
+        provider.addMetadata("model", "binding", "item", "value", null);
+        provider.addMetadata("model", "binding", "other", "value", null);
         assertEquals(3, provider.getAll().size());
 
-        provider.removeMetadataByItemName("item");
+        provider.removeMetadataByItemName("model", "item");
         assertEquals(1, provider.getAll().size());
     }
 
     @Test
     public void testRemoveMetadataByNamespace() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
-        provider.addMetadata("other", "item", "value", null);
-        provider.addMetadata("binding", "item", "value", null);
-        provider.addMetadata("binding", "other", "value", null);
+        provider.addMetadata("model", "other", "item", "value", null);
+        provider.addMetadata("model", "binding", "item", "value", null);
+        provider.addMetadata("model", "binding", "other", "value", null);
         assertEquals(3, provider.getAll().size());
 
         provider.removeMetadataByNamespace("binding");

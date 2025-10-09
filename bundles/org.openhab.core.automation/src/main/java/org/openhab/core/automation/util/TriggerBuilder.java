@@ -25,7 +25,6 @@ import org.openhab.core.automation.internal.TriggerImpl;
 public class TriggerBuilder extends ModuleBuilder<TriggerBuilder, Trigger> {
 
     protected TriggerBuilder() {
-        super();
     }
 
     protected TriggerBuilder(final Trigger condition) {

@@ -51,10 +51,15 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     private final Logger logger = LoggerFactory.getLogger(AbstractScriptModuleHandler.class);
 
     /** Constant defining the configuration parameter of modules that specifies the mime type of a script */
-    public static final String SCRIPT_TYPE = "type";
+    public static final String CONFIG_SCRIPT_TYPE = "type";
 
     /** Constant defining the configuration parameter of modules that specifies the script itself */
-    public static final String SCRIPT = "script";
+    public static final String CONFIG_SCRIPT = "script";
+
+    /**
+     * Constant defining the context key of the module type id.
+     */
+    public static final String CONTEXT_KEY_MODULE_TYPE_ID = "oh.module-type-id";
 
     protected final ScriptEngineManager scriptEngineManager;
 
@@ -73,8 +78,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         this.ruleUID = ruleUID;
         this.engineIdentifier = UUID.randomUUID().toString();
 
-        this.type = getValidConfigParameter(SCRIPT_TYPE, module.getConfiguration(), module.getId(), false);
-        this.script = getValidConfigParameter(SCRIPT, module.getConfiguration(), module.getId(), true);
+        this.type = getValidConfigParameter(CONFIG_SCRIPT_TYPE, module.getConfiguration(), module.getId(), false);
+        this.script = getValidConfigParameter(CONFIG_SCRIPT, module.getConfiguration(), module.getId(), true);
     }
 
     private static String getValidConfigParameter(String parameter, Configuration config, String moduleId,
@@ -136,6 +141,13 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     }
 
     /**
+     * Gets the type identifier of this module handler
+     * 
+     * @return the type identifier
+     */
+    abstract public String getTypeId();
+
+    /**
      * Gets the script engine identifier for this module
      *
      * @return the engine identifier string
@@ -163,6 +175,16 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
         if (container != null) {
             scriptEngine = Optional.ofNullable(container.getScriptEngine());
+            // Inject the module type id into the script context early, so engines can access it before script
+            // invocation.
+            ScriptContext scriptContext = container.getScriptEngine().getContext();
+            if (scriptContext == null) {
+                logger.error(
+                        "Script context is null for script engine '{}' of rule with UID '{}'. Please report this bug.",
+                        engineIdentifier, ruleUID);
+            } else {
+                scriptContext.setAttribute(CONTEXT_KEY_MODULE_TYPE_ID, getTypeId(), ScriptContext.ENGINE_SCOPE);
+            }
             return scriptEngine;
         } else {
             logger.debug("No engine available for script type '{}' in action '{}'.", type, module.getId());

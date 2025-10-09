@@ -42,7 +42,6 @@ public final class ExpressionIdentifier extends Expression {
      * @param stopper Expression that should not match, if the current token should be accepted as identifier
      */
     public ExpressionIdentifier(AbstractRuleBasedInterpreter interpreter, Expression stopper) {
-        super();
         this.interpreter = interpreter;
         this.stopper = stopper;
     }
