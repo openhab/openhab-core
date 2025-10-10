@@ -22,9 +22,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
@@ -39,7 +38,6 @@ import javax.script.ScriptException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.profile.ScriptProfile;
-import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
@@ -82,9 +80,6 @@ public class ScriptTransformationService implements TransformationService, Scrip
     private static final Pattern SCRIPT_CONFIG_PATTERN = Pattern.compile("(?<scriptUid>.+?)(\\?(?<params>.*?))?");
 
     private final Logger logger = LoggerFactory.getLogger(ScriptTransformationService.class);
-
-    private final ScheduledExecutorService scheduler = ThreadPoolManager
-            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private final String scriptType;
     private final URI profileConfigUri;
@@ -141,7 +136,8 @@ public class ScriptTransformationService implements TransformationService, Scrip
             params = configMatcher.group("params");
         }
 
-        ScriptRecord scriptRecord = scriptCache.computeIfAbsent(scriptUid, k -> new ScriptRecord());
+        ScriptRecord scriptRecord = Objects
+                .requireNonNull(scriptCache.computeIfAbsent(scriptUid, k -> new ScriptRecord()));
         scriptRecord.lock.lock();
         try {
             if (scriptRecord.script.isBlank()) {
@@ -163,9 +159,6 @@ public class ScriptTransformationService implements TransformationService, Scrip
 
             if (!scriptEngineManager.isSupported(scriptType)) {
                 // language has been removed, clear container and compiled scripts if found
-                if (scriptRecord.scriptEngineContainer != null) {
-                    scriptEngineManager.removeEngine(OPENHAB_TRANSFORMATION_SCRIPT + scriptUid);
-                }
                 clearCache(scriptUid);
                 throw new TransformationException(
                         "Script type '" + scriptType + "' is not supported by any available script engine.");
@@ -319,29 +312,9 @@ public class ScriptTransformationService implements TransformationService, Scrip
     private void disposeScriptRecord(ScriptRecord scriptRecord) {
         ScriptEngineContainer scriptEngineContainer = scriptRecord.scriptEngineContainer;
         if (scriptEngineContainer != null) {
-            disposeScriptEngine(scriptEngineContainer.getScriptEngine());
+            scriptEngineManager.removeEngine(scriptEngineContainer.getIdentifier());
         }
-        CompiledScript compiledScript = scriptRecord.compiledScript;
-        if (compiledScript != null) {
-            disposeScriptEngine(compiledScript.getEngine());
-        }
-    }
-
-    private void disposeScriptEngine(ScriptEngine scriptEngine) {
-        if (scriptEngine instanceof AutoCloseable closableScriptEngine) {
-            // we cannot not use ScheduledExecutorService.execute here as it might execute the task in the calling
-            // thread (calling ScriptEngine.close in the same thread may result in a deadlock if the ScriptEngine
-            // tries to Thread.join)
-            scheduler.schedule(() -> {
-                try {
-                    closableScriptEngine.close();
-                } catch (Exception e) {
-                    logger.error("Error while closing script engine", e);
-                }
-            }, 0, TimeUnit.SECONDS);
-        } else {
-            logger.trace("ScriptEngine does not support AutoCloseable interface");
-        }
+        scriptRecord.compiledScript = null;
     }
 
     private static class ScriptRecord {
