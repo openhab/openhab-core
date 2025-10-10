@@ -64,13 +64,14 @@ import org.slf4j.LoggerFactory;
  * language
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Florian Hotze - Implement script dependency tracking
  */
 @NonNullByDefault
 @Component(factory = "org.openhab.core.automation.module.script.transformation.factory", service = {
-        TransformationService.class, ScriptTransformationService.class, ConfigOptionProvider.class,
-        ConfigDescriptionProvider.class })
-public class ScriptTransformationService implements TransformationService, ConfigOptionProvider,
-        ConfigDescriptionProvider, RegistryChangeListener<Transformation> {
+        TransformationService.class, ScriptTransformationService.class, ScriptDependencyTracker.Listener.class,
+        ConfigOptionProvider.class, ConfigDescriptionProvider.class })
+public class ScriptTransformationService implements TransformationService, ScriptDependencyTracker.Listener,
+        ConfigOptionProvider, ConfigDescriptionProvider, RegistryChangeListener<Transformation> {
     public static final String SCRIPT_TYPE_PROPERTY_NAME = "openhab.transform.script.scriptType";
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
 
@@ -296,6 +297,16 @@ public class ScriptTransformationService implements TransformationService, Confi
         }
         return ConfigDescriptionBuilder.create(uri).withParameters(template.getParameters())
                 .withParameterGroups(template.getParameterGroups()).build();
+    }
+
+    @Override
+    public void onDependencyChange(String scriptId) {
+        String scriptUid = scriptId.substring(OPENHAB_TRANSFORMATION_SCRIPT.length());
+        ScriptRecord scriptRecord = scriptCache.get(scriptUid);
+        if (scriptRecord != null) {
+            logger.debug("Clearing script cache for script {}", scriptUid);
+            clearCache(scriptUid);
+        }
     }
 
     private void clearCache(String uid) {
