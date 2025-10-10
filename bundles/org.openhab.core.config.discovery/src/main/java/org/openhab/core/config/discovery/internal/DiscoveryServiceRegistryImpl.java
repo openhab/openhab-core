@@ -66,13 +66,20 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegistry, DiscoveryListener {
 
+    // All access must be guarded by "cachedResults"
     private final Map<DiscoveryService, Set<DiscoveryResult>> cachedResults = new HashMap<>();
 
     private final class AggregatingScanListener implements ScanListener {
 
         private final @Nullable ScanListener listener;
+
+        // All access must be guarded by "this"
         private int finishedDiscoveryServices = 0;
+
+        // All access must be guarded by "this"
         private boolean errorOccurred = false;
+
+        // All access must be guarded by "this"
         private int numberOfDiscoveryServices;
 
         private AggregatingScanListener(int numberOfDiscoveryServices, @Nullable ScanListener listener) {
@@ -81,28 +88,27 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
         }
 
         @Override
-        public synchronized void onFinished() {
+        public void onFinished() {
+            ScanListener listener = null;
             synchronized (this) {
                 finishedDiscoveryServices++;
                 logger.debug("Finished {} of {} discovery services.", finishedDiscoveryServices,
                         numberOfDiscoveryServices);
                 if (!errorOccurred && finishedDiscoveryServices == numberOfDiscoveryServices) {
-                    ScanListener listener = this.listener;
-                    if (listener != null) {
-                        listener.onFinished();
-                    }
+                    listener = this.listener;
                 }
+            }
+            if (listener != null) {
+                listener.onFinished();
             }
         }
 
         @Override
         public void onErrorOccurred(@Nullable Exception exception) {
+            ScanListener listener = null;
             synchronized (this) {
                 if (!errorOccurred) {
-                    ScanListener listener = this.listener;
-                    if (listener != null) {
-                        listener.onErrorOccurred(exception);
-                    }
+                    listener = this.listener;
                     errorOccurred = true;
                 } else {
                     // Skip error logging for aborted scans
@@ -114,23 +120,27 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
                     }
                 }
             }
+            if (listener != null) {
+                listener.onErrorOccurred(exception);
+            }
         }
 
         public void reduceNumberOfDiscoveryServices() {
+            ScanListener listener = null;
             synchronized (this) {
                 numberOfDiscoveryServices--;
                 if (!errorOccurred && finishedDiscoveryServices == numberOfDiscoveryServices) {
-                    ScanListener listener = this.listener;
-                    if (listener != null) {
-                        listener.onFinished();
-                    }
+                    listener = this.listener;
                 }
+            }
+            if (listener != null) {
+                listener.onFinished();
             }
         }
     }
 
     private final Set<DiscoveryService> discoveryServices = new CopyOnWriteArraySet<>();
-    private final Set<DiscoveryService> discoveryServicesAll = new HashSet<>();
+    private final Set<DiscoveryService> discoveryServicesAll = new CopyOnWriteArraySet<>();
 
     private final Set<DiscoveryListener> listeners = new CopyOnWriteArraySet<>();
 
@@ -153,7 +163,9 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
             removeDiscoveryServiceActivated(discoveryService);
         }
         listeners.clear();
-        cachedResults.clear();
+        synchronized (cachedResults) {
+            cachedResults.clear();
+        }
     }
 
     @Override
@@ -182,12 +194,14 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
 
     @Override
     public void addDiscoveryListener(DiscoveryListener listener) throws IllegalStateException {
-        synchronized (cachedResults) {
-            cachedResults.forEach((service, results) -> {
-                results.forEach(result -> listener.thingDiscovered(service, result));
-            });
-        }
         listeners.add(listener);
+        Map<DiscoveryService, Set<DiscoveryResult>> existingResults;
+        synchronized (cachedResults) {
+            existingResults = Map.copyOf(cachedResults);
+        }
+        existingResults.forEach((service, results) -> {
+            results.forEach(result -> listener.thingDiscovered(service, result));
+        });
     }
 
     @Override
@@ -248,12 +262,12 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     }
 
     @Override
-    public synchronized void removeDiscoveryListener(DiscoveryListener listener) throws IllegalStateException {
+    public void removeDiscoveryListener(DiscoveryListener listener) throws IllegalStateException {
         listeners.remove(listener);
     }
 
     @Override
-    public synchronized void thingDiscovered(final DiscoveryService source, final DiscoveryResult result) {
+    public void thingDiscovered(final DiscoveryService source, final DiscoveryResult result) {
         synchronized (cachedResults) {
             Objects.requireNonNull(cachedResults.computeIfAbsent(source, unused -> new HashSet<>())).add(result);
         }
@@ -268,7 +282,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     }
 
     @Override
-    public synchronized void thingRemoved(final DiscoveryService source, final ThingUID thingUID) {
+    public void thingRemoved(final DiscoveryService source, final ThingUID thingUID) {
         synchronized (cachedResults) {
             Iterator<DiscoveryResult> it = cachedResults.getOrDefault(source, Set.of()).iterator();
             while (it.hasNext()) {
@@ -376,8 +390,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
         }
     }
 
-    private synchronized Set<DiscoveryService> getDiscoveryServices(ThingTypeUID thingTypeUID)
-            throws IllegalStateException {
+    private Set<DiscoveryService> getDiscoveryServices(ThingTypeUID thingTypeUID) throws IllegalStateException {
         Set<DiscoveryService> discoveryServices = new HashSet<>();
 
         for (DiscoveryService discoveryService : this.discoveryServices) {
@@ -391,7 +404,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     }
 
     @Override
-    public synchronized Set<DiscoveryService> getDiscoveryServices(String bindingId) throws IllegalStateException {
+    public Set<DiscoveryService> getDiscoveryServices(String bindingId) throws IllegalStateException {
         Set<DiscoveryService> discoveryServices = new HashSet<>();
 
         for (DiscoveryService discoveryService : this.discoveryServices) {
