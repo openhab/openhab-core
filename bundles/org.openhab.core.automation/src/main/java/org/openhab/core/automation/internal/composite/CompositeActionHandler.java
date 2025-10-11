@@ -64,16 +64,17 @@ public class CompositeActionHandler extends AbstractCompositeModuleHandler<Actio
      * @see org.openhab.core.automation.handler.ActionHandler#execute(java.util.Map)
      */
     @Override
-    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
-        final Map<String, Object> result = new HashMap<>();
+    public @Nullable Map<String, @Nullable Object> execute(Map<String, Object> context) {
+        final Map<String, @Nullable Object> result = new HashMap<>();
         final List<Action> children = getChildren();
         final Map<String, Object> compositeContext = getCompositeContext(context);
         for (Action child : children) {
             ActionHandler childHandler = moduleHandlerMap.get(child);
             Map<String, Object> childContext = Collections.unmodifiableMap(getChildContext(child, compositeContext));
-            Map<String, Object> childResults = childHandler == null ? null : childHandler.execute(childContext);
+            Map<String, @Nullable Object> childResults = childHandler == null ? null
+                    : childHandler.execute(childContext);
             if (childResults != null) {
-                for (Entry<String, Object> childResult : childResults.entrySet()) {
+                for (Entry<String, @Nullable Object> childResult : childResults.entrySet()) {
                     String childOuputName = child.getId() + "." + childResult.getKey();
                     Output output = compositeOutputs.get(childOuputName);
                     if (output != null) {
