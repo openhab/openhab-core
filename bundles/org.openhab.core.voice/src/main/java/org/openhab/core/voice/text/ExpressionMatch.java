@@ -15,11 +15,14 @@ package org.openhab.core.voice.text;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Expression that successfully parses, if a given string constant is found. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public final class ExpressionMatch extends Expression {
 
     private String pattern;

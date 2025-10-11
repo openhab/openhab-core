@@ -255,7 +255,7 @@ public class SitemapResource
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSitemaps", summary = "Get all available sitemaps.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SitemapDTO.class)))) })
-    public Response getSitemaps() {
+    public @Nullable Response getSitemaps() {
         logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
         Collection<SitemapDTO> responseObject = getSitemapBeans(uriInfo.getAbsolutePathBuilder().build());
         return Response.ok(responseObject).build();
@@ -266,7 +266,7 @@ public class SitemapResource
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSitemapByName", summary = "Get sitemap by name.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDTO.class))) })
-    public Response getSitemapData(@Context HttpHeaders headers,
+    public @Nullable Response getSitemapData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
             @QueryParam("type") String type, @QueryParam("jsoncallback") @DefaultValue("callback") String callback,
@@ -294,7 +294,7 @@ public class SitemapResource
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sitemap with requested name does not exist"),
             @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
-    public Response getSitemapData(@Context HttpHeaders headers,
+    public @Nullable Response getSitemapData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
             @QueryParam("subscriptionid") @Parameter(description = "subscriptionid") @Nullable String subscriptionId,
@@ -326,7 +326,7 @@ public class SitemapResource
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PageDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sitemap with requested name does not exist or page does not exist, or page refers to a non-linkable widget"),
             @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
-    public Response getPageData(@Context HttpHeaders headers,
+    public @Nullable Response getPageData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
             @PathParam("pageid") @Parameter(description = "page id") String pageId,
@@ -368,7 +368,7 @@ public class SitemapResource
     @Operation(operationId = "createSitemapEventSubscription", summary = "Creates a sitemap event subscription.", responses = {
             @ApiResponse(responseCode = "201", description = "Subscription created."),
             @ApiResponse(responseCode = "503", description = "Subscriptions limit reached.") })
-    public Object createEventSubscription() {
+    public @Nullable Object createEventSubscription() {
         logger.debug("Received HTTP POST request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
 
         String subscriptionId = subscriptions.createSubscription(this);

@@ -231,7 +231,7 @@ public class ThingResource implements RESTResource {
                     @ApiResponse(responseCode = "400", description = "Thing uid does not match bridge uid."),
                     @ApiResponse(responseCode = "400", description = "A uid must be provided, if no binding can create a thing of this type."),
                     @ApiResponse(responseCode = "409", description = "A thing with the same uid already exists.") })
-    public Response create(
+    public @Nullable Response create(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @Parameter(description = "thing data", required = true) ThingDTO thingBean) {
         final Locale locale = localeService.getLocale(language);
@@ -307,7 +307,7 @@ public class ThingResource implements RESTResource {
     @Operation(operationId = "getThings", summary = "Get all available things.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedThingDTO.class), uniqueItems = true))) })
-    public Response getAll(@Context Request request,
+    public @Nullable Response getAll(@Context Request request,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary,
             @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and checks the If-Modified-Since header") boolean staticDataOnly) {
@@ -348,7 +348,7 @@ public class ThingResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedThingDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
-    public Response getByUID(
+    public @Nullable Response getByUID(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         final Locale locale = localeService.getLocale(language);
@@ -381,7 +381,7 @@ public class ThingResource implements RESTResource {
                     @ApiResponse(responseCode = "202", description = "ACCEPTED for asynchronous deletion."),
                     @ApiResponse(responseCode = "404", description = "Thing not found."),
                     @ApiResponse(responseCode = "409", description = "Thing could not be deleted because it's not editable.") })
-    public Response remove(
+    public @Nullable Response remove(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @DefaultValue("false") @QueryParam("force") @Parameter(description = "force") boolean force) {
@@ -439,7 +439,7 @@ public class ThingResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedThingDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found."),
                     @ApiResponse(responseCode = "409", description = "Thing could not be updated as it is not editable.") })
-    public Response update(
+    public @Nullable Response update(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @Parameter(description = "thing", required = true) ThingDTO thingBean) throws IOException {
@@ -500,10 +500,10 @@ public class ThingResource implements RESTResource {
                     @ApiResponse(responseCode = "400", description = "Configuration of the thing is not valid."),
                     @ApiResponse(responseCode = "404", description = "Thing not found"),
                     @ApiResponse(responseCode = "409", description = "Thing could not be updated as it is not editable.") })
-    public Response updateConfiguration(
+    public @Nullable Response updateConfiguration(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thing") String thingUID,
-            @Parameter(description = "configuration parameters") @Nullable Map<String, @Nullable Object> configurationParameters)
+            @Parameter(description = "configuration parameters") @Nullable Map<String, Object> configurationParameters)
             throws IOException {
         final Locale locale = localeService.getLocale(language);
 
@@ -561,7 +561,7 @@ public class ThingResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ThingStatusInfo.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
-    public Response getStatus(
+    public @Nullable Response getStatus(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thing") String thingUID) throws IOException {
         ThingUID thingUIDObject = new ThingUID(thingUID);
@@ -587,7 +587,7 @@ public class ThingResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedThingDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
-    public Response setEnabled(
+    public @Nullable Response setEnabled(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thing") String thingUID,
             @Parameter(description = "enabled") String enabled) throws IOException {
@@ -617,7 +617,7 @@ public class ThingResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigStatusMessage.class)))),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
-    public Response getConfigStatus(
+    public @Nullable Response getConfigStatus(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") String language,
             @PathParam("thingUID") @Parameter(description = "thing") String thingUID) throws IOException {
         ThingUID thingUIDObject = new ThingUID(thingUID);
@@ -646,7 +646,7 @@ public class ThingResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "400", description = "Firmware update preconditions not satisfied."),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
-    public Response updateFirmware(
+    public @Nullable Response updateFirmware(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thing") String thingUID,
             @PathParam("firmwareVersion") @Parameter(description = "version") String firmwareVersion)
@@ -682,7 +682,7 @@ public class ThingResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FirmwareStatusDTO.class))),
                     @ApiResponse(responseCode = "204", description = "No firmware status provided by this Thing.") })
-    public Response getFirmwareStatus(
+    public @Nullable Response getFirmwareStatus(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thing") String thingUID) throws IOException {
         ThingUID thingUIDObject = new ThingUID(thingUID);
@@ -702,7 +702,7 @@ public class ThingResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FirmwareDTO.class), uniqueItems = true))),
                     @ApiResponse(responseCode = "204", description = "No firmwares found.") })
-    public Response getFirmwares(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
+    public @Nullable Response getFirmwares(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         ThingUID aThingUID = new ThingUID(thingUID);
         Thing thing = thingRegistry.get(aThingUID);
@@ -747,7 +747,7 @@ public class ThingResource implements RESTResource {
      * @param thingUID
      * @return Response configured for NOT_FOUND
      */
-    private static Response getThingNotFoundResponse(String thingUID) {
+    private static @Nullable Response getThingNotFoundResponse(String thingUID) {
         String message = "Thing " + thingUID + " does not exist!";
         return JSONResponse.createResponse(Status.NOT_FOUND, null, message);
     }
@@ -760,7 +760,7 @@ public class ThingResource implements RESTResource {
      * @param errormessage an optional error message (may be null), ignored if the status family is successful
      * @return Response
      */
-    private Response getThingResponse(Status status, @Nullable Thing thing, Locale locale,
+    private @Nullable Response getThingResponse(Status status, @Nullable Thing thing, Locale locale,
             @Nullable String errormessage) {
         ThingStatusInfo thingStatusInfo = thingStatusInfoI18nLocalizationService.getLocalizedThingStatusInfo(thing,
                 locale);
@@ -790,9 +790,8 @@ public class ThingResource implements RESTResource {
         return linkedItemsMap;
     }
 
-    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
-            @Nullable Map<String, @Nullable Object> properties, ThingTypeUID thingTypeUID,
-            @Nullable ThingUID thingUID) {
+    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
+            ThingTypeUID thingTypeUID, @Nullable ThingUID thingUID) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -827,7 +826,7 @@ public class ThingResource implements RESTResource {
         return ConfigUtil.normalizeTypes(properties, configDescriptions);
     }
 
-    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(Map<String, @Nullable Object> properties,
+    private @Nullable Map<String, Object> normalizeConfiguration(Map<String, Object> properties,
             ChannelTypeUID channelTypeUID, ChannelUID channelUID) {
         if (properties == null || properties.isEmpty()) {
             return properties;

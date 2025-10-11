@@ -19,6 +19,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.Credentials;
 import org.openhab.core.auth.UserRegistry;
@@ -33,15 +35,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yannick Schaus - initial contribution
  */
+@NonNullByDefault
 public class ManagedUserLoginModule implements LoginModule {
 
     private final Logger logger = LoggerFactory.getLogger(ManagedUserLoginModule.class);
 
-    private UserRegistry userRegistry;
+    private @Nullable UserRegistry userRegistry;
 
-    private Subject subject;
+    private @Nullable Subject subject;
 
     @Override
+    @NonNullByDefault({})
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
             Map<String, ?> options) {
         this.subject = subject;

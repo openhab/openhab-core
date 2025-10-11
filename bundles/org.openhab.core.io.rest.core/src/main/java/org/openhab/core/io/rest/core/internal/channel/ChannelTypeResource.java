@@ -117,7 +117,7 @@ public class ChannelTypeResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getChannelTypes", summary = "Gets all available channel types.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ChannelTypeDTO.class), uniqueItems = true))) })
-    public Response getAll(
+    public @Nullable Response getAll(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("prefixes") @Parameter(description = "filter UIDs by prefix (multiple comma-separated prefixes allowed, for example: 'system,mqtt')") @Nullable String prefixes) {
         Locale locale = localeService.getLocale(language);
@@ -142,7 +142,7 @@ public class ChannelTypeResource implements RESTResource {
     @Operation(operationId = "getChannelTypeByUID", summary = "Gets channel type by UID.", responses = {
             @ApiResponse(responseCode = "200", description = "Channel type with provided channelTypeUID does not exist.", content = @Content(schema = @Schema(implementation = ChannelTypeDTO.class))),
             @ApiResponse(responseCode = "404", description = "No content") })
-    public Response getByUID(
+    public @Nullable Response getByUID(
             @PathParam("channelTypeUID") @Parameter(description = "channelTypeUID") String channelTypeUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
@@ -161,7 +161,7 @@ public class ChannelTypeResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class), uniqueItems = true))),
             @ApiResponse(responseCode = "204", description = "No content: channel type has no linkable items or is no trigger channel."),
             @ApiResponse(responseCode = "404", description = "Given channel type UID not found.") })
-    public Response getLinkableItemTypes(
+    public @Nullable Response getLinkableItemTypes(
             @PathParam("channelTypeUID") @Parameter(description = "channelTypeUID") String channelTypeUID) {
         ChannelTypeUID ctUID = new ChannelTypeUID(channelTypeUID);
         ChannelType channelType = channelTypeRegistry.getChannelType(ctUID);

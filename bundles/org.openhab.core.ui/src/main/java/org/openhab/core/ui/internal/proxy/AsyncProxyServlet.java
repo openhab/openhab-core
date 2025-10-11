@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -29,6 +31,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
  *
  * @author John Cocula - Initial contribution
  */
+@NonNullByDefault
 public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet {
 
     @Serial
@@ -41,7 +44,7 @@ public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet
     }
 
     @Override
-    public String getServletInfo() {
+    public @Nullable String getServletInfo() {
         return "Proxy (async)";
     }
 
@@ -49,13 +52,14 @@ public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet
      * Override <code>newHttpClient</code> so we can proxy to HTTPS URIs.
      */
     @Override
-    protected HttpClient newHttpClient() {
+    protected @Nullable HttpClient newHttpClient() {
         return new HttpClient(new SslContextFactory.Client());
     }
 
     @Override
-    protected void sendProxyRequest(HttpServletRequest clientRequest, HttpServletResponse proxyResponse,
-            Request proxyRequest) {
+    protected void sendProxyRequest(@Nullable HttpServletRequest clientRequest,
+            @Nullable HttpServletResponse proxyResponse, @Nullable Request proxyRequest) {
+        Objects.requireNonNull(clientRequest);
         if (service.proxyingVideoWidget(clientRequest)) {
             // We disable the timeout for video
             proxyRequest.timeout(0, TimeUnit.MILLISECONDS);
@@ -72,19 +76,26 @@ public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet
      * Add Basic Authentication header to request if user and password are specified in URI.
      */
     @Override
-    protected void copyRequestHeaders(HttpServletRequest clientRequest, Request proxyRequest) {
+    protected void copyRequestHeaders(@Nullable HttpServletRequest clientRequest, @Nullable Request proxyRequest) {
+        Objects.requireNonNull(clientRequest);
+        Objects.requireNonNull(proxyRequest);
+
         super.copyRequestHeaders(clientRequest, proxyRequest);
 
         service.maybeAppendAuthHeader(service.uriFromRequest(clientRequest), proxyRequest);
     }
 
     @Override
-    protected String rewriteTarget(HttpServletRequest request) {
+    protected @Nullable String rewriteTarget(@Nullable HttpServletRequest request) {
+        Objects.requireNonNull(request);
         return Objects.toString(service.uriFromRequest(request), null);
     }
 
     @Override
-    protected void onProxyRewriteFailed(HttpServletRequest request, HttpServletResponse response) {
+    protected void onProxyRewriteFailed(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response) {
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(response);
+
         service.sendError(request, response);
     }
 }

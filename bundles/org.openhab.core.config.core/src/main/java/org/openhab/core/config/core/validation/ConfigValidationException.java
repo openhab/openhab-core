@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.i18n.TranslationProvider;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public final class ConfigValidationException extends RuntimeException {
 
     @Serial
@@ -42,7 +45,7 @@ public final class ConfigValidationException extends RuntimeException {
     private final Logger logger = LoggerFactory.getLogger(ConfigValidationException.class);
     private final Bundle bundle;
     private final Collection<ConfigValidationMessage> configValidationMessages;
-    private final TranslationProvider translationProvider;
+    private final @Nullable TranslationProvider translationProvider;
 
     /**
      * Creates a new {@link ConfigValidationException} for the given {@link ConfigValidationMessage}s. It
@@ -53,8 +56,8 @@ public final class ConfigValidationException extends RuntimeException {
      * @param configValidationMessages the configuration description validation messages
      * @throws NullPointerException if given bundle or configuration description validation messages are null
      */
-    public ConfigValidationException(Bundle bundle, TranslationProvider translationProvider,
-            Collection<ConfigValidationMessage> configValidationMessages) {
+    public ConfigValidationException(@Nullable Bundle bundle, @Nullable TranslationProvider translationProvider,
+            @Nullable Collection<ConfigValidationMessage> configValidationMessages) {
         Objects.requireNonNull(bundle, "Bundle must not be null");
         Objects.requireNonNull(configValidationMessages, "Config validation messages must not be null");
         this.bundle = bundle;
@@ -91,7 +94,7 @@ public final class ConfigValidationException extends RuntimeException {
      *         internationalized then the default message (cp. {@link ConfigValidationMessage#defaultMessage}) is
      *         delivered)
      */
-    public Map<String, String> getValidationMessages(Locale locale) {
+    public Map<String, String> getValidationMessages(@Nullable Locale locale) {
         Map<String, String> ret = new HashMap<>();
         for (ConfigValidationMessage configValidationMessage : configValidationMessages) {
             if (translationProvider == null) {

@@ -72,7 +72,7 @@ public class ChannelUID extends UID {
      * @param groupId the channel's group id
      * @param id the channel's id
      */
-    public ChannelUID(ThingUID thingUID, String groupId, String id) {
+    public ChannelUID(ThingUID thingUID, @Nullable String groupId, String id) {
         super(toSegments(thingUID, groupId, id));
     }
 
