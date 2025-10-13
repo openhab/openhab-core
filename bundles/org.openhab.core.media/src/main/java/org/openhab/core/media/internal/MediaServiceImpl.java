@@ -93,6 +93,11 @@ public class MediaServiceImpl implements MediaService, MediaListenner {
         return proxyRegistry.get(key);
     }
 
+    @Override
+    public String getStreamUri(String cmdVal) {
+        return "";
+    }
+
     public void addProxySource(String source, String uri) {
         proxyRegistry.put(source, uri);
     }
