@@ -55,7 +55,6 @@ public class MediaStateType implements ComplexType, State, Command {
 
     public MediaStateType() {
         this(PlayPauseType.PLAY, new StringType(""), new StringType(""));
-
     }
 
     public MediaStateType(PlayPauseType state, @Nullable StringType device, @Nullable StringType binding) {
