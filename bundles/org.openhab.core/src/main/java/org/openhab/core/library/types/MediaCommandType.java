@@ -51,7 +51,6 @@ public class MediaCommandType implements ComplexType, State, Command {
 
     public MediaCommandType() {
         this(MediaCommandEnumType.NONE, "", new StringType(""), new StringType(""));
-
     }
 
     public MediaCommandType(MediaCommandEnumType command, @Nullable String param, @Nullable StringType device,
