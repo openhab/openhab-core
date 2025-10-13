@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
@@ -47,6 +48,8 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true, service = EventFactory.class)
 @NonNullByDefault
 public class ThingEventFactory extends AbstractEventFactory {
+    static final String THING_SOURCE = "org.openhab.core.thing";
+
     static final String THING_STATUS_INFO_EVENT_TOPIC = "openhab/things/{thingUID}/status";
 
     static final String THING_STATUS_INFO_CHANGED_EVENT_TOPIC = "openhab/things/{thingUID}/statuschanged";
@@ -328,7 +331,8 @@ public class ThingEventFactory extends AbstractEventFactory {
         checkNotNull(event, "event");
 
         String topic = buildTopic(CHANNEL_TRIGGERED_EVENT_TOPIC, channelUID);
-        TriggerEventPayloadBean bean = new TriggerEventPayloadBean(event, channelUID.getAsString());
+        TriggerEventPayloadBean bean = new TriggerEventPayloadBean(event,
+                AbstractEvent.buildSource(THING_SOURCE, channelUID.getAsString()));
         String payload = serializePayload(bean);
         return new ChannelTriggeredEvent(topic, payload, null, event, channelUID);
     }

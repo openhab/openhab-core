@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.events.Event;
 import org.openhab.core.internal.types.StateDescriptionFragmentImpl;
 import org.openhab.core.thing.ChannelUID;
@@ -123,9 +124,10 @@ public class ThingEventFactoryTest {
     private static final String CHANNEL_TRIGGERED_EVENT_TOPIC = ThingEventFactory.CHANNEL_TRIGGERED_EVENT_TOPIC
             .replace("{channelUID}", CHANNEL_UID.getAsString());
     private static final String CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD = new Gson()
-            .toJson(new TriggerEventPayloadBean(CommonTriggerEvents.PRESSED, CHANNEL_UID.getAsString()));
-    private static final String CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD = new Gson()
-            .toJson(new TriggerEventPayloadBean("", CHANNEL_UID.getAsString()));
+            .toJson(new TriggerEventPayloadBean(CommonTriggerEvents.PRESSED,
+                    AbstractEvent.buildSource(ThingEventFactory.THING_SOURCE, CHANNEL_UID.getAsString())));
+    private static final String CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD = new Gson().toJson(new TriggerEventPayloadBean(
+            "", AbstractEvent.buildSource(ThingEventFactory.THING_SOURCE, CHANNEL_UID.getAsString())));
 
     @Test
     public void testSupportedEventTypes() {
