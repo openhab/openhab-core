@@ -28,7 +28,7 @@
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.thing</artifactId>
-      <version>${project.version}</version>
+      <version>${project.version}</version> 
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
