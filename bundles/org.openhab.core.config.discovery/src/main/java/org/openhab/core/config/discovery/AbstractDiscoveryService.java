@@ -34,6 +34,7 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.util.SameThreadExecutorService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -59,24 +60,24 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractDiscoveryService.class);
 
-    protected final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(DISCOVERY_THREADPOOL_NAME);
+    protected final ScheduledExecutorService scheduler;
 
-    private final Set<DiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
+    protected final Set<DiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
 
     // All access must be guarded by "this"
     protected @Nullable ScanListener scanListener;
 
     private volatile boolean backgroundDiscoveryEnabled;
 
-    private final @Nullable String scanInputLabel;
-    private final @Nullable String scanInputDescription;
+    protected final @Nullable String scanInputLabel;
+    protected final @Nullable String scanInputDescription;
 
     // All access must be guarded by "cachedResults"
-    private final Map<ThingUID, DiscoveryResult> cachedResults = new HashMap<>();
+    protected final Map<ThingUID, DiscoveryResult> cachedResults = new HashMap<>();
 
     // This set is immutable and can safely be shared between threads
-    private final Set<ThingTypeUID> supportedThingTypes;
-    private final int timeout;
+    protected final Set<ThingTypeUID> supportedThingTypes;
+    protected final int timeout;
 
     // All access must be guarded by "this"
     private Instant timestampOfLastScan = Instant.MIN;
@@ -107,6 +108,39 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
         if (timeout < 0) {
             throw new IllegalArgumentException("The timeout must be >= 0!");
         }
+        this.scheduler = ThreadPoolManager.getScheduledPool(DISCOVERY_THREADPOOL_NAME);
+        this.supportedThingTypes = supportedThingTypes == null ? Set.of() : Set.copyOf(supportedThingTypes);
+        this.timeout = timeout;
+        this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
+        this.scanInputLabel = scanInputLabel;
+        this.scanInputDescription = scanInputDescription;
+    }
+
+    /**
+     * Creates a new instance of this class with the specified parameters.
+     * <p>
+     * <b>For use by tests only</b>, allows setting a different {@link ScheduledExecutorService} like
+     * {@link SameThreadExecutorService} for synchronous behavior during testing.
+     *
+     * @param scheduler the {@link ScheduledExecutorService} to use.
+     * @param supportedThingTypes the list of Thing types which are supported (can be null)
+     * @param timeout the discovery timeout in seconds after which the discovery
+     *            service automatically stops its forced discovery process (>= 0).
+     * @param backgroundDiscoveryEnabledByDefault defines, whether the default for this discovery service is to
+     *            enable background discovery or not.
+     * @param scanInputLabel the label of the optional input parameter to start the discovery or null if no input
+     *            parameter supported
+     * @param scanInputDescription the description of the optional input parameter to start the discovery or null if no
+     *            input parameter supported
+     * @throws IllegalArgumentException if {@code timeout < 0}
+     */
+    protected AbstractDiscoveryService(ScheduledExecutorService scheduler,
+            @Nullable Set<ThingTypeUID> supportedThingTypes, int timeout, boolean backgroundDiscoveryEnabledByDefault,
+            @Nullable String scanInputLabel, @Nullable String scanInputDescription) throws IllegalArgumentException {
+        if (timeout < 0) {
+            throw new IllegalArgumentException("The timeout must be >= 0!");
+        }
+        this.scheduler = scheduler;
         this.supportedThingTypes = supportedThingTypes == null ? Set.of() : Set.copyOf(supportedThingTypes);
         this.timeout = timeout;
         this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
