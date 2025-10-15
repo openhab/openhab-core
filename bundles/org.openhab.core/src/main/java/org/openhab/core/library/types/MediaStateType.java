@@ -61,12 +61,12 @@ public class MediaStateType implements ComplexType, State, Command {
         this.state = state;
         this.device = device != null ? device : new StringType("");
         this.binding = binding != null ? binding : new StringType("");
-        this.currentPlayingArtistName = new StringType("Artist");
-        this.currentPlayingTrackName = new StringType("Track");
-        this.currentPlayingArtUri = new StringType("ArtUri");
-        this.currentPlayingTrackPosition = new DecimalType("1.30");
-        this.currentPlayingTrackDuration = new DecimalType("5.02");
-        this.currentPlayingVolume = new DecimalType("12");
+        this.currentPlayingArtistName = new StringType("");
+        this.currentPlayingTrackName = new StringType("");
+        this.currentPlayingArtUri = new StringType("");
+        this.currentPlayingTrackPosition = new DecimalType("0.0");
+        this.currentPlayingTrackDuration = new DecimalType("0.0");
+        this.currentPlayingVolume = new DecimalType("0.0");
     }
 
     @Override
@@ -115,18 +115,6 @@ public class MediaStateType implements ComplexType, State, Command {
         } catch (Exception ex) {
             throw ex;
         }
-
-        /*
-         * List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).toList();
-         *
-         * PlayPauseType state = PlayPauseType.valueOf(constituents.get(0));
-         * MediaCommandType command = MediaCommandType.valueOf(constituents.get(1));
-         * String param = constituents.get(2);
-         * StringType device = new StringType(constituents.get(3));
-         * StringType binding = new StringType(constituents.get(4));
-         *
-         * return new MediaType(state, command, param, device, binding);
-         */
     }
 
     @Override
@@ -173,8 +161,13 @@ public class MediaStateType implements ComplexType, State, Command {
         }
 
         MediaStateType other = (MediaStateType) obj;
-        return Objects.equals(this.device, other.device) && Objects.equals(this.binding, other.binding)
-                && Objects.equals(this.state, other.state)
-                && Objects.equals(this.currentPlayingTrackPosition, other.currentPlayingTrackPosition);
+        return Objects.equals(this.state, other.state) && Objects.equals(this.device, other.device)
+                && Objects.equals(this.binding, other.binding)
+                && Objects.equals(this.currentPlayingArtistName, other.currentPlayingArtistName)
+                && Objects.equals(this.currentPlayingTrackName, other.currentPlayingTrackName)
+                && Objects.equals(this.currentPlayingArtUri, other.currentPlayingArtUri)
+                && Objects.equals(this.currentPlayingTrackPosition, other.currentPlayingTrackPosition)
+                && Objects.equals(this.currentPlayingTrackDuration, other.currentPlayingTrackDuration)
+                && Objects.equals(this.currentPlayingVolume, other.currentPlayingVolume);
     }
 }
