@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.openhab.core.features.karaf</groupId>
     <artifactId>org.openhab.core.reactor.features.karaf</artifactId>
-    <version>5.0.2-SNAPSHOT</version>
+    <version>5.0.2</version>
   </parent>
 
   <artifactId>org.openhab.core.features.karaf.openhab-core</artifactId>
