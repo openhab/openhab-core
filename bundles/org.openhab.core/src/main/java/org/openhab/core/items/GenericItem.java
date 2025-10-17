@@ -222,7 +222,7 @@ public abstract class GenericItem implements ActiveItem {
      * Set a new state.
      *
      * Subclasses may override this method in order to do necessary conversions upfront. Afterwards,
-     * {@link #applyState(State)} should be called by classes overriding this method.
+     * {@link #applyState(State, String)} should be called by classes overriding this method.
      *
      * @param state new state of this item
      * @param source the source of the state update. See
@@ -236,7 +236,7 @@ public abstract class GenericItem implements ActiveItem {
      * Set a new state.
      *
      * Subclasses may override this method in order to do necessary conversions upfront. Afterwards,
-     * {@link #applyState(State)} should be called by classes overriding this method.
+     * {@link #applyState(State, String)} should be called by classes overriding this method.
      *
      * @param state new state of this item
      */
