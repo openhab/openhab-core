@@ -55,9 +55,9 @@ public class CallItem extends GenericItem {
     }
 
     @Override
-    public void setState(State state) {
+    public void setState(State state, @Nullable String source) {
         if (isAcceptedState(ACCEPTED_DATA_TYPES, state)) {
-            applyState(state);
+            applyState(state, source);
         } else {
             logSetTypeError(state);
         }

@@ -397,12 +397,12 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     }
 
     @Override
-    public void setState(State state) {
+    public void setState(State state, @Nullable String source) {
         ZonedDateTime now = ZonedDateTime.now();
         State oldState = this.state;
         Item baseItem = this.baseItem;
         if (baseItem instanceof GenericItem item) {
-            item.setState(state);
+            item.setState(state, source);
             this.state = baseItem.getState();
         } else {
             this.state = state;

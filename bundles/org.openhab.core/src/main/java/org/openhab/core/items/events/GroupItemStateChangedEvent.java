@@ -39,7 +39,7 @@ public class GroupItemStateChangedEvent extends ItemStateChangedEvent {
     protected GroupItemStateChangedEvent(String topic, String payload, String itemName, String memberName,
             State newItemState, State oldItemState, @Nullable ZonedDateTime lastStateUpdate,
             @Nullable ZonedDateTime lastStateChange) {
-        super(topic, payload, itemName, newItemState, oldItemState, lastStateUpdate, lastStateChange);
+        super(topic, payload, itemName, newItemState, oldItemState, lastStateUpdate, lastStateChange, null);
         this.memberName = memberName;
     }
 
