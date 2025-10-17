@@ -251,16 +251,16 @@ public abstract class GenericItem implements ActiveItem {
      * @param lastStateChange last state change of this item
      */
     public void setState(State state, @Nullable State lastState, @Nullable ZonedDateTime lastStateUpdate,
-            @Nullable ZonedDateTime lastStateChange) {
+            @Nullable ZonedDateTime lastStateChange, @Nullable String source) {
         State oldState = this.state;
         this.state = state;
         this.lastState = lastState != null ? lastState : this.lastState;
         this.lastStateUpdate = lastStateUpdate != null ? lastStateUpdate : this.lastStateUpdate;
         this.lastStateChange = lastStateChange != null ? lastStateChange : this.lastStateChange;
         notifyListeners(oldState, state);
-        sendStateUpdatedEvent(state, lastStateUpdate, null);
+        sendStateUpdatedEvent(state, lastStateUpdate, source);
         if (!oldState.equals(state)) {
-            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange, null);
+            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange, source);
         }
     }
 
