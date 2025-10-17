@@ -235,9 +235,6 @@ public abstract class GenericItem implements ActiveItem {
     /**
      * Set a new state.
      *
-     * Subclasses may override this method in order to do necessary conversions upfront. Afterwards,
-     * {@link #applyState(State, String)} should be called by classes overriding this method.
-     *
      * @param state new state of this item
      */
     public final void setState(State state) {
