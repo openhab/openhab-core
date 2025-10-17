@@ -57,6 +57,11 @@ public class GroupItemStateChangedEvent extends ItemStateChangedEvent {
 
     @Override
     public String toString() {
-        return String.format("%s through %s", super.toString(), memberName);
+        String result = String.format("%s through %s", super.toString(), memberName);
+        String source = getSource();
+        if (source != null) {
+            result = String.format("%s (source: %s)", result, source);
+        }
+        return result;
     }
 }
