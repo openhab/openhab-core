@@ -16,14 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.AbstractUID;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * The {@link YamlThingDTO} is a data transfer object used to serialize a thing in a YAML configuration file.
@@ -32,10 +32,6 @@ import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
  */
 @YamlElementName("things")
 public class YamlThingDTO implements YamlElement, Cloneable {
-
-    private static final Pattern THING_UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
-    private static final Pattern CHANNEL_ID_PATTERN = Pattern
-            .compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*(#[a-zA-Z0-9_][a-zA-Z0-9_-]*)?");
 
     public String uid;
     public Boolean isBridge;
@@ -79,43 +75,36 @@ public class YamlThingDTO implements YamlElement, Cloneable {
             return false;
         }
         boolean ok = true;
-        // Check that uid has at least 3 segments and each segment respects the expected syntax
-        String[] segments = uid.split(AbstractUID.SEPARATOR);
-        if (segments.length < 3) {
-            addToList(errors, "invalid thing \"%s\": not enough segments in uid; minimum 3 is expected".formatted(uid));
+        ThingUID thingUID;
+        try {
+            thingUID = new ThingUID(uid);
+        } catch (IllegalArgumentException e) {
+            thingUID = new ThingUID("dummy:dummy:dummy");
+            addToList(errors, "invalid thing \"%s\": %s".formatted(uid, e.getMessage()));
             ok = false;
         }
-        for (String segment : segments) {
-            if (!THING_UID_SEGMENT_PATTERN.matcher(segment).matches()) {
-                addToList(errors, "invalid thing \"%s\": segment \"%s\" in uid not matching the expected syntax %s"
-                        .formatted(uid, segment, THING_UID_SEGMENT_PATTERN.pattern()));
-                ok = false;
-            }
-        }
         if (bridge != null && !bridge.isBlank()) {
-            // Check that bridge has at least 3 segments and each segment respects the expected syntax
-            segments = bridge.split(AbstractUID.SEPARATOR);
-            if (segments.length < 3) {
-                addToList(errors,
-                        "invalid thing \"%s\": not enough segments in value \"%s\" for \"bridge\" field; minimum 3 is expected"
-                                .formatted(uid, bridge));
+            try {
+                new ThingUID(bridge);
+            } catch (IllegalArgumentException e) {
+                addToList(errors, "invalid thing \"%s\": invalid value \"%s\" for \"bridge\" field: %s".formatted(uid,
+                        bridge, e.getMessage()));
                 ok = false;
-            }
-            for (String segment : segments) {
-                if (!THING_UID_SEGMENT_PATTERN.matcher(segment).matches()) {
-                    addToList(errors,
-                            "invalid thing \"%s\": segment \"%s\" in \"bridge\" field not matching the expected syntax %s"
-                                    .formatted(uid, segment, THING_UID_SEGMENT_PATTERN.pattern()));
-                    ok = false;
-                }
             }
         }
         if (channels != null) {
             for (Map.Entry<@NonNull String, @NonNull YamlChannelDTO> entry : channels.entrySet()) {
                 String channelId = entry.getKey();
-                if (!CHANNEL_ID_PATTERN.matcher(channelId).matches()) {
-                    addToList(errors, "invalid thing \"%s\": channel id \"%s\" not matching the expected syntax %s"
-                            .formatted(uid, channelId, CHANNEL_ID_PATTERN.pattern()));
+                String[] splittedChannelId = channelId.split(ChannelUID.CHANNEL_GROUP_SEPARATOR, 2);
+                try {
+                    if (splittedChannelId.length == 1) {
+                        new ChannelUID(thingUID, channelId);
+                    } else {
+                        new ChannelUID(thingUID, splittedChannelId[0], splittedChannelId[1]);
+                    }
+                } catch (IllegalArgumentException e) {
+                    addToList(errors, "invalid thing \"%s\": invalid channel id \"%s\": %s".formatted(uid, channelId,
+                            e.getMessage()));
                     ok = false;
                 }
                 List<String> channelErrors = new ArrayList<>();
