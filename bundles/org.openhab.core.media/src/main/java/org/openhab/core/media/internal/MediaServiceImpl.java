@@ -21,6 +21,7 @@ import org.openhab.core.media.MediaDevice;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
 import org.openhab.core.media.model.MediaEntry;
+import org.openhab.core.media.model.MediaQueue;
 import org.openhab.core.media.model.MediaRegistry;
 import org.openhab.core.media.model.MediaSearchResult;
 import org.osgi.service.component.annotations.Activate;
@@ -76,12 +77,16 @@ public class MediaServiceImpl implements MediaService, MediaListenner {
 
     @Override
     public void refreshEntry(MediaEntry mediaEntry, long start, long size) {
-        mediaEntry.registerEntry("Search", () -> {
-            MediaSearchResult searchResult = new MediaSearchResult("Search", "Search");
-            return searchResult;
-        });
-
-        logger.debug("");
+        if (mediaEntry instanceof MediaRegistry) {
+            mediaEntry.registerEntry("Search", () -> {
+                MediaSearchResult searchResult = new MediaSearchResult("Search", "Search");
+                return searchResult;
+            });
+            mediaEntry.registerEntry("CurrentQueue", () -> {
+                MediaQueue currentMediaQueue = new MediaQueue("CurrentQueue", "CurrentQueue");
+                return currentMediaQueue;
+            });
+        }
     }
 
     @Override

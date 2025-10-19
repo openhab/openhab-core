@@ -19,32 +19,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaTrack extends MediaEntry {
-    private String artUri = "/static/Artists.png";
-    private String artist = "";
+public class MediaQueue extends MediaCollection {
 
-    public MediaTrack() {
+    public MediaQueue() {
 
     }
 
-    public MediaTrack(String key, String trackName) {
-        super(key, trackName);
-    }
+    public MediaQueue(String key, String albumName) {
+        super(key, albumName);
 
-    public void setArtUri(String artUri) {
-        this.artUri = artUri;
     }
-
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
-
-    public String getArtUri() {
-        return this.artUri;
-    }
-
-    public String getArtist() {
-        return this.artist;
-    }
-
 }
