@@ -27,6 +27,7 @@ public class MediaDTO {
     public String type;
     public @Nullable String artUri;
     public @Nullable String label;
+    public @Nullable String complement;
 
     public MediaDTO(String id, String path, String type, String label) {
         this.id = id;
@@ -37,5 +38,9 @@ public class MediaDTO {
 
     public void setArtUri(String artUri) {
         this.artUri = artUri;
+    }
+
+    public void setComplement(String complement) {
+        this.complement = complement;
     }
 }
