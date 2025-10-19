@@ -16,7 +16,6 @@ import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.xtext.naming.QualifiedName;
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.openhab.core.model.rule.RulesStandaloneSetup;
 import org.openhab.core.model.rule.rules.RuleModel;
@@ -61,7 +60,7 @@ public class RuleContextHelper {
         for (VariableDeclaration var : ruleModel.getVariables()) {
             try {
                 Object initialValue = var.getRight() == null ? null
-                        : scriptEngine.newScriptFromXExpression(var.getRight()).execute();
+                        : scriptEngine.newScriptFromXExpression(var.getRight()).execute(evaluationContext);
                 evaluationContext.newValue(QualifiedName.create(var.getName()), initialValue);
             } catch (ScriptExecutionException e) {
                 logger.warn("Variable '{}' on rule file '{}' cannot be initialized with value '{}': {}", var.getName(),
@@ -70,14 +69,6 @@ public class RuleContextHelper {
         }
         ruleModel.eAdapters().add(new RuleContextAdapter(evaluationContext));
         return evaluationContext;
-    }
-
-    public static synchronized String getVariableDeclaration(RuleModel ruleModel) {
-        StringBuilder vars = new StringBuilder();
-        for (VariableDeclaration var : ruleModel.getVariables()) {
-            vars.append(NodeModelUtils.findActualNodeFor(var).getText());
-        }
-        return vars.toString();
     }
 
     /**
