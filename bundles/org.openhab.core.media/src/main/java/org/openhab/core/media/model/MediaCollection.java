@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.media.BaseDto;
 import org.openhab.core.media.MediaService;
 
 /**
@@ -99,6 +100,12 @@ public class MediaCollection extends MediaEntry {
 
     public void setArtUri(String artUri) {
         this.artUri = artUri;
+    }
+
+    @Override
+    public void initFrom(BaseDto dto) {
+        this.artUri = dto.getArtwork();
+
     }
 
 }

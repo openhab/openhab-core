@@ -13,10 +13,12 @@
 package org.openhab.core.media.internal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.media.BaseDto;
 import org.openhab.core.media.MediaDevice;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
@@ -144,6 +146,31 @@ public class MediaServiceImpl implements MediaService, MediaListenner {
 
     public Map<String, MediaListenner> getMediaListenners() {
         return mediaListenner;
+    }
+
+    @Override
+    public <T extends BaseDto, R extends MediaEntry> void RegisterCollections(MediaEntry parentEntry,
+            List<T> collection, Class<R> allocator) {
+        for (T dto : collection) {
+            String key = dto.getKey();
+            String name = dto.getName();
+
+            parentEntry.registerEntry(key, () -> {
+                try {
+                    MediaEntry mediaEntry = allocator.getDeclaredConstructor().newInstance();
+                    mediaEntry.setName(name);
+                    mediaEntry.setKey(key);
+
+                    // Let mediaEntry and dto subclass handle specific fields initialization
+                    mediaEntry.initFrom(dto);
+                    dto.initFields(mediaEntry);
+
+                    return mediaEntry;
+                } catch (Exception ex) {
+                    return null;
+                }
+            });
+        }
     }
 
 }

@@ -14,6 +14,7 @@ package org.openhab.core.media.model;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.media.BaseDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +150,10 @@ public class MediaEntry {
     public void print() {
         int level = getLevel();
         logger.debug(String.format("%s %d - MediaEntry %s - %s", empty.substring(0, level * 4), level, key, name));
+    }
+
+    public void initFrom(BaseDto dto) {
+
     }
 
 }
