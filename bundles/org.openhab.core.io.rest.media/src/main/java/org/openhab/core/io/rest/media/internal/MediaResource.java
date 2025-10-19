@@ -48,6 +48,7 @@ import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
 import org.openhab.core.media.model.MediaSearchResult;
 import org.openhab.core.media.model.MediaSource;
+import org.openhab.core.media.model.MediaTrack;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
@@ -148,7 +149,7 @@ public class MediaResource implements RESTResource {
         }
         MediaEntry entry = registry.getEntry(path);
 
-        if (path.startsWith("/Root/Search")) {
+        if (path.startsWith("/Root/Search") || path.startsWith("/Root/CurrentQueue")) {
             Map<String, MediaListenner> allMediaListenner = mediaService.getAllMediaListenner();
             for (String key : allMediaListenner.keySet()) {
                 if (key.equals("/Root")) {
@@ -211,6 +212,12 @@ public class MediaResource implements RESTResource {
             } else {
                 dto = new MediaDTO(subEntry.getKey(), subEntry.getPath(), subEntry.getClass().getTypeName(),
                         subEntry.getName());
+
+                if (subEntry instanceof MediaTrack mediaTrack) {
+                    dto.setArtUri(mediaTrack.getArtUri());
+                    dto.setComplement(mediaTrack.getArtist());
+
+                }
             }
 
             dtoCollection.addMediaDTO(dto);
