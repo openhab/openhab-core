@@ -12,10 +12,12 @@
  */
 package org.openhab.core.media;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
 
 /**
@@ -42,4 +44,8 @@ public interface MediaService {
     public String handleImageProxy(String uri);
 
     public void setBaseUri(String baseUri);
+
+    public <T extends BaseDto, R extends MediaEntry> void RegisterCollections(MediaEntry parentEntry,
+            List<T> collection, Class<R> allocator);
+
 }
