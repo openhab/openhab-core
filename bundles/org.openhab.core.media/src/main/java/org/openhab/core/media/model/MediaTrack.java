@@ -13,6 +13,7 @@
 package org.openhab.core.media.model;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.media.BaseDto;
 
 /**
  *
@@ -45,6 +46,11 @@ public class MediaTrack extends MediaEntry {
 
     public String getArtist() {
         return this.artist;
+    }
+
+    @Override
+    public void initFrom(BaseDto dto) {
+        this.artUri = dto.getArtwork();
     }
 
 }
