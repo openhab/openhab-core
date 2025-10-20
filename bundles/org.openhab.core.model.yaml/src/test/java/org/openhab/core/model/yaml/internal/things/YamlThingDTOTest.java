@@ -58,7 +58,7 @@ public class YamlThingDTOTest {
         th.bridge = "binding:idBridge";
         assertFalse(th.isValid(null, null));
 
-        th.bridge = "binding:type:-idBridge";
+        th.bridge = "binding:type:id#Bridge";
         assertFalse(th.isValid(null, null));
 
         th.bridge = "binding:type:idBridge";
