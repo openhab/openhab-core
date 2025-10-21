@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -268,6 +269,67 @@ public class NetUtil implements NetworkAddressService {
             LOGGER.error("Could not find broadcast address: {}", ex.getMessage(), ex);
         }
         return broadcastAddresses;
+    }
+
+    /**
+     * Finds the local interface address that is on the same subnet as the specific IP address, if one exists.
+     *
+     * @param address the IP address for which to find an interface address on the same subnet.
+     * @return The matching {@link InterfaceAddress} or {@code null} if no such local interface address exists.
+     */
+    public static @Nullable InterfaceAddress getSameSubnetInterfaceAddress(InetAddress address) {
+        byte[] addrBytes = address.getAddress();
+        Iterator<InterfaceAddress> ias;
+        try {
+            ias = NetworkInterface.networkInterfaces().filter(ni -> {
+                try {
+                    return !ni.isLoopback() && !ni.isPointToPoint() && ni.isUp();
+                } catch (SocketException e) {
+                    return false;
+                }
+            }).flatMap(ni -> ni.getInterfaceAddresses().stream()).filter(ia -> {
+                InetAddress addr = ia.getAddress();
+                return addr != null && !addr.isAnyLocalAddress() && !addr.isLinkLocalAddress()
+                        && !addr.isLoopbackAddress();
+            }).iterator();
+        } catch (SocketException e) {
+            return null;
+        }
+        InterfaceAddress ia;
+        short prefix;
+        byte[] iaBytes;
+        byte mask;
+        InetAddress addr;
+        while (ias.hasNext()) {
+            ia = ias.next();
+            addr = ia.getAddress();
+            if (addr == null) {
+                continue;
+            }
+            iaBytes = addr.getAddress();
+            if (iaBytes.length != addrBytes.length) {
+                continue;
+            }
+            prefix = ia.getNetworkPrefixLength();
+            int i = 0;
+            while (prefix > (short) 0) {
+                if (prefix > (short) 8) {
+                    if (addrBytes[i] != iaBytes[i]) {
+                        break;
+                    }
+                } else {
+                    mask = (byte) ((byte) 0xff << (8 - prefix));
+                    if ((addrBytes[i] & mask) == (iaBytes[i] & mask)) {
+                        return ia;
+                    }
+                    break;
+                }
+                prefix -= (short) 8;
+                i++;
+            }
+
+        }
+        return null;
     }
 
     @Override
