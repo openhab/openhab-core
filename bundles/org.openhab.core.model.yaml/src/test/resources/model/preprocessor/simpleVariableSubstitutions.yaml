@@ -1,0 +1,17 @@
+variables:
+  var1: value1
+  var2: value2
+  var3: value3
+  var4: value4
+  key: dynamickey
+
+plainkey: ${var1}
+${key}: dynamicvalue
+
+level1:
+  level2a: ${var2}
+  level2b:
+    level3: ${var3}
+
+list:
+  - ${var4}

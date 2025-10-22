@@ -1,0 +1,8 @@
+variables:
+  topvar: set_at_toplevel
+
+toplevel: !include
+  file: "${__FILE_NAME__}.inc.yaml"
+  vars:
+    topvar: set_at_include_level
+
