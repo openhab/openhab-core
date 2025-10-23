@@ -222,12 +222,23 @@ public abstract class GenericItem implements ActiveItem {
      * Set a new state.
      *
      * Subclasses may override this method in order to do necessary conversions upfront. Afterwards,
-     * {@link #applyState(State)} should be called by classes overriding this method.
+     * {@link #applyState(State, String)} should be called by classes overriding this method.
+     *
+     * @param state new state of this item
+     * @param source the source of the state update. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void setState(State state, @Nullable String source) {
+        applyState(state, source);
+    }
+
+    /**
+     * Set a new state.
      *
      * @param state new state of this item
      */
-    public void setState(State state) {
-        applyState(state);
+    public final void setState(State state) {
+        setState(state, null);
     }
 
     /**
@@ -247,9 +258,9 @@ public abstract class GenericItem implements ActiveItem {
         this.lastStateUpdate = lastStateUpdate != null ? lastStateUpdate : this.lastStateUpdate;
         this.lastStateChange = lastStateChange != null ? lastStateChange : this.lastStateChange;
         notifyListeners(oldState, state);
-        sendStateUpdatedEvent(state, lastStateUpdate);
+        sendStateUpdatedEvent(state, lastStateUpdate, null);
         if (!oldState.equals(state)) {
-            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange);
+            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange, null);
         }
     }
 
@@ -261,7 +272,7 @@ public abstract class GenericItem implements ActiveItem {
      *
      * @param state new state of this item
      */
-    protected final void applyState(State state) {
+    protected final void applyState(State state, @Nullable String source) {
         ZonedDateTime now = ZonedDateTime.now();
         State oldState = this.state;
         boolean stateChanged = !oldState.equals(state);
@@ -270,9 +281,9 @@ public abstract class GenericItem implements ActiveItem {
             lastState = oldState; // update before we notify listeners
         }
         notifyListeners(oldState, state);
-        sendStateUpdatedEvent(state, lastStateUpdate);
+        sendStateUpdatedEvent(state, lastStateUpdate, source);
         if (stateChanged) {
-            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange);
+            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange, source);
             lastStateChange = now; // update after we've notified listeners
         }
         lastStateUpdate = now;
@@ -322,19 +333,21 @@ public abstract class GenericItem implements ActiveItem {
         }
     }
 
-    private void sendStateUpdatedEvent(State newState, @Nullable ZonedDateTime lastStateUpdate) {
+    private void sendStateUpdatedEvent(State newState, @Nullable ZonedDateTime lastStateUpdate,
+            @Nullable String source) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
-            eventPublisher1.post(ItemEventFactory.createStateUpdatedEvent(this.name, newState, lastStateUpdate, null));
+            eventPublisher1
+                    .post(ItemEventFactory.createStateUpdatedEvent(this.name, newState, lastStateUpdate, source));
         }
     }
 
     private void sendStateChangedEvent(State newState, State oldState, @Nullable ZonedDateTime lastStateUpdate,
-            @Nullable ZonedDateTime lastStateChange) {
+            @Nullable ZonedDateTime lastStateChange, @Nullable String source) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
             eventPublisher1.post(ItemEventFactory.createStateChangedEvent(this.name, newState, oldState,
-                    lastStateUpdate, lastStateChange));
+                    lastStateUpdate, lastStateChange, source));
         }
     }
 

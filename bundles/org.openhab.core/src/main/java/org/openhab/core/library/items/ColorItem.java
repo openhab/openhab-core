@@ -77,7 +77,7 @@ public class ColorItem extends DimmerItem {
     }
 
     @Override
-    public void setState(State state) {
+    public void setState(State state, @Nullable String source) {
         if (isAcceptedState(ACCEPTED_DATA_TYPES, state)) {
             State currentState = this.state;
 
@@ -86,24 +86,26 @@ public class ColorItem extends DimmerItem {
                 PercentType saturation = hsbType.getSaturation();
                 // we map ON/OFF values to dark/bright, so that the hue and saturation values are not changed
                 if (state == OnOffType.OFF) {
-                    applyState(new HSBType(hue, saturation, PercentType.ZERO));
+                    applyState(new HSBType(hue, saturation, PercentType.ZERO), source);
                 } else if (state == OnOffType.ON) {
-                    applyState(new HSBType(hue, saturation, PercentType.HUNDRED));
+                    applyState(new HSBType(hue, saturation, PercentType.HUNDRED), source);
                 } else if (state instanceof PercentType percentType && !(state instanceof HSBType)) {
-                    applyState(new HSBType(hue, saturation, percentType));
+                    applyState(new HSBType(hue, saturation, percentType), source);
                 } else if (state instanceof DecimalType decimalType && !(state instanceof HSBType)) {
-                    applyState(new HSBType(hue, saturation,
-                            new PercentType(decimalType.toBigDecimal().multiply(BigDecimal.valueOf(100)))));
+                    applyState(
+                            new HSBType(hue, saturation,
+                                    new PercentType(decimalType.toBigDecimal().multiply(BigDecimal.valueOf(100)))),
+                            source);
                 } else {
-                    applyState(state);
+                    applyState(state, source);
                 }
             } else {
                 // try conversion
                 State convertedState = state.as(HSBType.class);
                 if (convertedState != null) {
-                    applyState(convertedState);
+                    applyState(convertedState, source);
                 } else {
-                    applyState(state);
+                    applyState(state, source);
                 }
             }
         } else {
