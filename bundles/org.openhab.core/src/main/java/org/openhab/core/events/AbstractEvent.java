@@ -22,6 +22,8 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public abstract class AbstractEvent implements Event {
+    public static final String ACTOR_SEPARATOR = "$";
+    public static final String DELEGATION_SEPARATOR = "=>";
 
     private final String topic;
 
@@ -94,5 +96,46 @@ public abstract class AbstractEvent implements Event {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Utility method to build a source string from a package and an optional actor.
+     *
+     * @param packageName the package (such as org.openhab.core.thing or org.openhab.binding.matter)
+     * @param actor the actor
+     * @return the final source string
+     */
+    public static String buildSource(String packageName, @Nullable String actor) {
+        if (actor == null || actor.isEmpty()) {
+            return packageName;
+        }
+        return packageName + ACTOR_SEPARATOR + actor;
+    }
+
+    /**
+     * Utility method to build a delegated source string from an original source and a package
+     *
+     * @param originalSource the original source (may be null)
+     * @param packageName the package (such as org.openhab.core.thing or org.openhab.binding.matter)
+     * @return the final source string
+     */
+    public static String buildDelegatedSource(@Nullable String originalSource, String packageName) {
+        if (originalSource == null || originalSource.isEmpty()) {
+            return packageName;
+        }
+        return originalSource + DELEGATION_SEPARATOR + packageName;
+    }
+
+    /**
+     * Utility method to build a delegated source string from an original source, a package and an optional actor.
+     *
+     * @param originalSource the original source (may be null)
+     * @param packageName the package (such as org.openhab.core.thing or org.openhab.binding.matter)
+     * @param actor the actor
+     * @return the final source string
+     */
+    public static String buildDelegatedSource(@Nullable String originalSource, String packageName,
+            @Nullable String actor) {
+        return buildDelegatedSource(originalSource, buildSource(packageName, actor));
     }
 }
