@@ -331,10 +331,10 @@ public class ThingEventFactory extends AbstractEventFactory {
         checkNotNull(event, "event");
 
         String topic = buildTopic(CHANNEL_TRIGGERED_EVENT_TOPIC, channelUID);
-        TriggerEventPayloadBean bean = new TriggerEventPayloadBean(event,
-                AbstractEvent.buildSource(THING_SOURCE, channelUID.getAsString()));
+        TriggerEventPayloadBean bean = new TriggerEventPayloadBean(event, channelUID.getAsString());
         String payload = serializePayload(bean);
-        return new ChannelTriggeredEvent(topic, payload, null, event, channelUID);
+        return new ChannelTriggeredEvent(topic, payload,
+                AbstractEvent.buildSource(THING_SOURCE, channelUID.getAsString()), event, channelUID);
     }
 
     private Event createTriggerEvent(String topic, String payload, @Nullable String source) {
