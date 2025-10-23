@@ -104,6 +104,11 @@ public class ItemStateChangedEvent extends ItemEvent {
 
     @Override
     public String toString() {
-        return String.format("Item '%s' changed from %s to %s", itemName, oldItemState, itemState);
+        String result = String.format("Item '%s' changed from %s to %s", itemName, oldItemState, itemState);
+        String source = getSource();
+        if (source != null) {
+            result = String.format("%s (source: %s)", result, source);
+        }
+        return result;
     }
 }
