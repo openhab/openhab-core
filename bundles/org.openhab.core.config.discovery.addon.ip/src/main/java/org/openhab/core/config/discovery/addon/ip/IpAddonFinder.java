@@ -406,20 +406,20 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
             return;
         }
         String broadcastAddress = networkAddressService.getConfiguredBroadcastAddress();
+        if (broadcastAddress == null || broadcastAddress.isBlank()) {
+            logger.debug("Unable to resolve broadcast address");
+            return;
+        }
         InetAddress bAddr;
         try {
             bAddr = InetAddress.getByName(broadcastAddress);
         } catch (UnknownHostException e) {
-            logger.warn("Unable to resolve broadcast address: {}", e.getMessage());
-            return;
-        }
-        if (broadcastAddress == null || broadcastAddress.isBlank()) {
-            logger.warn("Unable to resolve broadcast address");
+            logger.debug("Unable to resolve broadcast address: {}", e.getMessage());
             return;
         }
         InterfaceAddress sourceAddress = NetUtil.getSameSubnetInterfaceAddress(bAddr);
         if (sourceAddress == null) {
-            logger.warn("Unable to find a suitable interface address for broadcast address \"{}\"", broadcastAddress);
+            logger.debug("Unable to find a suitable interface address for broadcast address \"{}\"", broadcastAddress);
             return;
         }
         logger.debug("Starting broadcast scan with address {}", broadcastAddress);

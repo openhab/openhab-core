@@ -272,7 +272,7 @@ public class NetUtil implements NetworkAddressService {
     }
 
     /**
-     * Finds the local interface address that is on the same subnet as the specific IP address, if one exists.
+     * Finds the local interface address that is on the same subnet as the specified IP address, if one exists.
      *
      * @param address the IP address for which to find an interface address on the same subnet.
      * @return The matching {@link InterfaceAddress} or {@code null} if no such local interface address exists.
