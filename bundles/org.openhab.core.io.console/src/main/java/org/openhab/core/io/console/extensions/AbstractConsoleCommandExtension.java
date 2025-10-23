@@ -22,7 +22,6 @@ import org.openhab.core.io.console.Console;
  */
 @NonNullByDefault
 public abstract class AbstractConsoleCommandExtension implements ConsoleCommandExtension {
-
     private final String cmd;
     private final String desc;
 
