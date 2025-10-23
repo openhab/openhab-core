@@ -19,6 +19,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import javax.script.ScriptException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.transform.TransformationException;
@@ -167,7 +169,10 @@ public class ChannelTransformation {
                 try {
                     return Optional.ofNullable(service.transform(function, value));
                 } catch (TransformationException e) {
-                    logger.debug("Applying {} failed: {}", this, e.getMessage());
+                    if (e.getCause() instanceof ScriptException ex) {
+                        logger.error("Applying {} failed: {}", this, ex.getMessage());
+                    } else
+                        logger.debug("Applying {} failed: {}", this, e.getMessage());
                 }
             } else {
                 logger.warn("Failed to use {}, service not found", this);
