@@ -20,7 +20,7 @@
   <properties>
     <maven.plugin.api.version>3.9.6</maven.plugin.api.version>
     <maven.plugin.annotations.version>3.15.1</maven.plugin.annotations.version>
-    <maven.plugin.plugin.version>3.15.1</maven.plugin.plugin.version>
+    <maven.plugin.plugin.version>3.15.2</maven.plugin.plugin.version>
     <maven.plugin.compiler.version>3.8.1</maven.plugin.compiler.version>
   </properties>
 
