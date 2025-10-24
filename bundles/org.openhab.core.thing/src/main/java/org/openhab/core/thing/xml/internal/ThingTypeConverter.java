@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.xml.internal;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
+import org.openhab.core.config.core.xml.util.NodeAttributes;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 import org.openhab.core.config.core.xml.util.NodeList;
 import org.openhab.core.config.core.xml.util.NodeValue;
@@ -68,11 +70,30 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
         Object nextNode = nodeIterator.next("supported-bridge-type-refs", false);
 
         if (nextNode != null) {
-            String bindingID = (String) context.get("thing-descriptions.bindingId");
+            String thisBindingId = (String) context.get("thing-descriptions.bindingId");
 
-            String uidFormat = String.format("%s:%s", bindingID, "%s");
+            NodeList nodeList = (NodeList) nextNode;
+            List<NodeAttributes> nodes = (List<NodeAttributes>) nodeList.getList();
+            List<String> uids = new ArrayList<>(nodes.size());
 
-            return ((NodeList) nextNode).getAttributes("bridge-type-ref", "id", uidFormat);
+            for (NodeAttributes node : nodes) {
+                if ("bridge-type-ref".equals(node.getNodeName())) {
+                    String id = node.getAttribute("id");
+                    String bindingId = node.getAttribute("bindingId");
+
+                    if (id == null) {
+                        throw new ConversionException("Missing attribute 'id' in 'bridge-type-ref'!");
+                    }
+                    if (bindingId == null) {
+                        bindingId = thisBindingId;
+                    }
+                    uids.add(String.format("%s:%s", bindingId, id));
+                } else {
+                    throw new ConversionException("Invalid element in 'supported-bridge-type-refs'!");
+                }
+            }
+
+            return uids;
         }
 
         return null;
