@@ -76,6 +76,12 @@ public class OSGiConsole implements Console {
         }
     }
 
+    @Override
+    public @Nullable String getUser() {
+        Object result = session.get("USER");
+        return result != null ? result.toString() : null;
+    }
+
     public Session getSession() {
         return session;
     }

@@ -100,14 +100,14 @@ public class DimmerItem extends SwitchItem {
     }
 
     @Override
-    public void setState(State state) {
+    public void setState(State state, @Nullable String source) {
         if (isAcceptedState(ACCEPTED_DATA_TYPES, state)) {
             // try conversion
             State convertedState = state.as(PercentType.class);
             if (convertedState != null) {
-                applyState(convertedState);
+                applyState(convertedState, source);
             } else {
-                applyState(state);
+                applyState(state, source);
             }
         } else {
             logSetTypeError(state);

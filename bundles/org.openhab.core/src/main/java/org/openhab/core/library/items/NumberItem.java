@@ -200,14 +200,14 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     }
 
     @Override
-    public void setState(State state) {
+    public void setState(State state, @Nullable String source) {
         if (state instanceof DecimalType || state instanceof QuantityType<?>) {
             State internalState = getInternalState(state);
             if (internalState != null) {
-                applyState(internalState);
+                applyState(internalState, source);
             }
         } else if (state instanceof UnDefType) {
-            applyState(state);
+            applyState(state, source);
         } else {
             logSetTypeError(state);
         }

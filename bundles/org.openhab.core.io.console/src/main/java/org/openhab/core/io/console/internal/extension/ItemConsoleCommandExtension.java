@@ -44,7 +44,6 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = ConsoleCommandExtension.class)
 @NonNullByDefault
 public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension {
-
     private static final String SUBCMD_LIST = "list";
     private static final String SUBCMD_CLEAR = "clear";
     private static final String SUBCMD_REMOVE = "remove";
