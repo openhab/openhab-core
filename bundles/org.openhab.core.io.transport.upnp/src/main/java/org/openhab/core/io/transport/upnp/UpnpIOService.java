@@ -25,7 +25,7 @@ import java.util.Map;
 public interface UpnpIOService {
 
     /**
-     * Invoke an UPNP Action
+     * Invoke an UPNP Action using the device default namespace and serviceID
      * 
      * @param participant the participant to invoke the action for
      * @param serviceID the UPNP service to invoke the action upon
@@ -33,6 +33,18 @@ public interface UpnpIOService {
      * @param inputs a map of {variable,values} to parameterize the Action that will be invoked
      */
     Map<String, String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
+            Map<String, String> inputs);
+
+    /**
+     * Invoke an UPNP Action using the specified namespace and serviceID
+     * 
+     * @param participant the participant to invoke the action for
+     * @param namespace the namespace of the service to invoke the action upon
+     * @param serviceID the UPNP service to invoke the action upon
+     * @param actionID the Action to invoke
+     * @param inputs a map of {variable,values} to parameterize the Action that will be invoked
+     */
+    Map<String, String> invokeAction(UpnpIOParticipant participant, String namespace, String serviceID, String actionID,
             Map<String, String> inputs);
 
     /**
