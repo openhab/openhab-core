@@ -12,8 +12,6 @@
  */
 package org.openhab.core.model.script.scoping;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -69,12 +67,6 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
     @Override
     protected List<Class<?>> getExtensionClasses() {
         List<Class<?>> result = super.getExtensionClasses();
-        result.remove(Comparable.class);
-        result.remove(Double.class);
-        result.remove(Integer.class);
-        result.remove(BigInteger.class);
-        result.remove(BigDecimal.class);
-        result.remove(double.class);
 
         result.add(NumberExtensions.class);
 
