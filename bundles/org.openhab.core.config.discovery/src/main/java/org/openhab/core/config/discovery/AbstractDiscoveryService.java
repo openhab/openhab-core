@@ -34,7 +34,6 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
-import org.openhab.core.util.SameThreadExecutorService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -62,22 +61,22 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
     protected final ScheduledExecutorService scheduler;
 
-    protected final Set<DiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
+    private final Set<DiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
 
     // All access must be guarded by "this"
     protected @Nullable ScanListener scanListener;
 
     private volatile boolean backgroundDiscoveryEnabled;
 
-    protected final @Nullable String scanInputLabel;
-    protected final @Nullable String scanInputDescription;
+    private final @Nullable String scanInputLabel;
+    private final @Nullable String scanInputDescription;
 
     // All access must be guarded by "cachedResults"
-    protected final Map<ThingUID, DiscoveryResult> cachedResults = new HashMap<>();
+    private final Map<ThingUID, DiscoveryResult> cachedResults = new HashMap<>();
 
     // This set is immutable and can safely be shared between threads
-    protected final Set<ThingTypeUID> supportedThingTypes;
-    protected final int timeout;
+    private final Set<ThingTypeUID> supportedThingTypes;
+    private final int timeout;
 
     // All access must be guarded by "this"
     private Instant timestampOfLastScan = Instant.MIN;
@@ -120,7 +119,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * Creates a new instance of this class with the specified parameters.
      * <p>
      * <b>For use by tests only</b>, allows setting a different {@link ScheduledExecutorService} like
-     * {@link SameThreadExecutorService} for synchronous behavior during testing.
+     * {@link org.openhab.core.util.SameThreadExecutorService} for synchronous behavior during testing.
      *
      * @param scheduler the {@link ScheduledExecutorService} to use.
      * @param supportedThingTypes the list of Thing types which are supported (can be null)

@@ -195,6 +195,7 @@ public class SameThreadExecutorService extends AbstractExecutorService implement
         }
 
         @Override
+        @SuppressWarnings("PMD.CompareObjectsWithEquals")
         public int compareTo(@Nullable Delayed other) {
             if (this == other) {
                 return 0;
