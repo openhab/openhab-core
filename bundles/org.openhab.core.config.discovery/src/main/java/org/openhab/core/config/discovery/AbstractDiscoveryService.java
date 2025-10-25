@@ -59,7 +59,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractDiscoveryService.class);
 
-    protected final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(DISCOVERY_THREADPOOL_NAME);
+    protected final ScheduledExecutorService scheduler;
 
     private final Set<DiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
 
@@ -107,6 +107,39 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
         if (timeout < 0) {
             throw new IllegalArgumentException("The timeout must be >= 0!");
         }
+        this.scheduler = ThreadPoolManager.getScheduledPool(DISCOVERY_THREADPOOL_NAME);
+        this.supportedThingTypes = supportedThingTypes == null ? Set.of() : Set.copyOf(supportedThingTypes);
+        this.timeout = timeout;
+        this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
+        this.scanInputLabel = scanInputLabel;
+        this.scanInputDescription = scanInputDescription;
+    }
+
+    /**
+     * Creates a new instance of this class with the specified parameters.
+     * <p>
+     * <b>For use by tests only</b>, allows setting a different {@link ScheduledExecutorService} like
+     * {@link org.openhab.core.util.SameThreadExecutorService} for synchronous behavior during testing.
+     *
+     * @param scheduler the {@link ScheduledExecutorService} to use.
+     * @param supportedThingTypes the list of Thing types which are supported (can be null)
+     * @param timeout the discovery timeout in seconds after which the discovery
+     *            service automatically stops its forced discovery process (>= 0).
+     * @param backgroundDiscoveryEnabledByDefault defines, whether the default for this discovery service is to
+     *            enable background discovery or not.
+     * @param scanInputLabel the label of the optional input parameter to start the discovery or null if no input
+     *            parameter supported
+     * @param scanInputDescription the description of the optional input parameter to start the discovery or null if no
+     *            input parameter supported
+     * @throws IllegalArgumentException if {@code timeout < 0}
+     */
+    protected AbstractDiscoveryService(ScheduledExecutorService scheduler,
+            @Nullable Set<ThingTypeUID> supportedThingTypes, int timeout, boolean backgroundDiscoveryEnabledByDefault,
+            @Nullable String scanInputLabel, @Nullable String scanInputDescription) throws IllegalArgumentException {
+        if (timeout < 0) {
+            throw new IllegalArgumentException("The timeout must be >= 0!");
+        }
+        this.scheduler = scheduler;
         this.supportedThingTypes = supportedThingTypes == null ? Set.of() : Set.copyOf(supportedThingTypes);
         this.timeout = timeout;
         this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
