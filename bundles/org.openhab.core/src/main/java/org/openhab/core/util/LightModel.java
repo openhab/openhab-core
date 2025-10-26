@@ -30,6 +30,9 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 
 /**
+ * NOTE: This class is a temporary copy of the proposed OH Core Light Model. It is introduced here as a proof
+ * of concept until such time as the OH Core Light Model is available to be used directly.
+ *
  * The {@link LightModel} provides a state machine model for maintaining and modifying the state of a light,
  * which is intended to be used within the Thing Handler of a lighting binding.
  * <p>
@@ -657,6 +660,15 @@ public class LightModel {
     }
 
     /**
+     * Runtime State: get the HSBType color.
+     *
+     * @return HSBType representing the color.
+     */
+    public HSBType getHsb() {
+        return new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), cachedHSB.getBrightness());
+    }
+
+    /**
      * Runtime State: get the color temperature in Mirek/Mired, may be NaN if not known.
      *
      * @return double representing the color temperature in Mirek/Mired.
@@ -956,6 +968,15 @@ public class LightModel {
     }
 
     /**
+     * Runtime State: update the on/off state from the remote light.
+     *
+     * @param on true for ON, false for OFF
+     */
+    public void setOnOff(boolean on) {
+        zHandleOnOff(OnOffType.from(on));
+    }
+
+    /**
      * Runtime State: update the color with RGB(C)(W) fields from the remote light, and update the cached HSB color
      * accordingly. The array must be in the order [red, green, blue, (cold-)(white), (warm-white)]. If white is
      * present but the light does not support white channel(s) then IllegalArgumentException is thrown. Depending
@@ -1114,12 +1135,13 @@ public class LightModel {
      * @return a copy of this LightModel.
      */
     public LightModel copy() {
+        OnOffType tempOnOff = cachedOnOff;
         LightModel copy = new LightModel(lightCapabilities, rgbDataType, minimumOnBrightness, mirekControlCoolest,
                 mirekControlWarmest, stepSize, coolWhiteLed.getMirek(), warmWhiteLed.getMirek());
         copy.cachedBrightness = PercentType.valueOf(cachedBrightness.toFullString());
         copy.cachedHSB = HSBType.valueOf(cachedHSB.toFullString());
         copy.cachedMirek = cachedMirek;
-        copy.cachedOnOff = cachedOnOff == null ? null : OnOffType.valueOf(cachedOnOff.toFullString());
+        copy.cachedOnOff = tempOnOff == null ? null : OnOffType.valueOf(tempOnOff.toFullString());
         copy.ledOperatingMode = ledOperatingMode;
         return copy;
     }
@@ -1163,13 +1185,12 @@ public class LightModel {
      * @throws IllegalArgumentException if the colorTemperature parameter is not convertible to Mired.
      */
     private void zHandleColorTemperature(QuantityType<?> colorTemperature) throws IllegalArgumentException {
-        try {
-            QuantityType<?> mirek = Objects.requireNonNull(colorTemperature.toInvertibleUnit(Units.MIRED));
-            setMirek(mirek.doubleValue());
-        } catch (NullPointerException e) {
+        QuantityType<?> mirek = colorTemperature.toInvertibleUnit(Units.MIRED);
+        if (mirek == null) {
             throw new IllegalArgumentException(
                     "Parameter '%s' not convertible to Mirek/Mired".formatted(colorTemperature.toFullString()));
         }
+        setMirek(mirek.doubleValue());
     }
 
     /**
