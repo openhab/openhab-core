@@ -16,6 +16,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
@@ -25,18 +27,19 @@ import org.openhab.core.automation.type.Output;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class ModuleInformation {
     private final Method method;
     private final Object actionProvider;
     private final String uid;
-    private String label;
-    private String description;
-    private Visibility visibility;
-    private Set<String> tags;
-    private List<Input> inputs;
-    private List<Output> outputs;
-    private String configName;
-    private String thingUID;
+    private @Nullable String label;
+    private @Nullable String description;
+    private @Nullable Visibility visibility;
+    private @Nullable Set<String> tags;
+    private @Nullable List<Input> inputs;
+    private @Nullable List<Output> outputs;
+    private @Nullable String configName;
+    private @Nullable String thingUID;
 
     public ModuleInformation(String uid, Object actionProvider, Method m) {
         this.uid = uid;
@@ -56,67 +59,67 @@ public class ModuleInformation {
         return actionProvider;
     }
 
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return label;
     }
 
-    public void setLabel(String label) {
+    public void setLabel(@Nullable String label) {
         this.label = label;
     }
 
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(@Nullable String description) {
         this.description = description;
     }
 
-    public Visibility getVisibility() {
+    public @Nullable Visibility getVisibility() {
         return visibility;
     }
 
-    public void setVisibility(Visibility visibility) {
+    public void setVisibility(@Nullable Visibility visibility) {
         this.visibility = visibility;
     }
 
-    public List<Input> getInputs() {
+    public @Nullable List<Input> getInputs() {
         return inputs;
     }
 
-    public void setInputs(List<Input> inputs) {
+    public void setInputs(@Nullable List<Input> inputs) {
         this.inputs = inputs;
     }
 
-    public List<Output> getOutputs() {
+    public @Nullable List<Output> getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(List<Output> outputs) {
+    public void setOutputs(@Nullable List<Output> outputs) {
         this.outputs = outputs;
     }
 
-    public String getConfigName() {
+    public @Nullable String getConfigName() {
         return configName;
     }
 
-    public Set<String> getTags() {
+    public @Nullable Set<String> getTags() {
         return tags;
     }
 
-    public void setTags(Set<String> tags) {
+    public void setTags(@Nullable Set<String> tags) {
         this.tags = tags;
     }
 
-    public void setConfigName(String configName) {
+    public void setConfigName(@Nullable String configName) {
         this.configName = configName;
     }
 
-    public String getThingUID() {
+    public @Nullable String getThingUID() {
         return thingUID;
     }
 
-    public void setThingUID(String thingUID) {
+    public void setThingUID(@Nullable String thingUID) {
         this.thingUID = thingUID;
     }
 
@@ -136,7 +139,7 @@ public class ModuleInformation {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

@@ -16,15 +16,19 @@ import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Expression that successfully parses, if a thing identifier token is found. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public final class ExpressionIdentifier extends Expression {
 
     private AbstractRuleBasedInterpreter interpreter;
-    private Expression stopper;
+    private @Nullable Expression stopper;
 
     /**
      * Constructs a new instance.
@@ -41,7 +45,7 @@ public final class ExpressionIdentifier extends Expression {
      * @param interpreter the interpreter it belongs to. Used for dynamically fetching item name tokens
      * @param stopper Expression that should not match, if the current token should be accepted as identifier
      */
-    public ExpressionIdentifier(AbstractRuleBasedInterpreter interpreter, Expression stopper) {
+    public ExpressionIdentifier(AbstractRuleBasedInterpreter interpreter, @Nullable Expression stopper) {
         this.interpreter = interpreter;
         this.stopper = stopper;
     }
@@ -84,7 +88,7 @@ public final class ExpressionIdentifier extends Expression {
     /**
      * @return the stopper expression
      */
-    public Expression getStopper() {
+    public @Nullable Expression getStopper() {
         return stopper;
     }
 }

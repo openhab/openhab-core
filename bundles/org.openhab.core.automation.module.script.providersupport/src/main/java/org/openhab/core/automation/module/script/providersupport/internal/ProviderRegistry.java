@@ -12,12 +12,15 @@
  */
 package org.openhab.core.automation.module.script.providersupport.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Interface to be implemented by all {@link org.openhab.core.common.registry.Registry} (delegates) that are used to
  * provide openHAB entities from scripts.
  *
  * @author Florian Hotze - Initial contribution
  */
+@NonNullByDefault
 public interface ProviderRegistry {
 
     /**

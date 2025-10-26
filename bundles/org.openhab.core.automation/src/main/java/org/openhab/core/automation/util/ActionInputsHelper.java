@@ -79,12 +79,14 @@ public class ActionInputsHelper {
      * @return the list of config description parameters
      * @throws IllegalArgumentException if at least one of the input parameters has an unsupported type
      */
-    public List<ConfigDescriptionParameter> mapActionInputsToConfigDescriptionParameters(List<Input> inputs)
+    public List<ConfigDescriptionParameter> mapActionInputsToConfigDescriptionParameters(@Nullable List<Input> inputs)
             throws IllegalArgumentException {
         List<ConfigDescriptionParameter> configDescriptionParameters = new ArrayList<>();
 
-        for (Input input : inputs) {
-            configDescriptionParameters.add(mapActionInputToConfigDescriptionParameter(input));
+        if (inputs != null) {
+            for (Input input : inputs) {
+                configDescriptionParameters.add(mapActionInputToConfigDescriptionParameter(input));
+            }
         }
 
         return configDescriptionParameters;

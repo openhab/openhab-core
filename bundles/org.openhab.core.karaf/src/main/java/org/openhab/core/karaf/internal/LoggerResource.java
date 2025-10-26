@@ -85,7 +85,7 @@ public class LoggerResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getLogger", summary = "Get all loggers", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoggerBean.class))) })
-    public Response getLoggers(@Context UriInfo uriInfo) {
+    public @Nullable Response getLoggers(@Context UriInfo uriInfo) {
         final LoggerBean bean = new LoggerBean(logService.getLevel("ALL"));
         return Response.ok(bean).build();
     }
@@ -96,7 +96,8 @@ public class LoggerResource implements RESTResource {
     @Operation(operationId = "putLogger", summary = "Modify or add logger", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Payload is invalid.") })
-    public Response putLoggers(@PathParam("loggerName") @Parameter(description = "logger name") String loggerName,
+    public @Nullable Response putLoggers(
+            @PathParam("loggerName") @Parameter(description = "logger name") String loggerName,
             @Parameter(description = "logger", required = true) LoggerBean.@Nullable LoggerInfo logger,
             @Context UriInfo uriInfo) {
         if (logger == null || !BUNDLE_REGEX.matcher(logger.loggerName).matches() || !LOG_LEVELS.contains(logger.level)
@@ -112,7 +113,8 @@ public class LoggerResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getLogger", summary = "Get a single logger.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoggerBean.LoggerInfo.class))) })
-    public Response getLogger(@PathParam("loggerName") @Parameter(description = "logger name") String loggerName,
+    public @Nullable Response getLogger(
+            @PathParam("loggerName") @Parameter(description = "logger name") String loggerName,
             @Context UriInfo uriInfo) {
         final LoggerBean bean = new LoggerBean(logService.getLevel(loggerName));
         return Response.ok(bean).build();
@@ -122,7 +124,8 @@ public class LoggerResource implements RESTResource {
     @Path("/{loggerName: \\w(%20|[\\w.-])*}")
     @Operation(operationId = "removeLogger", summary = "Remove a single logger.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
-    public Response removeLogger(@PathParam("loggerName") @Parameter(description = "logger name") String loggerName,
+    public @Nullable Response removeLogger(
+            @PathParam("loggerName") @Parameter(description = "logger name") String loggerName,
             @Context UriInfo uriInfo) {
         logService.setLevel(loggerName, "DEFAULT");
         return Response.ok(null, MediaType.TEXT_PLAIN).build();

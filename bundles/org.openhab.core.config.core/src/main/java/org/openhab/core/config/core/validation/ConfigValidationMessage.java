@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 
@@ -28,6 +30,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public final class ConfigValidationMessage {
 
     /** The name of the configuration parameter whose value does not meet its {@link ConfigDescription} declaration. */
@@ -84,7 +87,7 @@ public final class ConfigValidationMessage {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

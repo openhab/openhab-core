@@ -35,6 +35,7 @@ import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,6 +75,7 @@ import org.osgi.framework.BundleContext;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@NonNullByDefault
 public class SitemapResourceTest extends JavaTest {
 
     private static final int STATE_UPDATE_WAIT_TIME = 100;
@@ -461,8 +463,8 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     private void configureItemUIRegistryForWidget(Widget w, String widgetId, String widgetIcon, String widgetLabel,
-            WidgetLabelSource widgetLabelSource, boolean visibility, String labelColor, String valueColor,
-            String iconColor, State state) {
+            WidgetLabelSource widgetLabelSource, boolean visibility, @Nullable String labelColor,
+            @Nullable String valueColor, @Nullable String iconColor, @Nullable State state) {
         when(itemUIRegistryMock.getWidgetId(w)).thenReturn(widgetId);
         when(itemUIRegistryMock.getCategory(w)).thenReturn(widgetIcon);
         when(itemUIRegistryMock.getLabel(w)).thenReturn(widgetLabel);
@@ -596,7 +598,8 @@ public class SitemapResourceTest extends JavaTest {
 
     private static Widget mockWidget(EList<IconRule> iconRules1, EList<VisibilityRule> visibilityRules1,
             EList<ColorArray> labelColors1, EList<ColorArray> valueColors1, EList<ColorArray> iconColors1,
-            EClass eClass, String widgetLabel, String widgetIcon, String widgetStaticIcon) {
+            EClass eClass, @Nullable String widgetLabel, @Nullable String widgetIcon,
+            @Nullable String widgetStaticIcon) {
         Widget w = mock(Widget.class);
         mockWidgetMethods(iconRules1, visibilityRules1, labelColors1, valueColors1, iconColors1, eClass, widgetLabel,
                 widgetIcon, widgetStaticIcon, w);
@@ -606,7 +609,8 @@ public class SitemapResourceTest extends JavaTest {
 
     private static Group mockGroup(EList<IconRule> iconRules1, EList<VisibilityRule> visibilityRules1,
             EList<ColorArray> labelColors1, EList<ColorArray> valueColors1, EList<ColorArray> iconColors1,
-            EClass eClass, String widgetLabel, String widgetIcon, String widgetStaticIcon, EList<Widget> children) {
+            EClass eClass, @Nullable String widgetLabel, @Nullable String widgetIcon, @Nullable String widgetStaticIcon,
+            EList<Widget> children) {
         Group w = mock(Group.class);
         mockWidgetMethods(iconRules1, visibilityRules1, labelColors1, valueColors1, iconColors1, eClass, widgetLabel,
                 widgetIcon, widgetStaticIcon, w);
@@ -616,7 +620,8 @@ public class SitemapResourceTest extends JavaTest {
 
     private static void mockWidgetMethods(EList<IconRule> iconRules1, EList<VisibilityRule> visibilityRules1,
             EList<ColorArray> labelColors1, EList<ColorArray> valueColors1, EList<ColorArray> iconColors1,
-            EClass eClass, String widgetLabel, String widgetIcon, String widgetStaticIcon, Widget w) {
+            EClass eClass, @Nullable String widgetLabel, @Nullable String widgetIcon, @Nullable String widgetStaticIcon,
+            Widget w) {
         when(w.eClass()).thenReturn(eClass);
         when(w.getLabel()).thenReturn(widgetLabel);
         when(w.getIcon()).thenReturn(widgetIcon);

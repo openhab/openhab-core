@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.UpnpService;
 import org.jupnp.controlpoint.ActionCallback;
@@ -70,6 +71,7 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("rawtypes")
 @Component(immediate = true)
+@NonNullByDefault
 public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     private final Logger logger = LoggerFactory.getLogger(UpnpIOServiceImpl.class);
@@ -97,7 +99,8 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
 
         @Override
-        protected void ended(GENASubscription subscription, CancelReason reason, UpnpResponse response) {
+        protected void ended(@Nullable GENASubscription subscription, @Nullable CancelReason reason,
+                @Nullable UpnpResponse response) {
             final Service service = subscription.getService();
             if (service != null) {
                 final ServiceId serviceId = service.getServiceId();
@@ -127,7 +130,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
 
         @Override
-        protected void established(GENASubscription subscription) {
+        protected void established(@Nullable GENASubscription subscription) {
             Device deviceRoot = subscription.getService().getDevice().getRoot();
             String serviceId = subscription.getService().getServiceId().getId();
 
@@ -147,7 +150,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
         @SuppressWarnings("unchecked")
         @Override
-        protected void eventReceived(GENASubscription sub) {
+        protected void eventReceived(@Nullable GENASubscription sub) {
             Map<String, StateVariableValue> values = sub.getCurrentValues();
             Device device = sub.getService().getDevice();
             String serviceId = sub.getService().getServiceId().getId();
@@ -172,14 +175,15 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
 
         @Override
-        protected void eventsMissed(GENASubscription subscription, int numberOfMissedEvents) {
+        protected void eventsMissed(@Nullable GENASubscription subscription, int numberOfMissedEvents) {
             logger.debug("A GENA subscription '{}' for device '{}' missed events",
                     subscription.getService().getServiceId(),
                     subscription.getService().getDevice().getRoot().getIdentity().getUdn());
         }
 
         @Override
-        protected void failed(GENASubscription subscription, UpnpResponse response, Exception e, String defaultMsg) {
+        protected void failed(@Nullable GENASubscription subscription, @Nullable UpnpResponse response,
+                @Nullable Exception e, @Nullable String defaultMsg) {
             Device deviceRoot = subscription.getService().getDevice().getRoot();
             String serviceId = subscription.getService().getServiceId().getId();
 
@@ -221,7 +225,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     @Override
-    public void addSubscription(UpnpIOParticipant participant, String serviceID, int duration) {
+    public void addSubscription(@Nullable UpnpIOParticipant participant, @Nullable String serviceID, int duration) {
         if (participant != null && serviceID != null) {
             registerParticipant(participant);
             Device device = getDevice(participant);
@@ -262,7 +266,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     @Override
-    public void removeSubscription(UpnpIOParticipant participant, String serviceID) {
+    public void removeSubscription(@Nullable UpnpIOParticipant participant, @Nullable String serviceID) {
         if (participant != null && serviceID != null) {
             Device device = getDevice(participant);
             if (device != null) {
@@ -288,14 +292,14 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
-            Map<String, String> inputs) {
+            @Nullable Map<String, String> inputs) {
         return invokeAction(participant, null, serviceID, actionID, inputs);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, String> invokeAction(UpnpIOParticipant participant, @Nullable String namespace, String serviceID,
-            String actionID, Map<String, String> inputs) {
+            String actionID, @Nullable Map<String, String> inputs) {
         Map<String, String> resultMap = new HashMap<>();
 
         if (serviceID != null && actionID != null && participant != null) {
@@ -366,14 +370,14 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     @Override
-    public void registerParticipant(UpnpIOParticipant participant) {
+    public void registerParticipant(@Nullable UpnpIOParticipant participant) {
         if (participant != null) {
             participants.add(participant);
         }
     }
 
     @Override
-    public void unregisterParticipant(UpnpIOParticipant participant) {
+    public void unregisterParticipant(@Nullable UpnpIOParticipant participant) {
         if (participant != null) {
             stopPollingForParticipant(participant);
             pollingJobs.remove(participant);
@@ -383,7 +387,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     @Override
-    public URL getDescriptorURL(UpnpIOParticipant participant) {
+    public @Nullable URL getDescriptorURL(UpnpIOParticipant participant) {
         RemoteDevice device = upnpService.getRegistry().getRemoteDevice(new UDN(participant.getUDN()), true);
         if (device != null) {
             return device.getIdentity().getDescriptorURL();
@@ -392,7 +396,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
     }
 
-    private Service findService(Device device, @Nullable String namespace, String serviceID) {
+    private Service findService(Device device, @Nullable String namespace, @Nullable String serviceID) {
         Service service;
         if (namespace == null) {
             namespace = device.getType().getNamespace();
@@ -431,10 +435,11 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     private class UPNPPollingRunnable implements Runnable {
 
         private final UpnpIOParticipant participant;
-        private final String serviceID;
-        private final String actionID;
+        private final @Nullable String serviceID;
+        private final @Nullable String actionID;
 
-        public UPNPPollingRunnable(UpnpIOParticipant participant, String serviceID, String actionID) {
+        public UPNPPollingRunnable(UpnpIOParticipant participant, @Nullable String serviceID,
+                @Nullable String actionID) {
             this.participant = participant;
             this.serviceID = serviceID;
             this.actionID = actionID;
@@ -482,7 +487,8 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     @Override
-    public void addStatusListener(UpnpIOParticipant participant, String serviceID, String actionID, int interval) {
+    public void addStatusListener(@Nullable UpnpIOParticipant participant, @Nullable String serviceID,
+            @Nullable String actionID, int interval) {
         if (participant != null) {
             registerParticipant(participant);
 
@@ -509,52 +515,57 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     @Override
-    public void removeStatusListener(UpnpIOParticipant participant) {
+    public void removeStatusListener(@Nullable UpnpIOParticipant participant) {
         if (participant != null) {
             unregisterParticipant(participant);
         }
     }
 
     @Override
-    public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-        informParticipants(device, true);
+    public void remoteDeviceAdded(@Nullable Registry registry, @Nullable RemoteDevice device) {
+        if (device != null) {
+            informParticipants(device, true);
 
-        for (RemoteDevice childDevice : device.getEmbeddedDevices()) {
-            informParticipants(childDevice, true);
+            for (RemoteDevice childDevice : device.getEmbeddedDevices()) {
+                informParticipants(childDevice, true);
+            }
         }
     }
 
     @Override
-    public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
+    public void remoteDeviceUpdated(@Nullable Registry registry, @Nullable RemoteDevice device) {
     }
 
     @Override
-    public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
-        informParticipants(device, false);
+    public void remoteDeviceRemoved(@Nullable Registry registry, @Nullable RemoteDevice device) {
+        if (device != null) {
+            informParticipants(device, false);
 
-        for (RemoteDevice childDevice : device.getEmbeddedDevices()) {
-            informParticipants(childDevice, false);
+            for (RemoteDevice childDevice : device.getEmbeddedDevices()) {
+                informParticipants(childDevice, false);
+            }
         }
     }
 
     @Override
-    public void remoteDeviceDiscoveryStarted(Registry registry, RemoteDevice device) {
+    public void remoteDeviceDiscoveryStarted(@Nullable Registry registry, @Nullable RemoteDevice device) {
     }
 
     @Override
-    public void remoteDeviceDiscoveryFailed(Registry registry, RemoteDevice device, Exception ex) {
+    public void remoteDeviceDiscoveryFailed(@Nullable Registry registry, @Nullable RemoteDevice device,
+            @Nullable Exception ex) {
     }
 
     @Override
-    public void localDeviceAdded(Registry registry, LocalDevice device) {
+    public void localDeviceAdded(@Nullable Registry registry, @Nullable LocalDevice device) {
     }
 
     @Override
-    public void localDeviceRemoved(Registry registry, LocalDevice device) {
+    public void localDeviceRemoved(@Nullable Registry registry, @Nullable LocalDevice device) {
     }
 
     @Override
-    public void beforeShutdown(Registry registry) {
+    public void beforeShutdown(@Nullable Registry registry) {
     }
 
     @Override

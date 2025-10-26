@@ -22,6 +22,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationManager;
@@ -45,6 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Łukasz Dywicki - Initial contribution.
  */
 @Component(configurationPid = "org.openhab.auth")
+@NonNullByDefault
 public class AuthenticationHandler implements Handler {
 
     private static final String AUTHENTICATION_ENABLED = "enabled";
@@ -56,7 +59,7 @@ public class AuthenticationHandler implements Handler {
 
     private final List<CredentialsExtractor<HttpServletRequest>> extractors = new CopyOnWriteArrayList<>();
 
-    private AuthenticationManager authenticationManager;
+    private @Nullable AuthenticationManager authenticationManager;
 
     // configuration properties
     private boolean enabled = false;
@@ -68,10 +71,10 @@ public class AuthenticationHandler implements Handler {
     }
 
     @Override
-    public void handle(final HttpServletRequest request, final HttpServletResponse response,
-            final HandlerContext context) throws Exception {
+    public void handle(final @Nullable HttpServletRequest request, final @Nullable HttpServletResponse response,
+            final @Nullable HandlerContext context) throws Exception {
         String requestUri = request.getRequestURI();
-        if (this.enabled && isSecured(requestUri, request.getMethod())) {
+        if (this.enabled && (request != null) && isSecured(requestUri, request.getMethod())) {
             if (authenticationManager == null) {
                 throw new AuthenticationException("Failed to authenticate request.");
             }
@@ -104,7 +107,8 @@ public class AuthenticationHandler implements Handler {
     }
 
     @Override
-    public void handleError(HttpServletRequest request, HttpServletResponse response, HandlerContext context) {
+    public void handleError(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response,
+            @Nullable HandlerContext context) {
         Object error = request.getAttribute(HandlerContext.ERROR_ATTRIBUTE);
 
         if (response.getStatus() == 403 || response.getStatus() == 401) {
@@ -131,7 +135,7 @@ public class AuthenticationHandler implements Handler {
         }
     }
 
-    private boolean isSecured(String requestUri, String method) {
+    private boolean isSecured(String requestUri, @Nullable String method) {
         if (requestUri.startsWith(loginUri) && !"post".equalsIgnoreCase(method)) {
             return false;
         }
@@ -141,12 +145,12 @@ public class AuthenticationHandler implements Handler {
     }
 
     @Activate
-    void activate(Map<String, Object> properties) {
+    void activate(@Nullable Map<String, Object> properties) {
         modified(properties);
     }
 
     @Modified
-    void modified(Map<String, Object> properties) {
+    void modified(@Nullable Map<String, Object> properties) {
         Object authenticationEnabled = properties.get(AUTHENTICATION_ENABLED);
         if (authenticationEnabled != null) {
             this.enabled = Boolean.parseBoolean(authenticationEnabled.toString());
@@ -159,20 +163,22 @@ public class AuthenticationHandler implements Handler {
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+    public void setAuthenticationManager(@Nullable AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 
-    public void unsetAuthenticationManager(AuthenticationManager authenticationManager) {
+    public void unsetAuthenticationManager(@Nullable AuthenticationManager authenticationManager) {
         this.authenticationManager = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, target = "(context=javax.servlet.http.HttpServletRequest)")
-    public void addCredentialsExtractor(CredentialsExtractor<HttpServletRequest> extractor) {
-        this.extractors.add(extractor);
+    public void addCredentialsExtractor(@Nullable CredentialsExtractor<HttpServletRequest> extractor) {
+        if (extractor != null) {
+            this.extractors.add(extractor);
+        }
     }
 
-    public void removeCredentialsExtractor(CredentialsExtractor<HttpServletRequest> extractor) {
+    public void removeCredentialsExtractor(@Nullable CredentialsExtractor<HttpServletRequest> extractor) {
         this.extractors.remove(extractor);
     }
 }

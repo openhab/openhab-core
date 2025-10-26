@@ -178,8 +178,8 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         }
 
         @Override
-        @Nullable
-        public Object compute(String key, BiFunction<String, @Nullable Object, @Nullable Object> remappingFunction) {
+        public @Nullable Object compute(String key,
+                BiFunction<String, @Nullable Object, @Nullable Object> remappingFunction) {
             return cache.compute(key, (k, v) -> remappingFunction.apply(k, v));
         }
 
@@ -252,8 +252,8 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         }
 
         @Override
-        @Nullable
-        public Object compute(String key, BiFunction<String, @Nullable Object, @Nullable Object> remappingFunction) {
+        public @Nullable Object compute(String key,
+                BiFunction<String, @Nullable Object, @Nullable Object> remappingFunction) {
             cacheLock.lock();
             try {
                 Object value = sharedCache.compute(key, (k, v) -> remappingFunction.apply(k, v));

@@ -22,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.UpnpService;
 import org.jupnp.model.message.header.RootDeviceHeader;
@@ -62,6 +63,7 @@ import org.slf4j.LoggerFactory;
  * @author Tim Roberts - Added primary address change
  */
 @Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.upnp")
+@NonNullByDefault
 public class UpnpDiscoveryService extends AbstractDiscoveryService
         implements RegistryListener, NetworkAddressChangeListener {
 
@@ -94,7 +96,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
 
     @Override
     @Modified
-    protected void modified(Map<String, Object> configProperties) {
+    protected void modified(@Nullable Map<String, Object> configProperties) {
         super.modified(configProperties);
     }
 
@@ -172,7 +174,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     }
 
     @Override
-    public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+    public void remoteDeviceAdded(@Nullable Registry registry, @Nullable RemoteDevice device) {
         for (UpnpDiscoveryParticipant participant : participants) {
             if (!device.isRoot() && !participant.notifyChildDevices()) {
                 continue;
@@ -204,7 +206,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     }
 
     @Override
-    public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
+    public void remoteDeviceRemoved(@Nullable Registry registry, @Nullable RemoteDevice device) {
         for (UpnpDiscoveryParticipant participant : participants) {
             if (!device.isRoot() && !participant.notifyChildDevices()) {
                 continue;
@@ -249,19 +251,19 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     }
 
     @Override
-    public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
+    public void remoteDeviceUpdated(@Nullable Registry registry, @Nullable RemoteDevice device) {
     }
 
     @Override
-    public void localDeviceAdded(Registry registry, LocalDevice device) {
+    public void localDeviceAdded(@Nullable Registry registry, @Nullable LocalDevice device) {
     }
 
     @Override
-    public void localDeviceRemoved(Registry registry, LocalDevice device) {
+    public void localDeviceRemoved(@Nullable Registry registry, @Nullable LocalDevice device) {
     }
 
     @Override
-    public void beforeShutdown(Registry registry) {
+    public void beforeShutdown(@Nullable Registry registry) {
     }
 
     @Override
@@ -269,10 +271,11 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     }
 
     @Override
-    public void remoteDeviceDiscoveryStarted(Registry registry, RemoteDevice device) {
+    public void remoteDeviceDiscoveryStarted(@Nullable Registry registry, @Nullable RemoteDevice device) {
     }
 
     @Override
-    public void remoteDeviceDiscoveryFailed(Registry registry, RemoteDevice device, Exception ex) {
+    public void remoteDeviceDiscoveryFailed(@Nullable Registry registry, @Nullable RemoteDevice device,
+            @Nullable Exception ex) {
     }
 }

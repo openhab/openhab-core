@@ -29,6 +29,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.client.ProxyConfiguration;
@@ -58,18 +60,23 @@ import org.slf4j.LoggerFactory;
  * @author Svilen Valkanov - replaced Apache HttpClient with Jetty
  */
 @Component(immediate = true)
+@NonNullByDefault
 public class HttpUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtil.class);
 
     private static final int DEFAULT_TIMEOUT_MS = 5000;
 
-    private static HttpClientFactory httpClientFactory;
+    private static @Nullable HttpClientFactory httpClientFactory;
 
     private static class ProxyParams {
+        @Nullable
         String proxyHost;
         int proxyPort = 80;
+        @Nullable
         String proxyUser;
+        @Nullable
         String proxyPassword;
+        @Nullable
         String nonProxyHosts;
     }
 
@@ -102,8 +109,8 @@ public class HttpUtil {
      * @return the response body or <code>NULL</code> when the request went wrong
      * @throws IOException when the request execution failed, timed out or it was interrupted
      */
-    public static String executeUrl(String httpMethod, String url, InputStream content, String contentType, int timeout)
-            throws IOException {
+    public static String executeUrl(String httpMethod, String url, @Nullable InputStream content,
+            @Nullable String contentType, int timeout) throws IOException {
         return executeUrl(httpMethod, url, null, content, contentType, timeout);
     }
 
@@ -122,8 +129,8 @@ public class HttpUtil {
      * @return the response body or <code>NULL</code> when the request went wrong
      * @throws IOException when the request execution failed, timed out or it was interrupted
      */
-    public static String executeUrl(String httpMethod, String url, Properties httpHeaders, InputStream content,
-            String contentType, int timeout) throws IOException {
+    public static String executeUrl(String httpMethod, String url, @Nullable Properties httpHeaders,
+            @Nullable InputStream content, @Nullable String contentType, int timeout) throws IOException {
         final ProxyParams proxyParams = prepareProxyParams();
 
         return executeUrl(httpMethod, url, httpHeaders, content, contentType, timeout, proxyParams.proxyHost,
@@ -148,9 +155,10 @@ public class HttpUtil {
      * @return the response body or <code>NULL</code> when the request went wrong
      * @throws IOException when the request execution failed, timed out or it was interrupted
      */
-    public static String executeUrl(String httpMethod, String url, Properties httpHeaders, InputStream content,
-            String contentType, int timeout, String proxyHost, Integer proxyPort, String proxyUser,
-            String proxyPassword, String nonProxyHosts) throws IOException {
+    public static String executeUrl(String httpMethod, String url, @Nullable Properties httpHeaders,
+            @Nullable InputStream content, @Nullable String contentType, int timeout, @Nullable String proxyHost,
+            @Nullable Integer proxyPort, @Nullable String proxyUser, @Nullable String proxyPassword,
+            @Nullable String nonProxyHosts) throws IOException {
         ContentResponse response = executeUrlAndGetReponse(httpMethod, url, httpHeaders, content, contentType, timeout,
                 proxyHost, proxyPort, proxyUser, proxyPassword, nonProxyHosts);
         String encoding = response.getEncoding() != null ? response.getEncoding().replace("\"", "").trim()
@@ -182,9 +190,10 @@ public class HttpUtil {
      * @return the response as a ContentResponse object or <code>NULL</code> when the request went wrong
      * @throws IOException when the request execution failed, timed out or it was interrupted
      */
-    private static ContentResponse executeUrlAndGetReponse(String httpMethod, String url, Properties httpHeaders,
-            InputStream content, String contentType, int timeout, String proxyHost, Integer proxyPort, String proxyUser,
-            String proxyPassword, String nonProxyHosts) throws IOException {
+    private static ContentResponse executeUrlAndGetReponse(String httpMethod, String url,
+            @Nullable Properties httpHeaders, @Nullable InputStream content, @Nullable String contentType, int timeout,
+            @Nullable String proxyHost, @Nullable Integer proxyPort, @Nullable String proxyUser,
+            @Nullable String proxyPassword, @Nullable String nonProxyHosts) throws IOException {
         // Referenced http client factory not available
         if (httpClientFactory == null) {
             throw new IllegalStateException("Http client factory not available");
@@ -305,7 +314,7 @@ public class HttpUtil {
      * @return <code>false</code> if the host of the given <code>uri</code> is contained in
      *         <code>nonProxyHosts</code>-list and <code>true</code> otherwise
      */
-    private static boolean shouldUseProxy(URI uri, String nonProxyHosts) {
+    private static boolean shouldUseProxy(URI uri, @Nullable String nonProxyHosts) {
         if (nonProxyHosts != null && !nonProxyHosts.isBlank()) {
             String givenHost = uri.toString();
 
@@ -360,7 +369,7 @@ public class HttpUtil {
      * @return a RawType object containing the image, null if the content type could not be found or the content type is
      *         not an image
      */
-    public static RawType downloadImage(String url) {
+    public static @Nullable RawType downloadImage(String url) {
         return downloadImage(url, DEFAULT_TIMEOUT_MS);
     }
 
@@ -374,7 +383,7 @@ public class HttpUtil {
      * @return a RawType object containing the image, null if the content type could not be found or the content type is
      *         not an image
      */
-    public static RawType downloadImage(String url, int timeout) {
+    public static @Nullable RawType downloadImage(String url, int timeout) {
         return downloadImage(url, true, -1, timeout);
     }
 
@@ -388,7 +397,7 @@ public class HttpUtil {
      * @return a RawType object containing the image, null if the content type could not be found or the content type is
      *         not an image or the data size is too big
      */
-    public static RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength) {
+    public static @Nullable RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength) {
         return downloadImage(url, scanTypeInContent, maxContentLength, DEFAULT_TIMEOUT_MS);
     }
 
@@ -403,7 +412,8 @@ public class HttpUtil {
      * @return a RawType object containing the image, null if the content type could not be found or the content type is
      *         not an image or the data size is too big
      */
-    public static RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength, int timeout) {
+    public static @Nullable RawType downloadImage(String url, boolean scanTypeInContent, long maxContentLength,
+            int timeout) {
         return downloadData(url, "image/.*", scanTypeInContent, maxContentLength, timeout);
     }
 
@@ -418,8 +428,8 @@ public class HttpUtil {
      * @return a RawType object containing the downloaded data, null if the content type does not match the expected
      *         type or the data size is too big
      */
-    public static RawType downloadData(String url, String contentTypeRegex, boolean scanTypeInContent,
-            long maxContentLength) {
+    public static @Nullable RawType downloadData(String url, @Nullable String contentTypeRegex,
+            boolean scanTypeInContent, long maxContentLength) {
         return downloadData(url, contentTypeRegex, scanTypeInContent, maxContentLength, DEFAULT_TIMEOUT_MS);
     }
 
@@ -435,8 +445,8 @@ public class HttpUtil {
      * @return a RawType object containing the downloaded data, null if the content type does not match the expected
      *         type or the data size is too big
      */
-    public static RawType downloadData(String url, String contentTypeRegex, boolean scanTypeInContent,
-            long maxContentLength, int timeout) {
+    public static @Nullable RawType downloadData(String url, @Nullable String contentTypeRegex,
+            boolean scanTypeInContent, long maxContentLength, int timeout) {
         final ProxyParams proxyParams = prepareProxyParams();
 
         RawType rawData = null;
@@ -500,7 +510,7 @@ public class HttpUtil {
      * @param data the data as a buffer of bytes
      * @return the MIME type of the content, null if the content type could not be found
      */
-    public static String guessContentTypeFromData(byte[] data) {
+    public static @Nullable String guessContentTypeFromData(byte[] data) {
         String contentType = null;
 
         // URLConnection.guessContentTypeFromStream(input) is not sufficient to detect all JPEG files
@@ -538,11 +548,11 @@ public class HttpUtil {
     }
 
     @Reference
-    protected void setHttpClientFactory(final HttpClientFactory httpClientFactory) {
+    protected void setHttpClientFactory(final @Nullable HttpClientFactory httpClientFactory) {
         HttpUtil.httpClientFactory = httpClientFactory;
     }
 
-    protected void unsetHttpClientFactory(final HttpClientFactory httpClientFactory) {
+    protected void unsetHttpClientFactory(final @Nullable HttpClientFactory httpClientFactory) {
         HttpUtil.httpClientFactory = null;
     }
 }

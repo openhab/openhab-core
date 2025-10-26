@@ -12,20 +12,24 @@
  */
 package org.openhab.core.voice.text;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Abstract syntax tree node. Result of parsing an expression.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public class ASTNode {
 
     private boolean success = false;
-    private ASTNode[] children;
-    private TokenList remainingTokens;
+    private ASTNode @Nullable [] children;
+    private @Nullable TokenList remainingTokens;
 
-    private String name;
-    private Object value;
-    private Object tag;
+    private @Nullable String name;
+    private @Nullable Object value;
+    private @Nullable Object tag;
 
     public ASTNode() {
     }
@@ -36,7 +40,7 @@ public class ASTNode {
      * @param children the node's children
      * @param remainingTokens remaining token list starting with the first token that was not covered/consumed
      */
-    public ASTNode(ASTNode[] children, TokenList remainingTokens) {
+    public ASTNode(ASTNode @Nullable [] children, @Nullable TokenList remainingTokens) {
         this.success = true;
         this.children = children;
         this.remainingTokens = remainingTokens;
@@ -48,7 +52,7 @@ public class ASTNode {
      * @param name the name that's used for looking up the tree
      * @return first node with the given name or null, if none was found
      */
-    public ASTNode findNode(String name) {
+    public @Nullable ASTNode findNode(String name) {
         if (this.name != null && this.name.equals(name)) {
             return this;
         }
@@ -88,7 +92,7 @@ public class ASTNode {
      * @param name the name of the named node to be found
      * @return the value of the resulting node as {@code String[]} or null if not found
      */
-    public String[] findValueAsStringArray(String name) {
+    public String @Nullable [] findValueAsStringArray(String name) {
         ASTNode node = findNode(name);
         return node == null ? null : node.getValueAsStringArray();
     }
@@ -100,7 +104,7 @@ public class ASTNode {
      * @param name the name of the named node to be found
      * @return the value of the resulting node as {@link String} or null if not found
      */
-    public String findValueAsString(String name) {
+    public @Nullable String findValueAsString(String name) {
         ASTNode node = findNode(name);
         return node == null ? null : node.getValueAsString();
     }
@@ -112,7 +116,7 @@ public class ASTNode {
      * @param cls the node's value has to be assignable to a reference of this class to match during search
      * @return the value of the resulting node. Null, if not found or the value does not match {@code cls}.
      */
-    public Object findValue(String name, Class<?> cls) {
+    public @Nullable Object findValue(String name, Class<?> cls) {
         ASTNode node = findNode(name);
         return node == null ? null
                 : ((node.value != null && cls.isAssignableFrom(node.value.getClass())) ? node.value : null);
@@ -124,7 +128,7 @@ public class ASTNode {
      * @param name the name of the named node to be found
      * @return the value of the resulting node. Null, if not found.
      */
-    public Object findValue(String name) {
+    public @Nullable Object findValue(String name) {
         ASTNode node = findNode(name);
         return node == null ? null : node.value;
     }
@@ -146,7 +150,7 @@ public class ASTNode {
     /**
      * @return the children
      */
-    public ASTNode[] getChildren() {
+    public ASTNode @Nullable [] getChildren() {
         return children;
     }
 
@@ -160,56 +164,56 @@ public class ASTNode {
     /**
      * @return the remainingTokens
      */
-    public TokenList getRemainingTokens() {
+    public @Nullable TokenList getRemainingTokens() {
         return remainingTokens;
     }
 
     /**
      * @param remainingTokens the remainingTokens to set
      */
-    public void setRemainingTokens(TokenList remainingTokens) {
+    public void setRemainingTokens(@Nullable TokenList remainingTokens) {
         this.remainingTokens = remainingTokens;
     }
 
     /**
      * @return the name
      */
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
     /**
      * @param name the name to set
      */
-    public void setName(String name) {
+    public void setName(@Nullable String name) {
         this.name = name;
     }
 
     /**
      * @return the value
      */
-    public Object getValue() {
+    public @Nullable Object getValue() {
         return value;
     }
 
     /**
      * @param value the value to set
      */
-    public void setValue(Object value) {
+    public void setValue(@Nullable Object value) {
         this.value = value;
     }
 
     /**
      * @return the tag
      */
-    public Object getTag() {
+    public @Nullable Object getTag() {
         return tag;
     }
 
     /**
      * @param tag the tag to set
      */
-    public void setTag(Object tag) {
+    public void setTag(@Nullable Object tag) {
         this.tag = tag;
     }
 }

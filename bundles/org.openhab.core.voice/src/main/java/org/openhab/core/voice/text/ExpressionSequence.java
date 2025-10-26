@@ -17,11 +17,14 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Expression that successfully parses, if a sequence of given expressions is matching. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public final class ExpressionSequence extends Expression {
 
     private List<Expression> subExpressions;

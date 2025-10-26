@@ -15,6 +15,7 @@ package org.openhab.core.io.transport.modbus.internal.pooling;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.EvictionConfig;
 import org.apache.commons.pool2.impl.EvictionPolicy;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.modbus.internal.pooling.ModbusSlaveConnectionFactoryImpl.PooledConnection;
 
 import net.wimpi.modbus.net.ModbusSlaveConnection;
@@ -26,6 +27,7 @@ import net.wimpi.modbus.net.ModbusSlaveConnection;
  *
  * @author Sami Salonen - Initial contribution
  */
+@NonNullByDefault({})
 public class ModbusSlaveConnectionEvictionPolicy implements EvictionPolicy<ModbusSlaveConnection> {
 
     @Override

@@ -16,6 +16,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
@@ -25,35 +27,36 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
  * @author Chris Jackson - Initial contribution
  * @author Thomas Höfer - Added unit
  */
+@NonNullByDefault
 public class ConfigDescriptionParameterBuilder {
 
     private String name;
     private Type type;
 
-    private String groupName;
+    private @Nullable String groupName;
 
-    private BigDecimal min;
-    private BigDecimal max;
-    private BigDecimal step;
-    private String pattern;
-    private Boolean required;
-    private Boolean readOnly;
-    private Boolean multiple;
-    private Integer multipleLimit;
-    private String unit;
-    private String unitLabel;
+    private @Nullable BigDecimal min;
+    private @Nullable BigDecimal max;
+    private @Nullable BigDecimal step;
+    private @Nullable String pattern;
+    private @Nullable Boolean required;
+    private @Nullable Boolean readOnly;
+    private @Nullable Boolean multiple;
+    private @Nullable Integer multipleLimit;
+    private @Nullable String unit;
+    private @Nullable String unitLabel;
 
-    private String context;
-    private String defaultValue;
-    private String label;
-    private String description;
+    private @Nullable String context;
+    private @Nullable String defaultValue;
+    private @Nullable String label;
+    private @Nullable String description;
 
-    private Boolean limitToOptions;
-    private Boolean advanced;
-    private Boolean verify;
+    private @Nullable Boolean limitToOptions;
+    private @Nullable Boolean advanced;
+    private @Nullable Boolean verify;
 
-    private List<ParameterOption> options = new ArrayList<>();
-    private List<FilterCriteria> filterCriteria = new ArrayList<>();
+    private @Nullable List<ParameterOption> options = new ArrayList<>();
+    private @Nullable List<FilterCriteria> filterCriteria = new ArrayList<>();
 
     private ConfigDescriptionParameterBuilder(String name, Type type) {
         this.name = name;
@@ -77,7 +80,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param min the min value of the {@link ConfigDescriptionParameter}
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withMinimum(BigDecimal min) {
+    public ConfigDescriptionParameterBuilder withMinimum(@Nullable BigDecimal min) {
         this.min = min;
         return this;
     }
@@ -88,7 +91,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param max the max value of the {@link ConfigDescriptionParameter}
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withMaximum(BigDecimal max) {
+    public ConfigDescriptionParameterBuilder withMaximum(@Nullable BigDecimal max) {
         this.max = max;
         return this;
     }
@@ -99,7 +102,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param step the step of the {@link ConfigDescriptionParameter}
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withStepSize(BigDecimal step) {
+    public ConfigDescriptionParameterBuilder withStepSize(@Nullable BigDecimal step) {
         this.step = step;
         return this;
     }
@@ -110,7 +113,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param pattern the pattern for the {@link ConfigDescriptionParameter}
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withPattern(String pattern) {
+    public ConfigDescriptionParameterBuilder withPattern(@Nullable String pattern) {
         this.pattern = pattern;
         return this;
     }
@@ -121,7 +124,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param readOnly <code>true</code> to make the parameter read only
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withReadOnly(Boolean readOnly) {
+    public ConfigDescriptionParameterBuilder withReadOnly(@Nullable Boolean readOnly) {
         this.readOnly = readOnly;
         return this;
     }
@@ -132,7 +135,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param multiple <code>true</code> for multiple selection
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withMultiple(Boolean multiple) {
+    public ConfigDescriptionParameterBuilder withMultiple(@Nullable Boolean multiple) {
         this.multiple = multiple;
         return this;
     }
@@ -143,7 +146,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param multipleLimit the parameters limit
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withMultipleLimit(Integer multipleLimit) {
+    public ConfigDescriptionParameterBuilder withMultipleLimit(@Nullable Integer multipleLimit) {
         this.multipleLimit = multipleLimit;
         return this;
     }
@@ -154,7 +157,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param context the context for this parameter
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withContext(String context) {
+    public ConfigDescriptionParameterBuilder withContext(@Nullable String context) {
         this.context = context;
         return this;
     }
@@ -165,7 +168,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param required <code>true</code> if the parameter is required
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withRequired(Boolean required) {
+    public ConfigDescriptionParameterBuilder withRequired(@Nullable Boolean required) {
         this.required = required;
         return this;
     }
@@ -176,7 +179,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param defaultValue the default value of the configuration parameter
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withDefault(String defaultValue) {
+    public ConfigDescriptionParameterBuilder withDefault(@Nullable String defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
@@ -187,7 +190,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param label a short user friendly description
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withLabel(String label) {
+    public ConfigDescriptionParameterBuilder withLabel(@Nullable String label) {
         this.label = label;
         return this;
     }
@@ -198,7 +201,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param description a detailed user friendly description
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withDescription(String description) {
+    public ConfigDescriptionParameterBuilder withDescription(@Nullable String description) {
         this.description = description;
         return this;
     }
@@ -209,7 +212,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param options the options for this parameter
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withOptions(List<ParameterOption> options) {
+    public ConfigDescriptionParameterBuilder withOptions(@Nullable List<ParameterOption> options) {
         this.options = options;
         return this;
     }
@@ -220,7 +223,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param advanced <code>true</code> to make the parameter advanced
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withAdvanced(Boolean advanced) {
+    public ConfigDescriptionParameterBuilder withAdvanced(@Nullable Boolean advanced) {
         this.advanced = advanced;
         return this;
     }
@@ -230,7 +233,7 @@ public class ConfigDescriptionParameterBuilder {
      *
      * @param verify flag
      */
-    public ConfigDescriptionParameterBuilder withVerify(Boolean verify) {
+    public ConfigDescriptionParameterBuilder withVerify(@Nullable Boolean verify) {
         this.verify = verify;
         return this;
     }
@@ -241,7 +244,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param limitToOptions <code>true</code> if only the declared options are acceptable
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withLimitToOptions(Boolean limitToOptions) {
+    public ConfigDescriptionParameterBuilder withLimitToOptions(@Nullable Boolean limitToOptions) {
         this.limitToOptions = limitToOptions;
         return this;
     }
@@ -252,7 +255,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param groupName the group name of this config description parameter
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withGroupName(String groupName) {
+    public ConfigDescriptionParameterBuilder withGroupName(@Nullable String groupName) {
         this.groupName = groupName;
         return this;
     }
@@ -263,7 +266,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param filterCriteria the filter criteria
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withFilterCriteria(List<FilterCriteria> filterCriteria) {
+    public ConfigDescriptionParameterBuilder withFilterCriteria(@Nullable List<FilterCriteria> filterCriteria) {
         this.filterCriteria = filterCriteria;
         return this;
     }
@@ -274,7 +277,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param unit the unit to be set
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withUnit(String unit) {
+    public ConfigDescriptionParameterBuilder withUnit(@Nullable String unit) {
         this.unit = unit;
         return this;
     }
@@ -285,7 +288,7 @@ public class ConfigDescriptionParameterBuilder {
      * @param unitLabel the unit label to be set
      * @return the updated builder instance
      */
-    public ConfigDescriptionParameterBuilder withUnitLabel(String unitLabel) {
+    public ConfigDescriptionParameterBuilder withUnitLabel(@Nullable String unitLabel) {
         this.unitLabel = unitLabel;
         return this;
     }

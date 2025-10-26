@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -36,6 +37,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Michael Riess - fix concurrent modification exception when setting properties
  * @author Michael Riess - fix equals() implementation
  */
+@NonNullByDefault
 public class Configuration {
     private final Map<String, Object> properties;
 
@@ -76,7 +78,13 @@ public class Configuration {
 
     public <T> T as(Class<T> configurationClass) {
         synchronized (properties) {
-            return ConfigParser.configurationAs(properties, configurationClass);
+            @Nullable
+            T result = ConfigParser.configurationAs(properties, configurationClass);
+            if (result == null) {
+                throw new IllegalArgumentException(
+                        "Configuration cannot be loaded converted to given class: " + configurationClass);
+            }
+            return result;
         }
     }
 
@@ -90,16 +98,25 @@ public class Configuration {
         return properties.containsKey(key);
     }
 
-    public Object get(String key) {
+    public @Nullable Object get(String key) {
         return properties.get(key);
     }
 
-    public Object put(String key, @Nullable Object value) {
-        Object normalizedValue = value == null ? null : ConfigUtil.normalizeType(value, null);
-        return properties.put(key, normalizedValue);
+    /**
+     * Insert a value.
+     * 
+     * @param key the key to insert the value for
+     */
+    public @Nullable Object put(String key, @Nullable Object value) {
+        if (value == null) {
+            return null;
+        }
+        // non-null if input is non-null
+        Object normalizedValue = ConfigUtil.normalizeType(value, null);
+        return (normalizedValue == null) ? null : properties.put(key, normalizedValue);
     }
 
-    public Object remove(String key) {
+    public @Nullable Object remove(String key) {
         return properties.remove(key);
     }
 

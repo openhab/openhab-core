@@ -12,11 +12,14 @@
  */
 package org.openhab.core.auth.oauth2client.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Just a place to store all the important, reused keywords.
  *
  * @author Gary Tse - Initial contribution
  */
+@NonNullByDefault
 public interface Keyword {
 
     String CLIENT_ID = "client_id";

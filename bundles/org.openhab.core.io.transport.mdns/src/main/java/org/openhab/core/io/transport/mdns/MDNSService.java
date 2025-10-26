@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.transport.mdns;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This interface defines how to use JmDNS based service discovery
  * to register and unregister services on Bonjour/MDNS
@@ -19,6 +21,7 @@ package org.openhab.core.io.transport.mdns;
  * @author Victor Belov - Initial contribution
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface MDNSService {
 
     /**

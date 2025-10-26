@@ -116,7 +116,7 @@ public class UIResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getUITiles", summary = "Get all registered UI tiles.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TileDTO.class)))) })
-    public Response getAll() {
+    public @Nullable Response getAll() {
         Stream<TileDTO> tiles = tileProvider.getTiles().map(this::toTileDTO);
         return Response.ok(new Stream2JSONInputStream(tiles)).build();
     }
@@ -126,7 +126,7 @@ public class UIResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getRegisteredUIComponentsInNamespace", summary = "Get all registered UI components in the specified namespace.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RootUIComponent.class)))) })
-    public Response getAllComponents(@Context Request request, @PathParam("namespace") String namespace,
+    public @Nullable Response getAllComponents(@Context Request request, @PathParam("namespace") String namespace,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         Stream<RootUIComponent> components = registry.getAll().stream();
@@ -177,7 +177,7 @@ public class UIResource implements RESTResource {
     @Operation(operationId = "getUIComponentInNamespace", summary = "Get a specific UI component in the specified namespace.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
             @ApiResponse(responseCode = "404", description = "Component not found") })
-    public Response getComponentByUID(@PathParam("namespace") String namespace,
+    public @Nullable Response getComponentByUID(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         RootUIComponent component = registry.get(componentUID);
@@ -195,7 +195,7 @@ public class UIResource implements RESTResource {
     @Operation(operationId = "addUIComponentToNamespace", summary = "Add a UI component in the specified namespace.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))) })
-    public Response addComponent(@PathParam("namespace") String namespace, RootUIComponent component) {
+    public @Nullable Response addComponent(@PathParam("namespace") String namespace, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         component.updateTimestamp();
         RootUIComponent createdComponent = registry.add(component);
@@ -211,7 +211,7 @@ public class UIResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
                     @ApiResponse(responseCode = "404", description = "Component not found") })
-    public Response updateComponent(@PathParam("namespace") String namespace,
+    public @Nullable Response updateComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         RootUIComponent existingComponent = registry.get(componentUID);
@@ -235,7 +235,7 @@ public class UIResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Component not found") })
-    public Response deleteComponent(@PathParam("namespace") String namespace,
+    public @Nullable Response deleteComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         RootUIComponent component = registry.get(componentUID);

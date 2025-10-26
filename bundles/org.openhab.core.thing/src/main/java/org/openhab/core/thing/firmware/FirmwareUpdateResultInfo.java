@@ -71,7 +71,7 @@ public final class FirmwareUpdateResultInfo {
      * @throws IllegalArgumentException if error message is null or empty for erroneous firmware updates
      */
     public static FirmwareUpdateResultInfo createFirmwareUpdateResultInfo(ThingUID thingUID,
-            FirmwareUpdateResult result, String errorMessage) {
+            FirmwareUpdateResult result, @Nullable String errorMessage) {
         return new FirmwareUpdateResultInfo(thingUID, result, errorMessage);
     }
 

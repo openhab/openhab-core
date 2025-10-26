@@ -104,7 +104,7 @@ public class ProfileTypeResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getProfileTypes", summary = "Gets all available profile types.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProfileTypeDTO.class), uniqueItems = true))) })
-    public Response getAll(
+    public @Nullable Response getAll(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("channelTypeUID") @Parameter(description = "channel type filter") @Nullable String channelTypeUID,
             @QueryParam("itemType") @Parameter(description = "item type filter") @Nullable String itemType) {

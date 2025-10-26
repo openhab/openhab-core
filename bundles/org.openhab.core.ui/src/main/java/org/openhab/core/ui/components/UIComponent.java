@@ -16,6 +16,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A UIComponent represents a piece of UI element for a client frontend to render; it is kept very simple and delegates
@@ -30,11 +34,15 @@ import java.util.Map;
  *
  * @author Yannick Schaus - Initial contribution
  */
+@NonNullByDefault
 public class UIComponent {
+    @Nullable
     String component;
 
+    @Nullable
     Map<String, Object> config;
 
+    @Nullable
     Map<String, List<UIComponent>> slots = null;
 
     /**
@@ -49,7 +57,7 @@ public class UIComponent {
      *
      * @param componentType type of the component as known to the frontend
      */
-    public UIComponent(String componentType) {
+    public UIComponent(@Nullable String componentType) {
         this.component = componentType;
         this.config = new HashMap<>();
     }
@@ -59,7 +67,7 @@ public class UIComponent {
      *
      * @return the component type
      */
-    public String getType() {
+    public @Nullable String getType() {
         return component;
     }
 
@@ -68,7 +76,7 @@ public class UIComponent {
      *
      * @return the component type
      */
-    public String getComponent() {
+    public @Nullable String getComponent() {
         return component;
     }
 
@@ -77,7 +85,7 @@ public class UIComponent {
      *
      * @param component the component type
      */
-    public void setComponent(String component) {
+    public void setComponent(@Nullable String component) {
         this.component = component;
     }
 
@@ -86,7 +94,7 @@ public class UIComponent {
      *
      * @return the map of configuration parameters
      */
-    public Map<String, Object> getConfig() {
+    public @Nullable Map<String, Object> getConfig() {
         return config;
     }
 
@@ -95,7 +103,7 @@ public class UIComponent {
      *
      * @param config the map of configuration parameters
      */
-    public void setConfig(Map<String, Object> config) {
+    public void setConfig(@Nullable Map<String, Object> config) {
         this.config = config;
     }
 
@@ -106,6 +114,7 @@ public class UIComponent {
      * @param value the parameter value
      */
     public void addConfig(String key, Object value) {
+        Objects.requireNonNull(config);
         this.config.put(key, value);
     }
 
@@ -114,7 +123,7 @@ public class UIComponent {
      *
      * @return the slots and their sub-components
      */
-    public Map<String, List<UIComponent>> getSlots() {
+    public @Nullable Map<String, List<UIComponent>> getSlots() {
         return slots;
     }
 
@@ -123,7 +132,7 @@ public class UIComponent {
      *
      * @param slots the slots and their sub-components
      */
-    public void setSlots(Map<String, List<UIComponent>> slots) {
+    public void setSlots(@Nullable Map<String, List<UIComponent>> slots) {
         this.slots = slots;
     }
 
@@ -149,7 +158,7 @@ public class UIComponent {
      * @param slotName the name of the slot
      * @return the list of sub-components in the slot
      */
-    public List<UIComponent> getSlot(String slotName) {
+    public @Nullable List<UIComponent> getSlot(String slotName) {
         return this.slots.get(slotName);
     }
 

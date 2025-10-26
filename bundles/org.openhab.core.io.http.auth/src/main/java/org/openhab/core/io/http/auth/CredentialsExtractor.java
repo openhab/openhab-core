@@ -14,6 +14,7 @@ package org.openhab.core.io.http.auth;
 
 import java.util.Optional;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.Credentials;
 
 /**
@@ -23,6 +24,7 @@ import org.openhab.core.auth.Credentials;
  *
  * @param <C> Context type.
  */
+@NonNullByDefault
 public interface CredentialsExtractor<C> {
 
     Optional<Credentials> retrieveCredentials(C requestContext);

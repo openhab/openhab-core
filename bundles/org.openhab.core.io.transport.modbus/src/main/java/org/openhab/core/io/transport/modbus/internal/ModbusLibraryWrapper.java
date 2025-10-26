@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.modbus.AsyncModbusReadResult;
 import org.openhab.core.io.transport.modbus.BitArray;
 import org.openhab.core.io.transport.modbus.ModbusReadCallback;
@@ -193,19 +193,19 @@ public class ModbusLibraryWrapper {
         ModbusTransaction transaction = endpoint.accept(new ModbusSlaveEndpointVisitor<>() {
 
             @Override
-            public @NonNull ModbusTransaction visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
+            public @Nullable ModbusTransaction visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
                 ModbusTCPTransaction transaction = new ModbusTCPTransaction();
                 transaction.setReconnecting(false);
                 return transaction;
             }
 
             @Override
-            public @NonNull ModbusTransaction visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
+            public @Nullable ModbusTransaction visit(ModbusSerialSlaveEndpoint modbusSerialSlavePoolingKey) {
                 return new ModbusSerialTransaction();
             }
 
             @Override
-            public @NonNull ModbusTransaction visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
+            public @Nullable ModbusTransaction visit(ModbusUDPSlaveEndpoint modbusUDPSlavePoolingKey) {
                 return new ModbusUDPTransaction();
             }
         });

@@ -17,7 +17,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.parser.Parser;
@@ -43,6 +46,7 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 @SuppressWarnings("deprecation")
 @Component(immediate = true)
 public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer<Bundle> {
@@ -62,7 +66,7 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
     /**
      * This field is a bundle tracker for bundles providing automation resources.
      */
-    private BundleTracker<Bundle> bTracker;
+    private @Nullable BundleTracker<Bundle> bTracker;
 
     /**
      * This field serves for saving the BundleEvents for the bundles providing automation resources until their
@@ -174,7 +178,7 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
      * This method returns the object to be tracked for the specified {@code Bundle}. The returned object is stored in
      * the {@code BundleTracker} and is available from the {@link BundleTracker#getObject(Bundle) getObject} method.
      *
-     * @param bundle The {@code Bundle} being added to the {@code BundleTracker} .
+     * @param bundle The {@code Bundle} (non-null) being added to the {@code BundleTracker} .
      * @param event The bundle event which caused this customizer method to be
      *            called or {@code null} if there is no bundle event associated with
      *            the call to this method.
@@ -183,7 +187,8 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
      *         be tracked.
      */
     @Override
-    public Bundle addingBundle(Bundle bundle, BundleEvent event) {
+    public Bundle addingBundle(@Nullable Bundle bundle, @Nullable BundleEvent event) {
+        Objects.requireNonNull(bundle);
         if (isAnAutomationProvider(bundle)) {
             if (HostFragmentMappingUtil.isFragmentBundle(bundle)) {
                 List<Bundle> hosts = HostFragmentMappingUtil.returnHostBundles(bundle);
@@ -213,14 +218,16 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
      * <p>
      * This method is called when a bundle being tracked by the {@code BundleTracker} has had its state modified.
      *
-     * @param bundle The {@code Bundle} whose state has been modified.
-     * @param event The bundle event which caused this customizer method to be
+     * @param bundle The {@code Bundle} (non-null) whose state has been modified.
+     * @param event The bundle event (non-null) which caused this customizer method to be
      *            called or {@code null} if there is no bundle event associated with
      *            the call to this method.
      * @param object The tracked object for the specified bundle.
      */
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+    public void modifiedBundle(@Nullable Bundle bundle, @Nullable BundleEvent event, @Nullable Bundle object) {
+        Objects.requireNonNull(bundle);
+        Objects.requireNonNull(event);
         int type = event.getType();
         if (type == BundleEvent.UPDATED || type == BundleEvent.RESOLVED) {
             addEvent(bundle, event);
@@ -233,14 +240,15 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
      * <p>
      * This method is called after a bundle is no longer being tracked by the {@code BundleTracker}.
      *
-     * @param bundle The {@code Bundle} that has been removed.
+     * @param bundle The {@code Bundle} (non-null) that has been removed.
      * @param event The bundle event which caused this customizer method to be
      *            called or {@code null} if there is no bundle event associated with
      *            the call to this method.
      * @param object The tracked object for the specified bundle.
      */
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+    public void removedBundle(@Nullable Bundle bundle, @Nullable BundleEvent event, @Nullable Bundle object) {
+        Objects.requireNonNull(bundle);
         if (HostFragmentMappingUtil.isFragmentBundle(bundle)) {
             for (Entry<Bundle, List<Bundle>> entry : HostFragmentMappingUtil.getMapping()) {
                 if (entry.getValue().contains(bundle)) {
@@ -264,7 +272,7 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
      *            bundle.
      */
     @SuppressWarnings({ "rawtypes" })
-    protected void addEvent(Bundle bundle, BundleEvent event) {
+    protected void addEvent(Bundle bundle, @Nullable BundleEvent event) {
         BundleEvent e = event != null ? event : initializeEvent(bundle);
         synchronized (queue) {
             queue.add(e);
@@ -290,7 +298,7 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
      * @return <tt>true</tt> if the specified {@link Bundle} contains resource files providing automation
      *         resources, <tt>false</tt> otherwise.
      */
-    private boolean isAnAutomationProvider(Bundle bundle) {
+    private boolean isAnAutomationProvider(@Nullable Bundle bundle) {
         return bundle.getEntryPaths(AbstractResourceBundleProvider.ROOT_DIRECTORY) != null;
     }
 }

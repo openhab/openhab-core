@@ -14,11 +14,15 @@ package org.openhab.core.voice.text;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * A helper to parse a sequence of tokens. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
  */
+@NonNullByDefault
 public class TokenList {
 
     private List<String> list;
@@ -48,7 +52,7 @@ public class TokenList {
      *
      * @return the first token of the list
      */
-    public String head() {
+    public @Nullable String head() {
         return (list.isEmpty() || head < 0 || head >= list.size()) ? null : list.get(head);
     }
 
@@ -57,7 +61,7 @@ public class TokenList {
      *
      * @return the last token of the list
      */
-    public String tail() {
+    public @Nullable String tail() {
         return (list.isEmpty() || tail < 0 || tail >= list.size()) ? null : list.get(tail);
     }
 
@@ -113,7 +117,7 @@ public class TokenList {
      * @return First token, if it is equal to one of the alternatives or if no alternatives were provided.
      *         Null otherwise. Always null, if there is no first token (if the list is empty).
      */
-    public String peekHead(String... alternatives) {
+    public @Nullable String peekHead(String... alternatives) {
         return peek(head, alternatives);
     }
 
@@ -125,7 +129,7 @@ public class TokenList {
      * @return Last token, if it is equal to one of the alternatives or if no alternatives were provided.
      *         Null otherwise. Always null, if there is no last token (if the list is empty).
      */
-    public String peekTail(String... alternatives) {
+    public @Nullable String peekTail(String... alternatives) {
         return peek(tail, alternatives);
     }
 
@@ -147,7 +151,7 @@ public class TokenList {
         return new TokenList(list, head, tail - 1);
     }
 
-    private String peek(int index, String... alternatives) {
+    private @Nullable String peek(int index, String... alternatives) {
         return splice(index, alternatives);
     }
 
@@ -155,7 +159,7 @@ public class TokenList {
         return splice(index, alternatives) != null;
     }
 
-    private String splice(int index, String... alternatives) {
+    private @Nullable String splice(int index, String... alternatives) {
         if (index < head || index > tail || head > tail) {
             return null;
         }

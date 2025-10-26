@@ -15,6 +15,7 @@ package org.openhab.core.config.core.internal.normalization;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 
 /**
@@ -24,6 +25,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
  * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - made class final and minor javadoc changes
  */
+@NonNullByDefault
 final class IntNormalizer extends AbstractNormalizer {
 
     @Override

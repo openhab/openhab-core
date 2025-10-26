@@ -110,7 +110,7 @@ public class InboxResource implements RESTResource {
             @ApiResponse(responseCode = "400", description = "Invalid new thing ID."),
             @ApiResponse(responseCode = "404", description = "Thing unable to be approved."),
             @ApiResponse(responseCode = "409", description = "No binding found that supports this thing.") })
-    public Response approve(
+    public @Nullable Response approve(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @Parameter(description = "thing label") @Nullable String label,
@@ -143,7 +143,7 @@ public class InboxResource implements RESTResource {
     @Operation(operationId = "removeItemFromInbox", summary = "Removes the discovery result from the inbox.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox.") })
-    public Response delete(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
+    public @Nullable Response delete(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         if (inbox.remove(new ThingUID(thingUID))) {
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } else {
@@ -155,7 +155,7 @@ public class InboxResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getDiscoveredInboxItems", summary = "Get all discovered things.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DiscoveryResultDTO.class)))) })
-    public Response getAll(
+    public @Nullable Response getAll(
             @QueryParam("includeIgnored") @DefaultValue("true") @Parameter(description = "If true, include ignored inbox entries. Defaults to true") boolean includeIgnored) {
         Stream<DiscoveryResult> discoveryStream = inbox.getAll().stream();
         if (!includeIgnored) {
@@ -169,7 +169,7 @@ public class InboxResource implements RESTResource {
     @Path("/{thingUID}/ignore")
     @Operation(operationId = "flagInboxItemAsIgnored", summary = "Flags a discovery result as ignored for further processing.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
-    public Response ignore(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
+    public @Nullable Response ignore(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         inbox.setFlag(new ThingUID(thingUID), DiscoveryResultFlag.IGNORED);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
@@ -178,7 +178,7 @@ public class InboxResource implements RESTResource {
     @Path("/{thingUID}/unignore")
     @Operation(operationId = "removeIgnoreFlagOnInboxItem", summary = "Removes ignore flag from a discovery result.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
-    public Response unignore(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
+    public @Nullable Response unignore(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         inbox.setFlag(new ThingUID(thingUID), DiscoveryResultFlag.NEW);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }

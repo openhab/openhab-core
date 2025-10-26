@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -26,30 +27,31 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Kai Kreuzer - Initial contribution
  * @author Yannick Schaus - Add fields
  */
+@NonNullByDefault
 public class Addon {
     public static final Set<String> CODE_MATURITY_LEVELS = Set.of("alpha", "beta", "mature", "stable");
     public static final String ADDON_SEPARATOR = "-";
 
     private final String uid;
 
-    private final String id;
-    private final String label;
+    private final @Nullable String id;
+    private final @Nullable String label;
     private final String version;
     private final @Nullable String maturity;
     private final boolean compatible;
-    private final String contentType;
+    private final @Nullable String contentType;
     private final @Nullable String link;
     private final String author;
     private final boolean verifiedAuthor;
     private boolean installed;
-    private final String type;
+    private final @Nullable String type;
     private final @Nullable String description;
     private final @Nullable String detailedDescription;
     private final String configDescriptionURI;
     private final String keywords;
     private final List<String> countries;
     private final @Nullable String license;
-    private final String connection;
+    private final @Nullable String connection;
     private final @Nullable String backgroundColor;
     private final @Nullable String imageLink;
     private final Map<String, Object> properties;
@@ -84,12 +86,12 @@ public class Addon {
      * @param loggerPackages a {@link List} containing the package names belonging to this add-on
      * @throws IllegalArgumentException when a mandatory parameter is invalid
      */
-    private Addon(String uid, String type, String id, String label, String version, @Nullable String maturity,
-            boolean compatible, String contentType, @Nullable String link, String author, boolean verifiedAuthor,
-            boolean installed, @Nullable String description, @Nullable String detailedDescription,
-            String configDescriptionURI, String keywords, List<String> countries, @Nullable String license,
-            String connection, @Nullable String backgroundColor, @Nullable String imageLink,
-            @Nullable Map<String, Object> properties, List<String> loggerPackages) {
+    private Addon(String uid, @Nullable String type, @Nullable String id, @Nullable String label, String version,
+            @Nullable String maturity, boolean compatible, @Nullable String contentType, @Nullable String link,
+            String author, boolean verifiedAuthor, boolean installed, @Nullable String description,
+            @Nullable String detailedDescription, String configDescriptionURI, String keywords, List<String> countries,
+            @Nullable String license, @Nullable String connection, @Nullable String backgroundColor,
+            @Nullable String imageLink, @Nullable Map<String, Object> properties, List<String> loggerPackages) {
         if (uid.isBlank()) {
             throw new IllegalArgumentException("uid must not be empty");
         }
@@ -129,7 +131,7 @@ public class Addon {
     /**
      * The type of the addon (same as id of {@link AddonType})
      */
-    public String getType() {
+    public @Nullable String getType() {
         return type;
     }
 
@@ -143,14 +145,14 @@ public class Addon {
     /**
      * The id of the add-on (e.g. "influxdb")
      */
-    public String getId() {
+    public @Nullable String getId() {
         return id;
     }
 
     /**
      * The label of the add-on
      */
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return label;
     }
 
@@ -199,7 +201,7 @@ public class Addon {
     /**
      * The content type of the add-on
      */
-    public String getContentType() {
+    public @Nullable String getContentType() {
         return contentType;
     }
 
@@ -248,7 +250,7 @@ public class Addon {
     /**
      * A string describing the type of connection (local, cloud, cloudDiscovery) this add-on uses, if applicable.
      */
-    public String getConnection() {
+    public @Nullable String getConnection() {
         return connection;
     }
 
@@ -333,24 +335,24 @@ public class Addon {
 
     public static class Builder {
         private final String uid;
-        private String id;
-        private String label;
+        private @Nullable String id;
+        private @Nullable String label;
         private String version = "";
         private @Nullable String maturity;
         private boolean compatible = true;
-        private String contentType;
+        private @Nullable String contentType;
         private @Nullable String link;
         private String author = "";
         private boolean verifiedAuthor = false;
         private boolean installed = false;
-        private String type;
+        private @Nullable String type;
         private @Nullable String description;
         private @Nullable String detailedDescription;
         private String configDescriptionURI = "";
         private String keywords = "";
         private List<String> countries = List.of();
         private @Nullable String license;
-        private String connection = "";
+        private @Nullable String connection = "";
         private @Nullable String backgroundColor;
         private @Nullable String imageLink;
         private Map<String, Object> properties = new HashMap<>();
@@ -360,17 +362,17 @@ public class Addon {
             this.uid = uid;
         }
 
-        public Builder withType(String type) {
+        public Builder withType(@Nullable String type) {
             this.type = type;
             return this;
         }
 
-        public Builder withId(String id) {
+        public Builder withId(@Nullable String id) {
             this.id = id;
             return this;
         }
 
-        public Builder withLabel(String label) {
+        public Builder withLabel(@Nullable String label) {
             this.label = label;
             return this;
         }
@@ -395,7 +397,7 @@ public class Addon {
             return this;
         }
 
-        public Builder withLink(String link) {
+        public Builder withLink(@Nullable String link) {
             this.link = link;
             return this;
         }
@@ -416,12 +418,12 @@ public class Addon {
             return this;
         }
 
-        public Builder withDescription(String description) {
+        public Builder withDescription(@Nullable String description) {
             this.description = description;
             return this;
         }
 
-        public Builder withDetailedDescription(String detailedDescription) {
+        public Builder withDetailedDescription(@Nullable String detailedDescription) {
             this.detailedDescription = detailedDescription;
             return this;
         }
@@ -446,12 +448,12 @@ public class Addon {
             return this;
         }
 
-        public Builder withConnection(String connection) {
+        public Builder withConnection(@Nullable String connection) {
             this.connection = connection;
             return this;
         }
 
-        public Builder withBackgroundColor(String backgroundColor) {
+        public Builder withBackgroundColor(@Nullable String backgroundColor) {
             this.backgroundColor = backgroundColor;
             return this;
         }

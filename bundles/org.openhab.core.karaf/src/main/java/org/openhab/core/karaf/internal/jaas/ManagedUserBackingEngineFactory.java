@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.UserRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -26,6 +27,7 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Yannick Schaus - initial contribution
  */
+@NonNullByDefault
 @Component(service = BackingEngineFactory.class)
 public class ManagedUserBackingEngineFactory implements BackingEngineFactory {
 
@@ -41,6 +43,7 @@ public class ManagedUserBackingEngineFactory implements BackingEngineFactory {
         return ManagedUserRealm.MODULE_CLASS;
     }
 
+    @NonNullByDefault({})
     @Override
     public BackingEngine build(Map<String, ?> options) {
         return new ManagedUserBackingEngine(userRegistry);

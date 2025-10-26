@@ -18,6 +18,8 @@ import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -25,6 +27,7 @@ import org.osgi.service.http.HttpContext;
  *
  * @author Łukasz Dywicki - Initial contribution.
  */
+@NonNullByDefault
 class DelegatingHttpContext implements HttpContext {
 
     private final HttpContext delegate;
@@ -34,17 +37,18 @@ class DelegatingHttpContext implements HttpContext {
     }
 
     @Override
-    public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public boolean handleSecurity(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response)
+            throws IOException {
         return delegate.handleSecurity(request, response);
     }
 
     @Override
-    public URL getResource(String name) {
+    public @Nullable URL getResource(@Nullable String name) {
         return delegate.getResource(name);
     }
 
     @Override
-    public String getMimeType(String name) {
+    public @Nullable String getMimeType(@Nullable String name) {
         return delegate.getMimeType(name);
     }
 }

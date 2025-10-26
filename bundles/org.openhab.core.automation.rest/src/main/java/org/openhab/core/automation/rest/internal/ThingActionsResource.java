@@ -166,7 +166,7 @@ public class ThingActionsResource implements RESTResource {
     @Operation(operationId = "getAvailableActionsForThing", summary = "Get all available actions for provided thing UID", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ThingActionDTO.class), uniqueItems = true))),
             @ApiResponse(responseCode = "404", description = "No actions found.") })
-    public Response getActions(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
+    public @Nullable Response getActions(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         ThingUID aThingUID = new ThingUID(thingUID);
@@ -226,7 +226,8 @@ public class ThingActionsResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Map.class))),
             @ApiResponse(responseCode = "404", description = "Action not found"),
             @ApiResponse(responseCode = "500", description = "Creation of action handler or execution failed") })
-    public Response executeThingAction(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
+    public @Nullable Response executeThingAction(
+            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @PathParam("actionUid") @Parameter(description = "action type UID (including scope, separated by '.')") String actionTypeUid,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @Parameter(description = "action inputs as map (parameter name as key / argument as value)") Map<String, Object> actionInputs) {

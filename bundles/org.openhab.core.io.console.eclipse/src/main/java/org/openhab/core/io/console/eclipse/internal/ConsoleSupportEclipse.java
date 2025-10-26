@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.openhab.core.io.console.Console;
@@ -38,6 +40,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Split console interface and specific implementation
  */
+@NonNullByDefault
 @Component
 public class ConsoleSupportEclipse implements CommandProvider {
 
@@ -58,7 +61,7 @@ public class ConsoleSupportEclipse implements CommandProvider {
         consoleCommandExtensions.remove(consoleCommandExtension.getCommand());
     }
 
-    private ConsoleCommandExtension getConsoleCommandExtension(final String cmd) {
+    private @Nullable ConsoleCommandExtension getConsoleCommandExtension(final String cmd) {
         return consoleCommandExtensions.get(cmd);
     }
 
@@ -74,7 +77,7 @@ public class ConsoleSupportEclipse implements CommandProvider {
      * @param interpreter the equinox command interpreter
      * @return null, return parameter is not used
      */
-    public Object _openhab(final CommandInterpreter interpreter) {
+    public @Nullable Object _openhab(final CommandInterpreter interpreter) {
         final Console console = new OSGiConsole(BASE, interpreter);
 
         final String cmd = interpreter.nextArgument();

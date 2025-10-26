@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
 
 /**
@@ -22,6 +23,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Laurent Garnier - New field reloadIcon
  * @author Danny Baumann - New field labelSource
  */
+@NonNullByDefault({}) // DTOs not to be checked
 public class SitemapWidgetEvent extends SitemapEvent {
 
     public String widgetId;

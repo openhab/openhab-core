@@ -188,7 +188,7 @@ public class AddonResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSuggestedAddons", summary = "Get suggested add-ons to be installed.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Addon.class)))), })
-    public Response getSuggestions(
+    public @Nullable Response getSuggestions(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
@@ -202,7 +202,7 @@ public class AddonResource implements RESTResource {
     @Operation(operationId = "getAddonServices", summary = "Get add-on services.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AddonType.class)))),
             @ApiResponse(responseCode = "404", description = "Service not found") })
-    public Response getTypes(
+    public @Nullable Response getTypes(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
@@ -228,7 +228,7 @@ public class AddonResource implements RESTResource {
     @Operation(operationId = "getAddonById", summary = "Get add-on with given ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Addon.class))),
             @ApiResponse(responseCode = "404", description = "Not found") })
-    public Response getById(
+    public @Nullable Response getById(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
@@ -251,7 +251,8 @@ public class AddonResource implements RESTResource {
     @Operation(operationId = "installAddonById", summary = "Installs the add-on with the given ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Not found") })
-    public Response installAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
+    public @Nullable Response installAddon(
+            final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
         if (addonService == null || addonService.getAddon(addonId, null) == null) {
@@ -274,7 +275,7 @@ public class AddonResource implements RESTResource {
     @Operation(operationId = "installAddonFromURL", summary = "Installs the add-on from the given URL.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "The given URL is malformed or not valid.") })
-    public Response installAddonByURL(
+    public @Nullable Response installAddonByURL(
             final @PathParam("url") @Parameter(description = "addon install URL") String url) {
         try {
             URI addonURI = new URI(url);
@@ -293,7 +294,8 @@ public class AddonResource implements RESTResource {
     @Operation(operationId = "uninstallAddon", summary = "Uninstalls the add-on with the given ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Not found") })
-    public Response uninstallAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
+    public @Nullable Response uninstallAddon(
+            final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
         if (addonService == null || addonService.getAddon(addonId, null) == null) {
@@ -317,7 +319,8 @@ public class AddonResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Add-on does not exist"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be read due to internal error") })
-    public Response getConfiguration(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
+    public @Nullable Response getConfiguration(
+            final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         try {
             AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
@@ -351,9 +354,10 @@ public class AddonResource implements RESTResource {
             @ApiResponse(responseCode = "204", description = "No old configuration"),
             @ApiResponse(responseCode = "404", description = "Add-on does not exist"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
-    public Response updateConfiguration(@PathParam("addonId") @Parameter(description = "Add-on id") String addonId,
+    public @Nullable Response updateConfiguration(
+            @PathParam("addonId") @Parameter(description = "Add-on id") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId,
-            @Nullable Map<String, @Nullable Object> configuration) {
+            @Nullable Map<String, Object> configuration) {
         try {
             AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
             if (addonService == null) {
@@ -379,8 +383,8 @@ public class AddonResource implements RESTResource {
         }
     }
 
-    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
-            @Nullable Map<String, @Nullable Object> properties, String addonId) {
+    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
+            String addonId) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }

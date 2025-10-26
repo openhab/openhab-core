@@ -33,6 +33,8 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerUtils;
 import org.openhab.core.service.ReadyService;
@@ -58,6 +60,7 @@ import org.osgi.framework.ServiceReference;
  * @author Dimitar Ivanov - The extension to include can be configured or default ones can be used; update method is
  *         introduced
  */
+@NonNullByDefault
 public class SyntheticBundleInstaller {
 
     private static final int WAIT_TIMOUT = 30; // [seconds]
@@ -363,7 +366,7 @@ public class SyntheticBundleInstaller {
             String path = url.getPath();
             URI baseURI = url.toURI();
 
-            List<URL> list = collectEntries(bundle, path, extensionsToInclude);
+            List<@Nullable URL> list = collectEntries(bundle, path, extensionsToInclude);
             for (URL entryURL : list) {
                 String fileEntry = convertToFileEntry(baseURI, entryURL);
                 result.add(fileEntry);
@@ -372,13 +375,13 @@ public class SyntheticBundleInstaller {
         return result;
     }
 
-    private static URL getBaseURL(Bundle bundle, String bundleName) {
+    private static @Nullable URL getBaseURL(Bundle bundle, String bundleName) {
         Enumeration<URL> entries = bundle.findEntries("/", bundleName, true);
         return entries != null ? entries.nextElement() : null;
     }
 
-    private static List<URL> collectEntries(Bundle bundle, String path, Set<String> extensionsToInclude) {
-        List<URL> result = new ArrayList<>();
+    private static List<@Nullable URL> collectEntries(Bundle bundle, String path, Set<String> extensionsToInclude) {
+        List<@Nullable URL> result = new ArrayList<>();
         for (String filePattern : extensionsToInclude) {
             Enumeration<URL> entries = bundle.findEntries(path, filePattern, true);
             if (entries != null) {
@@ -394,7 +397,7 @@ public class SyntheticBundleInstaller {
         return relativeURI.toString();
     }
 
-    private static Manifest getManifest(Bundle bundle, String bundlePath) throws IOException {
+    private static @Nullable Manifest getManifest(Bundle bundle, String bundlePath) throws IOException {
         String filePath = bundlePath + "META-INF/MANIFEST.MF";
         URL resource = bundle.getResource(filePath);
         if (resource == null) {

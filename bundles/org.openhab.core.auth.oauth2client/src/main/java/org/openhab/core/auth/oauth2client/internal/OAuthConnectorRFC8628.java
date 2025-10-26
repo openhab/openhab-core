@@ -82,10 +82,10 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     private final ScheduledExecutorService scheduler;
     private final String handle;
 
-    private final String accessTokenRequestUrl;
-    private final String deviceCodeRequestUrl;
-    private final String clientIdParameter;
-    private final String scopeParameter;
+    private final @Nullable String accessTokenRequestUrl;
+    private final @Nullable String deviceCodeRequestUrl;
+    private final @Nullable String clientIdParameter;
+    private final @Nullable String scopeParameter;
 
     private @Nullable ScheduledFuture<?> atrPollTaskSchedule;
     private @Nullable DeviceCodeResponseDTO dcrCached;
@@ -110,8 +110,8 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      */
     public OAuthConnectorRFC8628(OAuthClientService oAuthClientService, String handle,
             OAuthStoreHandler oAuthStoreHandler, HttpClientFactory httpClientFactory, @Nullable GsonBuilder gsonBuilder,
-            String accessTokenRequestUrl, String deviceCodeRequestUrl, String clientId, String scope)
-            throws OAuthException {
+            @Nullable String accessTokenRequestUrl, @Nullable String deviceCodeRequestUrl, @Nullable String clientId,
+            @Nullable String scope) throws OAuthException {
         super(httpClientFactory, null, gsonBuilder != null ? gsonBuilder : new GsonBuilder());
         this.oAuthClientService = oAuthClientService;
         this.oAuthStoreHandler = oAuthStoreHandler;

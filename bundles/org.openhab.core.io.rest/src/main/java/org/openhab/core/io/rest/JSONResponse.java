@@ -25,6 +25,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,7 @@ import com.google.gson.stream.JsonWriter;
  * @author Henning Treu - Provide streaming capabilities
  * @author Jörg Sautter - Improve streaming capabilities
  */
+@NonNullByDefault
 public class JSONResponse {
 
     private static final JSONResponse INSTANCE = new JSONResponse();
@@ -65,7 +68,7 @@ public class JSONResponse {
      * @param errormessage
      * @return Response containing a status and the errormessage in JSON format
      */
-    public static Response createErrorResponse(Response.StatusType status, String errormessage) {
+    public static Response createErrorResponse(Response.StatusType status, @Nullable String errormessage) {
         return createResponse(status, null, errormessage);
     }
 
@@ -78,7 +81,8 @@ public class JSONResponse {
      * @param errormessage an optional error message (may be null), ignored if the status family is successful
      * @return Response configure for error or success
      */
-    public static Response createResponse(Response.StatusType status, Object entity, String errormessage) {
+    public static Response createResponse(Response.StatusType status, @Nullable Object entity,
+            @Nullable String errormessage) {
         if (status.getFamily() != Response.Status.Family.SUCCESSFUL) {
             return INSTANCE.createErrorResponse(status, entity, errormessage);
         }
@@ -92,7 +96,7 @@ public class JSONResponse {
      * @param status
      * @return ResponseBuilder configured for "Content-Type" MediaType.APPLICATION_JSON
      */
-    private ResponseBuilder responseBuilder(Response.StatusType status) {
+    private @Nullable ResponseBuilder responseBuilder(Response.StatusType status) {
         return Response.status(status).header("Content-Type", MediaType.APPLICATION_JSON);
     }
 
@@ -105,7 +109,8 @@ public class JSONResponse {
      * @param ex
      * @return
      */
-    private JsonElement createErrorJson(String message, Response.StatusType status, Object entity, Exception ex) {
+    private JsonElement createErrorJson(@Nullable String message, Response.StatusType status, @Nullable Object entity,
+            @Nullable Exception ex) {
         JsonObject resultJson = new JsonObject();
         JsonObject errorJson = new JsonObject();
         resultJson.add(JSON_KEY_ERROR, errorJson);
@@ -137,14 +142,15 @@ public class JSONResponse {
         return resultJson;
     }
 
-    private Response createErrorResponse(Response.StatusType status, Object entity, String errormessage) {
+    private Response createErrorResponse(Response.StatusType status, @Nullable Object entity,
+            @Nullable String errormessage) {
         ResponseBuilder rp = responseBuilder(status);
         JsonElement errorJson = createErrorJson(errormessage, status, entity, null);
         rp.entity(errorJson);
         return rp.build();
     }
 
-    private Response createResponse(Response.StatusType status, final Object entity) {
+    private Response createResponse(Response.StatusType status, final @Nullable Object entity) {
         ResponseBuilder rp = responseBuilder(status);
 
         if (entity == null) {
@@ -185,7 +191,7 @@ public class JSONResponse {
         private final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
 
         @Override
-        public Response toResponse(Exception e) {
+        public @Nullable Response toResponse(@Nullable Exception e) {
             logger.debug("Exception during REST handling.", e);
 
             Response.StatusType status = Response.Status.INTERNAL_SERVER_ERROR;
