@@ -56,7 +56,7 @@ public class FilterCriteria {
             this.symbol = symbol;
         }
 
-        String getSymbol() {
+        public String getSymbol() {
             return symbol;
         }
     }
