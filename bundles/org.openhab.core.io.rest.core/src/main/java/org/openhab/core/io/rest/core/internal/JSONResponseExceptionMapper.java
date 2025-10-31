@@ -58,7 +58,7 @@ public class JSONResponseExceptionMapper implements ExceptionMapper<Exception> {
             logger.debug("Requested resource not (yet) found", cee);
             return cee.getResponse();
         } else if (e instanceof IllegalArgumentException){
-            logger.debug("Iivalid argument submitted for REST request", e);
+            logger.debug("Invalid argument submitted for REST request", e);
             return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } else {
             logger.error("Unexpected exception occurred while processing REST request.", e);
