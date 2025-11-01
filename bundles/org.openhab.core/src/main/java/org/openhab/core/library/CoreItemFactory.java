@@ -61,8 +61,7 @@ public class CoreItemFactory implements ItemFactory {
     public static final String SWITCH = "Switch";
 
     public static final Set<String> VALID_ITEM_TYPES = Set.of( //
-            CALL, COLOR, CONTACT, DATETIME, DIMMER, IMAGE, LOCATION, NUMBER, PLAYER, ROLLERSHUTTER, STRING, SWITCH //
-    );
+            CALL, COLOR, CONTACT, DATETIME, DIMMER, IMAGE, LOCATION, NUMBER, PLAYER, ROLLERSHUTTER, STRING, SWITCH);
 
     private final UnitProvider unitProvider;
 
