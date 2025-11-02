@@ -217,7 +217,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     private Device getDevice(UpnpIOParticipant participant) {
-        return upnpService.getRegistry().getDevice(new UDN(participant.getUDN()), false);
+        return upnpService.getRegistry().getDevice(new UDN(participant.getUDN()), true);
     }
 
     @Override
@@ -362,7 +362,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     @Override
     public boolean isRegistered(UpnpIOParticipant participant) {
-        return upnpService.getRegistry().getDevice(new UDN(participant.getUDN()), false) != null;
+        return upnpService.getRegistry().getDevice(new UDN(participant.getUDN()), true) != null;
     }
 
     @Override
@@ -518,10 +518,6 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     @Override
     public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
         informParticipants(device, true);
-
-        for (RemoteDevice childDevice : device.getEmbeddedDevices()) {
-            informParticipants(childDevice, true);
-        }
     }
 
     @Override
@@ -531,10 +527,6 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     @Override
     public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
         informParticipants(device, false);
-
-        for (RemoteDevice childDevice : device.getEmbeddedDevices()) {
-            informParticipants(childDevice, false);
-        }
     }
 
     @Override
