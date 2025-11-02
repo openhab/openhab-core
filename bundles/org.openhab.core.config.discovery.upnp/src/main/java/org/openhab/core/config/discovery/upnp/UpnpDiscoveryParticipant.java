@@ -12,11 +12,15 @@
  */
 package org.openhab.core.config.discovery.upnp;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.model.meta.RemoteDevice;
+import org.jupnp.model.meta.RemoteService;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
@@ -44,10 +48,11 @@ public interface UpnpDiscoveryParticipant {
     Set<ThingTypeUID> getSupportedThingTypeUIDs();
 
     /**
-     * Creates a discovery result for a upnp device
+     * Creates a discovery result for a UPnP device. Only the "root device" is discovered,
+     * to find embedded/child devices, use {@link #enumerateAllDevices(RemoteDevice)}.
      *
-     * @param device the upnp device found on the network
-     * @return the according discovery result or <code>null</code>, if device is not
+     * @param device the UPnP device found on the network.
+     * @return the resulting discovery result or {@code null}, if device is not
      *         supported by this participant
      */
     @Nullable
@@ -78,5 +83,50 @@ public interface UpnpDiscoveryParticipant {
      */
     default long getRemovalGracePeriodSeconds(RemoteDevice device) {
         return 0;
+    }
+
+    /**
+     * Generates a {@link List} of {@link RemoteService}es offered by the specified {@link RemoteDevice} and
+     * its embedded/child devices, if any.
+     *
+     * @param device the {@link RemoteDevice} whose services to enumerate.
+     * @return The resulting {@link List} of {@link RemoteService}es.
+     */
+    static List<RemoteService> enumerateAllServices(RemoteDevice device) {
+        List<RemoteService> result = new ArrayList<>();
+        RemoteService[] services;
+        for (RemoteDevice d : enumerateAllDevices(device)) {
+            services = d.getServices();
+            if (services != null && services.length > 0) {
+                result.addAll(Arrays.asList(services));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Generates a {@link List} of the specified {@link RemoteDevice} itself and its embedded/child devices.
+     *
+     * @param device the {@link RemoteDevice} whose device tree to enumerate.
+     * @return The resulting {@link List} of {@link RemoteDevice}s.
+     */
+    static List<RemoteDevice> enumerateAllDevices(RemoteDevice device) {
+        List<RemoteDevice> result = new ArrayList<>();
+        result.add(device);
+        enumerateChildDevices(device, result);
+        return result;
+    }
+
+    /**
+     * Traverses and adds child/embedded devices to the provided {@link List} recursively.
+     *
+     * @param device the {@link RemoteDevice} whose descendants to add to {@code devices}.
+     * @param devices the {@link List} to add the descendants to.
+     */
+    static void enumerateChildDevices(RemoteDevice device, List<RemoteDevice> devices) {
+        for (RemoteDevice child : device.getEmbeddedDevices()) {
+            devices.add(child);
+            enumerateChildDevices(child, devices);
+        }
     }
 }
