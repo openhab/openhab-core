@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.CurrencyService;
 import org.openhab.core.library.dimension.Currency;
 import org.openhab.core.library.dimension.EnergyPrice;
+import org.openhab.core.library.dimension.VolumePrice;
 
 import tech.units.indriya.AbstractSystemOfUnits;
 import tech.units.indriya.format.SimpleUnitFormat;
@@ -32,6 +33,7 @@ import tech.units.indriya.unit.ProductUnit;
  * The {@link CurrencyUnits} defines the UoM system for handling currencies
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Christoph Weitkamp - Added price per volume
  */
 @NonNullByDefault
 public final class CurrencyUnits extends AbstractSystemOfUnits {
@@ -41,10 +43,18 @@ public final class CurrencyUnits extends AbstractSystemOfUnits {
     public static final Unit<Currency> BASE_CURRENCY = new CurrencyUnit("DEF", null);
     public static final Unit<EnergyPrice> BASE_ENERGY_PRICE = new ProductUnit<>(
             BASE_CURRENCY.divide(Units.KILOWATT_HOUR));
+    public static final Unit<VolumePrice> PRICE_PER_LITRE = new ProductUnit<>(BASE_CURRENCY.divide(Units.LITRE));
+    public static final Unit<VolumePrice> PRICE_PER_CUBIC_METRE = new ProductUnit<>(
+            BASE_CURRENCY.divide(SIUnits.CUBIC_METRE));
+    public static final Unit<VolumePrice> PRICE_PER_GALLON_LIQUID_US = new ProductUnit<>(
+            BASE_CURRENCY.divide(ImperialUnits.GALLON_LIQUID_US));
 
     static {
         addUnit(BASE_CURRENCY);
         INSTANCE.units.add(BASE_ENERGY_PRICE);
+        INSTANCE.units.add(PRICE_PER_LITRE);
+        INSTANCE.units.add(PRICE_PER_CUBIC_METRE);
+        INSTANCE.units.add(PRICE_PER_GALLON_LIQUID_US);
     }
 
     @Override

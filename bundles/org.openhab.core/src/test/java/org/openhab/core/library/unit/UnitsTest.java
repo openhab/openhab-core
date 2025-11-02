@@ -12,8 +12,9 @@
  */
 package org.openhab.core.library.unit;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,6 +29,7 @@ import javax.measure.quantity.Power;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
+import javax.measure.quantity.Volume;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -282,6 +284,70 @@ public class UnitsTest {
         Quantity<Length> mile = km.to(ImperialUnits.MILE);
         assertThat(mile.getUnit(), is(ImperialUnits.MILE));
         assertThat(mile.getValue().doubleValue(), is(closeTo(6.2137119223733395d, DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testLitre2CubicMetre() {
+        Quantity<Volume> l = Quantities.getQuantity(BigDecimal.ONE, Units.LITRE);
+
+        Quantity<Volume> m3 = l.to(SIUnits.CUBIC_METRE);
+        assertThat(m3.getUnit(), is(SIUnits.CUBIC_METRE));
+        assertThat(m3.getValue().doubleValue(), closeTo(0.001, DEFAULT_ERROR));
+
+        QuantityType<Volume> litre = new QuantityType<>("5 l");
+
+        QuantityType<?> cubicMetre = litre.toUnit(SIUnits.CUBIC_METRE);
+        assertThat(cubicMetre, is(notNullValue()));
+        assertThat(cubicMetre.getUnit(), is(SIUnits.CUBIC_METRE));
+        assertThat(cubicMetre.doubleValue(), closeTo(0.005, DEFAULT_ERROR));
+    }
+
+    @Test
+    public void testCubicMetre2Litre() {
+        Quantity<Volume> m3 = Quantities.getQuantity(BigDecimal.ONE, SIUnits.CUBIC_METRE);
+
+        Quantity<Volume> l = m3.to(Units.LITRE);
+        assertThat(l.getUnit(), is(Units.LITRE));
+        assertThat(l.getValue().doubleValue(), closeTo(1000, DEFAULT_ERROR));
+
+        QuantityType<Volume> cubicMetre = new QuantityType<>("5 m³");
+
+        QuantityType<?> litre = cubicMetre.toUnit(Units.LITRE);
+        assertThat(litre, is(notNullValue()));
+        assertThat(litre.getUnit(), is(Units.LITRE));
+        assertThat(litre.doubleValue(), closeTo(5000, DEFAULT_ERROR));
+    }
+
+    @Test
+    public void testLitre2Gallon() {
+        Quantity<Volume> l = Quantities.getQuantity(BigDecimal.ONE, Units.LITRE);
+
+        Quantity<Volume> gal = l.to(ImperialUnits.GALLON_LIQUID_US);
+        assertThat(gal.getUnit(), is(ImperialUnits.GALLON_LIQUID_US));
+        assertThat(gal.getValue().doubleValue(), closeTo(0.2641, 1e-4));
+
+        QuantityType<Volume> litre = new QuantityType<>("5 l");
+
+        QuantityType<?> gallon = litre.toUnit(ImperialUnits.GALLON_LIQUID_US);
+        assertThat(gallon, is(notNullValue()));
+        assertThat(gallon.getUnit(), is(ImperialUnits.GALLON_LIQUID_US));
+        assertThat(gallon.doubleValue(), closeTo(1.3208, 1e-4));
+    }
+
+    @Test
+    public void testGallon2Litre() {
+        Quantity<Volume> gal = Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.GALLON_LIQUID_US);
+
+        Quantity<Volume> l = gal.to(Units.LITRE);
+        assertThat(l.getUnit(), is(Units.LITRE));
+        assertThat(l.getValue().doubleValue(), closeTo(3.7854, 1e-4));
+
+        QuantityType<Volume> gallon = new QuantityType<>("5 gal");
+
+        QuantityType<?> litre = gallon.toUnit(Units.LITRE);
+        assertThat(litre, is(notNullValue()));
+        assertThat(litre.getUnit(), is(Units.LITRE));
+        assertThat(litre.doubleValue(), closeTo(18.9270, 1e-4));
     }
 
     @Test

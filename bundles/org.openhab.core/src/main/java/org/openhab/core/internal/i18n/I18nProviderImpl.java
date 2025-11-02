@@ -79,6 +79,7 @@ import org.openhab.core.library.dimension.EnergyPrice;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiantExposure;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
+import org.openhab.core.library.dimension.VolumePrice;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 import org.openhab.core.library.types.PointType;
 import org.openhab.core.library.unit.CurrencyUnits;
@@ -115,6 +116,7 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - Initial contribution
  * @author Stefan Triller - Initial contribution
  * @author Erdoan Hadzhiyusein - Added time zone
+ * @author Christoph Weitkamp - Added price per volume
  */
 @Component(immediate = true, configurationPid = I18nProviderImpl.CONFIGURATION_PID, property = {
         Constants.SERVICE_PID + "=org.openhab.i18n", //
@@ -437,6 +439,9 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Temperature.class, SIUnits.CELSIUS, ImperialUnits.FAHRENHEIT);
         addDefaultUnit(dimensionMap, Time.class, Units.SECOND);
         addDefaultUnit(dimensionMap, Volume.class, SIUnits.CUBIC_METRE, ImperialUnits.GALLON_LIQUID_US);
+        addDefaultUnit(dimensionMap, VolumePrice.class, CurrencyUnits.PRICE_PER_LITRE);
+        addDefaultUnit(dimensionMap, VolumePrice.class, CurrencyUnits.PRICE_PER_CUBIC_METRE);
+        addDefaultUnit(dimensionMap, VolumePrice.class, CurrencyUnits.PRICE_PER_GALLON_LIQUID_US);
         addDefaultUnit(dimensionMap, VolumetricFlowRate.class, Units.LITRE_PER_MINUTE, ImperialUnits.GALLON_PER_MINUTE);
 
         return dimensionMap;
