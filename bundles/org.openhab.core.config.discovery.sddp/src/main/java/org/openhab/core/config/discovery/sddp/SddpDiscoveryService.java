@@ -140,9 +140,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         foundDevicesCache.stream().filter(d -> !d.isExpired()).forEach(d -> {
             DiscoveryResult result = participant.createResult(d);
             if (result != null) {
-                DiscoveryResult localizedResult = getLocalizedDiscoveryResult(result,
-                        FrameworkUtil.getBundle(participant.getClass()));
-                thingDiscovered(localizedResult);
+                thingDiscovered(result, FrameworkUtil.getBundle(participant.getClass()));
             }
         });
     }
@@ -380,9 +378,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
                 discoveryParticipants.forEach(p -> {
                     DiscoveryResult discoveryResult = p.createResult(device);
                     if (discoveryResult != null) {
-                        DiscoveryResult localizedResult = getLocalizedDiscoveryResult(discoveryResult,
-                                FrameworkUtil.getBundle(p.getClass()));
-                        thingDiscovered(localizedResult);
+                        thingDiscovered(discoveryResult, FrameworkUtil.getBundle(p.getClass()));
                     }
                 });
                 deviceParticipants.forEach(f -> f.deviceAdded(device));
