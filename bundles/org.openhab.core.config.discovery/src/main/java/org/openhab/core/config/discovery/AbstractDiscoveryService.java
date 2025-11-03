@@ -563,11 +563,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
             if (currentLabel.equals(label)) {
                 return discoveryResult;
             } else {
-                return DiscoveryResultBuilder.create(discoveryResult.getThingUID())
-                        .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
-                        .withProperties(discoveryResult.getProperties())
-                        .withRepresentationProperty(discoveryResult.getRepresentationProperty()).withLabel(label)
-                        .withTTL(discoveryResult.getTimeToLive()).build();
+                return DiscoveryResultBuilder.create(discoveryResult).withLabel(label).build();
             }
         } else {
             return discoveryResult;

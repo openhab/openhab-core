@@ -63,6 +63,20 @@ public class DiscoveryResultBuilder {
     }
 
     /**
+     * Creates a new builder initialized with the values from the specified {@link DiscoveryResult}.
+     *
+     * @param discoveryResult the {@link DiscoveryResult} to use for initialization.
+     * @return The new {@link DiscoveryResultBuilder}.
+     */
+    public static DiscoveryResultBuilder create(DiscoveryResult discoveryResult) {
+        return new DiscoveryResultBuilder(discoveryResult.getThingUID()).withBridge(discoveryResult.getBridgeUID())
+                .withProperties(discoveryResult.getProperties())
+                .withRepresentationProperty(discoveryResult.getRepresentationProperty())
+                .withLabel(discoveryResult.getLabel()).withTTL(discoveryResult.getTimeToLive())
+                .withThingType(discoveryResult.getThingTypeUID());
+    }
+
+    /**
      * Explicitly sets the thing type.
      *
      * @param thingTypeUID the {@link ThingTypeUID}
