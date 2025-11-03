@@ -14,6 +14,7 @@ package org.openhab.core.config.discovery.upnp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -22,15 +23,18 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.model.meta.RemoteDevice;
 import org.jupnp.model.meta.RemoteService;
 import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.upnp.internal.UpnpDiscoveryService;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
 /**
- * A {@link UpnpDiscoveryParticipant} that is registered as a service is picked up by the UpnpDiscoveryService
- * and can thus contribute {@link DiscoveryResult}s from
- * UPnP scans.
+ * A {@link UpnpDiscoveryParticipant} that is registered as a service is picked up by the {@link UpnpDiscoveryService}
+ * and can thus contribute {@link DiscoveryResult}s from UPnP scans.
  *
  * @author Kai Kreuzer - Initial contribution
+ *
+ * @implSpec Implementations should implement <i>either</i> {@link #createResult(RemoteDevice)} <i>or</i>
+ *           {@link #createResults(RemoteDevice)}, not both.
  */
 @NonNullByDefault
 public interface UpnpDiscoveryParticipant {
@@ -51,12 +55,27 @@ public interface UpnpDiscoveryParticipant {
      * Creates a discovery result for a UPnP device. Only the "root device" is discovered,
      * to find embedded/child devices, use {@link #enumerateAllDevices(RemoteDevice)}.
      *
-     * @param device the UPnP device found on the network.
-     * @return the resulting discovery result or {@code null}, if device is not
+     * @param device the UPnP device discovered on the network.
+     * @return the resulting discovery result or {@code null}, if the device isn't
      *         supported by this participant
      */
     @Nullable
-    DiscoveryResult createResult(RemoteDevice device);
+    default DiscoveryResult createResult(RemoteDevice device) {
+        return null;
+    }
+
+    /**
+     * Creates a collection of discovery results for a UPnP device. Only the "root device" is discovered,
+     * to find embedded/child devices, use {@link #enumerateAllDevices(RemoteDevice)}.
+     *
+     * @param device device the UPnP device discovered on the network.
+     * @return the resulting {@link Collection} of discovery results or {@code null}, if the device isn't
+     *         supported by this participant
+     */
+    @Nullable
+    default Collection<DiscoveryResult> createResults(RemoteDevice device) {
+        return null;
+    }
 
     /**
      * Returns the thing UID for a upnp device
