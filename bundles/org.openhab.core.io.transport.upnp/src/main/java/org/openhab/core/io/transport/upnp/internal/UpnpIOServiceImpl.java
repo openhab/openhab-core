@@ -115,16 +115,22 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         protected void ended(GENASubscription subscription, CancelReason reason, UpnpResponse response) {
             final Service service = subscription.getService();
             if (service != null) {
-                final ServiceId serviceId = service.getServiceId();
-                final Device device = service.getDevice();
-                if (device != null) {
-                    final Device deviceRoot = device.getRoot();
-                    if (deviceRoot != null) {
-                        final DeviceIdentity deviceRootIdentity = deviceRoot.getIdentity();
-                        if (deviceRootIdentity != null) {
-                            final UDN deviceRootUdn = deviceRootIdentity.getUdn();
+                if (logger.isDebugEnabled()) {
+                    ServiceId serviceId = service.getServiceId();
+                    Device device = service.getDevice();
+                    if (device != null) {
+                        DeviceIdentity identity;
+                        UDN deviceUdn = (identity = device.getIdentity()) == null ? null : identity.getUdn();
+                        Device deviceRoot = device.getRoot();
+                        if (!device.equals(deviceRoot)) {
+                            UDN deviceRootUdn = deviceRoot == null || (identity = deviceRoot.getIdentity()) == null
+                                    ? null
+                                    : identity.getUdn();
+                            logger.debug("A GENA subscription '{}' for device '{}' ('{}') was ended", serviceId.getId(),
+                                    deviceUdn, deviceRootUdn);
+                        } else {
                             logger.debug("A GENA subscription '{}' for device '{}' was ended", serviceId.getId(),
-                                    deviceRootUdn);
+                                    deviceUdn);
                         }
                     }
                 }
@@ -143,18 +149,33 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
         @Override
         protected void established(GENASubscription subscription) {
-            Device deviceRoot = subscription.getService().getDevice().getRoot();
-            String serviceId = subscription.getService().getServiceId().getId();
+            Service service = subscription.getService();
+            if (service != null) {
+                Device device = service.getDevice();
+                Device deviceRoot = device == null ? null : device.getRoot();
+                ServiceId serviceId = service.getServiceId();
 
-            logger.trace("A GENA subscription '{}' for device '{}' is established", serviceId,
-                    deviceRoot.getIdentity().getUdn());
+                if (logger.isDebugEnabled() && device != null) {
+                    DeviceIdentity identity;
+                    UDN deviceUdn = (identity = device.getIdentity()) == null ? null : identity.getUdn();
+                    if (!device.equals(deviceRoot)) {
+                        UDN deviceRootUdn = deviceRoot == null || (identity = deviceRoot.getIdentity()) == null ? null
+                                : identity.getUdn();
+                        logger.debug("A GENA subscription '{}' for device '{}' ('{}') was established",
+                                serviceId.getId(), deviceUdn, deviceRootUdn);
+                    } else {
+                        logger.debug("A GENA subscription '{}' for device '{}' was established", serviceId.getId(),
+                                deviceUdn);
+                    }
+                }
 
-            for (UpnpIOParticipant participant : participants) {
-                if (Objects.equals(getDevice(participant), deviceRoot)) {
-                    try {
-                        participant.onServiceSubscribed(serviceId, true);
-                    } catch (Exception e) {
-                        logger.error("Participant threw an exception onServiceSubscribed", e);
+                for (UpnpIOParticipant participant : participants) {
+                    if (Objects.equals(getDevice(participant), deviceRoot)) {
+                        try {
+                            participant.onServiceSubscribed(serviceId.getId(), true);
+                        } catch (Exception e) {
+                            logger.error("Participant threw an exception onServiceSubscribed", e);
+                        }
                     }
                 }
             }
@@ -162,51 +183,98 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
         @SuppressWarnings("unchecked")
         @Override
-        protected void eventReceived(GENASubscription sub) {
-            Map<String, StateVariableValue> values = sub.getCurrentValues();
-            Device deviceRoot = sub.getService().getDevice().getRoot();
-            String serviceId = sub.getService().getServiceId().getId();
+        protected void eventReceived(GENASubscription subscription) {
+            Map<String, StateVariableValue> values = subscription.getCurrentValues();
+            Service service = subscription.getService();
+            if (service != null) {
+                Device device = service.getDevice();
+                Device deviceRoot = device == null ? null : device.getRoot();
+                ServiceId serviceId = service.getServiceId();
 
-            logger.trace("Receiving a GENA subscription '{}' response for device '{}'", serviceId,
-                    deviceRoot.getIdentity().getUdn());
-            for (UpnpIOParticipant participant : participants) {
-                if (Objects.equals(getDevice(participant), deviceRoot)) {
-                    for (Entry<String, StateVariableValue> entry : values.entrySet()) {
-                        Object value = entry.getValue().getValue();
-                        if (value != null) {
-                            try {
-                                participant.onValueReceived(entry.getKey(), value.toString(), serviceId);
-                            } catch (Exception e) {
-                                logger.error("Participant threw an exception onValueReceived", e);
+                if (logger.isTraceEnabled() && device != null) {
+                    DeviceIdentity identity;
+                    UDN deviceUdn = (identity = device.getIdentity()) == null ? null : identity.getUdn();
+                    if (!device.equals(deviceRoot)) {
+                        UDN deviceRootUdn = deviceRoot == null || (identity = deviceRoot.getIdentity()) == null ? null
+                                : identity.getUdn();
+                        logger.trace("A GENA subscription '{}' event for device '{}' ('{}') was received",
+                                serviceId.getId(), deviceUdn, deviceRootUdn);
+                    } else {
+                        logger.trace("A GENA subscription '{}' event for device '{}' was received", serviceId.getId(),
+                                deviceUdn);
+                    }
+                }
+
+                for (UpnpIOParticipant participant : participants) {
+                    if (Objects.equals(getDevice(participant), deviceRoot)) {
+                        for (Entry<String, StateVariableValue> entry : values.entrySet()) {
+                            Object value = entry.getValue().getValue();
+                            if (value != null) {
+                                try {
+                                    participant.onValueReceived(entry.getKey(), value.toString(), serviceId.getId());
+                                } catch (Exception e) {
+                                    logger.error("Participant threw an exception onValueReceived", e);
+                                }
                             }
                         }
+                        break;
                     }
-                    break;
                 }
             }
         }
 
         @Override
         protected void eventsMissed(GENASubscription subscription, int numberOfMissedEvents) {
-            logger.debug("A GENA subscription '{}' for device '{}' missed events",
-                    subscription.getService().getServiceId(),
-                    subscription.getService().getDevice().getRoot().getIdentity().getUdn());
+            Service service;
+            if (logger.isDebugEnabled() && (service = subscription.getService()) != null) {
+                Device device = service.getDevice();
+                Device deviceRoot = device == null ? null : device.getRoot();
+                if (device != null) {
+                    ServiceId serviceId = service.getServiceId();
+                    DeviceIdentity identity;
+                    UDN deviceUdn = (identity = device.getIdentity()) == null ? null : identity.getUdn();
+                    if (!device.equals(deviceRoot)) {
+                        UDN deviceRootUdn = deviceRoot == null || (identity = deviceRoot.getIdentity()) == null ? null
+                                : identity.getUdn();
+                        logger.debug("A GENA subscription '{}' for device '{}' ('{}') missed {} events",
+                                serviceId.getId(), deviceUdn, deviceRootUdn, numberOfMissedEvents);
+                    } else {
+                        logger.debug("A GENA subscription '{}' for device '{}' missed {} events", serviceId.getId(),
+                                deviceUdn, numberOfMissedEvents);
+                    }
+                }
+            }
         }
 
         @Override
         protected void failed(GENASubscription subscription, UpnpResponse response, Exception e, String defaultMsg) {
-            Device deviceRoot = subscription.getService().getDevice().getRoot();
-            String serviceId = subscription.getService().getServiceId().getId();
+            Service service = subscription.getService();
+            if (service != null) {
+                Device device = service.getDevice();
+                Device deviceRoot = device == null ? null : device.getRoot();
+                ServiceId serviceId = service.getServiceId();
 
-            logger.debug("A GENA subscription '{}' for device '{}' failed", serviceId,
-                    deviceRoot.getIdentity().getUdn());
+                if (logger.isDebugEnabled() && device != null) {
+                    DeviceIdentity identity;
+                    UDN deviceUdn = (identity = device.getIdentity()) == null ? null : identity.getUdn();
+                    if (!device.equals(deviceRoot)) {
+                        UDN deviceRootUdn = deviceRoot == null || (identity = deviceRoot.getIdentity()) == null ? null
+                                : identity.getUdn();
+                        logger.debug("A GENA subscription '{}' for device '{}' ('{}') failed: {}", serviceId.getId(),
+                                deviceUdn, deviceRootUdn, defaultMsg);
+                    } else {
+                        logger.debug("A GENA subscription '{}' for device '{}' failed: {}", serviceId.getId(),
+                                deviceUdn, defaultMsg);
+                    }
+                }
 
-            for (UpnpIOParticipant participant : participants) {
-                if (Objects.equals(getDevice(participant), deviceRoot)) {
-                    try {
-                        participant.onServiceSubscribed(serviceId, false);
-                    } catch (Exception e2) {
-                        logger.error("Participant threw an exception onServiceSubscribed", e2);
+                for (UpnpIOParticipant participant : participants) {
+                    if (Objects.equals(getDevice(participant), deviceRoot)) {
+                        try {
+                            participant.onServiceSubscribed(serviceId.getId(), false);
+                        } catch (Exception e2) {
+                            logger.error("Participant threw an exception onServiceSubscribed", e2);
+                        }
                     }
                 }
             }
@@ -306,7 +374,6 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Map<String, String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
             Map<String, String> inputs) {
@@ -464,6 +531,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
             // registered
             try {
                 Device device = getDevice(participant);
+                String participantUdn = participant.getUDN();
                 if (device != null) {
                     Service service = findService(device, null, serviceID);
                     if (service != null) {
@@ -472,7 +540,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                             @SuppressWarnings("unchecked")
                             ActionInvocation invocation = new ActionInvocation(action);
                             logger.debug("Polling participant '{}' through Action '{}' of Service '{}' ",
-                                    participant.getUDN(), actionID, serviceID);
+                                    participantUdn, actionID, serviceID);
                             new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
 
                             ActionException anException = invocation.getFailure();
@@ -486,16 +554,14 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                                 setDeviceStatus(participant, true);
                             }
                         } else {
-                            logger.debug("Could not find action '{}' for participant '{}'", actionID,
-                                    participant.getUDN());
+                            logger.debug("Could not find action '{}' for participant '{}'", actionID, participantUdn);
                         }
                     } else {
-                        logger.debug("Could not find service '{}' for participant '{}'", serviceID,
-                                participant.getUDN());
+                        logger.debug("Could not find service '{}' for participant '{}'", serviceID, participantUdn);
                     }
                 }
             } catch (Exception e) {
-                logger.error("An exception occurred while polling an UPNP device: '{}'", e.getMessage(), e);
+                logger.error("An exception occurred while polling an UPnP device: '{}'", e.getMessage(), e);
             }
         }
     }
