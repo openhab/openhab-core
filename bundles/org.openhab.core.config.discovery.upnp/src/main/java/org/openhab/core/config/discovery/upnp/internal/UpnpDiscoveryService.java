@@ -120,9 +120,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
                             Stream.ofNullable(participant.createResults(device)).flatMap((result) -> result.stream()))
                     .toList();
             for (DiscoveryResult result : results) {
-                final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
-                        FrameworkUtil.getBundle(participant.getClass()));
-                thingDiscovered(resultNew);
+                thingDiscovered(result, FrameworkUtil.getBundle(participant.getClass()));
             }
         }
     }
@@ -183,10 +181,8 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
                         cancelRemovalTask(device.getIdentity().getUdn());
                     }
                 }
-                for (DiscoveryResult r : results) {
-                    final DiscoveryResult resultNew = getLocalizedDiscoveryResult(r,
-                            FrameworkUtil.getBundle(participant.getClass()));
-                    thingDiscovered(resultNew);
+                for (DiscoveryResult result : results) {
+                    thingDiscovered(result, FrameworkUtil.getBundle(participant.getClass()));
                 }
             } catch (Exception e) {
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
