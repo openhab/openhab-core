@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.UpnpService;
@@ -113,8 +114,12 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
 
         Collection<RemoteDevice> devices = upnpService.getRegistry().getRemoteDevices();
         for (RemoteDevice device : devices) {
-            DiscoveryResult result = participant.createResult(device);
-            if (result != null) {
+            @SuppressWarnings("null")
+            List<DiscoveryResult> results = Stream
+                    .concat(Stream.ofNullable(participant.createResult(device)),
+                            Stream.ofNullable(participant.createResults(device)).flatMap((result) -> result.stream()))
+                    .toList();
+            for (DiscoveryResult result : results) {
                 final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
                         FrameworkUtil.getBundle(participant.getClass()));
                 thingDiscovered(resultNew);
@@ -168,12 +173,18 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
         for (UpnpDiscoveryParticipant participant : participants) {
             try {
-                DiscoveryResult result = participant.createResult(device);
-                if (result != null) {
+                @SuppressWarnings("null")
+                List<DiscoveryResult> results = Stream
+                        .concat(Stream.ofNullable(participant.createResult(device)), Stream
+                                .ofNullable(participant.createResults(device)).flatMap((result) -> result.stream()))
+                        .toList();
+                if (!results.isEmpty()) {
                     if (participant.getRemovalGracePeriodSeconds(device) > 0) {
                         cancelRemovalTask(device.getIdentity().getUdn());
                     }
-                    final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
+                }
+                for (DiscoveryResult r : results) {
+                    final DiscoveryResult resultNew = getLocalizedDiscoveryResult(r,
                             FrameworkUtil.getBundle(participant.getClass()));
                     thingDiscovered(resultNew);
                 }
