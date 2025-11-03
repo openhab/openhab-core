@@ -29,6 +29,7 @@ import org.jupnp.UpnpService;
 import org.jupnp.controlpoint.ActionCallback;
 import org.jupnp.controlpoint.ControlPoint;
 import org.jupnp.controlpoint.SubscriptionCallback;
+import org.jupnp.model.UserConstants;
 import org.jupnp.model.action.ActionArgumentValue;
 import org.jupnp.model.action.ActionException;
 import org.jupnp.model.action.ActionInvocation;
@@ -88,10 +89,24 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     public class UpnpSubscriptionCallback extends SubscriptionCallback {
 
+        /**
+         * Creates a new subscription callback for the specified service with a requested duration of
+         * {@link UserConstants#DEFAULT_SUBSCRIPTION_DURATION_SECONDS}.
+         *
+         * @param service the {@link Service} to subscribe to.
+         */
         public UpnpSubscriptionCallback(Service service) {
             super(service);
         }
 
+        /**
+         * Creates a new subscription callback for the specified service with a requested duration of
+         * the specified number of seconds. The UPnP standard states that it "Should be greater than or equal
+         * to 1800 seconds (30 minutes)".
+         *
+         * @param service the {@link Service} to subscribe to.
+         * @param requestedDurationSeconds the subscription duration to request.
+         */
         public UpnpSubscriptionCallback(Service service, int requestedDurationSeconds) {
             super(service, requestedDurationSeconds);
         }
@@ -221,7 +236,12 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     @Override
-    public void addSubscription(UpnpIOParticipant participant, String serviceID, int duration) {
+    public void addSubscription(UpnpIOParticipant participant, String serviceID) {
+        addSubscription(participant, serviceID, UserConstants.DEFAULT_SUBSCRIPTION_DURATION_SECONDS);
+    }
+
+    @Override
+    public void addSubscription(UpnpIOParticipant participant, String serviceID, int requestedDurationSeconds) {
         if (participant != null && serviceID != null) {
             registerParticipant(participant);
             Device device = getDevice(participant);
@@ -231,7 +251,8 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                     logger.trace("Setting up an UPNP service subscription '{}' for particpant '{}'", serviceID,
                             participant.getUDN());
 
-                    UpnpSubscriptionCallback callback = new UpnpSubscriptionCallback(subService, duration);
+                    UpnpSubscriptionCallback callback = new UpnpSubscriptionCallback(subService,
+                            requestedDurationSeconds);
                     subscriptionCallbacks.put(subService, callback);
                     upnpService.getControlPoint().execute(callback);
                 } else {
@@ -394,14 +415,11 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     private Service findService(Device device, @Nullable String namespace, String serviceID) {
         Service service;
-        if (namespace == null) {
-            namespace = device.getType().getNamespace();
-        }
-        if (UDAServiceId.DEFAULT_NAMESPACE.equals(namespace)
-                || UDAServiceId.BROKEN_DEFAULT_NAMESPACE.equals(namespace)) {
+        String ns = namespace == null ? device.getType().getNamespace() : namespace;
+        if (UDAServiceId.DEFAULT_NAMESPACE.equals(ns) || UDAServiceId.BROKEN_DEFAULT_NAMESPACE.equals(ns)) {
             service = device.findService(new UDAServiceId(serviceID));
         } else {
-            service = device.findService(new ServiceId(namespace, serviceID));
+            service = device.findService(new ServiceId(ns, serviceID));
         }
         return service;
     }
@@ -458,8 +476,9 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                             new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
 
                             ActionException anException = invocation.getFailure();
-                            if (anException != null
-                                    && anException.getMessage().contains("Connection error or no response received")) {
+                            String message;
+                            if (anException != null && (message = anException.getMessage()) != null
+                                    && message.contains("Connection error or no response received")) {
                                 // The UDN is not reachable anymore
                                 setDeviceStatus(participant, false);
                             } else {
