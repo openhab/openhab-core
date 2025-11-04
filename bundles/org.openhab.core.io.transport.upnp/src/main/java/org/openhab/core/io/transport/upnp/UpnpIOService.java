@@ -15,6 +15,8 @@ package org.openhab.core.io.transport.upnp;
 import java.net.URL;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.model.meta.Service;
 
 /**
@@ -24,6 +26,7 @@ import org.jupnp.model.meta.Service;
  * @author Karel Goderis - Initial contribution
  * @author Kai Kreuzer - added descriptor url retrieval
  */
+@NonNullByDefault
 public interface UpnpIOService {
 
     /**
@@ -34,8 +37,8 @@ public interface UpnpIOService {
      * @param actionID the Action to invoke
      * @param inputs a map of {variable,values} to parameterize the Action that will be invoked
      */
-    Map<String, String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
-            Map<String, String> inputs);
+    Map<String, @Nullable String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
+            @Nullable Map<String, String> inputs);
 
     /**
      * Invoke an UPNP Action using the specified namespace and serviceID
@@ -46,8 +49,8 @@ public interface UpnpIOService {
      * @param actionID the Action to invoke
      * @param inputs a map of {variable,values} to parameterize the Action that will be invoked
      */
-    Map<String, String> invokeAction(UpnpIOParticipant participant, String namespace, String serviceID, String actionID,
-            Map<String, String> inputs);
+    Map<String, String> invokeAction(UpnpIOParticipant participant, @Nullable String namespace, String serviceID, String actionID,
+            @Nullable Map<String, String> inputs);
 
     /**
      * Create a GENA subscription for a {@link Service} with the specified ID and with a request for the
@@ -127,6 +130,7 @@ public interface UpnpIOService {
      * @param participant the participant whom's descriptor url is requested
      * @return the url of the descriptor as provided by the upnp device
      */
+    @Nullable
     URL getDescriptorURL(UpnpIOParticipant participant);
 
     /**
