@@ -150,7 +150,6 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         protected void eventReceived(GENASubscription sub) {
             Map<String, StateVariableValue> values = sub.getCurrentValues();
             Device device = sub.getService().getDevice();
-
             String serviceId = sub.getService().getServiceId().getId();
 
             logger.trace("Receiving a GENA subscription '{}' response for device '{}'", serviceId,
