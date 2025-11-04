@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.UpnpService;
 import org.jupnp.controlpoint.ActionCallback;
@@ -70,6 +71,7 @@ import org.slf4j.LoggerFactory;
  *         RENEW_FAILED
  */
 @SuppressWarnings("rawtypes")
+@NonNullByDefault
 @Component(immediate = true)
 public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
@@ -112,9 +114,10 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
 
         @Override
-        protected void ended(GENASubscription subscription, CancelReason reason, UpnpResponse response) {
-            final Service service = subscription.getService();
-            if (service != null) {
+        protected void ended(@Nullable GENASubscription subscription, @Nullable CancelReason reason,
+                @Nullable UpnpResponse response) {
+            Service service = subscription == null ? null : subscription.getService();
+            if (subscription != null && service != null) {
                 if (logger.isDebugEnabled()) {
                     ServiceId serviceId = service.getServiceId();
                     Device device = service.getDevice();
@@ -135,8 +138,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                     }
                 }
 
-                if ((CancelReason.EXPIRED.equals(reason) || CancelReason.RENEWAL_FAILED.equals(reason))
-                        && upnpService != null) {
+                if ((CancelReason.EXPIRED.equals(reason) || CancelReason.RENEWAL_FAILED.equals(reason))) {
                     final ControlPoint cp = upnpService.getControlPoint();
                     if (cp != null) {
                         final UpnpSubscriptionCallback callback = new UpnpSubscriptionCallback(service,
@@ -148,8 +150,8 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
 
         @Override
-        protected void established(GENASubscription subscription) {
-            Service service = subscription.getService();
+        protected void established(@Nullable GENASubscription subscription) {
+            Service service = subscription == null ? null : subscription.getService();
             if (service != null) {
                 Device device = service.getDevice();
                 Device deviceRoot = device == null ? null : device.getRoot();
@@ -183,10 +185,10 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
         @SuppressWarnings("unchecked")
         @Override
-        protected void eventReceived(GENASubscription subscription) {
-            Map<String, StateVariableValue> values = subscription.getCurrentValues();
-            Service service = subscription.getService();
-            if (service != null) {
+        protected void eventReceived(@Nullable GENASubscription subscription) {
+            Service service = subscription == null ? null : subscription.getService();
+            if (subscription != null && service != null) {
+                Map<String, StateVariableValue> values = subscription.getCurrentValues();
                 Device device = service.getDevice();
                 Device deviceRoot = device == null ? null : device.getRoot();
                 ServiceId serviceId = service.getServiceId();
@@ -224,9 +226,9 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
 
         @Override
-        protected void eventsMissed(GENASubscription subscription, int numberOfMissedEvents) {
+        protected void eventsMissed(@Nullable GENASubscription subscription, int numberOfMissedEvents) {
             Service service;
-            if (logger.isDebugEnabled() && (service = subscription.getService()) != null) {
+            if (logger.isDebugEnabled() && subscription != null && (service = subscription.getService()) != null) {
                 Device device = service.getDevice();
                 Device deviceRoot = device == null ? null : device.getRoot();
                 if (device != null) {
@@ -247,9 +249,10 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
 
         @Override
-        protected void failed(GENASubscription subscription, UpnpResponse response, Exception e, String defaultMsg) {
-            Service service = subscription.getService();
-            if (service != null) {
+        protected void failed(@Nullable GENASubscription subscription, @Nullable UpnpResponse response,
+                @Nullable Exception e, @Nullable String defaultMsg) {
+            Service service = subscription == null ? null : subscription.getService();
+            if (subscription != null && service != null) {
                 Device device = service.getDevice();
                 Device deviceRoot = device == null ? null : device.getRoot();
                 ServiceId serviceId = service.getServiceId();
@@ -299,8 +302,14 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         upnpService.getRegistry().removeListener(this);
     }
 
+    @Nullable
     private Device getDevice(UpnpIOParticipant participant) {
-        return upnpService.getRegistry().getDevice(new UDN(participant.getUDN()), true);
+        String participantUdn = participant.getUDN();
+        if (participantUdn == null) {
+            return null;
+        }
+        Registry registry = upnpService.getRegistry();
+        return registry == null ? null : registry.getDevice(new UDN(participantUdn), true);
     }
 
     @Override
@@ -310,29 +319,26 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     @Override
     public void addSubscription(UpnpIOParticipant participant, String serviceID, int requestedDurationSeconds) {
-        if (participant != null && serviceID != null) {
-            registerParticipant(participant);
-            Device device = getDevice(participant);
-            if (device != null) {
-                Service subService = searchSubService(serviceID, device);
-                if (subService != null) {
-                    logger.trace("Setting up an UPNP service subscription '{}' for particpant '{}'", serviceID,
-                            participant.getUDN());
+        registerParticipant(participant);
+        Device device = getDevice(participant);
+        if (device != null) {
+            Service subService = searchSubService(serviceID, device);
+            if (subService != null) {
+                logger.trace("Setting up an UPNP service subscription '{}' for particpant '{}'", serviceID,
+                        participant.getUDN());
 
-                    UpnpSubscriptionCallback callback = new UpnpSubscriptionCallback(subService,
-                            requestedDurationSeconds);
-                    subscriptionCallbacks.put(subService, callback);
-                    upnpService.getControlPoint().execute(callback);
-                } else {
-                    logger.trace("Could not find service '{}' for device '{}'", serviceID,
-                            device.getIdentity().getUdn());
-                }
+                UpnpSubscriptionCallback callback = new UpnpSubscriptionCallback(subService, requestedDurationSeconds);
+                subscriptionCallbacks.put(subService, callback);
+                upnpService.getControlPoint().execute(callback);
             } else {
-                logger.trace("Could not find an upnp device for participant '{}'", participant.getUDN());
+                logger.trace("Could not find service '{}' for device '{}'", serviceID, device.getIdentity().getUdn());
             }
+        } else {
+            logger.trace("Could not find an upnp device for participant '{}'", participant.getUDN());
         }
     }
 
+    @Nullable
     private Service searchSubService(String serviceID, Device device) {
         Service subService = findService(device, null, serviceID);
         if (subService == null) {
@@ -352,98 +358,92 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     @Override
     public void removeSubscription(UpnpIOParticipant participant, String serviceID) {
-        if (participant != null && serviceID != null) {
-            Device device = getDevice(participant);
-            if (device != null) {
-                Service subService = searchSubService(serviceID, device);
-                if (subService != null) {
-                    logger.trace("Removing an UPNP service subscription '{}' for particpant '{}'", serviceID,
-                            participant.getUDN());
+        Device device = getDevice(participant);
+        if (device != null) {
+            Service subService = searchSubService(serviceID, device);
+            if (subService != null) {
+                logger.trace("Removing an UPNP service subscription '{}' for particpant '{}'", serviceID,
+                        participant.getUDN());
 
-                    UpnpSubscriptionCallback callback = subscriptionCallbacks.remove(subService);
-                    if (callback != null) {
-                        callback.end();
-                    }
-                } else {
-                    logger.trace("Could not find service '{}' for device '{}'", serviceID,
-                            device.getIdentity().getUdn());
+                UpnpSubscriptionCallback callback = subscriptionCallbacks.remove(subService);
+                if (callback != null) {
+                    callback.end();
                 }
             } else {
-                logger.trace("Could not find an upnp device for participant '{}'", participant.getUDN());
+                logger.trace("Could not find service '{}' for device '{}'", serviceID, device.getIdentity().getUdn());
             }
+        } else {
+            logger.trace("Could not find an upnp device for participant '{}'", participant.getUDN());
         }
     }
 
     @Override
-    public Map<String, String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
-            Map<String, String> inputs) {
+    public Map<String, @Nullable String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
+            @Nullable Map<String, String> inputs) {
         return invokeAction(participant, null, serviceID, actionID, inputs);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, String> invokeAction(UpnpIOParticipant participant, @Nullable String namespace, String serviceID,
-            String actionID, Map<String, String> inputs) {
-        Map<String, String> resultMap = new HashMap<>();
+    public Map<String, @Nullable String> invokeAction(UpnpIOParticipant participant, @Nullable String namespace,
+            String serviceID, String actionID, @Nullable Map<String, String> inputs) {
+        Map<String, @Nullable String> resultMap = new HashMap<>();
 
-        if (serviceID != null && actionID != null && participant != null) {
-            registerParticipant(participant);
-            Device device = getDevice(participant);
+        registerParticipant(participant);
+        Device device = getDevice(participant);
 
-            if (device != null) {
-                Service service = findService(device, namespace, serviceID);
-                if (service != null) {
-                    Action action = service.getAction(actionID);
-                    if (action != null) {
-                        ActionInvocation invocation = new ActionInvocation(action);
-                        if (inputs != null) {
-                            for (Entry<String, String> entry : inputs.entrySet()) {
-                                invocation.setInput(entry.getKey(), entry.getValue());
+        if (device != null) {
+            Service service = findService(device, namespace, serviceID);
+            if (service != null) {
+                Action action = service.getAction(actionID);
+                if (action != null) {
+                    ActionInvocation invocation = new ActionInvocation(action);
+                    if (inputs != null) {
+                        for (Entry<String, String> entry : inputs.entrySet()) {
+                            invocation.setInput(entry.getKey(), entry.getValue());
+                        }
+                    }
+
+                    logger.trace("Invoking Action '{}' of service '{}' for participant '{}'", actionID, serviceID,
+                            participant.getUDN());
+                    new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
+
+                    ActionException anException = invocation.getFailure();
+                    if (anException != null && anException.getMessage() != null) {
+                        logger.debug("{}", anException.getMessage());
+                    }
+
+                    Map<String, ActionArgumentValue> result = invocation.getOutputMap();
+                    if (result != null) {
+                        for (Entry<String, ActionArgumentValue> entry : result.entrySet()) {
+                            String variable = entry.getKey();
+                            final ActionArgumentValue newArgument;
+                            try {
+                                newArgument = entry.getValue();
+                            } catch (final Exception ex) {
+                                logger.debug("An exception '{}' occurred, cannot get argument for variable '{}'",
+                                        ex.getMessage(), variable);
+                                continue;
+                            }
+                            try {
+                                if (newArgument.getValue() != null) {
+                                    resultMap.put(variable, newArgument.getValue().toString());
+                                }
+                            } catch (final Exception ex) {
+                                logger.debug(
+                                        "An exception '{}' occurred processing ActionArgumentValue '{}' with value '{}'",
+                                        ex.getMessage(), newArgument.getArgument().getName(), newArgument.getValue());
                             }
                         }
-
-                        logger.trace("Invoking Action '{}' of service '{}' for participant '{}'", actionID, serviceID,
-                                participant.getUDN());
-                        new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
-
-                        ActionException anException = invocation.getFailure();
-                        if (anException != null && anException.getMessage() != null) {
-                            logger.debug("{}", anException.getMessage());
-                        }
-
-                        Map<String, ActionArgumentValue> result = invocation.getOutputMap();
-                        if (result != null) {
-                            for (Entry<String, ActionArgumentValue> entry : result.entrySet()) {
-                                String variable = entry.getKey();
-                                final ActionArgumentValue newArgument;
-                                try {
-                                    newArgument = entry.getValue();
-                                } catch (final Exception ex) {
-                                    logger.debug("An exception '{}' occurred, cannot get argument for variable '{}'",
-                                            ex.getMessage(), variable);
-                                    continue;
-                                }
-                                try {
-                                    if (newArgument.getValue() != null) {
-                                        resultMap.put(variable, newArgument.getValue().toString());
-                                    }
-                                } catch (final Exception ex) {
-                                    logger.debug(
-                                            "An exception '{}' occurred processing ActionArgumentValue '{}' with value '{}'",
-                                            ex.getMessage(), newArgument.getArgument().getName(),
-                                            newArgument.getValue());
-                                }
-                            }
-                        }
-                    } else {
-                        logger.debug("Could not find action '{}' for participant '{}'", actionID, participant.getUDN());
                     }
                 } else {
-                    logger.debug("Could not find service '{}' for participant '{}'", serviceID, participant.getUDN());
+                    logger.debug("Could not find action '{}' for participant '{}'", actionID, participant.getUDN());
                 }
             } else {
-                logger.debug("Could not find an upnp device for participant '{}'", participant.getUDN());
+                logger.debug("Could not find service '{}' for participant '{}'", serviceID, participant.getUDN());
             }
+        } else {
+            logger.debug("Could not find an upnp device for participant '{}'", participant.getUDN());
         }
         return resultMap;
     }
@@ -455,22 +455,19 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     @Override
     public void registerParticipant(UpnpIOParticipant participant) {
-        if (participant != null) {
-            participants.add(participant);
-        }
+        participants.add(participant);
     }
 
     @Override
     public void unregisterParticipant(UpnpIOParticipant participant) {
-        if (participant != null) {
-            stopPollingForParticipant(participant);
-            pollingJobs.remove(participant);
-            currentStates.remove(participant);
-            participants.remove(participant);
-        }
+        stopPollingForParticipant(participant);
+        pollingJobs.remove(participant);
+        currentStates.remove(participant);
+        participants.remove(participant);
     }
 
     @Override
+    @Nullable
     public URL getDescriptorURL(UpnpIOParticipant participant) {
         RemoteDevice device = upnpService.getRegistry().getRemoteDevice(new UDN(participant.getUDN()), true);
         if (device != null) {
@@ -480,6 +477,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
     }
 
+    @Nullable
     private Service findService(Device device, @Nullable String namespace, String serviceID) {
         Service service;
         String ns = namespace == null ? device.getType().getNamespace() : namespace;
@@ -568,20 +566,18 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     @Override
     public void addStatusListener(UpnpIOParticipant participant, String serviceID, String actionID, int interval) {
-        if (participant != null) {
-            registerParticipant(participant);
+        registerParticipant(participant);
 
-            int pollingInterval = interval == 0 ? DEFAULT_POLLING_INTERVAL : interval;
+        int pollingInterval = interval == 0 ? DEFAULT_POLLING_INTERVAL : interval;
 
-            // remove the previous polling job, if any
-            stopPollingForParticipant(participant);
+        // remove the previous polling job, if any
+        stopPollingForParticipant(participant);
 
-            currentStates.put(participant, true);
+        currentStates.put(participant, true);
 
-            Runnable pollingRunnable = new UPNPPollingRunnable(participant, serviceID, actionID);
-            pollingJobs.put(participant,
-                    scheduler.scheduleWithFixedDelay(pollingRunnable, 0, pollingInterval, TimeUnit.SECONDS));
-        }
+        Runnable pollingRunnable = new UPNPPollingRunnable(participant, serviceID, actionID);
+        pollingJobs.put(participant,
+                scheduler.scheduleWithFixedDelay(pollingRunnable, 0, pollingInterval, TimeUnit.SECONDS));
     }
 
     private void stopPollingForParticipant(UpnpIOParticipant participant) {
@@ -595,43 +591,46 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     @Override
     public void removeStatusListener(UpnpIOParticipant participant) {
-        if (participant != null) {
-            unregisterParticipant(participant);
+        unregisterParticipant(participant);
+    }
+
+    @Override
+    public void remoteDeviceAdded(@Nullable Registry registry, @Nullable RemoteDevice device) {
+        if (device != null) {
+            informParticipants(device, true);
         }
     }
 
     @Override
-    public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-        informParticipants(device, true);
+    public void remoteDeviceUpdated(@Nullable Registry registry, @Nullable RemoteDevice device) {
     }
 
     @Override
-    public void remoteDeviceUpdated(Registry registry, RemoteDevice device) {
+    public void remoteDeviceRemoved(@Nullable Registry registry, @Nullable RemoteDevice device) {
+        if (device != null) {
+            informParticipants(device, false);
+        }
     }
 
     @Override
-    public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
-        informParticipants(device, false);
+    public void remoteDeviceDiscoveryStarted(@Nullable Registry registry, @Nullable RemoteDevice device) {
     }
 
     @Override
-    public void remoteDeviceDiscoveryStarted(Registry registry, RemoteDevice device) {
+    public void remoteDeviceDiscoveryFailed(@Nullable Registry registry, @Nullable RemoteDevice device,
+            @Nullable Exception ex) {
     }
 
     @Override
-    public void remoteDeviceDiscoveryFailed(Registry registry, RemoteDevice device, Exception ex) {
+    public void localDeviceAdded(@Nullable Registry registry, @Nullable LocalDevice device) {
     }
 
     @Override
-    public void localDeviceAdded(Registry registry, LocalDevice device) {
+    public void localDeviceRemoved(@Nullable Registry registry, @Nullable LocalDevice device) {
     }
 
     @Override
-    public void localDeviceRemoved(Registry registry, LocalDevice device) {
-    }
-
-    @Override
-    public void beforeShutdown(Registry registry) {
+    public void beforeShutdown(@Nullable Registry registry) {
     }
 
     @Override
