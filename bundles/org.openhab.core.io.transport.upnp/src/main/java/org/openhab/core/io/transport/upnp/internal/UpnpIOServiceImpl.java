@@ -154,8 +154,10 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
             logger.trace("Receiving a GENA subscription '{}' response for device '{}'", serviceId,
                     device.getIdentity().getUdn());
+
             for (UpnpIOParticipant participant : participants) {
-                if (Objects.equals(getDevice(participant), device)) {
+                Device participantDevice = getDevice(participant);
+                if (Objects.equals(participantDevice, device) || Objects.equals(participantDevice, device.getRoot())) {
                     for (Entry<String, StateVariableValue> entry : values.entrySet()) {
                         Object value = entry.getValue().getValue();
                         if (value != null) {
