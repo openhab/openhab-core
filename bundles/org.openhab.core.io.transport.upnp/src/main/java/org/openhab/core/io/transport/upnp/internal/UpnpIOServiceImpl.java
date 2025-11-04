@@ -305,7 +305,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     @Nullable
     private Device getDevice(UpnpIOParticipant participant) {
         String participantUdn = participant.getUDN();
-        if (participantUdn == null) {
+        if ("undefined".equals(participantUdn)) {
             return null;
         }
         Registry registry = upnpService.getRegistry();
