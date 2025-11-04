@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jupnp.model.meta.RemoteDevice;
 import org.jupnp.model.meta.Service;
 
 /**
@@ -30,7 +31,7 @@ import org.jupnp.model.meta.Service;
 public interface UpnpIOService {
 
     /**
-     * Invoke an UPNP Action using the device default namespace and serviceID
+     * Invoke an UPnP Action using the device default namespace and serviceID
      *
      * @param participant the participant to invoke the action for
      * @param serviceID the UPNP service to invoke the action upon
@@ -41,7 +42,7 @@ public interface UpnpIOService {
             @Nullable Map<String, String> inputs);
 
     /**
-     * Invoke an UPNP Action using the specified namespace and serviceID
+     * Invoke an UPnP Action using the specified namespace and serviceID
      *
      * @param participant the participant to invoke the action for
      * @param namespace the namespace of the service to invoke the action upon
@@ -49,13 +50,14 @@ public interface UpnpIOService {
      * @param actionID the Action to invoke
      * @param inputs a map of {variable,values} to parameterize the Action that will be invoked
      */
-    Map<String, String> invokeAction(UpnpIOParticipant participant, @Nullable String namespace, String serviceID, String actionID,
-            @Nullable Map<String, String> inputs);
+    Map<String, String> invokeAction(UpnpIOParticipant participant, @Nullable String namespace, String serviceID,
+            String actionID, @Nullable Map<String, String> inputs);
 
     /**
      * Create a GENA subscription for a {@link Service} with the specified ID and with a request for the
-     * default subscription duration (30 minutes). Please not that this is just a request, the published might
-     * grant a subscription with a different duration.
+     * default subscription duration (30 minutes). Please note that this is just a request, the published might
+     * grant a subscription with a different duration. If the service is found, this method will also register the
+     * participant with the {@link UpnpIOService} if it's not already registered.
      * <p>
      * For more information about subscription duration, see {@link #addSubscription(UpnpIOParticipant, String, int)}.
      *
@@ -65,9 +67,10 @@ public interface UpnpIOService {
     void addSubscription(UpnpIOParticipant participant, String serviceID);
 
     /**
-     * Create a GENA subscription for a {@link Service} with the specified ID and with a request for the
-     * specified subscription duration. Please not that this is just a request, the published might grant a
-     * subscription with a different duration.
+     * Create a GENA subscription for a {@link Service} with the specified ID with the specified subscription
+     * duration. Please note that this is just a request, the publisher might grant a subscription with a
+     * different duration. If the service is found, this method will also register the participant with the
+     * {@link UpnpIOService} if it's not already registered.
      * <p>
      * The subscription duration is <i>not</i> the duration the subscription will stay active. It will stay
      * active until it is cancelled. Instead, it's a Time To Live value for the subscription, within which the
@@ -111,7 +114,19 @@ public interface UpnpIOService {
     boolean isRegistered(UpnpIOParticipant participant);
 
     /**
-     * Register a participant with the UPNP IO Service
+     * Verify if the {@link RemoteDevice} that corresponds to the UDN reported by participant's
+     * {@link UpnpIOParticipant#getUDN()} method, is currently found in jUPnP's registry - which means that
+     * according to the rules of UPnP, it should currently be connected and reachable.
+     *
+     * @param participant the participant whose "linked device" to check for presence.
+     * @return {@code true} if the device is deemed to be connected, {@code false} if not.
+     */
+    boolean isDevicePresent(UpnpIOParticipant participant);
+
+    /**
+     * Register a participant with {@link UpnpIOService}. Participants will automatically receive
+     * presence status updates for their "linked device". The current status will be notified
+     * promptly after registration.
      *
      * @param participant the participant whose participation we want to register
      */
@@ -136,7 +151,11 @@ public interface UpnpIOService {
     /**
      * Establish a polling mechanism to check the status of a specific UDN device. The polling mechanism
      * works by invoking the actionID on serviceID every interval. It is assumed that the actionID does
-     * not take/have to take any {variable,value} input set
+     * not take/have to take any {variable,value} input set.
+     * <p>
+     * <b>Note:</b> This should be avoided unless the device is unable to stay online according to the UPnP
+     * specification. Polling is not needed for functioning devices, and will lead to increased load on both
+     * ends and the network, without any benefit.
      *
      * @param participant the participant for whom we want to set up a polling
      * @param serviceID the service to use for polling
