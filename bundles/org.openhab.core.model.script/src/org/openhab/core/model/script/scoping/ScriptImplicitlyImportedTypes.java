@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures;
 import org.openhab.core.library.unit.BinaryPrefix;
+import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
@@ -103,11 +104,12 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(URLEncoder.class);
         result.add(CoreUtil.class);
 
+        result.add(BinaryPrefix.class);
+        result.add(CurrencyUnits.class);
         result.add(ImperialUnits.class);
         result.add(MetricPrefix.class);
         result.add(SIUnits.class);
         result.add(Units.class);
-        result.add(BinaryPrefix.class);
 
         // date time static functions
         result.add(ChronoUnit.class);
