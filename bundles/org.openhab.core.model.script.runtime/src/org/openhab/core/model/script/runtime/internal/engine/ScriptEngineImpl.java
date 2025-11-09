@@ -38,7 +38,6 @@ import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.ScriptStandaloneSetup;
 import org.openhab.core.model.script.engine.Script;
 import org.openhab.core.model.script.engine.ScriptEngine;
-import org.openhab.core.model.script.engine.ScriptExecutionException;
 import org.openhab.core.model.script.engine.ScriptParsingException;
 import org.openhab.core.model.script.runtime.ScriptRuntime;
 import org.osgi.service.component.annotations.Activate;
@@ -116,11 +115,6 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
         ScriptImpl script = ScriptStandaloneSetup.getInjector().getInstance(ScriptImpl.class);
         script.setXExpression(expression);
         return script;
-    }
-
-    @Override
-    public Object executeScript(String scriptAsString) throws ScriptParsingException, ScriptExecutionException {
-        return newScriptFromString(scriptAsString).execute();
     }
 
     private XExpression parseScriptIntoXTextEObject(String scriptAsString) throws ScriptParsingException {
