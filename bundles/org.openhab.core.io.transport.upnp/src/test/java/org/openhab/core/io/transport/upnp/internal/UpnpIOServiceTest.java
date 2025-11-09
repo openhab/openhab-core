@@ -97,7 +97,7 @@ public class UpnpIOServiceTest {
         when(upnpServiceMock.getRegistry()).thenReturn(upnpRegistryMock);
         when(upnpServiceMock.getControlPoint()).thenReturn(controlPointMock);
 
-        upnpIoService = new UpnpIOServiceImpl(upnpServiceMock, new SameThreadExecutorService());
+        upnpIoService = new UpnpIOServiceImpl(upnpServiceMock, new SameThreadExecutorService(), 0L);
     }
 
     @Test
@@ -116,10 +116,11 @@ public class UpnpIOServiceTest {
         upnpIoService.registerParticipant(upnpIoParticipantMock);
         assertEquals(1, upnpIoService.participants.size());
         assertTrue(upnpIoService.participants.containsKey(upnpIoParticipantMock));
+        assertTrue(upnpIoService.isParticipantRegistered(upnpIoParticipantMock));
         ParticipantData data = upnpIoService.participants.get(upnpIoParticipantMock);
         assertNotNull(data);
         assertFalse(data.hasJob());
-        assertFalse(data.isAvailable());
+        assertTrue(data.isAvailable());
         assertTrue(data.getCallbacks().isEmpty());
     }
 
@@ -131,7 +132,7 @@ public class UpnpIOServiceTest {
         ParticipantData data = upnpIoService.participants.get(upnpIoParticipantMock);
         assertNotNull(data);
         assertTrue(data.hasJob());
-        assertFalse(data.isAvailable());
+        assertTrue(data.isAvailable());
         assertTrue(data.getCallbacks().isEmpty());
 
         upnpIoService.removeStatusListener(upnpIoParticipantMock);
@@ -146,7 +147,7 @@ public class UpnpIOServiceTest {
         ParticipantData data = upnpIoService.participants.get(upnpIoParticipantMock);
         assertNotNull(data);
         assertFalse(data.hasJob());
-        assertFalse(data.isAvailable());
+        assertTrue(data.isAvailable());
         assertEquals(1, data.getCallbacks().size());
 
         upnpIoService.addSubscription(upnpIoParticipant2Mock, SERVICE_ID_2, 60);
@@ -155,7 +156,7 @@ public class UpnpIOServiceTest {
         data = upnpIoService.participants.get(upnpIoParticipant2Mock);
         assertNotNull(data);
         assertFalse(data.hasJob());
-        assertFalse(data.isAvailable());
+        assertTrue(data.isAvailable());
         assertEquals(1, data.getCallbacks().size());
 
         upnpIoService.removeSubscription(upnpIoParticipantMock, SERVICE_ID);
@@ -165,7 +166,7 @@ public class UpnpIOServiceTest {
         data = upnpIoService.participants.get(upnpIoParticipant2Mock);
         assertNotNull(data);
         assertFalse(data.hasJob());
-        assertFalse(data.isAvailable());
+        assertTrue(data.isAvailable());
         assertEquals(1, data.getCallbacks().size());
 
         upnpIoService.removeSubscription(upnpIoParticipant2Mock, SERVICE_ID_2);

@@ -84,12 +84,18 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     private static final int DEFAULT_POLLING_INTERVAL = 60;
     private static final String POOL_NAME = "upnp-io";
+    private static final long DEFAULT_CACHED_EVENT_DELAY = 200L;
 
     // Threadsafe
     private final UpnpService upnpService;
 
     // All access must be guarded by "this"
     final Map<UpnpIOParticipant, ParticipantData> participants = new WeakHashMap<>();
+
+    // All access must be guarded by "events"
+    private final Map<DeviceIdentity, CachedDeviceEvent> events = new HashMap<>();
+
+    private final long cachedEventDelay;
 
     public class UpnpSubscriptionCallback extends SubscriptionCallback {
 
@@ -316,21 +322,23 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     @Activate
     public UpnpIOServiceImpl(final @Reference UpnpService upnpService) {
         this.upnpService = upnpService;
+        this.cachedEventDelay = DEFAULT_CACHED_EVENT_DELAY;
         this.scheduler = ThreadPoolManager.getScheduledPool(POOL_NAME);
     }
 
     /**
      * Only to be used by tests.
      */
-    UpnpIOServiceImpl(UpnpService upnpService, ScheduledExecutorService scheduler) {
+    UpnpIOServiceImpl(UpnpService upnpService, ScheduledExecutorService scheduler, long delay) {
         this.upnpService = upnpService;
+        this.cachedEventDelay = delay;
         this.scheduler = scheduler;
     }
 
     @Activate
     public void activate() {
         logger.debug("Starting UPnP IO service...");
-        upnpService.getRegistry().getRemoteDevices().forEach(device -> informParticipants(device, true));
+        upnpService.getRegistry().getRemoteDevices().forEach(device -> informParticipants(device, true, true));
         upnpService.getRegistry().addListener(this);
     }
 
@@ -545,6 +553,11 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     @Override
+    public synchronized boolean isParticipantRegistered(UpnpIOParticipant participant) {
+        return participants.containsKey(participant);
+    }
+
+    @Override
     public boolean isRegistered(UpnpIOParticipant participant) {
         return isDevicePresent(participant);
     }
@@ -555,10 +568,19 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     @Override
-    public void registerParticipant(UpnpIOParticipant participant) {
+    public boolean registerParticipant(UpnpIOParticipant participant) {
+        final ParticipantData data;
         synchronized (this) {
-            participants.computeIfAbsent(participant, d -> new ParticipantData());
+            if (participants.containsKey(participant)) {
+                return false;
+            }
+            data = new ParticipantData();
+            participants.put(participant, data);
         }
+        scheduler.submit(() -> {
+            setDeviceStatus(participant, data, isDevicePresent(participant), true);
+        });
+        return true;
     }
 
     @Override
@@ -611,8 +633,9 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
      *
      * @param device the device that has changed its status.
      * @param status {@code true}, if device is reachable, {@code false} otherwise.
+     * @param force if {@code true}, participants will be notified regardless of the previous status.
      */
-    private void informParticipants(RemoteDevice device, boolean status) {
+    private void informParticipants(RemoteDevice device, boolean status, boolean force) {
         DeviceIdentity identity;
         if ((identity = device.getIdentity()) == null) {
             return;
@@ -626,15 +649,17 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         for (Entry<UpnpIOParticipant, ParticipantData> entry : snapshot.entrySet()) {
             participant = entry.getKey();
             if (participant.getUDN().equals(identifier)) {
-                setDeviceStatus(participant, entry.getValue(), status);
+                setDeviceStatus(participant, entry.getValue(), status, force);
             }
         }
     }
 
-    private void setDeviceStatus(UpnpIOParticipant participant, ParticipantData data, boolean newStatus) {
+    private void setDeviceStatus(UpnpIOParticipant participant, ParticipantData data, boolean newStatus,
+            boolean force) {
         boolean oldStatus = data.getAndSetAvailable(newStatus);
-        if (oldStatus != newStatus) {
-            logger.debug("Device '{}' reachability status changed to '{}'", participant.getUDN(), newStatus);
+        if (force || oldStatus != newStatus) {
+            logger.debug("Device '{}' reachability status changed to '{}'{}", participant.getUDN(), newStatus,
+                    oldStatus == newStatus ? " (forced)" : "");
             participant.onStatusChanged(newStatus);
         }
     }
@@ -688,10 +713,10 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                             if (anException != null && (message = anException.getMessage()) != null
                                     && message.contains("Connection error or no response received")) {
                                 // The UDN is not reachable anymore
-                                setDeviceStatus(participant, data, false);
+                                setDeviceStatus(participant, data, false, false);
                             } else {
                                 // The UDN functions correctly
-                                setDeviceStatus(participant, data, true);
+                                setDeviceStatus(participant, data, true, false);
                             }
                         } else {
                             logger.debug("Could not find action '{}' for participant '{}'", actionID, participantUdn);
@@ -732,19 +757,43 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     @Override
     public void remoteDeviceAdded(@Nullable Registry registry, @Nullable RemoteDevice device) {
-        if (device != null) {
-            informParticipants(device, true);
+        DeviceIdentity identity;
+        if (device != null && (identity = device.getIdentity()) != null) {
+            synchronized (events) {
+                CachedDeviceEvent event = events.get(identity);
+                if (event == null || !event.updateEvent(device, true)) {
+                    // Event didn't exist or canceling failed, create a new one
+                    events.put(identity, new CachedDeviceEvent(device, true, cachedEventDelay));
+                }
+            }
         }
     }
 
     @Override
     public void remoteDeviceUpdated(@Nullable Registry registry, @Nullable RemoteDevice device) {
+        DeviceIdentity identity;
+        if (device != null && (identity = device.getIdentity()) != null) {
+            synchronized (events) {
+                CachedDeviceEvent event = events.get(identity);
+                if (event == null || !event.updateEvent(device, true)) {
+                    // Event didn't exist or canceling failed, create a new one
+                    events.put(identity, new CachedDeviceEvent(device, true, cachedEventDelay));
+                }
+            }
+        }
     }
 
     @Override
     public void remoteDeviceRemoved(@Nullable Registry registry, @Nullable RemoteDevice device) {
-        if (device != null) {
-            informParticipants(device, false);
+        DeviceIdentity identity;
+        if (device != null && (identity = device.getIdentity()) != null) {
+            synchronized (events) {
+                CachedDeviceEvent event = events.get(identity);
+                if (event == null || !event.updateEvent(device, false)) {
+                    // Event didn't exist or canceling failed, create a new one
+                    events.put(identity, new CachedDeviceEvent(device, false, cachedEventDelay));
+                }
+            }
         }
     }
 
@@ -818,6 +867,56 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         for (RemoteDevice child : device.getEmbeddedDevices()) {
             devices.add(child);
             enumerateChildDevices(child, devices);
+        }
+    }
+
+    private class CachedDeviceEvent {
+
+        private final DeviceIdentity identity;
+
+        private final long delayMs;
+
+        private boolean status;
+
+        private RemoteDevice device;
+
+        @Nullable
+        private ScheduledFuture<?> task;
+
+        public CachedDeviceEvent(RemoteDevice device, boolean status, long delayMs) {
+            this.device = device;
+            this.identity = device.getIdentity();
+            this.status = status;
+            this.delayMs = delayMs;
+            scheduleRun();
+        }
+
+        public boolean updateEvent(RemoteDevice device, boolean status) {
+            this.device = device;
+            this.status = status;
+            return scheduleRun();
+        }
+
+        @SuppressWarnings("PMD.CompareObjectsWithEquals")
+        private synchronized boolean scheduleRun() {
+            ScheduledFuture<?> task = this.task;
+            if (task != null) {
+                task.cancel(false);
+            }
+            boolean result = task == null || task.isCancelled();
+            final RemoteDevice deviceRef = device;
+            final boolean statusCopy = status;
+            final CachedDeviceEvent instanceRef = this;
+            this.task = scheduler.schedule(() -> {
+                synchronized (events) {
+                    CachedDeviceEvent event = events.get(identity);
+                    if (event == instanceRef) {
+                        events.remove(identity);
+                    }
+                }
+                informParticipants(deviceRef, statusCopy, false);
+            }, delayMs, TimeUnit.MILLISECONDS);
+            return result;
         }
     }
 
