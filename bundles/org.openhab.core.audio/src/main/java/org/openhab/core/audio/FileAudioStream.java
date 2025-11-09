@@ -36,6 +36,8 @@ import org.openhab.core.common.Disposable;
 public class FileAudioStream extends FixedLengthAudioStream implements Disposable {
 
     public static final String WAV_EXTENSION = "wav";
+    public static final String FLC_EXTENSION = "flc";
+    public static final String FLAC_EXTENSION = "flac";
     public static final String MP3_EXTENSION = "mp3";
     public static final String OGG_EXTENSION = "ogg";
     public static final String AAC_EXTENSION = "aac";
@@ -71,6 +73,10 @@ public class FileAudioStream extends FixedLengthAudioStream implements Disposabl
             case WAV_EXTENSION:
                 return parseWavFormat(file);
             case MP3_EXTENSION:
+                return AudioFormat.MP3;
+            case FLC_EXTENSION:
+                return AudioFormat.MP3;
+            case FLAC_EXTENSION:
                 return AudioFormat.MP3;
             case OGG_EXTENSION:
                 return AudioFormat.OGG;
