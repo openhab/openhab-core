@@ -36,6 +36,10 @@ public class AudioFormat {
     public static final AudioFormat MP3 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, null, null,
             null, null);
 
+    // generic flc format without any further constraints
+    public static final AudioFormat FLC = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED,
+            null, null, null, null);
+
     // generic wav format without any further constraints
     public static final AudioFormat WAV = new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED,
             null, null, null, null);
