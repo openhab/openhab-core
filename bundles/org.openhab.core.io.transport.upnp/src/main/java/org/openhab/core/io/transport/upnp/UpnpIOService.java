@@ -17,7 +17,10 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jupnp.model.action.ActionException;
+import org.jupnp.model.meta.Action;
 import org.jupnp.model.meta.RemoteDevice;
+import org.jupnp.model.meta.RemoteService;
 import org.jupnp.model.meta.Service;
 
 /**
@@ -31,8 +34,18 @@ import org.jupnp.model.meta.Service;
 public interface UpnpIOService {
 
     /**
-     * Invoke an UPnP Action using the device default namespace and serviceID
-     *
+     * Invoke an UPnP Action using the device default namespace, serviceID, actionID and inputs.
+     * <p>
+     * <b>Note:</b> This method has been kept as-is for backwards compatibility, but has some shortcomings:
+     * <ul>
+     * <li>It implicitly registers the participant with the {@link UpnpIOService}, which might not be expected.</li>
+     * <li>It doesn't throw an exception in case of an error, it just returns an empty map. There is therefore
+     * no real way to tell an error from a genuine empty result.</li>
+     * <li>It only allows invoking actions on services of the root device.
+     * </ul>
+     * To avoid these limitations, use one of the other overloaded versions.
+     * <p>
+     * 
      * @param participant the participant to invoke the action for
      * @param serviceID the UPNP service to invoke the action upon
      * @param actionID the Action to invoke
@@ -42,8 +55,18 @@ public interface UpnpIOService {
             @Nullable Map<String, String> inputs);
 
     /**
-     * Invoke an UPnP Action using the specified namespace and serviceID
-     *
+     * Invoke an UPnP Action using the specified namespace, serviceID, actionID and inputs.
+     * <p>
+     * <b>Note:</b> This method has been kept as-is for backwards compatibility, but has some shortcomings:
+     * <ul>
+     * <li>It implicitly registers the participant with the {@link UpnpIOService}, which might not be expected.</li>
+     * <li>It doesn't throw an exception in case of an error, it just returns an empty map. There is therefore
+     * no real way to tell an error from a genuine empty result.</li>
+     * <li>It only allows invoking actions on services of the root device.
+     * </ul>
+     * To avoid these limitations, use one of the other overloaded versions.
+     * <p>
+     * 
      * @param participant the participant to invoke the action for
      * @param namespace the namespace of the service to invoke the action upon
      * @param serviceID the UPNP service to invoke the action upon
@@ -52,6 +75,66 @@ public interface UpnpIOService {
      */
     Map<String, String> invokeAction(UpnpIOParticipant participant, @Nullable String namespace, String serviceID,
             String actionID, @Nullable Map<String, String> inputs);
+
+    /**
+     * Invoke the action with the specified action name from the device with the specified UDN and
+     * service ID, using the specified inputs.
+     * <p>
+     * <b>Note:</b> Embedded/child devices will not be searched, specify the UDN of the device that
+     * actually offers the service you wish to invoke.
+     *
+     * @param deviceUdn the UDN of the device whose service to look up.
+     * @param namespace the namespace to use, or {@code null} to use the device default namespace.
+     * @param serviceId the ID of the service whose action to invoke.
+     * @param actionName the name of the action to invoke.
+     * @param inputs the {@link Map} of input arguments.
+     * @return The resulting {@link Map} of results.
+     * @throws ActionException If the invocation fails.
+     */
+    public Map<String, @Nullable String> invokeAction(String deviceUdn, @Nullable String namespace, String serviceId,
+            String actionName, @Nullable Map<String, String> inputs) throws ActionException;
+
+    /**
+     * Invoke the action with the specified action name from the specified {@link RemoteDevice} and
+     * service ID, using the specified inputs.
+     * <p>
+     * <b>Note:</b> Embedded/child devices will not be searched, specify the {@link RemoteDevice} that
+     * actually offers the service you wish to invoke.
+     *
+     * @param device the {@link RemoteDevice} whose service to look up.
+     * @param namespace the namespace to use, or {@code null} to use the device default namespace.
+     * @param serviceId the ID of the service whose action to invoke.
+     * @param actionName the name of the action to invoke.
+     * @param inputs the {@link Map} of input arguments.
+     * @return The resulting {@link Map} of results.
+     * @throws ActionException If the invocation fails.
+     */
+    public Map<String, @Nullable String> invokeAction(RemoteDevice device, @Nullable String namespace, String serviceId,
+            String actionName, @Nullable Map<String, String> inputs) throws ActionException;
+
+    /**
+     * Invoke the action with the specified action name from the specified {@link RemoteService} using
+     * the specified inputs.
+     *
+     * @param service the {@link RemoteService} whose action to invoke.
+     * @param actionName the name of the action to invoke.
+     * @param inputs the {@link Map} of input arguments.
+     * @return The resulting {@link Map} of results.
+     * @throws ActionException If the invocation fails.
+     */
+    public Map<String, @Nullable String> invokeAction(RemoteService service, String actionName,
+            @Nullable Map<String, String> inputs) throws ActionException;
+
+    /**
+     * Invoke the specified {@link Action} and inputs.
+     *
+     * @param action the {@link Action} to invoke.
+     * @param inputs the {@link Map} of input arguments.
+     * @return The resulting {@link Map} of results.
+     * @throws ActionException If the invocation fails.
+     */
+    public Map<String, @Nullable String> invokeAction(Action<RemoteService> action,
+            @Nullable Map<String, String> inputs) throws ActionException;
 
     /**
      * Create a GENA subscription for a {@link Service} with the specified ID and with a request for the
