@@ -43,6 +43,8 @@ import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.io.rest.LocaleService;
 
+import com.google.gson.JsonParser;
+
 /**
  * @author Christoph Weitkamp - Initial contribution
  */
@@ -82,16 +84,16 @@ public class ConfigDescriptionResourceTest {
     public void shouldReturnAllConfigDescriptions() throws IOException {
         Response response = resource.getAll(null, null);
         assertThat(response.getStatus(), is(200));
-        assertThat(toString(response.getEntity()), is(
-                "[{\"uri\":\"system:i18n\",\"parameters\":[{\"default\":\"test\",\"name\":\"name\",\"required\":false,\"type\":\"TEXT\",\"readOnly\":false,\"multiple\":false,\"advanced\":false,\"verify\":false,\"limitToOptions\":true,\"options\":[],\"filterCriteria\":[]}],\"parameterGroups\":[]},{\"uri\":\"system:ephemeris\",\"parameters\":[{\"name\":\"country\",\"required\":false,\"type\":\"TEXT\",\"readOnly\":false,\"multiple\":false,\"advanced\":false,\"verify\":false,\"limitToOptions\":true,\"options\":[],\"filterCriteria\":[]}],\"parameterGroups\":[]}]"));
+        assertThat(JsonParser.parseString(toString(response.getEntity())), is(JsonParser.parseString(
+                "[{\"uri\":\"system:i18n\",\"parameters\":[{\"default\":\"test\",\"name\":\"name\",\"required\":false,\"type\":\"TEXT\",\"readOnly\":false,\"multiple\":false,\"advanced\":false,\"verify\":false,\"limitToOptions\":true,\"options\":[],\"filterCriteria\":[]}],\"parameterGroups\":[]},{\"uri\":\"system:ephemeris\",\"parameters\":[{\"name\":\"country\",\"required\":false,\"type\":\"TEXT\",\"readOnly\":false,\"multiple\":false,\"advanced\":false,\"verify\":false,\"limitToOptions\":true,\"options\":[],\"filterCriteria\":[]}],\"parameterGroups\":[]}]")));
     }
 
     @Test
     public void shouldReturnAConfigDescription() throws IOException {
         Response response = resource.getByURI(null, CONFIG_DESCRIPTION_SYSTEM_I18N_URI);
         assertThat(response.getStatus(), is(200));
-        assertThat(toString(response.getEntity()), is(
-                "{\"uri\":\"system:i18n\",\"parameters\":[{\"default\":\"test\",\"name\":\"name\",\"required\":false,\"type\":\"TEXT\",\"readOnly\":false,\"multiple\":false,\"advanced\":false,\"verify\":false,\"limitToOptions\":true,\"options\":[],\"filterCriteria\":[]}],\"parameterGroups\":[]}"));
+        assertThat(JsonParser.parseString(toString(response.getEntity())), is(JsonParser.parseString(
+                "{\"uri\":\"system:i18n\",\"parameters\":[{\"default\":\"test\",\"name\":\"name\",\"required\":false,\"type\":\"TEXT\",\"readOnly\":false,\"multiple\":false,\"advanced\":false,\"verify\":false,\"limitToOptions\":true,\"options\":[],\"filterCriteria\":[]}],\"parameterGroups\":[]}")));
     }
 
     @Test
