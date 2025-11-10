@@ -47,6 +47,7 @@ import org.jupnp.model.meta.RemoteDevice;
 import org.jupnp.model.meta.RemoteService;
 import org.jupnp.model.meta.Service;
 import org.jupnp.model.state.StateVariableValue;
+import org.jupnp.model.types.ErrorCode;
 import org.jupnp.model.types.ServiceId;
 import org.jupnp.model.types.UDAServiceId;
 import org.jupnp.model.types.UDN;
@@ -487,67 +488,131 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         return invokeAction(participant, null, serviceID, actionID, inputs);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Map<String, @Nullable String> invokeAction(UpnpIOParticipant participant, @Nullable String namespace,
             String serviceID, String actionID, @Nullable Map<String, String> inputs) {
-        Map<String, @Nullable String> resultMap = new HashMap<>();
 
         registerParticipant(participant);
         RemoteDevice device = getDevice(participant);
 
         if (device != null) {
-            RemoteService service = findService(device, namespace, serviceID);
-            if (service != null) {
-                Action action = service.getAction(actionID);
-                if (action != null) {
-                    ActionInvocation invocation = new ActionInvocation(action);
-                    if (inputs != null) {
-                        for (Entry<String, String> entry : inputs.entrySet()) {
-                            invocation.setInput(entry.getKey(), entry.getValue());
-                        }
-                    }
+            try {
+                return invokeAction(device, namespace, serviceID, actionID, inputs);
+            } catch (ActionException e) {
+                return Map.of();
+            }
 
-                    logger.trace("Invoking Action '{}' of service '{}' for participant '{}'", actionID, serviceID,
-                            participant.getUDN());
-                    new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
+        } else {
+            logger.debug("Could not find an UPnP device for participant '{}'", participant.getUDN());
+            return Map.of();
+        }
+    }
 
-                    ActionException anException = invocation.getFailure();
-                    if (anException != null && anException.getMessage() != null) {
-                        logger.debug("{}", anException.getMessage());
-                    }
+    @Override
+    public Map<String, @Nullable String> invokeAction(String deviceUdn, @Nullable String namespace, String serviceId,
+            String actionName, @Nullable Map<String, String> inputs) throws ActionException {
+        Registry registry = upnpService.getRegistry();
+        RemoteDevice device = registry == null ? null : registry.getRemoteDevice(new UDN(deviceUdn), true);
 
-                    Map<String, ActionArgumentValue> result = invocation.getOutputMap();
-                    if (result != null) {
-                        for (Entry<String, ActionArgumentValue> entry : result.entrySet()) {
-                            String variable = entry.getKey();
-                            final ActionArgumentValue newArgument;
-                            try {
-                                newArgument = entry.getValue();
-                            } catch (final Exception ex) {
-                                logger.debug("An exception '{}' occurred, cannot get argument for variable '{}'",
-                                        ex.getMessage(), variable);
-                                continue;
-                            }
-                            try {
-                                if (newArgument.getValue() != null) {
-                                    resultMap.put(variable, newArgument.getValue().toString());
-                                }
-                            } catch (final Exception ex) {
-                                logger.debug(
-                                        "An exception '{}' occurred processing ActionArgumentValue '{}' with value '{}'",
-                                        ex.getMessage(), newArgument.getArgument().getName(), newArgument.getValue());
-                            }
-                        }
-                    }
-                } else {
-                    logger.debug("Could not find action '{}' for participant '{}'", actionID, participant.getUDN());
-                }
+        if (device != null) {
+            Service service = findService(device, namespace, serviceId);
+            if (service instanceof RemoteService remoteService) {
+                return invokeAction(remoteService, actionName, inputs);
             } else {
-                logger.debug("Could not find service '{}' for participant '{}'", serviceID, participant.getUDN());
+                logger.debug("Could not find service '{}' of device '{}'", serviceId,
+                        device.getIdentity().getUdn().getIdentifierString());
+                throw new ActionException(-1, "Unknown service " + serviceId);
             }
         } else {
-            logger.debug("Could not find an upnp device for participant '{}'", participant.getUDN());
+            logger.debug("Could not find UPnP device '{}'", deviceUdn);
+            throw new ActionException(-1, "Unknown device " + deviceUdn);
+        }
+    }
+
+    @Override
+    public Map<String, @Nullable String> invokeAction(RemoteDevice device, @Nullable String namespace, String serviceId,
+            String actionName, @Nullable Map<String, String> inputs) throws ActionException {
+        Service service = findService(device, namespace, serviceId);
+        if (service instanceof RemoteService remoteService) {
+            return invokeAction(remoteService, actionName, inputs);
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Could not find service '{}' of device '{}'", serviceId,
+                        device.getIdentity().getUdn().getIdentifierString());
+            }
+            throw new ActionException(-1, "Unknown service " + serviceId);
+        }
+    }
+
+    @Override
+    public Map<String, @Nullable String> invokeAction(RemoteService service, String actionName,
+            @Nullable Map<String, String> inputs) throws ActionException {
+        Action<RemoteService> action = service.getAction(actionName);
+        if (action != null) {
+            return invokeAction(action, inputs);
+        } else {
+            if (logger.isDebugEnabled()) {
+                RemoteDevice device = service.getDevice();
+                logger.debug("Could not find action '{}' of service '{} of device '{}'", actionName,
+                        service.getServiceId().getId(), device.getIdentity().getUdn().getIdentifierString());
+            }
+            throw new ActionException(ErrorCode.INVALID_ACTION);
+        }
+    }
+
+    @Override
+    public Map<String, @Nullable String> invokeAction(Action<RemoteService> action,
+            @Nullable Map<String, String> inputs) throws ActionException {
+        ActionInvocation<RemoteService> invocation = new ActionInvocation<RemoteService>(action);
+        if (inputs != null) {
+            for (Entry<String, String> entry : inputs.entrySet()) {
+                invocation.setInput(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (logger.isTraceEnabled()) {
+            RemoteService service = action.getService();
+            RemoteDevice device = service.getDevice();
+            logger.trace("Invoking Action '{}' of service '{}' for device '{}'", action.getName(),
+                    service.getServiceId().getId(), device.getIdentity().getUdn().getIdentifierString());
+        }
+        new ActionCallback.Default(invocation, upnpService.getControlPoint()).run();
+
+        ActionException actionException = invocation.getFailure();
+        if (actionException != null && actionException.getMessage() != null) {
+            if (logger.isDebugEnabled()) {
+                RemoteService service = action.getService();
+                RemoteDevice device = service.getDevice();
+                logger.debug("Invocation of action '{}' of service '{}' for device '{}' failed: {}", action.getName(),
+                        service.getServiceId().getId(), device.getIdentity().getUdn().getIdentifierString(),
+                        actionException.getMessage());
+            }
+            throw actionException;
+        }
+
+        Map<String, @Nullable String> resultMap = new HashMap<>();
+        Map<String, ActionArgumentValue<RemoteService>> result = invocation.getOutputMap();
+        if (result != null) {
+            String variable;
+            ActionArgumentValue newArgument;
+            for (Entry<String, ActionArgumentValue<RemoteService>> entry : result.entrySet()) {
+                variable = entry.getKey();
+                try {
+                    newArgument = entry.getValue();
+                } catch (final Exception ex) {
+                    logger.debug("An exception occurred when getting argument for variable '{}': {}", variable,
+                            ex.getMessage());
+                    continue;
+                }
+                try {
+                    if (newArgument.getValue() != null) {
+                        resultMap.put(variable, newArgument.getValue().toString());
+                    }
+                } catch (final Exception ex) {
+                    logger.debug("An exception '{}' occurred processing ActionArgumentValue '{}' with value '{}'",
+                            ex.getMessage(), newArgument.getArgument().getName(), newArgument.getValue());
+                }
+            }
         }
         return resultMap;
     }
