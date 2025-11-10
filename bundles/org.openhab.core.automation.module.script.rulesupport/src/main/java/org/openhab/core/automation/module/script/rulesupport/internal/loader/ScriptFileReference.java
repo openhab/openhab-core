@@ -18,8 +18,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Script File wrapper offering various methods to inspect the script
@@ -28,8 +26,6 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class ScriptFileReference implements Comparable<ScriptFileReference> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScriptFileReference.class);
-
     private final AtomicBoolean queued = new AtomicBoolean();
     private final AtomicBoolean loaded = new AtomicBoolean();
 
@@ -82,10 +78,7 @@ public class ScriptFileReference implements Comparable<ScriptFileReference> {
         }
 
         String name1 = scriptFilePath.getFileName().toString();
-        LOGGER.trace("o1 [{}], name1 [{}]", scriptFilePath, name1);
-
         String name2 = other.scriptFilePath.getFileName().toString();
-        LOGGER.trace("o2 [{}], name2 [{}]", other.scriptFilePath, name2);
 
         int nameCompare = name1.compareToIgnoreCase(name2);
         if (nameCompare != 0) {
@@ -101,11 +94,11 @@ public class ScriptFileReference implements Comparable<ScriptFileReference> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ScriptFileReference other)) {
             return false;
         }
-        ScriptFileReference that = (ScriptFileReference) o;
-        return scriptFilePath.equals(that.scriptFilePath);
+        return Objects.equals(scriptFilePath, other.scriptFilePath) && Objects.equals(scriptType, other.scriptType)
+                && startLevel == other.startLevel;
     }
 
     @Override
