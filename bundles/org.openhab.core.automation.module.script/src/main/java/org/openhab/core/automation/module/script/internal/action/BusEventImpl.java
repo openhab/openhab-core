@@ -16,6 +16,7 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = BusEvent.class)
 @NonNullByDefault
 public class BusEventImpl implements BusEvent {
+    private static final String AUTOMATION_SOURCE = "org.openhab.core.automation.module.script";
 
     private final Logger logger = LoggerFactory.getLogger(BusEventImpl.class);
     private final ItemRegistry itemRegistry;
@@ -64,19 +66,36 @@ public class BusEventImpl implements BusEvent {
     }
 
     @Override
+    public void sendCommand(Item item, String commandString, @Nullable String source) {
+        if (item != null) {
+            sendCommand(item.getName(), commandString);
+        }
+    }
+
+    @Override
     public void sendCommand(Item item, Number command) {
+        sendCommand(item, command, null);
+    }
+
+    @Override
+    public void sendCommand(Item item, Number command, @Nullable String source) {
         if (item != null && command != null) {
-            sendCommand(item.getName(), command.toString());
+            sendCommand(item.getName(), command.toString(), source);
         }
     }
 
     @Override
     public void sendCommand(String itemName, String commandString) {
+        sendCommand(itemName, commandString, null);
+    }
+
+    @Override
+    public void sendCommand(String itemName, String commandString, @Nullable String source) {
         try {
             Item item = itemRegistry.getItem(itemName);
             Command command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);
             if (command != null) {
-                publisher.post(ItemEventFactory.createCommandEvent(itemName, command));
+                publisher.post(ItemEventFactory.createCommandEvent(itemName, command, buildSource(source)));
             } else {
                 logger.warn("Cannot convert '{}' to a command type which item '{}' accepts: {}.", commandString,
                         itemName, getAcceptedCommandNames(item));
@@ -92,22 +111,37 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void sendCommand(Item item, Command command) {
+        sendCommand(item, command, null);
+    }
+
+    @Override
+    public void sendCommand(Item item, Command command, @Nullable String source) {
         if (item != null) {
-            publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command));
+            publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, buildSource(source)));
         }
     }
 
     @Override
     public void postUpdate(Item item, String stateString) {
+        postUpdate(item, stateString, null);
+    }
+
+    @Override
+    public void postUpdate(Item item, String stateString, @Nullable String source) {
         if (item != null) {
-            postUpdate(item.getName(), stateString);
+            postUpdate(item.getName(), stateString, source);
         }
     }
 
     @Override
     public void postUpdate(Item item, Number state) {
+        postUpdate(item, state, null);
+    }
+
+    @Override
+    public void postUpdate(Item item, Number state, @Nullable String source) {
         if (item != null && state != null) {
-            postUpdate(item.getName(), state.toString());
+            postUpdate(item.getName(), state.toString(), source);
         }
     }
 
@@ -117,11 +151,16 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void postUpdate(String itemName, String stateString) {
+        postUpdate(itemName, stateString, null);
+    }
+
+    @Override
+    public void postUpdate(String itemName, String stateString, @Nullable String source) {
         try {
             Item item = itemRegistry.getItem(itemName);
             State state = TypeParser.parseState(item.getAcceptedDataTypes(), stateString);
             if (state != null) {
-                publisher.post(ItemEventFactory.createStateEvent(itemName, state));
+                publisher.post(ItemEventFactory.createStateEvent(itemName, state, buildSource(source)));
             } else {
                 logger.warn("Cannot convert '{}' to a state type which item '{}' accepts: {}.", stateString, itemName,
                         getAcceptedDataTypeNames(item));
@@ -133,25 +172,41 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void postUpdate(Item item, State state) {
+        postUpdate(item, state, null);
+    }
+
+    @Override
+    public void postUpdate(Item item, State state, @Nullable String source) {
         if (item != null) {
-            publisher.post(ItemEventFactory.createStateEvent(item.getName(), state));
+            publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
         }
     }
 
     @Override
     public void sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries) {
+        sendTimeSeries(item, timeSeries, null);
+    }
+
+    @Override
+    public void sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries, @Nullable String source) {
         if (item != null && timeSeries != null) {
-            publisher.post(ItemEventFactory.createTimeSeriesEvent(item.getName(), timeSeries, null));
+            publisher.post(ItemEventFactory.createTimeSeriesEvent(item.getName(), timeSeries, buildSource(source)));
         }
     }
 
     @Override
     public void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy) {
+        sendTimeSeries(itemName, values, policy, null);
+    }
+
+    @Override
+    public void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy,
+            @Nullable String source) {
         if (itemName != null && values != null) {
             try {
                 TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.valueOf(policy));
                 values.forEach((key, value) -> timeSeries.add(key.toInstant(), value));
-                publisher.post(ItemEventFactory.createTimeSeriesEvent(itemName, timeSeries, null));
+                publisher.post(ItemEventFactory.createTimeSeriesEvent(itemName, timeSeries, buildSource(source)));
             } catch (IllegalArgumentException e) {
                 logger.warn("Policy '{}' does not exist.", policy);
             }
@@ -186,5 +241,9 @@ public class BusEventImpl implements BusEvent {
                 }
             }
         }
+    }
+
+    private String buildSource(@Nullable String source) {
+        return Objects.requireNonNullElse(source, AUTOMATION_SOURCE);
     }
 }
