@@ -299,12 +299,42 @@ public interface UpnpIOService {
     public void addSubscription(UpnpIOParticipant participant, RemoteService service, int requestedDurationSeconds);
 
     /**
-     * Unsubscribe from a GENA subscription
+     * Unsubscribe from a GENA subscription.
+     * <p>
+     * Please note that if the participant is subscribing to several services with the same ID, this will just cancel
+     * one of them. There's no way to control which one. For more control, use one of the overloaded versions of
+     * this method.
      *
-     * @param participant the participant of the subscription
-     * @param serviceID the UPNP service we want to unsubscribe from
+     * @param participant the participant that is the receiver of the subscription events.
+     * @param serviceID the ID of the UPnP service we want to unsubscribe from.
+     * @return {@code true} if a subscription was unsubscribed from.
      */
     boolean removeSubscription(UpnpIOParticipant participant, String serviceID);
+
+    /**
+     * Unsubscribe from a GENA subscription with the specified service ID from the specified {@link RemoteDevice}.
+     * <p>
+     * Please note that if the participant is subscribing to several services with the same ID from the same device,
+     * this will just cancel one of them. There's no way to control which one. For more control, use
+     * {@link #removeSubscription(UpnpIOParticipant, RemoteService)}.
+     *
+     * @param participant the participant that is the receiver of the subscription events.
+     * @param device the {@link RemoteDevice} that provides the service to unsubscribe from.
+     * @param serviceId the ID of the service to unsubscribe from.
+     * @param namespace the namespace to use, or {@code null} to use the device default namespace.
+     * @return {@code true} if a subscription was unsubscribed from.
+     */
+    public boolean removeSubscription(UpnpIOParticipant participant, RemoteDevice device, String serviceId,
+            @Nullable String namespace);
+
+    /**
+     * Unsubscribe from a GENA subscription with the specified {@link RemoteService}.
+     *
+     * @param participant the participant that is the receiver of the subscription events.
+     * @param service the {@link RemoteService} whose subscription to cancel.
+     * @return {@code true} if a subscription was unsubscribed from.
+     */
+    public boolean removeSubscription(UpnpIOParticipant participant, RemoteService service);
 
     /**
      * Verify if the the specified participant is registered with {@link UpnpIOService} and will
