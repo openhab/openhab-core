@@ -138,22 +138,35 @@ public interface UpnpIOService {
 
     /**
      * Create a GENA subscription for a {@link Service} with the specified ID and with a request for the
-     * default subscription duration (30 minutes). Please note that this is just a request, the published might
+     * default subscription duration (30 minutes). Please note that this is just a request, the publisher might
      * grant a subscription with a different duration. If the service is found, this method will also register the
      * participant with the {@link UpnpIOService} if it's not already registered.
      * <p>
      * For more information about subscription duration, see {@link #addSubscription(UpnpIOParticipant, String, int)}.
+     * <p>
+     * The service will first be attempted resolved by looking through the services provided by the root device
+     * the participant is tied to with its UDN. If a service with the specified ID is found, it will be subscribed
+     * to. If not, services from embedded/child devices will be searched. If several embedded/child services provides
+     * a service with the same ID, it's unpredictable which one will be subscribed to. Use one of the overloaded
+     * methods to control which service to subscribe to if multiple with the same ID are available.
      *
-     * @param participant the participant to the subscription is for
-     * @param serviceID the UPNP service we want to subscribe to
+     * @param participant the participant that will receive the subscription events.
+     * @param serviceID the ID of UPnP service we want to subscribe to.
+     * @return {@code true} if the subscription attempt succeeded.
      */
-    void addSubscription(UpnpIOParticipant participant, String serviceID);
+    boolean addSubscription(UpnpIOParticipant participant, String serviceID);
 
     /**
      * Create a GENA subscription for a {@link Service} with the specified ID with the specified subscription
      * duration. Please note that this is just a request, the publisher might grant a subscription with a
      * different duration. If the service is found, this method will also register the participant with the
      * {@link UpnpIOService} if it's not already registered.
+     * <p>
+     * The service will first be attempted resolved by looking through the services provided by the root device
+     * the participant is tied to with its UDN. If a service with the specified ID is found, it will be subscribed
+     * to. If not, services from embedded/child devices will be searched. If several embedded/child services provides
+     * a service with the same ID, it's unpredictable which one will be subscribed to. Use one of the overloaded
+     * methods to control which service to subscribe to if multiple with the same ID are available.
      * <p>
      * The subscription duration is <i>not</i> the duration the subscription will stay active. It will stay
      * active until it is cancelled. Instead, it's a Time To Live value for the subscription, within which the
@@ -174,11 +187,116 @@ public interface UpnpIOService {
      * Should be greater than or equal to 1800 seconds (30 minutes).
      * </blockquote>
      *
-     * @param participant the participant to the subscription is for
-     * @param serviceID the UPNP service we want to subscribe to
-     * @param requestedDurationSeconds the request duration of the subscription in seconds.
+     * @param participant the participant that will receive the subscription events.
+     * @param serviceID the ID of UPnP service we want to subscribe to.
+     * @param requestedDurationSeconds the requested duration of the subscription in seconds.
+     * @return {@code true} if the subscription attempt succeeded.
      */
-    void addSubscription(UpnpIOParticipant participant, String serviceID, int requestedDurationSeconds);
+    boolean addSubscription(UpnpIOParticipant participant, String serviceID, int requestedDurationSeconds);
+
+    /**
+     * Create a GENA subscription for a {@link Service} with the specified ID offered by the specified
+     * {@link RemoteDevice}, with a request for the default subscription duration (30 minutes). Please note that
+     * this is just a request, the publisher might grant a subscription with a different duration. If the service
+     * is found, this method will also register the participant with the {@link UpnpIOService} if it's not already
+     * registered.
+     * <p>
+     * The service will be resolved by looking only at the services provided by the specified device. If the device
+     * offers multiple versions of the same service, it is unpredictable which service will be subscribed to.
+     * <p>
+     * For more information about subscription duration, see
+     * {@link #addSubscription(UpnpIOParticipant, RemoteDevice, String, int)}.
+     *
+     * @param participant the participant that will receive the subscription events.
+     * @param device the {@link RemoteDevice} which provides the service to subscribe to.
+     * @param serviceId the ID of UPnP service we want to subscribe to.
+     * @param namespace the namespace to use, or {@code null} to use the device default namespace.
+     * @return {@code true} if the subscription attempt succeeded.
+     */
+    public boolean addSubscription(UpnpIOParticipant participant, RemoteDevice device, String serviceId,
+            @Nullable String namespace);
+
+    /**
+     * Create a GENA subscription for a {@link Service} with the specified ID offered by the specified
+     * {@link RemoteDevice}, with the specified subscription duration. Please note that this is just a request,
+     * the publisher might grant a subscription with a different duration. If the service is found, this method
+     * will also register the participant with the {@link UpnpIOService} if it's not already registered.
+     * <p>
+     * The service will be resolved by looking only at the services provided by the specified device. If the device
+     * offers multiple versions of the same service, it is unpredictable which service will be subscribed to.
+     * <p>
+     * The subscription duration is <i>not</i> the duration the subscription will stay active. It will stay
+     * active until it is cancelled. Instead, it's a Time To Live value for the subscription, within which the
+     * subscription must be renewed, or it is automatically cancelled. jUPnP, which is used to manage this, will
+     * automatically renew subscriptions in time. This value is thus only needed to control when the publisher
+     * can consider a subscription cancelled in case OH stops responding, lose network connectivity, power etc.
+     * A low value will mean that the publisher will cancel the subscription sooner under such circumstances,
+     * but it will also lead to more network traffic to handle renewals.
+     * <p>
+     * The UPnP standard says the following on the subject:
+     * <blockquote>
+     * A duration should be chosen that matches assumptions about how frequently control points are removed from
+     * the network; if control points are removed every few minutes, then the duration should be similarly short,
+     * allowing a publisher to rapidly deprecate any expired subscribers; if control points are expected to be
+     * semi-permanent, then the duration should be very long, minimizing the processing and traffic associated
+     * with renewing subscriptions.
+     * <p>
+     * Should be greater than or equal to 1800 seconds (30 minutes).
+     * </blockquote>
+     *
+     * @param participant the participant that will receive the subscription events.
+     * @param device the {@link RemoteDevice} which provides the service to subscribe to.
+     * @param serviceId the ID of UPnP service we want to subscribe to.
+     * @param namespace the namespace to use, or {@code null} to use the device default namespace.
+     * @param requestedDurationSeconds the requested duration of the subscription in seconds.
+     * @return {@code true} if the subscription attempt succeeded.
+     */
+    public boolean addSubscription(UpnpIOParticipant participant, RemoteDevice device, String serviceId,
+            @Nullable String namespace, int requestedDurationSeconds);
+
+    /**
+     * Create a GENA subscription for the specified {@link RemoteService} with a request for the default
+     * subscription duration (30 minutes). Please note that this is just a request, the publisher might
+     * grant a subscription with a different duration. This method will register the participant with
+     * the {@link UpnpIOService} if it's not already registered.
+     * <p>
+     * For more information about subscription duration, see
+     * {@link #addSubscription(UpnpIOParticipant, RemoteService, int)}.
+     *
+     * @param participant the participant that will receive the subscription events.
+     * @param service the {@link RemoteService} to subscribe to.
+     */
+    public void addSubscription(UpnpIOParticipant participant, RemoteService service);
+
+    /**
+     * Create a GENA subscription for the specified {@link RemoteService} with the specified subscription duration.
+     * Please note that this is just a request, the publisher might grant a subscription with a different duration.
+     * This method will register the participant with the {@link UpnpIOService} if it's not already registered.
+     * <p>
+     * The subscription duration is <i>not</i> the duration the subscription will stay active. It will stay
+     * active until it is cancelled. Instead, it's a Time To Live value for the subscription, within which the
+     * subscription must be renewed, or it is automatically cancelled. jUPnP, which is used to manage this, will
+     * automatically renew subscriptions in time. This value is thus only needed to control when the publisher
+     * can consider a subscription cancelled in case OH stops responding, lose network connectivity, power etc.
+     * A low value will mean that the publisher will cancel the subscription sooner under such circumstances,
+     * but it will also lead to more network traffic to handle renewals.
+     * <p>
+     * The UPnP standard says the following on the subject:
+     * <blockquote>
+     * A duration should be chosen that matches assumptions about how frequently control points are removed from
+     * the network; if control points are removed every few minutes, then the duration should be similarly short,
+     * allowing a publisher to rapidly deprecate any expired subscribers; if control points are expected to be
+     * semi-permanent, then the duration should be very long, minimizing the processing and traffic associated
+     * with renewing subscriptions.
+     * <p>
+     * Should be greater than or equal to 1800 seconds (30 minutes).
+     * </blockquote>
+     *
+     * @param participant the participant that will receive the subscription events.
+     * @param service the {@link RemoteService} to subscribe to.
+     * @param requestedDurationSeconds the requested duration of the subscription in seconds.
+     */
+    public void addSubscription(UpnpIOParticipant participant, RemoteService service, int requestedDurationSeconds);
 
     /**
      * Unsubscribe from a GENA subscription
@@ -186,13 +304,13 @@ public interface UpnpIOService {
      * @param participant the participant of the subscription
      * @param serviceID the UPNP service we want to unsubscribe from
      */
-    void removeSubscription(UpnpIOParticipant participant, String serviceID);
+    boolean removeSubscription(UpnpIOParticipant participant, String serviceID);
 
     /**
      * Verify if the the specified participant is registered with {@link UpnpIOService} and will
      * receive device status updates.
      *
-     * @param participant the participant whose registration to verify-
+     * @param participant the participant whose registration to verify.
      * @return {@code true} if the participant is registered with the {@link UpnpIOService}.
      */
     boolean isParticipantRegistered(UpnpIOParticipant participant);
