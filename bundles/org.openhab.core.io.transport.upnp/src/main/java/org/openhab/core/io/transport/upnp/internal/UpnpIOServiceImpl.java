@@ -168,7 +168,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                 ParticipantData data = participant == null ? null : getData(participant);
                 if (data != null) {
                     if (callback == null) {
-                        data.removeCallback(getService().getServiceId());
+                        data.removeCallback(getService(), false);
                     } else {
                         data.addCallback((RemoteService) getService(), callback, false);
                     }
@@ -307,7 +307,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                 if (participant != null) {
                     ParticipantData data = getData(participant);
                     if (data != null) {
-                        data.removeCallback(serviceId);
+                        data.removeCallback(getService(), false);
                     }
                     try {
                         participant.onServiceSubscribed(serviceId.getId(), false);
@@ -497,7 +497,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                         participant.getUDN());
                 return false;
             }
-            callback = data.removeCallback(service);
+            callback = data.removeCallback(service, true);
         }
         if (callback != null) {
             if (logger.isTraceEnabled()) {
@@ -508,43 +508,48 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         return false;
     }
 
-    public boolean removeSubscription(UpnpIOParticipant participant, ServiceId serviceId) {
-        ParticipantData data;
-        synchronized (this) {
-            data = participants.get(participant);
-        }
-        if (data == null) {
-            logger.debug("Participant '{}' is trying to remove GENA subscription for '{}', but isn't registered",
-                    participant.getUDN(), serviceId.getId());
-            return false;
-        }
-
-        UpnpSubscriptionCallback callback = data.removeCallback(serviceId);
-        if (callback != null) {
-            if (logger.isTraceEnabled()) {
-                logger.trace("Removed GENA subscription for '{}' for particpant '{}'", serviceId.getId(),
-                        participant.getUDN());
+    @Override
+    public boolean removeSubscription(UpnpIOParticipant participant, RemoteDevice device, String serviceId,
+            @Nullable String namespace) {
+        RemoteService service = findService(device, namespace, serviceId);
+        if (service != null) {
+            ParticipantData data = getData(participant);
+            if (data == null) {
+                logger.debug("Participant '{}' is trying to remove GENA subscription for '{}', but isn't registered",
+                        participant.getUDN(), serviceId);
+                return false;
             }
-            return true;
+
+            UpnpSubscriptionCallback callback = data.removeCallback(service, true);
+            if (callback != null) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Removed GENA subscription for '{}' for device '{}' for participant '{}'", serviceId,
+                            device.getIdentity().getUdn().getIdentifierString(), participant.getUDN());
+                }
+                return true;
+            } else {
+                logger.debug(
+                        "Could not find and cancel GENA subscription for '{}' for device '{}' for participant '{}'",
+                        serviceId, device.getIdentity().getUdn().getIdentifierString(), participant.getUDN());
+            }
         } else {
-            logger.debug("Could not find and cancel GENA subscription for '{}' for participant '{}'", serviceId.getId(),
-                    participant.getUDN());
+            logger.debug(
+                    "Could not cancel GENA subscription for '{}' for device '{}' for participant '{}' because the service could not be found",
+                    serviceId, device.getIdentity().getUdn().getIdentifierString(), participant.getUDN());
         }
         return false;
     }
 
-    public boolean removeSubscription(UpnpIOParticipant participant, Service service) {
-        ParticipantData data;
-        synchronized (this) {
-            data = participants.get(participant);
-        }
+    @Override
+    public boolean removeSubscription(UpnpIOParticipant participant, RemoteService service) {
+        ParticipantData data = getData(participant);
         if (data == null) {
             logger.debug("Participant '{}' is trying to remove GENA subscription for '{}', but isn't registered",
                     participant.getUDN(), service.getServiceId().getId());
             return false;
         }
 
-        UpnpSubscriptionCallback callback = data.removeCallback(service);
+        UpnpSubscriptionCallback callback = data.removeCallback(service, true);
         if (callback != null) {
             if (logger.isTraceEnabled()) {
                 logger.trace("Removed GENA subscription for '{}' for particpant '{}'", service.getServiceId().getId(),
@@ -1251,19 +1256,20 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
         /**
          * Remove a {@link UpnpSubscriptionCallback} associated with the specified {@link Service} from the
-         * {@link Map} of callbacks, and return it. If a callback is found, its subscription is canceled before
-         * it is returned.
+         * {@link Map} of callbacks, and return it. If a callback is found and {@code doEnd} is {@code true},
+         * its subscription is canceled before it is returned.
          *
          * @param service the {@link Service} key for the entry to remove.
+         * @param doEnd {@code true} to cancel the subscription on successful removal.
          * @return The removed {@link UpnpSubscriptionCallback} or {@code null}.
          */
         @Nullable
-        public UpnpSubscriptionCallback removeCallback(Service service) {
+        public UpnpSubscriptionCallback removeCallback(Service service, boolean doEnd) {
             UpnpSubscriptionCallback result;
             synchronized (this) {
                 result = callbacks.remove(service);
             }
-            if (result != null) {
+            if (doEnd && result != null) {
                 result.end();
             }
             return result;
