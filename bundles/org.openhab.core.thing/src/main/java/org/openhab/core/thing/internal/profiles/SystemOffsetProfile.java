@@ -23,10 +23,11 @@ import org.openhab.core.library.unit.Units;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
-import org.openhab.core.thing.profiles.StateProfile;
 import org.openhab.core.thing.profiles.SystemProfiles;
+import org.openhab.core.thing.profiles.TimeSeriesProfile;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.Type;
 import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Initial contribution
  */
 @NonNullByDefault
-public class SystemOffsetProfile implements StateProfile {
+public class SystemOffsetProfile implements TimeSeriesProfile {
 
     static final String OFFSET_PARAM = "offset";
 
@@ -92,6 +93,14 @@ public class SystemOffsetProfile implements StateProfile {
     @Override
     public void onStateUpdateFromHandler(State state) {
         callback.sendUpdate((State) applyOffset(state, true));
+    }
+
+    @Override
+    public void onTimeSeriesFromHandler(TimeSeries timeSeries) {
+        TimeSeries transformedTimeSeries = new TimeSeries(timeSeries.getPolicy());
+        timeSeries.getStates().forEach(
+                entry -> transformedTimeSeries.add(entry.timestamp(), (State) applyOffset(entry.state(), true)));
+        callback.sendTimeSeries(transformedTimeSeries);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
