@@ -34,8 +34,18 @@ public class BusEvent {
         return null;
     }
 
+    public static Object sendCommand(Item item, String commandString, String source) {
+        BusEventActionService.getBusEvent().sendCommand(item, commandString, source);
+        return null;
+    }
+
     public static Object sendCommand(Item item, Number number) {
         BusEventActionService.getBusEvent().sendCommand(item, number);
+        return null;
+    }
+
+    public static Object sendCommand(Item item, Number number, String source) {
+        BusEventActionService.getBusEvent().sendCommand(item, number, source);
         return null;
     }
 
@@ -44,8 +54,18 @@ public class BusEvent {
         return null;
     }
 
+    public static Object sendCommand(String itemName, String commandString, String source) {
+        BusEventActionService.getBusEvent().sendCommand(itemName, commandString, source);
+        return null;
+    }
+
     public static Object sendCommand(Item item, Command command) {
         BusEventActionService.getBusEvent().sendCommand(item, command);
+        return null;
+    }
+
+    public static Object sendCommand(Item item, Command command, String source) {
+        BusEventActionService.getBusEvent().sendCommand(item, command, source);
         return null;
     }
 
@@ -54,8 +74,18 @@ public class BusEvent {
         return null;
     }
 
+    public static Object postUpdate(Item item, Number state, String source) {
+        BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        return null;
+    }
+
     public static Object postUpdate(Item item, String stateAsString) {
         BusEventActionService.getBusEvent().postUpdate(item, stateAsString);
+        return null;
+    }
+
+    public static Object postUpdate(Item item, String stateAsString, String source) {
+        BusEventActionService.getBusEvent().postUpdate(item, stateAsString, source);
         return null;
     }
 
@@ -64,14 +94,30 @@ public class BusEvent {
         return null;
     }
 
+    public static Object postUpdate(String itemName, String stateString, String source) {
+        BusEventActionService.getBusEvent().postUpdate(itemName, stateString, source);
+        return null;
+    }
+
     public static Object sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries) {
         BusEventActionService.getBusEvent().sendTimeSeries(item, timeSeries);
+        return null;
+    }
+
+    public static Object sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries, String source) {
+        BusEventActionService.getBusEvent().sendTimeSeries(item, timeSeries, source);
         return null;
     }
 
     public static Object sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values,
             String policy) {
         BusEventActionService.getBusEvent().sendTimeSeries(itemName, values, policy);
+        return null;
+    }
+
+    public static Object sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values,
+            String policy, String source) {
+        BusEventActionService.getBusEvent().sendTimeSeries(itemName, values, policy, source);
         return null;
     }
 
