@@ -104,6 +104,7 @@
 
 	<xs:complexType name="bridgeTypeRef">
 		<xs:attribute name="id" type="config-description:idRestrictionPattern" use="required"/>
+		<xs:attribute name="bindingId" type="config-description:idRestrictionPattern" use="optional"/>
 	</xs:complexType>
 
 	<xs:complexType name="channels">

@@ -228,7 +228,6 @@ public class ThingResource implements RESTResource {
     @Operation(operationId = "createThingInRegistry", summary = "Creates a new thing and adds it to the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = EnrichedThingDTO.class))),
-                    @ApiResponse(responseCode = "400", description = "Thing uid does not match bridge uid."),
                     @ApiResponse(responseCode = "400", description = "A uid must be provided, if no binding can create a thing of this type."),
                     @ApiResponse(responseCode = "409", description = "A thing with the same uid already exists.") })
     public Response create(
@@ -253,11 +252,6 @@ public class ThingResource implements RESTResource {
 
         if (thingBean.bridgeUID != null) {
             bridgeUID = new ThingUID(thingBean.bridgeUID);
-            if (thingUID != null && (!thingUID.getBindingId().equals(bridgeUID.getBindingId())
-                    || !thingUID.getBridgeIds().contains(bridgeUID.getId()))) {
-                return Response.status(Status.BAD_REQUEST)
-                        .entity("Thing UID '" + thingUID + "' does not match bridge UID '" + bridgeUID + "'").build();
-            }
         }
 
         // turn the ThingDTO's configuration into a Configuration
