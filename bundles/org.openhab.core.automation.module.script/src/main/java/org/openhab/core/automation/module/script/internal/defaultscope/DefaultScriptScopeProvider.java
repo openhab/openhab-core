@@ -53,6 +53,7 @@ import org.openhab.core.library.types.StringListType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.library.unit.BinaryPrefix;
+import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
@@ -153,11 +154,12 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         elements.put("PointType", PointType.class);
         elements.put("StringType", StringType.class);
 
+        elements.put("BinaryPrefix", BinaryPrefix.class);
+        elements.put("CurrencyUnits", CurrencyUnits.class);
         elements.put("ImperialUnits", ImperialUnits.class);
         elements.put("MetricPrefix", MetricPrefix.class);
         elements.put("SIUnits", SIUnits.class);
         elements.put("Units", Units.class);
-        elements.put("BinaryPrefix", BinaryPrefix.class);
 
         // date time static functions
         elements.put("ChronoUnit", ChronoUnit.class);
