@@ -468,8 +468,10 @@ public class ItemResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Parameter(description = "valid item state (e.g. ON, OFF)", required = true) String value,
-            @QueryParam("source") @Parameter(description = "the source of the event") @Nullable String source,
+            @QueryParam("source") @Parameter(description = "the source of the event") @Nullable String querySource,
+            @HeaderParam("X-OpenHAB-Source") @Parameter(description = "the source of the event; takes priority over the query parameter or JSON body if both are set") @Nullable String headerSource,
             @Context SecurityContext securityContext) {
+        String source = headerSource != null ? headerSource : querySource;
         return sendItemStateInternal(language, itemname, value, source, securityContext);
     }
 
@@ -478,10 +480,18 @@ public class ItemResource implements RESTResource {
     @Path("/{itemname: [a-zA-Z_0-9]+}/state")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response putItemStateJson(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Nullable String language,
-            @PathParam("itemname") String itemname, @Context SecurityContext securityContext,
-            ValueContainer valueContainer) {
-        return sendItemStateInternal(language, itemname, valueContainer.value(), valueContainer.source(),
-                securityContext);
+            @QueryParam("source") @Parameter(description = "the source of the event") @Nullable String querySource,
+            @PathParam("itemname") String itemname, @HeaderParam("X-OpenHAB-Source") @Nullable String headerSource,
+            @Context SecurityContext securityContext, ValueContainer valueContainer) {
+        String source;
+        if (headerSource != null) {
+            source = headerSource;
+        } else if (valueContainer.source() != null) {
+            source = valueContainer.source();
+        } else {
+            source = querySource;
+        }
+        return sendItemStateInternal(language, itemname, valueContainer.value(), source, securityContext);
     }
 
     private Response sendItemStateInternal(@Nullable String language, String itemname, String value,
@@ -525,8 +535,10 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "400", description = "Command cannot be parsed") })
     public Response postItemCommandPlain(@PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Parameter(description = "valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)", required = true) String value,
-            @QueryParam("source") @Parameter(description = "the source of the command") @Nullable String source,
+            @QueryParam("source") @Parameter(description = "the source of the command") @Nullable String querySource,
+            @HeaderParam("X-OpenHAB-Source") @Parameter(description = "the source of the command; takes priority over the query parameter or JSON body if multiple are set") @Nullable String headerSource,
             @Context SecurityContext securityContext) {
+        String source = headerSource != null ? headerSource : querySource;
         return sendItemCommandInternal(itemname, value, source, securityContext);
     }
 
@@ -535,8 +547,18 @@ public class ItemResource implements RESTResource {
     @Path("/{itemname: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postItemCommandJson(@PathParam("itemname") String itemname,
-            @Context SecurityContext securityContext, ValueContainer valueContainer) {
-        return sendItemCommandInternal(itemname, valueContainer.value(), valueContainer.source(), securityContext);
+            @QueryParam("source") @Parameter(description = "the source of the command") @Nullable String querySource,
+            @HeaderParam("X-OpenHAB-Source") @Nullable String headerSource, @Context SecurityContext securityContext,
+            ValueContainer valueContainer) {
+        String source;
+        if (headerSource != null) {
+            source = headerSource;
+        } else if (valueContainer.source() != null) {
+            source = valueContainer.source();
+        } else {
+            source = querySource;
+        }
+        return sendItemCommandInternal(itemname, valueContainer.value(), source, securityContext);
     }
 
     private Response sendItemCommandInternal(String itemname, String value, @Nullable String source,
