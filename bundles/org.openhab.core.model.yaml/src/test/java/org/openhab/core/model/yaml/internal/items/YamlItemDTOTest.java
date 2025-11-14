@@ -108,16 +108,31 @@ public class YamlItemDTOTest {
         item.tags = Set.of("Tag1", "Tag 2");
         assertTrue(item.isValid(null, null));
 
-        item.channel = "binding:type:uid:channelid";
-        assertTrue(item.isValid(null, null));
-        item.channel = "binding:type:uid:group#channelid";
-        assertTrue(item.isValid(null, null));
         item.channel = "binding:type:channelid";
         assertFalse(item.isValid(null, null));
         item.channel = "binding:$type:uid:group#channelid";
         assertFalse(item.isValid(null, null));
         item.channel = "binding:type:uid:group$channelid";
         assertFalse(item.isValid(null, null));
+        item.channel = "binding:type:uid:channelid";
+        assertTrue(item.isValid(null, null));
+        item.channel = "binding:type:uid:group#channelid";
+        assertTrue(item.isValid(null, null));
+
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of());
+        assertTrue(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50));
+        assertTrue(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "system.offset"));
+        assertFalse(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "system:off.set"));
+        assertFalse(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "xxx:system:offset"));
+        assertFalse(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "system:offset"));
+        assertTrue(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "offset"));
+        assertTrue(item.isValid(null, null));
     }
 
     @Test
