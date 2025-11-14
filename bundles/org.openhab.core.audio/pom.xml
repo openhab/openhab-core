@@ -44,6 +44,17 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+        <dependency>
+      <groupId>com.fasterxml.woodstox</groupId>
+      <artifactId>woodstox-core</artifactId>
+      <version>6.6.2</version>
+    </dependency>
+    <dependency>
+        <groupId>io.lindstrom</groupId>
+        <artifactId>mpd-parser</artifactId>
+        <version>0.19</version>
+        <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
