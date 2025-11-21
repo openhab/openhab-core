@@ -22,6 +22,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -32,6 +34,14 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.utils.AudioStreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.lindstrom.mpd.MPDParser;
+import io.lindstrom.mpd.data.AdaptationSet;
+import io.lindstrom.mpd.data.MPD;
+import io.lindstrom.mpd.data.Period;
+import io.lindstrom.mpd.data.Representation;
+import io.lindstrom.mpd.data.Segment;
+import io.lindstrom.mpd.data.SegmentTemplate;
 
 /**
  * This is an AudioStream from a URL. Note that some sinks, like Sonos, can directly handle URL
@@ -48,6 +58,7 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
 
     public static final String M3U_EXTENSION = "m3u";
     public static final String PLS_EXTENSION = "pls";
+    public static final String MPD_EXTENSION = "mpd";
 
     private final Logger logger = LoggerFactory.getLogger(URLAudioStream.class);
 
@@ -63,9 +74,66 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
         this.inputStream = createInputStream();
     }
 
+    public URLAudioStream(InputStream inputStream) throws AudioException {
+        this.url = "";
+        this.audioFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, false, 16, null, null);
+        // if (inputStream instanceof LazzyLoadingAudioStream) {
+        // this.inputStream = inputStream;
+        // } else {
+        this.inputStream = createInputStream(inputStream);
+        // }
+    }
+
+    private InputStream createInputStream(InputStream inputStream) throws AudioException {
+        try {
+            String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            if (content.contains("urn:mpeg:dash:schema:mpd")) {
+                MPDParser parser = new MPDParser();
+                MPD mpd = parser.parse(content);
+
+                List<Period> periodList = mpd.getPeriods();
+                if (periodList.size() > 1) {
+                    logger.debug("We only support simple period mpd at this time");
+                    throw new AudioException("NIY");
+                }
+
+                Period period = periodList.get(0);
+                List<AdaptationSet> adaptationSetList = period.getAdaptationSets();
+                AdaptationSet adaptationSet = adaptationSetList.get(0);
+
+                List<Representation> representationList = adaptationSet.getRepresentations();
+                Representation representation = representationList.get(0);
+
+                SegmentTemplate segmentTemplate = representation.getSegmentTemplate();
+                String initializationUri = segmentTemplate.getInitialization();
+                String mediaUri = segmentTemplate.getMedia();
+
+                List<Segment> segmentList = segmentTemplate.getSegmentTimeline();
+                Segment segment = segmentList.get(0);
+                long r = segment.getR();
+
+                List<URL> urls = new ArrayList();
+                urls.add(new URI(initializationUri).toURL());
+                for (int i = 0; i < r; i++) {
+                    logger.info("Segment:" + i);
+                    String downloadUri = mediaUri.replace("$Number$", "" + i);
+                    urls.add(new URI(downloadUri).toURL());
+                }
+
+                LazzyLoadingAudioStream stream = new LazzyLoadingAudioStream(urls);
+                return stream;
+            }
+
+            throw new AudioException("NIY");
+        } catch (Exception ex) {
+            throw new AudioException(ex);
+        }
+    }
+
     private InputStream createInputStream() throws AudioException {
         final String filename = url.toLowerCase();
         final String extension = AudioStreamUtils.getExtension(filename);
+
         try {
             URL streamUrl = new URI(url).toURL();
             switch (extension) {
@@ -96,6 +164,47 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
                         }
                     } catch (NoSuchElementException e) {
                         // we reached the end of the file, this exception is thus expected
+                    }
+                    break;
+                case MPD_EXTENSION:
+                    logger.info("=============================");
+                    try {
+                        MPDParser parser = new MPDParser();
+                        MPD mpd = parser.parse(streamUrl.openStream());
+
+                        List<Period> periodList = mpd.getPeriods();
+                        if (periodList.size() > 1) {
+                            logger.debug("We only support simple period mpd at this time");
+                            throw new Exception("NIY");
+                        }
+
+                        Period period = periodList.get(0);
+                        List<AdaptationSet> adaptationSetList = period.getAdaptationSets();
+                        AdaptationSet adaptationSet = adaptationSetList.get(0);
+
+                        List<Representation> representationList = adaptationSet.getRepresentations();
+                        Representation representation = representationList.get(0);
+
+                        SegmentTemplate segmentTemplate = representation.getSegmentTemplate();
+                        String initializationUri = segmentTemplate.getInitialization();
+                        String mediaUri = segmentTemplate.getMedia();
+
+                        List<Segment> segmentList = segmentTemplate.getSegmentTimeline();
+                        Segment segment = segmentList.get(0);
+                        long r = segment.getR();
+
+                        List<URL> urls = new ArrayList();
+                        urls.add(new URI(initializationUri).toURL());
+                        for (int i = 1; i < r; i++) {
+                            logger.info("Segment:" + i);
+                            String downloadUri = mediaUri.replace("$Number$", "" + i);
+                            urls.add(new URI(downloadUri).toURL());
+                        }
+
+                        LazzyLoadingAudioStream stream = new LazzyLoadingAudioStream(urls);
+                        return stream;
+                    } catch (Exception ex) {
+                        logger.info("bb");
                     }
                     break;
                 default:
@@ -160,6 +269,10 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
 
     @Override
     public InputStream getClonedStream() throws AudioException {
-        return new URLAudioStream(url);
+        if (url.isBlank()) {
+            return new URLAudioStream(inputStream);
+        } else {
+            return new URLAudioStream(url);
+        }
     }
 }
