@@ -354,11 +354,21 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     /**
      * Notifies the registered {@link DiscoveryListener}s about a discovered device.
      *
-     * @param discoveryResult Holds the information needed to identify the discovered device.
+     * @param discoveryResult the {@link DiscoveryResult} to send to listeners.
      */
     protected void thingDiscovered(final DiscoveryResult discoveryResult) {
-        final DiscoveryResult discoveryResultNew = getLocalizedDiscoveryResult(discoveryResult,
-                FrameworkUtil.getBundle(this.getClass()));
+        thingDiscovered(discoveryResult, FrameworkUtil.getBundle(this.getClass()));
+    }
+
+    /**
+     * Notifies the registered {@link DiscoveryListener}s about a discovered device, localizing the results
+     * using the specified {@link Bundle}.
+     *
+     * @param discoveryResult the {@link DiscoveryResult} to send to listeners.
+     * @param bundle the {@link Bundle} to use when looking up translations.
+     */
+    protected void thingDiscovered(final DiscoveryResult discoveryResult, @Nullable Bundle bundle) {
+        final DiscoveryResult discoveryResultNew = getLocalizedDiscoveryResult(discoveryResult, bundle);
         for (DiscoveryListener discoveryListener : discoveryListeners) {
             scheduler.execute(() -> {
                 try {
@@ -563,11 +573,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
             if (currentLabel.equals(label)) {
                 return discoveryResult;
             } else {
-                return DiscoveryResultBuilder.create(discoveryResult.getThingUID())
-                        .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
-                        .withProperties(discoveryResult.getProperties())
-                        .withRepresentationProperty(discoveryResult.getRepresentationProperty()).withLabel(label)
-                        .withTTL(discoveryResult.getTimeToLive()).build();
+                return DiscoveryResultBuilder.create(discoveryResult).withLabel(label).build();
             }
         } else {
             return discoveryResult;

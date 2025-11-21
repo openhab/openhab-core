@@ -222,9 +222,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
             DiscoveryResult result = participant.createResult(serviceInfo);
             if (result != null) {
                 cancelRemovalTask(serviceInfo);
-                final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
-                        FrameworkUtil.getBundle(participant.getClass()));
-                thingDiscovered(resultNew);
+                thingDiscovered(result, FrameworkUtil.getBundle(participant.getClass()));
             }
         } catch (Exception e) {
             logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
