@@ -77,11 +77,11 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
     public URLAudioStream(InputStream inputStream) throws AudioException {
         this.url = "";
         this.audioFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, false, 16, null, null);
-        // if (inputStream instanceof LazzyLoadingAudioStream) {
-        // this.inputStream = inputStream;
-        // } else {
-        this.inputStream = createInputStream(inputStream);
-        // }
+        if (inputStream instanceof LazzyLoadingAudioStream) {
+            this.inputStream = inputStream;
+        } else {
+            this.inputStream = createInputStream(inputStream);
+        }
     }
 
     private InputStream createInputStream(InputStream inputStream) throws AudioException {
@@ -114,7 +114,7 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
 
                 List<URL> urls = new ArrayList();
                 urls.add(new URI(initializationUri).toURL());
-                for (int i = 0; i < r; i++) {
+                for (int i = 1; i < r; i++) {
                     logger.info("Segment:" + i);
                     String downloadUri = mediaUri.replace("$Number$", "" + i);
                     urls.add(new URI(downloadUri).toURL());
@@ -254,6 +254,10 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
         return url;
     }
 
+    public boolean hasDirectURL() {
+        return !url.isBlank();
+    }
+
     @Override
     public void close() throws IOException {
         super.close();
@@ -269,7 +273,7 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
 
     @Override
     public InputStream getClonedStream() throws AudioException {
-        if (url.isBlank()) {
+        if (!hasDirectURL()) {
             return new URLAudioStream(inputStream);
         } else {
             return new URLAudioStream(url);
