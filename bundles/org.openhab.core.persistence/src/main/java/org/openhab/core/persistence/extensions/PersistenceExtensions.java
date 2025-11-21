@@ -15,6 +15,7 @@ package org.openhab.core.persistence.extensions;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -71,6 +72,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - add median methods
  * @author Mark Herwege - use item lastChange and lastUpdate methods if not in peristence
  * @author Mark Herwege - add Riemann sum methods
+ * @author Jörg Sautter - use Instant instead of ZonedDateTime in Riemann sum methods
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -1926,7 +1928,7 @@ public class PersistenceExtensions {
 
     private static @Nullable BigDecimal average(ZonedDateTime begin, ZonedDateTime end, Iterator<HistoricItem> it,
             @Nullable Unit<?> unit, @Nullable RiemannType type) {
-        BigDecimal sum = riemannSum(begin, end, it, unit, type);
+        BigDecimal sum = riemannSum(begin.toInstant(), end.toInstant(), it, unit, type);
         BigDecimal totalDuration = BigDecimal.valueOf(Duration.between(begin, end).toMillis());
         if (totalDuration.signum() == 0) {
             return null;
@@ -2195,35 +2197,39 @@ public class PersistenceExtensions {
         Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = (baseItem instanceof NumberItem numberItem)
                 && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
-        BigDecimal sum = riemannSum(beginTime, endTime, it, unit, type).scaleByPowerOfTen(-3);
+        BigDecimal sum = riemannSum(beginTime.toInstant(), endTime.toInstant(), it, unit, type).scaleByPowerOfTen(-3);
         if (unit != null) {
             return new QuantityType<>(sum, unit.multiply(Units.SECOND));
         }
         return new DecimalType(sum);
     }
 
-    private static BigDecimal riemannSum(ZonedDateTime begin, ZonedDateTime end, Iterator<HistoricItem> it,
-            @Nullable Unit<?> unit, @Nullable RiemannType type) {
+    private static BigDecimal riemannSum(Instant begin, Instant end, Iterator<HistoricItem> it, @Nullable Unit<?> unit,
+            @Nullable RiemannType type) {
         RiemannType riemannType = type == null ? RiemannType.LEFT : type;
 
         BigDecimal sum = BigDecimal.ZERO;
         HistoricItem prevItem = null;
-        HistoricItem nextItem = null;
+        HistoricItem nextItem;
         DecimalType prevState = null;
-        DecimalType nextState = null;
+        DecimalType nextState;
+        Instant prevInstant = null;
+        Instant nextInstant;
         Duration prevDuration = Duration.ZERO;
-        Duration nextDuration = Duration.ZERO;
+        Duration nextDuration;
 
         boolean midpointStartBucket = true; // The start and end buckets for the midpoint calculation should be
                                             // considered for the full length, this flag is used to find the start
                                             // bucket
         if ((riemannType == RiemannType.MIDPOINT) && it.hasNext()) {
             prevItem = it.next();
+            prevInstant = prevItem.getInstant();
             prevState = getPersistedValue(prevItem, unit);
         }
 
         while (it.hasNext()) {
             nextItem = it.next();
+            nextInstant = nextItem.getInstant();
             BigDecimal weight = BigDecimal.ZERO;
             BigDecimal value = BigDecimal.ZERO;
             switch (riemannType) {
@@ -2232,24 +2238,24 @@ public class PersistenceExtensions {
                         prevState = getPersistedValue(prevItem, unit);
                         if (prevState != null) {
                             value = prevState.toBigDecimal();
-                            weight = BigDecimal.valueOf(
-                                    Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp()).toMillis());
+                            weight = BigDecimal.valueOf(Duration.between(prevInstant, nextInstant).toMillis());
                         }
                     }
                     prevItem = nextItem;
+                    prevInstant = nextInstant;
                     break;
                 case RIGHT:
                     nextState = getPersistedValue(nextItem, unit);
                     if (nextState != null) {
                         value = nextState.toBigDecimal();
                         if (prevItem == null) {
-                            weight = BigDecimal.valueOf(Duration.between(begin, nextItem.getTimestamp()).toMillis());
+                            weight = BigDecimal.valueOf(Duration.between(begin, nextInstant).toMillis());
                         } else {
-                            weight = BigDecimal.valueOf(
-                                    Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp()).toMillis());
+                            weight = BigDecimal.valueOf(Duration.between(prevInstant, nextInstant).toMillis());
                         }
                     }
                     prevItem = nextItem;
+                    prevInstant = nextInstant;
                     break;
                 case TRAPEZOIDAL:
                     if (prevItem != null) {
@@ -2258,11 +2264,11 @@ public class PersistenceExtensions {
                         if (prevState != null && nextState != null) {
                             value = prevState.toBigDecimal().add(nextState.toBigDecimal())
                                     .divide(BigDecimal.valueOf(2));
-                            weight = BigDecimal.valueOf(
-                                    Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp()).toMillis());
+                            weight = BigDecimal.valueOf(Duration.between(prevInstant, nextInstant).toMillis());
                         }
                     }
                     prevItem = nextItem;
+                    prevInstant = nextInstant;
                     break;
                 case MIDPOINT:
                     if (prevItem != null) {
@@ -2272,12 +2278,12 @@ public class PersistenceExtensions {
                             if (midpointStartBucket && !prevDuration.isZero() && prevState != null) {
                                 // Add half of the start bucket with the start value (left approximation)
                                 sum = sum.add(prevState.toBigDecimal()
-                                        .multiply(BigDecimal.valueOf(prevDuration.dividedBy(2).toMillis())));
+                                        .multiply(BigDecimal.valueOf(prevDuration.toMillis() / 2)));
                                 midpointStartBucket = false;
                             }
-                            nextDuration = Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp());
+                            nextDuration = Duration.between(prevInstant, nextInstant);
                             weight = prevDuration.isZero() || nextDuration.isZero() ? BigDecimal.ZERO
-                                    : BigDecimal.valueOf(prevDuration.plus(nextDuration).dividedBy(2).toMillis());
+                                    : BigDecimal.valueOf(prevDuration.plus(nextDuration).toMillis() / 2);
                             if (!nextDuration.isZero()) {
                                 prevDuration = nextDuration;
                             }
@@ -2285,6 +2291,7 @@ public class PersistenceExtensions {
                         }
                     }
                     prevItem = nextItem;
+                    prevInstant = nextInstant;
                     break;
             }
             sum = sum.add(value.multiply(weight));
@@ -2295,7 +2302,7 @@ public class PersistenceExtensions {
             DecimalType dtState = getPersistedValue(prevItem, unit);
             if (dtState != null) {
                 BigDecimal value = dtState.toBigDecimal();
-                BigDecimal weight = BigDecimal.valueOf(prevDuration.dividedBy(2).toMillis());
+                BigDecimal weight = BigDecimal.valueOf(prevDuration.toMillis() / 2);
                 sum = sum.add(value.multiply(weight));
             }
         }
