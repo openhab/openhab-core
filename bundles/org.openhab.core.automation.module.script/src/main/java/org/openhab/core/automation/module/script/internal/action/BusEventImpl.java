@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * This allows a script to write to the openHAB event bus.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Florian Hotze - Refactored to OSGi service
  */
 @Component(immediate = true, service = BusEvent.class)
 @NonNullByDefault
