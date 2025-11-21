@@ -13,12 +13,7 @@ Script returns XBlockExpression:
 
 @Override
 XLiteral returns XExpression:
-  XClosure |
-  XBooleanLiteral |
-  XNullLiteral |
-  XStringLiteral |
-  XNumberLiteral |
-  XTypeLiteral |
+  super |
   QuantityLiteral
 ;
 
