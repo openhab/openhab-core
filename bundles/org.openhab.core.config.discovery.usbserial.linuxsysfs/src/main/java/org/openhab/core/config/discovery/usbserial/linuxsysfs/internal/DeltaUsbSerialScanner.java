@@ -29,6 +29,7 @@ import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 @NonNullByDefault
 public class DeltaUsbSerialScanner {
 
+    // All access must be guarded by "this"
     private Set<UsbSerialDeviceInformation> lastScanResult = new HashSet<>();
 
     private final UsbSerialScanner usbSerialScanner;
@@ -37,8 +38,8 @@ public class DeltaUsbSerialScanner {
         this.usbSerialScanner = usbSerialScanner;
     }
 
-    public Set<UsbSerialDeviceInformation> getLastScanResult() {
-        return lastScanResult;
+    public synchronized Set<UsbSerialDeviceInformation> getLastScanResult() {
+        return Set.copyOf(lastScanResult);
     }
 
     /**

@@ -15,11 +15,10 @@ package org.openhab.core.config.discovery.addon.usb;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_USB;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_USB;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -68,19 +67,17 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
     public static final Set<String> SUPPORTED_PROPERTIES = Set.of(PRODUCT, MANUFACTURER, CHIP_ID, REMOTE);
 
     private final Logger logger = LoggerFactory.getLogger(UsbAddonFinder.class);
-    private final Set<UsbSerialDiscovery> usbSerialDiscoveries = new CopyOnWriteArraySet<>();
-    private final Map<Long, UsbSerialDeviceInformation> usbDeviceInformations = new ConcurrentHashMap<>();
+
+    // All access must be guarded by "this"
+    private final Map<Long, UsbSerialDeviceInformation> usbDeviceInformations = new HashMap<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
-        usbSerialDiscoveries.add(usbSerialDiscovery);
         usbSerialDiscovery.registerDiscoveryListener(this);
-        usbSerialDiscovery.doSingleScan();
     }
 
     protected synchronized void removeUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
         usbSerialDiscovery.unregisterDiscoveryListener(this);
-        usbSerialDiscoveries.remove(usbSerialDiscovery);
     }
 
     @Override
@@ -102,17 +99,19 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
                 }
 
                 logger.trace("Checking candidate: {}", candidate.getUID());
-                for (UsbSerialDeviceInformation device : usbDeviceInformations.values()) {
-                    logger.trace("Checking device: {}", device);
+                synchronized (this) {
+                    for (UsbSerialDeviceInformation device : usbDeviceInformations.values()) {
+                        logger.trace("Checking device: {}", device);
 
-                    if (propertyMatches(matchProperties, PRODUCT, device.getProduct())
-                            && propertyMatches(matchProperties, MANUFACTURER, device.getManufacturer())
-                            && propertyMatches(matchProperties, CHIP_ID,
-                                    getChipId(device.getVendorId(), device.getProductId()))
-                            && propertyMatches(matchProperties, REMOTE, String.valueOf(device.getRemote()))) {
-                        result.add(candidate);
-                        logger.debug("Suggested add-on found: {}", candidate.getUID());
-                        break;
+                        if (propertyMatches(matchProperties, PRODUCT, device.getProduct())
+                                && propertyMatches(matchProperties, MANUFACTURER, device.getManufacturer())
+                                && propertyMatches(matchProperties, CHIP_ID,
+                                        getChipId(device.getVendorId(), device.getProductId()))
+                                && propertyMatches(matchProperties, REMOTE, String.valueOf(device.getRemote()))) {
+                            result.add(candidate);
+                            logger.debug("Suggested add-on found: {}", candidate.getUID());
+                            break;
+                        }
                     }
                 }
             }
@@ -141,47 +140,50 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
     /**
      * Add the discovered USB device information record to our internal map. If there is already an entry in the map
      * then merge the two sets of data.
-     * 
+     *
      * @param discoveredInfo the newly discovered USB device information.
      */
     @Override
     public void usbSerialDeviceDiscovered(UsbSerialDeviceInformation discoveredInfo) {
         UsbSerialDeviceInformation targetInfo = discoveredInfo;
-        UsbSerialDeviceInformation existingInfo = usbDeviceInformations.get(keyOf(targetInfo));
+        synchronized (this) {
+            UsbSerialDeviceInformation existingInfo = usbDeviceInformations.get(keyOf(targetInfo));
 
-        if (existingInfo != null) {
-            boolean isMerging = false;
-            String product = existingInfo.getProduct();
-            if (product != null) {
-                product = discoveredInfo.getProduct();
-                isMerging = true;
+            if (existingInfo != null) {
+                boolean isMerging = false;
+                String product = existingInfo.getProduct();
+                if (product != null) {
+                    product = discoveredInfo.getProduct();
+                    isMerging = true;
+                }
+                String manufacturer = existingInfo.getManufacturer();
+                if (manufacturer != null) {
+                    manufacturer = discoveredInfo.getManufacturer();
+                    isMerging = true;
+                }
+                String serialNumber = existingInfo.getSerialNumber();
+                if (serialNumber != null) {
+                    serialNumber = discoveredInfo.getSerialNumber();
+                    isMerging = true;
+                }
+                boolean remote = existingInfo.getRemote();
+                if (remote == discoveredInfo.getRemote()) {
+                    isMerging = true;
+                }
+                if (isMerging) {
+                    targetInfo = new UsbSerialDeviceInformation(discoveredInfo.getVendorId(),
+                            discoveredInfo.getProductId(), serialNumber, manufacturer, product,
+                            discoveredInfo.getInterfaceNumber(), discoveredInfo.getInterfaceDescription(),
+                            discoveredInfo.getSerialPort()).setRemote(remote);
+                }
             }
-            String manufacturer = existingInfo.getManufacturer();
-            if (manufacturer != null) {
-                manufacturer = discoveredInfo.getManufacturer();
-                isMerging = true;
-            }
-            String serialNumber = existingInfo.getSerialNumber();
-            if (serialNumber != null) {
-                serialNumber = discoveredInfo.getSerialNumber();
-                isMerging = true;
-            }
-            boolean remote = existingInfo.getRemote();
-            if (remote == discoveredInfo.getRemote()) {
-                isMerging = true;
-            }
-            if (isMerging) {
-                targetInfo = new UsbSerialDeviceInformation(discoveredInfo.getVendorId(), discoveredInfo.getProductId(),
-                        serialNumber, manufacturer, product, discoveredInfo.getInterfaceNumber(),
-                        discoveredInfo.getInterfaceDescription(), discoveredInfo.getSerialPort()).setRemote(remote);
-            }
+
+            usbDeviceInformations.put(keyOf(targetInfo), targetInfo);
         }
-
-        usbDeviceInformations.put(keyOf(targetInfo), targetInfo);
     }
 
     @Override
-    public void usbSerialDeviceRemoved(UsbSerialDeviceInformation removedInfo) {
+    public synchronized void usbSerialDeviceRemoved(UsbSerialDeviceInformation removedInfo) {
         usbDeviceInformations.remove(keyOf(removedInfo));
     }
 }

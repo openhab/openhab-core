@@ -202,7 +202,7 @@ public class Ser2NetUsbSerialDiscoveryTest {
     public void backgroundScanning() {
         discovery.startBackgroundScanning();
 
-        discovery.serviceAdded(serviceEvent1Mock);
+        discovery.serviceResolved(serviceEvent1Mock);
         discovery.serviceRemoved(serviceEvent1Mock);
         discovery.serviceAdded(serviceEvent2Mock);
         discovery.serviceAdded(invalidServiceEventMock);
@@ -215,7 +215,7 @@ public class Ser2NetUsbSerialDiscoveryTest {
         verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb1);
         verify(discoveryListenerMock, times(1)).usbSerialDeviceRemoved(usb1);
 
-        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb2);
+        verify(discoveryListenerMock, never()).usbSerialDeviceDiscovered(usb2);
         verify(discoveryListenerMock, never()).usbSerialDeviceRemoved(usb2);
 
         verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb3);
