@@ -486,6 +486,11 @@ public class DefaultSemanticTags {
                 "Pressure", //
                 "", //
                 "");
+        public static final SemanticTag PRICE = new SemanticTagImpl( //
+                "Property_Price", //
+                "Price", //
+                "", //
+                "Cost,Fee,Rate");
         public static final SemanticTag PROGRESS = new SemanticTagImpl( //
                 "Property_Progress", //
                 "Progress", //
