@@ -63,6 +63,10 @@ public class ThingDescriptionReaderTest {
         assertThat(thingTypeXmlResult.label, is("HUE Lamp"));
         assertThat(thingTypeXmlResult.description, is("My own great HUE Lamp."));
         assertThat(thingTypeXmlResult.semanticEquipmentTag, is("LightBulb"));
+        List<String> supportedBridgeTypeUIDs = thingTypeXmlResult.getBuilder().build().getSupportedBridgeTypeUIDs();
+        assertThat(supportedBridgeTypeUIDs.size(), is(2));
+        assertTrue(supportedBridgeTypeUIDs.contains("hue:bridge"));
+        assertTrue(supportedBridgeTypeUIDs.contains("mqtt:broker"));
 
         assertThat(channelGroupTypeXmlResults.size(), is(1));
 

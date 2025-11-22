@@ -7,6 +7,7 @@
 	<thing-type id="lamp">
 		<supported-bridge-type-refs>
 			<bridge-type-ref id="bridge"/>
+			<bridge-type-ref bindingId="mqtt" id="broker"/>
 		</supported-bridge-type-refs>
 
 		<label>HUE Lamp</label>

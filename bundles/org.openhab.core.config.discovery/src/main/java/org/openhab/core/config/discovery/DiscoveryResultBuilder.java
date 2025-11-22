@@ -115,7 +115,6 @@ public class DiscoveryResultBuilder {
      * @return the updated builder
      */
     public DiscoveryResultBuilder withBridge(@Nullable ThingUID bridgeUID) {
-        validateThingUID(bridgeUID);
         this.bridgeUID = bridgeUID;
         return this;
     }
@@ -162,14 +161,6 @@ public class DiscoveryResultBuilder {
         }
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
                 ttl);
-    }
-
-    private void validateThingUID(@Nullable ThingUID bridgeUID) {
-        if (bridgeUID != null && (!thingUID.getBindingId().equals(bridgeUID.getBindingId())
-                || !thingUID.getBridgeIds().contains(bridgeUID.getId()))) {
-            throw new IllegalArgumentException(
-                    "Thing UID '" + thingUID + "' does not match bridge UID '" + bridgeUID + "'");
-        }
     }
 
     private String getStackTrace(final Thread thread) {
