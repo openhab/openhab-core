@@ -319,6 +319,7 @@
 			<xs:enumeration value="Precipitation"/>
 			<xs:enumeration value="Presence"/>
 			<xs:enumeration value="Pressure"/>
+			<xs:enumeration value="Price"/>
 			<xs:enumeration value="Progress"/>
 			<xs:enumeration value="QualityOfService"/>
 			<xs:enumeration value="Radon"/>

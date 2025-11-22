@@ -89,6 +89,7 @@ Property,Precipitation,,Precipitation,,
 Property,Rain,Precipitation,Rain,,
 Property,Presence,,Presence,,Presence detection
 Property,Pressure,,Pressure,,
+Property,Price,,Price,"Cost, Fee, Rate",
 Property,Progress,,Progress,,
 Property,QualityOfService,,Quality of Service,,
 Property,SignalStrength,,Signal Strength,,

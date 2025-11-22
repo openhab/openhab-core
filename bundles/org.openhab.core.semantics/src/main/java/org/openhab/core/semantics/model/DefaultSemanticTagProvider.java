@@ -129,6 +129,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.RAIN);
         defaultTags.add(DefaultSemanticTags.Property.PRESENCE);
         defaultTags.add(DefaultSemanticTags.Property.PRESSURE);
+        defaultTags.add(DefaultSemanticTags.Property.PRICE);
         defaultTags.add(DefaultSemanticTags.Property.PROGRESS);
         defaultTags.add(DefaultSemanticTags.Property.QUALITY_OF_SERVICE);
         defaultTags.add(DefaultSemanticTags.Property.SIGNAL_STRENGTH);
