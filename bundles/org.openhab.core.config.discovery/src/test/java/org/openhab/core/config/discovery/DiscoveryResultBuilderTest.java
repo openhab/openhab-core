@@ -15,7 +15,6 @@ package org.openhab.core.config.discovery;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
 
@@ -107,8 +106,10 @@ public class DiscoveryResultBuilderTest {
 
     @Test
     public void testDiscoveryResultBuilderWithBridge() {
-        assertThrows(IllegalArgumentException.class, () -> DiscoveryResultBuilder
-                .create(new ThingUID(THING_TYPE_UID, "otherThingId")).withBridge(BRIDGE_UID).build());
+        DiscoveryResult otherDiscoveryResult = DiscoveryResultBuilder
+                .create(new ThingUID(THING_TYPE_UID, "otherThingId")).withBridge(BRIDGE_UID).build();
+
+        assertThat(otherDiscoveryResult.getBridgeUID(), is(BRIDGE_UID));
     }
 
     @Test
