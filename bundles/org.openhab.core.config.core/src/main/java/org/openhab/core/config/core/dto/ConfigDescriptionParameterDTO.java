@@ -39,6 +39,7 @@ public class ConfigDescriptionParameterDTO {
     public Type type;
     public BigDecimal min;
     public BigDecimal max;
+    @SerializedName(value = "step", alternate = "stepsize")
     public BigDecimal stepsize;
     public String pattern;
     public Boolean readOnly;
