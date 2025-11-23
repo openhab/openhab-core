@@ -309,7 +309,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             } else {
                 Set<String> newTags = new HashSet<>(activeItem.getTags());
                 newTags.addAll(channelDefaultTags);
-                logger.info("Item '{}' adding tags '{}' supplied by channel '{}'.", activeItem.getName(),
+                logger.debug("Item '{}' adding tags '{}' supplied by channel '{}'.", activeItem.getName(),
                         channelDefaultTags, link.getLinkedUID());
 
                 link.setTagsLinked(true);
@@ -344,8 +344,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             newTags.removeAll(oldLinkTags);
             // on openHAB shutdown tagsLinked may be true but oldLinkTags is already empty so do not log
             if (startlevel >= STARTLEVEL_COMPLETE) {
-                logger.info("Item '{}' removing tags '{}' supplied by channel '{}'.", activeItem.getName(), oldLinkTags,
-                        oldLink.getLinkedUID());
+                logger.debug("Item '{}' removing tags '{}' supplied by channel '{}'.", activeItem.getName(),
+                        oldLinkTags, oldLink.getLinkedUID());
             }
 
             // iterate over other links in case one may assign new tags
@@ -361,7 +361,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                         } else {
                             alreadyHasPointOrPropertyTag = true;
                             newTags.addAll(otherLinkTags);
-                            logger.info("Item '{}' adding tags '{}' supplied by channel '{}'.", activeItem.getName(),
+                            logger.debug("Item '{}' adding tags '{}' supplied by channel '{}'.", activeItem.getName(),
                                     otherLinkTags, otherLink.getLinkedUID());
                             otherLink.setTagsLinked(true);
                         }
