@@ -273,6 +273,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @Operation(operationId = "unlinkItemFromChannel", summary = "Unlinks an item from a channel.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "400", description = "Invalid channel UID."),
                     @ApiResponse(responseCode = "404", description = "Link not found."),
                     @ApiResponse(responseCode = "405", description = "Link not editable.") })
     public Response unlink(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
