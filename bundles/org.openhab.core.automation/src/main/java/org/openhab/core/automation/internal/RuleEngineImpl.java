@@ -29,6 +29,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -1119,45 +1120,54 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return Map.of();
         }
 
-        Future<Map<String, @Nullable Object>> future = thCallback.getScheduler().submit(() -> {
-            Map<String, @Nullable Object> returnContext = new HashMap<>();
-            synchronized (this) {
-                final RuleStatus ruleStatus = getRuleStatus(ruleUID);
-                if (ruleStatus != null && ruleStatus != RuleStatus.IDLE) {
-                    logger.error("Failed to execute rule '{}' with status '{}'", ruleUID, ruleStatus.name());
-                    return Map.of();
+        Future<Map<String, @Nullable Object>> future;
+        try {
+            future = thCallback.getScheduler().submit(() -> {
+                Map<String, @Nullable Object> returnContext = new HashMap<>();
+                synchronized (this) {
+                    final RuleStatus ruleStatus = getRuleStatus(ruleUID);
+                    if (ruleStatus != null && ruleStatus != RuleStatus.IDLE) {
+                        logger.error("Failed to execute rule '{}' with status '{}'", ruleUID, ruleStatus.name());
+                        return Map.of();
+                    }
+                    // change state to RUNNING
+                    setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
                 }
-                // change state to RUNNING
-                setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
-            }
-            try {
-                clearContext(ruleUID);
-                if (context != null && !context.isEmpty()) {
-                    getContext(ruleUID, null).putAll(context);
+                try {
+                    clearContext(ruleUID);
+                    if (context != null && !context.isEmpty()) {
+                        getContext(ruleUID, null).putAll(context);
+                    }
+                    if (!considerConditions || calculateConditions(rule)) {
+                        executeActions(rule, false);
+                    }
+                    logger.debug("The rule '{}' is executed.", ruleUID);
+                    returnContext.putAll(getContext(ruleUID, null));
+                } catch (Throwable t) {
+                    logger.error("Failed to execute rule '{}': ", ruleUID, t);
+                } finally {
+                    // change state to IDLE only if the rule has not been DISABLED.
+                    synchronized (this) {
+                        if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
+                            setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
+                        }
+                    }
                 }
-                if (!considerConditions || calculateConditions(rule)) {
-                    executeActions(rule, false);
-                }
-                logger.debug("The rule '{}' is executed.", ruleUID);
-                returnContext.putAll(getContext(ruleUID, null));
-            } catch (Throwable t) {
-                logger.error("Failed to execute rule '{}': ", ruleUID, t);
-            }
-            // change state to IDLE only if the rule has not been DISABLED.
-            synchronized (this) {
-                if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
-                    setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
-                }
-            }
-            return returnContext;
-        });
+                return returnContext;
+            });
+        } catch (RejectedExecutionException e) {
+            logger.warn("Failed to execute rule '{}' because the rule executor rejected execution: {}", ruleUID,
+                    e.getMessage());
+            return Map.of();
+        }
         try {
             return future.get();
         } catch (InterruptedException e) {
             logger.warn("Interrupted while waiting for rule '{}' to execute, attempting to cancel execution", ruleUID);
             future.cancel(true);
+            Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
-            logger.error("Failed to execute rule '{}': ", ruleUID, e);
+            logger.error("Failed to execute rule '{}': ", ruleUID, e.getCause());
         }
         return Map.of();
     }
