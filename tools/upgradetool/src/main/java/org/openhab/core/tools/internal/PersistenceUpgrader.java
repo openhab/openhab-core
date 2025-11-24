@@ -28,7 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link PersistenceUpgrader} removing default persistence strategy
+ * The {@link PersistenceUpgrader} removes the default persistence strategy.
+ *
+ * It upgrades the PersistenceServiceConfiguration database, removing default strategies and setting strategies on each
+ * configuration that has no strategy defined.
+ * See <a href="https://github.com/openhab/openhab-core/pull/4682">openhab/openhab-core#4682</a>.
  *
  * @author Mark Herwege - Initial Contribution
  */
@@ -46,11 +50,6 @@ public class PersistenceUpgrader implements Upgrader {
         return "Move persistence default strategy configuration to all persistence configuration without strategy defined";
     }
 
-    /**
-     * Upgrades the PersistenceServiceConfiguration database, removing default strategies and setting strategies on each
-     * configuration that has no strategy defined.
-     * See <a href="https://github.com/openhab/openhab-core/pull/4682">openhab/openhab-core#4682</a>.
-     */
     @Override
     public boolean execute(@Nullable Path userdataPath, @Nullable Path confPath) {
         if (userdataPath == null) {

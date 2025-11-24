@@ -60,6 +60,7 @@ public class UpgradeTool {
             new JSProfileUpgrader(), //
             new ScriptProfileUpgrader(), //
             new YamlConfigurationV1TagsUpgrader(), // Added in 5.0
+<<<<<<< Upstream, based on origin/main
             new HomeAssistantAddonUpgrader(), // Added in 5.1
             new HomieAddonUpgrader(), // Added in 5.1
             new PersistenceUpgrader() // Added in 5.1
