@@ -60,7 +60,8 @@ public class UpgradeTool {
             new JSProfileUpgrader(), //
             new ScriptProfileUpgrader(), //
             new YamlConfigurationV1TagsUpgrader(), // Added in 5.0
-            new PersistenceUpgrader());
+            new PersistenceUpgrader() // Added in 5.1
+    );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeTool.class);
     private static @Nullable JsonStorage<UpgradeRecord> upgradeRecords = null;
