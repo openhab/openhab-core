@@ -69,7 +69,7 @@ public class BusEventImpl implements BusEvent {
     @Override
     public void sendCommand(Item item, String commandString, @Nullable String source) {
         if (item != null) {
-            sendCommand(item.getName(), commandString);
+            sendCommand(item.getName(), commandString, source);
         }
     }
 
