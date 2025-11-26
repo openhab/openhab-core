@@ -23,6 +23,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -31,6 +32,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.util.ajax.JSON;
 import org.openhab.core.audio.utils.AudioStreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,9 +125,20 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
 
                 LazzyLoadingAudioStream stream = new LazzyLoadingAudioStream(urls, artist, title);
                 return stream;
+            } else {
+                HashMap<String, Object> result = (HashMap<String, Object>) JSON.parse(content);
+                Object[] urls = (Object[]) result.get("urls");
+                String url = (String) urls[0];
+
+                List<URL> targetUrls = new ArrayList();
+                targetUrls.add(new URI(url).toURL());
+                logger.info("");
+                LazzyLoadingAudioStream stream = new LazzyLoadingAudioStream(targetUrls, artist, title);
+                return stream;
+
             }
 
-            throw new AudioException("NIY");
+            // throw new AudioException("NIY");
         } catch (Exception ex) {
             throw new AudioException(ex);
         }
