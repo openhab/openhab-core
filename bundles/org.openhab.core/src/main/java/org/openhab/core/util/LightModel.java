@@ -30,9 +30,6 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 
 /**
- * NOTE: This class is a temporary copy of the proposed OH Core Light Model. It is introduced here as a proof
- * of concept until such time as the OH Core Light Model is available to be used directly.
- *
  * The {@link LightModel} provides a state machine model for maintaining and modifying the state of a light,
  * which is intended to be used within the Thing Handler of a lighting binding.
  * <p>
@@ -726,7 +723,6 @@ public class LightModel {
          * In white only mode the RGB values are all zero.
          */
         if (LedOperatingMode.WHITE_ONLY == ledOperatingMode) {
-
             /*
              * If the light has a single white led then its value is determined by the brightness only.
              */
@@ -756,7 +752,6 @@ public class LightModel {
          * In RGB only mode the RGB values are determined by the HSB values and the white values are always zero.
          */
         if (LedOperatingMode.RGB_ONLY == ledOperatingMode) {
-
             /*
              * RGB only - convert HSB to RGB, then scale to [0..255] and pad with zeros for white values.
              */
@@ -774,7 +769,6 @@ public class LightModel {
          * In combined mode the RGB and white values are all determined by the HSB values.
          */
         if (LedOperatingMode.COMBINED == ledOperatingMode) {
-
             /*
              * RGBCW - convert HSB to RGB, normalize it, then convert to RGBCW, then scale to [0..255]
              */
@@ -1305,7 +1299,7 @@ public class LightModel {
      * Internal: a class containing mathematical utility methods that convert between RGB and RGBCW color arrays
      * based on the RGB main values and the RGB sub- component values of the cool and warm white LEDs.
      *
-     * TODO it is intended to move this class to the {@link ColorUtil} utility class, but let's keep it here
+     * Note: it is intended to move this class to the {@link ColorUtil} utility class, but let's keep it here
      * for the time being in order to simplify testing and code review.
      */
     public static class RgbcwMath {
