@@ -74,21 +74,22 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
         this.inputStream = createInputStream();
     }
 
-    public URLAudioStream(InputStream inputStream) throws AudioException {
+    public URLAudioStream(InputStream inputStream, String artist, String title) throws AudioException {
         this.url = "";
         this.audioFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, false, 16, null, null);
         if (inputStream instanceof LazzyLoadingAudioStream) {
             this.inputStream = inputStream;
         } else {
-            this.inputStream = createInputStream(inputStream);
+            this.inputStream = createInputStream(inputStream, artist, title);
         }
     }
 
-    private InputStream createInputStream(InputStream inputStream) throws AudioException {
+    private InputStream createInputStream(InputStream inputStream, String artist, String title) throws AudioException {
         try {
             String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
             if (content.contains("urn:mpeg:dash:schema:mpd")) {
                 MPDParser parser = new MPDParser();
+                content = content.replace("<Label>FLAC_HIRES</Label>", "");
                 MPD mpd = parser.parse(content);
 
                 List<Period> periodList = mpd.getPeriods();
@@ -120,7 +121,7 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
                     urls.add(new URI(downloadUri).toURL());
                 }
 
-                LazzyLoadingAudioStream stream = new LazzyLoadingAudioStream(urls);
+                LazzyLoadingAudioStream stream = new LazzyLoadingAudioStream(urls, artist, title);
                 return stream;
             }
 
@@ -201,7 +202,7 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
                             urls.add(new URI(downloadUri).toURL());
                         }
 
-                        LazzyLoadingAudioStream stream = new LazzyLoadingAudioStream(urls);
+                        LazzyLoadingAudioStream stream = new LazzyLoadingAudioStream(urls, "", "");
                         return stream;
                     } catch (Exception ex) {
                         logger.info("bb");
@@ -274,7 +275,7 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
     @Override
     public InputStream getClonedStream() throws AudioException {
         if (!hasDirectURL()) {
-            return new URLAudioStream(inputStream);
+            return new URLAudioStream(inputStream, "", "");
         } else {
             return new URLAudioStream(url);
         }
