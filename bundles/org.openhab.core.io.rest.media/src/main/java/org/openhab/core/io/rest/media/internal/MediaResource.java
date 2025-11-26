@@ -39,15 +39,15 @@ import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.media.MediaDevice;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
+import org.openhab.core.media.MediaSink;
 import org.openhab.core.media.internal.MediaServlet;
 import org.openhab.core.media.model.MediaCollection;
+import org.openhab.core.media.model.MediaCollectionSource;
 import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
 import org.openhab.core.media.model.MediaSearchResult;
-import org.openhab.core.media.model.MediaSource;
 import org.openhab.core.media.model.MediaTrack;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -111,7 +111,7 @@ public class MediaResource implements RESTResource {
     @GET
     @Path("/sources")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getMediaSources", summary = "Get the list of all sources.", responses = {
+    @Operation(operationId = "getMediaCollectionSources", summary = "Get the list of all media collection sources.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MediaDTO.class)))) })
     public Response getSources(@Context UriInfo uriInfo,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -165,10 +165,10 @@ public class MediaResource implements RESTResource {
             }
 
         } else {
-            MediaSource mediaSource = entry.getMediaSource(false);
+            MediaCollectionSource mediaCollectionSource = entry.getMediaCollectionSource(false);
             String key = "/Root";
-            if (mediaSource != null) {
-                key = mediaSource.getKey();
+            if (mediaCollectionSource != null) {
+                key = mediaCollectionSource.getKey();
             }
 
             MediaListenner mediaListenner = mediaService.getMediaListenner(key);
@@ -236,7 +236,7 @@ public class MediaResource implements RESTResource {
             @QueryParam("path") @Parameter(description = "path of the ressource") @Nullable String path) {
         final Locale locale = localeService.getLocale(language);
 
-        Map<String, MediaDevice> devices = mediaService.getMediaDevices();
+        Map<String, MediaSink> devices = mediaService.getMediaSinks();
 
         Collection<Item> colItem = itemRegistry.getItemsOfType("Player");
         for (Item item : colItem) {
@@ -248,7 +248,7 @@ public class MediaResource implements RESTResource {
         }
 
         MediaSinkDTOCollection dtoCol = new MediaSinkDTOCollection();
-        for (MediaDevice device : devices.values()) {
+        for (MediaSink device : devices.values()) {
             MediaSinkDTO dto = new MediaSinkDTO(device.getId(), device.getName(), device.getType(),
                     device.getBinding());
 

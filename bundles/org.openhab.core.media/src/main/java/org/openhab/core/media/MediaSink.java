@@ -20,13 +20,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaDevice {
+public class MediaSink {
     private String id;
     private String name;
     private String type;
     private String binding;
 
-    public MediaDevice(String id, String name, String type, String binding) {
+    public MediaSink(String id, String name, String type, String binding) {
         this.id = id;
         this.name = name;
         this.type = type;
