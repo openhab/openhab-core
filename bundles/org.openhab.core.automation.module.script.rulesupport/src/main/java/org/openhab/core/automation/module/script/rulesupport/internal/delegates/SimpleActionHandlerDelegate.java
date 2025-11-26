@@ -44,7 +44,7 @@ public class SimpleActionHandlerDelegate extends BaseActionModuleHandler {
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(Map<String, @Nullable Object> inputs) {
+    public @Nullable Map<String, @Nullable Object> execute(Map<String, @Nullable Object> inputs) {
         Set<String> keys = new HashSet<>(inputs.keySet());
 
         Map<String, @Nullable Object> extendedInputs = new HashMap<>(inputs);
@@ -60,7 +60,7 @@ public class SimpleActionHandlerDelegate extends BaseActionModuleHandler {
         }
 
         Object result = actionHandler.execute(module, extendedInputs);
-        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, @Nullable Object> resultMap = new HashMap<>();
         resultMap.put("result", result);
         return resultMap;
     }

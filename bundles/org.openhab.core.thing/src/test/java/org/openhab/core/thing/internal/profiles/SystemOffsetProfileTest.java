@@ -15,8 +15,10 @@ package org.openhab.core.thing.internal.profiles;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import java.time.Instant;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Temperature;
@@ -35,6 +37,9 @@ import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
+import org.openhab.core.types.TimeSeries.Entry;
+import org.openhab.core.types.TimeSeries.Policy;
 
 /**
  * Tests for the system:offset profile
@@ -199,6 +204,29 @@ public class SystemOffsetProfileTest {
         QuantityType<?> decResult = (QuantityType<?>) result;
         assertEquals(3, decResult.intValue());
         assertEquals(Units.ONE, decResult.getUnit());
+    }
+
+    @Test
+    public void testTimeSeriesFromHandler() {
+        ProfileCallback callback = mock(ProfileCallback.class);
+        SystemOffsetProfile offsetProfile = createProfile(callback, "3");
+
+        TimeSeries ts = new TimeSeries(Policy.ADD);
+        Instant now = Instant.now();
+        ts.add(now, new DecimalType(23));
+
+        offsetProfile.onTimeSeriesFromHandler(ts);
+
+        ArgumentCaptor<TimeSeries> capture = ArgumentCaptor.forClass(TimeSeries.class);
+        verify(callback, times(1)).sendTimeSeries(capture.capture());
+
+        TimeSeries result = capture.getValue();
+        assertEquals(ts.getStates().count(), result.getStates().count());
+        Entry entry = result.getStates().findFirst().get();
+        assertNotNull(entry);
+        assertEquals(now, entry.timestamp());
+        DecimalType decResult = (DecimalType) entry.state();
+        assertEquals(26, decResult.intValue());
     }
 
     private SystemOffsetProfile createProfile(ProfileCallback callback, String offset) {

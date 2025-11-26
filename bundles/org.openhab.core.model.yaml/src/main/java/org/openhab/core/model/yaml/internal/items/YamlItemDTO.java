@@ -23,9 +23,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.AbstractUID;
 import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.ItemUtil;
+import org.openhab.core.items.MetadataKey;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
 
 /**
  * The {@link YamlItemDTO} is a data transfer object used to serialize an item in a YAML configuration file.
@@ -35,9 +39,7 @@ import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 @YamlElementName("items")
 public class YamlItemDTO implements YamlElement, Cloneable {
 
-    private static final Pattern ID_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
-    private static final Pattern CHANNEL_ID_PATTERN = Pattern
-            .compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*(#[a-zA-Z0-9_][a-zA-Z0-9_-]*)?");
+    private static final Pattern ICON_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
     public String name;
     public String type;
@@ -88,9 +90,10 @@ public class YamlItemDTO implements YamlElement, Cloneable {
             return false;
         }
         boolean ok = true;
-        if (!ID_PATTERN.matcher(name).matches()) {
-            addToList(errors, "invalid item: name \"%s\" not matching the expected syntax %s".formatted(name,
-                    ID_PATTERN.pattern()));
+        if (!ItemUtil.isValidItemName(name)) {
+            addToList(errors,
+                    "invalid item \"%s\": \"name\" must begin with a letter or underscore followed by alphanumeric characters and underscores, and must not contain any other symbols."
+                            .formatted(name));
             ok = false;
         }
         List<String> subErrors = new ArrayList<>();
@@ -138,17 +141,17 @@ public class YamlItemDTO implements YamlElement, Cloneable {
         }
         if (groups != null) {
             for (String gr : groups) {
-                if (!ID_PATTERN.matcher(gr).matches()) {
+                if (!ItemUtil.isValidItemName(gr)) {
                     addToList(errors,
-                            "invalid item \"%s\": value \"%s\" for group name not matching the expected syntax %s"
-                                    .formatted(name, gr, ID_PATTERN.pattern()));
+                            "invalid item \"%s\": value \"%s\" in \"groups\" field must begin with a letter or underscore followed by alphanumeric characters and underscores, and must not contain any other symbols."
+                                    .formatted(name, gr));
                     ok = false;
                 }
             }
         }
         if (channel != null) {
             subErrors.clear();
-            ok &= isValidChannel(channel, subErrors);
+            ok &= isValidChannel(channel, null, subErrors);
             subErrors.forEach(error -> {
                 addToList(errors, "invalid item \"%s\": %s".formatted(name, error));
             });
@@ -156,7 +159,7 @@ public class YamlItemDTO implements YamlElement, Cloneable {
         if (channels != null) {
             for (String ch : channels.keySet()) {
                 subErrors.clear();
-                ok &= isValidChannel(ch, subErrors);
+                ok &= isValidChannel(ch, channels.get(ch), subErrors);
                 subErrors.forEach(error -> {
                     addToList(errors, "invalid item \"%s\": %s".formatted(name, error));
                 });
@@ -164,9 +167,11 @@ public class YamlItemDTO implements YamlElement, Cloneable {
         }
         if (metadata != null) {
             for (String namespace : metadata.keySet()) {
-                if (!ID_PATTERN.matcher(namespace).matches()) {
-                    addToList(errors, "invalid item \"%s\": metadata \"%s\" not matching the expected syntax %s"
-                            .formatted(name, namespace, ID_PATTERN.pattern()));
+                try {
+                    new MetadataKey(namespace, name);
+                } catch (IllegalArgumentException e) {
+                    addToList(errors, "invalid item \"%s\": invalid metadata key (\"%s\", \"%s\"): %s".formatted(name,
+                            namespace, name, e.getMessage()));
                     ok = false;
                 }
             }
@@ -205,37 +210,38 @@ public class YamlItemDTO implements YamlElement, Cloneable {
         }
         for (int i = 0; i < nb; i++) {
             String segment = segments[i];
-            if (!ID_PATTERN.matcher(segment).matches()) {
+            if (!ICON_SEGMENT_PATTERN.matcher(segment).matches()) {
                 errors.add("segment \"%s\" in \"icon\" field not matching the expected syntax %s".formatted(segment,
-                        ID_PATTERN.pattern()));
+                        ICON_SEGMENT_PATTERN.pattern()));
                 ok = false;
             }
         }
         return ok;
     }
 
-    private boolean isValidChannel(String channelUID, List<@NonNull String> errors) {
+    private boolean isValidChannel(String channelUID, @Nullable Map<@NonNull String, @NonNull Object> configuration,
+            List<@NonNull String> errors) {
         boolean ok = true;
-        String[] segments = channelUID.split(AbstractUID.SEPARATOR);
-        int nb = segments.length;
-        if (nb < 4) {
-            errors.add("not enough segments in channel UID \"%s\"; minimum 4 is expected".formatted(channelUID));
+        try {
+            new ChannelUID(channelUID);
+        } catch (IllegalArgumentException e) {
+            errors.add("invalid channel UID \"%s\": %s".formatted(channelUID, e.getMessage()));
             ok = false;
         }
-        String segment;
-        for (int i = 0; i < (nb - 1); i++) {
-            segment = segments[i];
-            if (!ID_PATTERN.matcher(segment).matches()) {
-                errors.add("segment \"%s\" in channel UID \"%s\" not matching the expected syntax %s".formatted(segment,
-                        channelUID, ID_PATTERN.pattern()));
+        if (configuration != null && configuration.containsKey("profile")
+                && configuration.get("profile") instanceof String profile) {
+            String[] splittedProfile = profile.split(AbstractUID.SEPARATOR, 2);
+            try {
+                if (splittedProfile.length == 1) {
+                    new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, profile);
+                } else {
+                    new ProfileTypeUID(splittedProfile[0], splittedProfile[1]);
+                }
+            } catch (IllegalArgumentException e) {
+                errors.add("invalid value \"%s\" for \"profile\" parameter of channel \"%s\": %s".formatted(profile,
+                        channelUID, e.getMessage()));
                 ok = false;
             }
-        }
-        segment = segments[nb - 1];
-        if (!CHANNEL_ID_PATTERN.matcher(segment).matches()) {
-            errors.add("last segment \"%s\" in channel UID \"%s\" not matching the expected syntax %s"
-                    .formatted(segment, channelUID, CHANNEL_ID_PATTERN.pattern()));
-            ok = false;
         }
         return ok;
     }

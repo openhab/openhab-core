@@ -21,6 +21,7 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -405,9 +406,25 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
             return;
         }
         String broadcastAddress = networkAddressService.getConfiguredBroadcastAddress();
+        if (broadcastAddress == null || broadcastAddress.isBlank()) {
+            logger.debug("Unable to resolve broadcast address");
+            return;
+        }
+        InetAddress bAddr;
+        try {
+            bAddr = InetAddress.getByName(broadcastAddress);
+        } catch (UnknownHostException e) {
+            logger.debug("Unable to resolve broadcast address: {}", e.getMessage());
+            return;
+        }
+        InterfaceAddress sourceAddress = NetUtil.getSameSubnetInterfaceAddress(bAddr);
+        if (sourceAddress == null) {
+            logger.debug("Unable to find a suitable interface address for broadcast address \"{}\"", broadcastAddress);
+            return;
+        }
         logger.debug("Starting broadcast scan with address {}", broadcastAddress);
 
-        try (DatagramSocket socket = new DatagramSocket()) {
+        try (DatagramSocket socket = new DatagramSocket(0, sourceAddress.getAddress())) {
             socket.setBroadcast(true);
             socket.setSoTimeout(timeoutMs);
             byte[] sendBuffer = requestPlain.isEmpty() ? buildRequestArray(socket.getLocalSocketAddress(), request)

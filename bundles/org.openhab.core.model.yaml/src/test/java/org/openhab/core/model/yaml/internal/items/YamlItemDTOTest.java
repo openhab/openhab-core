@@ -54,6 +54,8 @@ public class YamlItemDTOTest {
         item.name = "$name";
         assertFalse(item.isValid(null, null));
         item.name = "my-name";
+        assertFalse(item.isValid(null, null));
+        item.name = "my_name";
         assertTrue(item.isValid(null, null));
 
         item.type = "Group";
@@ -106,16 +108,31 @@ public class YamlItemDTOTest {
         item.tags = Set.of("Tag1", "Tag 2");
         assertTrue(item.isValid(null, null));
 
-        item.channel = "binding:type:uid:channelid";
-        assertTrue(item.isValid(null, null));
-        item.channel = "binding:type:uid:group#channelid";
-        assertTrue(item.isValid(null, null));
         item.channel = "binding:type:channelid";
         assertFalse(item.isValid(null, null));
         item.channel = "binding:$type:uid:group#channelid";
         assertFalse(item.isValid(null, null));
         item.channel = "binding:type:uid:group$channelid";
         assertFalse(item.isValid(null, null));
+        item.channel = "binding:type:uid:channelid";
+        assertTrue(item.isValid(null, null));
+        item.channel = "binding:type:uid:group#channelid";
+        assertTrue(item.isValid(null, null));
+
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of());
+        assertTrue(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50));
+        assertTrue(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "system.offset"));
+        assertFalse(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "system:off.set"));
+        assertFalse(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "xxx:system:offset"));
+        assertFalse(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "system:offset"));
+        assertTrue(item.isValid(null, null));
+        item.channels = Map.of("binding:type:uid:channelid2", Map.of("param", 50, "profile", "offset"));
+        assertTrue(item.isValid(null, null));
     }
 
     @Test
@@ -123,10 +140,10 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name-2";
+        item1.name = "item_name";
+        item2.name = "item_name_2";
         assertFalse(item1.equals(item2));
-        item2.name = "item-name";
+        item2.name = "item_name";
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
 
@@ -206,8 +223,8 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name";
+        item1.name = "item_name";
+        item2.name = "item_name";
         item1.type = "String";
         item2.type = "String";
 
@@ -235,8 +252,8 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name";
+        item1.name = "item_name";
+        item2.name = "item_name";
         item1.type = "Number";
         item2.type = "Number";
 
@@ -264,8 +281,8 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name";
+        item1.name = "item_name";
+        item2.name = "item_name";
         item1.type = "Number";
         item2.type = "Number";
 
@@ -293,8 +310,8 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name";
+        item1.name = "item_name";
+        item2.name = "item_name";
         item1.type = "Number";
         item2.type = "Number";
 
@@ -322,8 +339,8 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name";
+        item1.name = "item_name";
+        item2.name = "item_name";
         item1.type = "Number";
         item2.type = "Number";
 
@@ -364,8 +381,8 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name";
+        item1.name = "item_name";
+        item2.name = "item_name";
         item1.type = "Number";
         item2.type = "Number";
 
@@ -406,8 +423,8 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name";
+        item1.name = "item_name";
+        item2.name = "item_name";
         item1.type = "Number";
         item2.type = "Number";
 
@@ -449,8 +466,8 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name";
+        item1.name = "item_name";
+        item2.name = "item_name";
         item1.type = "Number";
         item2.type = "Number";
 
@@ -499,8 +516,8 @@ public class YamlItemDTOTest {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
 
-        item1.name = "item-name";
-        item2.name = "item-name";
+        item1.name = "item_name";
+        item2.name = "item_name";
         item1.type = "Number";
         item2.type = "Number";
 

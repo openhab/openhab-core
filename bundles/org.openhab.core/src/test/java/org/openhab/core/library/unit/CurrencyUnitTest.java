@@ -23,6 +23,7 @@ import java.util.function.Function;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Energy;
+import javax.measure.quantity.Volume;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.internal.library.unit.CurrencyService;
 import org.openhab.core.library.dimension.Currency;
 import org.openhab.core.library.dimension.EnergyPrice;
+import org.openhab.core.library.dimension.VolumePrice;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.util.UnitUtils;
 
@@ -39,9 +41,12 @@ import org.openhab.core.types.util.UnitUtils;
  * The {@link CurrencyUnitTest} contains tests for the currency units
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Christoph Weitkamp - Added price per volume
  */
 @NonNullByDefault
 public class CurrencyUnitTest {
+
+    final CurrencyProvider testCurrencyProvider = new TestCurrencyProvider();
 
     @SuppressWarnings("unused")
     private final CurrencyService currencyService = new CurrencyService(
@@ -49,12 +54,12 @@ public class CurrencyUnitTest {
 
     @BeforeEach
     public void setup() {
-        currencyService.addCurrencyProvider(new TestCurrencyProvider());
+        currencyService.addCurrencyProvider(testCurrencyProvider);
     }
 
     @AfterEach
     public void tearDown() {
-        currencyService.removeCurrencyProvider(new TestCurrencyProvider());
+        currencyService.removeCurrencyProvider(testCurrencyProvider);
     }
 
     @Test
@@ -88,7 +93,7 @@ public class CurrencyUnitTest {
     }
 
     @Test
-    public void testPriceCalculation() {
+    public void testEnergyPriceCalculation() {
         QuantityType<EnergyPrice> unitPrice = new QuantityType<>("0.25 €/kWh");
         QuantityType<Energy> amount = new QuantityType<>("5 kWh");
         QuantityType<?> price = amount.multiply(unitPrice);
@@ -106,6 +111,89 @@ public class CurrencyUnitTest {
         assertThat(convertedPrice, is(notNullValue()));
         assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("DKK/kWh")));
         assertThat(convertedPrice.doubleValue(), closeTo(1.8625, 1e-4));
+    }
+
+    @Test
+    public void testPricePerLitreCalculation() {
+        QuantityType<VolumePrice> unitPrice = new QuantityType<>("0.25 €/l");
+        QuantityType<Volume> amount = new QuantityType<>("5 l");
+        QuantityType<?> price = amount.multiply(unitPrice);
+
+        assertThat(price, is(notNullValue()));
+        assertThat(price.getUnit(), is(TestCurrencyProvider.EUR));
+        assertThat(price.doubleValue(), closeTo(1.25, 1E-4));
+    }
+
+    @Test
+    public void testPricePerCubicMetreCalculation() {
+        QuantityType<VolumePrice> unitPrice = new QuantityType<>("0.25 EUR/m³");
+        QuantityType<Volume> amount = new QuantityType<>("5 m³");
+        QuantityType<?> price = amount.multiply(unitPrice);
+
+        assertThat(price, is(notNullValue()));
+        assertThat(price.getUnit(), is(TestCurrencyProvider.EUR));
+        assertThat(price.doubleValue(), closeTo(1.25, 1E-4));
+    }
+
+    @Test
+    public void testPricePerGallonCalculation() {
+        QuantityType<VolumePrice> unitPrice = new QuantityType<>("0.25 $/gal");
+        QuantityType<Volume> amount = new QuantityType<>("5 gal");
+        QuantityType<?> price = amount.multiply(unitPrice);
+
+        assertThat(price, is(notNullValue()));
+        assertThat(price.getUnit(), is(TestCurrencyProvider.USD));
+        assertThat(price.doubleValue(), closeTo(1.25, 1E-4));
+    }
+
+    @Test
+    public void testPricePerLitreCurrencyConversion() {
+        QuantityType<VolumePrice> price = new QuantityType<>("0.25 €/l");
+        QuantityType<VolumePrice> convertedPrice = price.toUnit("DKK/l");
+
+        assertThat(convertedPrice, is(notNullValue()));
+        assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("DKK/l")));
+        assertThat(convertedPrice.doubleValue(), closeTo(1.8625, 1e-4));
+    }
+
+    @Test
+    public void testPricePerCubicMetreConversion() {
+        QuantityType<VolumePrice> price = new QuantityType<>("0.25 EUR/m³");
+        QuantityType<VolumePrice> convertedPrice = price.toUnit("DKK/m³");
+
+        assertThat(convertedPrice, is(notNullValue()));
+        assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("DKK/m³")));
+        assertThat(convertedPrice.doubleValue(), closeTo(1.8625, 1e-4));
+    }
+
+    @Test
+    public void testPricePerGallonConversion() {
+        QuantityType<VolumePrice> price = new QuantityType<>("0.25 $/gal");
+        QuantityType<VolumePrice> convertedPrice = price.toUnit("DKK/gal");
+
+        assertThat(convertedPrice, is(notNullValue()));
+        assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("DKK/gal")));
+        assertThat(convertedPrice.doubleValue(), closeTo(1.7245, 1e-4));
+    }
+
+    @Test
+    public void testPricePerLitreUnitConversion() {
+        QuantityType<VolumePrice> price = new QuantityType<>("0.25 €/l");
+        QuantityType<VolumePrice> convertedPrice = price.toUnit("€/m³");
+
+        assertThat(convertedPrice, is(notNullValue()));
+        assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("€/m³")));
+        assertThat(convertedPrice.doubleValue(), closeTo(250.0, 1e-4));
+    }
+
+    @Test
+    public void testPricePerLitreComplexConversion() {
+        QuantityType<VolumePrice> price = new QuantityType<>("0.25 EUR/l");
+        QuantityType<VolumePrice> convertedPrice = price.toUnit("USD/gal");
+
+        assertThat(convertedPrice, is(notNullValue()));
+        assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("USD/gal")));
+        assertThat(convertedPrice.doubleValue(), closeTo(1.0220, 1e-4));
     }
 
     private static class TestCurrencyProvider implements CurrencyProvider {

@@ -47,6 +47,9 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * {@link ThingEventFactoryTest} tests the {@link ThingEventFactory}.
@@ -155,7 +158,7 @@ public class ThingEventFactoryTest {
 
         assertEquals(ThingStatusInfoEvent.TYPE, event.getType());
         assertEquals(THING_STATUS_EVENT_TOPIC, event.getTopic());
-        assertEquals(THING_STATUS_EVENT_PAYLOAD, event.getPayload());
+        assertEquals(JsonParser.parseString(THING_STATUS_EVENT_PAYLOAD), JsonParser.parseString(event.getPayload()));
         assertEquals(THING_STATUS_INFO, event.getStatusInfo());
         assertEquals(THING_UID, event.getThingUID());
     }
@@ -180,7 +183,7 @@ public class ThingEventFactoryTest {
 
         assertEquals(ThingAddedEvent.TYPE, event.getType());
         assertEquals(THING_ADDED_EVENT_TOPIC, event.getTopic());
-        assertEquals(THING_ADDED_EVENT_PAYLOAD, event.getPayload());
+        assertEquals(JsonParser.parseString(THING_ADDED_EVENT_PAYLOAD), JsonParser.parseString(event.getPayload()));
         assertNotNull(event.getThing());
         assertEquals(THING_UID.getAsString(), event.getThing().UID);
     }
@@ -192,11 +195,13 @@ public class ThingEventFactoryTest {
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
         assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
-        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_ONLY_NEW_VALUE, event.getPayload());
+        assertEquals(JsonParser.parseString(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_ONLY_NEW_VALUE),
+                JsonParser.parseString(event.getPayload()));
         assertEquals(CommonChannelDescriptionField.PATTERN, event.getField());
         assertEquals(CHANNEL_UID, event.getChannelUID());
         assertThat(event.getLinkedItemNames(), hasSize(2));
-        assertEquals(CHANNEL_DESCRIPTION_PATTERN_PAYLOAD, event.getValue());
+        assertEquals(JsonParser.parseString(CHANNEL_DESCRIPTION_PATTERN_PAYLOAD),
+                JsonParser.parseString(event.getValue()));
         assertNull(event.getOldValue());
     }
 
@@ -207,7 +212,8 @@ public class ThingEventFactoryTest {
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
         assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
-        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_VALUE, event.getPayload());
+        assertEquals(JsonParser.parseString(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_VALUE),
+                JsonParser.parseString(event.getPayload()));
         assertEquals(CommonChannelDescriptionField.PATTERN, event.getField());
         assertEquals(CHANNEL_UID, event.getChannelUID());
         assertThat(event.getLinkedItemNames(), hasSize(2));
@@ -258,11 +264,19 @@ public class ThingEventFactoryTest {
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
         assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
-        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_ONLY_NEW_OPTIONS, event.getPayload());
+
+        JsonObject expectedJson = JsonParser.parseString(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_ONLY_NEW_OPTIONS)
+                .getAsJsonObject();
+        expectedJson.add("value", JsonParser.parseString(expectedJson.get("value").getAsString()));
+        JsonObject actualJson = JsonParser.parseString(event.getPayload()).getAsJsonObject();
+        actualJson.add("value", JsonParser.parseString(actualJson.get("value").getAsString()));
+        assertEquals(expectedJson, actualJson);
+
         assertEquals(CommonChannelDescriptionField.STATE_OPTIONS, event.getField());
         assertEquals(CHANNEL_UID, event.getChannelUID());
         assertEquals(itemNames, event.getLinkedItemNames());
-        assertEquals(CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD, event.getValue());
+        assertEquals(JsonParser.parseString(CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD),
+                JsonParser.parseString(event.getValue()));
         assertEquals(options,
                 JSONCONVERTER.fromJson(event.getValue(), ChannelDescriptionStateOptionsPayloadBean.class).options);
         assertNull(event.getOldValue());
@@ -298,14 +312,26 @@ public class ThingEventFactoryTest {
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
         assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
-        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_OPTIONS, event.getPayload());
+
+        JsonObject expectedJson = JsonParser.parseString(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_OPTIONS)
+                .getAsJsonObject();
+        expectedJson.add("value", JsonParser.parseString(expectedJson.get("value").getAsString()));
+        expectedJson.add("oldValue", JsonParser.parseString(expectedJson.get("oldValue").getAsString()));
+        JsonObject actualJson = JsonParser.parseString(event.getPayload()).getAsJsonObject();
+        actualJson.add("value", JsonParser.parseString(actualJson.get("value").getAsString()));
+        actualJson.add("oldValue", JsonParser.parseString(actualJson.get("oldValue").getAsString()));
+        assertEquals(expectedJson, actualJson);
+
         assertEquals(CommonChannelDescriptionField.STATE_OPTIONS, event.getField());
         assertEquals(CHANNEL_UID, event.getChannelUID());
         assertEquals(itemNames, event.getLinkedItemNames());
-        assertEquals(CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD, event.getValue());
+        assertEquals(JsonParser.parseString(CHANNEL_DESCRIPTION_STATE_OPTIONS_PAYLOAD),
+                JsonParser.parseString(event.getValue()));
         assertEquals(options,
                 JSONCONVERTER.fromJson(event.getValue(), ChannelDescriptionStateOptionsPayloadBean.class).options);
-        assertEquals(CHANNEL_DESCRIPTION_OLD_STATE_OPTIONS_PAYLOAD, event.getOldValue());
+        String oldValue = event.getOldValue();
+        assertEquals(JsonParser.parseString(CHANNEL_DESCRIPTION_OLD_STATE_OPTIONS_PAYLOAD),
+                oldValue == null ? JsonNull.INSTANCE : JsonParser.parseString(oldValue));
         assertEquals(oldOptions,
                 JSONCONVERTER.fromJson(event.getOldValue(), ChannelDescriptionStateOptionsPayloadBean.class).options);
     }
@@ -353,14 +379,26 @@ public class ThingEventFactoryTest {
 
         assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
         assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
-        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_DESCRIPTION, event.getPayload());
+
+        JsonObject expectedJson = JsonParser
+                .parseString(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_DESCRIPTION).getAsJsonObject();
+        expectedJson.add("value", JsonParser.parseString(expectedJson.get("value").getAsString()));
+        expectedJson.add("oldValue", JsonParser.parseString(expectedJson.get("oldValue").getAsString()));
+        JsonObject actualJson = JsonParser.parseString(event.getPayload()).getAsJsonObject();
+        actualJson.add("value", JsonParser.parseString(actualJson.get("value").getAsString()));
+        actualJson.add("oldValue", JsonParser.parseString(actualJson.get("oldValue").getAsString()));
+        assertEquals(expectedJson, actualJson);
+
         assertEquals(CommonChannelDescriptionField.ALL, event.getField());
         assertEquals(CHANNEL_UID, event.getChannelUID());
         assertEquals(itemNames, event.getLinkedItemNames());
-        assertEquals(CHANNEL_DESCRIPTION_STATE_DESCRIPTION_PAYLOAD, event.getValue());
+        assertEquals(JsonParser.parseString(CHANNEL_DESCRIPTION_STATE_DESCRIPTION_PAYLOAD),
+                JsonParser.parseString(event.getValue()));
         assertEquals(stateDescriptionFragment,
                 JSONCONVERTER.fromJson(event.getValue(), StateDescriptionFragmentImpl.class));
-        assertEquals(CHANNEL_DESCRIPTION_OLD_STATE_DESCRIPTION_PAYLOAD, event.getOldValue());
+        String oldValue = event.getOldValue();
+        assertEquals(JsonParser.parseString(CHANNEL_DESCRIPTION_OLD_STATE_DESCRIPTION_PAYLOAD),
+                oldValue == null ? JsonNull.INSTANCE : JsonParser.parseString(oldValue));
         assertEquals(oldStateDescriptionFragment,
                 JSONCONVERTER.fromJson(event.getOldValue(), StateDescriptionFragmentImpl.class));
     }
@@ -371,7 +409,8 @@ public class ThingEventFactoryTest {
 
         assertEquals(ChannelTriggeredEvent.TYPE, event.getType());
         assertEquals(CHANNEL_TRIGGERED_EVENT_TOPIC, event.getTopic());
-        assertEquals(CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD, event.getPayload());
+        assertEquals(JsonParser.parseString(CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD),
+                JsonParser.parseString(event.getPayload()));
         assertNotNull(event.getEvent());
         assertEquals(CommonTriggerEvents.PRESSED, event.getEvent());
         assertEquals(CHANNEL_UID, event.getChannel());
@@ -398,7 +437,8 @@ public class ThingEventFactoryTest {
 
         assertEquals(ChannelTriggeredEvent.TYPE, event.getType());
         assertEquals(CHANNEL_TRIGGERED_EVENT_TOPIC, event.getTopic());
-        assertEquals(CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD, event.getPayload());
+        assertEquals(JsonParser.parseString(CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD),
+                JsonParser.parseString(event.getPayload()));
         assertNotNull(event.getEvent());
         assertEquals("", event.getEvent());
         assertEquals(CHANNEL_UID, event.getChannel());

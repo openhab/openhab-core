@@ -76,7 +76,7 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
                 }
             }
             if (isAccepted) {
-                item.setState(newState);
+                item.setState(newState, updateEvent.getSource());
             } else {
                 logger.debug("Received update of a not accepted type ({}) for item {}",
                         newState.getClass().getSimpleName(), itemName);
@@ -91,7 +91,7 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
         try {
             Item item = itemRegistry.getItem(commandEvent.getItemName());
             if (item instanceof GroupItem groupItem) {
-                groupItem.send(commandEvent.getItemCommand());
+                groupItem.send(commandEvent.getItemCommand(), commandEvent.getSource());
             }
         } catch (ItemNotFoundException e) {
             logger.debug("Received command for non-existing item: {}", e.getMessage());

@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.UpnpService;
 import org.jupnp.controlpoint.ActionCallback;
 import org.jupnp.controlpoint.ControlPoint;
@@ -148,13 +149,15 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         @Override
         protected void eventReceived(GENASubscription sub) {
             Map<String, StateVariableValue> values = sub.getCurrentValues();
-            Device deviceRoot = sub.getService().getDevice().getRoot();
+            Device device = sub.getService().getDevice();
             String serviceId = sub.getService().getServiceId().getId();
 
             logger.trace("Receiving a GENA subscription '{}' response for device '{}'", serviceId,
-                    deviceRoot.getIdentity().getUdn());
+                    device.getIdentity().getUdn());
+
             for (UpnpIOParticipant participant : participants) {
-                if (Objects.equals(getDevice(participant), deviceRoot)) {
+                Device participantDevice = getDevice(participant);
+                if (Objects.equals(participantDevice, device) || Objects.equals(participantDevice, device.getRoot())) {
                     for (Entry<String, StateVariableValue> entry : values.entrySet()) {
                         Object value = entry.getValue().getValue();
                         if (value != null) {
@@ -244,13 +247,13 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     private Service searchSubService(String serviceID, Device device) {
-        Service subService = findService(device, serviceID);
+        Service subService = findService(device, null, serviceID);
         if (subService == null) {
             // service not on the root device, we search the embedded devices as well
             Device[] embedded = device.getEmbeddedDevices();
             if (embedded != null) {
                 for (Device aDevice : embedded) {
-                    subService = findService(aDevice, serviceID);
+                    subService = findService(aDevice, null, serviceID);
                     if (subService != null) {
                         break;
                     }
@@ -288,6 +291,13 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     @Override
     public Map<String, String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
             Map<String, String> inputs) {
+        return invokeAction(participant, null, serviceID, actionID, inputs);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Map<String, String> invokeAction(UpnpIOParticipant participant, @Nullable String namespace, String serviceID,
+            String actionID, Map<String, String> inputs) {
         Map<String, String> resultMap = new HashMap<>();
 
         if (serviceID != null && actionID != null && participant != null) {
@@ -295,7 +305,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
             Device device = getDevice(participant);
 
             if (device != null) {
-                Service service = findService(device, serviceID);
+                Service service = findService(device, namespace, serviceID);
                 if (service != null) {
                     Action action = service.getAction(actionID);
                     if (action != null) {
@@ -384,9 +394,11 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
     }
 
-    private Service findService(Device device, String serviceID) {
+    private Service findService(Device device, @Nullable String namespace, String serviceID) {
         Service service;
-        String namespace = device.getType().getNamespace();
+        if (namespace == null) {
+            namespace = device.getType().getNamespace();
+        }
         if (UDAServiceId.DEFAULT_NAMESPACE.equals(namespace)
                 || UDAServiceId.BROKEN_DEFAULT_NAMESPACE.equals(namespace)) {
             service = device.findService(new UDAServiceId(serviceID));
@@ -437,7 +449,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
             try {
                 Device device = getDevice(participant);
                 if (device != null) {
-                    Service service = findService(device, serviceID);
+                    Service service = findService(device, null, serviceID);
                     if (service != null) {
                         Action action = service.getAction(actionID);
                         if (action != null) {

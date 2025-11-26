@@ -94,7 +94,7 @@ public class RunRuleActionHandler extends BaseActionModuleHandler {
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
+    public @Nullable Map<String, @Nullable Object> execute(Map<String, Object> context) {
         // execute each rule after the other; at the moment synchronously
         Object previousEvent = context.get("event");
         Event event = AutomationEventFactory.createExecutionEvent(moduleId,

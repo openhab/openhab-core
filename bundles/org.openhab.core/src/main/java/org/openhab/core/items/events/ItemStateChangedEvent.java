@@ -53,8 +53,9 @@ public class ItemStateChangedEvent extends ItemEvent {
      * @param lastStateChange the last state change
      */
     protected ItemStateChangedEvent(String topic, String payload, String itemName, State newItemState,
-            State oldItemState, @Nullable ZonedDateTime lastStateUpdate, @Nullable ZonedDateTime lastStateChange) {
-        super(topic, payload, itemName, null);
+            State oldItemState, @Nullable ZonedDateTime lastStateUpdate, @Nullable ZonedDateTime lastStateChange,
+            @Nullable String source) {
+        super(topic, payload, itemName, source);
         this.itemState = newItemState;
         this.oldItemState = oldItemState;
         this.lastStateUpdate = lastStateUpdate;
@@ -104,6 +105,11 @@ public class ItemStateChangedEvent extends ItemEvent {
 
     @Override
     public String toString() {
-        return String.format("Item '%s' changed from %s to %s", itemName, oldItemState, itemState);
+        String result = String.format("Item '%s' changed from %s to %s", itemName, oldItemState, itemState);
+        String source = getSource();
+        if (source != null) {
+            result = String.format("%s (source: %s)", result, source);
+        }
+        return result;
     }
 }
