@@ -79,8 +79,12 @@ public class LazzyLoadingAudioStream extends InputStream {
 
     private InputStream startDownload(URL url) throws IOException {
         if (first) {
-            first = false;
-            return downloadAndInject(url);
+            try {
+                first = false;
+                return downloadAndInject(url);
+            } catch (Exception ex) {
+                first = false;
+            }
         }
 
         PipedInputStream in = new PipedInputStream(64 * 1024);
