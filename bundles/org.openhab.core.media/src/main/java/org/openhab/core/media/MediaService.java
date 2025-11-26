@@ -29,7 +29,7 @@ import org.openhab.core.media.model.MediaRegistry;
 public interface MediaService {
     public MediaRegistry getMediaRegistry();
 
-    public Map<String, MediaDevice> getMediaDevices();
+    public Map<String, MediaSink> getMediaSinks();
 
     public void addMediaListenner(String key, MediaListenner mediaListenner);
 
@@ -37,7 +37,7 @@ public interface MediaService {
 
     public @Nullable MediaListenner getMediaListenner(String key);
 
-    public void registerDevice(MediaDevice device);
+    public void registerDevice(MediaSink device);
 
     public @Nullable String getProxy(String key);
 

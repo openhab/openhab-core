@@ -47,10 +47,10 @@ import org.openhab.core.media.MediaService;
 import org.openhab.core.media.model.MediaAlbum;
 import org.openhab.core.media.model.MediaArtist;
 import org.openhab.core.media.model.MediaCollection;
+import org.openhab.core.media.model.MediaCollectionSource;
 import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaPlayList;
 import org.openhab.core.media.model.MediaRegistry;
-import org.openhab.core.media.model.MediaSource;
 import org.openhab.core.media.model.MediaTrack;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -218,7 +218,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         MediaEntry currentEntry = mediaRegistry.getEntry(path);
 
         if (currentEntry != null) {
-            MediaSource mediaSource = currentEntry.getMediaSource(false);
+            MediaCollectionSource mediaSource = currentEntry.getMediaCollectionSource(false);
             if (mediaSource != null) {
                 MediaListenner mediaListenner = mediaService.getMediaListenner(mediaSource.getKey());
                 if (mediaListenner != null) {

@@ -19,9 +19,9 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.media.BaseDto;
-import org.openhab.core.media.MediaDevice;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
+import org.openhab.core.media.MediaSink;
 import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaQueue;
 import org.openhab.core.media.model.MediaRegistry;
@@ -43,7 +43,7 @@ public class MediaServiceImpl implements MediaService, MediaListenner {
     private final Logger logger = LoggerFactory.getLogger(MediaServiceImpl.class);
 
     private Map<String, MediaListenner> mediaListenner = new HashMap<String, MediaListenner>();
-    private Map<String, MediaDevice> mediaDevices = new HashMap<String, MediaDevice>();
+    private Map<String, MediaSink> mediaSinks = new HashMap<String, MediaSink>();
 
     public @Nullable MediaListenner listenner = null;
     public MediaRegistry registry = new MediaRegistry(this);
@@ -135,13 +135,13 @@ public class MediaServiceImpl implements MediaService, MediaListenner {
     }
 
     @Override
-    public void registerDevice(MediaDevice device) {
-        mediaDevices.put(device.getId(), device);
+    public void registerDevice(MediaSink device) {
+        mediaSinks.put(device.getId(), device);
     }
 
     @Override
-    public Map<String, MediaDevice> getMediaDevices() {
-        return mediaDevices;
+    public Map<String, MediaSink> getMediaSinks() {
+        return mediaSinks;
     }
 
     public Map<String, MediaListenner> getMediaListenners() {

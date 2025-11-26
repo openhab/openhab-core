@@ -5,7 +5,7 @@ import org.openhab.core.media.model.MediaAlbum;
 import org.openhab.core.media.model.MediaArtist;
 import org.openhab.core.media.model.MediaCollection;
 import org.openhab.core.media.model.MediaRegistry;
-import org.openhab.core.media.model.MediaSource;
+import org.openhab.core.media.model.MediaCollectionSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +21,8 @@ public class Test {
         MediaService mediaService = new MediaServiceImpl();
         MediaRegistry mediaRegistry = mediaService.getMediaRegistry();
 
-        MediaSource mediaSource = mediaRegistry.registerEntry("Spotify", () -> {
-            return new MediaSource("Spotify", "SpotifyName");
+        MediaCollectionSource mediaSource = mediaRegistry.registerEntry("Spotify", () -> {
+            return new MediaCollectionSource("Spotify", "SpotifyName");
         });
 
         MediaCollection mediaAlbums = mediaSource.registerEntry("Albums", () -> {
