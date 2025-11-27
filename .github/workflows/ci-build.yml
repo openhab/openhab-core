@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ '21' ]
+        java: [ '21', '25-ea' ]
         os: [ 'ubuntu-24.04' ]
     name: Build (Java ${{ matrix.java }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -174,11 +174,3 @@ jobs:
           title: CheckStyle Violations
           path: '**/checkstyle-result.xml'
           mode: inline
-
-      - name: Remove Label
-        if: ${{ always() && github.event.label.name == 'rebuild' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.number }}
-        run: |
-          gh pr edit $PR --remove-label rebuild
