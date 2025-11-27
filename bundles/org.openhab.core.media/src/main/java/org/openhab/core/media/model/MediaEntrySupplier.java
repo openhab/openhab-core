@@ -19,17 +19,17 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaCollectionSource extends MediaCollection {
+public class MediaEntrySupplier extends MediaCollection {
 
-    public MediaCollectionSource() {
+    public MediaEntrySupplier() {
 
     }
 
-    public MediaCollectionSource(String key, String sourceName) {
+    public MediaEntrySupplier(String key, String sourceName) {
         super(key, sourceName);
     }
 
-    public MediaCollectionSource(String key, String sourceName, String artUri) {
+    public MediaEntrySupplier(String key, String sourceName, String artUri) {
         super(key, sourceName);
 
         this.artUri = artUri;
