@@ -46,6 +46,8 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
 /**
  * This is an audio sink that is registered as a service, which can play wave files to the hosts outputs (e.g. speaker,
  * line-out).
@@ -178,6 +180,21 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
     @Override
     public @Nullable String getLabel(@Nullable Locale locale) {
         return "System Speaker";
+    }
+
+    @Override
+    public String getName() {
+        return "SystemSpeaker";
+    }
+
+    @Override
+    public String getBinding() {
+        return "core.audio";
+    }
+
+    @Override
+    public String getType() {
+        return "";
     }
 
     @Override

@@ -12,7 +12,10 @@
  */
 package org.openhab.core.media;
 
+import java.util.Locale;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * This is an interface that is
@@ -20,33 +23,16 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaSink {
-    private String id;
-    private String name;
-    private String type;
-    private String binding;
+public interface MediaSink {
+    String getId();
 
-    public MediaSink(String id, String name, String type, String binding) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.binding = binding;
-    }
+    String getName();
 
-    public String getId() {
-        return this.id;
-    }
+    @Nullable
+    String getLabel(@Nullable Locale locale);
 
-    public String getName() {
-        return this.name;
-    }
+    String getType();
 
-    public String getType() {
-        return this.type;
-    }
-
-    public String getBinding() {
-        return this.binding;
-    }
+    String getBinding();
 
 }
