@@ -28,6 +28,9 @@ import org.openhab.core.media.model.MediaRegistry;
 import org.openhab.core.media.model.MediaSearchResult;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,8 +138,14 @@ public class MediaServiceImpl implements MediaService, MediaListenner {
     }
 
     @Override
-    public void registerDevice(MediaSink device) {
-        mediaSinks.put(device.getId(), device);
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    public void addMediaSink(MediaSink mediaSink) {
+        this.mediaSinks.put(mediaSink.getId(), mediaSink);
+    }
+
+    @Override
+    public void removeMediaSink(MediaSink mediaSink) {
+        this.mediaSinks.remove(mediaSink.getId());
     }
 
     @Override

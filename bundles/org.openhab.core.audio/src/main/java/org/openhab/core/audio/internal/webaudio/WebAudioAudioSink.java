@@ -108,6 +108,21 @@ public class WebAudioAudioSink extends AudioSinkAsync {
     }
 
     @Override
+    public String getName() {
+        return "WebAudio";
+    }
+
+    @Override
+    public String getBinding() {
+        return "core.audio";
+    }
+
+    @Override
+    public String getType() {
+        return "";
+    }
+
+    @Override
     public PercentType getVolume() throws IOException {
         return PercentType.HUNDRED;
     }

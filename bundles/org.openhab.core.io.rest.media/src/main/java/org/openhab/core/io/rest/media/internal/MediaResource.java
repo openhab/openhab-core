@@ -44,8 +44,8 @@ import org.openhab.core.media.MediaService;
 import org.openhab.core.media.MediaSink;
 import org.openhab.core.media.internal.MediaServlet;
 import org.openhab.core.media.model.MediaCollection;
-import org.openhab.core.media.model.MediaCollectionSource;
 import org.openhab.core.media.model.MediaEntry;
+import org.openhab.core.media.model.MediaEntrySupplier;
 import org.openhab.core.media.model.MediaRegistry;
 import org.openhab.core.media.model.MediaSearchResult;
 import org.openhab.core.media.model.MediaTrack;
@@ -165,7 +165,7 @@ public class MediaResource implements RESTResource {
             }
 
         } else {
-            MediaCollectionSource mediaCollectionSource = entry.getMediaCollectionSource(false);
+            MediaEntrySupplier mediaCollectionSource = entry.getMediaCollectionSource(false);
             String key = "/Root";
             if (mediaCollectionSource != null) {
                 key = mediaCollectionSource.getKey();
@@ -236,7 +236,7 @@ public class MediaResource implements RESTResource {
             @QueryParam("path") @Parameter(description = "path of the ressource") @Nullable String path) {
         final Locale locale = localeService.getLocale(language);
 
-        Map<String, MediaSink> devices = mediaService.getMediaSinks();
+        Map<String, MediaSink> sinks = mediaService.getMediaSinks();
 
         Collection<Item> colItem = itemRegistry.getItemsOfType("Player");
         for (Item item : colItem) {
@@ -248,7 +248,7 @@ public class MediaResource implements RESTResource {
         }
 
         MediaSinkDTOCollection dtoCol = new MediaSinkDTOCollection();
-        for (MediaSink device : devices.values()) {
+        for (MediaSink device : sinks.values()) {
             MediaSinkDTO dto = new MediaSinkDTO(device.getId(), device.getName(), device.getType(),
                     device.getBinding());
 
@@ -261,7 +261,7 @@ public class MediaResource implements RESTResource {
                     }
                 }
             }
-
+            dto.setPlayerItemName("aa");
             dtoCol.addMediaSinkDTO(dto);
         }
 

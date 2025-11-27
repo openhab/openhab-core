@@ -65,12 +65,12 @@ public class MediaEntry {
 
     }
 
-    public @Nullable MediaCollectionSource getMediaCollectionSource(boolean first) {
-        if (this instanceof MediaCollectionSource) {
-            if (parent != null && parent instanceof MediaCollectionSource && !first) {
+    public @Nullable MediaEntrySupplier getMediaCollectionSource(boolean first) {
+        if (this instanceof MediaEntrySupplier) {
+            if (parent != null && parent instanceof MediaEntrySupplier && !first) {
                 return parent.getMediaCollectionSource(first);
             } else {
-                return (MediaCollectionSource) this;
+                return (MediaEntrySupplier) this;
             }
         }
 
@@ -129,7 +129,7 @@ public class MediaEntry {
     }
 
     public String getSubPath() {
-        if (parent != null && !(parent instanceof MediaCollectionSource)) {
+        if (parent != null && !(parent instanceof MediaEntrySupplier)) {
             return parent.getSubPath() + "/" + getKey();
 
         } else {

@@ -27,25 +27,29 @@ import org.openhab.core.media.model.MediaRegistry;
  */
 @NonNullByDefault
 public interface MediaService {
-    public MediaRegistry getMediaRegistry();
+    MediaRegistry getMediaRegistry();
 
-    public Map<String, MediaSink> getMediaSinks();
+    Map<String, MediaSink> getMediaSinks();
 
-    public void addMediaListenner(String key, MediaListenner mediaListenner);
+    void addMediaListenner(String key, MediaListenner mediaListenner);
 
-    public Map<String, MediaListenner> getAllMediaListenner();
+    Map<String, MediaListenner> getAllMediaListenner();
 
-    public @Nullable MediaListenner getMediaListenner(String key);
+    @Nullable
+    MediaListenner getMediaListenner(String key);
 
-    public void registerDevice(MediaSink device);
+    void addMediaSink(MediaSink mediaSink);
 
-    public @Nullable String getProxy(String key);
+    void removeMediaSink(MediaSink mediaSink);
 
-    public String handleImageProxy(String uri);
+    @Nullable
+    String getProxy(String key);
 
-    public void setBaseUri(String baseUri);
+    String handleImageProxy(String uri);
 
-    public <T extends BaseDto, R extends MediaEntry> void RegisterCollections(MediaEntry parentEntry,
-            List<T> collection, Class<R> allocator);
+    void setBaseUri(String baseUri);
+
+    <T extends BaseDto, R extends MediaEntry> void RegisterCollections(MediaEntry parentEntry, List<T> collection,
+            Class<R> allocator);
 
 }
