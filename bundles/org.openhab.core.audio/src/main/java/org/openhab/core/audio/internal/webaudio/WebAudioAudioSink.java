@@ -119,7 +119,7 @@ public class WebAudioAudioSink extends AudioSinkAsync {
 
     @Override
     public String getType() {
-        return "";
+        return "internal";
     }
 
     @Override

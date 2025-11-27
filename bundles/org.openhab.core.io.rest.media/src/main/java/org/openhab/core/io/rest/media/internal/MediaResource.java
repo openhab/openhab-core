@@ -249,19 +249,22 @@ public class MediaResource implements RESTResource {
 
         MediaSinkDTOCollection dtoCol = new MediaSinkDTOCollection();
         for (MediaSink device : sinks.values()) {
-            MediaSinkDTO dto = new MediaSinkDTO(device.getId(), device.getName(), device.getType(),
+            MediaSinkDTO dto = new MediaSinkDTO(device.getName(), "" + device.getLabel(null), device.getType(),
                     device.getBinding());
+
+            if (device.getType() == "internal") {
+                dto.setPlayerItemName("internal");
+            }
 
             for (Item item : colItem) {
                 Set<ChannelUID> r1 = itemChannelLinkRegistry.getBoundChannels(item.getName());
                 for (ChannelUID ruid : r1) {
-                    if (ruid.getBindingId().equals(device.getBinding())
-                            && ruid.getThingUID().getId().equals(device.getId())) {
+                    if ((ruid.getBindingId().equals(device.getBinding())
+                            && ruid.getThingUID().getId().equals(device.getName()))) {
                         dto.setPlayerItemName(item.getName());
                     }
                 }
             }
-            dto.setPlayerItemName("aa");
             dtoCol.addMediaSinkDTO(dto);
         }
 
