@@ -98,13 +98,13 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     private @Nullable String defaultSource;
     private @Nullable String defaultSink;
 
-    @Reference
-    protected void setMediaService(MediaService mediaService) {
-        this.mediaService = mediaService;
+    public AudioManagerImpl() {
+
     }
 
-    protected void unsetThingTypeProvider(MediaService mediaService) {
-        this.mediaService = null;
+    @Activate
+    public AudioManagerImpl(@Reference MediaService mediaService) {
+        this.mediaService = mediaService;
     }
 
     @Activate
@@ -457,6 +457,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addAudioSink(AudioSink audioSink) {
+        logger.info("register audioSink: {} {}", mediaService, audioSink.getId());
         this.audioSinks.put(audioSink.getId(), audioSink);
         if (mediaService != null) {
             this.mediaService.addMediaSink(audioSink);

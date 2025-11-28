@@ -139,6 +139,7 @@ public class MediaServiceImpl implements MediaService, MediaListenner {
     @Override
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addMediaSink(MediaSink mediaSink) {
+        logger.info("register mediaSink: {} {}", this, mediaSink.getId());
         this.mediaSinks.put(mediaSink.getId(), mediaSink);
     }
 
