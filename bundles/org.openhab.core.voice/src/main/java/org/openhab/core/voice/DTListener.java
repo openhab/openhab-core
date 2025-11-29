@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public interface DTListener {
     /**
-     * Invoked when a {@link KSEvent} event occurs during keyword spotting.
+     * Invoked when a {@link DTEvent} event occurs.
      *
      * @param dtEvent The {@link DTEvent} fired by the {@link DTService}
      */

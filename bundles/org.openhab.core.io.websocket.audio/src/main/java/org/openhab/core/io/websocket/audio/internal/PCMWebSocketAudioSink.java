@@ -139,7 +139,7 @@ public class PCMWebSocketAudioSink implements AudioSink {
             } else {
                 finalAudioStream = audioStream;
             }
-            int bytesPer500ms = (targetSampleRate * (targetBitDepth / 8) * channels) / 2;
+            int bytesPer500ms = (targetSampleRate * (targetBitDepth / 8) * targetChannels) / 2;
             transferAudio(finalAudioStream, outputStream, bytesPer500ms, duration, transferenceAborted);
         } catch (InterruptedIOException ignored) {
         } catch (IOException e) {

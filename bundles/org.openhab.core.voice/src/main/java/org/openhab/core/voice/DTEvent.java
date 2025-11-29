@@ -15,8 +15,11 @@ package org.openhab.core.voice;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A tagging interface for keyword spotting events.
+ * A tagging interface for dialog trigger events.
  *
+ * This interface is intended to represent events that can trigger a dialog,
+ * without being specific to any particular type of event such as keyword spotting.
+ * 
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
