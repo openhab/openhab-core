@@ -116,17 +116,17 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
         ArrayList<PCMWebSocketConnection> handlers = new ArrayList<>(webSocketConnections);
         for (var handler : handlers) {
             if (handler != null) {
-                boolean pinned = false;
+                boolean pinged = false;
                 var remote = handler.getRemote();
                 if (remote != null) {
                     try {
                         remote.sendPing(wrap("oh".getBytes(StandardCharsets.UTF_8)));
-                        pinned = true;
+                        pinged = true;
                     } catch (IOException ignored) {
                     }
                 }
-                if (!pinned) {
-                    logger.warn("ping failed, disconnecting speaker {}", handler.getId());
+                if (!pinged) {
+                    logger.debug("Ping failed, disconnecting speaker '{}'", handler.getId());
                     var session = handler.getSession();
                     if (session != null) {
                         session.close();

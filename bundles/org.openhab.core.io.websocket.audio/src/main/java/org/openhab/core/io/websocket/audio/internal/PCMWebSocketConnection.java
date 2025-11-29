@@ -115,7 +115,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
         }
         this.session = sess;
         this.remote = sess.getRemote();
-        logger.info("New client connected.");
+        logger.debug("New client connected.");
         scheduledDisconnection = executor.schedule(() -> {
             try {
                 sess.disconnect();
@@ -130,7 +130,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
             try {
                 remote.sendStringByFuture(new ObjectMapper().writeValueAsString(msg));
             } catch (JsonProcessingException e) {
-                logger.warn("JsonProcessingException writing JSON message: ", e);
+                logger.warn("JsonProcessingException writing JSON message", e);
             }
         }
     }
@@ -155,10 +155,10 @@ public class PCMWebSocketConnection implements WebSocketListener {
     @Override
     public void onWebSocketText(@Nullable String message) {
         try {
-            var rootMessageNode = jsonMapper.readTree(message);
+            JsonNode rootMessageNode = jsonMapper.readTree(message);
             if (rootMessageNode.has("cmd")) {
+                String cmd = rootMessageNode.get("cmd").asText().trim().toUpperCase();
                 try {
-                    var cmd = rootMessageNode.get("cmd").asText().trim().toUpperCase();
                     logger.debug("Handling msg '{}'", cmd);
                     var messageType = WebSocketCommand.InputCommands.valueOf(cmd);
                     switch (messageType) {
@@ -177,20 +177,22 @@ public class PCMWebSocketConnection implements WebSocketListener {
                         }
                         case ON_SPOT -> onRemoteSpot();
                     }
-
                 } catch (IOException | IllegalStateException e) {
-                    logger.warn("Disconnecting client: {}", e.getMessage());
+                    logger.warn("Error handing command '{}' with message: {}. Disconnecting client", cmd,
+                            e.getMessage());
                     disconnect();
                 }
             }
         } catch (JsonProcessingException e) {
-            logger.warn("Exception parsing JSON message: ", e);
+            logger.warn("Exception parsing JSON message.", e);
+            logger.warn("Disconnecting client.");
+            disconnect();
         }
     }
 
     @Override
     public void onWebSocketError(@Nullable Throwable cause) {
-        logger.warn("WebSocket Error: ", cause);
+        logger.warn("WebSocket Error", cause);
     }
 
     @Override
