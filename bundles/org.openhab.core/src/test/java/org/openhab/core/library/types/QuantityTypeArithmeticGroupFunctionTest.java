@@ -33,7 +33,12 @@ import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -58,10 +63,26 @@ import org.osgi.service.component.ComponentContext;
  */
 @ExtendWith(MockitoExtension.class)
 @NonNullByDefault
+@Execution(ExecutionMode.SAME_THREAD)
 public class QuantityTypeArithmeticGroupFunctionTest {
+
+    @Nullable
+    private static Locale initialLocale;
 
     private @Mock @NonNullByDefault({}) ComponentContext componentContext;
     private final UnitProvider unitProvider = new TestUnitProvider();
+
+    @BeforeAll
+    public static void setUpClass() {
+        initialLocale = Locale.getDefault();
+    }
+
+    @AfterAll
+    @SuppressWarnings("PMD.SetDefaultLocale")
+    public static void tearDownClass() {
+        // Set the default locale to its initial value.
+        Locale.setDefault(initialLocale);
+    }
 
     /**
      * Locales having a different decimal and grouping separators to test string parsing and generation.
@@ -78,6 +99,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testSumFunctionQuantityType(Locale locale) {
         Locale.setDefault(locale);
 
@@ -96,6 +118,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testSumFunctionQuantityTypeDifferentUnits(Locale locale) {
         Locale.setDefault(locale);
 
@@ -114,6 +137,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testSumFunctionQuantityTypeIncompatibleUnits(Locale locale) {
         Locale.setDefault(locale);
 
@@ -130,6 +154,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testAvgFunctionQuantityType(Locale locale) {
         Locale.setDefault(locale);
 
@@ -156,6 +181,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testAvgFunctionQuantityTypeDifferentUnits(Locale locale) {
         Locale.setDefault(locale);
 
@@ -175,6 +201,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testAvgFunctionQuantityTypeIncompatibleUnits(Locale locale) {
         Locale.setDefault(locale);
 
@@ -238,6 +265,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMaxFunctionQuantityType(Locale locale) {
         Locale.setDefault(locale);
 
@@ -256,6 +284,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMaxFunctionQuantityTypeDifferentUnits(Locale locale) {
         Locale.setDefault(locale);
 
@@ -274,6 +303,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMaxFunctionQuantityTypeIncompatibleUnits(Locale locale) {
         Locale.setDefault(locale);
 
@@ -290,6 +320,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMinFunctionQuantityType(Locale locale) {
         Locale.setDefault(locale);
 
@@ -308,6 +339,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMaxFunctionQuantityTypeOnDimensionless(Locale locale) {
         Locale.setDefault(locale);
 
@@ -327,6 +359,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMinFunctionQuantityTypeDifferentUnits(Locale locale) {
         Locale.setDefault(locale);
 
@@ -345,6 +378,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMinFunctionQuantityTypeIncompatibleUnits(Locale locale) {
         Locale.setDefault(locale);
 
@@ -361,6 +395,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testSumFunctionQuantityTypeWithGroups(Locale locale) {
         Locale.setDefault(locale);
 
@@ -389,6 +424,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testSumFunctionQuantityTypeDifferentUnitsBaseKelvin(Locale locale) {
         Locale.setDefault(locale);
 
@@ -407,6 +443,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testAvgFunctionQuantityTypeDifferentUnitsBaseKelvin(Locale locale) {
         Locale.setDefault(locale);
 
@@ -426,6 +463,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMaxFunctionQuantityTypeDifferentUnitsBaseKelvin(Locale locale) {
         Locale.setDefault(locale);
 
@@ -444,6 +482,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMinFunctionQuantityTypeDifferentUnitsBaseKelvin(Locale locale) {
         Locale.setDefault(locale);
 
@@ -462,6 +501,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testSumFunctionColorTemperatureDifferentUnitsBaseKelvin(Locale locale) {
         Locale.setDefault(locale);
 
@@ -481,6 +521,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testAvgFunctionQuantityTypeColorTempDifferentUnitsBaseKelvin(Locale locale) {
         Locale.setDefault(locale);
 
@@ -500,6 +541,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testAvgFunctionQuantityTypeColorTempDifferentUnitsBaseMirek(Locale locale) {
         Locale.setDefault(locale);
 
@@ -519,6 +561,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMinFunctionColorTemperatureDifferentUnitsBaseKelvin(Locale locale) {
         Locale.setDefault(locale);
 
@@ -538,6 +581,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testMaxFunctionColorTemperatureDifferentUnitsBaseKelvin(Locale locale) {
         Locale.setDefault(locale);
 
@@ -557,6 +601,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testSumFunctionQuantityTypeDifferentUnitsBaseWatt(Locale locale) {
         Locale.setDefault(locale);
 
