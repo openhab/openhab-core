@@ -239,6 +239,12 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.websocket/${project.version}</bundle>
 	</feature>
 
+	<feature name="openhab-core-io-websocket-audio" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature dependency="true">openhab-core-io-websocket</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.websocket.audio/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-io-transport-coap" version="${project.version}">
 		<feature>openhab-core-base</feature>
 
@@ -466,6 +472,7 @@
 		<feature>openhab-core-io-rest-transform</feature>
 		<feature>openhab-core-io-rest-voice</feature>
 		<feature>openhab-core-io-websocket</feature>
+		<feature>openhab-core-io-websocket-audio</feature>
 		<feature>openhab-core-model-lsp</feature>
 		<feature>openhab-core-model-item</feature>
 		<feature>openhab-core-model-persistence</feature>

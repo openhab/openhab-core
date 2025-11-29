@@ -87,6 +87,7 @@
     <module>org.openhab.core.io.transport.serial.rxtx.rfc2217</module>
     <module>org.openhab.core.io.transport.upnp</module>
     <module>org.openhab.core.io.websocket</module>
+    <module>org.openhab.core.io.websocket.audio</module>
     <module>org.openhab.core.io.jetty.certificate</module>
     <module>org.openhab.core.model.core</module>
     <module>org.openhab.core.model.item</module>

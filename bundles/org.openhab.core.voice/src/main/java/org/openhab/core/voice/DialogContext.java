@@ -29,7 +29,7 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
  * @author Miguel Álvarez - Initial contribution
  */
 @NonNullByDefault
-public record DialogContext(@Nullable KSService ks, @Nullable String keyword, STTService stt, TTSService tts,
+public record DialogContext(@Nullable DTService dt, @Nullable String keyword, STTService stt, TTSService tts,
         @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink, Locale locale,
         String dialogGroup, @Nullable String locationItem, @Nullable String listeningItem,
         @Nullable String listeningMelody) {
@@ -42,7 +42,7 @@ public record DialogContext(@Nullable KSService ks, @Nullable String keyword, ST
         // services
         private @Nullable AudioSource source;
         private @Nullable AudioSink sink;
-        private @Nullable KSService ks;
+        private @Nullable DTService dt;
         private @Nullable STTService stt;
         private @Nullable TTSService tts;
         private @Nullable Voice voice;
@@ -72,7 +72,14 @@ public record DialogContext(@Nullable KSService ks, @Nullable String keyword, ST
 
         public Builder withKS(@Nullable KSService service) {
             if (service != null) {
-                this.ks = service;
+                this.dt = service;
+            }
+            return this;
+        }
+
+        public Builder withDT(@Nullable DTService service) {
+            if (service != null) {
+                this.dt = service;
             }
             return this;
         }
@@ -165,7 +172,7 @@ public record DialogContext(@Nullable KSService ks, @Nullable String keyword, ST
          * @throws IllegalStateException if a required dialog component is missing
          */
         public DialogContext build() throws IllegalStateException {
-            KSService ksService = ks;
+            DTService dtService = dt;
             STTService sttService = stt;
             TTSService ttsService = tts;
             List<HumanLanguageInterpreter> hliServices = hlis;
@@ -191,7 +198,7 @@ public record DialogContext(@Nullable KSService ks, @Nullable String keyword, ST
                 }
                 throw new IllegalStateException("Cannot build dialog context: " + String.join(", ", errors) + ".");
             } else {
-                return new DialogContext(ksService, keyword, sttService, ttsService, voice, hliServices, audioSource,
+                return new DialogContext(dtService, keyword, sttService, ttsService, voice, hliServices, audioSource,
                         audioSink, locale, dialogGroup, locationItem, listeningItem, listeningMelody);
             }
         }
