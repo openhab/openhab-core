@@ -19,7 +19,12 @@ import java.util.Locale;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,7 +34,23 @@ import org.openhab.core.library.unit.Units;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
+@Execution(ExecutionMode.SAME_THREAD)
 public class PercentTypeTest {
+
+    @Nullable
+    private static Locale initialLocale;
+
+    @BeforeAll
+    public static void setUpClass() {
+        initialLocale = Locale.getDefault();
+    }
+
+    @AfterAll
+    @SuppressWarnings("PMD.SetDefaultLocale")
+    public static void tearDownClass() {
+        // Set the default locale to its initial value.
+        Locale.setDefault(initialLocale);
+    }
 
     /**
      * Locales having a different decimal and grouping separators to test string parsing and generation.
@@ -46,6 +67,7 @@ public class PercentTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testKnownInvalidConstructors(Locale locale) {
         Locale.setDefault(locale);
 
@@ -85,6 +107,7 @@ public class PercentTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testLocalizedStringConstruction(Locale defaultLocale) {
         Locale.setDefault(defaultLocale);
 
@@ -106,6 +129,7 @@ public class PercentTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void negativeNumber(Locale defaultLocale) {
         Locale.setDefault(defaultLocale);
 
@@ -119,6 +143,7 @@ public class PercentTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void moreThan100(Locale defaultLocale) {
         Locale.setDefault(defaultLocale);
 
