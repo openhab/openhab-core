@@ -584,7 +584,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @Override
     public synchronized @Nullable String createIsolatedModel(InputStream inputStream, List<String> errors,
             List<String> warnings) {
-        String modelName = "%sYAML_model_%d.yaml".formatted(PREFIX_TMP_MODEL, ++counter);
+        String modelName = "%smodel_%d.yaml".formatted(PREFIX_TMP_MODEL, ++counter);
         boolean valid;
         try {
             valid = processModelContent(modelName, Kind.CREATE, objectMapper.readTree(inputStream), errors, warnings);
