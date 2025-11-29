@@ -12,7 +12,11 @@
  */
 package org.openhab.core.io.websocket.audio.internal;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
