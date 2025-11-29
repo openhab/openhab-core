@@ -94,7 +94,7 @@ public class RuleEnablementActionHandler extends BaseActionModuleHandler {
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
+    public @Nullable Map<String, @Nullable Object> execute(Map<String, Object> context) {
         for (String uid : uids) {
             if (callback != null) {
                 callback.setEnabled(uid, enable);

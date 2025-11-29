@@ -54,7 +54,7 @@ public class SynthesizeActionHandler extends BaseActionModuleHandler {
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(Map<String, Object> context) {
+    public @Nullable Map<String, @Nullable Object> execute(Map<String, Object> context) {
         audioManager.playMelody(melody, sink, volume);
         return null;
     }

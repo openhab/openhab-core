@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.bom</groupId>
     <artifactId>org.openhab.core.reactor.bom</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>5.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.bom.runtime</artifactId>
@@ -18,12 +18,12 @@
   <properties>
     <californium.version>4.0.0-M2</californium.version>
     <!-- cxf can be updated independently of karaf, only used in karaf tests -->
-    <cxf.version>3.6.5</cxf.version>
-    <jackson.version>2.18.2</jackson.version>
+    <cxf.version>3.6.8</cxf.version>
+    <jackson.version>2.19.2</jackson.version>
     <jetty.version>9.4.57.v20241219</jetty.version>
-    <pax.logging.version>2.2.8</pax.logging.version>
-    <pax.web.version>8.0.30</pax.web.version>
-    <swagger.version>2.2.28</swagger.version>
+    <pax.logging.version>2.3.0</pax.logging.version>
+    <pax.web.version>8.0.33</pax.web.version>
+    <swagger.version>2.2.35</swagger.version>
   </properties>
 
   <dependencyManagement>
@@ -93,7 +93,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.metatype</artifactId>
-      <version>1.4.500</version>
+      <version>1.6.400</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -107,7 +107,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.event</artifactId>
-      <version>1.6.200</version>
+      <version>1.6.300</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -127,7 +127,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.log.stream</artifactId>
-      <version>1.1.100</version>
+      <version>1.1.200</version>
       <scope>compile</scope>
     </dependency>
 
@@ -216,7 +216,7 @@
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.annotation-api-1.3</artifactId>
-      <version>1.3_1</version>
+      <version>1.3_3</version>
     </dependency>
 
     <!-- Stax 1.2 API -->
@@ -268,7 +268,7 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.pushstream</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -325,7 +325,7 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.jdbc</artifactId>
-      <version>1.0.1</version>
+      <version>1.1.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -405,24 +405,24 @@
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.5</version>
+      <version>1.6.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.18.0</version>
+      <version>2.20.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.17.0</version>
+      <version>3.18.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
-      <version>3.11.1</version>
+      <version>3.12.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -455,14 +455,14 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
-      <version>1.78.1</version>
+      <version>1.81</version>
     </dependency>
 
     <!-- Gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.11.0</version>
+      <version>2.13.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -470,7 +470,7 @@
     <dependency>
       <groupId>com.igormaznitsa</groupId>
       <artifactId>jbbp</artifactId>
-      <version>1.4.1</version>
+      <version>3.0.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -478,7 +478,7 @@
     <dependency>
       <groupId>org.jmdns</groupId>
       <artifactId>jmdns</artifactId>
-      <version>3.5.12</version>
+      <version>3.6.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -507,19 +507,19 @@
     <dependency>
       <groupId>org.openhab.osgiify</groupId>
       <artifactId>si.uom.si-units</artifactId>
-      <version>2.2</version>
+      <version>2.2.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>si.uom</groupId>
-      <artifactId>si-quantity</artifactId>
-      <version>2.2</version>
+      <groupId>org.openhab.osgiify</groupId>
+      <artifactId>si.uom.si-quantity</artifactId>
+      <version>2.2.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>tech.units</groupId>
       <artifactId>indriya</artifactId>
-      <version>2.2.2</version>
+      <version>2.2.3</version>
       <scope>compile</scope>
     </dependency>
 
@@ -527,13 +527,13 @@
     <dependency>
       <groupId>com.hivemq</groupId>
       <artifactId>hivemq-mqtt-client</artifactId>
-      <version>1.3.5</version>
+      <version>1.3.9</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.openhab.osgiify</groupId>
       <artifactId>com.google.dagger</artifactId>
-      <version>2.27</version>
+      <version>2.42</version>
       <scope>compile</scope>
     </dependency>
 
@@ -785,13 +785,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.26</version>
+      <version>4.27</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.26</version>
+      <version>4.27</version>
       <scope>compile</scope>
     </dependency>
 
@@ -799,7 +799,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>33.3.1-jre</version>
+      <version>33.4.8-jre</version>
       <scope>compile</scope>
     </dependency>
 
@@ -813,7 +813,7 @@
     <dependency>
       <groupId>io.github.classgraph</groupId>
       <artifactId>classgraph</artifactId>
-      <version>4.8.176</version>
+      <version>4.8.180</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -843,13 +843,13 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.xtend</groupId>
+      <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtend.lib</artifactId>
       <version>${xtext.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.xtend</groupId>
+      <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtend.lib.macro</artifactId>
       <version>${xtext.version}</version>
       <scope>compile</scope>
@@ -911,7 +911,7 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>9.7.1</version>
+      <version>9.8</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -958,7 +958,7 @@
     <dependency>
       <groupId>de.focus-shift</groupId>
       <artifactId>jollyday-jackson</artifactId>
-      <version>1.5.0</version>
+      <version>1.5.4</version>
       <scope>compile</scope>
     </dependency>
 
@@ -1004,6 +1004,12 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
       <version>${jackson.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -1068,19 +1074,19 @@
     <dependency>
       <groupId>org.openhab.osgiify</groupId>
       <artifactId>io.methvin.directory-watcher</artifactId>
-      <version>0.18.0</version>
+      <version>0.19.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.16.0</version>
+      <version>5.17.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.16.0</version>
+      <version>5.17.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

@@ -11,7 +11,7 @@
 
   <groupId>org.openhab.core</groupId>
   <artifactId>org.openhab.core.reactor</artifactId>
-  <version>5.0.0-SNAPSHOT</version>
+  <version>5.1.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
 
@@ -64,20 +64,27 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <maven.compiler.release>21</maven.compiler.release>
+    <oh.java.version>21</oh.java.version>
+    <maven.compiler.release>${oh.java.version}</maven.compiler.release>
 
     <bnd.version>7.1.0</bnd.version>
-    <commons.net.version>3.11.1</commons.net.version>
+    <commons.net.version>3.12.0</commons.net.version>
     <eea.version>2.4.0</eea.version>
-    <karaf.compile.version>4.4.7</karaf.compile.version>
-    <karaf.tooling.version>4.4.7</karaf.tooling.version>
+    <karaf.compile.version>4.4.8</karaf.compile.version>
+    <karaf.tooling.version>4.4.8</karaf.tooling.version>
     <sat.version>0.17.0</sat.version>
     <slf4j.version>2.0.16</slf4j.version>
-    <xtext.version>2.37.0</xtext.version>
+    <xtext.version>2.40.0</xtext.version>
     <spotless.version>2.44.3</spotless.version>
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>
     <spotless.eclipse.wtp.version>4.21.0</spotless.eclipse.wtp.version>
+
+    <!-- TEST -->
+    <!-- cxf can be updated independently, karaf only uses it in tests -->
+    <cxf.version>3.6.8</cxf.version>
+    <junit.version>5.13.4</junit.version>
+    <mockito.version>5.19.0</mockito.version>
   </properties>
 
   <dependencyManagement>
@@ -268,13 +275,13 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
-          <version>3.4.1</version>
+          <version>3.5.0</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.14.0</version>
+          <version>3.14.1</version>
           <configuration>
             <compilerId>eclipse</compilerId>
             <compilerArgs>
@@ -292,12 +299,12 @@ Import-Package: \\
             <dependency>
               <groupId>org.codehaus.plexus</groupId>
               <artifactId>plexus-compiler-eclipse</artifactId>
-              <version>2.15.0</version>
+              <version>2.16.1</version>
             </dependency>
             <dependency>
               <groupId>org.eclipse.jdt</groupId>
               <artifactId>ecj</artifactId>
-              <version>3.41.0</version>
+              <version>3.43.0</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -311,7 +318,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.6.2</version>
         </plugin>
 
         <plugin>
@@ -329,7 +336,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.11.2</version>
+          <version>3.12.0</version>
           <configuration>
             <outputDirectory>${project.build.directory}/site</outputDirectory>
             <failOnError>true</failOnError>
@@ -365,13 +372,13 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.15.1</version>
+          <version>3.15.2</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>3.2.0</version>
           <configuration>
             <preparationGoals>clean install</preparationGoals>
           </configuration>
@@ -398,10 +405,12 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.3</version>
+          <version>3.5.4</version>
           <configuration>
             <argLine>--add-opens java.base/java.net=ALL-UNNAMED
-              --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+              --add-opens java.base/java.util=ALL-UNNAMED
+              -javaagent:"${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar"
+              -Xshare:off</argLine>
             <systemPropertyVariables>
               <junit.jupiter.execution.timeout.default>15 m</junit.jupiter.execution.timeout.default>
             </systemPropertyVariables>
@@ -409,7 +418,7 @@ Import-Package: \\
         </plugin>
 
         <plugin>
-          <groupId>org.eclipse.xtend</groupId>
+          <groupId>org.eclipse.xtext</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
           <version>${xtext.version}</version>
           <executions>
@@ -431,13 +440,13 @@ Import-Package: \\
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>3.6.0</version>
+          <version>3.6.1</version>
         </plugin>
 
         <plugin>
           <groupId>com.mycila</groupId>
           <artifactId>license-maven-plugin</artifactId>
-          <version>4.6</version>
+          <version>5.0.0</version>
           <configuration>
             <basedir>${basedir}</basedir>
             <quiet>false</quiet>
@@ -492,7 +501,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.openhab.core.tools</groupId>
           <artifactId>i18n-maven-plugin</artifactId>
-          <version>4.3.1</version>
+          <version>5.0.1</version>
         </plugin>
 
         <plugin>

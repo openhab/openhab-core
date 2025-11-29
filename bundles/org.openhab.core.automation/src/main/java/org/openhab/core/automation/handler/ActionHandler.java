@@ -48,5 +48,5 @@ public interface ActionHandler extends ModuleHandler {
      * @return a map with the {@code outputs} which are the result of the {@link Action}'s execution (may be null).
      */
     @Nullable
-    Map<String, Object> execute(Map<String, Object> context);
+    Map<String, @Nullable Object> execute(Map<String, Object> context);
 }

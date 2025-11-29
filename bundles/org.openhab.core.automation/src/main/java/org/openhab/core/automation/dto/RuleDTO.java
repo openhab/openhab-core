@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 
@@ -26,15 +27,16 @@ import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
  */
 public class RuleDTO {
 
-    public List<TriggerDTO> triggers;
-    public List<ConditionDTO> conditions;
-    public List<ActionDTO> actions;
-    public Map<String, Object> configuration;
-    public List<ConfigDescriptionParameterDTO> configDescriptions;
+    public List<@NonNull TriggerDTO> triggers;
+    public List<@NonNull ConditionDTO> conditions;
+    public List<@NonNull ActionDTO> actions;
+    public Map<@NonNull String, @NonNull Object> configuration;
+    public List<@NonNull ConfigDescriptionParameterDTO> configDescriptions;
     public String templateUID;
+    public String templateState;
     public String uid;
     public String name;
-    public Set<String> tags;
+    public Set<@NonNull String> tags;
     public Visibility visibility;
     public String description;
 }

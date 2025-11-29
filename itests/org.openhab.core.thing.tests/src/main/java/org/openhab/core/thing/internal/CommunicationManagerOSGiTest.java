@@ -13,7 +13,6 @@
 package org.openhab.core.thing.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Collection;
@@ -35,6 +34,7 @@ import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.items.Metadata;
@@ -79,6 +79,7 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.TimeSeries;
+import org.osgi.framework.BundleContext;
 
 /**
  *
@@ -90,8 +91,9 @@ import org.openhab.core.types.TimeSeries;
 public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private static class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
-        public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry) {
-            super(thingRegistry, itemRegistry);
+        public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry,
+                ItemBuilderFactory itemBuilderFactory, BundleContext bundleContext) {
+            super(null, thingRegistry, itemRegistry, itemBuilderFactory, bundleContext);
         }
 
         @Override
@@ -153,15 +155,19 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ThingHandler thingHandlerMock;
     private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
     private @Mock @NonNullByDefault({}) TriggerProfile triggerProfileMock;
+    private @Mock @NonNullByDefault({}) ItemBuilderFactory itemBuilderFactoryMock;
 
     private @NonNullByDefault({}) CommunicationManager manager;
     private @NonNullByDefault({}) SafeCaller safeCaller;
-
-    private ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock,
-            itemRegistryMock);
+    private @NonNullByDefault({}) ItemChannelLinkRegistryAdvanced iclRegistry;
 
     @BeforeEach
     public void beforeEach() {
+        registerVolatileStorageService();
+
+        iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock, itemRegistryMock, itemBuilderFactoryMock,
+                bundleContext);
+
         when(UNIT_PROVIDER_MOCK.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
         item5 = new NumberItem("Number:Temperature", ITEM_NAME_5, UNIT_PROVIDER_MOCK);
 
@@ -176,13 +182,10 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
                 itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock);
 
         doAnswer(invocation -> {
-            switch (((Channel) invocation.getArguments()[0]).getKind()) {
-                case STATE:
-                    return new ProfileTypeUID("test:state");
-                case TRIGGER:
-                    return new ProfileTypeUID("test:trigger");
-            }
-            return null;
+            return switch (((Channel) invocation.getArguments()[0]).getKind()) {
+                case STATE -> new ProfileTypeUID("test:state");
+                case TRIGGER -> new ProfileTypeUID("test:trigger");
+            };
         }).when(profileAdvisorMock).getSuggestedProfileTypeUID(isA(Channel.class), isA(String.class));
         doAnswer(invocation -> {
             switch (((ProfileTypeUID) invocation.getArguments()[0]).toString()) {
@@ -301,9 +304,9 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemCommandEventSingleLink() {
-        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_2, OnOffType.ON));
+        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_2, OnOffType.ON, "mysource"));
         waitForAssert(() -> {
-            verify(stateProfileMock).onCommandFromItem(eq(OnOffType.ON));
+            verify(stateProfileMock).onCommandFromItem(eq(OnOffType.ON), eq("mysource"));
         });
         verifyNoMoreInteractions(stateProfileMock);
         verifyNoMoreInteractions(triggerProfileMock);
@@ -315,7 +318,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         // Take unit from accepted item type (see channel built from STATE_CHANNEL_UID_3)
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_5, DecimalType.valueOf("20")));
         waitForAssert(() -> {
-            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °C")));
+            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °C")), isNull());
         });
         verifyNoMoreInteractions(stateProfileMock);
         verifyNoMoreInteractions(triggerProfileMock);
@@ -329,7 +332,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_5, DecimalType.valueOf("20")));
         waitForAssert(() -> {
-            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °F")));
+            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °F")), isNull());
         });
         verifyNoMoreInteractions(stateProfileMock);
         verifyNoMoreInteractions(triggerProfileMock);
@@ -339,7 +342,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     public void testItemCommandEventMultiLink() {
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_1, OnOffType.ON));
         waitForAssert(() -> {
-            verify(stateProfileMock, times(2)).onCommandFromItem(eq(OnOffType.ON));
+            verify(stateProfileMock, times(2)).onCommandFromItem(eq(OnOffType.ON), isNull());
         });
         verifyNoMoreInteractions(stateProfileMock);
         verifyNoMoreInteractions(triggerProfileMock);
@@ -351,7 +354,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         manager.receive(
                 ItemEventFactory.createCommandEvent(ITEM_NAME_1, OnOffType.ON, STATE_CHANNEL_UID_2.getAsString()));
         waitForAssert(() -> {
-            verify(stateProfileMock).onCommandFromItem(eq(OnOffType.ON));
+            verify(stateProfileMock).onCommandFromItem(eq(OnOffType.ON), eq(STATE_CHANNEL_UID_2.getAsString()));
         });
         verifyNoMoreInteractions(stateProfileMock);
         verifyNoMoreInteractions(triggerProfileMock);

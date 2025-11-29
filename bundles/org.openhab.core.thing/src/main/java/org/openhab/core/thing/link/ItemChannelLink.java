@@ -31,12 +31,14 @@ public class ItemChannelLink extends AbstractLink {
     private final @NonNullByDefault({}) ChannelUID channelUID;
     private final Configuration configuration;
 
+    // this field tracks whether the item's current tags were applied from the linked channel's default tags
+    private transient boolean tagsLinked = false;
+
     /**
      * Default constructor in package scope only. Will allow to instantiate this
      * class by reflection. Not intended to be used for normal instantiation.
      */
     ItemChannelLink() {
-        super();
         this.channelUID = null;
         this.configuration = new Configuration();
     }
@@ -71,5 +73,19 @@ public class ItemChannelLink extends AbstractLink {
     @Override
     public int hashCode() {
         return super.hashCode() * configuration.hashCode();
+    }
+
+    /**
+     * Check if the item's current tags were applied from the linked channel's default tags
+     */
+    public boolean tagsLinked() {
+        return tagsLinked;
+    }
+
+    /**
+     * Set the flag that indicates if the item's current tags were applied from the linked channel's default tags
+     */
+    public void setTagsLinked(boolean value) {
+        tagsLinked = value;
     }
 }

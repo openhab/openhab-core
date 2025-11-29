@@ -437,9 +437,18 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         boolean installed = addonHandlers.stream()
                 .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(uid));
 
+        String title = topic.title;
+        int compatibilityStart = topic.title.lastIndexOf("["); // version range always starts with [
+        if (topic.title.lastIndexOf(" ") < compatibilityStart) { // check includes [ not present
+            String potentialRange = topic.title.substring(compatibilityStart);
+            Matcher matcher = BundleVersion.RANGE_PATTERN.matcher(potentialRange);
+            if (matcher.matches()) {
+                title = topic.title.substring(0, compatibilityStart).trim();
+            }
+        }
+
         Addon.Builder builder = Addon.create(uid).withType(type).withId(id).withContentType(contentType)
-                .withLabel(topic.title).withImageLink(topic.imageUrl)
-                .withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
+                .withLabel(title).withImageLink(topic.imageUrl).withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
                 .withAuthor(topic.postStream.posts[0].displayUsername).withMaturity(maturity)
                 .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties);
 

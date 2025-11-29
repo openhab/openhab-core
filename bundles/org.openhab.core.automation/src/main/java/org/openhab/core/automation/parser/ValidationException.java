@@ -122,6 +122,6 @@ public class ValidationException extends Exception {
     public enum ObjectType {
         MODULE_TYPE,
         TEMPLATE,
-        RULE;
+        RULE
     }
 }

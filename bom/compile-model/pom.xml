@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.bom</groupId>
     <artifactId>org.openhab.core.reactor.bom</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>5.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.bom.compile-model</artifactId>
@@ -134,7 +134,7 @@
     <dependency>
       <groupId>io.github.classgraph</groupId>
       <artifactId>classgraph</artifactId>
-      <version>4.8.176</version>
+      <version>4.8.180</version>
       <scope>compile</scope>
     </dependency>
 

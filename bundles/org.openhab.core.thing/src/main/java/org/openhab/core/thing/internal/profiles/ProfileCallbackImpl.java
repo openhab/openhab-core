@@ -17,6 +17,7 @@ import java.util.function.Function;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.SafeCaller;
+import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemStateConverter;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class ProfileCallbackImpl implements ProfileCallback {
+    private static final String THING_SOURCE = "org.openhab.core.thing";
 
     private final Logger logger = LoggerFactory.getLogger(ProfileCallbackImpl.class);
 
@@ -118,13 +120,12 @@ public class ProfileCallbackImpl implements ProfileCallback {
     }
 
     @Override
-    public void sendCommand(Command command) {
-        eventPublisher
-                .post(ItemEventFactory.createCommandEvent(link.getItemName(), command, link.getLinkedUID().toString()));
+    public void sendCommand(Command command, @Nullable String source) {
+        eventPublisher.post(ItemEventFactory.createCommandEvent(link.getItemName(), command, buildSource(source)));
     }
 
     @Override
-    public void sendUpdate(State state) {
+    public void sendUpdate(State state, @Nullable String source) {
         Item item = itemProvider.apply(link.getItemName());
         if (item == null) {
             logger.warn("Cannot post update event '{}' for item '{}', because no item could be found.", state,
@@ -142,12 +143,11 @@ public class ProfileCallbackImpl implements ProfileCallback {
             acceptedState = itemStateConverter.convertToAcceptedState(state, item);
         }
 
-        eventPublisher.post(
-                ItemEventFactory.createStateEvent(link.getItemName(), acceptedState, link.getLinkedUID().toString()));
+        eventPublisher.post(ItemEventFactory.createStateEvent(link.getItemName(), acceptedState, buildSource(source)));
     }
 
     @Override
-    public void sendTimeSeries(TimeSeries timeSeries) {
+    public void sendTimeSeries(TimeSeries timeSeries, @Nullable String source) {
         Item item = itemProvider.apply(link.getItemName());
         if (item == null) {
             logger.warn("Cannot send time series event '{}' for item '{}', because no item could be found.", timeSeries,
@@ -155,13 +155,17 @@ public class ProfileCallbackImpl implements ProfileCallback {
             return;
         }
 
-        eventPublisher.post(
-                ItemEventFactory.createTimeSeriesEvent(link.getItemName(), timeSeries, link.getLinkedUID().toString()));
+        eventPublisher
+                .post(ItemEventFactory.createTimeSeriesEvent(link.getItemName(), timeSeries, buildSource(source)));
     }
 
     @FunctionalInterface
     public interface AcceptedTypeConverter {
         @Nullable
         Command toAcceptedCommand(Command originalType, @Nullable Channel channel, @Nullable Item item);
+    }
+
+    private String buildSource(@Nullable String source) {
+        return AbstractEvent.buildDelegatedSource(source, THING_SOURCE, link.getLinkedUID().toString());
     }
 }

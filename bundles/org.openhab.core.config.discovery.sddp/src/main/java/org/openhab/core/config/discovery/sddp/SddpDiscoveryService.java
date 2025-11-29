@@ -62,6 +62,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This is a {@link DiscoveryService} implementation, which can find SDDP devices in the network.
+ * <p>
+ * Simple Device Discovery Protocol (SDDP) is a simple multicast discovery protocol implemented
+ * by many "smart home" devices to allow a controlling agent to easily discover and connect to
+ * devices on a local subnet.
+ * <p>
+ * SDDP was created by Control4, and is quite similar to UPnP's standard Simple Service Discovery
+ * Protocol (SSDP), and it serves a virtually identical purpose. SDDP is not a standard protocol
+ * and it is not publicly documented.
+ * <p>
  * Support for bindings can be achieved by implementing and registering a {@link SddpDiscoveryParticipant}.
  * Support for finders can be achieved by implementing and registering a {@link SddpDeviceParticipant}.
  *
@@ -342,7 +351,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     /**
      * Process the {@link DatagramPacket} content by trying to create an {@link SddpDevice} and eventually adding it to
      * the foundDevicesCache, and if so, then notifying all listeners.
-     * 
+     *
      * @param packet a datagram packet that arrived over the network.
      */
     private synchronized void processPacket(DatagramPacket packet) {

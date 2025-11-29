@@ -15,7 +15,6 @@ package org.openhab.core.model.yaml.internal.util;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -31,18 +30,10 @@ import org.openhab.core.util.StringUtils;
 @NonNullByDefault
 public class YamlElementUtils {
 
-    private static final Set<String> VALID_ITEM_TYPES = Set.of(CoreItemFactory.SWITCH, CoreItemFactory.ROLLERSHUTTER,
-            CoreItemFactory.CONTACT, CoreItemFactory.STRING, CoreItemFactory.NUMBER, CoreItemFactory.DIMMER,
-            CoreItemFactory.DATETIME, CoreItemFactory.COLOR, CoreItemFactory.IMAGE, CoreItemFactory.PLAYER,
-            CoreItemFactory.LOCATION, CoreItemFactory.CALL);
-
     public static boolean equalsConfig(@Nullable Map<String, Object> first, @Nullable Map<String, Object> second) {
         if (first != null && second != null) {
-            if (first.size() != second.size()) {
-                return false;
-            } else {
-                return first.entrySet().stream().allMatch(e -> equalsConfigValue(e.getValue(), second.get(e.getKey())));
-            }
+            return first.size() != second.size() ? false
+                    : first.entrySet().stream().allMatch(e -> equalsConfigValue(e.getValue(), second.get(e.getKey())));
         } else {
             return first == null && second == null;
         }
@@ -60,7 +51,7 @@ public class YamlElementUtils {
 
     public static boolean isValidItemType(@Nullable String type) {
         String adjustedType = getAdjustedItemType(type);
-        return adjustedType == null ? true : VALID_ITEM_TYPES.contains(adjustedType);
+        return adjustedType == null ? true : CoreItemFactory.VALID_ITEM_TYPES.contains(adjustedType);
     }
 
     public static boolean isNumberItemType(@Nullable String type) {

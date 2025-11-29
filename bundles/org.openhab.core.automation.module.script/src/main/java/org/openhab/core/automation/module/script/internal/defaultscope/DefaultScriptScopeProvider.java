@@ -33,7 +33,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
-import org.openhab.core.events.EventPublisher;
+import org.openhab.core.automation.module.script.action.BusEvent;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
@@ -85,14 +85,12 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
     private final Map<String, Object> elements = new ConcurrentHashMap<>();
 
-    private final ScriptBusEventImpl busEvent;
     private final ScriptThingActionsImpl thingActions;
 
     @Activate
     public DefaultScriptScopeProvider(final @Reference ItemRegistry itemRegistry,
             final @Reference ThingRegistry thingRegistry, final @Reference RuleRegistry ruleRegistry,
-            final @Reference EventPublisher eventPublisher) {
-        this.busEvent = new ScriptBusEventImpl(itemRegistry, eventPublisher);
+            final @Reference BusEvent busEvent) {
         this.thingActions = new ScriptThingActionsImpl(thingRegistry);
 
         elements.put("State", State.class);
@@ -190,7 +188,6 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
     @Deactivate
     protected void deactivate() {
-        busEvent.dispose();
         thingActions.dispose();
         elements.clear();
     }

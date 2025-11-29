@@ -1,7 +1,0 @@
-version: 2
-readOnly: false
-firstType:
-  element1:
-    description: description1
-  element2:
-    description: description2

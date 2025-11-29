@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.item.internal;
 
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,10 +47,7 @@ import org.openhab.core.model.item.BindingConfigParseException;
 import org.openhab.core.model.item.BindingConfigReader;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ModelBinding;
-import org.openhab.core.model.items.ModelGroupFunction;
-import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
-import org.openhab.core.model.items.ModelNormalItem;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateDescriptionFragmentProvider;
@@ -67,9 +66,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Laurent Garnier - Add method getAllFromModel + do not notify the item registry for isolated models
  */
 @NonNullByDefault
-@Component(service = { ItemProvider.class, StateDescriptionFragmentProvider.class }, immediate = true)
+@Component(service = { ItemProvider.class, GenericItemProvider.class,
+        StateDescriptionFragmentProvider.class }, immediate = true)
 public class GenericItemProvider extends AbstractProvider<Item>
         implements ModelRepositoryChangeListener, ItemProvider, StateDescriptionFragmentProvider {
 
@@ -86,6 +87,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private final Collection<ItemFactory> itemFactorys = new ArrayList<>();
 
+    private final Map<String, Map<String, String>> stateFormattersMap = new ConcurrentHashMap<>();
     private final Map<String, StateDescriptionFragment> stateDescriptionFragments = new ConcurrentHashMap<>();
 
     private Integer rank;
@@ -170,6 +172,14 @@ public class GenericItemProvider extends AbstractProvider<Item>
         return items;
     }
 
+    public Collection<Item> getAllFromModel(String modelName) {
+        return itemsMap.getOrDefault(modelName, List.of());
+    }
+
+    public Map<String, String> getStateFormattersFromModel(String modelName) {
+        return stateFormattersMap.getOrDefault(modelName, Map.of());
+    }
+
     private Collection<Item> getItemsFromModel(String modelName) {
         logger.debug("Read items from model '{}'", modelName);
 
@@ -177,7 +187,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
         ItemModel model = (ItemModel) modelRepository.getModel(modelName);
         if (model != null) {
             for (ModelItem modelItem : model.getItems()) {
-                Item item = createItemFromModelItem(modelItem);
+                Item item = createItemFromModelItem(modelItem, modelName);
                 if (item != null) {
                     for (String groupName : modelItem.getGroups()) {
                         ((GenericItem) item).addGroupName(groupName);
@@ -206,8 +216,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
         // create items and read new binding configuration
         if (!EventType.REMOVED.equals(type)) {
             for (ModelItem modelItem : model.getItems()) {
-                genericMetaDataProvider.removeMetadataByItemName(modelItem.getName());
-                Item item = createItemFromModelItem(modelItem);
+                genericMetaDataProvider.removeMetadataByItemName(modelName, modelItem.getName());
+                Item item = createItemFromModelItem(modelItem, modelName);
                 if (item != null) {
                     internalDispatchBindings(modelName, item, modelItem.getBindings());
                 }
@@ -220,49 +230,55 @@ public class GenericItemProvider extends AbstractProvider<Item>
         }
     }
 
-    private @Nullable Item createItemFromModelItem(ModelItem modelItem) {
-        Item item;
-        if (modelItem instanceof ModelGroupItem modelGroupItem) {
-            Item baseItem;
-            try {
-                baseItem = createItemOfType(modelGroupItem.getType(), modelGroupItem.getName());
-            } catch (IllegalArgumentException e) {
-                logger.debug("Error creating base item for group item '{}', item will be ignored: {}",
-                        modelGroupItem.getName(), e.getMessage());
-                return null;
-            }
-            if (baseItem != null) {
-                // if the user did not specify a function the first value of the enum in xtext (EQUAL) will be used
-                ModelGroupFunction function = modelGroupItem.getFunction();
-                item = applyGroupFunction(baseItem, modelGroupItem, function);
-            } else {
-                item = new GroupItem(modelGroupItem.getName());
-            }
-        } else {
-            ModelNormalItem normalItem = (ModelNormalItem) modelItem;
-            try {
-                item = createItemOfType(normalItem.getType(), normalItem.getName());
-            } catch (IllegalArgumentException e) {
-                logger.debug("Error creating item '{}', item will be ignored: {}", normalItem.getName(),
-                        e.getMessage());
-                return null;
-            }
+    private @Nullable Item createItemFromModelItem(ModelItem modelItem, String modelName) {
+        String itemType = modelItem.getType();
+        if (itemType == null || itemType.isBlank()) {
+            logger.warn("Item '{}' has no type defined, ignoring it.", modelItem.getName());
+            return null;
         }
-        if (item instanceof ActiveItem activeItem) {
-            String label = modelItem.getLabel();
-            String format = extractFormat(label);
-            if (format != null) {
-                label = label.substring(0, label.indexOf("[")).trim();
-                stateDescriptionFragments.put(modelItem.getName(),
-                        StateDescriptionFragmentBuilder.create().withPattern(format).build());
+
+        try {
+            String[] itemTypeSegments = itemType.split(ItemUtil.EXTENSION_SEPARATOR);
+            String mainItemType = itemTypeSegments[0];
+
+            Item item = switch (mainItemType) {
+                case "Group" -> createGroupItem(modelItem, itemTypeSegments);
+                default -> createItemOfType(itemType, modelItem.getName());
+            };
+
+            if (item instanceof ActiveItem activeItem) {
+                String label = modelItem.getLabel();
+                String format = extractFormat(label);
+                if (format != null) {
+                    label = label.substring(0, label.indexOf("[")).trim();
+                    Map<String, String> formatters = Objects
+                            .requireNonNull(stateFormattersMap.computeIfAbsent(modelName, k -> new HashMap<>()));
+                    formatters.put(modelItem.getName(), format);
+                    if (!isIsolatedModel(modelName)) {
+                        stateDescriptionFragments.put(modelItem.getName(),
+                                StateDescriptionFragmentBuilder.create().withPattern(format).build());
+                    }
+                } else {
+                    Map<String, String> formatters = stateFormattersMap.get(modelName);
+                    if (formatters != null) {
+                        formatters.remove(modelItem.getName());
+                        if (formatters.isEmpty()) {
+                            stateFormattersMap.remove(modelName);
+                        }
+                    }
+                    if (!isIsolatedModel(modelName)) {
+                        stateDescriptionFragments.remove(modelItem.getName());
+                    }
+                }
+                activeItem.setLabel(label);
+                activeItem.setCategory(modelItem.getIcon());
+                assignTags(modelItem, activeItem);
+                return item;
             } else {
-                stateDescriptionFragments.remove(modelItem.getName());
+                return null;
             }
-            activeItem.setLabel(label);
-            activeItem.setCategory(modelItem.getIcon());
-            assignTags(modelItem, activeItem);
-            return item;
-        } else {
+        } catch (IllegalArgumentException e) {
+            logger.debug("Error creating item '{}', item will be ignored: {}", modelItem.getName(), e.getMessage());
             return null;
         }
     }
@@ -285,14 +301,14 @@ public class GenericItemProvider extends AbstractProvider<Item>
         }
     }
 
-    private GroupItem applyGroupFunction(Item baseItem, ModelGroupItem modelGroupItem, ModelGroupFunction function) {
+    private GroupItem applyGroupFunction(Item baseItem, ModelItem modelItem, String function) {
         GroupFunctionDTO dto = new GroupFunctionDTO();
-        dto.name = function.getName();
-        dto.params = modelGroupItem.getArgs().toArray(new String[0]);
+        dto.name = function;
+        dto.params = modelItem.getArgs().toArray(new String[0]);
 
         GroupFunction groupFunction = ItemDTOMapper.mapFunction(baseItem, dto);
 
-        return new GroupItem(modelGroupItem.getName(), baseItem, groupFunction);
+        return new GroupItem(modelItem.getName(), baseItem, groupFunction);
     }
 
     private void dispatchBindingsPerItemType(String[] itemTypes) {
@@ -303,7 +319,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                     for (String itemType : itemTypes) {
                         String type = modelItem.getType();
                         if (type != null && itemType.equals(ItemUtil.getMainItemType(type))) {
-                            Item item = createItemFromModelItem(modelItem);
+                            Item item = createItemFromModelItem(modelItem, modelName);
                             if (item != null) {
                                 internalDispatchBindings(null, modelName, item, modelItem.getBindings());
                             }
@@ -324,7 +340,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                     for (ModelBinding modelBinding : modelItem.getBindings()) {
                         for (String bindingType : bindingTypes) {
                             if (bindingType.equals(modelBinding.getType())) {
-                                Item item = createItemFromModelItem(modelItem);
+                                Item item = createItemFromModelItem(modelItem, modelName);
                                 if (item != null) {
                                     internalDispatchBindings(reader, modelName, item, modelItem.getBindings());
                                 }
@@ -389,7 +405,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                             bindingType, item.getName(), e);
                 }
             } else {
-                genericMetaDataProvider.addMetadata(bindingType, item.getName(), config, configuration.getProperties());
+                genericMetaDataProvider.addMetadata(modelName, bindingType, item.getName(), config,
+                        configuration.getProperties());
             }
         }
     }
@@ -403,20 +420,22 @@ public class GenericItemProvider extends AbstractProvider<Item>
                     Map<String, Item> oldItems = toItemMap(itemsMap.get(modelName));
                     Map<String, Item> newItems = toItemMap(getItemsFromModel(modelName));
                     itemsMap.put(modelName, newItems.values());
-                    for (Item newItem : newItems.values()) {
-                        Item oldItem = oldItems.get(newItem.getName());
-                        if (oldItem != null) {
-                            if (hasItemChanged(oldItem, newItem)) {
-                                notifyListenersAboutUpdatedElement(oldItem, newItem);
+                    if (!isIsolatedModel(modelName)) {
+                        for (Item newItem : newItems.values()) {
+                            Item oldItem = oldItems.get(newItem.getName());
+                            if (oldItem != null) {
+                                if (hasItemChanged(oldItem, newItem)) {
+                                    notifyListenersAboutUpdatedElement(oldItem, newItem);
+                                }
+                            } else {
+                                notifyListenersAboutAddedElement(newItem);
                             }
-                        } else {
-                            notifyListenersAboutAddedElement(newItem);
                         }
                     }
                     processBindingConfigsFromModel(modelName, type);
                     for (Item oldItem : oldItems.values()) {
                         if (!newItems.containsKey(oldItem.getName())) {
-                            notifyAndCleanup(oldItem);
+                            notifyAndCleanup(modelName, oldItem);
                         }
                     }
                     break;
@@ -424,18 +443,21 @@ public class GenericItemProvider extends AbstractProvider<Item>
                     processBindingConfigsFromModel(modelName, type);
                     Collection<Item> itemsFromModel = getItemsFromModel(modelName);
                     itemsMap.remove(modelName);
+                    stateFormattersMap.remove(modelName);
                     for (Item item : itemsFromModel) {
-                        notifyAndCleanup(item);
+                        notifyAndCleanup(modelName, item);
                     }
                     break;
             }
         }
     }
 
-    private void notifyAndCleanup(Item oldItem) {
-        notifyListenersAboutRemovedElement(oldItem);
-        this.stateDescriptionFragments.remove(oldItem.getName());
-        genericMetaDataProvider.removeMetadataByItemName(oldItem.getName());
+    private void notifyAndCleanup(String modelName, Item oldItem) {
+        if (!isIsolatedModel(modelName)) {
+            notifyListenersAboutRemovedElement(oldItem);
+            this.stateDescriptionFragments.remove(oldItem.getName());
+        }
+        genericMetaDataProvider.removeMetadataByItemName(modelName, oldItem.getName());
     }
 
     protected boolean hasItemChanged(Item item1, Item item2) {
@@ -494,6 +516,47 @@ public class GenericItemProvider extends AbstractProvider<Item>
             ret.put(item.getName(), item);
         }
         return ret;
+    }
+
+    /**
+     * Creates a new GroupItem based on the given ModelItem and item type segments.
+     *
+     * @param modelItem The ModelItem to create the GroupItem from.
+     * @param itemTypeSegments The segments of the item type.
+     * @return A new GroupItem or null if the item type is invalid.
+     */
+    private @Nullable GroupItem createGroupItem(ModelItem modelItem, String[] itemTypeSegments) {
+        if (itemTypeSegments.length == 1) {
+            // Just plain "Group" with no base type
+            return new GroupItem(modelItem.getName());
+        }
+
+        String function = GroupFunction.DEFAULT;
+
+        String baseItemType = switch (itemTypeSegments.length) {
+            case 2 -> itemTypeSegments[1];
+            case 3 -> {
+                // 3 segments could either be Group:Type:Function, or Group:Number:Dimension -> Find out which one it is
+                if (!modelItem.getArgs().isEmpty() || GroupFunction.VALID_FUNCTIONS.contains(itemTypeSegments[2])) {
+                    // It's Group:Type:Function because there are arguments or the third segment is a valid function
+                    function = itemTypeSegments[2];
+                    yield itemTypeSegments[1];
+                } else {
+                    // Otherwise, it must be Group:Number:Dimension
+                    yield itemTypeSegments[1] + ItemUtil.EXTENSION_SEPARATOR + itemTypeSegments[2];
+                }
+            }
+            case 4 -> {
+                // 4 segments: "Group:Number:Dimension:Function"
+                function = itemTypeSegments[3];
+                yield itemTypeSegments[1] + ItemUtil.EXTENSION_SEPARATOR + itemTypeSegments[2];
+            }
+            default -> throw new IllegalArgumentException("Invalid group item type: " + modelItem.getType()
+                    + ". Expected formats are 'Group', 'Group:Type', 'Group:Type:Function', or 'Group:Number:Dimension:Function' with a maximum of 4 segments.");
+        };
+
+        Item baseItem = createItemOfType(baseItemType, modelItem.getName());
+        return applyGroupFunction(baseItem, modelItem, function);
     }
 
     /**

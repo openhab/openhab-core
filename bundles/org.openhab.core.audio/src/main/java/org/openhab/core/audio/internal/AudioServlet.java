@@ -98,7 +98,6 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     @Activate
     public AudioServlet(@Reference AudioSinkUtils audioSinkUtils) {
-        super();
         this.audioSinkUtils = audioSinkUtils;
     }
 

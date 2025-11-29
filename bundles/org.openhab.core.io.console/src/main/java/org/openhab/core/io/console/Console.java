@@ -53,4 +53,13 @@ public interface Console {
     default String readLine(String prompt, final @Nullable Character mask) throws IOException {
         throw new UnsupportedOperationException("readLine not supported");
     }
+
+    /**
+     * Returns the user name associated with the console, or null if no user is associated.
+     *
+     * @return the user name, or null if no user is associated
+     */
+    default @Nullable String getUser() {
+        return null;
+    }
 }

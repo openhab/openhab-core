@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -40,8 +40,6 @@ import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.AddonFinderConstants;
 import org.openhab.core.config.discovery.addon.AddonSuggestionService;
 import org.openhab.core.i18n.LocaleProvider;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * JUnit tests for the {@link AddonSuggestionService}.
@@ -55,21 +53,20 @@ public class AddonSuggestionServiceTests {
 
     public static final String MDNS_SERVICE_TYPE = "mdnsServiceType";
 
-    private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
     private @NonNullByDefault({}) LocaleProvider localeProvider;
     private @NonNullByDefault({}) AddonInfoProvider addonInfoProvider;
     private @NonNullByDefault({}) AddonFinder mdnsAddonFinder;
     private @NonNullByDefault({}) AddonFinder upnpAddonFinder;
     private @NonNullByDefault({}) AddonSuggestionService addonSuggestionService;
 
-    private final Map<String, Object> config = Map.of(AddonFinderConstants.CFG_FINDER_MDNS, true,
-            AddonFinderConstants.CFG_FINDER_UPNP, true);
+    private final HashMap<String, Object> config = new HashMap<>(
+            Map.of(AddonFinderConstants.CFG_FINDER_MDNS, true, AddonFinderConstants.CFG_FINDER_UPNP, true));
 
     @AfterAll
     public void cleanUp() {
         assertNotNull(addonSuggestionService);
         try {
-            addonSuggestionService.close();
+            addonSuggestionService.deactivate();
         } catch (Exception e) {
             fail(e);
         }
@@ -77,7 +74,6 @@ public class AddonSuggestionServiceTests {
 
     @BeforeAll
     public void setup() {
-        setupMockConfigurationAdmin();
         setupMockLocaleProvider();
         setupMockAddonInfoProvider();
         setupMockMdnsAddonFinder();
@@ -86,32 +82,13 @@ public class AddonSuggestionServiceTests {
     }
 
     private AddonSuggestionService createAddonSuggestionService() {
-        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(configurationAdmin, localeProvider,
-                config);
+        AddonSuggestionService addonSuggestionService = new AddonSuggestionService(localeProvider, config);
         assertNotNull(addonSuggestionService);
 
         addonSuggestionService.addAddonFinder(mdnsAddonFinder);
         addonSuggestionService.addAddonFinder(upnpAddonFinder);
 
         return addonSuggestionService;
-    }
-
-    private void setupMockConfigurationAdmin() {
-        // create the mock
-        configurationAdmin = mock(ConfigurationAdmin.class);
-        Configuration configuration = mock(Configuration.class);
-        try {
-            when(configurationAdmin.getConfiguration(any())).thenReturn(configuration);
-        } catch (IOException e) {
-        }
-        when(configuration.getProperties()).thenReturn(null);
-
-        // check that it works
-        assertNotNull(configurationAdmin);
-        try {
-            assertNull(configurationAdmin.getConfiguration(AddonSuggestionService.CONFIG_PID).getProperties());
-        } catch (IOException e) {
-        }
     }
 
     private void setupMockLocaleProvider() {

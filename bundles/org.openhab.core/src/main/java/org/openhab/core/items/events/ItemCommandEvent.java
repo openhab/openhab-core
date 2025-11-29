@@ -63,6 +63,11 @@ public class ItemCommandEvent extends ItemEvent {
 
     @Override
     public String toString() {
-        return String.format("Item '%s' received command %s", itemName, command);
+        String result = String.format("Item '%s' received command %s", itemName, command);
+        String source = getSource();
+        if (source != null) {
+            result = String.format("%s (source: %s)", result, source);
+        }
+        return result;
     }
 }

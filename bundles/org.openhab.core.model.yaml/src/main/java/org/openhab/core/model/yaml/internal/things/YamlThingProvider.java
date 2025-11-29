@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.yaml.internal.things;
 
+import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -147,7 +149,13 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public Collection<Thing> getAll() {
-        return thingsMap.values().stream().flatMap(list -> list.stream()).toList();
+        // Ignore isolated models
+        return thingsMap.keySet().stream().filter(name -> !isIsolatedModel(name))
+                .map(name -> thingsMap.getOrDefault(name, List.of())).flatMap(list -> list.stream()).toList();
+    }
+
+    public Collection<Thing> getAllFromModel(String modelName) {
+        return thingsMap.getOrDefault(modelName, List.of());
     }
 
     @Override
@@ -157,7 +165,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public boolean isVersionSupported(int version) {
-        return version >= 2;
+        return version >= 1;
     }
 
     @Override
@@ -173,7 +181,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         modelThings.addAll(added);
         added.forEach(t -> {
             logger.debug("model {} added thing {}", modelName, t.getUID());
-            notifyListenersAboutAddedElement(t);
+            if (!isIsolatedModel(modelName)) {
+                notifyListenersAboutAddedElement(t);
+            }
         });
     }
 
@@ -187,11 +197,15 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 modelThings.remove(oldThing);
                 modelThings.add(t);
                 logger.debug("model {} updated thing {}", modelName, t.getUID());
-                notifyListenersAboutUpdatedElement(oldThing, t);
+                if (!isIsolatedModel(modelName)) {
+                    notifyListenersAboutUpdatedElement(oldThing, t);
+                }
             }, () -> {
                 modelThings.add(t);
                 logger.debug("model {} added thing {}", modelName, t.getUID());
-                notifyListenersAboutAddedElement(t);
+                if (!isIsolatedModel(modelName)) {
+                    notifyListenersAboutAddedElement(t);
+                }
             });
         });
     }
@@ -204,7 +218,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
                 logger.debug("model {} removed thing {}", modelName, t.getUID());
-                notifyListenersAboutRemovedElement(oldThing);
+                if (!isIsolatedModel(modelName)) {
+                    notifyListenersAboutRemovedElement(oldThing);
+                }
             }, () -> logger.debug("model {} thing {} not found", modelName, t.getUID()));
         });
         if (modelThings.isEmpty()) {
@@ -293,7 +309,8 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         if (newThing != null) {
             logger.debug("Successfully loaded thing \'{}\' during retry", thingUID);
             Thing oldThing = null;
-            for (Collection<Thing> modelThings : thingsMap.values()) {
+            for (Map.Entry<String, Collection<Thing>> entry : thingsMap.entrySet()) {
+                Collection<Thing> modelThings = entry.getValue();
                 oldThing = modelThings.stream().filter(t -> t.getUID().equals(newThing.getUID())).findFirst()
                         .orElse(null);
                 if (oldThing != null) {
@@ -301,7 +318,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     modelThings.remove(oldThing);
                     modelThings.add(newThing);
                     logger.debug("Refreshing thing \'{}\' after successful retry", newThing.getUID());
-                    if (!ThingHelper.equals(oldThing, newThing)) {
+                    if (!ThingHelper.equals(oldThing, newThing) && !isIsolatedModel(entry.getKey())) {
                         notifyListenersAboutUpdatedElement(oldThing, newThing);
                     }
                     break;
@@ -376,36 +393,11 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         Set<String> addedChannelIds = new HashSet<>();
         List<Channel> channels = new ArrayList<>();
         channelsDto.forEach((channelId, channelDto) -> {
-            ChannelTypeUID channelTypeUID = null;
-            ChannelKind kind = channelDto.getKind();
-            String itemType = channelDto.getItemType();
-            String label = channelDto.label;
-            AutoUpdatePolicy autoUpdatePolicy = null;
-            Configuration configuration = new Configuration(channelDto.config);
-            if (channelDto.type != null) {
-                channelTypeUID = new ChannelTypeUID(thingUID.getBindingId(), channelDto.type);
-                ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID,
-                        localeProvider.getLocale());
-                if (channelType != null) {
-                    kind = channelType.getKind();
-                    itemType = channelType.getItemType();
-                    if (label == null) {
-                        label = channelType.getLabel();
-                    }
-                    autoUpdatePolicy = channelType.getAutoUpdatePolicy();
-                    URI descUriO = channelType.getConfigDescriptionURI();
-                    if (descUriO != null) {
-                        ConfigUtil.applyDefaultConfiguration(configuration,
-                                configDescriptionRegistry.getConfigDescription(descUriO));
-                    }
-                } else {
-                    logger.warn("Channel type {} could not be found for thing '{}'.", channelTypeUID, thingUID);
-                }
-            }
-
-            Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, channelId), itemType).withKind(kind)
-                    .withConfiguration(configuration).withType(channelTypeUID).withLabel(label)
-                    .withAutoUpdatePolicy(autoUpdatePolicy).build();
+            ChannelTypeUID channelTypeUID = channelDto.type == null ? null
+                    : new ChannelTypeUID(thingUID.getBindingId(), channelDto.type);
+            Channel channel = createChannel(thingUID, channelId, channelTypeUID, channelDto.getKind(),
+                    channelDto.getItemType(), channelDto.label, channelDto.description, null,
+                    new Configuration(channelDto.config), true);
             channels.add(channel);
             addedChannelIds.add(channelId);
         });
@@ -428,6 +420,49 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             }
         });
         return channels;
+    }
+
+    private Channel createChannel(ThingUID thingUID, String channelId, @Nullable ChannelTypeUID channelTypeUID,
+            ChannelKind channelKind, @Nullable String channelItemType, @Nullable String channelLabel,
+            @Nullable String channelDescription, @Nullable AutoUpdatePolicy channelAutoUpdatePolicy,
+            Configuration channelConfiguration, boolean ignoreMissingChannelType) {
+        ChannelKind kind = channelKind;
+        String itemType = channelItemType;
+        String label = channelLabel;
+        String description = channelDescription;
+        AutoUpdatePolicy autoUpdatePolicy = channelAutoUpdatePolicy;
+        Configuration configuration = new Configuration(channelConfiguration);
+        if (channelTypeUID != null) {
+            ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID, localeProvider.getLocale());
+            if (channelType != null) {
+                kind = channelType.getKind();
+                itemType = channelType.getItemType();
+                if (label == null) {
+                    label = channelType.getLabel();
+                }
+                if (description == null) {
+                    description = channelType.getDescription();
+                }
+                autoUpdatePolicy = channelType.getAutoUpdatePolicy();
+                URI descUriO = channelType.getConfigDescriptionURI();
+                if (descUriO != null) {
+                    ConfigUtil.applyDefaultConfiguration(configuration,
+                            configDescriptionRegistry.getConfigDescription(descUriO));
+                }
+            } else if (!ignoreMissingChannelType) {
+                logger.warn("Channel type {} could not be found for thing '{}'.", channelTypeUID, thingUID);
+            }
+        }
+
+        ChannelBuilder builder = ChannelBuilder.create(new ChannelUID(thingUID, channelId), itemType).withKind(kind)
+                .withConfiguration(configuration).withType(channelTypeUID).withAutoUpdatePolicy(autoUpdatePolicy);
+        if (label != null) {
+            builder.withLabel(label);
+        }
+        if (description != null) {
+            builder.withDescription(description);
+        }
+        return builder.build();
     }
 
     private void mergeThing(Thing target, Thing source) {
@@ -453,7 +488,16 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     targetChannel.getConfiguration().put(paramName, channel.getConfiguration().get(paramName));
                 });
             } else {
-                channelsToAdd.add(channel);
+                Channel newChannel = channel;
+                if (channel.getChannelTypeUID() != null) {
+                    // We create again the user defined channel because channel type was potentially not yet
+                    // in the registry when the channel was initially created
+                    newChannel = createChannel(target.getUID(), channel.getUID().getIdWithoutGroup(),
+                            channel.getChannelTypeUID(), channel.getKind(), channel.getAcceptedItemType(),
+                            channel.getLabel(), channel.getDescription(), channel.getAutoUpdatePolicy(),
+                            channel.getConfiguration(), false);
+                }
+                channelsToAdd.add(newChannel);
             }
         });
 

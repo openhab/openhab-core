@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery;
 
+import java.time.Instant;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -72,6 +73,6 @@ public interface DiscoveryListener {
      * @return collection of thing UIDs of all removed things
      */
     @Nullable
-    Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
+    Collection<ThingUID> removeOlderResults(DiscoveryService source, Instant timestamp,
             @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID);
 }

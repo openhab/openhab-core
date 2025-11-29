@@ -66,13 +66,18 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
     }
 
     @Override
+    public String getTypeId() {
+        return TYPE_ID;
+    }
+
+    @Override
     public void compile() throws ScriptException {
         super.compileScript();
     }
 
     @Override
-    public @Nullable Map<String, Object> execute(final Map<String, Object> context) {
-        Map<String, Object> resultMap = new HashMap<>();
+    public @Nullable Map<String, @Nullable Object> execute(final Map<String, Object> context) {
+        Map<String, @Nullable Object> resultMap = new HashMap<>();
 
         if (script.isEmpty()) {
             return resultMap;
@@ -91,7 +96,7 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
             }
             try {
                 setExecutionContext(scriptEngine, context);
-                Object result = eval(scriptEngine, script);
+                Object result = eval(scriptEngine);
                 resultMap.put("result", result);
                 resetExecutionContext(scriptEngine, context);
             } finally { // Make sure that Lock is unlocked regardless of an exception being thrown or not to avoid

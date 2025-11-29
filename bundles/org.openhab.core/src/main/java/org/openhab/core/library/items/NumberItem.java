@@ -98,16 +98,48 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         return ACCEPTED_COMMAND_TYPES;
     }
 
+    /**
+     * Send a DecimalType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(DecimalType command) {
-        internalSend(command);
+        internalSend(command, null);
     }
 
+    /**
+     * Send a DecimalType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(DecimalType command, @Nullable String source) {
+        internalSend(command, source);
+    }
+
+    /**
+     * Send a QuantityType command to the item.
+     *
+     * @param command the command to be sent
+     */
     public void send(QuantityType<?> command) {
+        send(command, null);
+    }
+
+    /**
+     * Send a QuantityType command to the item.
+     *
+     * @param command the command to be sent
+     * @param source the source of the command. See
+     *            https://www.openhab.org/docs/developer/utils/events.html#the-core-events
+     */
+    public void send(QuantityType<?> command, @Nullable String source) {
         if (dimension == null) {
             DecimalType strippedCommand = new DecimalType(command);
-            internalSend(strippedCommand);
+            internalSend(strippedCommand, source);
         } else if (command.getUnit().isCompatible(unit) || command.getUnit().inverse().isCompatible(unit)) {
-            internalSend(command);
+            internalSend(command, source);
         } else {
             logger.warn("Command '{}' to item '{}' was rejected because it is incompatible with the item unit '{}'",
                     command, name, unit);
@@ -168,14 +200,14 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     }
 
     @Override
-    public void setState(State state) {
+    public void setState(State state, @Nullable String source) {
         if (state instanceof DecimalType || state instanceof QuantityType<?>) {
             State internalState = getInternalState(state);
             if (internalState != null) {
-                applyState(internalState);
+                applyState(internalState, source);
             }
         } else if (state instanceof UnDefType) {
-            applyState(state);
+            applyState(state, source);
         } else {
             logSetTypeError(state);
         }

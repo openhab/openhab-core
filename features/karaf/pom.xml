@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.features</groupId>
     <artifactId>org.openhab.core.reactor.features</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>5.1.0-SNAPSHOT</version>
   </parent>
 
   <groupId>org.openhab.core.features.karaf</groupId>
@@ -29,13 +29,6 @@
       <version>${karaf.tooling.version}</version>
       <type>kar</type>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <!-- This should have been an optional dependency and will be fixed in Karaf 4.2.8 (KARAF-6462). -->
-          <groupId>org.knopflerfish.kf6</groupId>
-          <artifactId>log-API</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- Repositories -->

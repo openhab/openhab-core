@@ -97,6 +97,8 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class PersistenceManagerImpl implements ItemRegistryChangeListener, StateChangeListener, ReadyTracker,
         PersistenceServiceConfigurationRegistryChangeListener, TimeSeriesListener, PersistenceManager {
+    private static final String PERSISTENCE_SOURCE = "org.openhab.core.persistence";
+
     private final Logger logger = LoggerFactory.getLogger(PersistenceManagerImpl.class);
 
     private final ReadyMarker marker = new ReadyMarker("persistence", "restore");
@@ -613,7 +615,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 }
             }
             genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
-            genericItem.setState(state, lastState, lastStateUpdate, lastStateChange);
+            genericItem.setState(state, lastState, lastStateUpdate, lastStateChange, PERSISTENCE_SOURCE);
             genericItem.addStateChangeListener(PersistenceManagerImpl.this);
             if (logger.isDebugEnabled()) {
                 logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
@@ -658,7 +660,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
         private void restoreItemState(String itemName, State state) {
             Item item = itemRegistry.get(itemName);
             if (item != null) {
-                ((GenericItem) item).setState(state);
+                ((GenericItem) item).setState(state, PERSISTENCE_SOURCE);
             }
             scheduleNextPersistedForecastForItem(itemName);
         }

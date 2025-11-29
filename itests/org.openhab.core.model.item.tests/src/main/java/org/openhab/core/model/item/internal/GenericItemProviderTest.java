@@ -27,11 +27,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.GenericItem;
@@ -39,7 +43,6 @@ import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
-import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -48,10 +51,12 @@ import org.openhab.core.items.events.AbstractItemRegistryEvent;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.items.events.ItemUpdatedEvent;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.ArithmeticGroupFunction;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityTypeArithmeticGroupFunction;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -404,6 +409,34 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         });
     }
 
+    private static Stream<Arguments> testGroupTypeSyntax() {
+        return Stream.of( //
+                Arguments.of("Group:Number Grp", "Number", GroupFunction.Equality.class),
+                Arguments.of("Group:Number:MAX Grp", "Number", ArithmeticGroupFunction.Max.class),
+
+                Arguments.of("Group:Number:Power Grp", "Number:Power", GroupFunction.Equality.class),
+                Arguments.of("Group:Number:Power:MAX Grp", "Number:Power",
+                        QuantityTypeArithmeticGroupFunction.Max.class),
+
+                Arguments.of("Group:Switch:OR(ON,OFF) Grp", "Switch", ArithmeticGroupFunction.Or.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void testGroupTypeSyntax(String model, String expectedBaseType,
+            Class<? extends GroupFunction> expectedFunction) {
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        assertThat(itemRegistry.getAll(), hasSize(1));
+
+        if (itemRegistry.getAll().iterator().next() instanceof GroupItem groupItem) {
+            assertThat(groupItem.getBaseItem(), is(notNullValue()));
+            assertThat(groupItem.getBaseItem().getType(), is(expectedBaseType));
+            assertThat(groupItem.getFunction(), instanceOf(expectedFunction));
+        } else {
+            throw new AssertionError("Item is not a GroupItem");
+        }
+    }
+
     @Test
     public void testStableOrder() {
         String model = "Group testGroup " + //
@@ -491,7 +524,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemIsSame() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -504,7 +537,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItem() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -517,7 +550,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesFunctionParameters() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -530,7 +563,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItemAndFunction() {
-        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
+        GenericItemProvider gip = getService(GenericItemProvider.class);
         assertThat(gip, is(notNullValue()));
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -711,5 +744,44 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         stateDescription = item.getStateDescription();
         assertThat(stateDescription, is(notNullValue()));
         assertThat(stateDescription.getPattern(), is("%s"));
+    }
+
+    @Test
+    public void testKeywordsInOtherFields() {
+        String itemTypeList = CoreItemFactory.VALID_ITEM_TYPES.stream().sorted().collect(joining(", "));
+        String functionList = GroupFunction.VALID_FUNCTIONS.stream().sorted().collect(joining(", "));
+        String model = """
+                    DateTime DateTime [%s]
+                    Switch Switch "Switch" <Switch> [%s]
+
+                    // Multiline item with keywords at the start of line
+                    String
+                    String
+                    <
+                    String
+                    >
+                    [
+                    String
+                    ]
+
+                    Number EQUALITY
+                """.formatted(itemTypeList, functionList);
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+
+        assertThat(itemRegistry.getAll(), hasSize(4));
+
+        Item dateTimeItem = itemRegistry.get("DateTime");
+        assertThat(dateTimeItem.getTags().stream().sorted().collect(joining(", ")), is(equalTo(itemTypeList)));
+
+        Item switchItem = itemRegistry.get("Switch");
+        assertThat(switchItem.getTags().stream().sorted().collect(joining(", ")), is(equalTo(functionList)));
+        assertThat(switchItem.getLabel(), is("Switch"));
+        assertThat(switchItem.getCategory(), is("Switch"));
+
+        Item multilineItem = itemRegistry.get("String");
+        assertThat(multilineItem.getTags().stream().sorted().collect(joining(", ")), is(equalTo("String")));
+        assertThat(multilineItem.getCategory(), is("String"));
+
+        assertThat(itemRegistry.get("EQUALITY"), is(notNullValue()));
     }
 }

@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.util.SameThreadExecutorService;
 import org.osgi.framework.Bundle;
 
 /**
@@ -100,9 +102,11 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
 
     class TestDiscoveryService extends AbstractDiscoveryService {
 
+        int discoveryResults;
+
         public TestDiscoveryService(TranslationProvider i18nProvider, LocaleProvider localeProvider)
                 throws IllegalArgumentException {
-            super(Set.of(THING_TYPE_UID), 1, false);
+            super(new SameThreadExecutorService(), Set.of(THING_TYPE_UID), 1, false, null, null);
             this.i18nProvider = i18nProvider;
             this.localeProvider = localeProvider;
         }
@@ -114,12 +118,14 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
             DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(THING_UID1).withThingType(THING_TYPE_UID)
                     .withProperties(properties).withRepresentationProperty(KEY1).withBridge(BRIDGE_UID)
                     .withLabel(DISCOVERY_LABEL).build();
+            discoveryResults++;
             thingDiscovered(discoveryResult);
 
             // Discovered thing 2 has a hard coded label but with a key based on its thing UID defined in the properties
             // file => the value from the properties file should be considered
             discoveryResult = DiscoveryResultBuilder.create(THING_UID2).withThingType(THING_TYPE_UID)
                     .withProperties(properties).withRepresentationProperty(KEY1).withLabel(DISCOVERY_LABEL).build();
+            discoveryResults++;
             thingDiscovered(discoveryResult);
 
             // Discovered thing 3 has a label referencing an entry in the properties file and no key based on its thing
@@ -127,6 +133,7 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
             discoveryResult = DiscoveryResultBuilder.create(THING_UID3).withThingType(THING_TYPE_UID)
                     .withProperties(properties).withRepresentationProperty(KEY1).withBridge(BRIDGE_UID)
                     .withLabel(DISCOVERY_LABEL_KEY1).build();
+            discoveryResults++;
             thingDiscovered(discoveryResult);
 
             // Discovered thing 4 has a label referencing an entry in the properties file and a key based on its thing
@@ -135,7 +142,14 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
             discoveryResult = DiscoveryResultBuilder.create(THING_UID4).withThingType(THING_TYPE_UID)
                     .withProperties(properties).withRepresentationProperty(KEY1).withLabel(DISCOVERY_LABEL_KEY2)
                     .build();
+            discoveryResults++;
             thingDiscovered(discoveryResult);
+        }
+
+        @Override
+        protected void stopScan() {
+            discoveryResults--;
+            thingRemoved(THING_UID3);
         }
     }
 
@@ -143,7 +157,8 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
 
         public TestDiscoveryServiceWithRequiredCode(TranslationProvider i18nProvider, LocaleProvider localeProvider)
                 throws IllegalArgumentException {
-            super(Set.of(THING_TYPE_UID), 1, false, PAIRING_CODE_LABEL, PAIRING_CODE_DESCR);
+            super(new SameThreadExecutorService(), Set.of(THING_TYPE_UID), 1, false, PAIRING_CODE_LABEL,
+                    PAIRING_CODE_DESCR);
             this.i18nProvider = i18nProvider;
             this.localeProvider = localeProvider;
         }
@@ -191,10 +206,11 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
 
     @Override
     public void thingRemoved(DiscoveryService source, ThingUID thingUID) {
+        assertThat(thingUID, is(THING_UID3));
     }
 
     @Override
-    public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
+    public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, Instant timestamp,
             @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
         return null;
     }
@@ -207,6 +223,9 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
         assertNull(discoveryService.getScanInputDescription());
         discoveryService.addDiscoveryListener(this);
         discoveryService.startScan();
+        assertEquals(4, discoveryService.discoveryResults);
+        discoveryService.stopScan();
+        assertEquals(3, discoveryService.discoveryResults);
     }
 
     @Test

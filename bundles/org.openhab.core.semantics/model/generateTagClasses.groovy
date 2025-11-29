@@ -23,21 +23,19 @@ baseDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).get
 header = header()
 tagTypes = ["Location": 1, "Point": 2, "Property": 3, "Equipment": 4] // determines the order of the types in the file
 tagsByType = tagTypes.keySet().collectEntries { [(it): []] }
+tagsLabelsSynonyms = []
 
 def tagSets = new TreeMap<String, String>()
 
 tags = loadCsv("${baseDir}/model/SemanticTags.csv")
 
-def labelsFile = new FileWriter("${baseDir}/src/main/resources/tags.properties")
-labelsFile.write("# Generated content - do not edit!\n")
-
 tags.each { line ->
     println "Processing Tag $line.Tag"
 
-    def tagSet = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
-    tagSets.put(line.Tag,tagSet)
+    checkDuplicates(line)
 
-    appendLabelsFile(labelsFile, line, tagSet)
+    def tagSet = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
+    tagSets.put(line.Tag, tagSet)
 
     if (!tagTypes.containsKey(line.Type)) {
         println "Unrecognized type " + line.Type
@@ -46,8 +44,7 @@ tags.each { line ->
     tagsByType[line.Type].add(line)
 }
 
-labelsFile.close()
-
+createLabelsFile(tags, tagSets)
 createDefaultSemanticTags(tagSets)
 createDefaultProviderFile(tagSets)
 updateThingDescriptionXsd()
@@ -90,12 +87,52 @@ def quoted(def str) {
     return str
 }
 
-def appendLabelsFile(FileWriter file, def line, String tagSet) {
-    file.write(tagSet + "=" + line.Label)
-    if (line.Synonyms) {
-        file.write("," + line.Synonyms.replaceAll(", ", ","))
+def checkDuplicates(def line) {
+    if (line.Tag in tagsLabelsSynonyms) {
+        throw new Exception("Duplicate tag found: " + line.Tag)
     }
-    file.write("\n")
+
+    if (line.Label) {
+        label = line.Label.trim()
+        if (label in tagsLabelsSynonyms) {
+            throw new Exception("Duplicate label found: " + label)
+        } else {
+            tagsLabelsSynonyms.add(label)
+        }
+    }
+
+    tagsLabelsSynonyms.add(line.Tag)
+
+    if (line.Synonyms) {
+        line.Synonyms.split(",").each { synonym ->
+            synonym = synonym.trim()
+            if (synonym in tagsLabelsSynonyms) {
+                throw new Exception("Duplicate synonym found: " + synonym)
+            } else {
+                tagsLabelsSynonyms.add(synonym)
+            }
+        }
+    }
+}
+
+def createLabelsFile(def tags, def tagSets) {
+    def file = new FileWriter("${baseDir}/src/main/resources/tags.properties")
+    file.write("# Generated content - do not edit!\n")
+
+    for (line in tags) {
+        tagSet = tagSets[line.Tag]
+        file.write(tagSet + "=" + line.Label)
+        if (line.Synonyms) {
+            file.write("," + line.Synonyms.replaceAll(", ", ","))
+        }
+        file.write("\n")
+        if (line.Description) {
+            file.write(tagSet + "__description=" + line.Description)
+            file.write("\n")
+        }
+    }
+
+    file.close()
 }
 
 def camelToUpperCasedSnake(def tag) {

@@ -31,7 +31,6 @@ public class KSException extends DTException {
      * Constructs a new exception with null as its detail message.
      */
     public KSException() {
-        super();
     }
 
     /**

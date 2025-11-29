@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.io.rest.RESTConstants;
 
@@ -37,13 +38,16 @@ public class RootBean {
 
     public final String measurementSystem;
 
+    public final String timezone;
+
     public final RuntimeInfo runtimeInfo = new RuntimeInfo();
 
     public final List<Links> links = new ArrayList<>();
 
-    public RootBean(LocaleProvider localeProvider, UnitProvider unitProvider) {
+    public RootBean(LocaleProvider localeProvider, UnitProvider unitProvider, TimeZoneProvider timeZoneProvider) {
         this.locale = localeProvider.getLocale().toString();
         this.measurementSystem = unitProvider.getMeasurementSystem().getName();
+        this.timezone = timeZoneProvider.getTimeZone().toString();
     }
 
     public static class RuntimeInfo {

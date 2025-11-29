@@ -156,6 +156,7 @@ public class JsonStorageTest extends JavaTest {
     @SuppressWarnings({ "null", "unchecked" })
     @Test
     public void testOrdering() throws IOException {
+        Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT).create();
         objectStorage.put("DummyObject", new DummyObject());
         {
             objectStorage.put("a", new DummyObject());
@@ -172,15 +173,16 @@ public class JsonStorageTest extends JavaTest {
             persistAndReadAgain();
         }
         String storageStringBA = Files.readString(tmpFile.toPath());
-        assertEquals(storageStringAB, storageStringBA);
+        assertEquals(gson.fromJson(storageStringAB, JsonObject.class),
+                gson.fromJson(storageStringBA, JsonObject.class));
 
         {
             objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0, List.of());
             objectStorage.flush();
         }
         String storageStringReserialized = Files.readString(tmpFile.toPath());
-        assertEquals(storageStringAB, storageStringReserialized);
-        Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT).create();
+        assertEquals(gson.fromJson(storageStringAB, JsonObject.class),
+                gson.fromJson(storageStringReserialized, JsonObject.class));
 
         // Parse json. Gson preserves json object key ordering when we parse only JsonObject
         JsonObject orderedMap = gson.fromJson(storageStringAB, JsonObject.class);

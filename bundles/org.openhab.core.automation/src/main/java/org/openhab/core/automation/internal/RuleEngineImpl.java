@@ -39,6 +39,7 @@ import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.Rule.TemplateState;
 import org.openhab.core.automation.RuleExecution;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
@@ -180,7 +181,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The context map of a {@link Rule} is cleaned when the execution is completed. The relation is
      * {@link Rule}'s UID to Rule context map.
      */
-    private final Map<String, Map<String, Object>> contextMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, @Nullable Object>> contextMap = new ConcurrentHashMap<>();
 
     /**
      * This field holds reference to {@link ModuleTypeRegistry}. The {@link RuleEngineImpl} needs it to auto-map
@@ -838,8 +839,17 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return false;
         }
 
-        // Set the module handlers and so check if all handlers are available.
         final String ruleUID = rule.getUID();
+        TemplateState templateState = rule.unwrap().getTemplateState();
+        if (templateState == TemplateState.TEMPLATE_MISSING || templateState == TemplateState.PENDING) {
+            setStatus(ruleUID,
+                    new RuleStatusInfo(RuleStatus.UNINITIALIZED,
+                            templateState == TemplateState.TEMPLATE_MISSING ? RuleStatusDetail.TEMPLATE_MISSING_ERROR
+                                    : RuleStatusDetail.TEMPLATE_PENDING));
+            return false;
+        }
+
+        // Set the module handlers and so check if all handlers are available.
         final String errMsgs = setModuleHandlers(ruleUID, rule.getModules());
         if (errMsgs != null) {
             setStatus(ruleUID,
@@ -848,9 +858,14 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return false;
         }
 
-        // Compile the conditions and actions and so check if they are valid.
-        if (!compileRule(rule)) {
-            return false;
+        if (started) {
+            // compile the conditions and actions and so check if they are valid
+            if (!compileRule(rule)) {
+                return false;
+            }
+        } else {
+            // script engines are not available yet, so skip compilation
+            logger.debug("Rule engine not yet started - skipping compilation of rule '{}'", ruleUID);
         }
 
         // Register the rule and set idle status.
@@ -878,11 +893,17 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @return true if compilation succeeded, otherwise false
      */
     private boolean compileRule(final WrappedRule rule) {
+        logger.debug("Compiling rule '{}' ...", rule.getUID());
         try {
             compileConditions(rule);
             compileActions(rule);
             return true;
         } catch (Throwable t) {
+            if (logger.isDebugEnabled()) {
+                logger.error("Failed to compile rule: {}", rule.getUID(), t);
+            } else {
+                logger.error("Failed to compile rule {}: {}", rule.getUID(), t.getMessage());
+            }
             setStatus(rule.getUID(), new RuleStatusInfo(RuleStatus.UNINITIALIZED,
                     RuleStatusDetail.HANDLER_INITIALIZING_ERROR, t.getMessage()));
             unregister(rule);
@@ -1034,7 +1055,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return;
         }
         if (!started) {
-            logger.debug("Rule engine not yet started - not executing rule '{}',", ruleUID);
+            logger.debug("Rule engine not yet started - not executing rule '{}'", ruleUID);
             return;
         }
         synchronized (this) {
@@ -1073,9 +1094,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     @Override
-    public Map<String, Object> runNow(String ruleUID, boolean considerConditions,
+    public Map<String, @Nullable Object> runNow(String ruleUID, boolean considerConditions,
             @Nullable Map<String, Object> context) {
-        Map<String, Object> returnContext = new HashMap<>();
+        Map<String, @Nullable Object> returnContext = new HashMap<>();
         final WrappedRule rule = getManagedRule(ruleUID);
         if (rule == null) {
             logger.warn("Failed to execute rule '{}': Invalid Rule UID", ruleUID);
@@ -1113,7 +1134,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     @Override
-    public Map<String, Object> runNow(String ruleUID) {
+    public Map<String, @Nullable Object> runNow(String ruleUID) {
         return runNow(ruleUID, false, null);
     }
 
@@ -1123,7 +1144,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param ruleUID the UID of the rule whose context must be cleared.
      */
     protected void clearContext(String ruleUID) {
-        Map<String, Object> context = contextMap.get(ruleUID);
+        Map<String, @Nullable Object> context = contextMap.get(ruleUID);
         if (context != null) {
             context.clear();
         }
@@ -1147,7 +1168,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param outputs new output values.
      */
     private void updateContext(String ruleUID, String moduleUID, @Nullable Map<String, ?> outputs) {
-        Map<String, Object> context = getContext(ruleUID, null);
+        Map<String, @Nullable Object> context = getContext(ruleUID, null);
         if (outputs != null) {
             for (Map.Entry<String, ?> entry : outputs.entrySet()) {
                 String key = moduleUID + OUTPUT_SEPARATOR + entry.getKey();
@@ -1159,8 +1180,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     /**
      * @return copy of current context in rule engine
      */
-    private Map<String, Object> getContext(String ruleUID, @Nullable Set<Connection> connections) {
-        Map<String, Object> context = contextMap.computeIfAbsent(ruleUID, k -> new HashMap<>());
+    private Map<String, @Nullable Object> getContext(String ruleUID, @Nullable Set<Connection> connections) {
+        Map<String, @Nullable Object> context = contextMap.computeIfAbsent(ruleUID, k -> new HashMap<>());
         if (context == null) {
             throw new IllegalStateException("context cannot be null at that point - please report a bug.");
         }
@@ -1205,6 +1226,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (conditions.isEmpty()) {
             return;
         }
+        logger.trace("Compiling conditions of {}", rule.getUID());
         for (WrappedCondition wrappedCondition : conditions) {
             final Condition condition = wrappedCondition.unwrap();
             ConditionHandler cHandler = wrappedCondition.getModuleHandler();
@@ -1212,7 +1234,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 try {
                     cHandler.compile();
                 } catch (Throwable t) {
-                    String errMessage = "Failed to pre-compile condition: " + condition.getId() + "(" + t.getMessage()
+                    String errMessage = "Failed to compile condition: " + condition.getId() + "(" + t.getMessage()
                             + ")";
                     throw new RuntimeException(errMessage, t);
                 }
@@ -1240,7 +1262,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             }
             final Condition condition = wrappedCondition.unwrap();
             ConditionHandler tHandler = wrappedCondition.getModuleHandler();
-            Map<String, Object> context = getContext(ruleUID, wrappedCondition.getConnections());
+            Map<String, @Nullable Object> context = getContext(ruleUID, wrappedCondition.getConnections());
             if (tHandler != null && !tHandler.isSatisfied(Collections.unmodifiableMap(context))) {
                 logger.debug("The condition '{}' of rule '{}' is unsatisfied.", condition.getId(), ruleUID);
                 return false;
@@ -1260,6 +1282,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (actions.isEmpty()) {
             return;
         }
+        logger.trace("Compiling actions of rule {}", rule.getUID());
         for (WrappedAction wrappedAction : actions) {
             final Action action = wrappedAction.unwrap();
             ActionHandler aHandler = wrappedAction.getModuleHandler();
@@ -1267,7 +1290,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 try {
                     aHandler.compile();
                 } catch (Throwable t) {
-                    String errMessage = "Failed to pre-compile action: " + action.getId() + "(" + t.getMessage() + ")";
+                    String errMessage = "Failed to compile action: " + action.getId() + "(" + t.getMessage() + ")";
                     throw new RuntimeException(errMessage, t);
                 }
             }
@@ -1294,9 +1317,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             final Action action = wrappedAction.unwrap();
             ActionHandler aHandler = wrappedAction.getModuleHandler();
             if (aHandler != null) {
-                Map<String, Object> context = getContext(ruleUID, wrappedAction.getConnections());
+                Map<String, @Nullable Object> context = getContext(ruleUID, wrappedAction.getConnections());
                 try {
-                    Map<String, ?> outputs = aHandler.execute(Collections.unmodifiableMap(context));
+                    Map<String, @Nullable ?> outputs = aHandler.execute(Collections.unmodifiableMap(context));
                     if (outputs != null) {
                         context = getContext(ruleUID, null);
                         updateContext(ruleUID, action.getId(), outputs);
@@ -1561,8 +1584,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * handlers weren't available when the rule was added to the rule engine.
      */
     private void compileRules() {
+        logger.debug("Compiling all enabled rules");
         getScheduledExecutor().submit(() -> {
-            ruleRegistry.getAll().stream() //
+            ruleRegistry.stream() //
                     .filter(r -> isEnabled(r.getUID())) //
                     .forEach(r -> compileRule(r.getUID()));
             executeRulesWithStartLevel();
@@ -1571,7 +1595,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     private void executeRulesWithStartLevel() {
         getScheduledExecutor().submit(() -> {
-            ruleRegistry.getAll().stream() //
+            ruleRegistry.stream() //
                     .filter(this::mustTrigger) //
                     .forEach(r -> runNow(r.getUID(), true,
                             Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",

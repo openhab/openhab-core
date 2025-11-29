@@ -47,6 +47,11 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
     }
 
     @Override
+    public String getTypeId() {
+        return TYPE_ID;
+    }
+
+    @Override
     public void compile() throws ScriptException {
         super.compileScript();
     }
@@ -75,7 +80,7 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
             }
             try {
                 setExecutionContext(scriptEngine, context);
-                Object returnVal = eval(scriptEngine, script);
+                Object returnVal = eval(scriptEngine);
                 if (returnVal instanceof Boolean boolean1) {
                     result = boolean1;
                 } else {

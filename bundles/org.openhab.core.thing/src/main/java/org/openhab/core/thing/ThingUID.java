@@ -34,7 +34,6 @@ public class ThingUID extends UID {
      * class by reflection. Not intended to be used for normal instantiation.
      */
     ThingUID() {
-        super();
     }
 
     /**

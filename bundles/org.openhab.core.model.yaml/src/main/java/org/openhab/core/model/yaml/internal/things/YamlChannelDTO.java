@@ -15,12 +15,12 @@ package org.openhab.core.model.yaml.internal.things;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
  * The {@link YamlChannelDTO} is a data transfer object used to serialize a channel in a YAML configuration file.
@@ -29,13 +29,12 @@ import org.openhab.core.thing.type.ChannelKind;
  */
 public class YamlChannelDTO {
 
-    private static final Pattern CHANNEL_TYPE_PATTERN = Pattern.compile("^[a-zA-Z0-9_][a-zA-Z0-9_-]*$");
-
     public String type;
     public String kind;
     public String itemType;
     public String itemDimension;
     public String label;
+    public String description;
     public Map<@NonNull String, @NonNull Object> config;
 
     public YamlChannelDTO() {
@@ -44,9 +43,10 @@ public class YamlChannelDTO {
     public boolean isValid(@NonNull List<@NonNull String> errors, @NonNull List<@NonNull String> warnings) {
         boolean ok = true;
         if (type != null) {
-            if (!CHANNEL_TYPE_PATTERN.matcher(type).find()) {
-                errors.add("value \"%s\" for \"type\" field not matching the expected syntax %s".formatted(type,
-                        CHANNEL_TYPE_PATTERN.pattern()));
+            try {
+                new ChannelTypeUID("dummy", type);
+            } catch (IllegalArgumentException e) {
+                errors.add("invalid value \"%s\" for \"type\" field: %s".formatted(type, e.getMessage()));
                 ok = false;
             }
             if (kind != null) {
@@ -99,7 +99,7 @@ public class YamlChannelDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, getKind(), getItemType(), label);
+        return Objects.hash(type, getKind(), getItemType(), label, description);
     }
 
     @Override
@@ -112,6 +112,7 @@ public class YamlChannelDTO {
         YamlChannelDTO other = (YamlChannelDTO) obj;
         return Objects.equals(type, other.type) && getKind() == other.getKind()
                 && Objects.equals(getItemType(), other.getItemType()) && Objects.equals(label, other.label)
+                && Objects.equals(description, other.description)
                 && YamlElementUtils.equalsConfig(config, other.config);
     }
 }

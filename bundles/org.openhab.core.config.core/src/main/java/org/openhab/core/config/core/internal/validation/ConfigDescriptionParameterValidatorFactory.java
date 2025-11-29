@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public final class ConfigDescriptionParameterValidatorFactory {
 
     private ConfigDescriptionParameterValidatorFactory() {
-        super();
     }
 
     /**

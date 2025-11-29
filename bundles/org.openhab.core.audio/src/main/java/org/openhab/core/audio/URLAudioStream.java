@@ -101,6 +101,7 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
                 default:
                     break;
             }
+            streamUrl = new URI(url).toURL();
             URLConnection connection = streamUrl.openConnection();
             if ("unknown/unknown".equals(connection.getContentType())) {
                 // Java does not parse non-standard headers used by SHOUTCast

@@ -68,6 +68,9 @@ public interface ScriptEngineFactory {
 
     /**
      * This method creates a new ScriptEngine based on the supplied file extension or MimeType.
+     * openHAB-core always passes as parameter one of the values, returned by getScriptTypes().
+     * The parameter serves for a ScriptEngineFactory, which announces support for several
+     * distinct languages, to create a ScriptEngine for the requested language.
      *
      * @param scriptType a file extension (script) or MimeType (ScriptAction or ScriptCondition)
      * @return ScriptEngine or null

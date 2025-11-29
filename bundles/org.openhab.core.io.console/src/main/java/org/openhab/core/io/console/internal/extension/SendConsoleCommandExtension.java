@@ -17,6 +17,7 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.ConsoleCommandCompleter;
@@ -44,6 +45,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = ConsoleCommandExtension.class)
 @NonNullByDefault
 public class SendConsoleCommandExtension extends AbstractConsoleCommandExtension {
+    private static final String CONSOLE_SOURCE = "org.openhab.core.io.console";
 
     private final ItemRegistry itemRegistry;
     private final EventPublisher eventPublisher;
@@ -71,7 +73,8 @@ public class SendConsoleCommandExtension extends AbstractConsoleCommandExtension
                     String commandName = args[1];
                     Command command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandName);
                     if (command != null) {
-                        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command));
+                        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command,
+                                AbstractEvent.buildSource(CONSOLE_SOURCE, console.getUser())));
                         console.println("Command has been sent successfully.");
                     } else {
                         console.println(

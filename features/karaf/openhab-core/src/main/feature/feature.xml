@@ -28,7 +28,7 @@
 
 		<feature dependency="true">openhab.tp-gson</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.37.0)(!(version&gt;=2.38.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.40.0)(!(version&gt;=2.41.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
 		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
@@ -40,14 +40,13 @@
 		<requirement>openhab.tp;filter:="(feature=jna)"</requirement>
 		<feature dependency="true">openhab.tp-jna</feature>
 
-		<bundle>mvn:org.openhab/base-fixes/1.0.0</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.process/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
-		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.18.0</bundle>
+		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.19.1</bundle>
 		<feature dependency="true">openhab-core-storage-json</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
@@ -140,6 +139,12 @@
 	<feature name="openhab-core-automation-module-script" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script/${project.version}</bundle>
+	</feature>
+
+	<feature name="openhab-core-automation-module-script-providersupport" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature dependency="true">openhab-core-automation-module-script</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script.providersupport/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-automation-module-script-rulesupport" version="${project.version}">
@@ -407,10 +412,10 @@
 
 	<feature name="openhab-core-model-lsp" version="${project.version}">
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.37.0)(!(version&gt;=2.38.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.40.0)(!(version&gt;=2.41.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.23.1)(!(version&gt;=0.24.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.24.0)(!(version&gt;=0.24.1)))"</requirement>
 		<feature dependency="true">openhab.tp-lsp4j</feature>
 
 		<feature>openhab-core-model-item-ide</feature>
@@ -454,6 +459,7 @@
 		<feature>openhab-core-auth-jaas</feature>
 		<feature>openhab-core-automation-rest</feature>
 		<feature>openhab-core-automation-module-script</feature>
+		<feature>openhab-core-automation-module-script-providersupport</feature>
 		<feature>openhab-core-automation-module-script-rulesupport</feature>
 		<feature>openhab-core-automation-module-media</feature>
 		<feature>openhab-core-io-console-karaf</feature>

@@ -15,7 +15,8 @@ package org.openhab.core.config.discovery.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
 import java.math.BigDecimal;
@@ -1019,7 +1020,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsOnlyRemovesResultsFromTheSameDiscoveryService() {
         inbox.thingDiscovered(discoveryService1, testDiscoveryResult);
-        long now = Instant.now().toEpochMilli() + 1;
+        Instant now = Instant.now().plusMillis(1);
         assertThat(inbox.getAll().size(), is(1));
 
         // should not remove a result
@@ -1034,7 +1035,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsRemovesResultsWithoutAsource() {
         inbox.add(testDiscoveryResult);
-        long now = Instant.now().toEpochMilli() + 1;
+        Instant now = Instant.now().plusMillis(1);
         assertThat(inbox.getAll().size(), is(1));
 
         // should remove a result
