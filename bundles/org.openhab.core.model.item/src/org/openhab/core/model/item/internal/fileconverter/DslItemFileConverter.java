@@ -139,15 +139,15 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
         String label = item.getLabel();
         boolean patternInjected = false;
         String defaultPattern = getDefaultStatePattern(item);
-        String patterToInject = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter
+        String patternToInject = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter
                 : null;
-        if (patterToInject != null) {
+        if (patternToInject != null) {
             // Inject the pattern in the label
             patternInjected = true;
             if (label != null && !label.isEmpty()) {
-                model.setLabel("%s [%s]".formatted(label, patterToInject));
+                model.setLabel("%s [%s]".formatted(label, patternToInject));
             } else {
-                model.setLabel("[%s]".formatted(patterToInject));
+                model.setLabel("[%s]".formatted(patternToInject));
             }
         } else {
             model.setLabel(label);
