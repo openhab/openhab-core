@@ -31,6 +31,7 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSinkAsync;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.JavaSoundAudioSink;
 import org.openhab.core.audio.PipedAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
@@ -57,10 +58,10 @@ import javazoom.jl.player.Player;
  *
  */
 @NonNullByDefault
-@Component(service = AudioSink.class, immediate = true)
-public class JavaSoundAudioSink extends AudioSinkAsync {
+@Component(service = { JavaSoundAudioSink.class, AudioSink.class }, immediate = true)
+public class JavaSoundAudioSinkImpl extends AudioSinkAsync implements JavaSoundAudioSink {
 
-    private final Logger logger = LoggerFactory.getLogger(JavaSoundAudioSink.class);
+    private final Logger logger = LoggerFactory.getLogger(JavaSoundAudioSinkImpl.class);
 
     private boolean isMac = false;
     private @Nullable PercentType macVolumeValue = null;
