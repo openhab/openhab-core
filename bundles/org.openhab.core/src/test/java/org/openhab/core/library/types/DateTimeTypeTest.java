@@ -192,7 +192,9 @@ public class DateTimeTypeTest {
     @SuppressWarnings("PMD.SetDefaultTimeZone")
     public static void tearDownClass() {
         // Set the default time zone to its initial value.
-        TimeZone.setDefault(initialTimeZone);
+        if (initialTimeZone != null) {
+            TimeZone.setDefault(initialTimeZone);
+        }
     }
 
     /**

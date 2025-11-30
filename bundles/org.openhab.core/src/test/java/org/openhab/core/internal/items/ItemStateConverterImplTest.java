@@ -66,7 +66,9 @@ public class ItemStateConverterImplTest {
     @SuppressWarnings("PMD.SetDefaultLocale")
     public static void tearDownClass() {
         // Set the default locale to its initial value.
-        Locale.setDefault(initialLocale);
+        if (initialLocale != null) {
+            Locale.setDefault(initialLocale);
+        }
     }
 
     /**
