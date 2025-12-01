@@ -15,18 +15,32 @@ package org.openhab.core.voice;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A {@link KSEvent} fired when the {@link KSService} encounters an error.
+ * A {@link DTEvent} fired when the {@link DTService} encounters an error.
  *
- * @author Kelly Davis - Initial contribution
+ * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public class KSErrorEvent extends DTErrorEvent implements KSEvent {
+public class DTErrorEvent implements DTEvent {
+    /**
+     * The message describing the error
+     */
+    private final String message;
+
     /**
      * Constructs an instance with the passed {@code message}.
      *
      * @param message The message describing the error
      */
-    public KSErrorEvent(String message) {
-        super(message);
+    public DTErrorEvent(String message) {
+        this.message = message;
+    }
+
+    /**
+     * Gets the message describing this error
+     *
+     * @return The message describing this error
+     */
+    public String getMessage() {
+        return this.message;
     }
 }

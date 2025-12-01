@@ -15,10 +15,18 @@ package org.openhab.core.voice;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A tagging interface for keyword spotting events.
+ * The listener interface for receiving {@link DTEvent} events.
  *
- * @author Kelly Davis - Initial contribution
+ * A class interested in processing {@link DTEvent} events implements this interface.
+ *
+ * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public interface KSEvent extends DTEvent {
+public interface DTListener {
+    /**
+     * Invoked when a {@link DTEvent} event occurs.
+     *
+     * @param dtEvent The {@link DTEvent} fired by the {@link DTService}
+     */
+    void dtEventReceived(DTEvent dtEvent);
 }

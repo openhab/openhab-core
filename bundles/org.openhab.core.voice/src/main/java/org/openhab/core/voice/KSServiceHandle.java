@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Kelly Davis - Initial contribution
  */
 @NonNullByDefault
-public interface KSServiceHandle {
+public interface KSServiceHandle extends DTServiceHandle {
     /**
      * Aborts keyword spotting in the associated {@link KSService}
      */
