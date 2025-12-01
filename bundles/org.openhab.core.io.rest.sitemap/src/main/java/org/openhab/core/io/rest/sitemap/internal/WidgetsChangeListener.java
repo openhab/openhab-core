@@ -209,8 +209,7 @@ public class WidgetsChangeListener implements EventSubscriber {
             boolean skipWidget = !itemBelongsToWidget;
             // We skip the chart widgets having a refresh argument
             if (!skipWidget && w instanceof Chart chartWidget) {
-                Integer refresh = chartWidget.getRefresh();
-                skipWidget = refresh != null && refresh > 0;
+                skipWidget = chartWidget.getRefresh() > 0;
             }
             if (!skipWidget || definesVisibilityOrColorOrIcon(w, item.getName())) {
                 SitemapWidgetEvent event = constructSitemapEventForWidget(item, state, w);

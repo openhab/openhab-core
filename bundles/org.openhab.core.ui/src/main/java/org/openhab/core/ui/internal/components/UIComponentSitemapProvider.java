@@ -151,96 +151,99 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     protected @Nullable Widget buildWidget(UIComponent component, Parent parent) {
         Widget widget = sitemapFactory.createWidget(component.getType(), parent);
 
-        if (widget != null) {
-            switch (widget) {
-                case Image imageWidget:
-                    setWidgetPropertyFromComponentConfig(imageWidget, component, "url");
-                    setWidgetPropertyFromComponentConfig(imageWidget, component, "refresh");
-                    break;
-                case Video videoWidget:
-                    setWidgetPropertyFromComponentConfig(videoWidget, component, "url");
-                    setWidgetPropertyFromComponentConfig(videoWidget, component, "encoding");
-                    break;
-                case Chart chartWidget:
-                    setWidgetPropertyFromComponentConfig(chartWidget, component, "service");
-                    setWidgetPropertyFromComponentConfig(chartWidget, component, "refresh");
-                    setWidgetPropertyFromComponentConfig(chartWidget, component, "period");
-                    setWidgetPropertyFromComponentConfig(chartWidget, component, "legend");
-                    setWidgetPropertyFromComponentConfig(chartWidget, component, "forceAsItem");
-                    setWidgetPropertyFromComponentConfig(chartWidget, component, "yAxisDecimalPattern");
-                    setWidgetPropertyFromComponentConfig(chartWidget, component, "interpolation");
-                    break;
-                case Webview webviewWidget:
-                    setWidgetPropertyFromComponentConfig(webviewWidget, component, "height");
-                    setWidgetPropertyFromComponentConfig(webviewWidget, component, "url");
-                    break;
-                case Switch switchWidget:
-                    addWidgetMappings(switchWidget.getMappings(), component);
-                    break;
-                case Mapview mapviewWidget:
-                    setWidgetPropertyFromComponentConfig(mapviewWidget, component, "height");
-                    break;
-                case Slider sliderWidget:
-                    setWidgetPropertyFromComponentConfig(sliderWidget, component, "minValue");
-                    setWidgetPropertyFromComponentConfig(sliderWidget, component, "maxValue");
-                    setWidgetPropertyFromComponentConfig(sliderWidget, component, "step");
-                    setWidgetPropertyFromComponentConfig(sliderWidget, component, "switchEnabled");
-                    setWidgetPropertyFromComponentConfig(sliderWidget, component, "releaseOnly");
-                    break;
-                case Selection selectionWidget:
-                    addWidgetMappings(selectionWidget.getMappings(), component);
-                    break;
-                case Input inputWidget:
-                    setWidgetPropertyFromComponentConfig(inputWidget, component, "inputHint");
-                    break;
-                case Setpoint setpointWidget:
-                    setWidgetPropertyFromComponentConfig(setpointWidget, component, "minValue");
-                    setWidgetPropertyFromComponentConfig(setpointWidget, component, "maxValue");
-                    setWidgetPropertyFromComponentConfig(setpointWidget, component, "step");
-                    break;
-                case Colortemperaturepicker colortemperaturepickerWidget:
-                    setWidgetPropertyFromComponentConfig(colortemperaturepickerWidget, component, "minValue");
-                    setWidgetPropertyFromComponentConfig(colortemperaturepickerWidget, component, "maxValue");
-                    break;
-                case Buttongrid buttongridWidget:
-                    addWidgetButtons(buttongridWidget.getButtons(), component);
-                    break;
-                case Button buttonWidget:
-                    setWidgetPropertyFromComponentConfig(buttonWidget, component, "row");
-                    setWidgetPropertyFromComponentConfig(buttonWidget, component, "column");
-                    setWidgetPropertyFromComponentConfig(buttonWidget, component, "stateless");
-                    setWidgetPropertyFromComponentConfig(buttonWidget, component, "cmd");
-                    setWidgetPropertyFromComponentConfig(buttonWidget, component, "releaseCmd");
-                    break;
-                case Default defaultWidget:
-                    setWidgetPropertyFromComponentConfig(defaultWidget, component, "height");
-                    break;
-                default:
-                    break;
-            }
+        if (widget == null) {
+            logger.warn("Unknown sitemap component type {}", component.getType());
+            return null;
+        }
 
-            setWidgetPropertyFromComponentConfig(widget, component, "item");
-            setWidgetPropertyFromComponentConfig(widget, component, "label");
-            setWidgetPropertyFromComponentConfig(widget, component, "icon");
-            setWidgetPropertyFromComponentConfig(widget, component, "staticIcon");
+        switch (widget) {
+            case Image imageWidget:
+                setWidgetPropertyFromComponentConfig(imageWidget, component, "url");
+                setWidgetPropertyFromComponentConfig(imageWidget, component, "refresh");
+                break;
+            case Video videoWidget:
+                setWidgetPropertyFromComponentConfig(videoWidget, component, "url");
+                setWidgetPropertyFromComponentConfig(videoWidget, component, "encoding");
+                break;
+            case Chart chartWidget:
+                setWidgetPropertyFromComponentConfig(chartWidget, component, "service");
+                setWidgetPropertyFromComponentConfig(chartWidget, component, "refresh");
+                setWidgetPropertyFromComponentConfig(chartWidget, component, "period");
+                setWidgetPropertyFromComponentConfig(chartWidget, component, "legend");
+                setWidgetPropertyFromComponentConfig(chartWidget, component, "forceAsItem");
+                setWidgetPropertyFromComponentConfig(chartWidget, component, "yAxisDecimalPattern");
+                setWidgetPropertyFromComponentConfig(chartWidget, component, "interpolation");
+                break;
+            case Webview webviewWidget:
+                setWidgetPropertyFromComponentConfig(webviewWidget, component, "height");
+                setWidgetPropertyFromComponentConfig(webviewWidget, component, "url");
+                break;
+            case Switch switchWidget:
+                addWidgetMappings(switchWidget.getMappings(), component);
+                break;
+            case Mapview mapviewWidget:
+                setWidgetPropertyFromComponentConfig(mapviewWidget, component, "height");
+                break;
+            case Slider sliderWidget:
+                setWidgetPropertyFromComponentConfig(sliderWidget, component, "minValue");
+                setWidgetPropertyFromComponentConfig(sliderWidget, component, "maxValue");
+                setWidgetPropertyFromComponentConfig(sliderWidget, component, "step");
+                setWidgetPropertyFromComponentConfig(sliderWidget, component, "switchEnabled");
+                setWidgetPropertyFromComponentConfig(sliderWidget, component, "releaseOnly");
+                break;
+            case Selection selectionWidget:
+                addWidgetMappings(selectionWidget.getMappings(), component);
+                break;
+            case Input inputWidget:
+                setWidgetPropertyFromComponentConfig(inputWidget, component, "inputHint");
+                break;
+            case Setpoint setpointWidget:
+                setWidgetPropertyFromComponentConfig(setpointWidget, component, "minValue");
+                setWidgetPropertyFromComponentConfig(setpointWidget, component, "maxValue");
+                setWidgetPropertyFromComponentConfig(setpointWidget, component, "step");
+                break;
+            case Colortemperaturepicker colortemperaturepickerWidget:
+                setWidgetPropertyFromComponentConfig(colortemperaturepickerWidget, component, "minValue");
+                setWidgetPropertyFromComponentConfig(colortemperaturepickerWidget, component, "maxValue");
+                break;
+            case Buttongrid buttongridWidget:
+                addWidgetButtons(buttongridWidget.getButtons(), component);
+                break;
+            case Button buttonWidget:
+                setWidgetPropertyFromComponentConfig(buttonWidget, component, "row");
+                setWidgetPropertyFromComponentConfig(buttonWidget, component, "column");
+                setWidgetPropertyFromComponentConfig(buttonWidget, component, "stateless");
+                setWidgetPropertyFromComponentConfig(buttonWidget, component, "cmd");
+                setWidgetPropertyFromComponentConfig(buttonWidget, component, "releaseCmd");
+                break;
+            case Default defaultWidget:
+                setWidgetPropertyFromComponentConfig(defaultWidget, component, "height");
+                break;
+            default:
+                break;
+        }
 
-            if (widget instanceof LinkableWidget linkableWidget) {
-                if (component.getSlots() != null && component.getSlots().containsKey("widgets")) {
-                    for (UIComponent childComponent : component.getSlot("widgets")) {
-                        Widget childWidget = buildWidget(childComponent, linkableWidget);
-                        if (childWidget != null) {
-                            linkableWidget.getWidgets().add(childWidget);
-                        }
+        setWidgetPropertyFromComponentConfig(widget, component, "item");
+        setWidgetPropertyFromComponentConfig(widget, component, "label");
+        setWidgetPropertyFromComponentConfig(widget, component, "icon");
+        setWidgetPropertyFromComponentConfig(widget, component, "staticIcon");
+
+        if (widget instanceof LinkableWidget linkableWidget) {
+            if (component.getSlots() != null && component.getSlots().containsKey("widgets")) {
+                for (UIComponent childComponent : component.getSlot("widgets")) {
+                    Widget childWidget = buildWidget(childComponent, linkableWidget);
+                    if (childWidget != null) {
+                        linkableWidget.getWidgets().add(childWidget);
                     }
                 }
             }
-
-            addWidgetRules(widget.getVisibility(), component, "visibility");
-            addWidgetRules(widget.getLabelColor(), component, "labelColor");
-            addWidgetRules(widget.getValueColor(), component, "valueColor");
-            addWidgetRules(widget.getIconColor(), component, "iconColor");
-            addWidgetRules(widget.getIconRules(), component, "iconRules");
         }
+
+        addWidgetRules(widget.getVisibility(), component, "visibility");
+        addWidgetRules(widget.getLabelColor(), component, "labelColor");
+        addWidgetRules(widget.getValueColor(), component, "valueColor");
+        addWidgetRules(widget.getIconColor(), component, "iconColor");
+        addWidgetRules(widget.getIconRules(), component, "iconRules");
 
         return widget;
     }
@@ -260,7 +263,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             Class<?> clazz = widget.getClass();
             Method method = List.of(clazz.getMethods()).stream().filter(m -> m.getName().equals(setterName)).findFirst()
                     .get();
-            Class<?> argumentType = (method.getParameters()[0].getType());
+            Class<?> argumentType = method.getParameters()[0].getType();
             if (argumentType.equals(Integer.class) || argumentType.equals(int.class)) {
                 normalizedValue = (normalizedValue instanceof BigDecimal bd) ? bd.intValue()
                         : Integer.parseInt(normalizedValue.toString());
@@ -359,6 +362,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                         Rule rule = sitemapFactory.createRule();
                         List<Condition> conditions = getConditions(conditionsString, component, key);
                         rule.setConditions(conditions);
+                        rule.setArgument(argument);
                         rules.add(rule);
                     }
                 }

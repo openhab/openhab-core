@@ -106,6 +106,7 @@ public class ItemUIRegistryImplTest {
     private @Mock @NonNullByDefault({}) ItemRegistry registryMock;
     private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactoryMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
+    private @Mock @NonNullByDefault({}) Sitemap sitemapMock;
     private @Mock @NonNullByDefault({}) Widget widgetMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
 
@@ -588,6 +589,9 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getWidgetUnknownPageId() throws ItemNotFoundException {
+        when(sitemapFactoryMock.createSitemap(SITEMAP_NAME)).thenReturn(sitemapMock);
+        when(sitemapMock.getWidgets()).thenReturn(List.of());
+
         Sitemap sitemap = sitemapFactoryMock.createSitemap(SITEMAP_NAME);
         when(registryMock.getItem("unknown")).thenThrow(new ItemNotFoundException("unknown"));
         Widget w = uiRegistry.getWidget(sitemap, "unknown");

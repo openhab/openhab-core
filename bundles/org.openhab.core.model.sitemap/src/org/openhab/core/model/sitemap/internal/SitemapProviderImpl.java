@@ -330,6 +330,7 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
             modelColorRules.forEach(modelColorRule -> {
                 Rule colorRule = sitemapFactory.createRule();
                 addRuleConditions(colorRule.getConditions(), modelColorRule.getConditions());
+                colorRule.setArgument(modelColorRule.getArg());
                 colorRules.add(colorRule);
             });
         }
@@ -342,6 +343,7 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
                 Rule iconRule = sitemapFactory.createRule();
                 iconRule.setArgument(modelIconRule.getArg());
                 addRuleConditions(iconRule.getConditions(), modelIconRule.getConditions());
+                iconRule.setArgument(modelIconRule.getArg());
                 iconRules.add(iconRule);
             });
         }

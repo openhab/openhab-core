@@ -1288,9 +1288,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public @Nullable String getConditionalIcon(Widget w) {
-        List<Rule> rulList = w.getIconRules();
+        List<Rule> ruleList = w.getIconRules();
         // Sanity check
-        if (rulList.isEmpty()) {
+        if (ruleList.isEmpty()) {
             return null;
         }
 
@@ -1300,7 +1300,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         // Loop through all elements looking for the definition associated
         // with the supplied value
-        for (Rule rule : rulList) {
+        for (Rule rule : ruleList) {
             if (allConditionsOk(rule.getConditions(), w)) {
                 // We have the icon for this value - break!
                 icon = rule.getArgument();
