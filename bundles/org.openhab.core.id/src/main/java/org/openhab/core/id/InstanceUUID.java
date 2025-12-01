@@ -71,6 +71,15 @@ public class InstanceUUID {
         return uuid;
     }
 
+    /**
+     * Generates a new UUID and writes it to the specified file.
+     * This method creates any necessary parent directories and writes the UUID to the file
+     * using UTF-8 encoding.
+     *
+     * @param file the file where the UUID will be stored
+     * @return the newly generated UUID string
+     * @throws IOException if the file cannot be written
+     */
     private static String generateToFile(File file) throws IOException {
         // create intermediary directories
         if (file.getParentFile() instanceof File parentFile) {
@@ -81,6 +90,14 @@ public class InstanceUUID {
         return newUuid;
     }
 
+    /**
+     * Reads the first line from the UUID file.
+     * This method opens the file, reads the first line, and properly closes the reader.
+     * If the file cannot be read or is empty, an empty string is returned and a warning is logged.
+     *
+     * @param file the file to read from
+     * @return the first line of the file, or an empty string if the file cannot be read or is empty
+     */
     private static String readFirstLine(File file) {
         try (final BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             return reader.readLine() instanceof String line ? line : "";
