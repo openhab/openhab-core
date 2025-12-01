@@ -12,6 +12,7 @@
  */
 package org.openhab.core.util;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -121,6 +122,47 @@ public class HexUtils {
      */
     public static byte[] hexToBytes(String hexString) {
         return hexToBytes(hexString, "(?<=\\G.{2})");
+    }
+
+    /**
+     * Convert a white space delimited hex block to a byte array.
+     *
+     * @param hexBlock the hex block
+     * @return the byte array
+     * @throws IllegalArgumentException if a value is invalid
+     */
+    public static byte[] hexBlockToBytes(String hexBlock) throws IllegalArgumentException {
+        String plainHex = hexBlock.replaceAll("\\s+", "");
+        if (plainHex.length() % 2 != 0) {
+            throw new IllegalArgumentException("Hex string must have even length");
+        }
+        int length = plainHex.length();
+        byte[] result = new byte[length / 2];
+        for (int i = 0; i < length; i += 2) {
+            int hi = Character.digit(plainHex.charAt(i), 16);
+            int lo = Character.digit(plainHex.charAt(i + 1), 16);
+            if (hi == -1 || lo == -1) {
+                throw new IllegalArgumentException(
+                        "Invalid hex character: " + plainHex.charAt(i) + plainHex.charAt(i + 1));
+            }
+            result[i / 2] = (byte) ((hi << 4) + lo);
+        }
+        return result;
+    }
+
+    /**
+     * Convert a white space delimited hex block to a {@link BigInteger}.
+     *
+     * @param hexBlock the hex block
+     * @return the BigInteger value
+     * @throws IllegalArgumentException if a value is invalid
+     */
+    public static BigInteger hexBlockToBigInteger(String hexBlock) throws IllegalArgumentException {
+        String plainHex = hexBlock.replaceAll("\\s+", "");
+        if (plainHex.length() % 2 != 0) {
+            throw new IllegalArgumentException("Hex string must have even length");
+        }
+        return new BigInteger(plainHex, 16);
     }
 
     public static byte hexToByte(byte high, byte low) {
