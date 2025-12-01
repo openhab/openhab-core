@@ -145,7 +145,7 @@ public interface UpnpDiscoveryParticipant {
     static void enumerateChildDevices(RemoteDevice device, List<RemoteDevice> devices) {
         for (RemoteDevice child : device.getEmbeddedDevices()) {
             devices.add(child);
-            enumerateChildDevices(device, devices);
+            enumerateChildDevices(child, devices);
         }
     }
 }
