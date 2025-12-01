@@ -27,17 +27,36 @@ public class ConversionException extends Exception {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new ConversionException with no detail message.
+     */
     public ConversionException() {
     }
 
+    /**
+     * Constructs a new ConversionException with the specified detail message.
+     *
+     * @param message the detail message describing the conversion error
+     */
     public ConversionException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new ConversionException with the specified detail message and cause.
+     *
+     * @param message the detail message describing the conversion error
+     * @param cause the underlying cause of the conversion error
+     */
     public ConversionException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new ConversionException with the specified cause.
+     *
+     * @param cause the underlying cause of the conversion error
+     */
     public ConversionException(Throwable cause) {
         super(cause);
     }
