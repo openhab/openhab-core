@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -77,19 +78,28 @@ public class LogWebSocket implements LogListener {
     private final LogWebSocketAdapter wsAdapter;
     private final Gson gson;
 
+    // All access must be guarded by "this"
     private @Nullable Session session;
+
+    // All access must be guarded by "this"
     private @Nullable RemoteEndpoint remoteEndpoint;
 
     private final ScheduledExecutorService scheduledExecutorService;
+
+    // All access must be guarded by "this"
     private @Nullable ScheduledFuture<?> commitScheduledFuture;
 
-    private long lastSentTime = 0;
+    private volatile long lastSentTime = 0;
+
+    // All access must be guarded by "this"
     private List<LogDTO> deferredLogs = new ArrayList<>();
 
+    // All access must be guarded by "this"
     private boolean enabled = false;
-    private long lastSequence = FIRST_SEQUENCE;
 
-    private List<Pattern> loggerPatterns = List.of();
+    private volatile long lastSequence = FIRST_SEQUENCE;
+
+    private final List<Pattern> loggerPatterns = new CopyOnWriteArrayList<>();
 
     public LogWebSocket(Gson gson, LogWebSocketAdapter wsAdapter) {
         this.wsAdapter = wsAdapter;
@@ -100,19 +110,21 @@ public class LogWebSocket implements LogListener {
 
     @OnWebSocketClose
     public void onClose(int statusCode, String reason) {
-        if (enabled) {
-            this.wsAdapter.unregisterListener(this);
-        }
         stopDeferredScheduledFuture();
-        this.session = null;
-        this.remoteEndpoint = null;
+        synchronized (this) {
+            if (enabled) {
+                this.wsAdapter.unregisterListener(this);
+                enabled = false;
+            }
+            this.session = null;
+            this.remoteEndpoint = null;
+        }
     }
 
     @OnWebSocketConnect
-    public void onConnect(Session session) {
+    public synchronized void onConnect(Session session) {
         this.session = session;
-        RemoteEndpoint remoteEndpoint = session.getRemote();
-        this.remoteEndpoint = remoteEndpoint;
+        this.remoteEndpoint = session.getRemote();
     }
 
     @OnWebSocketMessage
@@ -126,13 +138,18 @@ public class LogWebSocket implements LogListener {
         lastSentTime = Long.MAX_VALUE;
         stopDeferredScheduledFuture();
 
-        // Enable log messages
-        if (!enabled) {
-            this.wsAdapter.registerListener(this);
-            enabled = true;
-        }
+        Session session;
+        RemoteEndpoint remoteEndpoint;
+        synchronized (this) {
+            // Enable log messages
+            if (!enabled) {
+                this.wsAdapter.registerListener(this);
+                enabled = true;
+            }
 
-        RemoteEndpoint remoteEndpoint = this.remoteEndpoint;
+            session = this.session;
+            remoteEndpoint = this.remoteEndpoint;
+        }
         if (session == null || remoteEndpoint == null) {
             // no connection or no remote endpoint , do nothing this is possible due to async behavior
             return;
@@ -146,24 +163,32 @@ public class LogWebSocket implements LogListener {
             return;
         }
 
-        loggerPatterns = logFilterDto.loggerNames == null ? List.of()
-                : logFilterDto.loggerNames.stream().map(Pattern::compile).toList();
+        if (!loggerPatterns.isEmpty()) {
+            loggerPatterns.clear();
+        }
+        List<String> loggerNames;
+        if (logFilterDto != null && (loggerNames = logFilterDto.loggerNames) != null) {
+            List<Pattern> filters = loggerNames.stream().map(Pattern::compile).toList();
+            if (!filters.isEmpty()) {
+                loggerPatterns.addAll(filters);
+            }
+        }
 
         Long timeStart;
         Long timeStop;
-        if (logFilterDto.timeStart != null) {
+        if (logFilterDto != null && logFilterDto.timeStart != null) {
             timeStart = logFilterDto.timeStart;
         } else {
             timeStart = Long.MIN_VALUE;
         }
-        if (logFilterDto.timeStop != null) {
+        if (logFilterDto != null && logFilterDto.timeStop != null) {
             timeStop = logFilterDto.timeStop;
         } else {
             timeStop = Long.MAX_VALUE;
         }
 
         Long sequenceStart;
-        if (logFilterDto.sequenceStart != null) {
+        if (logFilterDto != null && logFilterDto.sequenceStart != null) {
             sequenceStart = logFilterDto.sequenceStart;
         } else {
             sequenceStart = lastSequence;
@@ -191,15 +216,17 @@ public class LogWebSocket implements LogListener {
         List<LogDTO> dtoList = filteredEvents.stream().map(this::map).collect(Collectors.toList());
         Collections.sort(dtoList);
 
+        long sentTime;
         try {
             sendMessage(gson.toJson(dtoList));
+            sentTime = System.currentTimeMillis();
         } catch (IOException e) {
+            sentTime = Long.MIN_VALUE;
         }
-        lastSentTime = System.currentTimeMillis();
 
         // Remove any duplicates from the live log buffer
         long newestSequence = logs.getFirst().getSequence();
-        synchronized (deferredLogs) {
+        synchronized (this) {
             Iterator<LogDTO> iterator = deferredLogs.iterator();
             while (iterator.hasNext()) {
                 LogDTO value = iterator.next();
@@ -208,13 +235,14 @@ public class LogWebSocket implements LogListener {
                 }
             }
         }
+        lastSentTime = sentTime == Long.MIN_VALUE ? 0L : sentTime;
 
         // Continue with live logs...
         flush();
     }
 
     @OnWebSocketError
-    public void onError(Session session, @Nullable Throwable error) {
+    public void onError(@Nullable Session session, @Nullable Throwable error) {
         if (session != null) {
             session.close();
         }
@@ -224,8 +252,11 @@ public class LogWebSocket implements LogListener {
         onClose(StatusCode.NO_CODE, message);
     }
 
-    private synchronized void sendMessage(String message) throws IOException {
-        RemoteEndpoint remoteEndpoint = this.remoteEndpoint;
+    private void sendMessage(String message) throws IOException {
+        RemoteEndpoint remoteEndpoint;
+        synchronized (this) {
+            remoteEndpoint = this.remoteEndpoint;
+        }
         if (remoteEndpoint == null) {
             return;
         }
@@ -242,12 +273,14 @@ public class LogWebSocket implements LogListener {
         lastSequence = logEntry.getSequence();
 
         // If the last message sent was less than SEND_PERIOD ago, then we just buffer
-        if (lastSentTime > System.currentTimeMillis() - SEND_PERIOD) {
+        long lastSent = lastSentTime;
+        if (lastSent > System.currentTimeMillis() - SEND_PERIOD) {
             // Start the timer if this is the first deferred log
-            synchronized (deferredLogs) {
+            synchronized (this) {
                 if (deferredLogs.isEmpty()) {
+                    stopDeferredScheduledFuture();
                     commitScheduledFuture = scheduledExecutorService.schedule(this::flush,
-                            lastSentTime + SEND_PERIOD - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+                            lastSent + SEND_PERIOD - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
                 }
 
                 deferredLogs.add(logDTO);
@@ -283,24 +316,32 @@ public class LogWebSocket implements LogListener {
 
     private void stopDeferredScheduledFuture() {
         // Stop any existing scheduled commit
-        ScheduledFuture<?> commitScheduledFuture = this.commitScheduledFuture;
-        if (commitScheduledFuture != null) {
+        ScheduledFuture<?> commitScheduledFuture;
+        synchronized (this) {
+            commitScheduledFuture = this.commitScheduledFuture;
+            this.commitScheduledFuture = null;
+        }
+        if (commitScheduledFuture != null && !commitScheduledFuture.isDone()) {
             commitScheduledFuture.cancel(false);
-            commitScheduledFuture = null;
         }
     }
 
-    private synchronized void flush() {
+    private void flush() {
         stopDeferredScheduledFuture();
 
-        synchronized (deferredLogs) {
-            if (!deferredLogs.isEmpty()) {
-                try {
-                    sendMessage(gson.toJson(deferredLogs));
-                } catch (IOException e) {
-                }
-
+        List<LogDTO> logs;
+        synchronized (this) {
+            if (deferredLogs.isEmpty()) {
+                logs = null;
+            } else {
+                logs = List.copyOf(deferredLogs);
                 deferredLogs.clear();
+            }
+        }
+        if (logs != null) {
+            try {
+                sendMessage(gson.toJson(logs));
+            } catch (IOException e) {
             }
         }
     }

@@ -15,8 +15,8 @@ package org.openhab.core.io.websocket;
 import java.io.IOException;
 import java.io.Serial;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,7 +78,7 @@ public class CommonWebSocketServlet extends WebSocketServlet {
 
     public static final String DEFAULT_ADAPTER_ID = EventWebSocketAdapter.ADAPTER_ID;
 
-    private final Map<String, WebSocketAdapter> connectionHandlers = new HashMap<>();
+    private final Map<String, WebSocketAdapter> connectionHandlers = new ConcurrentHashMap<>();
     private final AuthFilter authFilter;
 
     @SuppressWarnings("unused")
