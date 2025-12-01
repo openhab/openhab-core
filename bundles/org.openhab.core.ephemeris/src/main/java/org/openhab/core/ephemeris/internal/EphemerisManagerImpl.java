@@ -103,6 +103,15 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private @NonNullByDefault({}) String country;
     private @Nullable String region;
 
+    /**
+     * Constructs and activates the EphemerisManagerImpl.
+     * This constructor is called by the OSGi framework during component activation.
+     * It initializes the ephemeris manager with locale support, loads country/region/city descriptions
+     * from the Jollyday library resources, and sets up the default weekend dayset.
+     *
+     * @param localeProvider the locale provider service for internationalization support
+     * @param bundleContext the OSGi bundle context used to access bundle resources
+     */
     @Activate
     public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider, final BundleContext bundleContext) {
         this.localeProvider = localeProvider;
@@ -125,15 +134,37 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         }
     }
 
+    /**
+     * Sorts a list of parameter options alphabetically by their label.
+     * This ensures that country, region, and city options are presented in alphabetical order
+     * in the user interface configuration dropdowns.
+     *
+     * @param parameterOptions the list of parameter options to sort in-place
+     */
     private void sortByLabel(List<ParameterOption> parameterOptions) {
         parameterOptions.sort(Comparator.comparing(ParameterOption::getLabel));
     }
 
+    /**
+     * Activates the EphemerisManagerImpl component.
+     * This method is called by the OSGi framework when the component is activated.
+     * It delegates to the {@link #modified(Map)} method to process the initial configuration.
+     *
+     * @param config the initial configuration properties
+     */
     @Activate
     protected void activate(Map<String, Object> config) {
         modified(config);
     }
 
+    /**
+     * Processes configuration updates for the EphemerisManagerImpl.
+     * This method is called by the OSGi framework when the configuration is modified.
+     * It processes custom dayset definitions (e.g., custom weekend days), and updates
+     * the country, region, and city parameters for holiday calculations.
+     *
+     * @param config the updated configuration properties
+     */
     @Modified
     protected void modified(Map<String, Object> config) {
         config.entrySet().stream().filter(e -> e.getKey().startsWith(CONFIG_DAYSET_PREFIX)).forEach(e -> {
@@ -222,6 +253,15 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         return null;
     }
 
+    /**
+     * Converts a file path to a URL.
+     * This method checks if the file exists on the local filesystem and converts it to a file:// URL.
+     * Used to load custom holiday definition files from the filesystem.
+     *
+     * @param filename the absolute or relative path to the file
+     * @return the URL representing the file
+     * @throws FileNotFoundException if the file does not exist or the URL cannot be formed
+     */
     private URL getUrl(String filename) throws FileNotFoundException {
         if (Files.exists(Path.of(filename))) {
             try {
@@ -234,6 +274,14 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         }
     }
 
+    /**
+     * Retrieves or creates a HolidayManager for the specified key.
+     * This method caches HolidayManager instances to avoid recreating them for repeated requests.
+     * The manager key can be either a country code (String) or a URL to a custom holiday definition file.
+     *
+     * @param managerKey either a country code string or a URL to a holiday configuration file
+     * @return the HolidayManager instance for the specified key
+     */
     private HolidayManager getHolidayManager(Object managerKey) {
         HolidayManager holidayManager = holidayManagers.get(managerKey);
         if (holidayManager == null) {
@@ -253,6 +301,16 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         return holidayManager;
     }
 
+    /**
+     * Retrieves a list of holidays within a specified time window.
+     * This method queries the HolidayManager for all holidays between the start date and
+     * the end date (start date + span), considering the configured country/region/city parameters.
+     *
+     * @param from the start date of the time window
+     * @param span the number of days to look ahead from the start date
+     * @param holidayManager the HolidayManager instance to query
+     * @return a sorted list of holidays within the time window
+     */
     private List<Holiday> getHolidays(ZonedDateTime from, int span, HolidayManager holidayManager) {
         LocalDate fromDate = from.toLocalDate();
         LocalDate toDate = from.plusDays(span).toLocalDate();
@@ -276,6 +334,16 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         return getDaysUntil(from, searchedHoliday, getUrl(filename));
     }
 
+    /**
+     * Calculates the number of days until a specified holiday.
+     * This method searches for the holiday within a 1-year time window starting from the given date.
+     * The search is case-insensitive and matches against the holiday's property key.
+     *
+     * @param from the start date to calculate from
+     * @param searchedHoliday the name/key of the holiday to search for
+     * @param holidayManager the HolidayManager instance to query
+     * @return the number of days until the holiday, or -1 if the holiday is not found within the year
+     */
     private long getDaysUntil(ZonedDateTime from, String searchedHoliday, HolidayManager holidayManager) {
         List<Holiday> sortedHolidays = getHolidays(from, 366, holidayManager);
         Optional<Holiday> result = sortedHolidays.stream()
@@ -283,6 +351,15 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         return result.map(holiday -> from.toLocalDate().until(holiday.getDate(), ChronoUnit.DAYS)).orElse(-1L);
     }
 
+    /**
+     * Retrieves the key of the first bank holiday within a specified time window.
+     * This method searches for the earliest occurring holiday starting from the given date.
+     *
+     * @param from the start date of the time window
+     * @param span the number of days to search ahead
+     * @param holidayManager the HolidayManager instance to query
+     * @return the property key of the first holiday found, or null if no holiday exists in the time window
+     */
     private @Nullable String getFirstBankHolidayKey(ZonedDateTime from, int span, HolidayManager holidayManager) {
         Optional<Holiday> holiday = getHolidays(from, span, holidayManager).stream().findFirst();
         return holiday.map(Holiday::getPropertiesKey).orElse(null);
@@ -350,6 +427,16 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         return getNextBankHoliday(from, getUrl(filename));
     }
 
+    /**
+     * Adds or updates a dayset definition.
+     * A dayset is a collection of days of the week (e.g., weekend = Saturday + Sunday).
+     * This method parses the provided values, strips non-alphabetic characters, converts to uppercase,
+     * and creates a set of DayOfWeek values.
+     *
+     * @param setName the name of the dayset (e.g., "weekend", "workdays")
+     * @param values an iterable collection of day names (e.g., "SATURDAY", "SUNDAY")
+     * @throws IllegalArgumentException if a day name cannot be parsed as a valid DayOfWeek
+     */
     private void addDayset(String setName, Iterable<?> values) {
         Set<DayOfWeek> dayset = new HashSet<>();
         for (Object day : values) {
@@ -421,6 +508,15 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         }
     }
 
+    /**
+     * Validates and normalizes a property part.
+     * This method trims whitespace and converts the part to lowercase.
+     * Used during parsing of country/region/city property keys.
+     *
+     * @param part the property part to validate
+     * @return the trimmed and lowercased property part
+     * @throws IllegalArgumentException if the part is empty after trimming
+     */
     private static String getValidPart(String part) {
         final String subject = part.trim();
         if (!subject.isEmpty()) {
