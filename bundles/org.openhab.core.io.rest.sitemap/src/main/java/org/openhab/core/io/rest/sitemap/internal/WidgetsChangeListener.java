@@ -205,7 +205,7 @@ public class WidgetsChangeListener implements EventSubscriber {
                 events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren(grid)));
             }
 
-            boolean itemBelongsToWidget = w.getItem() != null && item.getName().equals(w.getItem());
+            boolean itemBelongsToWidget = item.getName().equals(w.getItem());
             boolean skipWidget = !itemBelongsToWidget;
             // We skip the chart widgets having a refresh argument
             if (!skipWidget && w instanceof Chart chartWidget) {
@@ -242,7 +242,7 @@ public class WidgetsChangeListener implements EventSubscriber {
         event.descriptionChanged = false;
         // event.item contains the (potentially changed) data of the item belonging to
         // the widget including its state (in event.item.state)
-        boolean itemBelongsToWidget = widget.getItem() != null && item.getName().equals(widget.getItem());
+        boolean itemBelongsToWidget = item.getName().equals(widget.getItem());
         final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(widget);
         State stateToBeSent = null;
         if (itemToBeSent != null) {
