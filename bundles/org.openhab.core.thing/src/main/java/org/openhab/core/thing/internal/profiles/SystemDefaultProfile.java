@@ -13,6 +13,7 @@
 package org.openhab.core.thing.internal.profiles;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
@@ -21,6 +22,7 @@ import org.openhab.core.thing.profiles.TimeSeriesProfile;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
+import org.openhab.core.types.UnDefType;
 
 /**
  * This is the default profile for stateful channels.
@@ -46,25 +48,71 @@ public class SystemDefaultProfile implements TimeSeriesProfile {
 
     @Override
     public void onCommandFromItem(Command command) {
+        if (command == null) {
+            return;
+        }
+        if (command instanceof StringType) {
+            String value = ((StringType) command).toString();
+            if (isSemanticNull(value)) {
+                return;
+            }
+        }
         callback.handleCommand(command);
     }
 
     @Override
     public void onStateUpdateFromHandler(State state) {
-        callback.sendUpdate(state);
+        if (state == null) {
+            return;
+        }
+        State processedState = state;
+        if (state instanceof StringType) {
+            String value = ((StringType) state).toString();
+            if (isSemanticNull(value)) {
+                processedState = UnDefType.UNDEF;
+            }
+        }
+        callback.sendUpdate(processedState);
     }
 
     @Override
     public void onCommandFromHandler(Command command) {
+        if (command == null) {
+            return;
+        }
+        if (command instanceof StringType) {
+            String value = ((StringType) command).toString();
+            if (isSemanticNull(value)) {
+                return;
+            }
+        }
         callback.sendCommand(command);
     }
 
     @Override
     public void onTimeSeriesFromHandler(TimeSeries timeSeries) {
+        if (timeSeries == null) {
+            return;
+        }
         callback.sendTimeSeries(timeSeries);
     }
 
     @Override
     public void onStateUpdateFromItem(State state) {
+    }
+
+    /**
+     * Checks if a string value represents a semantic null (e.g., "null", "undefined", "nan").
+     *
+     * @param value the string value to check
+     * @return true if the value is a semantic null, false otherwise
+     */
+    private static boolean isSemanticNull(String value) {
+        if (value == null) {
+            return true;
+        }
+        String t = value.trim();
+        return t.isEmpty() || t.equalsIgnoreCase("null") || t.equalsIgnoreCase("undefined") || t.equalsIgnoreCase("nan")
+                || t.equalsIgnoreCase("udf") || t.equalsIgnoreCase("undef");
     }
 }
