@@ -52,7 +52,7 @@ public class MediaSinkDTO {
     }
 
     public String getPlayerItemName() {
-        return this.getPlayerItemName();
+        return this.playerItemName;
     }
 
     public void setPlayerItemName(String playerItemName) {
