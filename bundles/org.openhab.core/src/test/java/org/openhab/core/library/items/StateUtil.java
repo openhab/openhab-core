@@ -26,6 +26,9 @@ import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.MediaCommandEnumType;
+import org.openhab.core.library.types.MediaCommandType;
+import org.openhab.core.library.types.MediaStateType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.OpenClosedType;
 import org.openhab.core.library.types.PercentType;
@@ -92,6 +95,9 @@ public class StateUtil {
 
         states.add(UpDownType.UP);
         states.add(UpDownType.DOWN);
+
+        states.add(new MediaCommandType(MediaCommandEnumType.NONE, "", new StringType(""), new StringType("")));
+        states.add(new MediaStateType(PlayPauseType.NONE, new StringType(""), new StringType("")));
 
         QuantityType<Temperature> quantityType = new QuantityType<>("12 °C");
         states.add(quantityType);

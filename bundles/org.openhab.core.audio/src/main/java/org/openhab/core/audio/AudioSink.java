@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.media.MediaSink;
 
 /**
  * Definition of an audio output like headphones, a speaker or for writing to
@@ -30,13 +31,14 @@ import org.openhab.core.library.types.PercentType;
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  */
 @NonNullByDefault
-public interface AudioSink {
+public interface AudioSink extends MediaSink {
 
     /**
      * Returns a simple string that uniquely identifies this service
      *
      * @return an id that identifies this service
      */
+    @Override
     String getId();
 
     /**
@@ -45,6 +47,7 @@ public interface AudioSink {
      * @param locale the locale to provide the label for
      * @return a localized string to be used in UIs
      */
+    @Override
     @Nullable
     String getLabel(@Nullable Locale locale);
 
