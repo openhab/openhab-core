@@ -75,10 +75,7 @@ public final class ReadyMarker {
         if (!identifier.equals(other.identifier)) {
             return false;
         }
-        if (!type.equals(other.type)) {
-            return false;
-        }
-        return true;
+        return type.equals(other.type);
     }
 
     @Override

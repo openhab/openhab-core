@@ -145,7 +145,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
      * 
      * @return the type identifier
      */
-    abstract public String getTypeId();
+    public abstract String getTypeId();
 
     /**
      * Gets the script engine identifier for this module
