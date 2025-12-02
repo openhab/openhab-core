@@ -145,6 +145,11 @@ public class JavaSoundAudioSinkImpl extends AudioSinkAsync implements JavaSoundA
         threadFactory.newThread(() -> {
             try {
                 streamPlayerFinal.play();
+
+                while (!streamPlayerFinal.isComplete()) {
+                    int pos = streamPlayerFinal.getPosition();
+                    Thread.sleep(1000);
+                }
             } catch (Exception e) {
                 logger.error("An exception occurred while playing audio : '{}'", e.getMessage());
             } finally {
@@ -179,17 +184,17 @@ public class JavaSoundAudioSinkImpl extends AudioSinkAsync implements JavaSoundA
 
     @Override
     public @Nullable String getLabel(@Nullable Locale locale) {
-        return "System Speaker";
+        return "Internal Audio";
     }
 
     @Override
     public String getName() {
-        return "SystemSpeaker";
+        return "internalaudio";
     }
 
     @Override
     public String getBinding() {
-        return "core.audio";
+        return "audio";
     }
 
     @Override

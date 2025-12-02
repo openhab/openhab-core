@@ -51,6 +51,7 @@ import org.openhab.core.media.model.MediaSearchResult;
 import org.openhab.core.media.model.MediaTrack;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -252,18 +253,28 @@ public class MediaResource implements RESTResource {
             MediaSinkDTO dto = new MediaSinkDTO(device.getName(), "" + device.getLabel(null), device.getType(),
                     device.getBinding());
 
-            if (device.getType() == "internal") {
-                dto.setPlayerItemName("internal");
-            }
-
+            logger.info("");
             for (Item item : colItem) {
                 Set<ChannelUID> r1 = itemChannelLinkRegistry.getBoundChannels(item.getName());
+                Set<Thing> r2 = itemChannelLinkRegistry.getBoundThings(item.getName());
+
                 for (ChannelUID ruid : r1) {
-                    if ((ruid.getBindingId().equals(device.getBinding())
-                            && ruid.getThingUID().getId().equals(device.getName()))) {
+                    ThingUID uid = ruid.getThingUID();
+
+                    if (ruid.getBindingId().equals(device.getBinding()) && uid.getId().equals(device.getName())) {
                         dto.setPlayerItemName(item.getName());
                     }
                 }
+
+                if ("".equals(dto.getPlayerItemName())) {
+                    for (Thing thing : r2) {
+                        if (thing.getThingTypeUID().getBindingId().equals(device.getBinding())
+                                && thing.getThingTypeUID().getId().equals(device.getName())) {
+                            dto.setPlayerItemName(item.getName());
+                        }
+                    }
+                }
+
             }
             dtoCol.addMediaSinkDTO(dto);
         }

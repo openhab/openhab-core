@@ -110,12 +110,12 @@ public class WebAudioAudioSinkImpl extends AudioSinkAsync implements WebAudioAud
 
     @Override
     public String getName() {
-        return "WebAudio";
+        return "webaudio";
     }
 
     @Override
     public String getBinding() {
-        return "core.audio";
+        return "audio";
     }
 
     @Override
