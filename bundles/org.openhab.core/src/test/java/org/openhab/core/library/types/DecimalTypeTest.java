@@ -43,8 +43,7 @@ import org.openhab.core.library.unit.Units;
 @Execution(ExecutionMode.SAME_THREAD)
 public class DecimalTypeTest {
 
-    @Nullable
-    private static Locale initialLocale;
+    private static @Nullable Locale initialLocale;
 
     @BeforeAll
     public static void setUpClass() {

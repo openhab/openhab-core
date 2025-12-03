@@ -56,8 +56,7 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
     private static final Locale DEFAULT = Locale.ENGLISH;
     private static final Locale GERMAN = Locale.GERMANY;
 
-    @Nullable
-    private static Locale initialLocale;
+    private static @Nullable Locale initialLocale;
 
     private final Logger logger = LoggerFactory.getLogger(HostFragmentSupportTest.class);
     private @NonNullByDefault({}) ModuleTypeRegistry registry;

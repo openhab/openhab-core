@@ -56,8 +56,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 @Execution(ExecutionMode.SAME_THREAD)
 public class DateTimeTypeTest {
 
-    @Nullable
-    private static TimeZone initialTimeZone;
+    private static @Nullable TimeZone initialTimeZone;
 
     /**
      * parameter test set class.

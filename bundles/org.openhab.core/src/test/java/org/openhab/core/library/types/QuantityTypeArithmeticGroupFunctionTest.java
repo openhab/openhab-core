@@ -66,8 +66,7 @@ import org.osgi.service.component.ComponentContext;
 @Execution(ExecutionMode.SAME_THREAD)
 public class QuantityTypeArithmeticGroupFunctionTest {
 
-    @Nullable
-    private static Locale initialLocale;
+    private static @Nullable Locale initialLocale;
 
     private @Mock @NonNullByDefault({}) ComponentContext componentContext;
     private final UnitProvider unitProvider = new TestUnitProvider();

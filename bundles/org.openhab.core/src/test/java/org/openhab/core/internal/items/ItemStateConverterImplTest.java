@@ -52,8 +52,7 @@ import org.openhab.core.types.UnDefType;
 @Execution(ExecutionMode.SAME_THREAD)
 public class ItemStateConverterImplTest {
 
-    @Nullable
-    private static Locale initialLocale;
+    private static @Nullable Locale initialLocale;
 
     private @NonNullByDefault({}) ItemStateConverterImpl itemStateConverter;
 

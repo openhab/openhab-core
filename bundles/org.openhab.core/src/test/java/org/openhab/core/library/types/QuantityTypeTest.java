@@ -62,8 +62,7 @@ import tech.units.indriya.unit.UnitDimension;
 @Execution(ExecutionMode.SAME_THREAD)
 public class QuantityTypeTest {
 
-    @Nullable
-    private static Locale initialLocale;
+    private static @Nullable Locale initialLocale;
 
     @BeforeAll
     public static void setUpClass() {
