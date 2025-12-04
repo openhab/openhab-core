@@ -16,6 +16,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.console.Console;
 
 /**
+ * Implementation of the Console interface for OSGi RFC 147 console.
+ * This console implementation outputs to System.out and uses a base command scope
+ * for formatting usage messages.
  *
  * @author Markus Rathgeb - Initial contribution
  */
@@ -24,10 +27,20 @@ public class OSGiConsole implements Console {
 
     private final String base;
 
+    /**
+     * Constructs a new OSGi RFC 147 console.
+     *
+     * @param base the base command scope (e.g., "openhab")
+     */
     public OSGiConsole(final String base) {
         this.base = base;
     }
 
+    /**
+     * Gets the base command scope.
+     *
+     * @return the base command scope string
+     */
     public String getBase() {
         return base;
     }
