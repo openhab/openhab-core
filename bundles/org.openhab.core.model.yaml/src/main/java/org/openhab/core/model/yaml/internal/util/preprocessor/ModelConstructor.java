@@ -102,13 +102,18 @@ class ModelConstructor extends Constructor {
 
     public class ConstructInterpolation extends AbstractConstruct {
 
+        @Override
         public Object construct(@Nullable Node node) {
+            if (node == null) {
+                return "";
+            }
+
             ScalarNode scalarNode = (ScalarNode) node;
 
             String value = (String) constructScalar(scalarNode);
 
             // don't interpolate single quoted strings
-            if (scalarNode == null || scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.SINGLE_QUOTED) {
+            if (scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.SINGLE_QUOTED) {
                 return value;
             }
 
