@@ -46,22 +46,48 @@ public class ConsoleSupportEclipse implements CommandProvider {
     private final SortedMap<String, ConsoleCommandExtension> consoleCommandExtensions = Collections
             .synchronizedSortedMap(new TreeMap<>());
 
+    /**
+     * Constructs a new ConsoleSupportEclipse instance.
+     */
     public ConsoleSupportEclipse() {
     }
 
+    /**
+     * Adds a console command extension to the registry.
+     * This method is called dynamically by OSGi when a new console command extension is registered.
+     *
+     * @param consoleCommandExtension the console command extension to add
+     */
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addConsoleCommandExtension(ConsoleCommandExtension consoleCommandExtension) {
         consoleCommandExtensions.put(consoleCommandExtension.getCommand(), consoleCommandExtension);
     }
 
+    /**
+     * Removes a console command extension from the registry.
+     * This method is called dynamically by OSGi when a console command extension is unregistered.
+     *
+     * @param consoleCommandExtension the console command extension to remove
+     */
     public void removeConsoleCommandExtension(ConsoleCommandExtension consoleCommandExtension) {
         consoleCommandExtensions.remove(consoleCommandExtension.getCommand());
     }
 
+    /**
+     * Gets a console command extension by command name.
+     *
+     * @param cmd the command name
+     * @return the console command extension, or null if not found
+     */
     private ConsoleCommandExtension getConsoleCommandExtension(final String cmd) {
         return consoleCommandExtensions.get(cmd);
     }
 
+    /**
+     * Gets all registered console command extensions.
+     *
+     * @return a collection of all console command extensions
+     */
     private Collection<ConsoleCommandExtension> getConsoleCommandExtensions() {
         return new HashSet<>(consoleCommandExtensions.values());
     }
@@ -105,6 +131,11 @@ public class ConsoleSupportEclipse implements CommandProvider {
         return null;
     }
 
+    /**
+     * Gets the help text for all registered openHAB console commands.
+     *
+     * @return the help text listing all available commands and their usage
+     */
     @Override
     public String getHelp() {
         return ConsoleInterpreter.getHelp(BASE, " ", getConsoleCommandExtensions());
