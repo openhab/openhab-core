@@ -360,8 +360,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     private boolean processIncludeFile(Kind kind, Path fullPath) {
-        boolean logged = false;
-
         Set<String> dependingModels = modelIncludes.getKeys(fullPath);
 
         if (dependingModels.isEmpty()) {
