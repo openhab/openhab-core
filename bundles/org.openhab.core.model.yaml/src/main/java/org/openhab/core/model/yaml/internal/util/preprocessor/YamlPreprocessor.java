@@ -118,14 +118,14 @@ public class YamlPreprocessor {
         } // let the caller catch the exception and log a message
     }
 
-    /*
+    /**
      * Extracts variables from the given map.
      *
      * @param variables the map to store the extracted variables.
-     * Only variables that are not already present will be added.
+     *            Only variables that are not already present will be added.
      *
      * @return true if the variables were successfully extracted or if they were not present.
-     * false if the variables value is not a map.
+     *         false if the variables value is not a map.
      */
     private static boolean extractVariables(Map<String, Object> dataMap, HashMap<String, String> variables) {
         Object variablesSection = dataMap.get(VARIABLES_KEY);
@@ -150,7 +150,8 @@ public class YamlPreprocessor {
     private static void addSpecialVariables(Map<String, String> variables, Path file) {
         Path absolutePath = file.toAbsolutePath();
         variables.put("__FILE__", absolutePath.toString());
-        String fullFileName = file.getFileName().toString();
+        Path fileNamePath = file.getFileName();
+        String fullFileName = fileNamePath != null ? fileNamePath.toString() : "";
         int dotIndex = fullFileName.lastIndexOf(".");
         String fileName = fullFileName;
         String fileExtension = "";
@@ -160,12 +161,13 @@ public class YamlPreprocessor {
         }
         variables.put("__FILE_NAME__", fileName);
         variables.put("__FILE_EXT__", fileExtension);
-        String directory = absolutePath.getParent().toString();
+        Path parentPath = absolutePath.getParent();
+        String directory = parentPath != null ? parentPath.toString() : "";
         variables.put("__DIRECTORY__", directory);
         variables.put("__DIR__", directory);
     }
 
-    /*
+    /**
      * Process special nodes in the YAML data that correspond to !include.
      * This method is called recursively for nested objects.
      */
