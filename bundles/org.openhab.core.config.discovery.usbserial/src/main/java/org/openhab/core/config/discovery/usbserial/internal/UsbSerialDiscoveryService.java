@@ -31,6 +31,7 @@ import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryParticipant;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -101,7 +102,8 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
         for (UsbSerialDeviceInformation usbSerialDeviceInformation : previouslyDiscovered) {
             DiscoveryResult result = participant.createResult(usbSerialDeviceInformation);
             if (result != null) {
-                thingDiscovered(createDiscoveryResultWithUsbProperties(result, usbSerialDeviceInformation));
+                thingDiscovered(createDiscoveryResultWithUsbProperties(result, usbSerialDeviceInformation),
+                        FrameworkUtil.getBundle(participant.getClass()));
             }
         }
     }

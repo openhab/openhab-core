@@ -91,6 +91,18 @@ public class DiscoveryResultBuilderTest {
     }
 
     @Test
+    public void testDiscoveryResultBuilderCopy() {
+        DiscoveryResult r = DiscoveryResultBuilder.create(discoveryResult).build();
+        assertThat(r.getThingUID(), is(discoveryResult.getThingUID()));
+        assertThat(r.getThingTypeUID(), is(discoveryResult.getThingTypeUID()));
+        assertThat(r.getBindingId(), is(discoveryResult.getBindingId()));
+        assertThat(r.getLabel(), is(discoveryResult.getLabel()));
+        assertThat(r.getProperties(), is(discoveryResult.getProperties()));
+        assertThat(r.getRepresentationProperty(), is(discoveryResult.getRepresentationProperty()));
+        assertThat(r.getTimeToLive(), is(discoveryResult.getTimeToLive()));
+    }
+
+    @Test
     public void testDiscoveryResultBuilderWithTTL() {
         DiscoveryResult otherDiscoveryResult = builder.withTTL(100L).build();
 

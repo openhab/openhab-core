@@ -118,9 +118,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
             }
             DiscoveryResult result = participant.createResult(device);
             if (result != null) {
-                final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
-                        FrameworkUtil.getBundle(participant.getClass()));
-                thingDiscovered(resultNew);
+                thingDiscovered(result, FrameworkUtil.getBundle(participant.getClass()));
             }
         }
     }
@@ -183,9 +181,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
                     if (participant.getRemovalGracePeriodSeconds(device) > 0) {
                         cancelRemovalTask(device.getIdentity().getUdn());
                     }
-                    final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
-                            FrameworkUtil.getBundle(participant.getClass()));
-                    thingDiscovered(resultNew);
+                    thingDiscovered(result, FrameworkUtil.getBundle(participant.getClass()));
                 }
             } catch (Exception e) {
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
