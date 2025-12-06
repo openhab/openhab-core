@@ -334,6 +334,7 @@ public class PersistenceResource implements RESTResource {
     @Operation(operationId = "storeItemDataInPersistenceService", summary = "Stores item persistence data into the persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "400", description = "Invalid state, time format, or persistence service not modifiable."),
                     @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
     public Response httpPutPersistenceItemData(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
