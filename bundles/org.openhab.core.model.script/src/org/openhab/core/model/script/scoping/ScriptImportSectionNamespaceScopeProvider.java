@@ -35,6 +35,7 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
     public static final QualifiedName MODEL_SCRIPT_ACTIONS_PACKAGE = QualifiedName.create("org", "openhab", "core",
             "model", "script", "actions");
     public static final QualifiedName TIME_PACKAGE = QualifiedName.create("java", "time");
+    public static final QualifiedName CHRONOUNIT_CLASS = QualifiedName.create("java", "time", "temporal", "ChronoUnit");
     public static final QualifiedName QUANTITY_PACKAGE = QualifiedName.create("javax", "measure", "quantity");
 
     @Override
@@ -47,6 +48,7 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
         implicitImports.add(doCreateImportNormalizer(CORE_PERSISTENCE_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(MODEL_SCRIPT_ACTIONS_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(TIME_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(CHRONOUNIT_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(QUANTITY_PACKAGE, true, false));
         return implicitImports;
     }
