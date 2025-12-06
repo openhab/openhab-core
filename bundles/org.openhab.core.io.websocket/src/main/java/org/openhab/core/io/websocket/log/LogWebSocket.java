@@ -89,7 +89,8 @@ public class LogWebSocket implements LogListener {
     // All access must be guarded by "this"
     private @Nullable ScheduledFuture<?> commitScheduledFuture;
 
-    private volatile long lastSentTime = 0;
+    // All access must be guarded by "this"
+    private long lastSentTime = 0;
 
     // All access must be guarded by "this"
     private List<LogDTO> deferredLogs = new ArrayList<>();
@@ -97,7 +98,8 @@ public class LogWebSocket implements LogListener {
     // All access must be guarded by "this"
     private boolean enabled = false;
 
-    private volatile long lastSequence = FIRST_SEQUENCE;
+    // All access must be guarded by "this"
+    private long lastSequence = FIRST_SEQUENCE;
 
     private final List<Pattern> loggerPatterns = new CopyOnWriteArrayList<>();
 
@@ -134,13 +136,13 @@ public class LogWebSocket implements LogListener {
             return;
         }
 
-        // Defer sending live logs while we process the history
-        lastSentTime = Long.MAX_VALUE;
-        stopDeferredScheduledFuture();
-
         Session session;
         RemoteEndpoint remoteEndpoint;
         synchronized (this) {
+            // Defer sending live logs while we process the history
+            lastSentTime = Long.MAX_VALUE;
+            stopDeferredScheduledFuture();
+
             // Enable log messages
             if (!enabled) {
                 this.wsAdapter.registerListener(this);
@@ -191,7 +193,9 @@ public class LogWebSocket implements LogListener {
         if (logFilterDto != null && logFilterDto.sequenceStart != null) {
             sequenceStart = logFilterDto.sequenceStart;
         } else {
-            sequenceStart = lastSequence;
+            synchronized (this) {
+                sequenceStart = lastSequence;
+            }
         }
 
         List<LogEntry> logs = new ArrayList<>();
@@ -200,7 +204,9 @@ public class LogWebSocket implements LogListener {
         }
 
         if (logs.isEmpty()) {
-            lastSentTime = 0;
+            synchronized (this) {
+                lastSentTime = 0;
+            }
             return;
         }
 
@@ -235,7 +241,9 @@ public class LogWebSocket implements LogListener {
                 }
             }
         }
-        lastSentTime = sentTime == Long.MIN_VALUE ? 0L : sentTime;
+        synchronized (this) {
+            lastSentTime = sentTime == Long.MIN_VALUE ? 0L : sentTime;
+        }
 
         // Continue with live logs...
         flush();
@@ -263,6 +271,10 @@ public class LogWebSocket implements LogListener {
         remoteEndpoint.sendString(message);
     }
 
+    /**
+     * @implNote Under no circumstances must this method result in something being logged, since that
+     *           causes an "endless circle".
+     */
     @Override
     public void logged(@NonNullByDefault({}) LogEntry logEntry) {
         if (!loggerPatterns.isEmpty() && loggerPatterns.stream().noneMatch(logPatternMatch(logEntry))) {
@@ -270,27 +282,28 @@ public class LogWebSocket implements LogListener {
         }
 
         LogDTO logDTO = map(logEntry);
-        lastSequence = logEntry.getSequence();
+        boolean bufferEmpty;
+        synchronized (this) {
+            lastSequence = logEntry.getSequence();
 
-        // If the last message sent was less than SEND_PERIOD ago, then we just buffer
-        long lastSent = lastSentTime;
-        if (lastSent > System.currentTimeMillis() - SEND_PERIOD) {
-            // Start the timer if this is the first deferred log
-            synchronized (this) {
-                if (deferredLogs.isEmpty()) {
+            // If the buffer isn't empty or the last message was sent less than SEND_PERIOD ago, then we just buffer
+            if (!(bufferEmpty = deferredLogs.isEmpty()) || lastSentTime > System.currentTimeMillis() - SEND_PERIOD) {
+                if (bufferEmpty) {
                     stopDeferredScheduledFuture();
                     commitScheduledFuture = scheduledExecutorService.schedule(this::flush,
-                            lastSent + SEND_PERIOD - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+                            lastSentTime + SEND_PERIOD - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
                 }
 
                 deferredLogs.add(logDTO);
-            }
-        } else {
-            lastSentTime = System.currentTimeMillis();
-            try {
-                sendMessage(gson.toJson(logDTO));
-            } catch (IOException e) {
-                // Fail silently!
+            } else {
+                lastSentTime = System.currentTimeMillis();
+                scheduledExecutorService.submit(() -> {
+                    try {
+                        sendMessage(gson.toJson(logDTO));
+                    } catch (IOException e) {
+                        // Fail silently!
+                    }
+                });
             }
         }
     }
