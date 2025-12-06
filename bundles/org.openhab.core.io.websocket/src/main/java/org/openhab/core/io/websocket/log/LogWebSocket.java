@@ -15,6 +15,7 @@ package org.openhab.core.io.websocket.log;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -22,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +41,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.common.ThreadFactoryBuilder;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 import org.slf4j.Logger;
@@ -84,7 +86,8 @@ public class LogWebSocket implements LogListener {
     // All access must be guarded by "this"
     private @Nullable RemoteEndpoint remoteEndpoint;
 
-    private final ScheduledExecutorService scheduledExecutorService;
+    // All access must be guarded by "this"
+    private @Nullable ScheduledExecutorService scheduledExecutorService;
 
     // All access must be guarded by "this"
     private @Nullable ScheduledFuture<?> commitScheduledFuture;
@@ -106,8 +109,6 @@ public class LogWebSocket implements LogListener {
     public LogWebSocket(Gson gson, LogWebSocketAdapter wsAdapter) {
         this.wsAdapter = wsAdapter;
         this.gson = gson;
-
-        scheduledExecutorService = ThreadPoolManager.getScheduledPool("LogWebSocket");
     }
 
     @OnWebSocketClose
@@ -120,6 +121,11 @@ public class LogWebSocket implements LogListener {
             }
             this.session = null;
             this.remoteEndpoint = null;
+            this.deferredLogs.clear();
+            if (this.scheduledExecutorService != null) {
+                this.scheduledExecutorService.shutdownNow();
+            }
+            this.scheduledExecutorService = null;
         }
     }
 
@@ -127,6 +133,15 @@ public class LogWebSocket implements LogListener {
     public synchronized void onConnect(Session session) {
         this.session = session;
         this.remoteEndpoint = session.getRemote();
+        if (this.scheduledExecutorService != null) {
+            this.scheduledExecutorService.shutdownNow();
+        }
+        InetSocketAddress isa = session.getRemoteAddress();
+        String name = isa == null ? "websocket-logger"
+                : "websocket-logger-" + isa.getHostString() + ':' + isa.getPort();
+        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(ThreadFactoryBuilder.create()
+                .withNamePrefix("OH").withName(name).withUncaughtExceptionHandler((t, e) -> {
+                }).build());
     }
 
     @OnWebSocketMessage
@@ -283,21 +298,25 @@ public class LogWebSocket implements LogListener {
 
         LogDTO logDTO = map(logEntry);
         boolean bufferEmpty;
+        ScheduledExecutorService executor;
         synchronized (this) {
+            if ((executor = scheduledExecutorService) == null) {
+                return;
+            }
             lastSequence = logEntry.getSequence();
 
             // If the buffer isn't empty or the last message was sent less than SEND_PERIOD ago, then we just buffer
             if (!(bufferEmpty = deferredLogs.isEmpty()) || lastSentTime > System.currentTimeMillis() - SEND_PERIOD) {
                 if (bufferEmpty) {
                     stopDeferredScheduledFuture();
-                    commitScheduledFuture = scheduledExecutorService.schedule(this::flush,
+                    commitScheduledFuture = executor.schedule(this::flush,
                             lastSentTime + SEND_PERIOD - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
                 }
 
                 deferredLogs.add(logDTO);
             } else {
                 lastSentTime = System.currentTimeMillis();
-                scheduledExecutorService.submit(() -> {
+                executor.submit(() -> {
                     try {
                         sendMessage(gson.toJson(logDTO));
                     } catch (IOException e) {
