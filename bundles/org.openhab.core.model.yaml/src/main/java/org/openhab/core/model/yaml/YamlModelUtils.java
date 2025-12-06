@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class YamlModelUtils {
 
-    public static final String PREFIX_TMP_MODEL = "tmp_";
+    public static final String PREFIX_TMP_MODEL = "___tmp_";
 
     /**
      * Indicates if a model is an isolated model
