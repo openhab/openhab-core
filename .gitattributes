@@ -1,4 +1,14 @@
-*.java text=auto
-*.xml text=auto
-*.xml_gen text=auto
-*.xsd text=auto
+# Fix CRLF issues: Force all text files to use LF (Linux) line endings
+* text=auto eol=lf
+
+# Explicitly set languages to avoid ambiguity
+*.java text eol=lf
+*.xml text eol=lf
+*.md text eol=lf
+*.properties text eol=lf
+*.json text eol=lf
+
+# Binary files (do not touch these)
+*.png binary
+*.jpg binary
+*.jar binary
