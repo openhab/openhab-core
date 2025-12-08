@@ -52,8 +52,8 @@ public class LRUMediaCacheEntryTest {
     private @Mock @NonNullByDefault({}) LRUMediaCache<MetadataSample> ttsServiceMock;
     private @Mock @NonNullByDefault({}) Supplier<LRUMediaCacheEntry<MetadataSample>> supplier;
 
-    private @NonNullByDefault({}) @Mock StorageService storageService;
-    private @NonNullByDefault({}) @Mock Storage<MetadataSample> storage;
+    private @Mock @NonNullByDefault({}) StorageService storageService;
+    private @Mock @NonNullByDefault({}) Storage<MetadataSample> storage;
 
     @BeforeEach
     public void init() {
