@@ -208,10 +208,10 @@ public class EventWebSocket {
                                         topicExcludeFilter = new TopicEventFilter(excludeTopics);
                                     }
                                 }
-                            }
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Setting topic filter for connection to {}: {}",
-                                        remoteEndpoint.getInetSocketAddress(), topics);
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("Setting topic filter for connection to {}: {}",
+                                            remoteEndpoint.getInetSocketAddress(), topics);
+                                }
                             }
                             responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
                                     eventDTO.payload, null, eventDTO.eventId);
