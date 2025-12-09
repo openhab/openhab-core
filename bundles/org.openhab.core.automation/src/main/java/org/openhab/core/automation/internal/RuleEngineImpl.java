@@ -26,8 +26,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -168,7 +170,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     /**
      * flag to check whether we have reached a start level where we want to start rule execution
      */
-    private boolean started = false;
+    private volatile boolean started = false;
 
     protected final Logger logger = LoggerFactory.getLogger(RuleEngineImpl.class);
 
@@ -677,11 +679,12 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      */
     private void unregister(WrappedRule r) {
         String rUID = r.getUID();
+        TriggerHandlerCallbackImpl callback;
         synchronized (this) {
-            TriggerHandlerCallbackImpl callback = thCallbacks.remove(rUID);
-            if (callback != null) {
-                callback.dispose();
-            }
+            callback = thCallbacks.remove(rUID);
+        }
+        if (callback != null) {
+            callback.dispose();
         }
         removeModuleHandlers(r.getModules(), rUID);
     }
@@ -1050,15 +1053,16 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param td {@link TriggerData} object containing new values for {@link Trigger}'s {@link Output}s
      */
     protected void runRule(String ruleUID, TriggerHandlerCallbackImpl.TriggerData td) {
-        if (thCallbacks.get(ruleUID) == null) {
-            // the rule was unregistered
-            return;
-        }
-        if (!started) {
-            logger.debug("Rule engine not yet started - not executing rule '{}'", ruleUID);
-            return;
-        }
         synchronized (this) {
+            if (thCallbacks.get(ruleUID) == null) {
+                // the rule was unregistered
+                return;
+            }
+            if (!started) {
+                logger.debug("Rule engine not yet started - not executing rule '{}'", ruleUID);
+                return;
+            }
+
             final RuleStatus ruleStatus = getRuleStatus(ruleUID);
             if (ruleStatus != null && ruleStatus != RuleStatus.IDLE) {
                 logger.error("Failed to execute rule ‘{}' with status '{}'", ruleUID, ruleStatus.name());
@@ -1096,41 +1100,76 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     @Override
     public Map<String, @Nullable Object> runNow(String ruleUID, boolean considerConditions,
             @Nullable Map<String, Object> context) {
-        Map<String, @Nullable Object> returnContext = new HashMap<>();
         final WrappedRule rule = getManagedRule(ruleUID);
         if (rule == null) {
             logger.warn("Failed to execute rule '{}': Invalid Rule UID", ruleUID);
-            return returnContext;
+            return Map.of();
         }
+
+        TriggerHandlerCallbackImpl thCallback;
         synchronized (this) {
-            final RuleStatus ruleStatus = getRuleStatus(ruleUID);
-            if (ruleStatus != null && ruleStatus != RuleStatus.IDLE) {
-                logger.error("Failed to execute rule ‘{}' with status '{}'", ruleUID, ruleStatus.name());
-                return returnContext;
+            thCallback = thCallbacks.get(ruleUID);
+        }
+        if (thCallback == null) {
+            RuleStatus ruleStatus;
+            synchronized (this) {
+                ruleStatus = getRuleStatus(ruleUID);
             }
-            // change state to RUNNING
-            setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
+            logger.error("Failed to execute rule '{}' with status '{}': could not acquire rule thread", ruleUID,
+                    ruleStatus == null ? "UNKNOWN" : ruleStatus.name());
+            return Map.of();
+        }
+
+        Future<Map<String, @Nullable Object>> future;
+        try {
+            future = thCallback.getScheduler().submit(() -> {
+                Map<String, @Nullable Object> returnContext = new HashMap<>();
+                synchronized (this) {
+                    final RuleStatus ruleStatus = getRuleStatus(ruleUID);
+                    if (ruleStatus != null && ruleStatus != RuleStatus.IDLE) {
+                        logger.error("Failed to execute rule '{}' with status '{}'", ruleUID, ruleStatus.name());
+                        return Map.of();
+                    }
+                    // change state to RUNNING
+                    setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
+                }
+                try {
+                    clearContext(ruleUID);
+                    if (context != null && !context.isEmpty()) {
+                        getContext(ruleUID, null).putAll(context);
+                    }
+                    if (!considerConditions || calculateConditions(rule)) {
+                        executeActions(rule, false);
+                    }
+                    logger.debug("The rule '{}' is executed.", ruleUID);
+                    returnContext.putAll(getContext(ruleUID, null));
+                } catch (Throwable t) {
+                    logger.error("Failed to execute rule '{}': ", ruleUID, t);
+                } finally {
+                    // change state to IDLE only if the rule has not been DISABLED.
+                    synchronized (this) {
+                        if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
+                            setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
+                        }
+                    }
+                }
+                return returnContext;
+            });
+        } catch (RejectedExecutionException e) {
+            logger.warn("Failed to execute rule '{}' because the rule executor rejected execution: {}", ruleUID,
+                    e.getMessage());
+            return Map.of();
         }
         try {
-            clearContext(ruleUID);
-            if (context != null && !context.isEmpty()) {
-                getContext(ruleUID, null).putAll(context);
-            }
-            if (!considerConditions || calculateConditions(rule)) {
-                executeActions(rule, false);
-            }
-            logger.debug("The rule '{}' is executed.", ruleUID);
-            returnContext.putAll(getContext(ruleUID, null));
-        } catch (Throwable t) {
-            logger.error("Failed to execute rule '{}': ", ruleUID, t);
+            return future.get();
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted while waiting for rule '{}' to execute, attempting to cancel execution", ruleUID);
+            future.cancel(true);
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
+            logger.error("Failed to execute rule '{}': ", ruleUID, e.getCause());
         }
-        // change state to IDLE only if the rule has not been DISABLED.
-        synchronized (this) {
-            if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
-                setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
-            }
-        }
-        return returnContext;
+        return Map.of();
     }
 
     @Override
