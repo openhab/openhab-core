@@ -44,7 +44,7 @@ import org.openhab.core.types.State;
 public class PersistenceIncludeFilterTest {
     private static final String ITEM_NAME = "itemName";
 
-    private @NonNullByDefault({}) @Mock GenericItem item;
+    private @Mock @NonNullByDefault({}) GenericItem item;
 
     @ParameterizedTest
     @MethodSource("argumentProvider")
