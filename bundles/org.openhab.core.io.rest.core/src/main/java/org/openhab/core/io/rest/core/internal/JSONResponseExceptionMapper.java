@@ -56,6 +56,9 @@ public class JSONResponseExceptionMapper implements ExceptionMapper<Exception> {
             // see https://github.com/openhab/openhab-distro/issues/1616
             logger.debug("Requested resource not (yet) found", cee);
             return cee.getResponse();
+        } else if (e instanceof IllegalArgumentException) {
+            logger.debug("Invalid argument submitted for REST request", e);
+            return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } else {
             logger.error("Unexpected exception occurred while processing REST request.", e);
             return delegate.toResponse(e);
