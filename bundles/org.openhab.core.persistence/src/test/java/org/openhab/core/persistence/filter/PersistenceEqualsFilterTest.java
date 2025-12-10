@@ -46,7 +46,7 @@ import org.openhab.core.types.State;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class PersistenceEqualsFilterTest {
-    
+
     private @Mock @NonNullByDefault({}) GenericItem item;
 
     @ParameterizedTest
