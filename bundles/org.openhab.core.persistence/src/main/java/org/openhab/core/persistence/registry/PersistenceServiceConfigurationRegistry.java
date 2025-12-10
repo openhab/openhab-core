@@ -14,12 +14,11 @@ package org.openhab.core.persistence.registry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Registry;
-import org.openhab.core.persistence.internal.PersistenceManagerImpl;
 
 /**
  * The {@link PersistenceServiceConfigurationRegistry} is the central place to store persistence service configurations.
  * Configurations are registered through {@link PersistenceServiceConfigurationProvider}.
- * Because the {@link PersistenceManagerImpl} implementation needs to listen to
+ * Because the {@link org.openhab.core.persistence.internal.PersistenceManagerImpl} implementation needs to listen to
  * different registries, the {@link PersistenceServiceConfigurationRegistryChangeListener} can be used to add listeners
  * to this registry.
  *
