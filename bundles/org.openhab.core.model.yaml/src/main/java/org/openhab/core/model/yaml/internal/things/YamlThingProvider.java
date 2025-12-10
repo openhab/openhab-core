@@ -492,10 +492,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 if (channel.getChannelTypeUID() != null) {
                     // We create again the user defined channel because channel type was potentially not yet
                     // in the registry when the channel was initially created
-                    newChannel = createChannel(target.getUID(), channel.getUID().getIdWithoutGroup(),
-                            channel.getChannelTypeUID(), channel.getKind(), channel.getAcceptedItemType(),
-                            channel.getLabel(), channel.getDescription(), channel.getAutoUpdatePolicy(),
-                            channel.getConfiguration(), false);
+                    newChannel = createChannel(target.getUID(), channel.getUID().getId(), channel.getChannelTypeUID(),
+                            channel.getKind(), channel.getAcceptedItemType(), channel.getLabel(),
+                            channel.getDescription(), channel.getAutoUpdatePolicy(), channel.getConfiguration(), false);
                 }
                 channelsToAdd.add(newChannel);
             }
