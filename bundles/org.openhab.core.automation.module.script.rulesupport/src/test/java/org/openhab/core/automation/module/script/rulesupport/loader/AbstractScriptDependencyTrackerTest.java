@@ -48,7 +48,7 @@ public class AbstractScriptDependencyTrackerTest {
 
     private @NonNullByDefault({}) AbstractScriptDependencyTracker scriptDependencyTracker;
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
-    private @TempDir @NonNullByDefault({}) Path rootWatchPath;
+    private @NonNullByDefault({}) @TempDir Path rootWatchPath;
     private @NonNullByDefault({}) Path depPath;
     private @NonNullByDefault({}) Path depPath2;
 

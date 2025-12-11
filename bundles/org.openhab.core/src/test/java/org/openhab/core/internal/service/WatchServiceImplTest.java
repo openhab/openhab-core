@@ -55,7 +55,7 @@ public class WatchServiceImplTest extends JavaTest {
     public @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
 
     private @NonNullByDefault({}) WatchServiceImpl watchService;
-    private @TempDir @NonNullByDefault({}) Path rootPath;
+    private @NonNullByDefault({}) @TempDir Path rootPath;
     private @NonNullByDefault({}) TestWatchEventListener listener;
 
     @BeforeEach

@@ -73,7 +73,7 @@ class AbstractScriptFileWatcherTest extends JavaTest {
     private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
 
-    protected @TempDir @NonNullByDefault({}) Path tempScriptDir;
+    protected @NonNullByDefault({}) @TempDir Path tempScriptDir;
 
     private final AtomicInteger atomicInteger = new AtomicInteger();
 

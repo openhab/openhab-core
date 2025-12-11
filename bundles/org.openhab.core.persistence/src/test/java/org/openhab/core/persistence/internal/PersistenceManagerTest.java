@@ -152,18 +152,18 @@ public class PersistenceManagerTest {
 
     private static final String TEST_MODIFIABLE_PERSISTENCE_SERVICE_ID = "testModifiablePersistenceService";
 
-    private @Mock @NonNullByDefault({}) CronScheduler cronSchedulerMock;
-    private @Mock @NonNullByDefault({}) Scheduler schedulerMock;
-    private @Mock @NonNullByDefault({}) ScheduledCompletableFuture<Void> scheduledFutureMock;
-    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
-    private @Mock @NonNullByDefault({}) SafeCaller safeCallerMock;
-    private @Mock @NonNullByDefault({}) SafeCallerBuilder<@NonNull QueryablePersistenceService> safeCallerBuilderMock;
-    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
-    private @Mock @NonNullByDefault({}) PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
+    private @NonNullByDefault({}) @Mock CronScheduler cronSchedulerMock;
+    private @NonNullByDefault({}) @Mock Scheduler schedulerMock;
+    private @NonNullByDefault({}) @Mock ScheduledCompletableFuture<Void> scheduledFutureMock;
+    private @NonNullByDefault({}) @Mock ItemRegistry itemRegistryMock;
+    private @NonNullByDefault({}) @Mock SafeCaller safeCallerMock;
+    private @NonNullByDefault({}) @Mock SafeCallerBuilder<@NonNull QueryablePersistenceService> safeCallerBuilderMock;
+    private @NonNullByDefault({}) @Mock ReadyService readyServiceMock;
+    private @NonNullByDefault({}) @Mock PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
 
-    private @Mock @NonNullByDefault({}) PersistenceService persistenceServiceMock;
-    private @Mock @NonNullByDefault({}) QueryablePersistenceService queryablePersistenceServiceMock;
-    private @Mock @NonNullByDefault({}) ModifiablePersistenceService modifiablePersistenceServiceMock;
+    private @NonNullByDefault({}) @Mock PersistenceService persistenceServiceMock;
+    private @NonNullByDefault({}) @Mock QueryablePersistenceService queryablePersistenceServiceMock;
+    private @NonNullByDefault({}) @Mock ModifiablePersistenceService modifiablePersistenceServiceMock;
 
     private @NonNullByDefault({}) PersistenceManagerImpl manager;
 

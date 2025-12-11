@@ -65,7 +65,7 @@ public class FileTransformationProviderTest {
     private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull Transformation> listenerMock;
 
     private @NonNullByDefault({}) FileTransformationProvider provider;
-    private @TempDir @NonNullByDefault({}) Path configPath;
+    private @NonNullByDefault({}) @TempDir Path configPath;
     private @NonNullByDefault({}) Path transformationPath;
 
     @BeforeEach
