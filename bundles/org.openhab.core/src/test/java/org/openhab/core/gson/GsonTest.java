@@ -67,7 +67,7 @@ class GsonTest {
         assertEquals("John Doe", test.name, "Name field should match");
         assertEquals(30, test.age, "Age field should match");
         assertEquals("john.doe@example.com", test.email, "Email field should match");
-        assertEquals(true, test.active, "Active field should match");
+        assertTrue(test.active, "Active field should match");
     }
 
     @Test
@@ -84,7 +84,7 @@ class GsonTest {
         // Verify all fields are correctly deserialized
         assertEquals("John Doe", test.n, "Name field should match");
         assertEquals(30, test.age, "Age field should match");
-        assertEquals(true, test.active, "Active field should match");
+        assertTrue(test.active, "Active field should match");
         assertEquals("john.doe@example.com", test.e, "Email field should match");
     }
 
@@ -102,7 +102,7 @@ class GsonTest {
         // Verify all fields are correctly deserialized
         assertEquals("John Doe", test.n, "Name field should match");
         assertEquals(30, test.age, "Age field should match");
-        assertEquals(true, test.active, "Active field should match");
+        assertTrue(test.active, "Active field should match");
         assertEquals("john.doe@example.com", test.e, "Email field should match");
     }
 }

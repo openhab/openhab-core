@@ -41,7 +41,7 @@ public class GsonTestClassAnnotated_DTO {
 
     @Override
     public String toString() {
-        return "GsonTestClass{" + "name='" + n + '\'' + ", age=" + age + ", email='" + e + '\'' + ", active=" + active
-                + '}';
+        return "GsonTestClassAnnotated_DTO{" + "name='" + n + '\'' + ", age=" + age + ", email='" + e + '\''
+                + ", active=" + active + '}';
     }
 }
