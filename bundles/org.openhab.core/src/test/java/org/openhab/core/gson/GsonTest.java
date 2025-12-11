@@ -35,7 +35,7 @@ class GsonTest {
     private static final Gson GSON = new GsonBuilder().create();
 
     /**
-     * Load the test JSON payload string from a file, from hue binding
+     * Load the test JSON payload string from a file (copied from hue binding)
      */
     private String load(String fileName) {
         try (FileReader file = new FileReader(String.format("src/test/resources/%s.json", fileName));
