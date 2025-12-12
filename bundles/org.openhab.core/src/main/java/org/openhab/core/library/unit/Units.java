@@ -20,6 +20,7 @@ import javax.measure.Unit;
 import javax.measure.quantity.Acceleration;
 import javax.measure.quantity.AmountOfSubstance;
 import javax.measure.quantity.Angle;
+import javax.measure.quantity.Area;
 import javax.measure.quantity.CatalyticActivity;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.ElectricCapacitance;
@@ -91,11 +92,22 @@ public final class Units extends CustomUnits {
     public static final Unit<Acceleration> STANDARD_GRAVITY = addUnit(METRE_PER_SQUARE_SECOND.multiply(9.80665));
     public static final Unit<AmountOfSubstance> MOLE = addUnit(tech.units.indriya.unit.Units.MOLE);
     public static final Unit<Volume> LITRE = addUnit(tech.units.indriya.unit.Units.LITRE);
+    public static final Unit<Volume> CUBIC_MILLIMETRE = addUnit(Units.LITRE.divide(1000000));
+    public static final Unit<Volume> CUBIC_CENTIMETRE = addUnit(Units.LITRE.divide(1000));
     @SuppressWarnings("unchecked")
     public static final Unit<Dimensionless> DEUTSCHE_HAERTE = addUnit((Unit<Dimensionless>) new TransformedUnit<>("°dH",
             MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE), MultiplyConverter.of(0.17833)));
     public static final Unit<Angle> DEGREE_ANGLE = addUnit(NonSI.DEGREE_ANGLE);
     public static final Unit<Angle> RADIAN = addUnit(tech.units.indriya.unit.Units.RADIAN);
+    public static final Unit<Area> SQUARE_MILLIMETRE = addUnit(
+            new ProductUnit<Area>(MetricPrefix.MILLI(tech.units.indriya.unit.Units.METRE)
+                    .multiply(MetricPrefix.MILLI(tech.units.indriya.unit.Units.METRE))));
+    public static final Unit<Area> SQUARE_CENTIMETRE = addUnit(
+            new ProductUnit<Area>(MetricPrefix.CENTI(tech.units.indriya.unit.Units.METRE)
+                    .multiply(MetricPrefix.CENTI(tech.units.indriya.unit.Units.METRE))));
+    public static final Unit<Area> SQUARE_KILOMETRE = addUnit(
+            new ProductUnit<Area>(MetricPrefix.KILO(tech.units.indriya.unit.Units.METRE)
+                    .multiply(MetricPrefix.KILO(tech.units.indriya.unit.Units.METRE))));
     public static final Unit<ArealDensity> DOBSON_UNIT = addUnit(
             new ProductUnit<>(MetricPrefix.MILLI(tech.units.indriya.unit.Units.MOLE).multiply(0.4462)
                     .divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
@@ -262,6 +274,8 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MICRO_CURIE, "µCi");
         SimpleUnitFormat.getInstance().label(NANO_CURIE, "nCi");
         SimpleUnitFormat.getInstance().label(PICO_CURIE, "pCi");
+        SimpleUnitFormat.getInstance().label(CUBIC_CENTIMETRE, "cm³");
+        SimpleUnitFormat.getInstance().label(CUBIC_MILLIMETRE, "mm³");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_DAY, "m³/d");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_HOUR, "m³/h");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_MINUTE, "m³/min");
@@ -289,6 +303,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(KILOVOLT_AMPERE, "kVA");
         SimpleUnitFormat.getInstance().label(KILOWATT_HOUR, "kWh");
         SimpleUnitFormat.getInstance().label(KNOT, KNOT.getSymbol());
+        SimpleUnitFormat.getInstance().alias(LITRE, "dm³");
         SimpleUnitFormat.getInstance().label(LITRE_PER_MINUTE, "l/min");
         SimpleUnitFormat.getInstance().label(MEGABYTE, "MB");
         SimpleUnitFormat.getInstance().label(MEBIBYTE, "MiB");
@@ -311,6 +326,9 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().alias(PEBIBYTE, "Pio");
         SimpleUnitFormat.getInstance().label(PETABIT, "Pbit");
         SimpleUnitFormat.getInstance().label(RPM, "rpm");
+        SimpleUnitFormat.getInstance().label(SQUARE_CENTIMETRE, "cm²");
+        SimpleUnitFormat.getInstance().label(SQUARE_KILOMETRE, "km²");
+        SimpleUnitFormat.getInstance().label(SQUARE_MILLIMETRE, "mm²");
         SimpleUnitFormat.getInstance().label(STANDARD_GRAVITY, "gₙ");
         SimpleUnitFormat.getInstance().label(SIEMENS_PER_METRE, "S/m");
         SimpleUnitFormat.getInstance().label(TERABYTE, "TB");
