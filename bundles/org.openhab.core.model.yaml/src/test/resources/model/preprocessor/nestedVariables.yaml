@@ -1,0 +1,7 @@
+variables:
+  final: value
+  var2: fin
+  var3: al
+  var4: va
+
+key: ${${${var4}r2}${var3}}
