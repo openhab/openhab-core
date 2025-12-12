@@ -61,7 +61,6 @@ Require-Bundle: org.antlr.runtime,\
  org.eclipse.emf.ecore,\
  org.eclipse.emf.mwe2.launch;resolution:=optional,\
  org.openhab.core.model.item,\
- org.eclipse.xtend.lib;resolution:=optional,\
  org.eclipse.xtext.common.types,\
  org.eclipse.xtext.xtext.generator;resolution:=optional,\
  org.eclipse.xtext.util,\
