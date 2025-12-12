@@ -17,6 +17,8 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.openhab.core.io.console.Console;
 
 /**
+ * Implementation of the Console interface for Eclipse OSGi console.
+ * This class wraps the Eclipse OSGi CommandInterpreter to provide a unified console interface.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Split to separate file
@@ -27,21 +29,43 @@ public class OSGiConsole implements Console {
     private final String baseCommand;
     private final CommandInterpreter interpreter;
 
+    /**
+     * Constructs a new OSGi console wrapper.
+     *
+     * @param baseCommand the base command name (e.g., "openhab")
+     * @param interpreter the Eclipse OSGi command interpreter
+     */
     public OSGiConsole(final String baseCommand, final CommandInterpreter interpreter) {
         this.baseCommand = baseCommand;
         this.interpreter = interpreter;
     }
 
+    /**
+     * Prints a string to the console without a newline.
+     *
+     * @param s the string to print
+     */
     @Override
     public void print(final String s) {
         interpreter.print(s);
     }
 
+    /**
+     * Prints a string to the console with a newline.
+     *
+     * @param s the string to print
+     */
     @Override
     public void println(final String s) {
         interpreter.println(s);
     }
 
+    /**
+     * Prints the usage information for a command.
+     * The output format is: "Usage: {baseCommand} {usageString}".
+     *
+     * @param s the usage string describing command syntax
+     */
     @Override
     public void printUsage(final String s) {
         interpreter.println(String.format("Usage: %s %s", baseCommand, s));

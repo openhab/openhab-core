@@ -87,6 +87,7 @@ import com.google.gson.JsonSyntaxException;
  * @author Christoph Weitkamp - Added support for value containing a list of configuration options
  */
 @Component(immediate = true, service = ConfigDispatcher.class)
+@NonNullByDefault
 public class ConfigDispatcher {
 
     private final Logger logger = LoggerFactory.getLogger(ConfigDispatcher.class);
@@ -118,17 +119,25 @@ public class ConfigDispatcher {
     private static final String DEFAULT_LIST_ENDING_CHARACTER = "]";
     private static final String DEFAULT_LIST_DELIMITER = ",";
 
-    private ExclusivePIDMap exclusivePIDMap;
+    private @Nullable ExclusivePIDMap exclusivePIDMap;
 
     private final ConfigurationAdmin configAdmin;
 
-    private File exclusivePIDStore;
+    private @Nullable File exclusivePIDStore;
 
     @Activate
     public ConfigDispatcher(final @Reference ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
     }
 
+    /**
+     * Activates the ConfigDispatcher component.
+     * This method is called by the OSGi framework when the component is activated.
+     * It initializes the exclusive PID store, loads any previously saved exclusive PIDs,
+     * and processes the default configuration file.
+     *
+     * @param bundleContext the OSGi bundle context used to access bundle-specific data files
+     */
     @Activate
     public void activate(BundleContext bundleContext) {
         exclusivePIDStore = bundleContext.getDataFile(EXCLUSIVE_PID_STORE_FILE);
@@ -136,6 +145,16 @@ public class ConfigDispatcher {
         readDefaultConfig();
     }
 
+    /**
+     * Loads the list of exclusive PIDs from the bundle data file.
+     * Exclusive PIDs are configuration PIDs that are managed by a single configuration file
+     * (marked with "pid:" prefix). This method attempts to deserialize the previously stored
+     * PID list from JSON format. If the file doesn't exist or cannot be parsed, a new empty
+     * map is created.
+     *
+     * <p>
+     * This method is called during component activation to restore the state from previous runs.
+     */
     private void loadExclusivePIDList() {
         try (FileReader reader = new FileReader(exclusivePIDStore)) {
             exclusivePIDMap = gson.fromJson(reader, ExclusivePIDMap.class);
@@ -153,6 +172,16 @@ public class ConfigDispatcher {
         }
     }
 
+    /**
+     * Stores the current list of exclusive PIDs to the bundle data file.
+     * This method serializes the exclusive PID map to JSON format and writes it to persistent storage.
+     * The stored data is used to track which configuration files use exclusive PIDs and to detect
+     * orphaned configurations when files are deleted.
+     *
+     * <p>
+     * This method is called after processing configuration files to ensure the state is preserved
+     * across component restarts.
+     */
     private void storeCurrentExclusivePIDList() {
         try (FileWriter writer = new FileWriter(exclusivePIDStore)) {
             exclusivePIDMap.setCurrentExclusivePIDList();
@@ -162,7 +191,7 @@ public class ConfigDispatcher {
         }
     }
 
-    private Configuration getConfigurationWithContext(String pidWithContext)
+    private @Nullable Configuration getConfigurationWithContext(String pidWithContext)
             throws IOException, InvalidSyntaxException {
         if (!pidWithContext.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
             throw new IllegalArgumentException("Given PID should be followed by a context");
@@ -223,9 +252,25 @@ public class ConfigDispatcher {
         }
     }
 
+    /**
+     * Processes configuration files from a directory or a single file.
+     * If the given file is a directory, all .cfg files within it are processed in order of
+     * their last modification time (oldest first). If the given file is a regular file,
+     * it is processed directly.
+     *
+     * <p>
+     * After processing all files, this method cleans up orphaned exclusive PIDs
+     * (configurations whose files have been deleted) and saves the current state.
+     *
+     * @param dir the directory containing configuration files, or a single configuration file to process
+     */
     public void processConfigFile(File dir) {
         if (dir.isDirectory() && dir.exists()) {
             File[] files = dir.listFiles();
+            if (files == null) {
+                logger.warn("Unable to list files in directory '{}', skipping processing", dir.getAbsolutePath());
+                return;
+            }
             // Sort the files by modification time,
             // so that the last modified file is processed last.
             Arrays.sort(files, Comparator.comparingLong(File::lastModified));
@@ -393,13 +438,21 @@ public class ConfigDispatcher {
         storeCurrentExclusivePIDList();
     }
 
+    /**
+     * Called when a configuration file is removed.
+     * This method marks the configuration file as removed in the exclusive PID map,
+     * processes any orphaned PIDs (configurations whose files no longer exist),
+     * and updates the persisted state.
+     *
+     * @param path the absolute path of the removed configuration file
+     */
     public void fileRemoved(String path) {
         exclusivePIDMap.setFileRemoved(path);
         processOrphanExclusivePIDs();
         storeCurrentExclusivePIDList();
     }
 
-    private String getPIDFromLine(String line) {
+    private @Nullable String getPIDFromLine(String line) {
         if (line.startsWith(PID_MARKER)) {
             return line.substring(PID_MARKER.length()).trim();
         }
@@ -491,7 +544,7 @@ public class ConfigDispatcher {
          * service config files.
          * The map will hold a 1:1 relation mapping from an exclusive PID to its absolute path in the file system.
          */
-        private transient Map<String, String> processedPIDMapping = new HashMap<>();
+        private transient Map<String, @Nullable String> processedPIDMapping = new HashMap<>();
 
         /**
          * Package protected default constructor to allow reflective instantiation.
@@ -510,8 +563,8 @@ public class ConfigDispatcher {
         }
 
         public void setFileRemoved(String absolutePath) {
-            for (Entry<String, String> entry : processedPIDMapping.entrySet()) {
-                if (entry.getValue().equals(absolutePath)) {
+            for (Entry<String, @Nullable String> entry : processedPIDMapping.entrySet()) {
+                if (absolutePath.equals(entry.getValue())) {
                     entry.setValue(null);
                     return; // we expect a 1:1 relation between PID and path
                 }
@@ -543,7 +596,7 @@ public class ConfigDispatcher {
                     .toList();
         }
 
-        public boolean contains(String pid) {
+        public boolean contains(@Nullable String pid) {
             return processedPIDMapping.containsKey(pid);
         }
     }
