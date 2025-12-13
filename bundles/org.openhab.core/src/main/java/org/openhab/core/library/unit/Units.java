@@ -91,6 +91,7 @@ public final class Units extends CustomUnits {
             tech.units.indriya.unit.Units.METRE_PER_SQUARE_SECOND);
     public static final Unit<Acceleration> STANDARD_GRAVITY = addUnit(METRE_PER_SQUARE_SECOND.multiply(9.80665));
     public static final Unit<AmountOfSubstance> MOLE = addUnit(tech.units.indriya.unit.Units.MOLE);
+    public static final Unit<Volume> LITRE = addUnit(tech.units.indriya.unit.Units.LITRE);
     @SuppressWarnings("unchecked")
     public static final Unit<Dimensionless> DEUTSCHE_HAERTE = addUnit((Unit<Dimensionless>) new TransformedUnit<>("°dH",
             MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE), MultiplyConverter.of(0.17833)));
@@ -212,7 +213,6 @@ public final class Units extends CustomUnits {
     public static final Unit<Time> WEEK = addUnit(tech.units.indriya.unit.Units.WEEK);
     public static final Unit<Time> MONTH = addUnit(tech.units.indriya.unit.Units.MONTH);
     public static final Unit<Time> YEAR = addUnit(tech.units.indriya.unit.Units.YEAR);
-    public static final Unit<Volume> LITRE = addUnit(tech.units.indriya.unit.Units.LITRE);
     public static final Unit<Volume> CUBIC_MILLIMETRE = addUnit(Units.LITRE.divide(1000000));
     public static final Unit<Volume> CUBIC_CENTIMETRE = addUnit(Units.LITRE.divide(1000));
     public static final Unit<VolumetricFlowRate> LITRE_PER_MINUTE = addUnit(
