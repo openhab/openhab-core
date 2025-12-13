@@ -23,15 +23,15 @@ import org.openhab.core.tools.ExtractedAddonUpgrader;
  * @author Cody Cutrer - Initial contribution
  */
 @NonNullByDefault
-public class HomeAssistantAddonUpgrader extends ExtractedAddonUpgrader {
+public class HomieAddonUpgrader extends ExtractedAddonUpgrader {
     @Override
     public String getName() {
-        return "homeAssistantAddonUpgrader";
+        return "homieAddonUpgrader";
     }
 
     @Override
     public String getDescription() {
-        return "Installs the Home Assistant addon if Home Assistant Things are present";
+        return "Installs the Homie addon if Homie Things are present";
     }
 
     @Override
@@ -41,11 +41,11 @@ public class HomeAssistantAddonUpgrader extends ExtractedAddonUpgrader {
 
     @Override
     public String getAddonName() {
-        return "homeassistant";
+        return "homie";
     }
 
     @Override
     public boolean thingTypeMatches(String thingTypeUID) {
-        return thingTypeUID.startsWith("mqtt:homeassistant");
+        return thingTypeUID.startsWith("mqtt:homie");
     }
 }
