@@ -389,18 +389,22 @@ public class UnitsTest {
     public void testSquareCmConversion() {
         QuantityType<Area> m2 = new QuantityType<>("1 m²");
         QuantityType<Area> mm2 = new QuantityType<>("100 mm²");
+        QuantityType<Area> km2 = new QuantityType<>("1 km²");
 
         assertEquals(10000.0, m2.toUnit("cm²").doubleValue(), DEFAULT_ERROR);
         assertEquals(1.0, mm2.toUnit("cm²").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1000000.0, km2.toUnit("m²").doubleValue(), DEFAULT_ERROR);
     }
 
     @Test
     public void testCubicCmConversion() {
         QuantityType<Volume> l = new QuantityType<>("1 l");
         QuantityType<Volume> cm3 = new QuantityType<>("1000 cm³");
+        QuantityType<Volume> mm3 = new QuantityType<>("1000 mm³");
 
         assertEquals(1.0, l.toUnit("dm³").doubleValue(), DEFAULT_ERROR);
         assertEquals(1.0, cm3.toUnit("l").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1.0, mm3.toUnit("cm³").doubleValue(), DEFAULT_ERROR);
     }
 
     @Test
