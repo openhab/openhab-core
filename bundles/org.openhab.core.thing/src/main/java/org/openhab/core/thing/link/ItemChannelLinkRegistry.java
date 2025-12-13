@@ -85,6 +85,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     private boolean useTagsGlobally = false;
     private int startlevel = 0;
+    private boolean oneShotLoggingDone = false;
 
     @Activate
     public ItemChannelLinkRegistry(final @Nullable Map<String, @Nullable Object> configuration,
@@ -97,6 +98,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         this.itemRegistry.addRegistryChangeListener(this);
         this.itemBuilderFactory = itemBuilderFactory;
         this.eventRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, null);
+        this.oneShotLoggingDone = false;
 
         modified(configuration);
     }
@@ -109,6 +111,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
 
     @Override
     protected void deactivate() {
+        oneShotLoggingDone = false;
         eventRegistration.unregister();
         itemRegistry.removeRegistryChangeListener(this);
         super.deactivate();
@@ -309,9 +312,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             } else {
                 Set<String> newTags = new HashSet<>(activeItem.getTags());
                 newTags.addAll(channelDefaultTags);
-                logger.info("Item '{}' adding tags '{}' supplied by channel '{}'.", activeItem.getName(),
-                        channelDefaultTags, link.getLinkedUID());
-
+                logTagsAdded(activeItem.getName(), channelDefaultTags, link.getLinkedUID());
                 link.setTagsLinked(true);
 
                 updateExistingRegistryItemTagsAndNotifyRegistryListeners(activeItem.getName(), newTags);
@@ -344,8 +345,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             newTags.removeAll(oldLinkTags);
             // on openHAB shutdown tagsLinked may be true but oldLinkTags is already empty so do not log
             if (startlevel >= STARTLEVEL_COMPLETE) {
-                logger.info("Item '{}' removing tags '{}' supplied by channel '{}'.", activeItem.getName(), oldLinkTags,
-                        oldLink.getLinkedUID());
+                logger.debug("Item '{}' removing tags '{}' supplied by channel '{}'.", activeItem.getName(),
+                        oldLinkTags, oldLink.getLinkedUID());
             }
 
             // iterate over other links in case one may assign new tags
@@ -361,8 +362,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                         } else {
                             alreadyHasPointOrPropertyTag = true;
                             newTags.addAll(otherLinkTags);
-                            logger.info("Item '{}' adding tags '{}' supplied by channel '{}'.", activeItem.getName(),
-                                    otherLinkTags, otherLink.getLinkedUID());
+                            logTagsAdded(activeItem.getName(), otherLinkTags, otherLink.getLinkedUID());
                             otherLink.setTagsLinked(true);
                         }
                     }
@@ -490,6 +490,15 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
                 }
             }
             startlevel = newStartlevel;
+        }
+    }
+
+    private void logTagsAdded(String item, Set<String> tags, ChannelUID channel) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Item '{}' adding tags '{}' supplied by channel '{}'.", item, tags, channel);
+        } else if (!oneShotLoggingDone) {
+            oneShotLoggingDone = true;
+            logger.info("At least one Item added tags supplied by a channel. => Enable debug logging to see details.");
         }
     }
 }
