@@ -13,15 +13,17 @@
 package org.openhab.core.events;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link TopicEventFilter} is a default openHAB {@link EventFilter} implementation that ensures filtering
  * of events based on a single event topic or multiple event topics.
+ * <p>
+ * Thread-safe.
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Florian Hotze - Add support for filtering of events by multiple event topics
@@ -29,8 +31,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class TopicEventFilter implements EventFilter {
 
-    private final @Nullable Pattern topicRegex;
-    private final List<Pattern> topicsRegexes = new ArrayList<>();
+    private final List<Pattern> topicsRegexes;
 
     /**
      * Constructs a new topic event filter.
@@ -40,7 +41,7 @@ public class TopicEventFilter implements EventFilter {
      *      Regex</a>
      */
     public TopicEventFilter(String topicRegex) {
-        this.topicRegex = Pattern.compile(topicRegex);
+        this.topicsRegexes = List.of(Pattern.compile(topicRegex));
     }
 
     /**
@@ -51,20 +52,15 @@ public class TopicEventFilter implements EventFilter {
      *      Regex</a>
      */
     public TopicEventFilter(List<String> topicsRegexes) {
-        this.topicRegex = null;
+        List<Pattern> tmpTopicsRegexes = new ArrayList<>();
         for (String topicRegex : topicsRegexes) {
-            this.topicsRegexes.add(Pattern.compile(topicRegex));
+            tmpTopicsRegexes.add(Pattern.compile(topicRegex));
         }
+        this.topicsRegexes = Collections.unmodifiableList(tmpTopicsRegexes);
     }
 
     @Override
     public boolean apply(Event event) {
-        String topic = event.getTopic();
-        Pattern topicRegex = this.topicRegex;
-        if (topicRegex != null) {
-            return topicRegex.matcher(topic).matches();
-        } else {
-            return topicsRegexes.stream().anyMatch(p -> p.matcher(topic).matches());
-        }
+        return topicsRegexes.stream().anyMatch(p -> p.matcher(event.getTopic()).matches());
     }
 }
