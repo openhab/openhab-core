@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Jimmy Tanagra - Refactor upgraders into individual classes
+ * @author Mark Herwege - Added persistence strategy upgrader
  */
 @NonNullByDefault
 public class UpgradeTool {
