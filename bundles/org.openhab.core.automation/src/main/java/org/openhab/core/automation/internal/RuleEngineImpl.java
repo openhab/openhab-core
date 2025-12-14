@@ -878,8 +878,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (slTriggers.stream()
                 .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
                         .intValue() <= startLevelService.getStartLevel())) {
-            runNow(rule.getUID(), true, Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES,
-                    "event", SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES)));
+            runNow(rule.getUID(), true,
+                    Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",
+                            SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES,
+                                    RuleEngineImpl.class.getName() + ".activateRule")));
         }
 
         return true;
@@ -1599,7 +1601,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                     .filter(this::mustTrigger) //
                     .forEach(r -> runNow(r.getUID(), true,
                             Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",
-                                    SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES))));
+                                    SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES,
+                                            RuleEngineImpl.class.getName() + ".executeRulesWithStartLevel"))));
             started = true;
             readyService.markReady(MARKER);
             logger.info("Rule engine started.");

@@ -255,7 +255,8 @@ public class StartLevelService {
         }
         openHABStartLevel = level;
         scheduler.submit(() -> {
-            StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level);
+            StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level,
+                    StartLevelService.class.getName());
             eventPublisher.post(startlevelEvent);
             logger.debug("Reached start level {}", level);
         });
