@@ -359,7 +359,7 @@ public class PersistenceResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Path("persistencehealth")
+    @Path("health")
     @Operation(operationId = "getPersistenceHealth", summary = "Gets configuration problems with persistence services.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceServiceProblem.class), uniqueItems = true))) })
