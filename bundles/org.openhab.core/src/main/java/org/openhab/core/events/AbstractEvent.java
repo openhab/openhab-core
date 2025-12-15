@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 public abstract class AbstractEvent implements Event {
     public static final String ACTOR_SEPARATOR = "$";
     public static final String DELEGATION_SEPARATOR = "=>";
+    public static final String DELEGATION_ESCAPE = "__";
 
     private final String topic;
 
@@ -99,43 +100,58 @@ public abstract class AbstractEvent implements Event {
     }
 
     /**
-     * Utility method to build a source string from a package and an optional actor.
+     * Utility method to build a source string from a bundle and an optional actor.
      *
-     * @param packageName the package (such as org.openhab.core.thing or org.openhab.binding.matter)
+     * Bundle names may not contain the actor separator.
+     *
+     * The actor, if present, will be replaced with `__` to disallow the delegation separator.
+     * Consequently, `__` will be doubled as an escape sequence.
+     *
+     * @param bundle the bundle (such as org.openhab.core.thing or org.openhab.binding.matter)
      * @param actor the actor
      * @return the final source string
      */
-    public static String buildSource(String packageName, @Nullable String actor) {
+    public static String buildSource(String bundle, @Nullable String actor) {
+        if (bundle.contains(ACTOR_SEPARATOR)) {
+            throw new IllegalArgumentException("Bundle must not contain the actor separator '" + ACTOR_SEPARATOR + "'");
+        }
+        if (bundle.contains(DELEGATION_SEPARATOR)) {
+            throw new IllegalArgumentException(
+                    "Bundle must not contain the delegation separator '" + DELEGATION_SEPARATOR + "'");
+        }
+
         if (actor == null || actor.isEmpty()) {
-            return packageName;
+            return bundle;
         }
-        return packageName + ACTOR_SEPARATOR + actor;
+
+        actor = actor.replace(DELEGATION_ESCAPE, DELEGATION_ESCAPE + DELEGATION_ESCAPE);
+        actor = actor.replace(DELEGATION_SEPARATOR, DELEGATION_ESCAPE);
+        return bundle + ACTOR_SEPARATOR + actor;
     }
 
     /**
-     * Utility method to build a delegated source string from an original source and a package
+     * Utility method to build a delegated source string from an original source and a bundle
      *
      * @param originalSource the original source (may be null)
-     * @param packageName the package (such as org.openhab.core.thing or org.openhab.binding.matter)
+     * @param bundle the bundle (such as org.openhab.core.thing or org.openhab.binding.matter)
      * @return the final source string
      */
-    public static String buildDelegatedSource(@Nullable String originalSource, String packageName) {
+    public static String buildDelegatedSource(@Nullable String originalSource, String bundle) {
         if (originalSource == null || originalSource.isEmpty()) {
-            return packageName;
+            return bundle;
         }
-        return originalSource + DELEGATION_SEPARATOR + packageName;
+        return originalSource + DELEGATION_SEPARATOR + bundle;
     }
 
     /**
-     * Utility method to build a delegated source string from an original source, a package and an optional actor.
+     * Utility method to build a delegated source string from an original source, a bundle and an optional actor.
      *
      * @param originalSource the original source (may be null)
-     * @param packageName the package (such as org.openhab.core.thing or org.openhab.binding.matter)
+     * @param bundle the bundle (such as org.openhab.core.thing or org.openhab.binding.matter)
      * @param actor the actor
      * @return the final source string
      */
-    public static String buildDelegatedSource(@Nullable String originalSource, String packageName,
-            @Nullable String actor) {
-        return buildDelegatedSource(originalSource, buildSource(packageName, actor));
+    public static String buildDelegatedSource(@Nullable String originalSource, String bundle, @Nullable String actor) {
+        return buildDelegatedSource(originalSource, buildSource(bundle, actor));
     }
 }

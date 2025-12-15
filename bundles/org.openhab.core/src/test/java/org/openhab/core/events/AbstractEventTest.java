@@ -28,6 +28,14 @@ public class AbstractEventTest {
     public void testBuildSource() throws Exception {
         assertEquals(AbstractEvent.buildSource("org.openhab.core.thing", null), "org.openhab.core.thing");
         assertEquals(AbstractEvent.buildSource("org.openhab.core.thing", "actor"), "org.openhab.core.thing$actor");
+        assertEquals(AbstractEvent.buildSource("org.openhab.core.io.rest", "my=>actor"),
+                "org.openhab.core.io.rest$my__actor");
+        assertEquals(AbstractEvent.buildSource("org.openhab.core.io.rest", "my__actor"),
+                "org.openhab.core.io.rest$my____actor");
+        assertThrows(IllegalArgumentException.class,
+                () -> AbstractEvent.buildSource("org.openhab$core.thing", "actor"));
+        assertThrows(IllegalArgumentException.class,
+                () -> AbstractEvent.buildSource("org.openhab.core=>thing", "actor"));
     }
 
     @Test
