@@ -65,7 +65,7 @@ public class Audio {
     public static void playSound(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
             @ParamDoc(name = "filename", text = "the filename with extension") String filename) {
         try {
-            AudioActionService.audioManager.playFile(filename, sink);
+            AudioActionService.audioManager.playFile(filename, AudioActionService.audioManager.getSinkIds(sink));
         } catch (AudioException e) {
             logger.warn("Failed playing audio file: {}", e.getMessage());
         }
@@ -76,7 +76,8 @@ public class Audio {
             @ParamDoc(name = "filename", text = "the filename with extension") String filename,
             @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
         try {
-            AudioActionService.audioManager.playFile(filename, sink, volume);
+            AudioActionService.audioManager.playFile(filename, AudioActionService.audioManager.getSinkIds(sink),
+                    volume);
         } catch (AudioException e) {
             logger.warn("Failed playing audio file: {}", e.getMessage());
         }
@@ -103,7 +104,7 @@ public class Audio {
     public static synchronized void playStream(@ParamDoc(name = "sink", text = "the id of the sink") String sink,
             @ParamDoc(name = "url", text = "the url of the audio stream") String url) {
         try {
-            AudioActionService.audioManager.stream(url, sink);
+            AudioActionService.audioManager.stream(url, AudioActionService.audioManager.getSinkIds(sink));
         } catch (AudioException e) {
             logger.warn("Failed streaming audio url: {}", e.getMessage());
         }
@@ -167,7 +168,7 @@ public class Audio {
 
     /**
      * Converts a float volume to a {@link PercentType} volume and checks if float volume is in the [0;1] range.
-     * 
+     *
      * @param volume
      * @return
      */
