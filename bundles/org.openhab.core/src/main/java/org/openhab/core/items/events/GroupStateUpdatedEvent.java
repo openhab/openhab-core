@@ -29,7 +29,7 @@ import org.openhab.core.types.State;
 public class GroupStateUpdatedEvent extends ItemStateUpdatedEvent {
 
     /**
-     * The group item state changed event type.
+     * The group item state updated event type.
      */
     public static final String TYPE = GroupStateUpdatedEvent.class.getSimpleName();
 
@@ -42,7 +42,7 @@ public class GroupStateUpdatedEvent extends ItemStateUpdatedEvent {
     }
 
     /**
-     * @return the name of the changed group member
+     * @return the name of the updated group member
      */
     public String getMemberName() {
         return this.memberName;
