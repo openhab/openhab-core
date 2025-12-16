@@ -59,7 +59,12 @@ public class PersistenceUpgrader implements Upgrader {
 
         Path persistenceJsonDatabasePath = userdataPath
                 .resolve(Path.of("jsondb", "org.openhab.core.persistence.PersistenceServiceConfiguration.json"));
-        logger.info("Setting default strategy on persistence configurations without strategy '{}'",
+        if (Files.notExists(persistenceJsonDatabasePath)) {
+            // No managed persistence configurations, so no need to upgrade
+            return true;
+        }
+
+        logger.info("Setting default strategy on managed persistence configurations without strategy '{}'",
                 persistenceJsonDatabasePath);
 
         if (!Files.isWritable(persistenceJsonDatabasePath)) {
