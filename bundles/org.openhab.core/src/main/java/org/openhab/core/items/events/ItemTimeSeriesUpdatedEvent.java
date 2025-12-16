@@ -60,6 +60,6 @@ public class ItemTimeSeriesUpdatedEvent extends ItemEvent {
 
     @Override
     public String toString() {
-        return String.format("Item '%s' updated timeseries with %d values.", itemName, timeSeries.size());
+        return String.format("Item '%s' updated time series with %d values.", itemName, timeSeries.size());
     }
 }
