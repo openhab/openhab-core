@@ -30,7 +30,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.YAMLException;
 
 /**
  * The {@link YamlPreprocessorTest} contains tests for the {@link YamlPreprocessor} class.
@@ -195,11 +194,11 @@ public class YamlPreprocessorTest {
     }
 
     @Test
-    void circularInclusionTest() throws IOException {
+    void circularInclusionTest() {
         try {
             YamlPreprocessor.load(SOURCE_PATH.resolve("circularInclusion.yaml"), this::emptyCallback);
             fail("Expected an exception to be thrown");
-        } catch (YAMLException e) {
+        } catch (IOException e) {
             assertThat(e.getMessage(), containsString("Circular inclusion detected"));
         }
     }
