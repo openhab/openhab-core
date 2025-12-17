@@ -197,10 +197,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         Path relativePath = mainWatchPath.relativize(fullPath);
         String modelName = relativePath.toString();
 
-        // always clear the list of includes if it's a model
-        // if it loads correctly, it will be re-populated
-        modelIncludes.removeKey(modelName);
-
         // check here because include files can have any extension
         if (!initializing && processIncludeFile(kind, fullPath)) {
             return;
@@ -211,6 +207,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             logger.trace("Ignored {}", fullPath);
             return;
         }
+
+        // Always clear the list of includes for this model.
+        // If it loads correctly, it will be re-populated
+        modelIncludes.removeKey(modelName);
 
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
