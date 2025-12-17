@@ -62,12 +62,17 @@ public class YamlPreprocessor {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(YamlPreprocessor.class);
 
     public static Object load(Path file, Consumer<Path> includeCallback) throws IOException {
-        return load(file, new HashMap<>(), new HashSet<>(), includeCallback);
+        try {
+            return load(file, new HashMap<>(), new HashSet<>(), includeCallback);
+        } catch (YAMLException e) {
+            // rethrow as IOException so the caller has a simpler error handling and avoids dependency on SnakeYAML
+            throw new IOException(e.getMessage(), e);
+        }
     }
 
     @SuppressWarnings("unchecked")
     static Object load(Path file, Map<String, String> variables, Set<Path> includeStack, Consumer<Path> includeCallback)
-            throws IOException {
+            throws IOException, YAMLException {
         LOGGER.debug("Loading file({}): {} with given vars {}", includeStack.size(), file, variables);
 
         Set<Path> includeStackBranch = new HashSet<>(includeStack);
