@@ -19,6 +19,9 @@ import org.openhab.core.io.console.ConsoleInterpreter;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 
 /**
+ * Wrapper class that bridges console command extensions to OSGi RFC 147 command interface.
+ * This class wraps a ConsoleCommandExtension and exposes it as an OSGi command that can be
+ * invoked through the OSGi command shell.
  *
  * @author Markus Rathgeb - Initial contribution
  */
@@ -27,14 +30,23 @@ public class CommandWrapper {
 
     private final ConsoleCommandExtension command;
 
+    /**
+     * Constructs a new command wrapper.
+     *
+     * @param command the console command extension to wrap
+     */
     public CommandWrapper(final ConsoleCommandExtension command) {
         this.command = command;
     }
 
-    // Called for all commands there is no function found for.
-    // The first argument is the command.
-    // The CommandSession interface provides methods for executing commands and getting and setting session variables.
-    // We could return an Object or void.
+    /**
+     * Main entry point for command execution via OSGi RFC 147 interface.
+     * This method is called when no specific function is found for the command.
+     * The first argument is the command name, and remaining arguments are passed to the command.
+     *
+     * @param args the command arguments, where args[0] is the command name
+     * @throws Exception if command execution fails
+     */
     public void _main(/* CommandSession session, */String[] args) throws Exception {
         if (args.length == 0) {
             System.out.println("missing command");
