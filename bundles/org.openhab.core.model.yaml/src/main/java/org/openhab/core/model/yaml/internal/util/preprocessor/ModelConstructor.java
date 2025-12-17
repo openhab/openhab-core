@@ -53,7 +53,7 @@ class ModelConstructor extends Constructor {
      *
      * Supported syntax (subset of bash variable substitution):
      * - ${var} : Simple variable substitution. If 'var' is not set, returns empty string.
-     * - ${var-default} : If 'var' is set but empty, returns empty string . If not set, returns 'default'.
+     * - ${var-default} : If 'var' is set but empty, returns empty string. If not set, returns 'default'.
      * - ${var:-default} : If 'var' is set but empty, returns 'default'. If not set, returns 'default'.
      * - Default values can be single-quoted, double-quoted, or unquoted.
      *
