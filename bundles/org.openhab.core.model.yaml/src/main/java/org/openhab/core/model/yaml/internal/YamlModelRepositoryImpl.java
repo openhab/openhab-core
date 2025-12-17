@@ -25,6 +25,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -360,7 +361,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     private boolean processIncludeFile(Kind kind, Path fullPath) {
-        Set<String> dependingModels = modelIncludes.getKeys(fullPath);
+        Set<String> dependingModels = new HashSet<>(modelIncludes.getKeys(fullPath)); // Defensive copy
 
         if (dependingModels.isEmpty()) {
             return false;
