@@ -99,8 +99,12 @@ public class YamlPreprocessor {
         // Call this after extracting user variables so that special variables supersede them
         addSpecialVariables(combinedVars, file);
 
-        // second pass: load the file again to perform variable substitution
-        // and process includes and packages
+        // Note: The YAML file must be loaded twice.
+        // The first pass above extracts user-defined variables,
+        // while the second pass below performs variable interpolation.
+        // This cannot be avoided, because SnakeYAML executes interpolation during the construction phase itself.
+        // Once the object graph is built, substitutions cannot be applied retroactively,
+        // so a full reload with the resolved variables is required.
         Map<String, Object> dataMap = (Map<String, Object>) loadYaml(file, combinedVars);
         dataMap.remove(VARIABLES_KEY); // we've already extracted the variables in the first pass
         LOGGER.trace("Loaded data from {}: {}", file, dataMap);
@@ -201,7 +205,9 @@ public class YamlPreprocessor {
     }
 
     // Load the included file (recursively) and return its content
-    // If an error occurs, return an empty map to allow the including file to finish loading
+    // If an error occurs, return an empty map to allow the including file to finish loading.
+    // We don't want to throw an exception here because it would bubble up through the include stack
+    // obscuring the exact include that caused the error.
     private static Object loadIncludeFile(Path file, IncludeObject includeObject, Map<String, String> variables,
             Set<Path> includeStack, Consumer<Path> includeCallback) {
         Path includeFile = file.resolveSibling(includeObject.fileName());
