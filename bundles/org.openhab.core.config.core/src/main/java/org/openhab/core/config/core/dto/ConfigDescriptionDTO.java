@@ -16,11 +16,14 @@ import java.util.List;
 
 import org.openhab.core.config.core.ConfigDescription;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * {@link ConfigDescriptionDTO} is a data transfer object for {@link ConfigDescription}.
  *
  * @author Dennis Nobel - Initial contribution
  */
+@Schema(name = "ConfigDescription")
 public class ConfigDescriptionDTO {
 
     public String uri;

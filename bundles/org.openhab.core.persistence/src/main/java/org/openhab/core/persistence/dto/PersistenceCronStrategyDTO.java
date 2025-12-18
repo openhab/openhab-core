@@ -14,12 +14,15 @@ package org.openhab.core.persistence.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * The {@link PersistenceCronStrategyDTO} is used for transferring persistence cron
  * strategies
  *
  * @author Jan N. Klug - Initial contribution
  */
+@Schema(name = "PersistenceCronStrategy")
 @NonNullByDefault
 public class PersistenceCronStrategyDTO {
     public String name = "";

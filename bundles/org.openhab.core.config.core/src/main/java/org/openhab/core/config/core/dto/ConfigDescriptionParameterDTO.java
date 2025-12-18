@@ -19,6 +19,8 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize parameter of a configuration description.
  *
@@ -27,6 +29,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Chris Jackson - Added group, advanced, limitToOptions, multipleLimit, verify attributes
  * @author Thomas Höfer - Added unit
  */
+@Schema(name = "ConfigDescriptionParameter")
 public class ConfigDescriptionParameterDTO {
 
     public String context;

@@ -15,11 +15,14 @@ package org.openhab.core.io.rest.sitemap.internal;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize page content.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Schema(name = "Page")
 public class PageDTO {
 
     public String id;

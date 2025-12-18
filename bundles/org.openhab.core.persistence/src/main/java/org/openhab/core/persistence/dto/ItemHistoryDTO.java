@@ -20,11 +20,14 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.State;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a java bean that is used to serialize items to JSON.
  *
  * @author Chris Jackson - Initial contribution
  */
+@Schema(name = "ItemHistory")
 public class ItemHistoryDTO {
 
     public String name;

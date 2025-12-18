@@ -14,6 +14,8 @@ package org.openhab.core.io.rest.auth.internal;
 
 import org.openhab.core.auth.User;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO object for a successful token endpoint response, as per RFC 6749, Section 5.1.
  *
@@ -22,6 +24,7 @@ import org.openhab.core.auth.User;
  *
  * @author Yannick Schaus - initial contribution
  */
+@Schema(name = "TokenResponse")
 public class TokenResponseDTO {
     public String access_token;
     public String token_type;

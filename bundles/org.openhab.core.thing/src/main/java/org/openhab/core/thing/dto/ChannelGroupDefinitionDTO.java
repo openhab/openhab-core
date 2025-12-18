@@ -14,11 +14,14 @@ package org.openhab.core.thing.dto;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize channel group definitions.
  *
  * @author Dennis Nobel - Initial contribution
  */
+@Schema(name = "ChannelGroupDefinition")
 public class ChannelGroupDefinitionDTO {
 
     public String id;

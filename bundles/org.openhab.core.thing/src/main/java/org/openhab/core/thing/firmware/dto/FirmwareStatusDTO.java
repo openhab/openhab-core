@@ -15,11 +15,14 @@ package org.openhab.core.thing.firmware.dto;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize firmware status information.
  *
  * @author Aoun Bukhari - Initial contribution
  */
+@Schema(name = "FirmwareStatus")
 @NonNullByDefault
 public class FirmwareStatusDTO {
     public final String status;

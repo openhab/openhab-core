@@ -17,11 +17,14 @@ import java.util.Set;
 
 import org.openhab.core.thing.dto.ChannelDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize channels with dynamic data like linked items.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Schema(name = "EnrichedChannel")
 public class EnrichedChannelDTO extends ChannelDTO {
 
     public final Set<String> linkedItems;

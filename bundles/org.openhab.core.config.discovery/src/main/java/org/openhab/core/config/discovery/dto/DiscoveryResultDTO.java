@@ -18,12 +18,15 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize discovery results.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Thomas Höfer - Added representation
  */
+@Schema(name = "DiscoveryResult")
 @NonNullByDefault
 public class DiscoveryResultDTO {
 

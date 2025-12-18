@@ -18,6 +18,8 @@ import java.util.Map;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used with to serialize thing types.
  *
@@ -27,6 +29,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
  * @author Miki Jankov - Introducing StrippedThingTypeDTO
  * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
+@Schema(name = "ThingType")
 public class ThingTypeDTO extends StrippedThingTypeDTO {
 
     public List<ChannelDefinitionDTO> channels;

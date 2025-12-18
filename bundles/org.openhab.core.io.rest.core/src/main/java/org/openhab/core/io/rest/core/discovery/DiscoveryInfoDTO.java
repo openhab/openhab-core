@@ -15,11 +15,14 @@ package org.openhab.core.io.rest.core.discovery;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize the information about binding discovery.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "DiscoveryInfo")
 @NonNullByDefault
 public class DiscoveryInfoDTO {
 

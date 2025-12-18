@@ -14,11 +14,14 @@ package org.openhab.core.io.rest.core.fileformat;
 
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object to serialize a channel link for an item contained in a file format.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "FileFormatChannelLink")
 public class FileFormatChannelLinkDTO {
 
     public String channelUID;

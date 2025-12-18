@@ -14,11 +14,14 @@ package org.openhab.core.thing.profiles.dto;
 
 import java.util.Collection;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * DTO for profile types
  *
  * @author Stefan Triller - Initial contribution
  */
+@Schema(name = "ProfileType")
 public class ProfileTypeDTO {
 
     public String uid;

@@ -14,11 +14,14 @@ package org.openhab.core.persistence.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * The {@link PersistenceStrategyDTO} is used for transferring persistence strategies.
  *
  * @author Jan N. Klug - Initial contribution
  */
+@Schema(name = "PersistenceStrategy")
 @NonNullByDefault
 public class PersistenceStrategyDTO {
     public String type;
