@@ -44,7 +44,7 @@ public class YamlPreprocessorTest {
 
     @Test
     public void booleanParserTest() throws IOException {
-        Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>());
+        Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), SOURCE_PATH.resolve("dummy.yaml"));
 
         assertThat(yaml.load("true"), equalTo(true));
         assertThat(yaml.load("TRUE"), equalTo(true));
