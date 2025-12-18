@@ -200,7 +200,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         Path relativePath = mainWatchPath.relativize(fullPath);
         String modelName = relativePath.toString();
 
-        // check here because include files can have any extension
+        // Check here because include files can have any extension
+        // We don't want to process include files during initialization to avoid reloading models multiple times
         if (!initializing && processIncludeFile(kind, fullPath)) {
             return;
         }
