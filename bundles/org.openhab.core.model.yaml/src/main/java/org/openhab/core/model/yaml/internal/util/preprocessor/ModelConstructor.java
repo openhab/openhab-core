@@ -230,10 +230,13 @@ class ModelConstructor extends Constructor {
                     return Map.of();
                 }
 
-                @SuppressWarnings("unchecked")
-                Map<String, String> vars = Optional.ofNullable(includeOptions.get("vars")).filter(Map.class::isInstance)
-                        .map(Map.class::cast).orElse(Map.of());
-                return new IncludeObject(fileName, vars);
+                try {
+                    Map<String, String> vars = Optional.ofNullable(includeOptions.get("vars"))
+                            .filter(Map.class::isInstance).map(Map.class::cast).orElse(Map.of());
+                    return new IncludeObject(fileName, vars);
+                } catch (ClassCastException e) {
+                    throw new IllegalArgumentException("Invalid 'vars' type in !include: " + mappingNode, e);
+                }
             } else {
                 logger.warn("Invalid !include argument type: {}", node == null ? null : node.getClass().getName());
             }
