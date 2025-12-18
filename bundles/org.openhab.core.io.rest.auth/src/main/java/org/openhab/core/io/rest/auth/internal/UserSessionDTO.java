@@ -14,11 +14,14 @@ package org.openhab.core.io.rest.auth.internal;
 
 import java.util.Date;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO representing a user session, without the sensible information.
  *
  * @author Yannick Schaus - initial contribution
  */
+@Schema(name = "UserSession")
 public class UserSessionDTO {
     public String sessionId;
     public Date createdTime;

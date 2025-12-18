@@ -15,11 +15,14 @@ package org.openhab.core.automation.rest.internal.dto;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.dto.RuleDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize rules with dynamic data like the status.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Schema(name = "EnrichedRule")
 public class EnrichedRuleDTO extends RuleDTO {
 
     public RuleStatusInfo status;

@@ -14,12 +14,15 @@ package org.openhab.core.io.rest.core.fileformat;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object to serialize the different components that can be contained
  * in a file format (items, things, ...) including an optional list of warnings.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "ExtendedFileFormat")
 public class ExtendedFileFormatDTO extends FileFormatDTO {
 
     public List<String> warnings;

@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.AdditionalPropertiesValue;
+
 /**
  * A UIComponent represents a piece of UI element for a client frontend to render; it is kept very simple and delegates
  * the actual rendering and behavior to the frontend.
@@ -33,6 +36,7 @@ import java.util.Map;
 public class UIComponent {
     String component;
 
+    @Schema(additionalProperties = AdditionalPropertiesValue.TRUE)
     Map<String, Object> config;
 
     Map<String, List<UIComponent>> slots = null;
@@ -59,6 +63,7 @@ public class UIComponent {
      *
      * @return the component type
      */
+    @Schema(hidden = true)
     public String getType() {
         return component;
     }
