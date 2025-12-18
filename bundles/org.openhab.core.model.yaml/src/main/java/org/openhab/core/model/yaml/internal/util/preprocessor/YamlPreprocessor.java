@@ -96,6 +96,7 @@ public class YamlPreprocessor {
             return yamlData;
         }
 
+        // Call this after extracting user variables so that special variables supersede them
         addSpecialVariables(combinedVars, file);
 
         // second pass: load the file again to perform variable substitution
@@ -136,11 +137,14 @@ public class YamlPreprocessor {
         Object variablesSection = dataMap.get(VARIABLES_KEY);
         if (variablesSection instanceof Map<?, ?> variablesMap) {
             variablesMap.forEach((key, value) -> {
-                if (value instanceof Map) {
+                if (key == null) {
+                    LOGGER.warn("Encountered variable with null key in '{}' section; value '{}' will be ignored",
+                            VARIABLES_KEY, value);
+                } else if (value instanceof Map) {
                     LOGGER.warn("Value type for variable '{}' cannot be a map", key);
                 } else if (value instanceof List) {
                     LOGGER.warn("Value type for variable '{}' cannot be a list", key);
-                } else if (value != null && key != null) {
+                } else if (value != null) {
                     variables.putIfAbsent(key.toString(), value.toString());
                 }
             });
@@ -152,6 +156,7 @@ public class YamlPreprocessor {
     }
 
     // Add special variables so they get interpolated in the second pass
+    // Special variables will override any user-defined variables with the same name
     private static void addSpecialVariables(Map<String, String> variables, Path file) {
         Path absolutePath = file.toAbsolutePath();
         variables.put("__FILE__", absolutePath.toString());
@@ -195,6 +200,8 @@ public class YamlPreprocessor {
         return data;
     }
 
+    // Load the included file (recursively) and return its content
+    // If an error occurs, return an empty map to allow the including file to finish loading
     private static Object loadIncludeFile(Path file, IncludeObject includeObject, Map<String, String> variables,
             Set<Path> includeStack, Consumer<Path> includeCallback) {
         Path includeFile = file.resolveSibling(includeObject.fileName());

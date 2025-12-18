@@ -76,7 +76,8 @@ public class YamlPreprocessorTest {
     @Test
     void anchorsTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("anchors.yaml"),
-                this::emptyCallback);
+                path -> {
+                });
         assertThat(data.get("baz"), equalTo("bar"));
         assertThat(data.get("bar"), equalTo("qux"));
     }
@@ -94,7 +95,8 @@ public class YamlPreprocessorTest {
     // from the resulting data structure
     void extraElementsRemovedTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("extraElementsRemoved.yaml"), this::emptyCallback);
+                .load(SOURCE_PATH.resolve("extraElementsRemoved.yaml"), path -> {
+                });
         assertNull(data.get("variables"));
         assertNull(data.get("packages"));
     }
@@ -102,7 +104,8 @@ public class YamlPreprocessorTest {
     @Test
     public void simpleVariableSubstitutionsTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("simpleVariableSubstitutions.yaml"), this::emptyCallback);
+                .load(SOURCE_PATH.resolve("simpleVariableSubstitutions.yaml"), path -> {
+                });
         assertThat(data.get("plainkey"), equalTo("value1"));
         assertThat(data.get("dynamickey"), equalTo("dynamicvalue"));
 
@@ -118,14 +121,16 @@ public class YamlPreprocessorTest {
     @Test
     public void nestedVariablesTest() throws IOException {
         Map<String, String> data = (Map<String, String>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("nestedVariables.yaml"), this::emptyCallback);
+                .load(SOURCE_PATH.resolve("nestedVariables.yaml"), path -> {
+                });
         assertThat(data.get("key"), equalTo("value"));
     }
 
     @Test
     void variableSyntaxTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("variableSyntax.yaml"), this::emptyCallback);
+                .load(SOURCE_PATH.resolve("variableSyntax.yaml"), path -> {
+                });
 
         assertThat(data.get("empty_no_default"), equalTo(""));
         assertThat(data.get("absent_no_default"), equalTo(""));
@@ -151,7 +156,8 @@ public class YamlPreprocessorTest {
     @Test
     void include1DeepTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("include1Deep.yaml"),
-                this::emptyCallback);
+                path -> {
+                });
 
         assertThat(getNestedValue(data, "toplevel", "includedkey"), equalTo("value"));
     }
@@ -159,7 +165,8 @@ public class YamlPreprocessorTest {
     @Test
     void include2DeepTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("include2Deep.yaml"),
-                this::emptyCallback);
+                path -> {
+                });
 
         assertThat(getNestedValue(data, "toplevel", "level1", "level2"), equalTo("foo"));
     }
@@ -167,7 +174,8 @@ public class YamlPreprocessorTest {
     @Test
     void predefinedVarsTest() throws IOException {
         Path sourcePath = SOURCE_PATH.resolve("predefinedVars.yaml");
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(sourcePath, this::emptyCallback);
+        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(sourcePath, path -> {
+        });
 
         assertThat(data.get("file"), equalTo(sourcePath.toAbsolutePath().toString()));
         assertThat(data.get("filename"), equalTo("predefinedVars"));
@@ -178,7 +186,8 @@ public class YamlPreprocessorTest {
     @Test
     void predefinedVarsNotOverridableTest() throws IOException {
         Path sourcePath = SOURCE_PATH.resolve("predefinedVarsNotOverridable.yaml");
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(sourcePath, this::emptyCallback);
+        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(sourcePath, path -> {
+        });
 
         Path file = sourcePath;
         assertThat(data.get("file"), equalTo(file.toAbsolutePath().toString()));
@@ -196,7 +205,8 @@ public class YamlPreprocessorTest {
     @Test
     void circularInclusionTest() {
         try {
-            YamlPreprocessor.load(SOURCE_PATH.resolve("circularInclusion.yaml"), this::emptyCallback);
+            YamlPreprocessor.load(SOURCE_PATH.resolve("circularInclusion.yaml"), path -> {
+            });
             fail("Expected an exception to be thrown");
         } catch (IOException e) {
             assertThat(e.getMessage(), containsString("Circular inclusion detected"));
@@ -206,7 +216,8 @@ public class YamlPreprocessorTest {
     @Test
     void includedTopLevelVarsTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("includedTopLevelVars.yaml"), this::emptyCallback);
+                .load(SOURCE_PATH.resolve("includedTopLevelVars.yaml"), path -> {
+                });
 
         assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_toplevel"));
     }
@@ -214,7 +225,8 @@ public class YamlPreprocessorTest {
     @Test
     void includedTopLevelFileVarsTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("includedTopLevelFileVars.yaml"), this::emptyCallback);
+                .load(SOURCE_PATH.resolve("includedTopLevelFileVars.yaml"), path -> {
+                });
 
         assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_include_level"));
     }
@@ -222,7 +234,8 @@ public class YamlPreprocessorTest {
     @Test
     void varsPropagate2LevelsTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("varsPropagate2Levels.yaml"), this::emptyCallback);
+                .load(SOURCE_PATH.resolve("varsPropagate2Levels.yaml"), path -> {
+                });
 
         assertThat(getNestedValue(data, "toplevel", "data", "data"), equalTo("toplevel"));
     }
@@ -230,7 +243,8 @@ public class YamlPreprocessorTest {
     @Test
     void packagesTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("packages.yaml"),
-                this::emptyCallback);
+                path -> {
+                });
 
         // defined in the package
         assertThat(getNestedValue(data, "things", "thing1", "label"), equalTo("label1"));
@@ -252,7 +266,8 @@ public class YamlPreprocessorTest {
     @Test
     void hiddenKeysTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("hiddenKeys.yaml"),
-                this::emptyCallback);
+                path -> {
+                });
 
         assertThat(getNestedValue(data, ".energy_type"), nullValue());
         assertThat(getNestedValue(data, "items", "energy_1", "type"), equalTo("number"));
@@ -263,11 +278,6 @@ public class YamlPreprocessorTest {
         assertThat(getNestedValue(data, "items", "energy_2", "dimension"), equalTo("Energy"));
         assertThat(getNestedValue(data, "items", "energy_2", "unit"), equalTo("kWh"));
         assertThat(getNestedValue(data, "items", "energy_2", "label"), equalTo("Energy_2"));
-    }
-
-    void emptyCallback(Path includeFile) {
-        // This method is intentionally left empty to satisfy the callback interface
-        // in the tests where no action is needed on include files.
     }
 
     /**
