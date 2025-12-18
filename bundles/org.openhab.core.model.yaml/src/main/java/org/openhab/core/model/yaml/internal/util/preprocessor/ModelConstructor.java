@@ -138,7 +138,7 @@ class ModelConstructor extends Constructor {
                     logger.debug("Interpolating variable {} => {}", variableName, resolved);
                     return Matcher.quoteReplacement(resolved);
                 });
-                if (nestedLevel++ > MAX_VAR_NESTING_DEPTH) {
+                if (nestedLevel++ >= MAX_VAR_NESTING_DEPTH) {
                     throw new YAMLException("Variable nesting is too deep in " + value);
                 }
                 matcher = VARIABLE_PATTERN.matcher(interpolated);
