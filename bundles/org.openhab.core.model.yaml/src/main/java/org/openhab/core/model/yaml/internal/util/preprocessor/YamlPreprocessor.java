@@ -123,7 +123,7 @@ public class YamlPreprocessor {
 
     private static Object loadYaml(Path path, Map<String, String> variables) throws IOException {
         try (InputStream inputStream = Files.newInputStream(path)) {
-            Yaml yaml = newYaml(variables);
+            Yaml yaml = newYaml(variables, path);
             return yaml.load(inputStream);
         } // let the caller catch the exception and log a message
     }
@@ -205,9 +205,6 @@ public class YamlPreprocessor {
     }
 
     // Load the included file (recursively) and return its content
-    // If an error occurs, return an empty map to allow the including file to finish loading.
-    // We don't want to throw an exception here because it would bubble up through the include stack
-    // obscuring the exact include that caused the error.
     private static Object loadIncludeFile(Path file, IncludeObject includeObject, Map<String, String> variables,
             Set<Path> includeStack, Consumer<Path> includeCallback) {
         Path includeFile = file.resolveSibling(includeObject.fileName());
@@ -218,9 +215,8 @@ public class YamlPreprocessor {
             includeCallback.accept(includeFile);
             return loadedFile;
         } catch (IOException e) {
-            LOGGER.warn("Error loading include file '{}' (included from '{}'): {}", includeObject.fileName(), file,
-                    e.getMessage());
-            return Map.of();
+            throw new YAMLException(
+                    "Error loading include file '" + includeObject.fileName() + "' (included from '" + file + "')", e);
         }
     }
 
@@ -270,8 +266,8 @@ public class YamlPreprocessor {
                 Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> replacement, LinkedHashMap::new));
     }
 
-    static Yaml newYaml(Map<String, String> variables) {
-        return new Yaml(new ModelConstructor(variables), new Representer(new DumperOptions()), new DumperOptions(),
-                new ModelResolver());
+    static Yaml newYaml(Map<String, String> variables, Path path) {
+        return new Yaml(new ModelConstructor(variables, path), new Representer(new DumperOptions()),
+                new DumperOptions(), new ModelResolver());
     }
 }
