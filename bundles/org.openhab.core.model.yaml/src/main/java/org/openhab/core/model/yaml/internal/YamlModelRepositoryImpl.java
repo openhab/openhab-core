@@ -185,7 +185,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         e.getMessage());
             }
         });
-        initializing = false;
+        synchronized (this) {
+            initializing = false;
+        }
     }
 
     @Deactivate
@@ -361,7 +363,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     private boolean processIncludeFile(Kind kind, Path fullPath) {
-        Set<String> dependingModels = new HashSet<>(modelIncludes.getKeys(fullPath)); // Defensive copy
+        // Take a snapshot of the depending models. While getKeys(...) returns an unmodifiable Set,
+        // the underlying modelIncludes structure can be modified indirectly by processWatchEvent(...)
+        // (which is invoked below for each depending model). Iterating over the live key view could
+        // therefore lead to ConcurrentModificationException; iterating over this defensive copy is safe.
+        Set<String> dependingModels = new HashSet<>(modelIncludes.getKeys(fullPath));
 
         if (dependingModels.isEmpty()) {
             return false;
@@ -377,12 +383,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
         dependingModels.forEach(modelName -> {
             Path modelPath = mainWatchPath.resolve(modelName);
-            try {
-                // reprocess the model that depends on this include file
-                processWatchEvent(Kind.MODIFY, modelPath);
-            } catch (Exception e) {
-                logger.warn("Failed to reprocess model {} after include file change: {}", modelName, e.getMessage());
-            }
+            // reprocess the model that depends on this include file
+            processWatchEvent(Kind.MODIFY, modelPath);
         });
 
         return true;
