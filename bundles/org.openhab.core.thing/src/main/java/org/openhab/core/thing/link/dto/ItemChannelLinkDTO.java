@@ -14,11 +14,14 @@ package org.openhab.core.thing.link.dto;
 
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize links.
  *
  * @author Dennis Nobel - Initial contribution
  */
+@Schema(name = "ItemChannelLink")
 public class ItemChannelLinkDTO extends AbstractLinkDTO {
 
     public String channelUID;
