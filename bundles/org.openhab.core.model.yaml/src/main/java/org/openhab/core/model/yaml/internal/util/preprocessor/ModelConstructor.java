@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -88,11 +89,13 @@ class ModelConstructor extends Constructor {
     private final Logger logger = LoggerFactory.getLogger(ModelConstructor.class);
 
     private final Map<String, String> variables;
+    private final Path currentFile;
 
-    public ModelConstructor(Map<String, String> variables) {
+    public ModelConstructor(Map<String, String> variables, Path currentFile) {
         super(new LoaderOptions());
 
         this.variables = variables;
+        this.currentFile = currentFile;
 
         this.yamlConstructors.put(INCLUDE_TAG, new ConstructInclude());
         this.yamlConstructors.put(Tag.STR, new ConstructInterpolation());
@@ -139,7 +142,7 @@ class ModelConstructor extends Constructor {
                     return Matcher.quoteReplacement(resolved);
                 });
                 if (nestedLevel++ >= MAX_VAR_NESTING_DEPTH) {
-                    throw new YAMLException("Variable nesting is too deep in " + value);
+                    throw new YAMLException(currentFile + ": variable nesting is too deep in " + value);
                 }
                 matcher = VARIABLE_PATTERN.matcher(interpolated);
             } while (matcher.find());
@@ -153,8 +156,8 @@ class ModelConstructor extends Constructor {
             // now find the correct constructor for the new node
             Construct constructor = yamlConstructors.get(newTag);
             if (constructor == null) {
-                throw new YAMLException("No constructor found for substituted value '%s' => '%s' with tag %s"
-                        .formatted(value, interpolated, newTag));
+                throw new YAMLException("%s: no constructor found for substituted value '%s' => '%s' with tag %s"
+                        .formatted(currentFile, value, interpolated, newTag));
             }
             // finally, construct the new node
             return constructor.construct(replacedNode);
@@ -226,21 +229,20 @@ class ModelConstructor extends Constructor {
 
                 String fileName = (String) includeOptions.get("file");
                 if (fileName == null) {
-                    logger.warn("Missing 'file' key in !include: {}", includeOptions);
-                    return Map.of();
+                    throw new YAMLException(currentFile + ": missing 'file' key in !include: " + includeOptions);
                 }
 
                 try {
-                    Map<String, String> vars = Optional.ofNullable(includeOptions.get("vars"))
-                            .filter(Map.class::isInstance).map(Map.class::cast).orElse(Map.of());
+                    Map<String, String> vars = Optional.ofNullable(includeOptions.get("vars")).map(Map.class::cast)
+                            .orElse(Map.of());
                     return new IncludeObject(fileName, vars);
                 } catch (ClassCastException e) {
-                    throw new IllegalArgumentException("Invalid 'vars' type in !include: " + mappingNode, e);
+                    throw new YAMLException(currentFile + ": invalid 'vars' type in !include file: " + fileName
+                            + ", vars: " + includeOptions.get("vars") + " (not a map)", e);
                 }
-            } else {
-                logger.warn("Invalid !include argument type: {}", node == null ? null : node.getClass().getName());
             }
-            return Map.of();
+            throw new YAMLException(currentFile + ": invalid !include argument type: "
+                    + (node == null ? null : node.getClass().getName()));
         }
     }
 }
