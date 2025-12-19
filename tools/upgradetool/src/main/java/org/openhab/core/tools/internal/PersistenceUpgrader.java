@@ -93,9 +93,6 @@ public class PersistenceUpgrader implements Upgrader {
             }
         }
 
-        logger.info("Setting default strategy on managed persistence configurations without strategy '{}'",
-                persistenceJsonDatabasePath);
-
         if (!Files.isWritable(persistenceJsonDatabasePath)) {
             logger.error("Cannot access persistence configuration database '{}', check path and access rights.",
                     persistenceJsonDatabasePath);
@@ -114,7 +111,7 @@ public class PersistenceUpgrader implements Upgrader {
             PersistenceServiceConfigurationDTO serviceConfigDTO = defaultServiceConfig(serviceId);
             if (serviceConfigDTO != null) {
                 persistenceStorage.put(serviceId, serviceConfigDTO);
-                logger.info("{}: added strategy configurations", serviceId);
+                logger.info("{}: added strategy configurations for persistence service without configuration", serviceId);
             }
         });
 
