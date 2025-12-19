@@ -61,16 +61,8 @@ public class StateAndCommandProvider {
 
         STATES.add(UnDefType.UNDEF);
         STATES.add(UnDefType.NULL);
-        STATES.add(OnOffType.ON);
-        STATES.add(OnOffType.OFF);
-        STATES.add(UpDownType.UP);
-        STATES.add(UpDownType.DOWN);
         STATES.add(OpenClosedType.OPEN);
         STATES.add(OpenClosedType.CLOSED);
-        STATES.add(PlayPauseType.PLAY);
-        STATES.add(PlayPauseType.PAUSE);
-        STATES.add(RewindFastforwardType.REWIND);
-        STATES.add(RewindFastforwardType.FASTFORWARD);
 
         TYPES.addAll(COMMANDS);
         TYPES.addAll(STATES);
@@ -78,13 +70,5 @@ public class StateAndCommandProvider {
 
     static public Iterable<Type> getAllTypes() {
         return TYPES;
-    }
-
-    static public Iterable<Command> getAllCommands() {
-        return COMMANDS;
-    }
-
-    static public Iterable<State> getAllStates() {
-        return STATES;
     }
 }
