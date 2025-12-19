@@ -281,7 +281,7 @@ public class YamlPreprocessorTest {
     }
 
     /**
-     * Retrieves a nested value from a map using the provided keys.
+     * Retrieve a nested value from a map using the provided keys.
      * <p>
      * This method navigates through a map structure using the given keys in order.
      * If a key is not found or the current value is not a map, the method returns {@code null}.
