@@ -111,7 +111,8 @@ public class PersistenceUpgrader implements Upgrader {
             PersistenceServiceConfigurationDTO serviceConfigDTO = defaultServiceConfig(serviceId);
             if (serviceConfigDTO != null) {
                 persistenceStorage.put(serviceId, serviceConfigDTO);
-                logger.info("{}: added strategy configurations for persistence service without configuration", serviceId);
+                logger.info("{}: added strategy configurations for persistence service without configuration",
+                        serviceId);
             }
         });
 
