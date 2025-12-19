@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -59,13 +60,17 @@ public class PersistenceUpgrader implements Upgrader {
             logger.error("{} skipped: no userdata directory found.", getName());
             return false;
         }
+        if (confPath == null) {
+            logger.error("{} skipped: no conf directory found.", getName());
+            return false;
+        }
 
         List<String> managedConfigs;
         try {
             managedConfigs = managedPersistenceConfigs(installedPersistenceAddons(userdataPath),
                     unmanagedPersistenceConfigs(confPath));
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("{} skipped: failed to read config: {}", getName(), e.getMessage());
             return false;
         }
         if (managedConfigs.isEmpty()) {
@@ -146,13 +151,12 @@ public class PersistenceUpgrader implements Upgrader {
         List<String> configLines;
         configLines = Files.readAllLines(addonsConfigPath);
 
-        for (int i = 0; i < configLines.size(); i++) {
-            String line = Objects.requireNonNull(configLines.get(i));
+        for (String line : configLines) {
             if (line.startsWith("persistence")) {
                 String[] persistenceLine = line.split("=");
                 if (persistenceLine.length > 1) {
                     String[] persistenceAddons = persistenceLine[1].replace("\"", "").split(",");
-                    return List.of(persistenceAddons).stream().map(p -> p.trim()).toList();
+                    return Stream.of(persistenceAddons).map(String::trim).toList();
                 }
             }
         }
@@ -161,8 +165,10 @@ public class PersistenceUpgrader implements Upgrader {
 
     private List<String> unmanagedPersistenceConfigs(Path configPath) throws IOException {
         Path persistenceConfigPath = configPath.resolve("persistence");
-        return Files.list(persistenceConfigPath).filter(configFile -> configFile.endsWith(".persist"))
-                .map(configFile -> configFile.getFileName().toString().replace(".persist", "")).toList();
+        try (Stream<Path> files = Files.list(persistenceConfigPath)) {
+            return files.filter(configFile -> configFile.endsWith(".persist"))
+                    .map(configFile -> configFile.getFileName().toString().replace(".persist", "")).toList();
+        }
     }
 
     private List<String> managedPersistenceConfigs(List<String> installedAddons, List<String> unmanagedConfigs) {
