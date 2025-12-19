@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -113,8 +112,13 @@ public class YamlPreprocessor {
                 includeCallback);
         LOGGER.trace("Loaded includes from {}: {}", file, dataMap);
 
-        Map<String, Object> packages = (Map<String, Object>) dataMap.remove(PACKAGES_KEY);
-        dataMap = mergePackages(dataMap, packages);
+        Object packagesObj = dataMap.remove(PACKAGES_KEY);
+        if (packagesObj instanceof Map<?, ?> packages) {
+            mergePackages(dataMap, (Map<String, Object>) packages);
+        } else if (packagesObj != null) {
+            LOGGER.warn("{}: The 'packages' section is not a map", file);
+        }
+
         LOGGER.trace("Combined data from {}: {}", file, dataMap);
 
         dataMap = excludeHiddenKeys(dataMap);
@@ -223,11 +227,7 @@ public class YamlPreprocessor {
     // Recursively merge packages into the main data map
     // if the same key exists in both the main map and the package, the main map value is kept
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> mergePackages(Map<String, Object> mainData,
-            @Nullable Map<String, Object> packages) {
-        if (packages == null) {
-            return mainData;
-        }
+    private static void mergePackages(Map<String, Object> mainData, Map<String, Object> packages) {
         packages.forEach((packageName, pkg) -> {
             if (pkg instanceof Map) {
                 mergeElements(mainData, (Map<String, Object>) pkg);
@@ -235,11 +235,18 @@ public class YamlPreprocessor {
                 LOGGER.warn("Package '{}' is not a map: {}", packageName, pkg);
             }
         });
-        return mainData;
     }
 
+    /**
+     * Recursively merges packageData into mainData.
+     * - Maps are merged in-place (recursive composition)
+     * - Lists are concatenated (creates new list with both elements)
+     * - Other values in packageData overwrite mainData
+     *
+     * Note that mainData is modified in-place.
+     */
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> mergeElements(Map<String, Object> mainData, Map<String, Object> packageData) {
+    private static void mergeElements(Map<String, Object> mainData, Map<String, Object> packageData) {
         packageData.forEach((key, value) -> {
             if (mainData.containsKey(key)) {
                 Object mainValue = mainData.get(key);
@@ -257,7 +264,6 @@ public class YamlPreprocessor {
                 mainData.put(key, value);
             }
         });
-        return mainData;
     }
 
     private static Map<String, Object> excludeHiddenKeys(Map<String, Object> dataMap) {
