@@ -82,9 +82,10 @@ public class PersistenceUpgrader implements Upgrader {
                 .resolve(Path.of("jsondb", "org.openhab.core.persistence.PersistenceServiceConfiguration.json"));
         if (Files.notExists(persistenceJsonDatabasePath)) {
             // No configuration, but persistence addons are installed and there is no unmanaged configuration for it, so
-            // it needs to be created
+            // it needs to be created. Add JSON content to avoid warning from JSONDB.
             try {
                 Files.createFile(persistenceJsonDatabasePath);
+                Files.writeString(persistenceJsonDatabasePath, "{}");
             } catch (IOException e) {
                 logger.error("Cannot create persistence configuration database '{}', check path and access rights.",
                         persistenceJsonDatabasePath);
