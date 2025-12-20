@@ -16,12 +16,15 @@ import java.util.Map;
 
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is an enriched data transfer object that is used to serialize items channel links with dynamic data like the
  * editable flag.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@Schema(name = "EnrichedItemChannelLink")
 public class EnrichedItemChannelLinkDTO extends ItemChannelLinkDTO {
 
     public Boolean editable;

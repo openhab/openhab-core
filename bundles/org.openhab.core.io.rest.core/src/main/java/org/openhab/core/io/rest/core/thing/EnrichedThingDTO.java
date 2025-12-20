@@ -19,6 +19,8 @@ import org.openhab.core.thing.dto.AbstractThingDTO;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize things with dynamic data like the status.
  *
@@ -28,6 +30,7 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
  * @author Wouter Born - Let (Enriched)ThingDTO extend AbstractThingDTO so both can define their own "channels" type
  * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
+@Schema(name = "EnrichedThing")
 public class EnrichedThingDTO extends AbstractThingDTO {
 
     public List<EnrichedChannelDTO> channels;

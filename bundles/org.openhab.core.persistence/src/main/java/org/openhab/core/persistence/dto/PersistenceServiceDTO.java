@@ -12,11 +12,14 @@
  */
 package org.openhab.core.persistence.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a java bean that is used to serialize services to JSON.
  *
  * @author Chris Jackson - Initial contribution
  */
+@Schema(name = "PersistenceService")
 public class PersistenceServiceDTO {
     public PersistenceServiceDTO() {
     }

@@ -273,6 +273,7 @@ public class ThingActionsResource implements RESTResource {
         return scopeAnnotation.name();
     }
 
+    @Schema(name = "ThingAction")
     private static class ThingActionDTO {
         public String actionUid = "";
 
