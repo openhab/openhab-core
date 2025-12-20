@@ -78,7 +78,7 @@ public class PersistenceUpgrader implements Upgrader {
             // No managed persistence configurations, so no need to upgrade
             return true;
         }
-        logger.debug("found {} managed persistence configurations: {}", managedConfigs.size(),
+        logger.debug("found {} (missing) managed persistence configurations: {}", managedConfigs.size(),
                 String.join(",", managedConfigs));
         logger.debug("found {} unmanaged persistence configurations: {}", unmanagedConfigs.size(),
                 String.join(",", unmanagedConfigs));
