@@ -15,6 +15,8 @@ package org.openhab.core.tools.internal;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -90,6 +92,11 @@ public class PersistenceUpgrader implements Upgrader {
             // it needs to be created. Add JSON content to avoid warning from JSONDB.
             try {
                 Files.createFile(persistenceJsonDatabasePath);
+                if (Files.getFileStore(persistenceJsonDatabasePath)
+                        .supportsFileAttributeView(PosixFileAttributeView.class)) {
+                    Files.setPosixFilePermissions(persistenceJsonDatabasePath,
+                            PosixFilePermissions.fromString("rw-rw-rw-"));
+                }
                 Files.writeString(persistenceJsonDatabasePath, "{}");
             } catch (IOException e) {
                 logger.error("Cannot create persistence configuration database '{}', check path and access rights.",
