@@ -65,10 +65,11 @@ public class PersistenceUpgrader implements Upgrader {
             return false;
         }
 
+        List<String> unmanagedConfigs;
         List<String> managedConfigs;
         try {
-            managedConfigs = managedPersistenceConfigs(installedPersistenceAddons(userdataPath),
-                    unmanagedPersistenceConfigs(confPath));
+            unmanagedConfigs = unmanagedPersistenceConfigs(confPath);
+            managedConfigs = managedPersistenceConfigs(installedPersistenceAddons(userdataPath), unmanagedConfigs);
         } catch (IOException e) {
             logger.error("{} skipped: failed to read config: {}", getName(), e.getMessage());
             return false;
@@ -77,6 +78,10 @@ public class PersistenceUpgrader implements Upgrader {
             // No managed persistence configurations, so no need to upgrade
             return true;
         }
+        logger.debug("found {} managed persistence configurations: {}", managedConfigs.size(),
+                String.join(",", managedConfigs));
+        logger.debug("found {} unmanaged persistence configurations: {}", unmanagedConfigs.size(),
+                String.join(",", unmanagedConfigs));
 
         Path persistenceJsonDatabasePath = userdataPath
                 .resolve(Path.of("jsondb", "org.openhab.core.persistence.PersistenceServiceConfiguration.json"));
@@ -165,8 +170,8 @@ public class PersistenceUpgrader implements Upgrader {
     private List<String> unmanagedPersistenceConfigs(Path configPath) throws IOException {
         Path persistenceConfigPath = configPath.resolve("persistence");
         try (Stream<Path> files = Files.list(persistenceConfigPath)) {
-            return files.filter(configFile -> configFile.endsWith(".persist"))
-                    .map(configFile -> configFile.getFileName().toString().replace(".persist", "")).toList();
+            return files.map(f -> f.getFileName().toString()).filter(f -> f.endsWith(".persist"))
+                    .map(f -> f.replace(".persist", "")).toList();
         }
     }
 
