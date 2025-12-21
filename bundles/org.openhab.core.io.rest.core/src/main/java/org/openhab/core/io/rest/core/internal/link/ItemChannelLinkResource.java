@@ -321,6 +321,7 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Path("/orphans")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getOrphanLinks", summary = "Get orphan links between items and broken/non-existent thing channels", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BrokenItemChannelLinkDTO.class)))) })
     public Response getOrphanLinks() {
