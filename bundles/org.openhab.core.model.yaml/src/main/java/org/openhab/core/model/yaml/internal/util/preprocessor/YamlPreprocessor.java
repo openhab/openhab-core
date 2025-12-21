@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.representer.Representer;
@@ -76,10 +77,12 @@ public class YamlPreprocessor {
 
         Set<Path> includeStackBranch = new HashSet<>(includeStack);
         if (!includeStackBranch.add(file)) {
-            throw new YAMLException("Circular inclusion detected: " + includeStackBranch + " -> " + file);
+            String includeStackChain = includeStackBranch.stream().map(Path::toString)
+                    .collect(Collectors.joining(" -> "));
+            throw new YAMLException("Circular inclusion detected: " + includeStackChain + " -> " + file);
         }
         if (includeStackBranch.size() > MAX_INCLUDE_DEPTH) {
-            throw new YAMLException("Maximum include depth exceeded");
+            throw new YAMLException("Maximum include depth (" + MAX_INCLUDE_DEPTH + ") exceeded");
         }
 
         HashMap<String, String> combinedVars = new HashMap<>(variables);
@@ -218,9 +221,22 @@ public class YamlPreprocessor {
             Object loadedFile = load(includeFile, includeVars, includeStack, includeCallback);
             includeCallback.accept(includeFile);
             return loadedFile;
-        } catch (IOException e) {
-            throw new YAMLException(
-                    "Error loading include file '" + includeObject.fileName() + "' (included from '" + file + "')", e);
+        } catch (IOException | YAMLException e) {
+            // Only wrap the exception if it's not already an "Error loading include file" message
+            // to avoid repeating the wrapper message in nested includes
+            String errorMessage = e.getMessage();
+            if (errorMessage != null) {
+                if (errorMessage.startsWith("Error loading include file")) {
+                    throw new YAMLException(errorMessage, e);
+                }
+                errorMessage = ": " + errorMessage;
+            } else {
+                errorMessage = "";
+            }
+
+            // Wrap the exception to indicate where the error occurred
+            throw new YAMLException("Error loading include file '" + includeObject.fileName() + "' (included from '"
+                    + file + "')" + errorMessage, e);
         }
     }
 
@@ -273,7 +289,11 @@ public class YamlPreprocessor {
     }
 
     static Yaml newYaml(Map<String, String> variables, Path path) {
-        return new Yaml(new ModelConstructor(variables, path), new Representer(new DumperOptions()),
-                new DumperOptions(), new ModelResolver());
+        LoaderOptions loaderOptions = new LoaderOptions();
+        // Throw on duplicate keys; loadIncludeFile will prepend the including
+        // file name to help users locate the error in the include chain.
+        loaderOptions.setAllowDuplicateKeys(false);
+        return new Yaml(new ModelConstructor(loaderOptions, variables, path), new Representer(new DumperOptions()),
+                new DumperOptions(), loaderOptions, new ModelResolver());
     }
 }
