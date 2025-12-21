@@ -91,8 +91,8 @@ class ModelConstructor extends Constructor {
     private final Map<String, String> variables;
     private final Path currentFile;
 
-    public ModelConstructor(Map<String, String> variables, Path currentFile) {
-        super(new LoaderOptions());
+    public ModelConstructor(LoaderOptions options, Map<String, String> variables, Path currentFile) {
+        super(options);
 
         this.variables = variables;
         this.currentFile = currentFile;
