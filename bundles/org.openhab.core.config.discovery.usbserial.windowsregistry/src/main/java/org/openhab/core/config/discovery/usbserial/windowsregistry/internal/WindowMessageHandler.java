@@ -138,7 +138,7 @@ public class WindowMessageHandler implements Runnable, WindowProc {
             HANDLE[] handles = new HANDLE[] { terminateEvent };
             boolean running = true;
             while (running) {
-                switch (user32.MsgWaitForMultipleObjects(handles.length, handles, false, WinBase.INFINITE,
+                switch (user32.msgWaitForMultipleObjects(handles.length, handles, false, WinBase.INFINITE,
                         User32Ex.QS_ALLINPUT)) {
                     case User32Ex.WAIT_OBJECT_0:
                         // terminateEvent was triggered, terminate
