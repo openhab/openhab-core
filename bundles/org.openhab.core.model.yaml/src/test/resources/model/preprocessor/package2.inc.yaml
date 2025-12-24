@@ -1,6 +1,0 @@
-things:
-  ${thingname}:
-    label: ${label}
-    config:
-      pkgprop: package
-      commonprop: package
