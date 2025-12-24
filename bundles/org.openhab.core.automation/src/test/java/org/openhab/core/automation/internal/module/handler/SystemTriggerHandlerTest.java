@@ -80,7 +80,7 @@ public class SystemTriggerHandlerTest {
         SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
-        Event event = SystemEventFactory.createStartlevelEvent(70);
+        Event event = SystemEventFactory.createStartlevelEvent(70, null);
         triggerHandler.receive(event);
 
         verifyNoInteractions(callbackMock);
@@ -93,7 +93,7 @@ public class SystemTriggerHandlerTest {
         SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
-        Event event = SystemEventFactory.createStartlevelEvent(100);
+        Event event = SystemEventFactory.createStartlevelEvent(100, null);
         triggerHandler.receive(event);
 
         verify(callbackMock).triggered(eq(triggerMock), captor.capture());
@@ -109,7 +109,7 @@ public class SystemTriggerHandlerTest {
         SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
-        Event event = SystemEventFactory.createStartlevelEvent(100);
+        Event event = SystemEventFactory.createStartlevelEvent(100, null);
         triggerHandler.receive(event);
 
         verify(callbackMock).triggered(eq(triggerMock), captor.capture());
