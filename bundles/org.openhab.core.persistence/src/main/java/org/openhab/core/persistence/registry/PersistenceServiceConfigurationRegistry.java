@@ -12,6 +12,8 @@
  */
 package org.openhab.core.persistence.registry;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Registry;
 
@@ -29,4 +31,6 @@ public interface PersistenceServiceConfigurationRegistry extends Registry<Persis
     void addRegistryChangeListener(PersistenceServiceConfigurationRegistryChangeListener listener);
 
     void removeRegistryChangeListener(PersistenceServiceConfigurationRegistryChangeListener listener);
+
+    List<String> getPersistenceServiceConfigurationRegistryConflicts();
 }
