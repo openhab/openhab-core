@@ -241,26 +241,128 @@ public class YamlPreprocessorTest {
     }
 
     @Test
-    void packagesTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("packages.yaml"),
-                path -> {
-                });
+    void packagesLoadFromPackagesTest() throws IOException {
+        Map<String, Object> data = loadPackages();
 
-        // defined in the package
         assertThat(getNestedValue(data, "things", "thing1", "label"), equalTo("label1"));
-        assertThat(getNestedValue(data, "things", "thing2", "label"), equalTo("label2"));
+        assertThat(getNestedValue(data, "things", "thing1", "scalar"), equalTo("package"));
+        assertThat(getNestedValue(data, "things", "thing1", "map1", "scalar1"), equalTo("package"));
+        assertThat(getNestedValue(data, "things", "thing1", "config", "map1", "scalar1"), equalTo("package"));
+    }
 
-        // defined in the main level
-        assertThat(getNestedValue(data, "things", "thing3", "label"), equalTo("label3"));
+    @Test
+    void packagesDoNotRemoveNonPackageThingsTest() throws IOException {
+        Map<String, Object> data = loadPackages();
 
-        // defined in both main and package, they should be merged with values from the main overriding
-        // the package
-        assertThat(getNestedValue(data, "things", "thing4", "label"), equalTo("main"));
-        assertThat(getNestedValue(data, "things", "thing4", "config", "mainprop"), equalTo("main"));
-        assertThat(getNestedValue(data, "things", "thing4", "config", "pkgprop"), equalTo("package"));
-        assertThat(getNestedValue(data, "things", "thing4", "config", "commonprop"), equalTo("overridden"));
+        assertThat(getNestedValue(data, "things", "thing_only_in_main", "label"), equalTo("label3"));
+    }
 
-        assertThat(getNestedValue(data, "list", "test1"), equalTo(List.of("main1", "package1")));
+    @Test
+    void packagesOverwriteBehaviorTest() throws IOException {
+        Map<String, Object> data = loadPackages();
+
+        Map<String, Object> thingOverwrite = (Map<String, Object>) getNestedValue(data, "things", "thing_overwrite");
+
+        // Verify that scalar properties overwrite package values
+        assertThat(getNestedValue(thingOverwrite, "label"), equalTo("main"));
+        assertThat(getNestedValue(thingOverwrite, "scalar"), equalTo("main"));
+
+        // Verify map overwrite - should only have main values, not package values
+        assertThat(getNestedValue(thingOverwrite, "map1", "scalar1"), equalTo("main"));
+        assertThat((Map<String, Object>) getNestedValue(thingOverwrite, "map1"), not(hasKey("scalar2")));
+
+        // Verify list overwrite - should only have main values, not package values
+        assertThat(getNestedValue(thingOverwrite, "list1"), equalTo(List.of("main")));
+
+        // Verify that top-level non-overridden properties from package are retained
+        assertThat(getNestedValue(thingOverwrite, "map2", "scalar1"), equalTo("package"));
+        assertThat(getNestedValue(thingOverwrite, "map2", "scalar2"), equalTo("package"));
+        assertThat(getNestedValue(thingOverwrite, "list2"), equalTo(List.of("package")));
+
+        // Verify nested config overwrite
+        assertThat(getNestedValue(thingOverwrite, "config", "scalar1"), equalTo("main"));
+
+        Map<String, Object> configMap = (Map<String, Object>) getNestedValue(thingOverwrite, "config");
+
+        // Verify nested map overwrite - should only have main values, not package values
+        assertThat(getNestedValue(configMap, "map1", "mainkey"), equalTo("main"));
+        assertThat((Map<String, Object>) getNestedValue(configMap, "map1"), not(hasKey("scalar1")));
+        assertThat((Map<String, Object>) getNestedValue(configMap, "map1"), not(hasKey("scalar2")));
+
+        // Verify nested list overwrite - should only have main values, not package values
+        assertThat(getNestedValue(configMap, "list1"), equalTo(List.of("main")));
+    }
+
+    @Test
+    void packagesMergeBehaviorTest() throws IOException {
+        Map<String, Object> data = loadPackages();
+
+        Map<String, Object> thingMerge = (Map<String, Object>) getNestedValue(data, "things", "thing_merge");
+
+        // Verify scalar merging
+        assertThat(getNestedValue(thingMerge, "config", "scalar1"), equalTo("package"));
+        assertThat(getNestedValue(thingMerge, "config", "scalar2"), equalTo("main"));
+        assertThat(getNestedValue(thingMerge, "config", "scalar3"), equalTo("new"));
+
+        // Verify map merging (merges by default)
+        // map1:scalar1 is not defined in main
+        assertThat(getNestedValue(thingMerge, "config", "map1", "scalar1"), equalTo("package"));
+        // map1:scalar2 is defined in main -> overwrites package
+        assertThat(getNestedValue(thingMerge, "config", "map1", "scalar2"), equalTo("main"));
+        // map1:scalar3 is only defined in main
+        assertThat(getNestedValue(thingMerge, "config", "map1", "scalar3"), equalTo("main"));
+
+        // Verify list merging (merges by default)
+        assertThat(getNestedValue(thingMerge, "config", "list1"), equalTo(List.of("package", "main")));
+
+        // Verify map2 now also merges (recursive merge behavior)
+        // map2:mainkey is only defined in main
+        assertThat(getNestedValue(thingMerge, "config", "map2", "mainkey"), equalTo("main"));
+        // map2:scalar1 and scalar2 are only defined in package
+        assertThat(getNestedValue(thingMerge, "config", "map2", "scalar1"), equalTo("package"));
+        assertThat(getNestedValue(thingMerge, "config", "map2", "scalar2"), equalTo("package"));
+
+        // Verify list2 is also merged from package, even though not in main
+        assertThat(getNestedValue(thingMerge, "config", "list2"), equalTo(List.of("package")));
+
+        // Verify top-level properties
+        assertThat(getNestedValue(thingMerge, "scalar"), equalTo("package"));
+        assertThat(getNestedValue(thingMerge, "mainscalar"), equalTo("main"));
+        assertThat(getNestedValue(thingMerge, "mainmap", "mainkey"), equalTo("main"));
+        assertThat(getNestedValue(thingMerge, "mainlist1"), equalTo(List.of("main")));
+        assertThat(getNestedValue(thingMerge, "mainlist2"), equalTo(List.of("main")));
+    }
+
+    @Test
+    void packagesRemoveBehaviorTest() throws IOException {
+        Map<String, Object> data = loadPackages();
+
+        Map<String, Object> thingRemove = (Map<String, Object>) getNestedValue(data, "things", "thing_remove");
+
+        // Verify that !remove directive removes top-level keys
+        assertThat(thingRemove, not(hasKey("label")));
+        assertThat(thingRemove, not(hasKey("list1")));
+
+        Map<String, Object> configMap = (Map<String, Object>) getNestedValue(thingRemove, "config");
+
+        // Verify that !remove directive removes nested keys
+        assertThat(configMap, not(hasKey("scalar1")));
+        assertThat(configMap, not(hasKey("map1")));
+        assertThat(configMap, not(hasKey("list1")));
+        assertThat((Map<String, Object>) getNestedValue(configMap, "map2"), not(hasKey("scalar1")));
+
+        // Verify that non-removed keys are retained
+        assertThat(getNestedValue(thingRemove, "scalar"), equalTo("package"));
+        assertThat(getNestedValue(thingRemove, "map1", "scalar1"), equalTo("package"));
+        assertThat(getNestedValue(thingRemove, "map1", "scalar2"), equalTo("package"));
+        assertThat(getNestedValue(thingRemove, "list2"), equalTo(List.of("package")));
+
+        assertThat(getNestedValue(configMap, "scalar2"), equalTo("package"));
+        assertThat(getNestedValue(configMap, "map2", "scalar2"), equalTo("package"));
+        assertThat(getNestedValue(configMap, "list2"), equalTo(List.of("package")));
+
+        // Verify that an entire thing can be removed
+        assertThat((Map<String, Object>) getNestedValue(data, "things"), not(hasKey("whole_thing_removed")));
     }
 
     @Test
@@ -278,6 +380,11 @@ public class YamlPreprocessorTest {
         assertThat(getNestedValue(data, "items", "energy_2", "dimension"), equalTo("Energy"));
         assertThat(getNestedValue(data, "items", "energy_2", "unit"), equalTo("kWh"));
         assertThat(getNestedValue(data, "items", "energy_2", "label"), equalTo("Energy_2"));
+    }
+
+    private Map<String, Object> loadPackages() throws IOException {
+        return (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("packaging.yaml"), path -> {
+        });
     }
 
     /**

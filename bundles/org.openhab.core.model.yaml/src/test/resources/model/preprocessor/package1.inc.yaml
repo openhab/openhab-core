@@ -1,3 +1,0 @@
-things:
-  ${thingname}:
-    label: ${label}

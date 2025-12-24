@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.yaml.internal.util.preprocessor;
+package org.openhab.core.model.yaml.internal.util.preprocessor.tags;
 
-import java.util.Map;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * The {@link IncludeObject} represents an object constructed from an <code>!include</code> node
+ * The {@link ReplaceObject} represents an object constructed from a <code>!replace</code> node
  * to be processed by the {@link YamlPreprocessor}.
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-record IncludeObject(String fileName, Map<String, String> vars) {
+public record ReplaceObject(@Nullable Object object) {
 }
