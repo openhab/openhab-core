@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
@@ -32,6 +33,7 @@ import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
 
 /**
@@ -47,6 +49,9 @@ import org.yaml.snakeyaml.nodes.Tag;
 class ModelConstructor extends Constructor {
 
     private static final Tag INCLUDE_TAG = new Tag("!include");
+    private static final Tag REPLACE_TAG = new Tag("!replace");
+    private static final Tag REMOVE_TAG = new Tag("!remove");
+
     private static final int MAX_VAR_NESTING_DEPTH = 10;
 
     /**
@@ -98,6 +103,8 @@ class ModelConstructor extends Constructor {
         this.currentFile = currentFile;
 
         this.yamlConstructors.put(INCLUDE_TAG, new ConstructInclude());
+        this.yamlConstructors.put(REPLACE_TAG, new ConstructReplace());
+        this.yamlConstructors.put(REMOVE_TAG, new ConstructRemove());
         this.yamlConstructors.put(Tag.STR, new ConstructInterpolation());
         this.yamlConstructors.put(Tag.NULL, new ConstructNull());
         logger.trace("ModelConstructor created with vars: {}", variables);
@@ -243,6 +250,30 @@ class ModelConstructor extends Constructor {
             }
             throw new YAMLException(currentFile + ": invalid !include argument type: "
                     + (node == null ? null : node.getClass().getName()));
+        }
+    }
+
+    private class ConstructReplace extends AbstractConstruct {
+        @Override
+        public Object construct(@Nullable Node node) {
+            if (node instanceof MappingNode mappingNode) {
+                Map<Object, Object> map = constructMapping(mappingNode);
+                logger.debug("Constructing !replace map node: {}", map);
+                return new ReplaceObject(map);
+            } else if (node instanceof SequenceNode sequenceNode) {
+                Object list = constructSequence(sequenceNode);
+                logger.debug("Constructing !replace sequence node: {}", list);
+                return new ReplaceObject(list);
+            }
+            throw new YAMLException(currentFile + ": invalid !replace argument. Expected a map or a list.");
+        }
+    }
+
+    private class ConstructRemove extends AbstractConstruct {
+        @Override
+        public Object construct(@Nullable Node node) {
+            logger.debug("Constructing !remove node: {}", node);
+            return new RemoveObject();
         }
     }
 }
