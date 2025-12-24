@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.*;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -251,35 +252,79 @@ public class YamlPreprocessor {
                 LOGGER.warn("Package '{}' is not a map: {}", packageName, pkg);
             }
         });
+
+        // Recursively resolve all ReplaceObject and RemoveObject instances
+        resolveSpecialObjects(mainData);
     }
 
     /**
      * Recursively merges packageData into mainData.
-     * - Maps are merged in-place (recursive composition)
-     * - Lists are concatenated (creates new list with both elements)
-     * - Other values in packageData overwrite mainData
+     * - Maps are merged in-place (recursive composition) by default
+     * - Lists are concatenated (creates new list with both elements) by default
+     * - If a value has !replace or !remove tag, the package value is ignored - to be handled later
+     * - Other values in packageData are added if not present in mainData
      *
      * Note that mainData is modified in-place.
+     *
+     * @param mainData the main data map to merge into
+     * @param packageData the package data to merge from
      */
     @SuppressWarnings("unchecked")
     private static void mergeElements(Map<String, Object> mainData, Map<String, Object> packageData) {
         packageData.forEach((key, value) -> {
             if (mainData.containsKey(key)) {
                 Object mainValue = mainData.get(key);
+                if (mainValue instanceof ReplaceObject) {
+                    // With !replace, we keep only the main value (discard package value entirely)
+                    // resolveSpecialObjects will unwrap the ReplaceObject later
+                    return;
+                }
+                if (mainValue instanceof RemoveObject) {
+                    // If main value is !remove, we'll ignore the package value
+                    // resolveSpecialObjects will remove the key later
+                    return;
+                }
+                // Default behavior: merge maps and lists
                 if (mainValue instanceof Map && value instanceof Map) {
                     Map<String, Object> mainMap = (Map<String, Object>) mainValue;
                     Map<String, Object> pkgMap = (Map<String, Object>) value;
                     mergeElements(mainMap, pkgMap);
-                } else if (mainValue instanceof List && value instanceof List) {
+                    mainData.put(key, mainMap);
+                    return;
+                }
+                if (mainValue instanceof List && value instanceof List) {
                     List<Object> mainList = (List<Object>) mainValue;
                     List<Object> pkgList = (List<Object>) value;
-                    mainData.put(key, Stream.concat(mainList.stream(), pkgList.stream()).toList());
+                    // append main list after package list
+                    mainData.put(key, Stream.concat(pkgList.stream(), mainList.stream()).toList());
+                    return;
                 }
-                // if the value is not a map or list, keep the main value
+                // For non-map/non-list values, keep the main value overwriting the package value
             } else {
                 mainData.put(key, value);
             }
         });
+    }
+
+    /**
+     * Recursively resolves ReplaceObject and RemoveObject instances in the data structure.
+     * - RemoveObject: removes the key from its parent map
+     * - ReplaceObject: unwraps to its contained object
+     */
+    @SuppressWarnings("unchecked")
+    private static void resolveSpecialObjects(Map<String, Object> data) {
+        // First, recursively process nested structures
+        data.forEach((key, value) -> {
+            if (value instanceof Map) {
+                resolveSpecialObjects((Map<String, Object>) value);
+            } else if (value instanceof ReplaceObject replaceObj && replaceObj.object() instanceof Map) {
+                resolveSpecialObjects((Map<String, Object>) replaceObj.object());
+            }
+        });
+
+        // Then remove RemoveObject entries and unwrap ReplaceObject entries
+        data.entrySet().removeIf(entry -> entry.getValue() instanceof RemoveObject);
+        data.replaceAll((key, value) -> value instanceof ReplaceObject replaceObj ? replaceObj.object() : value);
     }
 
     private static Map<String, Object> excludeHiddenKeys(Map<String, Object> dataMap) {
