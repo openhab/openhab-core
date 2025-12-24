@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.discovery.usbserial.windowsregistry.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.NTStatus;
 import com.sun.jna.platform.win32.User32;
@@ -23,6 +25,7 @@ import com.sun.jna.win32.W32APIOptions;
  *
  * @author Ravi Nadahar - Initial contribution.
  */
+@NonNullByDefault
 public interface User32Ex extends User32 {
 
     /** The instance. */
@@ -145,5 +148,5 @@ public interface User32Ex extends User32 {
      *         <li>{@link #WAIT_FAILED}</li>
      *         </ul>
      */
-    int MsgWaitForMultipleObjects(int nCount, HANDLE[] pHandles, boolean fWaitAll, int dwMilliseconds, int dwWakeMask);
+    int msgWaitForMultipleObjects(int nCount, HANDLE[] pHandles, boolean fWaitAll, int dwMilliseconds, int dwWakeMask);
 }
