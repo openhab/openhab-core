@@ -82,4 +82,9 @@ public class AddonType {
         }
         return id.equals(((AddonType) obj).id);
     }
+
+    @Override
+    public String toString() {
+        return "AddonType [id=" + id + ", label=" + label + "]";
+    }
 }

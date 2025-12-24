@@ -27,7 +27,20 @@ public class AddonParameter {
     private @NonNullByDefault({}) String name;
     private @NonNullByDefault({}) String value;
 
+    /**
+     * Creates a new add-on parameter instance.
+     *
+     * @param name the parameter name, must not be null or blank
+     * @param value the parameter value, must not be null or blank
+     * @throws IllegalArgumentException if name or value is null or blank
+     */
     public AddonParameter(String name, String value) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("name must not be null or empty");
+        }
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("value must not be null or empty");
+        }
         this.name = name;
         this.value = value;
     }
@@ -58,5 +71,10 @@ public class AddonParameter {
         }
         AddonParameter other = (AddonParameter) obj;
         return Objects.equals(name, other.name) && Objects.equals(value, other.value);
+    }
+
+    @Override
+    public String toString() {
+        return "AddonParameter [name=" + name + ", value=" + value + "]";
     }
 }

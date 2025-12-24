@@ -29,7 +29,20 @@ public class AddonMatchProperty {
     private @NonNullByDefault({}) String regex;
     private transient @NonNullByDefault({}) Pattern pattern;
 
+    /**
+     * Creates a new add-on match property instance.
+     *
+     * @param name the property name, must not be null or blank
+     * @param regex the regular expression pattern, must not be null or blank
+     * @throws IllegalArgumentException if name or regex is null or blank
+     */
     public AddonMatchProperty(String name, String regex) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("name must not be null or empty");
+        }
+        if (regex == null || regex.isBlank()) {
+            throw new IllegalArgumentException("regex must not be null or empty");
+        }
         this.name = name;
         this.regex = regex;
         this.pattern = null;
@@ -69,5 +82,10 @@ public class AddonMatchProperty {
         }
         AddonMatchProperty other = (AddonMatchProperty) obj;
         return Objects.equals(name, other.name) && Objects.equals(regex, other.regex);
+    }
+
+    @Override
+    public String toString() {
+        return "AddonMatchProperty [name=" + name + ", regex=" + regex + "]";
     }
 }

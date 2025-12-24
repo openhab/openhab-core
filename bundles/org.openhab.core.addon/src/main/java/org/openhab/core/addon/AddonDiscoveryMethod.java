@@ -78,4 +78,10 @@ public class AddonDiscoveryMethod {
         return Objects.equals(serviceType, other.serviceType) && Objects.equals(parameters, other.parameters)
                 && Objects.equals(matchProperties, other.matchProperties);
     }
+
+    @Override
+    public String toString() {
+        return "AddonDiscoveryMethod [serviceType=" + serviceType + ", parameters=" + parameters + ", matchProperties="
+                + matchProperties + "]";
+    }
 }

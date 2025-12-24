@@ -32,16 +32,39 @@ public class AddonI18nUtil {
 
     private final TranslationProvider i18nProvider;
 
+    /**
+     * Creates a new instance with the given translation provider.
+     *
+     * @param i18nProvider the translation provider to use for localization
+     */
     public AddonI18nUtil(TranslationProvider i18nProvider) {
         this.i18nProvider = i18nProvider;
     }
 
+    /**
+     * Gets the localized description for an add-on.
+     *
+     * @param bundle the bundle containing the translations
+     * @param addonId the identifier of the add-on
+     * @param defaultDescription the default description text
+     * @param locale the locale to use for translation, or null to use the default locale
+     * @return the localized description, or the default description if no translation is available
+     */
     public String getDescription(Bundle bundle, String addonId, String defaultDescription, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription, () -> inferKey(addonId, "description"));
         String localizedText = i18nProvider.getText(bundle, key, defaultDescription, locale);
         return localizedText != null ? localizedText : defaultDescription;
     }
 
+    /**
+     * Gets the localized name for an add-on.
+     *
+     * @param bundle the bundle containing the translations
+     * @param addonId the identifier of the add-on
+     * @param defaultLabel the default label text
+     * @param locale the locale to use for translation, or null to use the default locale
+     * @return the localized name, or the default label if no translation is available
+     */
     public String getName(Bundle bundle, String addonId, String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(addonId, "name"));
         String localizedText = i18nProvider.getText(bundle, key, defaultLabel, locale);

@@ -60,7 +60,7 @@ public class Addon {
      *
      * @param uid the id of the add-on (e.g. "binding-dmx", "json:transform-format" or "marketplace:123456")
      * @param type the type id of the add-on (e.g. "automation")
-     * @param uid the technical name of the add-on (e.g. "influxdb")
+     * @param id the technical name of the add-on (e.g. "influxdb")
      * @param label the label of the add-on
      * @param version the version of the add-on
      * @param maturity the maturity level of this version
