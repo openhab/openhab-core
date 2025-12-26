@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.websocket.event;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
@@ -23,6 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
+import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
@@ -47,7 +47,7 @@ import com.google.gson.reflect.TypeToken;
 @WebSocket
 @NonNullByDefault
 @SuppressWarnings("unused")
-public class EventWebSocket {
+public class EventWebSocket implements WriteCallback {
     public static final String WEBSOCKET_EVENT_TYPE = "WebSocketEvent";
     public static final String WEBSOCKET_TOPIC_PREFIX = "openhab/websocket/";
 
@@ -115,9 +115,11 @@ public class EventWebSocket {
     public void onText(String message) {
         RemoteEndpoint remoteEndpoint;
         Session session;
+        String remoteIdentifier;
         synchronized (this) {
             remoteEndpoint = this.remoteEndpoint;
             session = this.session;
+            remoteIdentifier = this.remoteIdentifier;
         }
         if (session == null || remoteEndpoint == null) {
             // no connection or no remote endpoint , do nothing this is possible due to async behavior
@@ -239,16 +241,7 @@ public class EventWebSocket {
                     "Deserialization error: " + e.getMessage(), null, null);
         }
 
-        try {
-            sendMessage(gson.toJson(responseEvent));
-        } catch (IOException e) {
-            if (logger.isDebugEnabled()) {
-                synchronized (this) {
-                    logger.debug("Failed to send WebSocketResponseEvent event {} to {}: {}", responseEvent,
-                            remoteIdentifier, e.getMessage());
-                }
-            }
-        }
+        sendMessage(gson.toJson(responseEvent), remoteEndpoint);
     }
 
     @OnWebSocketError
@@ -268,35 +261,44 @@ public class EventWebSocket {
         TopicEventFilter topicIncludeFilter;
         TopicEventFilter topicExcludeFilter;
         String remoteIdentifier;
+        RemoteEndpoint remoteEndpoint;
         synchronized (this) {
             typeFilter = this.typeFilter;
             sourceFilter = this.sourceFilter;
             topicIncludeFilter = this.topicIncludeFilter;
             topicExcludeFilter = this.topicExcludeFilter;
             remoteIdentifier = this.remoteIdentifier;
-        }
-        try {
-            String source = event.getSource();
-            if ((source == null || !sourceFilter.contains(event.getSource()))
-                    && (typeFilter.isEmpty() || typeFilter.contains(event.getType()))
-                    && (topicIncludeFilter == null || topicIncludeFilter.apply(event))
-                    && (topicExcludeFilter == null || !topicExcludeFilter.apply(event))) {
-                sendMessage(gson.toJson(new EventDTO(event)));
-            }
-        } catch (IOException e) {
-            logger.debug("Failed to send event {} to {}: {}", event, remoteIdentifier, e.getMessage());
-        }
-    }
-
-    private void sendMessage(String message) throws IOException {
-        RemoteEndpoint remoteEndpoint;
-        synchronized (this) {
             remoteEndpoint = this.remoteEndpoint;
         }
         if (remoteEndpoint == null) {
-            logger.warn("Could not determine remote endpoint, failed to send '{}'.", message);
+            logger.warn("Could not determine remote endpoint for event '{}'", event);
             return;
         }
-        remoteEndpoint.sendString(message);
+        String source = event.getSource();
+        if ((source == null || !sourceFilter.contains(event.getSource()))
+                && (typeFilter.isEmpty() || typeFilter.contains(event.getType()))
+                && (topicIncludeFilter == null || topicIncludeFilter.apply(event))
+                && (topicExcludeFilter == null || !topicExcludeFilter.apply(event))) {
+            sendMessage(gson.toJson(new EventDTO(event)), remoteEndpoint);
+        }
+    }
+
+    private void sendMessage(String message, RemoteEndpoint remoteEndpoint) {
+        remoteEndpoint.sendString(message, this);
+    }
+
+    @Override
+    public void writeFailed(@Nullable Throwable x) {
+        String remoteIdentifier;
+        synchronized (this) {
+            remoteIdentifier = this.remoteIdentifier;
+        }
+        logger.debug("Failed to send websocket message to '{}': {}", remoteIdentifier,
+                x == null ? "No information" : x.getMessage());
+    }
+
+    @Override
+    public void writeSuccess() {
+        // Do nothing
     }
 }
