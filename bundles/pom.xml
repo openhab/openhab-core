@@ -50,6 +50,7 @@
     <module>org.openhab.core</module>
     <module>org.openhab.core.audio</module>
     <module>org.openhab.core.ephemeris</module>
+    <module>org.openhab.core.hli</module>
     <module>org.openhab.core.id</module>
     <module>org.openhab.core.persistence</module>
     <module>org.openhab.core.semantics</module>
