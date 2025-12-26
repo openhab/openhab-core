@@ -112,6 +112,7 @@ public class UIResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/tiles")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getUITiles", summary = "Get all registered UI tiles.", responses = {
@@ -122,6 +123,7 @@ public class UIResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getRegisteredUIComponentsInNamespace", summary = "Get all registered UI components in the specified namespace.", responses = {
@@ -172,6 +174,7 @@ public class UIResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getUIComponentInNamespace", summary = "Get a specific UI component in the specified namespace.", responses = {
