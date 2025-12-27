@@ -258,7 +258,7 @@ public class YamlPreprocessor {
             // If the package is an IncludeObject, inject the ID first, then process it
             if (pkg instanceof IncludeObject includeObj) {
                 Map<String, String> newVars = new HashMap<>(includeObj.vars());
-                newVars.putIfAbsent(PACKAGE_ID_VAR, packageId.toString());
+                newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                 IncludeObject pkgWithId = new IncludeObject(includeObj.fileName(), newVars);
                 processedPkg = processIncludes(file, pkgWithId, variables, includeStack, includeCallback);
             }
@@ -266,7 +266,7 @@ public class YamlPreprocessor {
             if (processedPkg instanceof Map) {
                 Map<String, Object> pkgMap = (Map<String, Object>) processedPkg;
                 // Also inject ID into any nested IncludeObjects within the package
-                Map<String, Object> pkgWithId = injectPackageId(pkgMap, packageId.toString());
+                Map<String, Object> pkgWithId = injectPackageId(pkgMap, packageId);
                 // Process any remaining includes after injection
                 pkgWithId = (Map<String, Object>) processIncludes(file, pkgWithId, variables, includeStack,
                         includeCallback);

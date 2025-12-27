@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor.tags;
 
+import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
+
 /**
  * The {@link RemoveObject} represents an object constructed from an <code>!remove</code> node
  * to be processed by the {@link YamlPreprocessor}.

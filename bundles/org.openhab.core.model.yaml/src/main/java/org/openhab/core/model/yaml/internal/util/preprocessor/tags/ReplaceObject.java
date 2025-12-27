@@ -13,6 +13,7 @@
 package org.openhab.core.model.yaml.internal.util.preprocessor.tags;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 
 /**
  * The {@link ReplaceObject} represents an object constructed from a <code>!replace</code> node
