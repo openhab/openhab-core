@@ -97,8 +97,9 @@ public class YamlPreprocessorTest {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
                 .load(SOURCE_PATH.resolve("extraElementsRemoved.yaml"), path -> {
                 });
-        assertNull(data.get("variables"));
-        assertNull(data.get("packages"));
+
+        assertThat(data, not(hasKey("variables")));
+        assertThat(data, not(hasKey("packages")));
     }
 
     @Test
@@ -232,6 +233,16 @@ public class YamlPreprocessorTest {
     }
 
     @Test
+    void includeVarsFromGlobalTest() throws IOException {
+        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
+                .load(SOURCE_PATH.resolve("includeVarsFromGlobal.yaml"), path -> {
+                });
+
+        // The included file resolves ${bar} where bar is set to ${foo} from globals
+        assertThat(getNestedValue(data, "data", "includedkey"), equalTo("globalFoo"));
+    }
+
+    @Test
     void varsPropagate2LevelsTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
                 .load(SOURCE_PATH.resolve("varsPropagate2Levels.yaml"), path -> {
@@ -248,6 +259,14 @@ public class YamlPreprocessorTest {
         assertThat(getNestedValue(data, "things", "thing1", "scalar"), equalTo("package"));
         assertThat(getNestedValue(data, "things", "thing1", "map1", "scalar1"), equalTo("package"));
         assertThat(getNestedValue(data, "things", "thing1", "config", "map1", "scalar1"), equalTo("package"));
+    }
+
+    @Test
+    void packagesInjectPackageIdTest() throws IOException {
+        Map<String, Object> data = loadPackages();
+
+        assertThat(getNestedValue(data, "things", "pid_test", "packageid"), equalTo("package_id_test"));
+        assertThat(getNestedValue(data, "things", "pid_override", "packageid"), equalTo("id_override"));
     }
 
     @Test
