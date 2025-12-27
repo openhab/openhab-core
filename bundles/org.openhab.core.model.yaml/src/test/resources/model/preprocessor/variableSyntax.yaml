@@ -1,25 +1,81 @@
 variables:
   exist: value1
-  empty:
+  empty_value:
+  empty_value1:
+  if: reserved # reserved word as variable name
+  one: 1
 
-empty_no_default: ${empty}
+  mapping:
+    foo: bar
+    baz: qux
+  key: foo
+
+  list:
+    - item1
+    - item2
+
+simple: ${exist} # => value1
+double_quoted: "${exist}" # => value1
+single_quoted: '${exist}' # => ${exist} (no substitution in single quotes)
+
+# since 'if' will cause an error in jinja expressions but are allowed in simple form,
+# use it here to prove that they are handled using the simple syntax
+reserved_word: ${if}
+spaced_var: ${   if    }
+
+empty_no_default: ${empty_value}
 absent_no_default: ${absent}
 
-exists: ${exist-default} # => value1
-empty: ${empty-default} # => ""
-absent: ${absent-default} # => default
+exists: ${exist|default('default')} # => value1
+empty_value_test: ${empty_value|default('default')} # => ""
+empty_value_test_compound: "prefix-${empty_value1|default('default')}" # => ""
+absent: ${absent|default('default')} # => default
 
-exists_with_colon: ${exist:-default} # => value1
-empty_with_colon: ${empty:-default} # => default
-absent_with_colon: ${absent:-default} # => default
+exists_with_true: ${exist|default('default', true)} # => value1
+empty_value_with_true: ${empty_value|default('default', true)} # => default
+absent_with_true: ${absent|default('default', true)} # => default
 
-absent_default_multiple: "${absent:-foo}${absent:-bar}"
-absent_default_multiple_braces: "${absent:-{foo}} ${absent:-{bar}}"
-absent_default_braces: "${absent:-{foo}}"
-absent_default_single_quoted: "${absent:-'{foo}'}"
-absent_default_double_quoted: "${absent:-\"{foo}\"}"
+absent_default_multiple: "${absent|default('foo')}${absent|default('bar')}"
+absent_default_multiple_braces: "${absent|default('{foo}')} ${absent|default('{bar}')}"
+absent_default_braces: "${absent|default('{foo}')}"
+absent_default_single_quoted: "${absent|default('{foo}')}"
+absent_default_double_quoted: "${absent|default('{foo}')}"
 
-absent_with_empty_default: ${absent:-}
+absent_with_empty_default: ${absent|default('')}
 
-absent_with_nested_default: ${absent:-${exist}}
-absent_with_nested_default_quoted: "${absent:-'${exist}'}"
+absent_with_nested_default: ${absent|default(exist)}
+absent_with_nested_default_quoted: "${absent|default(exist)}"
+
+chained: ${exist|default('default')|upper} # => VALUE1
+
+compound_value: Value is ${exist|default('default')} # => Value is: value1
+compound_quoted: "Value is ${exist|default('default')}" # => Value is: value1
+
+multiple_patterns: ${exist}-${one}
+
+string_var: "${1}"
+string_var_literal: |
+  ${1}
+string_var_folded: >
+  ${1}
+int_var: ${1}
+
+map_var: ${mapping}
+map_lookup: ${mapping[key]} # => bar
+map_literal_key: ${mapping['baz']} # => qux
+map_literal_key_dbl: ${mapping["foo"]} # => bar
+map_literal_chained: ${mapping.baz} # => qux
+
+list_var: ${list}
+list_index_0: ${list[0]} # => item1
+list_index_1: ${list[1]} # => item2
+list_index_lookup: ${list[one]} # => item2
+
+${key}: dynamickey
+
+level1:
+  level2a: ${exist}
+  level2b:
+    level3: ${key}
+
+jinja_expression: ${ mapping[key].repeat(2) + 'ian' }

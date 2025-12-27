@@ -22,5 +22,5 @@ import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-public record IncludeObject(String fileName, Map<String, String> vars) {
+public record IncludeObject(String fileName, Map<String, Object> vars) {
 }

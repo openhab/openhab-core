@@ -27,7 +27,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.*;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.IncludeObject;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.RemoveObject;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.ReplaceObject;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -73,7 +75,7 @@ public class YamlPreprocessor {
     }
 
     @SuppressWarnings("unchecked")
-    static Object load(Path file, Map<String, String> variables, Set<Path> includeStack, Consumer<Path> includeCallback)
+    static Object load(Path file, Map<String, Object> variables, Set<Path> includeStack, Consumer<Path> includeCallback)
             throws IOException, YAMLException {
         LOGGER.debug("Loading file({}): {} with given vars {}", includeStack.size(), file, variables);
 
@@ -87,9 +89,9 @@ public class YamlPreprocessor {
             throw new YAMLException("Maximum include depth (" + MAX_INCLUDE_DEPTH + ") exceeded");
         }
 
-        HashMap<String, String> combinedVars = new HashMap<>(variables);
+        HashMap<String, Object> combinedVars = new HashMap<>(variables);
         // first pass: load the file to extract variables
-        Object yamlData = loadYaml(file, variables);
+        Object yamlData = loadYaml(file, variables, false);
         if (yamlData instanceof Map) {
             if (extractVariables((Map<String, Object>) yamlData, combinedVars)) {
                 LOGGER.trace("Combined vars: {}", combinedVars);
@@ -109,9 +111,9 @@ public class YamlPreprocessor {
         // This cannot be avoided, because SnakeYAML executes interpolation during the construction phase itself.
         // Once the object graph is built, substitutions cannot be applied retroactively,
         // so a full reload with the resolved variables is required.
-        Map<String, Object> dataMap = (Map<String, Object>) loadYaml(file, combinedVars);
+        Map<String, Object> dataMap = (Map<String, Object>) loadYaml(file, combinedVars, true);
         dataMap.remove(VARIABLES_KEY); // we've already extracted the variables in the first pass
-        LOGGER.trace("Loaded data from {}: {}", file, dataMap);
+        LOGGER.debug("Loaded data from {}: {}", file, dataMap);
 
         // Extract packages before processing includes so we can handle them separately
         Object packagesObj = dataMap.remove(PACKAGES_KEY);
@@ -119,7 +121,7 @@ public class YamlPreprocessor {
         // Process includes in everything except packages
         dataMap = (Map<String, Object>) processIncludes(file, dataMap, combinedVars, includeStackBranch,
                 includeCallback);
-        LOGGER.trace("Loaded includes from {}: {}", file, dataMap);
+        LOGGER.debug("Loaded includes from {}: {}", file, dataMap);
 
         // Process packages separately - this allows us to inject the package ID before processing includes
         if (packagesObj instanceof Map<?, ?> packages) {
@@ -129,15 +131,15 @@ public class YamlPreprocessor {
             LOGGER.warn("{}: The 'packages' section is not a map", file);
         }
 
-        LOGGER.trace("Combined data from {}: {}", file, dataMap);
+        LOGGER.debug("Combined data from {}: {}", file, dataMap);
 
         dataMap = excludeHiddenKeys(dataMap);
         return dataMap;
     }
 
-    private static Object loadYaml(Path path, Map<String, String> variables) throws IOException {
+    private static Object loadYaml(Path path, Map<String, Object> variables, boolean finalPass) throws IOException {
         try (InputStream inputStream = Files.newInputStream(path)) {
-            Yaml yaml = newYaml(variables, path);
+            Yaml yaml = newYaml(variables, path, finalPass);
             return yaml.load(inputStream);
         } // let the caller catch the exception and log a message
     }
@@ -151,19 +153,18 @@ public class YamlPreprocessor {
      * @return true if the variables were successfully extracted or if they were not present.
      *         false if the variables value is not a map.
      */
-    private static boolean extractVariables(Map<String, Object> dataMap, HashMap<String, String> variables) {
+    private static boolean extractVariables(Map<String, Object> dataMap, HashMap<String, Object> variables) {
         Object variablesSection = dataMap.get(VARIABLES_KEY);
         if (variablesSection instanceof Map<?, ?> variablesMap) {
             variablesMap.forEach((key, value) -> {
                 if (key == null) {
                     LOGGER.warn("Encountered variable with null key in '{}' section; value '{}' will be ignored",
                             VARIABLES_KEY, value);
-                } else if (value instanceof Map) {
-                    LOGGER.warn("Value type for variable '{}' cannot be a map", key);
-                } else if (value instanceof List) {
-                    LOGGER.warn("Value type for variable '{}' cannot be a list", key);
-                } else if (value != null) {
-                    variables.putIfAbsent(key.toString(), value.toString());
+                } else {
+                    // Treat null values as empty strings so variables defined without a value
+                    // (e.g., `empty_value:`) are recognized and can be used with filters like `default()`.
+                    Object normalized = value == null ? "" : value;
+                    variables.putIfAbsent(key.toString(), normalized);
                 }
             });
             return true;
@@ -175,7 +176,7 @@ public class YamlPreprocessor {
 
     // Add special variables so they get interpolated in the second pass
     // Special variables will override any user-defined variables with the same name
-    private static void addSpecialVariables(Map<String, String> variables, Path file) {
+    private static void addSpecialVariables(Map<String, Object> variables, Path file) {
         Path absolutePath = file.toAbsolutePath();
         variables.put("__FILE__", absolutePath.toString());
         Path fileNamePath = file.getFileName();
@@ -200,7 +201,7 @@ public class YamlPreprocessor {
      * This method is called recursively for nested objects.
      */
     @SuppressWarnings("unchecked")
-    private static Object processIncludes(Path file, Object data, Map<String, String> variables, Set<Path> includeStack,
+    private static Object processIncludes(Path file, Object data, Map<String, Object> variables, Set<Path> includeStack,
             Consumer<Path> includeCallback) {
         if (data instanceof IncludeObject includeObject) {
             return loadIncludeFile(file, includeObject, variables, includeStack, includeCallback);
@@ -219,10 +220,10 @@ public class YamlPreprocessor {
     }
 
     // Load the included file (recursively) and return its content
-    private static Object loadIncludeFile(Path file, IncludeObject includeObject, Map<String, String> variables,
+    private static Object loadIncludeFile(Path file, IncludeObject includeObject, Map<String, Object> variables,
             Set<Path> includeStack, Consumer<Path> includeCallback) {
         Path includeFile = file.resolveSibling(includeObject.fileName());
-        Map<String, String> includeVars = new HashMap<>(variables);
+        Map<String, Object> includeVars = new HashMap<>(variables);
         includeVars.putAll(includeObject.vars());
         try {
             Object loadedFile = load(includeFile, includeVars, includeStack, includeCallback);
@@ -251,13 +252,13 @@ public class YamlPreprocessor {
     // if the same key exists in both the main map and the package, the main map value is kept
     @SuppressWarnings("unchecked")
     private static void mergePackages(Path file, Map<String, Object> mainData, Map<String, Object> packages,
-            Map<String, String> variables, Set<Path> includeStack, Consumer<Path> includeCallback) {
+            Map<String, Object> variables, Set<Path> includeStack, Consumer<Path> includeCallback) {
         packages.forEach((packageId, pkg) -> {
             Object processedPkg = pkg;
 
             // If the package is an IncludeObject, inject the ID first, then process it
             if (pkg instanceof IncludeObject includeObj) {
-                Map<String, String> newVars = new HashMap<>(includeObj.vars());
+                Map<String, Object> newVars = new HashMap<>(includeObj.vars());
                 newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                 IncludeObject pkgWithId = new IncludeObject(includeObj.fileName(), newVars);
                 processedPkg = processIncludes(file, pkgWithId, variables, includeStack, includeCallback);
@@ -293,7 +294,7 @@ public class YamlPreprocessor {
         return data.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> {
             Object value = entry.getValue();
             if (value instanceof IncludeObject includeObj) {
-                Map<String, String> newVars = new HashMap<>(includeObj.vars());
+                Map<String, Object> newVars = new HashMap<>(includeObj.vars());
                 newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                 return new IncludeObject(includeObj.fileName(), newVars);
             } else if (value instanceof Map) {
@@ -302,7 +303,7 @@ public class YamlPreprocessor {
                 List<Object> list = (List<Object>) value;
                 return list.stream().map(item -> {
                     if (item instanceof IncludeObject includeObj) {
-                        Map<String, String> newVars = new HashMap<>(includeObj.vars());
+                        Map<String, Object> newVars = new HashMap<>(includeObj.vars());
                         newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                         return new IncludeObject(includeObj.fileName(), newVars);
                     } else if (item instanceof Map) {
@@ -391,12 +392,12 @@ public class YamlPreprocessor {
                 Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> replacement, LinkedHashMap::new));
     }
 
-    static Yaml newYaml(Map<String, String> variables, Path path) {
+    static Yaml newYaml(Map<String, Object> variables, Path path, boolean finalPass) {
         LoaderOptions loaderOptions = new LoaderOptions();
         // Throw on duplicate keys; loadIncludeFile will prepend the including
         // file name to help users locate the error in the include chain.
         loaderOptions.setAllowDuplicateKeys(false);
-        return new Yaml(new ModelConstructor(loaderOptions, variables, path), new Representer(new DumperOptions()),
-                new DumperOptions(), loaderOptions, new ModelResolver());
+        return new Yaml(new ModelConstructor(loaderOptions, variables, path, finalPass),
+                new Representer(new DumperOptions()), new DumperOptions(), loaderOptions, new ModelResolver());
     }
 }
