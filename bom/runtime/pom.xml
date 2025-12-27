@@ -18,8 +18,9 @@
   <properties>
     <californium.version>4.0.0-M2</californium.version>
     <!-- cxf can be updated independently of karaf, only used in karaf tests -->
-    <cxf.version>3.6.8</cxf.version>
-    <jackson.version>2.19.2</jackson.version>
+    <cxf.version>3.6.9</cxf.version>
+    <jackson.annotations.version>2.20</jackson.annotations.version>
+    <jackson.version>2.20.1</jackson.version>
     <jetty.version>9.4.57.v20241219</jetty.version>
     <pax.logging.version>2.3.0</pax.logging.version>
     <pax.web.version>8.0.33</pax.web.version>
@@ -411,12 +412,12 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.20.0</version>
+      <version>2.21.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.18.0</version>
+      <version>3.20.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -455,7 +456,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
-      <version>1.81</version>
+      <version>1.83</version>
     </dependency>
 
     <!-- Gson -->
@@ -785,13 +786,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.27</version>
+      <version>4.28</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.27</version>
+      <version>4.28</version>
       <scope>compile</scope>
     </dependency>
 
@@ -799,7 +800,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>33.4.8-jre</version>
+      <version>33.5.0-jre</version>
       <scope>compile</scope>
     </dependency>
 
@@ -813,7 +814,7 @@
     <dependency>
       <groupId>io.github.classgraph</groupId>
       <artifactId>classgraph</artifactId>
-      <version>4.8.180</version>
+      <version>4.8.184</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -911,7 +912,7 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>9.8</version>
+      <version>9.9</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -974,7 +975,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>${jackson.version}</version>
+      <version>${jackson.annotations.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -1080,13 +1081,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.17.0</version>
+      <version>5.18.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.17.0</version>
+      <version>5.18.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

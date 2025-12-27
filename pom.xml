@@ -71,11 +71,11 @@
     <bnd.version>7.1.0</bnd.version>
     <commons.net.version>3.12.0</commons.net.version>
     <eea.version>2.4.0</eea.version>
-    <karaf.compile.version>4.4.8</karaf.compile.version>
-    <karaf.tooling.version>4.4.8</karaf.tooling.version>
+    <karaf.compile.version>4.4.9</karaf.compile.version>
+    <karaf.tooling.version>4.4.9</karaf.tooling.version>
     <sat.version>0.17.0</sat.version>
     <slf4j.version>2.0.16</slf4j.version>
-    <xtext.version>2.40.0</xtext.version>
+    <xtext.version>2.41.0</xtext.version>
     <spotless.version>2.44.3</spotless.version>
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>
@@ -83,7 +83,7 @@
 
     <!-- TEST -->
     <!-- cxf can be updated independently, karaf only uses it in tests -->
-    <cxf.version>3.6.8</cxf.version>
+    <cxf.version>3.6.9</cxf.version>
     <junit.version>5.13.4</junit.version>
     <mockito.version>5.19.0</mockito.version>
   </properties>

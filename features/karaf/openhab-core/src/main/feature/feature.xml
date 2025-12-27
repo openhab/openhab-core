@@ -28,7 +28,7 @@
 
 		<feature dependency="true">openhab.tp-gson</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.40.0)(!(version&gt;=2.41.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.41.0)(!(version&gt;=2.42.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
 		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
@@ -412,7 +412,7 @@
 
 	<feature name="openhab-core-model-lsp" version="${project.version}">
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.40.0)(!(version&gt;=2.41.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.41.0)(!(version&gt;=2.42.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
 		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.24.0)(!(version&gt;=0.24.1)))"</requirement>
