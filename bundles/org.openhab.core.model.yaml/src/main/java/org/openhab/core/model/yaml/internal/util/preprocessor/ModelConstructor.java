@@ -20,7 +20,9 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.*;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.IncludeObject;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.RemoveObject;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.ReplaceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
@@ -52,61 +54,57 @@ class ModelConstructor extends Constructor {
     private static final Tag REPLACE_TAG = new Tag("!replace");
     private static final Tag REMOVE_TAG = new Tag("!remove");
 
-    private static final int MAX_VAR_NESTING_DEPTH = 10;
-
     /**
-     * Matches variable interpolation patterns in YAML strings.
+     * Matches ${...} interpolation patterns in YAML strings.
      *
-     * Supported syntax (subset of bash variable substitution):
-     * - ${var} : Simple variable substitution. If 'var' is not set, returns empty string.
-     * - ${var-default} : If 'var' is set but empty, returns empty string. If not set, returns 'default'.
-     * - ${var:-default} : If 'var' is set but empty, returns 'default'. If not set, returns 'default'.
-     * - Default values can be single-quoted, double-quoted, or unquoted.
+     * Allows nested quotes like default('{foo}') without prematurely stopping at the inner '}'
      *
-     * Regex breakdown:
-     * - (?<name>\\w+) : Captures the variable name (alphanumeric and underscore).
-     * - (?<separator>:?-) : Optionally captures the separator (either '-' or ':-').
-     * - '(?<defaultsq>[^']*)' : Captures single-quoted default value (inside quotes).
-     * - "(?<defaultdq>[^"]*)" : Captures double-quoted default value (inside quotes).
-     * - (?<default>[^}]*) : Captures unquoted default value (up to closing brace).
-     * - All default value groups are optional.
-     *
-     * Additional notes:
-     * - If no default value is provided, an empty string is returned.
-     * - Whitespace inside default values is preserved.
-     * - Nested variable patterns are not matched by this regex (handled separately).
-     * - Invalid patterns (e.g., missing closing brace) will not match.
+     * Examples:
+     * - ${name} : Simple variable substitution
+     * - ${name|capitalize} : Apply capitalize filter
+     * - ${name|default('value')} : Use default if variable is not set
+     * - ${name|upper} : Convert to uppercase
      */
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("""
             \\$\\{
-                (?<name>\\w+)
+            (?<content>
                 (?:
-                    (?<separator>:?-)
-                    (?:
-                        '(?<defaultsq>[^']*)' |   # single-quoted default (capture inside quotes)
-                        "(?<defaultdq>[^"]*)" |   # double-quoted default (capture inside quotes)
-                        (?<default>[^}]*)         # unquoted default
-                    )
-                )?
+                    [^}"']+ |
+                    "[^"]*" |
+                    '[^']*'
+                )+
+            )
             \\}
             """, Pattern.COMMENTS);
 
+    // Pattern for simple variable names (no pipes, operators)
+    private static final Pattern SIMPLE_VAR_PATTERN = Pattern.compile("^\\s*[a-zA-Z_][a-zA-Z0-9_]*\\s*$");
+
+    // Pattern for matching plain YAML scalar that is just ${varname}
+    private static final Pattern SIMPLE_VAR_INTERPOLATION = Pattern
+            .compile("^\\$\\{\\s*(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\\s*\\}$");
+
     private final Logger logger = LoggerFactory.getLogger(ModelConstructor.class);
 
-    private final Map<String, String> variables;
+    private final Map<String, Object> variables;
     private final Path currentFile;
+    private final boolean finalPass;
 
-    public ModelConstructor(LoaderOptions options, Map<String, String> variables, Path currentFile) {
+    public ModelConstructor(LoaderOptions options, Map<String, Object> variables, Path currentFile, boolean finalPass) {
         super(options);
 
         this.variables = variables;
         this.currentFile = currentFile;
+        this.finalPass = finalPass;
 
+        this.yamlConstructors.put(Tag.NULL, new ConstructNull());
         this.yamlConstructors.put(INCLUDE_TAG, new ConstructInclude());
         this.yamlConstructors.put(REPLACE_TAG, new ConstructReplace());
         this.yamlConstructors.put(REMOVE_TAG, new ConstructRemove());
-        this.yamlConstructors.put(Tag.STR, new ConstructInterpolation());
-        this.yamlConstructors.put(Tag.NULL, new ConstructNull());
+
+        if (finalPass) {
+            this.yamlConstructors.put(Tag.STR, new ConstructInterpolation());
+        }
         logger.trace("ModelConstructor created with vars: {}", variables);
     }
 
@@ -119,94 +117,87 @@ class ModelConstructor extends Constructor {
             }
 
             ScalarNode scalarNode = (ScalarNode) node;
-
+            DumperOptions.ScalarStyle scalarStyle = scalarNode.getScalarStyle();
             String value = (String) constructScalar(scalarNode);
 
+            logger.debug("ConstructInterpolation: value='{}' (null={}), style={}", value, value == null, scalarStyle);
+
+            if (value == null) {
+                logger.warn("{}: constructScalar() returned null on node {}!", currentFile, node);
+            }
+
             // don't interpolate single quoted strings
-            if (scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.SINGLE_QUOTED) {
+            if (scalarStyle == DumperOptions.ScalarStyle.SINGLE_QUOTED) {
                 return value;
+            }
+
+            if (scalarStyle == DumperOptions.ScalarStyle.PLAIN) {
+                Matcher simpleMatch = SIMPLE_VAR_INTERPOLATION.matcher(value);
+                if (simpleMatch.matches()) {
+                    // Direct variable lookup without Jinja for unquoted ${varname}
+                    // This is a special case to return non-string types like integers, booleans, lists, maps
+                    String varName = simpleMatch.group("name");
+                    Object varValue = variables.get(varName);
+                    logger.debug("Simple variable lookup: ${{}} => '{}'", varName, varValue);
+                    return varValue == null ? "" : varValue;
+                }
             }
 
             Matcher matcher = VARIABLE_PATTERN.matcher(value);
             if (!matcher.find()) {
+                logger.debug("No variable pattern match for '{}'", value);
                 return value;
             }
 
-            String interpolated = value;
-            int nestedLevel = 0;
+            // Replace ${...} with content (simple variables directly, complex expressions via Jinja)
+            String interpolated = matcher.replaceAll(match -> {
+                String content = match.group("content");
 
-            do {
-                interpolated = matcher.replaceAll(match -> {
-                    String variableName = match.group("name");
-                    String separator = match.group("separator");
-                    String defaultSingleQuoted = match.group("defaultsq");
-                    String defaultDoubleQuoted = match.group("defaultdq");
-                    String defaultUnquoted = match.group("default");
-                    String resolved = resolveVariable(variableName, separator,
-                            defaultDoubleQuoted != null ? defaultDoubleQuoted
-                                    : defaultSingleQuoted != null ? defaultSingleQuoted : defaultUnquoted);
-                    logger.debug("Interpolating variable {} => {}", variableName, resolved);
-                    return Matcher.quoteReplacement(resolved);
-                });
-                if (nestedLevel++ >= MAX_VAR_NESTING_DEPTH) {
-                    throw new YAMLException(currentFile + ": variable nesting is too deep in " + value);
+                // Check if this is a simple variable name (no filters, operators)
+                if (SIMPLE_VAR_PATTERN.matcher(content).matches()) {
+                    // Direct variable lookup without Jinja
+                    Object varValue = variables.get(content.strip());
+                    String renderedValue = varValue == null ? "" : varValue.toString();
+                    logger.debug("Simple variable lookup: ${{}} => '{}'", content, renderedValue);
+                    return Matcher.quoteReplacement(renderedValue);
                 }
-                matcher = VARIABLE_PATTERN.matcher(interpolated);
-            } while (matcher.find());
 
-            // resolve the interpolated node because the type might change e.g.
+                // Complex expression - use Jinja
+                String template = "{{ " + content + " }}";
+                String rendered = JinjavaTemplateEngine.render(template, variables, currentFile);
+                logger.debug("Jinja expression: ${{}} => '{}'", content, rendered);
+                return Matcher.quoteReplacement(rendered);
+            });
+
+            if (interpolated.isEmpty()) {
+                return interpolated;
+            }
+
+            // Preserve quoted strings: if original was quoted (double or single), keep it as string
+            if (scalarStyle == DumperOptions.ScalarStyle.DOUBLE_QUOTED
+                    || scalarStyle == DumperOptions.ScalarStyle.LITERAL
+                    || scalarStyle == DumperOptions.ScalarStyle.FOLDED) {
+                return interpolated;
+            }
+
+            // For plain (unquoted) scalars, allow type inference.
+            // Resolve the interpolated node because the type might change e.g.
             // ${var1} => 1: originally a STR, it now becomes !!int 1
             ModelResolver resolver = new ModelResolver();
             Tag newTag = resolver.resolve(NodeId.scalar, interpolated, true);
-            ScalarNode replacedNode = new ScalarNode(newTag, interpolated, scalarNode.getStartMark(),
-                    scalarNode.getEndMark(), scalarNode.getScalarStyle());
             // now find the correct constructor for the new node
             Construct constructor = yamlConstructors.get(newTag);
             if (constructor == null) {
                 throw new YAMLException("%s: no constructor found for substituted value '%s' => '%s' with tag %s"
                         .formatted(currentFile, value, interpolated, newTag));
             }
+            ScalarNode replacedNode = new ScalarNode(newTag, interpolated, scalarNode.getStartMark(),
+                    scalarNode.getEndMark(), scalarStyle);
             // finally, construct the new node
-            return constructor.construct(replacedNode);
-        }
-
-        /**
-         * Implement the logic for missing and unset variables
-         *
-         * @param name - variable name in the template
-         * @param separator - separator in the template, can be :-, -
-         * @param defaultValue - default value or the error in the template.
-         *            If defaultValue is null, return an empty string.
-         * @return the value to resolve in the template
-         */
-        private String resolveVariable(String name, @Nullable String separator, @Nullable String defaultValue) {
-            String value = variables.get(name);
-            if (isSetAndNotEmpty(value)) {
-                return value;
-            }
-            if (shouldUseDefault(separator, value)) {
-                return getDefaultOrEmpty(defaultValue);
-            }
-            return "";
-        }
-
-        private boolean isSetAndNotEmpty(@Nullable String value) {
-            return value != null && !value.isEmpty();
-        }
-
-        private boolean shouldUseDefault(@Nullable String separator, @Nullable String value) {
-            if (separator == null) {
-                return false;
-            }
-            if (separator.startsWith(":")) {
-                return value == null || value.isEmpty();
-            } else {
-                return value == null;
-            }
-        }
-
-        private String getDefaultOrEmpty(@Nullable String defaultValue) {
-            return defaultValue != null ? defaultValue : "";
+            Object result = constructor.construct(replacedNode);
+            logger.debug("ConstructInterpolation result: {} (type: {})", result,
+                    result == null ? "null" : result.getClass().getSimpleName());
+            return result;
         }
     }
 
@@ -240,7 +231,7 @@ class ModelConstructor extends Constructor {
                 }
 
                 try {
-                    Map<String, String> vars = Optional.ofNullable(includeOptions.get("vars")).map(Map.class::cast)
+                    Map<String, Object> vars = Optional.ofNullable(includeOptions.get("vars")).map(Map.class::cast)
                             .orElse(Map.of());
                     return new IncludeObject(fileName, vars);
                 } catch (ClassCastException e) {
