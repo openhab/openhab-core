@@ -5,6 +5,17 @@ packages:
       thingname: thing1
       label: label1
 
+  package_id_test: !include
+    file: package.inc.yaml
+    vars:
+      thingname: pid_test
+
+  package_id_override: !include
+    file: package.inc.yaml
+    vars:
+      thingname: pid_override
+      package_id: id_override
+
   override props in package: !include
     file: package.inc.yaml
     vars:

@@ -2,6 +2,7 @@ things:
   ${thingname}:
     label: ${label}
     scalar: package
+    packageid: ${package_id}
 
     map1:
       scalar1: package
