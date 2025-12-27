@@ -1,0 +1,98 @@
+packages:
+  thing1: !include
+    file: package.inc.yaml
+    vars:
+      thingname: thing1
+      label: label1
+
+  package_id_test: !include
+    file: package.inc.yaml
+    vars:
+      thingname: pid_test
+
+  package_id_override: !include
+    file: package.inc.yaml
+    vars:
+      thingname: pid_override
+      package_id: id_override
+
+  override props in package: !include
+    file: package.inc.yaml
+    vars:
+      thingname: thing_overwrite
+      label: packageOverwrite
+
+  merge props in package: !include
+    file: package.inc.yaml
+    vars:
+      thingname: thing_merge
+      label: packageMerge
+
+  remove props in package: !include
+    file: package.inc.yaml
+    vars:
+      thingname: thing_remove
+      label: packageRemove
+
+  remove the entire thing: !include
+    file: package.inc.yaml
+    vars:
+      thingname: whole_thing_removed
+      label: packageRemoved
+
+things:
+  # thing1 is not customized in main, so uses package values
+
+  thing_only_in_main:
+    label: label3
+
+  thing_overwrite:
+    label: main
+    scalar: main
+
+    map1: !replace # with !replace, the map from the package is completely discarded
+      scalar1: main
+    list1: !replace
+      - main
+    # leave map2 and list2 alone to verify they merge automatically
+
+    config:
+      scalar1: main
+      map1: !replace
+        mainkey: main
+      list1: !replace
+        - main
+
+  thing_merge:
+    config:
+      scalar2: main
+      scalar3: new
+      map1:
+        scalar2: main
+        scalar3: main
+      map2:
+        mainkey: main
+      list1:
+        - main
+
+    # these are not in the package, but should be merged in anyway
+    # at any depth because merging is the default
+    mainscalar: main
+    mainmap:
+      mainkey: main
+    mainlist1:
+      - main
+    mainlist2:
+      - main
+
+  thing_remove:
+    config:
+      scalar1: !remove
+      map1: !remove
+      map2:
+        scalar1: !remove
+      list1: !remove
+    label: !remove
+    list1: !remove
+
+  whole_thing_removed: !remove

@@ -1,0 +1,37 @@
+things:
+  ${thingname}:
+    label: ${label}
+    scalar: package
+    packageid: ${package_id}
+
+    map1:
+      scalar1: package
+      scalar2: package
+    map2:
+      scalar1: package
+      scalar2: package
+
+    list1:
+      - package
+    list2:
+      - package
+
+    config:
+      scalar1: package
+      scalar2: package
+
+      map1:
+        scalar1: package
+        scalar2: package
+      map2:
+        scalar1: package
+        scalar2: package
+
+      list1:
+        - package
+      list2:
+        - package
+
+items:
+  item_for_${thingname}:
+    label: item ${label}
