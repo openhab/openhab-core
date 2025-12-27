@@ -1,0 +1,7 @@
+variables:
+  foo: globalFoo
+
+data: !include
+  file: includeVarsFromGlobal.inc.yaml
+  vars:
+    bar: ${foo}

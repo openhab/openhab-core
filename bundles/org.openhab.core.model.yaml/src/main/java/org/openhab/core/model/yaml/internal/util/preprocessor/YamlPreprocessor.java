@@ -59,6 +59,7 @@ public class YamlPreprocessor {
 
     private static final String VARIABLES_KEY = "variables";
     private static final String PACKAGES_KEY = "packages";
+    private static final String PACKAGE_ID_VAR = "package_id";
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(YamlPreprocessor.class);
 
@@ -112,13 +113,18 @@ public class YamlPreprocessor {
         dataMap.remove(VARIABLES_KEY); // we've already extracted the variables in the first pass
         LOGGER.trace("Loaded data from {}: {}", file, dataMap);
 
+        // Extract packages before processing includes so we can handle them separately
+        Object packagesObj = dataMap.remove(PACKAGES_KEY);
+
+        // Process includes in everything except packages
         dataMap = (Map<String, Object>) processIncludes(file, dataMap, combinedVars, includeStackBranch,
                 includeCallback);
         LOGGER.trace("Loaded includes from {}: {}", file, dataMap);
 
-        Object packagesObj = dataMap.remove(PACKAGES_KEY);
+        // Process packages separately - this allows us to inject the package ID before processing includes
         if (packagesObj instanceof Map<?, ?> packages) {
-            mergePackages(dataMap, (Map<String, Object>) packages);
+            mergePackages(file, dataMap, (Map<String, Object>) packages, combinedVars, includeStackBranch,
+                    includeCallback);
         } else if (packagesObj != null) {
             LOGGER.warn("{}: The 'packages' section is not a map", file);
         }
@@ -244,17 +250,69 @@ public class YamlPreprocessor {
     // Recursively merge packages into the main data map
     // if the same key exists in both the main map and the package, the main map value is kept
     @SuppressWarnings("unchecked")
-    private static void mergePackages(Map<String, Object> mainData, Map<String, Object> packages) {
-        packages.forEach((packageName, pkg) -> {
-            if (pkg instanceof Map) {
-                mergeElements(mainData, (Map<String, Object>) pkg);
+    private static void mergePackages(Path file, Map<String, Object> mainData, Map<String, Object> packages,
+            Map<String, String> variables, Set<Path> includeStack, Consumer<Path> includeCallback) {
+        packages.forEach((packageId, pkg) -> {
+            Object processedPkg = pkg;
+
+            // If the package is an IncludeObject, inject the ID first, then process it
+            if (pkg instanceof IncludeObject includeObj) {
+                Map<String, String> newVars = new HashMap<>(includeObj.vars());
+                newVars.putIfAbsent(PACKAGE_ID_VAR, packageId.toString());
+                IncludeObject pkgWithId = new IncludeObject(includeObj.fileName(), newVars);
+                processedPkg = processIncludes(file, pkgWithId, variables, includeStack, includeCallback);
+            }
+
+            if (processedPkg instanceof Map) {
+                Map<String, Object> pkgMap = (Map<String, Object>) processedPkg;
+                // Also inject ID into any nested IncludeObjects within the package
+                Map<String, Object> pkgWithId = injectPackageId(pkgMap, packageId.toString());
+                // Process any remaining includes after injection
+                pkgWithId = (Map<String, Object>) processIncludes(file, pkgWithId, variables, includeStack,
+                        includeCallback);
+                mergeElements(mainData, pkgWithId);
             } else {
-                LOGGER.warn("Package '{}' is not a map: {}", packageName, pkg);
+                LOGGER.warn("Package '{}' did not resolve to a map: {}", packageId, processedPkg);
             }
         });
 
         // Recursively resolve all ReplaceObject and RemoveObject instances
         resolveSpecialObjects(mainData);
+    }
+
+    /**
+     * Recursively inject the package ID into IncludeObject vars.
+     * This adds an id variable with the package name to all includes within the package.
+     *
+     * @param data the package data to process
+     * @param packageId the package ID to inject
+     * @return the modified package data
+     */
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> injectPackageId(Map<String, Object> data, String packageId) {
+        return data.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+            Object value = entry.getValue();
+            if (value instanceof IncludeObject includeObj) {
+                Map<String, String> newVars = new HashMap<>(includeObj.vars());
+                newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
+                return new IncludeObject(includeObj.fileName(), newVars);
+            } else if (value instanceof Map) {
+                return injectPackageId((Map<String, Object>) value, packageId);
+            } else if (value instanceof List) {
+                List<Object> list = (List<Object>) value;
+                return list.stream().map(item -> {
+                    if (item instanceof IncludeObject includeObj) {
+                        Map<String, String> newVars = new HashMap<>(includeObj.vars());
+                        newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
+                        return new IncludeObject(includeObj.fileName(), newVars);
+                    } else if (item instanceof Map) {
+                        return injectPackageId((Map<String, Object>) item, packageId);
+                    }
+                    return item;
+                }).toList();
+            }
+            return value;
+        }, (existing, replacement) -> replacement, LinkedHashMap::new));
     }
 
     /**
