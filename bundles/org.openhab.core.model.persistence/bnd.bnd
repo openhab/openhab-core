@@ -1,6 +1,5 @@
 Bundle-SymbolicName: ${project.artifactId}
 Export-Package: org.openhab.core.model.persistence,\
- org.openhab.core.model.persistence.extensions,\
  org.openhab.core.model.persistence.formatting,\
  org.openhab.core.model.persistence.generator,\
  org.openhab.core.model.persistence.parser.antlr,\
