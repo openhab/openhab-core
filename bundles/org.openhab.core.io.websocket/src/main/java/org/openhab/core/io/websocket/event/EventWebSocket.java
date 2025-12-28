@@ -188,27 +188,12 @@ public class EventWebSocket implements WriteCallback {
                         } else if ((WEBSOCKET_TOPIC_PREFIX + "filter/topic").equals(eventDTO.topic)) {
                             List<String> topics = Objects
                                     .requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE), List.of());
-                            for (String topic : topics) {
-                                if (!TOPIC_VALIDATE_PATTERN.matcher(topic).matches()) {
-                                    throw new EventProcessingException(
-                                            "Invalid topic '" + topic + "' in topic filter WebSocketEvent");
-                                }
-                            }
-                            List<String> includeTopics = topics.stream().filter(t -> !t.startsWith("!")).toList();
-                            List<String> excludeTopics = topics.stream().filter(t -> t.startsWith("!"))
-                                    .map(t -> t.substring(1)).toList();
-                            // convert to regex: replace any wildcard (*) with the regex pattern (.*)
-                            includeTopics = includeTopics.stream().map(t -> t.trim().replace("*", ".*") + "$").toList();
-                            excludeTopics = excludeTopics.stream().map(t -> t.trim().replace("*", ".*") + "$").toList();
-                            // create topic filter if topic list not empty
-                            if (!includeTopics.isEmpty() || !excludeTopics.isEmpty()) {
+                            TopicEventFilter includeFilter = TopicFilterMapper.mapTopicsToIncludeFilter(topics);
+                            TopicEventFilter excludeFilter = TopicFilterMapper.mapTopicsToExcludeFilter(topics);
+                            if (includeFilter != null || excludeFilter != null) {
                                 synchronized (this) {
-                                    if (!includeTopics.isEmpty()) {
-                                        topicIncludeFilter = new TopicEventFilter(includeTopics);
-                                    }
-                                    if (!excludeTopics.isEmpty()) {
-                                        topicExcludeFilter = new TopicEventFilter(excludeTopics);
-                                    }
+                                    topicIncludeFilter = includeFilter;
+                                    topicExcludeFilter = excludeFilter;
                                 }
                                 if (logger.isDebugEnabled()) {
                                     logger.debug("Setting topic filter for connection to {}: {}",

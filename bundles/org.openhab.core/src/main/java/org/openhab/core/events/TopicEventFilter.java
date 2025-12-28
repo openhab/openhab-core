@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -48,10 +49,11 @@ public class TopicEventFilter implements EventFilter {
      * Constructs a new topic event filter.
      *
      * @param topicsRegexes the regular expressions of multiple topics
+     * @throws PatternSyntaxException indicate a syntax error in a any of the regular-expression patterns
      * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/regex/Pattern.html">Java
      *      Regex</a>
      */
-    public TopicEventFilter(List<String> topicsRegexes) {
+    public TopicEventFilter(List<String> topicsRegexes) throws PatternSyntaxException {
         List<Pattern> tmpTopicsRegexes = new ArrayList<>();
         for (String topicRegex : topicsRegexes) {
             tmpTopicsRegexes.add(Pattern.compile(topicRegex));
