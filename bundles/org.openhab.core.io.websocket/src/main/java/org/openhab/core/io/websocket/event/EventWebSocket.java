@@ -51,7 +51,6 @@ public class EventWebSocket implements WriteCallback {
     public static final String WEBSOCKET_TOPIC_PREFIX = "openhab/websocket/";
 
     private static final Type STRING_LIST_TYPE = TypeToken.getParameterized(List.class, String.class).getType();
-    private static final Pattern TOPIC_VALIDATE_PATTERN = Pattern.compile("^!?(\\w*\\*?\\/?)+$");
 
     private final Logger logger = LoggerFactory.getLogger(EventWebSocket.class);
 

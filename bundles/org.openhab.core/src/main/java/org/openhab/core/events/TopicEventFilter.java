@@ -49,7 +49,7 @@ public class TopicEventFilter implements EventFilter {
      * Constructs a new topic event filter.
      *
      * @param topicsRegexes the regular expressions of multiple topics
-     * @throws PatternSyntaxException indicate a syntax error in a any of the regular-expression patterns
+     * @throws PatternSyntaxException indicate a syntax error in any of the regular-expression patterns
      * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/regex/Pattern.html">Java
      *      Regex</a>
      */

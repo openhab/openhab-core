@@ -30,7 +30,7 @@ import org.openhab.core.events.TopicEventFilter;
  */
 @NonNullByDefault
 public final class TopicFilterMapper {
-    private static final Pattern TOPIC_VALIDATE_PATTERN = Pattern.compile("^!?(\\w*\\*?/?)+$");
+    private static final Pattern TOPIC_VALIDATE_PATTERN = Pattern.compile("^(\\w*\\*?/?)+$");
 
     private TopicFilterMapper() {
     }
@@ -71,7 +71,7 @@ public final class TopicFilterMapper {
     }
 
     /**
-     * Maps the topic expressions to a {@link TopicEventFilter} for event exlusion.
+     * Maps the topic expressions to a {@link TopicEventFilter} for event exclusion.
      * 
      * @param topics the topic expressions
      * @return the {@link TopicEventFilter} or `null` if there are no exclusions defined
