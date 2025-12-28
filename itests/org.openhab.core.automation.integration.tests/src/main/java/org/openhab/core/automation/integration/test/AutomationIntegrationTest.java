@@ -82,6 +82,7 @@ import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.thing.ThingRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +97,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(AutomationIntegrationTest.class);
     private @Nullable EventPublisher eventPublisher;
+    private @Nullable ThingRegistry thingRegistry;
     private @Nullable ItemRegistry itemRegistry;
     private @NonNullByDefault({}) StartLevelService startLevelService;
     private @Nullable RuleRegistry ruleRegistry;
@@ -112,14 +114,15 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         logger.info("@Before.begin");
 
         eventPublisher = getService(EventPublisher.class);
+        thingRegistry = getService(ThingRegistry.class);
         itemRegistry = getService(ItemRegistry.class);
         startLevelService = mock(StartLevelService.class);
         when(startLevelService.getStartLevel()).thenReturn(100);
         registerService(startLevelService, StartLevelService.class.getName());
 
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
-                Objects.requireNonNull(eventPublisher), Objects.requireNonNull(itemRegistry),
-                mock(TimeZoneProvider.class), startLevelService);
+                Objects.requireNonNull(eventPublisher), Objects.requireNonNull(thingRegistry),
+                Objects.requireNonNull(itemRegistry), mock(TimeZoneProvider.class), startLevelService);
         mock(CoreModuleHandlerFactory.class);
         registerService(coreModuleHandlerFactory);
 
