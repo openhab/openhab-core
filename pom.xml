@@ -84,7 +84,8 @@
     <!-- TEST -->
     <!-- cxf can be updated independently, karaf only uses it in tests -->
     <cxf.version>3.6.9</cxf.version>
-    <junit.version>5.13.4</junit.version>
+    <!-- bndtools restricts to <5.13, see https://github.com/bndtools/bnd/issues/6651 -->
+    <junit.version>5.12.2</junit.version>
     <mockito.version>5.19.0</mockito.version>
   </properties>
 
