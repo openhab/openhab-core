@@ -65,6 +65,7 @@ public class EventWebSocketTest {
     private static final String REMOTE_WEBSOCKET_IMPLEMENTATION = "fooWebsocket";
 
     private static final String TEST_ITEM_NAME = "testItem";
+    private static final String REX_TEST_ITEM_NAME = "rexTestItem";
     private static final NumberItem TEST_ITEM = new NumberItem(TEST_ITEM_NAME);
 
     private Gson gson = new Gson();
@@ -245,7 +246,15 @@ public class EventWebSocketTest {
     @Test
     public void eventFromBusFilterIncludeTopic() throws IOException {
         EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
-                "[\"openhab/items/*/command\", \"openhab/items/*/statechanged\"]", null, null);
+                // topic filters defined:
+                // - openhab/items/{TEST_ITEM_NAME}/command => a single topic
+                // - openhab/items/*/statechanged => wildcard => matches ItemStateChangedEvent &
+                // GroupItemStateChangedEvent for all Items
+                // - openhab/items/rex[^/]*/state => RegEx => matches ItemStateEvent for all Items starting with "rex"
+                "[\"openhab/items/" + TEST_ITEM_NAME + "/command\", " + //
+                        "\"openhab/items/*/statechanged\", " + //
+                        "\"openhab/items/rex[^/]*/state\"]",
+                null, null);
         EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
                 eventDTO.payload, null, null);
         eventWebSocket.onText(gson.toJson(eventDTO));
@@ -263,16 +272,31 @@ public class EventWebSocketTest {
         eventWebSocket.processEvent(event);
         verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
 
+        event = ItemEventFactory.createStateEvent(REX_TEST_ITEM_NAME, DecimalType.ZERO,
+                REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+
+        clearInvocations(remoteEndpoint);
+
         // not subscribed topics are not sent
+        event = ItemEventFactory.createCommandEvent(REX_TEST_ITEM_NAME, DecimalType.ZERO,
+                REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint, never()).sendString(any(), any());
+
         event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint, times(2)).sendString(any(), any());
+        verify(remoteEndpoint, never()).sendString(any(), any());
     }
 
     @Test
     public void eventFromBusFilterExcludeTopic() throws IOException {
         EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
-                "[\"!openhab/items/" + TEST_ITEM_NAME + "/command\"]", null, null);
+                // topic filters defined:
+                // - !openhab/items/{TEST_ITEM_NAME}/command => a single topic
+                // - !openhab/items/rex[^/]*/state => RegEx => matches ItemStateEvent for all Items starting with "rex"
+                "[\"!openhab/items/" + TEST_ITEM_NAME + "/command\", \"!openhab/items/rex[^/]*/state\"]", null, null);
         EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
                 eventDTO.payload, null, null);
         eventWebSocket.onText(gson.toJson(eventDTO));
@@ -283,9 +307,19 @@ public class EventWebSocketTest {
         Event event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO,
                 REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint, times(0)).sendString(any());
+        verify(remoteEndpoint, never()).sendString(any(), any());
+
+        event = ItemEventFactory.createStateEvent(REX_TEST_ITEM_NAME, DecimalType.ZERO,
+                REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint, never()).sendString(any(), any());
 
         // not excluded topics are sent
+        event = ItemEventFactory.createCommandEvent(REX_TEST_ITEM_NAME, DecimalType.ZERO,
+                REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+
         event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO, null,
                 null);
         eventWebSocket.processEvent(event);
