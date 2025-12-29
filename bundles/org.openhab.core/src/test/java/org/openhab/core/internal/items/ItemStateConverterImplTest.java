@@ -28,8 +28,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.i18n.UnitProvider;
@@ -49,7 +47,6 @@ import org.openhab.core.types.UnDefType;
  * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
-@Execution(ExecutionMode.SAME_THREAD)
 public class ItemStateConverterImplTest {
 
     @Nullable
