@@ -645,7 +645,16 @@ Import-Package: \\
                   <version>3.9.6</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
+                  <version>[21.0,22.0),[25.0,26.0)</version>
+                </requireJavaVersion>
+                <requireJavaVersion>
                   <version>[21.0,22.0)</version>
+                  <message>++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++
+JDK 25 compiler is in use, generating Java 21 bytecode.
+This is not officially supported.
+Consider using JDK 21 for building and testing.
+++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++</message>
+                  <level>WARN</level>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -792,6 +801,8 @@ Import-Package: \\
     <profile>
       <id>with-bnd-resolver-resolve</id>
       <activation>
+        <!-- TODO remove automatic activation once upgrade from bnd 7.1.0 to 7.2.0 is done -->
+        <jdk>[25.0,26.0)</jdk>
         <property>
           <name>withResolver</name>
         </property>
@@ -815,6 +826,40 @@ Import-Package: \\
           </plugins>
         </pluginManagement>
       </build>
+    </profile>
+    <!-- TODO remove this profile once upgrade from bnd 7.1.0 to 7.2.0 is done -->
+    <profile>
+      <id>jdk25</id>
+      <activation>
+        <jdk>[25.0,26.0)</jdk>
+      </activation>
+      <properties>
+        <bnd.version>7.2.0-SNAPSHOT</bnd.version>
+      </properties>
+      <repositories>
+        <repository>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+          <id>bnd-snapshots</id>
+          <url>https://bndtools.jfrog.io/bndtools/update-snapshot</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+          <id>bnd-snapshots-plugins</id>
+          <url>https://bndtools.jfrog.io/bndtools/update-snapshot</url>
+        </pluginRepository>
+      </pluginRepositories>
     </profile>
   </profiles>
 </project>
