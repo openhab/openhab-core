@@ -27,8 +27,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.storage.StorageService;
@@ -49,7 +47,6 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("deprecation")
 @NonNullByDefault
-@Execution(ExecutionMode.SAME_THREAD)
 public class HostFragmentSupportTest extends JavaOSGiTest {
 
     private static final Locale BULGARIAN = Locale.of("bg");
