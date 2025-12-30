@@ -367,7 +367,7 @@ public class PersistenceResource implements RESTResource {
         List<PersistenceServiceProblem> persistenceProblems = new ArrayList<>();
 
         List<String> configurationConflicts = persistenceServiceConfigurationRegistry
-                .getPersistenceServiceConfigurationRegistryConflicts();
+                .getServiceConfigurationConflicts();
         for (String serviceId : configurationConflicts) {
             persistenceProblems.add(new PersistenceServiceProblem(
                     PersistenceServiceProblem.PERSISTENCE_DUPLICATE_CONFIG, serviceId, null, false));
