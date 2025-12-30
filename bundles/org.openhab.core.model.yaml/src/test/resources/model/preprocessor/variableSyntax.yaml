@@ -14,6 +14,9 @@ variables:
     - item1
     - item2
 
+  varname-with-dash: dashvalue
+  varname with space: spacevalue
+
 simple: ${exist} # => value1
 double_quoted: "${exist}" # => value1
 single_quoted: '${exist}' # => ${exist} (no substitution in single quotes)
@@ -21,7 +24,10 @@ single_quoted: '${exist}' # => ${exist} (no substitution in single quotes)
 # since 'if' will cause an error in jinja expressions but are allowed in simple form,
 # use it here to prove that they are handled using the simple syntax
 reserved_word: ${if}
-spaced_var: ${   if    }
+simple_spaced_interpolation: ${   if    }
+
+varname_with_dash: ${VARS['varname-with-dash']}
+varname_with_space: ${VARS["varname with space"]}
 
 empty_no_default: ${empty_value}
 absent_no_default: ${absent}
