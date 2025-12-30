@@ -266,7 +266,7 @@ public class YamlPreprocessor {
 
             if (processedPkg instanceof Map) {
                 Map<String, Object> pkgMap = (Map<String, Object>) processedPkg;
-                // Also inject ID into any nested IncludeObjects within the package
+                // Also inject the package ID into all nested IncludeObjects within the package
                 Map<String, Object> pkgWithId = injectPackageId(pkgMap, packageId);
                 // Process any remaining includes after injection
                 pkgWithId = (Map<String, Object>) processIncludes(file, pkgWithId, variables, includeStack,
@@ -283,7 +283,7 @@ public class YamlPreprocessor {
 
     /**
      * Recursively inject the package ID into IncludeObject vars.
-     * This adds an id variable with the package name to all includes within the package.
+     * This adds a `package_id` variable to all includes within the package.
      *
      * @param data the package data to process
      * @param packageId the package ID to inject

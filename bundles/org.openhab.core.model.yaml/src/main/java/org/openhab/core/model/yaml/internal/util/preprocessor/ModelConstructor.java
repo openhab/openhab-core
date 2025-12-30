@@ -221,6 +221,7 @@ class ModelConstructor extends Constructor {
         public Object construct(@Nullable Node node) {
             logger.debug("Constructing !include node: {}", node);
             if (node instanceof ScalarNode scalarNode) {
+                // ScalarNode's constructor ensured that its value is not null, so we can safely call trim()
                 String value = constructScalar(scalarNode).trim();
                 return new IncludeObject(value, Map.of());
             } else if (node instanceof MappingNode mappingNode) {
