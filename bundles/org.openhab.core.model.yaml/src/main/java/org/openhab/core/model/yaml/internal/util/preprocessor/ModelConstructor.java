@@ -14,7 +14,7 @@ package org.openhab.core.model.yaml.internal.util.preprocessor;
 
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,14 +92,12 @@ class ModelConstructor extends Constructor {
 
     private final Map<String, Object> variables;
     private final Path currentFile;
-    private final boolean finalPass;
 
     public ModelConstructor(LoaderOptions options, Map<String, Object> variables, Path currentFile, boolean finalPass) {
         super(options);
 
         this.variables = variables;
         this.currentFile = currentFile;
-        this.finalPass = finalPass;
 
         this.yamlConstructors.put(Tag.NULL, new ConstructNull());
         this.yamlConstructors.put(INCLUDE_TAG, new ConstructInclude());
@@ -202,7 +200,7 @@ class ModelConstructor extends Constructor {
             Object result = constructor.construct(replacedNode);
             logger.debug("ConstructInterpolation result: {} (type: {})", result,
                     result == null ? "null" : result.getClass().getSimpleName());
-            return result;
+            return Objects.requireNonNullElse(result, "");
         }
     }
 
@@ -212,9 +210,7 @@ class ModelConstructor extends Constructor {
         // This matches the behavior of Jackson's parser, otherwise some tests will fail
         @Override
         public Object construct(@Nullable Node node) {
-            if (node != null) {
-                constructScalar((ScalarNode) node);
-            }
+            // Always return empty string, regardless of node content
             return "";
         }
     }
@@ -222,10 +218,11 @@ class ModelConstructor extends Constructor {
     private class ConstructInclude extends AbstractConstruct {
 
         @Override
+        @SuppressWarnings("unchecked")
         public Object construct(@Nullable Node node) {
             logger.debug("Constructing !include node: {}", node);
             if (node instanceof ScalarNode scalarNode) {
-                // ScalarNode's constructor ensured that its value is not null, so we can safely call trim()
+                // ScalarNode's constructor ensured that its value is not null
                 String value = constructScalar(scalarNode).trim();
                 return new IncludeObject(value, Map.of());
             } else if (node instanceof MappingNode mappingNode) {
@@ -236,13 +233,14 @@ class ModelConstructor extends Constructor {
                     throw new YAMLException(currentFile + ": missing 'file' key in !include: " + includeOptions);
                 }
 
-                try {
-                    Map<String, Object> vars = Optional.ofNullable(includeOptions.get("vars")).map(Map.class::cast)
-                            .orElse(Map.of());
-                    return new IncludeObject(fileName, vars);
-                } catch (ClassCastException e) {
+                Object varsObj = includeOptions.get("vars");
+                if (varsObj == null) {
+                    return new IncludeObject(fileName, Map.of());
+                } else if (varsObj instanceof Map<?, ?>) {
+                    return new IncludeObject(fileName, (Map<String, Object>) varsObj);
+                } else {
                     throw new YAMLException(currentFile + ": invalid 'vars' type in !include file: " + fileName
-                            + ", vars: " + includeOptions.get("vars") + " (not a map)", e);
+                            + ", vars: " + varsObj + " (not a map)");
                 }
             }
             throw new YAMLException(currentFile + ": invalid !include argument type: "

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor.tags;
 
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 
 /**
@@ -21,5 +20,5 @@ import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-public record ReplaceObject(@Nullable Object object) {
+public record ReplaceObject(Object object) {
 }

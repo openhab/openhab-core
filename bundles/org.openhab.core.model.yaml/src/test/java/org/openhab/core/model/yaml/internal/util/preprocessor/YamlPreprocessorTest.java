@@ -75,9 +75,7 @@ public class YamlPreprocessorTest {
 
     @Test
     void anchorsTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("anchors.yaml"),
-                path -> {
-                });
+        Map<String, Object> data = loadFixture("anchors.yaml");
         assertThat(data.get("baz"), equalTo("bar"));
         assertThat(data.get("bar"), equalTo("qux"));
     }
@@ -94,9 +92,7 @@ public class YamlPreprocessorTest {
     // After the preprocessor, the variables and packages sections should be removed
     // from the resulting data structure
     void extraElementsRemovedTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("extraElementsRemoved.yaml"), path -> {
-                });
+        Map<String, Object> data = loadFixture("extraElementsRemoved.yaml");
 
         assertThat(data, not(hasKey("variables")));
         assertThat(data, not(hasKey("packages")));
@@ -104,9 +100,7 @@ public class YamlPreprocessorTest {
 
     @Test
     void variableSyntaxTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("variableSyntax.yaml"), path -> {
-                });
+        Map<String, Object> data = loadFixture("variableSyntax.yaml");
 
         assertThat(data.get("simple"), equalTo("value1"));
         assertThat(data.get("double_quoted"), equalTo("value1"));
@@ -149,11 +143,18 @@ public class YamlPreprocessorTest {
         assertThat(data.get("string_var"), instanceOf(String.class));
         assertThat(data.get("string_var"), equalTo("1"));
 
-        assertThat(data.get("string_var_literal"), instanceOf(String.class));
-        assertThat(((String) data.get("string_var_literal")).strip(), equalTo("1"));
+        Object stringVarLiteral = data.get("string_var_literal");
+        assertThat(stringVarLiteral, instanceOf(String.class));
+        // although this seems redundant, it avoids explicit cast warnings
+        if (stringVarLiteral instanceof String literal) {
+            assertThat(literal.strip(), equalTo("1"));
+        }
 
-        assertThat(data.get("string_var_folded"), instanceOf(String.class));
-        assertThat(((String) data.get("string_var_folded")).strip(), equalTo("1"));
+        Object stringVarFolded = data.get("string_var_folded");
+        assertThat(stringVarFolded, instanceOf(String.class));
+        if (stringVarFolded instanceof String folded) {
+            assertThat(folded.strip(), equalTo("1"));
+        }
 
         assertThat(data.get("int_var"), instanceOf(Integer.class));
         assertThat(data.get("int_var"), equalTo(1));
@@ -182,47 +183,40 @@ public class YamlPreprocessorTest {
 
     @Test
     void include1DeepTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("include1Deep.yaml"),
-                path -> {
-                });
+        Map<String, Object> data = loadFixture("include1Deep.yaml");
 
         assertThat(getNestedValue(data, "toplevel", "includedkey"), equalTo("value"));
     }
 
     @Test
     void include2DeepTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("include2Deep.yaml"),
-                path -> {
-                });
+        Map<String, Object> data = loadFixture("include2Deep.yaml");
 
         assertThat(getNestedValue(data, "toplevel", "level1", "level2"), equalTo("foo"));
     }
 
     @Test
     void predefinedVarsTest() throws IOException {
-        Path sourcePath = SOURCE_PATH.resolve("predefinedVars.yaml");
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(sourcePath, path -> {
-        });
+        Path file = SOURCE_PATH.resolve("predefinedVars.yaml");
+        Map<String, Object> data = loadFixture(file.getFileName().toString());
 
-        assertThat(data.get("file"), equalTo(sourcePath.toAbsolutePath().toString()));
+        assertThat(data.get("file"), equalTo(file.toAbsolutePath().toString()));
         assertThat(data.get("filename"), equalTo("predefinedVars"));
         assertThat(data.get("ext"), equalTo("yaml"));
-        assertThat(data.get("path"), equalTo(sourcePath.toAbsolutePath().getParent().toString()));
+        assertThat(data.get("path"), equalTo(file.toAbsolutePath().getParent().toString()));
     }
 
     @Test
     void predefinedVarsNotOverridableTest() throws IOException {
-        Path sourcePath = SOURCE_PATH.resolve("predefinedVarsNotOverridable.yaml");
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(sourcePath, path -> {
-        });
+        Path file = SOURCE_PATH.resolve("predefinedVarsNotOverridable.yaml");
+        Map<String, Object> data = loadFixture(file.getFileName().toString());
 
-        Path file = sourcePath;
         assertThat(data.get("file"), equalTo(file.toAbsolutePath().toString()));
         assertThat(data.get("filename"), equalTo("predefinedVarsNotOverridable"));
         assertThat(data.get("ext"), equalTo("yaml"));
         assertThat(data.get("path"), equalTo(file.toAbsolutePath().getParent().toString()));
 
-        file = sourcePath.resolveSibling("predefinedVarsNotOverridable.inc.yaml");
+        file = file.resolveSibling("predefinedVarsNotOverridable.inc.yaml");
         assertThat(getNestedValue(data, "include", "file"), equalTo(file.toAbsolutePath().toString()));
         assertThat(getNestedValue(data, "include", "filename"), equalTo("predefinedVarsNotOverridable.inc"));
         assertThat(getNestedValue(data, "include", "ext"), equalTo("yaml"));
@@ -231,35 +225,27 @@ public class YamlPreprocessorTest {
 
     @Test
     void circularInclusionTest() {
-        IOException exception = assertThrows(IOException.class,
-                () -> YamlPreprocessor.load(SOURCE_PATH.resolve("circularInclusion.yaml"), path -> {
-                }));
+        IOException exception = assertThrows(IOException.class, () -> loadFixture("circularInclusion.yaml"));
         assertThat(exception.getMessage(), containsString("Circular inclusion detected"));
     }
 
     @Test
     void includedTopLevelVarsTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("includedTopLevelVars.yaml"), path -> {
-                });
+        Map<String, Object> data = loadFixture("includedTopLevelVars.yaml");
 
         assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_toplevel"));
     }
 
     @Test
     void includedTopLevelFileVarsTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("includedTopLevelFileVars.yaml"), path -> {
-                });
+        Map<String, Object> data = loadFixture("includedTopLevelFileVars.yaml");
 
         assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_include_level"));
     }
 
     @Test
     void includeVarsFromGlobalTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("includeVarsFromGlobal.yaml"), path -> {
-                });
+        Map<String, Object> data = loadFixture("includeVarsFromGlobal.yaml");
 
         // The included file resolves ${bar} where bar is set to ${foo} from globals
         assertThat(getNestedValue(data, "data", "includedkey"), equalTo("globalFoo"));
@@ -267,16 +253,14 @@ public class YamlPreprocessorTest {
 
     @Test
     void varsPropagate2LevelsTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
-                .load(SOURCE_PATH.resolve("varsPropagate2Levels.yaml"), path -> {
-                });
+        Map<String, Object> data = loadFixture("varsPropagate2Levels.yaml");
 
         assertThat(getNestedValue(data, "toplevel", "data", "data"), equalTo("toplevel"));
     }
 
     @Test
     void packagesLoadFromPackagesTest() throws IOException {
-        Map<String, Object> data = loadPackages();
+        Map<String, Object> data = loadFixture("packaging.yaml");
 
         assertThat(getNestedValue(data, "things", "thing1", "label"), equalTo("label1"));
         assertThat(getNestedValue(data, "things", "thing1", "scalar"), equalTo("package"));
@@ -286,7 +270,7 @@ public class YamlPreprocessorTest {
 
     @Test
     void packagesInjectPackageIdTest() throws IOException {
-        Map<String, Object> data = loadPackages();
+        Map<String, Object> data = loadFixture("packaging.yaml");
 
         assertThat(getNestedValue(data, "things", "pid_test", "packageid"), equalTo("package_id_test"));
         assertThat(getNestedValue(data, "things", "pid_override", "packageid"), equalTo("id_override"));
@@ -294,16 +278,19 @@ public class YamlPreprocessorTest {
 
     @Test
     void packagesDoNotRemoveNonPackageThingsTest() throws IOException {
-        Map<String, Object> data = loadPackages();
+        Map<String, Object> data = loadFixture("packaging.yaml");
 
         assertThat(getNestedValue(data, "things", "thing_only_in_main", "label"), equalTo("label3"));
     }
 
     @Test
+    @SuppressWarnings("null")
     void packagesOverwriteBehaviorTest() throws IOException {
-        Map<String, Object> data = loadPackages();
+        Map<String, Object> data = loadFixture("packaging.yaml");
 
-        Map<String, Object> thingOverwrite = (Map<String, Object>) getNestedValue(data, "things", "thing_overwrite");
+        Object thingOverwriteObj = getNestedValue(data, "things", "thing_overwrite");
+
+        Map<String, Object> thingOverwrite = (Map<String, Object>) thingOverwriteObj;
 
         // Verify that scalar properties overwrite package values
         assertThat(getNestedValue(thingOverwrite, "label"), equalTo("main"));
@@ -336,8 +323,9 @@ public class YamlPreprocessorTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void packagesMergeBehaviorTest() throws IOException {
-        Map<String, Object> data = loadPackages();
+        Map<String, Object> data = loadFixture("packaging.yaml");
 
         Map<String, Object> thingMerge = (Map<String, Object>) getNestedValue(data, "things", "thing_merge");
 
@@ -376,8 +364,9 @@ public class YamlPreprocessorTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void packagesRemoveBehaviorTest() throws IOException {
-        Map<String, Object> data = loadPackages();
+        Map<String, Object> data = loadFixture("packaging.yaml");
 
         Map<String, Object> thingRemove = (Map<String, Object>) getNestedValue(data, "things", "thing_remove");
 
@@ -409,9 +398,7 @@ public class YamlPreprocessorTest {
 
     @Test
     void hiddenKeysTest() throws IOException {
-        Map<String, Object> data = (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("hiddenKeys.yaml"),
-                path -> {
-                });
+        Map<String, Object> data = loadFixture("hiddenKeys.yaml");
 
         assertThat(getNestedValue(data, ".energy_type"), nullValue());
         assertThat(getNestedValue(data, "items", "energy_1", "type"), equalTo("number"));
@@ -424,8 +411,19 @@ public class YamlPreprocessorTest {
         assertThat(getNestedValue(data, "items", "energy_2", "label"), equalTo("Energy_2"));
     }
 
-    private Map<String, Object> loadPackages() throws IOException {
-        return (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve("packaging.yaml"), path -> {
+    /**
+     * Load a YAML fixture file from the test resources.
+     * <p>
+     * This helper method simplifies loading fixture files by automatically resolving the path
+     * relative to the standard test resources directory and parsing the YAML content.
+     *
+     * @param filename the name of the YAML file to load (relative to the fixture directory)
+     * @return the parsed YAML content as a Map
+     * @throws IOException if an error occurs reading the file
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> loadFixture(String filename) throws IOException {
+        return (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve(filename), path -> {
         });
     }
 
