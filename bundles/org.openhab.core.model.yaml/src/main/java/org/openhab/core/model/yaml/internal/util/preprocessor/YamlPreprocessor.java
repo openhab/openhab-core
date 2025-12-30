@@ -236,6 +236,7 @@ public class YamlPreprocessor {
         String includeFile = includeObject.fileName();
         Path includeFilePath = currentFile.resolveSibling(includeFile);
         Map<String, Object> includeVars = new HashMap<>(variables);
+        // include vars override current vars
         includeVars.putAll(includeObject.vars());
         try {
             includeCallback.accept(includeFilePath);
