@@ -12,11 +12,10 @@
  */
 package org.openhab.core.persistence.internal;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -46,8 +45,8 @@ public class PersistenceServiceConfigurationRegistryImpl
         extends AbstractRegistry<PersistenceServiceConfiguration, String, PersistenceServiceConfigurationProvider>
         implements PersistenceServiceConfigurationRegistry {
     private final Logger logger = LoggerFactory.getLogger(PersistenceServiceConfigurationRegistryImpl.class);
-    private final Map<String, Provider<PersistenceServiceConfiguration>> serviceToProvider = new HashMap<>();
-    private final Map<String, Set<Provider<PersistenceServiceConfiguration>>> serviceToAllProviders = new HashMap<>();
+    private final Map<String, Provider<PersistenceServiceConfiguration>> serviceToProvider = new ConcurrentHashMap<>();
+    private final Map<String, Set<Provider<PersistenceServiceConfiguration>>> serviceToAllProviders = new ConcurrentHashMap<>();
     private final Set<PersistenceServiceConfigurationRegistryChangeListener> registryChangeListeners = new CopyOnWriteArraySet<>();
 
     public PersistenceServiceConfigurationRegistryImpl() {
@@ -58,7 +57,7 @@ public class PersistenceServiceConfigurationRegistryImpl
     public void added(Provider<PersistenceServiceConfiguration> provider, PersistenceServiceConfiguration element) {
         String elementUID = element.getUID();
         Set<Provider<PersistenceServiceConfiguration>> providers = serviceToAllProviders.getOrDefault(elementUID,
-                new HashSet<>());
+                new CopyOnWriteArraySet<>());
         providers.add(provider);
         serviceToAllProviders.put(elementUID, providers);
         Provider<PersistenceServiceConfiguration> existingProvider = serviceToProvider.get(elementUID);
@@ -81,6 +80,9 @@ public class PersistenceServiceConfigurationRegistryImpl
         Set<Provider<PersistenceServiceConfiguration>> providers = serviceToAllProviders.get(elementUID);
         if (providers != null) {
             providers.remove(provider);
+            if (providers.isEmpty()) {
+                serviceToAllProviders.remove(elementUID);
+            }
         }
         if (!provider.equals(serviceToProvider.getOrDefault(elementUID, provider))) {
             logger.warn("Tried to remove strategy container with serviceId '{}', but it was added by another provider.",
@@ -89,8 +91,14 @@ public class PersistenceServiceConfigurationRegistryImpl
             super.removed(provider, element);
             if (providers != null && !providers.isEmpty()) {
                 Provider<PersistenceServiceConfiguration> alternateProvider = providers.stream().findAny().get();
-                serviceToProvider.put(elementUID, alternateProvider);
-                super.added(alternateProvider, element);
+                PersistenceServiceConfiguration alternateElement = alternateProvider.getAll().stream()
+                        .filter(e -> elementUID.equals(e.getUID())).findAny().orElse(null);
+                if (alternateElement != null) {
+                    super.added(alternateProvider, alternateElement);
+                    serviceToProvider.put(elementUID, alternateProvider);
+                }
+            } else {
+                serviceToProvider.remove(elementUID);
             }
         }
     }
@@ -144,7 +152,7 @@ public class PersistenceServiceConfigurationRegistryImpl
     }
 
     @Override
-    public List<String> getPersistenceServiceConfigurationRegistryConflicts() {
+    public List<String> getServiceConfigurationConflicts() {
         return serviceToAllProviders.entrySet().stream().filter(entry -> entry.getValue().size() > 1)
                 .map(entry -> entry.getKey()).toList();
     }

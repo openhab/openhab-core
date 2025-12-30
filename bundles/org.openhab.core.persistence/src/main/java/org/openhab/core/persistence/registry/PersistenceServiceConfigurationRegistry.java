@@ -32,5 +32,11 @@ public interface PersistenceServiceConfigurationRegistry extends Registry<Persis
 
     void removeRegistryChangeListener(PersistenceServiceConfigurationRegistryChangeListener listener);
 
-    List<String> getPersistenceServiceConfigurationRegistryConflicts();
+    /**
+     * Returns a list of persistence services that have configurations defined by multiple providers, e.g. a DSL
+     * provider and a managed provider.
+     *
+     * @return a list of persistence identifiers of currently detected configuration conflicts, empty if no conflicts
+     */
+    List<String> getServiceConfigurationConflicts();
 }
