@@ -124,6 +124,7 @@ class ModelConstructor extends Constructor {
 
             if (value == null) {
                 logger.warn("{}: constructScalar() returned null on node {}!", currentFile, node);
+                return "";
             }
 
             // don't interpolate single quoted strings
