@@ -228,13 +228,10 @@ public class YamlPreprocessorTest {
 
     @Test
     void circularInclusionTest() {
-        try {
-            YamlPreprocessor.load(SOURCE_PATH.resolve("circularInclusion.yaml"), path -> {
-            });
-            fail("Expected an exception to be thrown");
-        } catch (IOException e) {
-            assertThat(e.getMessage(), containsString("Circular inclusion detected"));
-        }
+        IOException exception = assertThrows(IOException.class,
+                () -> YamlPreprocessor.load(SOURCE_PATH.resolve("circularInclusion.yaml"), path -> {
+                }));
+        assertThat(exception.getMessage(), containsString("Circular inclusion detected"));
     }
 
     @Test
