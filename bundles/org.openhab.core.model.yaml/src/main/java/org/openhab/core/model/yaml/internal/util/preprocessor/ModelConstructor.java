@@ -77,12 +77,16 @@ class ModelConstructor extends Constructor {
             \\}
             """, Pattern.COMMENTS);
 
-    // Pattern for simple variable names (no pipes, operators)
-    private static final Pattern SIMPLE_VAR_PATTERN = Pattern.compile("^\\s*[a-zA-Z_][a-zA-Z0-9_]*\\s*$");
+    // Variable name pattern
+    private static final String VAR_NAME_REGEX = "[a-zA-Z_][a-zA-Z0-9_]*";
 
-    // Pattern for matching plain YAML scalar that is just ${varname}
+    // Pattern for simple variable names (no pipes, operators)
+    private static final Pattern SIMPLE_VAR_PATTERN = Pattern.compile("^\\s*" + VAR_NAME_REGEX + "\\s*$");
+
+    // Pattern for matching plain YAML scalar where the whole value is just key: ${varname}
+    // and not part of a larger string
     private static final Pattern SIMPLE_VAR_INTERPOLATION = Pattern
-            .compile("^\\$\\{\\s*(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\\s*\\}$");
+            .compile("^\\$\\{\\s*(?<name>" + VAR_NAME_REGEX + ")\\s*\\}$");
 
     private final Logger logger = LoggerFactory.getLogger(ModelConstructor.class);
 

@@ -113,7 +113,10 @@ public class YamlPreprocessorTest {
         assertThat(data.get("single_quoted"), equalTo("${exist}"));
 
         assertThat(data.get("reserved_word"), equalTo("reserved"));
-        assertThat(data.get("spaced_var"), equalTo("reserved"));
+        assertThat(data.get("simple_spaced_interpolation"), equalTo("reserved"));
+
+        assertThat(data.get("varname_with_dash"), equalTo("dashvalue"));
+        assertThat(data.get("varname_with_space"), equalTo("spacevalue"));
 
         assertThat(data.get("empty_no_default"), equalTo(""));
         assertThat(data.get("absent_no_default"), equalTo(""));
