@@ -83,7 +83,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Laurent Garnier - new parameters to retrieve errors and warnings when loading a file
  * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createIsolatedModel and
  *         removeIsolatedModel
- * @author Jimmy Tanagra - Added Yaml preprocessor to support !include, variable substitutions, and packages
+ * @author Jimmy Tanagra - Added Yaml preprocessor to support variable substitutions, packages, and include-file
+ *         processing
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -359,10 +360,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     private boolean processIncludeFile(Kind kind, Path fullPath) {
-        // Take a snapshot of the depending models. While getKeys(...) returns an unmodifiable Set,
-        // the underlying modelIncludes structure can be modified indirectly by processWatchEvent(...)
-        // (which is invoked below for each depending model). Iterating over the live key view could
-        // therefore lead to ConcurrentModificationException; iterating over this defensive copy is safe.
+        // Take a copy of modelIncludes because it gets modified in processWatchEvent
         Set<String> dependingModels = new HashSet<>(modelIncludes.getKeys(fullPath));
 
         if (dependingModels.isEmpty()) {
@@ -377,10 +375,13 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         };
         logger.info("An include file '{}' was {}", fullPath, action);
 
+        // When an include file was deleted, process the depending models as if they were deleted too.
+        // This avoids having to reload and reparse the main model file only to find out that it is invalid
+        // Otherwise, process them as modified/updated so they are reloaded.
+        Kind modelChangeKind = (kind == Kind.DELETE) ? kind : Kind.MODIFY;
         dependingModels.forEach(modelName -> {
             Path modelPath = mainWatchPath.resolve(modelName);
-            // reprocess the model that depends on this include file
-            processWatchEvent(Kind.MODIFY, modelPath);
+            processWatchEvent(modelChangeKind, modelPath);
         });
 
         return true;
