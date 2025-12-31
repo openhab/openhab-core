@@ -55,9 +55,7 @@ import org.yaml.snakeyaml.representer.Representer;
  */
 @NonNullByDefault
 public class YamlPreprocessor {
-    // Maximum allowed include depth to prevent stack overflow.
-    // Stack overflow has been observed at around 450 on a large system,
-    // so we use a conservative default of 100 to avoid issues.
+
     private static final int MAX_INCLUDE_DEPTH = 100;
 
     private static final String VARIABLES_KEY = "variables";
