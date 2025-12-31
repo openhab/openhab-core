@@ -4,4 +4,4 @@ variables:
 data: !include
   file: includeVarsFromGlobal.inc.yaml
   vars:
-    bar: ${foo}
+    bar: !sub ${foo}

@@ -21,7 +21,9 @@ import org.yaml.snakeyaml.error.YAMLException;
 
 import com.hubspot.jinjava.Jinjava;
 import com.hubspot.jinjava.JinjavaConfig;
+import com.hubspot.jinjava.interpret.Context;
 import com.hubspot.jinjava.interpret.InterpretException;
+import com.hubspot.jinjava.interpret.JinjavaInterpreter;
 
 /**
  * Wrapper around Jinjava template engine for rendering ${...} expressions.
@@ -31,14 +33,15 @@ import com.hubspot.jinjava.interpret.InterpretException;
 @NonNullByDefault
 class JinjavaTemplateEngine {
 
+    private static final JinjavaConfig JINJAVA_CONFIG;
     private static final Jinjava JINJAVA;
 
     static {
-        JinjavaConfig config = JinjavaConfig.newBuilder() //
-                .withFailOnUnknownTokens(false) // don't fail on unknown variables
+        JINJAVA_CONFIG = JinjavaConfig.newBuilder() //
+                .withFailOnUnknownTokens(true) // surface undefined variables instead of silently ignoring
                 .withMaxRenderDepth(10) //
                 .build();
-        JINJAVA = new Jinjava(config);
+        JINJAVA = new Jinjava(JINJAVA_CONFIG);
     }
 
     /**
@@ -55,5 +58,42 @@ class JinjavaTemplateEngine {
         } catch (InterpretException e) {
             throw new YAMLException(currentFile + ": (Jinjava) " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Evaluate a Jinjava expression and return the raw object result (no string coercion).
+     *
+     * @param expression the expression content without delimiters (e.g., "user.profile")
+     * @param variables the variable context
+     * @param currentFile the current file being processed (for error messages)
+     * @return the evaluated object (map/list/number/boolean/string)
+     */
+    public static Object renderObject(String expression, Map<String, Object> variables, Path currentFile) {
+        try {
+            Context context = new Context(JINJAVA.getGlobalContext());
+            context.putAll(variables);
+            JinjavaInterpreter interpreter = new JinjavaInterpreter(JINJAVA, context, JINJAVA_CONFIG);
+            Object result = interpreter.resolveELExpression(expression, 0);
+            return normalizeType(result);
+        } catch (InterpretException e) {
+            throw new YAMLException(currentFile + ": (Jinjava) " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Normalize types returned by Jinjava to avoid Long where Integer is expected.
+     * This is to maintain the same behavior as SnakeYAML which uses Integer for small integers.
+     *
+     * @param obj the object to normalize
+     * @return the normalized object
+     */
+    private static Object normalizeType(Object obj) {
+        if (obj instanceof Long value) {
+            // Check if the value fits in an Integer
+            if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+                return Math.toIntExact(value);
+            }
+        }
+        return obj;
     }
 }

@@ -4,13 +4,13 @@ variables:
   __FILE_EXT__: main
   __DIRECTORY__: main
 
-file: ${__FILE__}
-filename: ${__FILE_NAME__}
-ext: ${__FILE_EXT__}
-path: ${__DIRECTORY__}
+file: !sub ${__FILE__}
+filename: !sub ${__FILE_NAME__}
+ext: !sub ${__FILE_EXT__}
+path: !sub ${__DIRECTORY__}
 
 include: !include
-  file: "${__FILE_NAME__}.inc.yaml"
+  file: predefinedVarsNotOverridable.inc.yaml
   vars:
     __FILE__: includevar
     __FILE_NAME__: includevar
