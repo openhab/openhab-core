@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -43,397 +44,452 @@ public class YamlPreprocessorTest {
     private static final Path SOURCE_PATH = Path.of("src/test/resources/model/preprocessor");
 
     @Test
-    public void booleanParserTest() throws IOException {
-        Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), SOURCE_PATH.resolve("dummy.yaml"), false);
-
-        assertThat(yaml.load("true"), equalTo(true));
-        assertThat(yaml.load("TRUE"), equalTo(true));
-        assertThat(yaml.load("True"), equalTo(true));
-        assertThat(yaml.load("TrUe"), equalTo(true));
-
-        assertThat(yaml.load("false"), equalTo(false));
-        assertThat(yaml.load("False"), equalTo(false));
-        assertThat(yaml.load("FALSE"), equalTo(false));
-        assertThat(yaml.load("fALsE"), equalTo(false));
-
-        List.of("on", "On", "ON", "oN").forEach(value -> {
-            assertThat(yaml.load(value), equalTo(value));
-        });
-
-        List.of("off", "Off", "OFF", "oFf").forEach(value -> {
-            assertThat(yaml.load(value), equalTo(value));
-        });
-
-        List.of("yes", "Yes", "YES", "yEs").forEach(value -> {
-            assertThat(yaml.load(value), equalTo(value));
-        });
-
-        List.of("no", "No", "NO", "nO").forEach(value -> {
-            assertThat(yaml.load(value), equalTo(value));
-        });
-    }
-
-    @Test
-    void anchorsTest() throws IOException {
-        Map<String, Object> data = loadFixture("anchors.yaml");
-        assertThat(data.get("baz"), equalTo("bar"));
-        assertThat(data.get("bar"), equalTo("qux"));
-    }
-
-    @Test
-    void getNestedValueTest() {
+    void nestedValueLookup() {
         Map<String, Object> data = Map.of("top", Map.of("level1", Map.of("level2", "value")));
         assertThat(getNestedValue(data, "top", "level1", "level2"), equalTo("value"));
         assertNull(getNestedValue(data, "top", "nolevel1", "level2"));
         assertNull(getNestedValue(data, "top", "level1", "nolevel2"));
     }
 
-    @Test
-    // After the preprocessor, the variables and packages sections should be removed
-    // from the resulting data structure
-    void extraElementsRemovedTest() throws IOException {
-        Map<String, Object> data = loadFixture("extraElementsRemoved.yaml");
+    @Nested
+    class YamlLoaderTests {
+        static final String PATH = "loader/";
 
-        assertThat(data, not(hasKey("variables")));
-        assertThat(data, not(hasKey("packages")));
-    }
+        @Test
+        public void booleanParser() throws IOException {
+            Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), Path.of("dummy.yaml"), false);
 
-    @Test
-    void untaggedPatternsNotInterpolatedTest() throws IOException {
-        Map<String, Object> data = loadFixture("untaggedPatternsNotInterpolated.yaml");
+            assertThat(yaml.load("true"), equalTo(true));
+            assertThat(yaml.load("TRUE"), equalTo(true));
+            assertThat(yaml.load("True"), equalTo(true));
+            assertThat(yaml.load("TrUe"), equalTo(true));
 
-        assertThat(data.get("plain"), not(equalTo("bar")));
-        assertThat(data.get("double_quoted"), not(equalTo("bar")));
-        assertThat(data.get("single_quoted"), not(equalTo("bar")));
-        assertThat(data.get("spaced_pattern"), not(equalTo("bar")));
-        assertThat(data.get("multiline_pattern"), not(equalTo("bar")));
-        assertThat(data.get("folded"), not(equalTo("bar")));
-    }
+            assertThat(yaml.load("false"), equalTo(false));
+            assertThat(yaml.load("False"), equalTo(false));
+            assertThat(yaml.load("FALSE"), equalTo(false));
+            assertThat(yaml.load("fALsE"), equalTo(false));
 
-    @Test
-    void missingVariablesTest() {
-        IOException exception = assertThrows(IOException.class, () -> loadFixture("missingVariables.yaml"));
-        assertThat(exception.getMessage(), containsString("undefined_variable"));
-    }
+            List.of("on", "On", "ON", "oN").forEach(value -> {
+                assertThat(yaml.load(value), equalTo(value));
+            });
 
-    @Test
-    void variableSyntaxTest() throws IOException {
-        Map<String, Object> data = loadFixture("variableSyntax.yaml");
+            List.of("off", "Off", "OFF", "oFf").forEach(value -> {
+                assertThat(yaml.load(value), equalTo(value));
+            });
 
-        assertThat(data.get("plain"), equalTo("value1"));
-        assertThat(data.get("double_quoted"), equalTo("value1"));
-        assertThat(data.get("single_quoted"), equalTo("value1"));
+            List.of("yes", "Yes", "YES", "yEs").forEach(value -> {
+                assertThat(yaml.load(value), equalTo(value));
+            });
 
-        assertThat(data.get("spaces_inside_delimiters"), equalTo("value1"));
-
-        assertThat(data.get("vars_bracket_double"), equalTo("reserved"));
-        assertThat(data.get("vars_bracket_single"), equalTo("reserved"));
-        assertThat(data.get("vars_with_dash"), equalTo("dashvalue"));
-        assertThat(data.get("vars_with_space"), equalTo("spacevalue"));
-
-        assertThat(data.get("empty_no_default"), equalTo(""));
-        // assertThat(data.get("absent_no_default"), equalTo(""));
-
-        assertThat(data.get("exists"), equalTo("value1"));
-        assertThat(data.get("empty_value_test"), equalTo(""));
-        assertThat(data.get("empty_value_test_compound"), equalTo("prefix-"));
-        // assertThat(data.get("absent"), equalTo("default"));
-
-        assertThat(data.get("exists_with_true"), equalTo("value1"));
-        assertThat(data.get("empty_value_with_true"), equalTo("default"));
-        // assertThat(data.get("absent_with_true"), equalTo("default"));
-
-        // assertThat(data.get("absent_default_multiple"), equalTo("foobar"));
-        // assertThat(data.get("absent_default_multiple_braces"), equalTo("{foo} {bar}"));
-        // assertThat(data.get("absent_default_braces"), equalTo("{foo}"));
-        // assertThat(data.get("absent_default_single_quoted"), equalTo("{foo}"));
-        // assertThat(data.get("absent_default_double_quoted"), equalTo("{foo}"));
-
-        // assertThat(data.get("absent_with_empty_default"), equalTo(""));
-
-        // assertThat(data.get("absent_with_nested_default"), equalTo("value1"));
-        // assertThat(data.get("absent_with_nested_default_quoted"), equalTo("value1"));
-
-        assertThat(data.get("chained"), equalTo("VALUE1"));
-
-        assertThat(data.get("compound_value"), equalTo("Value is value1"));
-        assertThat(data.get("compound_quoted"), equalTo("Value is value1"));
-
-        assertThat(data.get("multiple_patterns"), equalTo("value1-1"));
-
-        assertThat(data.get("string_const"), instanceOf(String.class));
-        assertThat(data.get("string_const"), equalTo("1"));
-
-        Object stringConstLiteral = data.get("string_const_literal");
-        assertThat(stringConstLiteral, instanceOf(String.class));
-        // although this seems redundant, it avoids explicit cast warnings
-        if (stringConstLiteral instanceof String literal) {
-            assertThat(literal.strip(), equalTo("1"));
+            List.of("no", "No", "NO", "nO").forEach(value -> {
+                assertThat(yaml.load(value), equalTo(value));
+            });
         }
 
-        Object stringConstFolded = data.get("string_const_folded");
-        assertThat(stringConstFolded, instanceOf(String.class));
-        if (stringConstFolded instanceof String folded) {
-            assertThat(folded.strip(), equalTo("1"));
+        @Test
+        void anchors() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "anchors.yaml");
+            assertThat(data.get("baz"), equalTo("bar"));
+            assertThat(data.get("bar"), equalTo("qux"));
         }
 
-        assertThat(data.get("int_const"), instanceOf(Integer.class));
-        assertThat(data.get("int_const"), equalTo(1));
-        assertThat(data.get("int_const_quoted"), instanceOf(Integer.class));
-        assertThat(data.get("int_const_quoted"), equalTo(1));
-        assertThat(data.get("int_var"), instanceOf(Integer.class));
-        assertThat(data.get("int_var"), equalTo(1));
-        assertThat(data.get("int_var_VARS"), equalTo(1));
+        // After the preprocessor, the variables and packages sections should be removed
+        // from the resulting data structure
+        @Test
+        void extraElementsRemoved() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "extraElementsRemoved.yaml");
 
-        // assertThat(data.get("map_var"), instanceOf(Map.class));
-        // assertThat(data.get("map_var"), equalTo(Map.of("foo", "bar", "baz", "qux")));
-        assertThat(data.get("map_lookup"), equalTo("bar"));
-        assertThat(data.get("map_literal_key"), equalTo("qux"));
-        assertThat(data.get("map_literal_key_dbl"), equalTo("bar"));
-        assertThat(data.get("map_literal_chained"), equalTo("qux"));
+            assertThat(data, not(hasKey("variables")));
+            assertThat(data, not(hasKey("packages")));
+        }
 
-        // assertThat(data.get("list_var"), instanceOf(List.class));
-        // assertThat(data.get("list_var"), equalTo(List.of("item1", "item2")));
-        assertThat(data.get("list_index_0"), equalTo("item1"));
-        assertThat(data.get("list_index_1"), equalTo("item2"));
-        assertThat(data.get("list_index_lookup"), equalTo("item2"));
+        @Test
+        void hidesKeysPrefixedWithDot() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "hiddenKeys.yaml");
 
-        assertThat(data.get("foo"), equalTo("dynamickey"));
-
-        assertThat(getNestedValue(data, "level1", "level2a"), equalTo("value1"));
-        assertThat(getNestedValue(data, "level1", "level2b", "level3"), equalTo("foo"));
-
-        assertThat(data.get("jinja_expression"), equalTo("barbarian"));
+            assertThat(getNestedValue(data, ".energy_type"), nullValue());
+            assertThat(getNestedValue(data, "items", "energy_1", "type"), equalTo("number"));
+            assertThat(getNestedValue(data, "items", "energy_1", "dimension"), equalTo("Energy"));
+            assertThat(getNestedValue(data, "items", "energy_1", "unit"), equalTo("kWh"));
+            assertThat(getNestedValue(data, "items", "energy_1", "label"), equalTo("Energy_1"));
+            assertThat(getNestedValue(data, "items", "energy_2", "type"), equalTo("number"));
+            assertThat(getNestedValue(data, "items", "energy_2", "dimension"), equalTo("Energy"));
+            assertThat(getNestedValue(data, "items", "energy_2", "unit"), equalTo("kWh"));
+            assertThat(getNestedValue(data, "items", "energy_2", "label"), equalTo("Energy_2"));
+        }
     }
 
-    @Test
-    void include1DeepTest() throws IOException {
-        Map<String, Object> data = loadFixture("include1Deep.yaml");
+    @Nested
+    class VariableTests {
+        static final String PATH = "variables/";
 
-        assertThat(getNestedValue(data, "toplevel", "includedkey"), equalTo("value"));
+        @Test
+        void untaggedPatternsNotInterpolated() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "untaggedPatternsNotInterpolated.yaml");
+
+            assertThat(data.get("plain"), not(equalTo("bar")));
+            assertThat(data.get("double_quoted"), not(equalTo("bar")));
+            assertThat(data.get("single_quoted"), not(equalTo("bar")));
+            assertThat(data.get("spaced_pattern"), not(equalTo("bar")));
+            assertThat(data.get("multiline_pattern"), not(equalTo("bar")));
+            assertThat(data.get("folded"), not(equalTo("bar")));
+        }
+
+        @Test
+        void missingVariables() {
+            IOException exception = assertThrows(IOException.class, () -> loadFixture(PATH + "missingVariables.yaml"));
+            assertThat(exception.getMessage(), containsString("undefined_variable"));
+        }
+
+        @Test
+        void variableSyntax() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "variableSyntax.yaml");
+
+            assertThat(data.get("plain"), equalTo("value1"));
+            assertThat(data.get("double_quoted"), equalTo("value1"));
+            assertThat(data.get("single_quoted"), equalTo("value1"));
+
+            assertThat(data.get("spaces_inside_delimiters"), equalTo("value1"));
+
+            assertThat(data.get("vars_bracket_double"), equalTo("reserved"));
+            assertThat(data.get("vars_bracket_single"), equalTo("reserved"));
+            assertThat(data.get("vars_with_dash"), equalTo("dashvalue"));
+            assertThat(data.get("vars_with_space"), equalTo("spacevalue"));
+
+            assertThat(data.get("empty_no_default"), equalTo(""));
+
+            assertThat(data.get("exists"), equalTo("value1"));
+            assertThat(data.get("empty_value_test"), equalTo(""));
+            assertThat(data.get("empty_value_test_compound"), equalTo("prefix-"));
+
+            assertThat(data.get("exists_with_true"), equalTo("value1"));
+            assertThat(data.get("empty_value_with_true"), equalTo("default"));
+
+            assertThat(data.get("chained"), equalTo("VALUE1"));
+
+            assertThat(data.get("compound_value"), equalTo("Value is value1"));
+            assertThat(data.get("compound_quoted"), equalTo("Value is value1"));
+
+            assertThat(data.get("multiple_patterns"), equalTo("value1-1"));
+
+            assertThat(data.get("string_const"), instanceOf(String.class));
+            assertThat(data.get("string_const"), equalTo("1"));
+
+            Object stringConstLiteral = data.get("string_const_literal");
+            assertThat(stringConstLiteral, instanceOf(String.class));
+            // although this seems redundant, it avoids explicit cast warning
+            if (stringConstLiteral instanceof String literal) {
+                assertThat(literal.strip(), equalTo("1"));
+            }
+
+            Object stringConstFolded = data.get("string_const_folded");
+            assertThat(stringConstFolded, instanceOf(String.class));
+            if (stringConstFolded instanceof String folded) {
+                assertThat(folded.strip(), equalTo("1"));
+            }
+
+            assertThat(data.get("int_const"), equalTo(1));
+            assertThat(data.get("int_const_quoted"), equalTo("1"));
+            assertThat(data.get("int_var"), equalTo(1));
+            assertThat(data.get("int_var_VARS"), equalTo(1));
+
+            assertThat(data.get("map_var"), instanceOf(Map.class));
+            assertThat(data.get("map_var"), equalTo(Map.of("foo", "bar", "baz", "qux")));
+            assertThat(data.get("map_lookup"), equalTo("bar"));
+            assertThat(data.get("map_literal_key"), equalTo("qux"));
+            assertThat(data.get("map_literal_key_dbl"), equalTo("bar"));
+            assertThat(data.get("map_literal_chained"), equalTo("qux"));
+
+            assertThat(data.get("list_var"), instanceOf(List.class));
+            assertThat(data.get("list_var"), equalTo(List.of("item1", "item2")));
+            assertThat(data.get("list_index_0"), equalTo("item1"));
+            assertThat(data.get("list_index_1"), equalTo("item2"));
+            assertThat(data.get("list_index_lookup"), equalTo("item2"));
+
+            assertThat(data.get("foo"), equalTo("dynamickey"));
+
+            assertThat(getNestedValue(data, "level1", "level2a"), equalTo("value1"));
+            assertThat(getNestedValue(data, "level1", "level2b", "level3"), equalTo("foo"));
+
+            assertThat(data.get("jinja_expression"), equalTo("barbarian"));
+        }
+
+        @Test
+        void withinMergedAliases() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "aliasSubstitutions.yaml");
+
+            assertThat(getNestedValue(data, "final_plain_plain", "foo"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "final_plain_sub", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "final_plain_nosub", "foo"), equalTo("${foo}"));
+
+            assertThat(getNestedValue(data, "final_sub_plain", "foo"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "final_sub_sub", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "final_sub_nosub", "foo"), equalTo("${foo}"));
+
+            assertThat(getNestedValue(data, "final_nosub_plain", "foo"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "final_nosub_sub", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "final_nosub_nosub", "foo"), equalTo("${foo}"));
+        }
+
+        @Test
+        void predefinedVars() throws IOException {
+            Path file = SOURCE_PATH.resolve(PATH + "predefinedVars.yaml").toAbsolutePath();
+            Map<String, Object> data = loadFixture(file.toString());
+
+            assertThat(data.get("file"), equalTo(file.toString()));
+            assertThat(data.get("filename"), equalTo("predefinedVars"));
+            assertThat(data.get("ext"), equalTo("yaml"));
+            assertThat(data.get("path"), equalTo(file.getParent().toString()));
+        }
+
+        @Test
+        void predefinedVarsNotOverridable() throws IOException {
+            Path file = SOURCE_PATH.resolve(PATH + "predefinedVarsNotOverridable.yaml").toAbsolutePath();
+            Map<String, Object> data = loadFixture(file.toString());
+
+            // Verify that predefined vars cannot be overridden by the `variables` section
+            assertThat(data.get("file"), equalTo(file.toString()));
+            assertThat(data.get("filename"), equalTo("predefinedVarsNotOverridable"));
+            assertThat(data.get("ext"), equalTo("yaml"));
+            assertThat(data.get("path"), equalTo(file.getParent().toString()));
+
+            // Verify that predefined vars cannot be overridden by !include vars
+            file = file.resolveSibling("predefinedVarsNotOverridable.inc.yaml");
+            assertThat(getNestedValue(data, "include", "file"), equalTo(file.toString()));
+            assertThat(getNestedValue(data, "include", "filename"), equalTo("predefinedVarsNotOverridable.inc"));
+            assertThat(getNestedValue(data, "include", "ext"), equalTo("yaml"));
+            assertThat(getNestedValue(data, "include", "path"), equalTo(file.getParent().toString()));
+        }
+
+        @Test
+        void nosub() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "nosub.yaml");
+
+            assertThat(getNestedValue(data, "top", "level1", "level2"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "top", "level1", "level2_sub", "level3"), equalTo("bar"));
+            assertThat(getNestedValue(data, "top", "level1", "level2_sub", "level3_nosub", "level4"),
+                    equalTo("${foo}"));
+            assertThat(getNestedValue(data, "top", "level1", "level2_sub", "level3_nosub", "level4_sub", "level5"),
+                    equalTo("bar"));
+        }
+
+        @Test
+        void subNosubVsInclude() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "subNosubVsInclude.yaml");
+
+            // !include without !sub / !nosub should behave as plain inclusion
+            // leaving the behavior inside the included file unaffected
+            assertThat(getNestedValue(data, "plain", "plain"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "plain", "sub"), equalTo("bar"));
+            assertThat(getNestedValue(data, "plain", "nosub"), equalTo("${foo}"));
+
+            // !sub in the main file should NOT alter the behavior inside the included file
+            assertThat(getNestedValue(data, "sub", "data", "plain"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "sub", "data", "sub"), equalTo("bar"));
+            assertThat(getNestedValue(data, "sub", "data", "nosub"), equalTo("${foo}"));
+
+            // !nosub in the main file should NOT alter the behavior inside the included file
+            assertThat(getNestedValue(data, "nosub", "data", "plain"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "nosub", "data", "sub"), equalTo("bar"));
+            assertThat(getNestedValue(data, "nosub", "data", "nosub"), equalTo("${foo}"));
+        }
     }
 
-    @Test
-    void include2DeepTest() throws IOException {
-        Map<String, Object> data = loadFixture("include2Deep.yaml");
+    @Nested
+    class InclusionTests {
+        static final String PATH = "include/";
 
-        assertThat(getNestedValue(data, "toplevel", "level1", "level2"), equalTo("foo"));
+        @Test
+        void include1Deep() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "include1Deep.yaml");
+
+            assertThat(getNestedValue(data, "toplevel", "includedkey"), equalTo("value"));
+        }
+
+        @Test
+        void include2Deep() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "include2Deep.yaml");
+
+            assertThat(getNestedValue(data, "toplevel", "level1", "level2"), equalTo("foo"));
+        }
+
+        @Test
+        void circularInclusion() {
+            IOException exception = assertThrows(IOException.class, () -> loadFixture(PATH + "circularInclusion.yaml"));
+            assertThat(exception.getMessage(), containsString("Circular inclusion detected"));
+        }
+
+        @Test
+        void includedTopLevelVars() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "includedTopLevelVars.yaml");
+
+            assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_toplevel"));
+        }
+
+        @Test
+        void includedTopLevelFileVars() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "includedTopLevelFileVars.yaml");
+
+            assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_include_level"));
+        }
+
+        @Test
+        void includeVarsFromGlobal() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "includeVarsFromGlobal.yaml");
+
+            // The included file resolves ${bar} where bar is set to ${foo} from globals
+            assertThat(getNestedValue(data, "data", "includedkey"), equalTo("globalFoo"));
+        }
+
+        @Test
+        void varsPropagate2Levels() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "varsPropagate2Levels.yaml");
+
+            assertThat(getNestedValue(data, "toplevel", "data", "data"), equalTo("toplevel"));
+        }
     }
 
-    @Test
-    void predefinedVarsTest() throws IOException {
-        Path file = SOURCE_PATH.resolve("predefinedVars.yaml");
-        Map<String, Object> data = loadFixture(file.getFileName().toString());
+    @Nested
+    class PackagingTests {
+        static final String PATH = "packages/";
 
-        assertThat(data.get("file"), equalTo(file.toAbsolutePath().toString()));
-        assertThat(data.get("filename"), equalTo("predefinedVars"));
-        assertThat(data.get("ext"), equalTo("yaml"));
-        assertThat(data.get("path"), equalTo(file.toAbsolutePath().getParent().toString()));
-    }
+        @Test
+        void packageImport() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "packaging.yaml");
 
-    @Test
-    void predefinedVarsNotOverridableTest() throws IOException {
-        Path file = SOURCE_PATH.resolve("predefinedVarsNotOverridable.yaml");
-        Map<String, Object> data = loadFixture(file.getFileName().toString());
+            assertThat(getNestedValue(data, "things", "thing1", "label"), equalTo("label1"));
+            assertThat(getNestedValue(data, "things", "thing1", "scalar"), equalTo("package"));
+            assertThat(getNestedValue(data, "things", "thing1", "map1", "scalar1"), equalTo("package"));
+            assertThat(getNestedValue(data, "things", "thing1", "config", "map1", "scalar1"), equalTo("package"));
+        }
 
-        assertThat(data.get("file"), equalTo(file.toAbsolutePath().toString()));
-        assertThat(data.get("filename"), equalTo("predefinedVarsNotOverridable"));
-        assertThat(data.get("ext"), equalTo("yaml"));
-        assertThat(data.get("path"), equalTo(file.toAbsolutePath().getParent().toString()));
+        @Test
+        void packageIdInsertion() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "packaging.yaml");
 
-        file = file.resolveSibling("predefinedVarsNotOverridable.inc.yaml");
-        assertThat(getNestedValue(data, "include", "file"), equalTo(file.toAbsolutePath().toString()));
-        assertThat(getNestedValue(data, "include", "filename"), equalTo("predefinedVarsNotOverridable.inc"));
-        assertThat(getNestedValue(data, "include", "ext"), equalTo("yaml"));
-        assertThat(getNestedValue(data, "include", "path"), equalTo(file.toAbsolutePath().getParent().toString()));
-    }
+            assertThat(getNestedValue(data, "things", "pid_test", "packageid"), equalTo("package_id_test"));
+            assertThat(getNestedValue(data, "things", "pid_override", "packageid"), equalTo("id_override"));
+        }
 
-    @Test
-    void circularInclusionTest() {
-        IOException exception = assertThrows(IOException.class, () -> loadFixture("circularInclusion.yaml"));
-        assertThat(exception.getMessage(), containsString("Circular inclusion detected"));
-    }
+        @Test
+        void keepsNonPackageThings() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "packaging.yaml");
 
-    @Test
-    void includedTopLevelVarsTest() throws IOException {
-        Map<String, Object> data = loadFixture("includedTopLevelVars.yaml");
+            assertThat(getNestedValue(data, "things", "thing_only_in_main", "label"), equalTo("label3"));
+        }
 
-        assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_toplevel"));
-    }
+        @Test
+        @SuppressWarnings("null")
+        void packageOverwriteBehavior() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "packaging.yaml");
 
-    @Test
-    void includedTopLevelFileVarsTest() throws IOException {
-        Map<String, Object> data = loadFixture("includedTopLevelFileVars.yaml");
+            Object thingOverwriteObj = getNestedValue(data, "things", "thing_overwrite");
 
-        assertThat(getNestedValue(data, "toplevel", "level1"), equalTo("set_at_include_level"));
-    }
+            Map<String, Object> thingOverwrite = (Map<String, Object>) thingOverwriteObj;
 
-    @Test
-    void includeVarsFromGlobalTest() throws IOException {
-        Map<String, Object> data = loadFixture("includeVarsFromGlobal.yaml");
+            // Verify that scalar properties overwrite package values
+            assertThat(getNestedValue(thingOverwrite, "label"), equalTo("main"));
+            assertThat(getNestedValue(thingOverwrite, "scalar"), equalTo("main"));
 
-        // The included file resolves ${bar} where bar is set to ${foo} from globals
-        assertThat(getNestedValue(data, "data", "includedkey"), equalTo("globalFoo"));
-    }
+            // Verify map overwrite - should only have main values, not package values
+            assertThat(getNestedValue(thingOverwrite, "map1", "scalar1"), equalTo("main"));
+            assertThat((Map<String, Object>) getNestedValue(thingOverwrite, "map1"), not(hasKey("scalar2")));
 
-    @Test
-    void varsPropagate2LevelsTest() throws IOException {
-        Map<String, Object> data = loadFixture("varsPropagate2Levels.yaml");
+            // Verify list overwrite - should only have main values, not package values
+            assertThat(getNestedValue(thingOverwrite, "list1"), equalTo(List.of("main")));
 
-        assertThat(getNestedValue(data, "toplevel", "data", "data"), equalTo("toplevel"));
-    }
+            // Verify that top-level non-overridden properties from package are retained
+            assertThat(getNestedValue(thingOverwrite, "map2", "scalar1"), equalTo("package"));
+            assertThat(getNestedValue(thingOverwrite, "map2", "scalar2"), equalTo("package"));
+            assertThat(getNestedValue(thingOverwrite, "list2"), equalTo(List.of("package")));
 
-    @Test
-    void packagesLoadFromPackagesTest() throws IOException {
-        Map<String, Object> data = loadFixture("packaging.yaml");
+            // Verify nested config overwrite
+            assertThat(getNestedValue(thingOverwrite, "config", "scalar1"), equalTo("main"));
 
-        assertThat(getNestedValue(data, "things", "thing1", "label"), equalTo("label1"));
-        assertThat(getNestedValue(data, "things", "thing1", "scalar"), equalTo("package"));
-        assertThat(getNestedValue(data, "things", "thing1", "map1", "scalar1"), equalTo("package"));
-        assertThat(getNestedValue(data, "things", "thing1", "config", "map1", "scalar1"), equalTo("package"));
-    }
+            Map<String, Object> configMap = (Map<String, Object>) getNestedValue(thingOverwrite, "config");
 
-    @Test
-    void packagesInjectPackageIdTest() throws IOException {
-        Map<String, Object> data = loadFixture("packaging.yaml");
+            // Verify nested map overwrite - should only have main values, not package values
+            assertThat(getNestedValue(configMap, "map1", "mainkey"), equalTo("main"));
+            assertThat((Map<String, Object>) getNestedValue(configMap, "map1"), not(hasKey("scalar1")));
+            assertThat((Map<String, Object>) getNestedValue(configMap, "map1"), not(hasKey("scalar2")));
 
-        assertThat(getNestedValue(data, "things", "pid_test", "packageid"), equalTo("package_id_test"));
-        assertThat(getNestedValue(data, "things", "pid_override", "packageid"), equalTo("id_override"));
-    }
+            // Verify nested list overwrite - should only have main values, not package values
+            assertThat(getNestedValue(configMap, "list1"), equalTo(List.of("main")));
+        }
 
-    @Test
-    void packagesDoNotRemoveNonPackageThingsTest() throws IOException {
-        Map<String, Object> data = loadFixture("packaging.yaml");
+        @Test
+        @SuppressWarnings("null")
+        void packageMergeBehavior() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "packaging.yaml");
 
-        assertThat(getNestedValue(data, "things", "thing_only_in_main", "label"), equalTo("label3"));
-    }
+            Map<String, Object> thingMerge = (Map<String, Object>) getNestedValue(data, "things", "thing_merge");
 
-    @Test
-    @SuppressWarnings("null")
-    void packagesOverwriteBehaviorTest() throws IOException {
-        Map<String, Object> data = loadFixture("packaging.yaml");
+            // Verify scalar merging
+            assertThat(getNestedValue(thingMerge, "config", "scalar1"), equalTo("package"));
+            assertThat(getNestedValue(thingMerge, "config", "scalar2"), equalTo("main"));
+            assertThat(getNestedValue(thingMerge, "config", "scalar3"), equalTo("new"));
 
-        Object thingOverwriteObj = getNestedValue(data, "things", "thing_overwrite");
+            // Verify map merging (merges by default)
+            // map1:scalar1 is not defined in main
+            assertThat(getNestedValue(thingMerge, "config", "map1", "scalar1"), equalTo("package"));
+            // map1:scalar2 is defined in main -> overwrites package
+            assertThat(getNestedValue(thingMerge, "config", "map1", "scalar2"), equalTo("main"));
+            // map1:scalar3 is only defined in main
+            assertThat(getNestedValue(thingMerge, "config", "map1", "scalar3"), equalTo("main"));
 
-        Map<String, Object> thingOverwrite = (Map<String, Object>) thingOverwriteObj;
+            // Verify list merging (merges by default)
+            assertThat(getNestedValue(thingMerge, "config", "list1"), equalTo(List.of("package", "main")));
 
-        // Verify that scalar properties overwrite package values
-        assertThat(getNestedValue(thingOverwrite, "label"), equalTo("main"));
-        assertThat(getNestedValue(thingOverwrite, "scalar"), equalTo("main"));
+            // Verify map2 now also merges (recursive merge behavior)
+            // map2:mainkey is only defined in main
+            assertThat(getNestedValue(thingMerge, "config", "map2", "mainkey"), equalTo("main"));
+            // map2:scalar1 and scalar2 are only defined in package
+            assertThat(getNestedValue(thingMerge, "config", "map2", "scalar1"), equalTo("package"));
+            assertThat(getNestedValue(thingMerge, "config", "map2", "scalar2"), equalTo("package"));
 
-        // Verify map overwrite - should only have main values, not package values
-        assertThat(getNestedValue(thingOverwrite, "map1", "scalar1"), equalTo("main"));
-        assertThat((Map<String, Object>) getNestedValue(thingOverwrite, "map1"), not(hasKey("scalar2")));
+            // Verify list2 is also merged from package, even though not in main
+            assertThat(getNestedValue(thingMerge, "config", "list2"), equalTo(List.of("package")));
 
-        // Verify list overwrite - should only have main values, not package values
-        assertThat(getNestedValue(thingOverwrite, "list1"), equalTo(List.of("main")));
+            // Verify top-level properties
+            assertThat(getNestedValue(thingMerge, "scalar"), equalTo("package"));
+            assertThat(getNestedValue(thingMerge, "mainscalar"), equalTo("main"));
+            assertThat(getNestedValue(thingMerge, "mainmap", "mainkey"), equalTo("main"));
+            assertThat(getNestedValue(thingMerge, "mainlist1"), equalTo(List.of("main")));
+            assertThat(getNestedValue(thingMerge, "mainlist2"), equalTo(List.of("main")));
+        }
 
-        // Verify that top-level non-overridden properties from package are retained
-        assertThat(getNestedValue(thingOverwrite, "map2", "scalar1"), equalTo("package"));
-        assertThat(getNestedValue(thingOverwrite, "map2", "scalar2"), equalTo("package"));
-        assertThat(getNestedValue(thingOverwrite, "list2"), equalTo(List.of("package")));
+        @Test
+        @SuppressWarnings("null")
+        void packageRemoveBehavior() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "packaging.yaml");
 
-        // Verify nested config overwrite
-        assertThat(getNestedValue(thingOverwrite, "config", "scalar1"), equalTo("main"));
+            Map<String, Object> thingRemove = (Map<String, Object>) getNestedValue(data, "things", "thing_remove");
 
-        Map<String, Object> configMap = (Map<String, Object>) getNestedValue(thingOverwrite, "config");
+            // Verify that !remove directive removes top-level keys
+            assertThat(thingRemove, not(hasKey("label")));
+            assertThat(thingRemove, not(hasKey("list1")));
 
-        // Verify nested map overwrite - should only have main values, not package values
-        assertThat(getNestedValue(configMap, "map1", "mainkey"), equalTo("main"));
-        assertThat((Map<String, Object>) getNestedValue(configMap, "map1"), not(hasKey("scalar1")));
-        assertThat((Map<String, Object>) getNestedValue(configMap, "map1"), not(hasKey("scalar2")));
+            Map<String, Object> configMap = (Map<String, Object>) getNestedValue(thingRemove, "config");
 
-        // Verify nested list overwrite - should only have main values, not package values
-        assertThat(getNestedValue(configMap, "list1"), equalTo(List.of("main")));
-    }
+            // Verify that !remove directive removes nested keys
+            assertThat(configMap, not(hasKey("scalar1")));
+            assertThat(configMap, not(hasKey("map1")));
+            assertThat(configMap, not(hasKey("list1")));
+            assertThat((Map<String, Object>) getNestedValue(configMap, "map2"), not(hasKey("scalar1")));
 
-    @Test
-    @SuppressWarnings("null")
-    void packagesMergeBehaviorTest() throws IOException {
-        Map<String, Object> data = loadFixture("packaging.yaml");
+            // Verify that non-removed keys are retained
+            assertThat(getNestedValue(thingRemove, "scalar"), equalTo("package"));
+            assertThat(getNestedValue(thingRemove, "map1", "scalar1"), equalTo("package"));
+            assertThat(getNestedValue(thingRemove, "map1", "scalar2"), equalTo("package"));
+            assertThat(getNestedValue(thingRemove, "list2"), equalTo(List.of("package")));
 
-        Map<String, Object> thingMerge = (Map<String, Object>) getNestedValue(data, "things", "thing_merge");
+            assertThat(getNestedValue(configMap, "scalar2"), equalTo("package"));
+            assertThat(getNestedValue(configMap, "map2", "scalar2"), equalTo("package"));
+            assertThat(getNestedValue(configMap, "list2"), equalTo(List.of("package")));
 
-        // Verify scalar merging
-        assertThat(getNestedValue(thingMerge, "config", "scalar1"), equalTo("package"));
-        assertThat(getNestedValue(thingMerge, "config", "scalar2"), equalTo("main"));
-        assertThat(getNestedValue(thingMerge, "config", "scalar3"), equalTo("new"));
-
-        // Verify map merging (merges by default)
-        // map1:scalar1 is not defined in main
-        assertThat(getNestedValue(thingMerge, "config", "map1", "scalar1"), equalTo("package"));
-        // map1:scalar2 is defined in main -> overwrites package
-        assertThat(getNestedValue(thingMerge, "config", "map1", "scalar2"), equalTo("main"));
-        // map1:scalar3 is only defined in main
-        assertThat(getNestedValue(thingMerge, "config", "map1", "scalar3"), equalTo("main"));
-
-        // Verify list merging (merges by default)
-        assertThat(getNestedValue(thingMerge, "config", "list1"), equalTo(List.of("package", "main")));
-
-        // Verify map2 now also merges (recursive merge behavior)
-        // map2:mainkey is only defined in main
-        assertThat(getNestedValue(thingMerge, "config", "map2", "mainkey"), equalTo("main"));
-        // map2:scalar1 and scalar2 are only defined in package
-        assertThat(getNestedValue(thingMerge, "config", "map2", "scalar1"), equalTo("package"));
-        assertThat(getNestedValue(thingMerge, "config", "map2", "scalar2"), equalTo("package"));
-
-        // Verify list2 is also merged from package, even though not in main
-        assertThat(getNestedValue(thingMerge, "config", "list2"), equalTo(List.of("package")));
-
-        // Verify top-level properties
-        assertThat(getNestedValue(thingMerge, "scalar"), equalTo("package"));
-        assertThat(getNestedValue(thingMerge, "mainscalar"), equalTo("main"));
-        assertThat(getNestedValue(thingMerge, "mainmap", "mainkey"), equalTo("main"));
-        assertThat(getNestedValue(thingMerge, "mainlist1"), equalTo(List.of("main")));
-        assertThat(getNestedValue(thingMerge, "mainlist2"), equalTo(List.of("main")));
-    }
-
-    @Test
-    @SuppressWarnings("null")
-    void packagesRemoveBehaviorTest() throws IOException {
-        Map<String, Object> data = loadFixture("packaging.yaml");
-
-        Map<String, Object> thingRemove = (Map<String, Object>) getNestedValue(data, "things", "thing_remove");
-
-        // Verify that !remove directive removes top-level keys
-        assertThat(thingRemove, not(hasKey("label")));
-        assertThat(thingRemove, not(hasKey("list1")));
-
-        Map<String, Object> configMap = (Map<String, Object>) getNestedValue(thingRemove, "config");
-
-        // Verify that !remove directive removes nested keys
-        assertThat(configMap, not(hasKey("scalar1")));
-        assertThat(configMap, not(hasKey("map1")));
-        assertThat(configMap, not(hasKey("list1")));
-        assertThat((Map<String, Object>) getNestedValue(configMap, "map2"), not(hasKey("scalar1")));
-
-        // Verify that non-removed keys are retained
-        assertThat(getNestedValue(thingRemove, "scalar"), equalTo("package"));
-        assertThat(getNestedValue(thingRemove, "map1", "scalar1"), equalTo("package"));
-        assertThat(getNestedValue(thingRemove, "map1", "scalar2"), equalTo("package"));
-        assertThat(getNestedValue(thingRemove, "list2"), equalTo(List.of("package")));
-
-        assertThat(getNestedValue(configMap, "scalar2"), equalTo("package"));
-        assertThat(getNestedValue(configMap, "map2", "scalar2"), equalTo("package"));
-        assertThat(getNestedValue(configMap, "list2"), equalTo(List.of("package")));
-
-        // Verify that an entire thing can be removed
-        assertThat((Map<String, Object>) getNestedValue(data, "things"), not(hasKey("whole_thing_removed")));
-    }
-
-    @Test
-    void hiddenKeysTest() throws IOException {
-        Map<String, Object> data = loadFixture("hiddenKeys.yaml");
-
-        assertThat(getNestedValue(data, ".energy_type"), nullValue());
-        assertThat(getNestedValue(data, "items", "energy_1", "type"), equalTo("number"));
-        assertThat(getNestedValue(data, "items", "energy_1", "dimension"), equalTo("Energy"));
-        assertThat(getNestedValue(data, "items", "energy_1", "unit"), equalTo("kWh"));
-        assertThat(getNestedValue(data, "items", "energy_1", "label"), equalTo("Energy_1"));
-        assertThat(getNestedValue(data, "items", "energy_2", "type"), equalTo("number"));
-        assertThat(getNestedValue(data, "items", "energy_2", "dimension"), equalTo("Energy"));
-        assertThat(getNestedValue(data, "items", "energy_2", "unit"), equalTo("kWh"));
-        assertThat(getNestedValue(data, "items", "energy_2", "label"), equalTo("Energy_2"));
+            // Verify that an entire thing can be removed
+            assertThat((Map<String, Object>) getNestedValue(data, "things"), not(hasKey("whole_thing_removed")));
+        }
     }
 
     /**
