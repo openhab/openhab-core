@@ -1,0 +1,6 @@
+variables:
+  foo: bar
+
+plain: ${foo} # => ${foo}
+sub: !sub ${foo} # => bar
+nosub: !nosub ${foo} # => ${foo}

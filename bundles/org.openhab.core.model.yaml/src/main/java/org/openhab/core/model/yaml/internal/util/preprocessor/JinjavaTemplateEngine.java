@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -84,14 +84,21 @@ class JinjavaTemplateEngine {
      * Normalize types returned by Jinjava to avoid Long where Integer is expected.
      * This is to maintain the same behavior as SnakeYAML which uses Integer for small integers.
      *
+     * Example:
+     *
+     * ```yaml
+     * native: 1 # returns a Java Integer
+     * jinja: ${ 1 } # before normalization returns a Java Long
+     * ```
+     *
      * @param obj the object to normalize
      * @return the normalized object
      */
     private static Object normalizeType(Object obj) {
-        if (obj instanceof Long value) {
+        if (obj instanceof Long longValue) {
             // Check if the value fits in an Integer
-            if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
-                return Math.toIntExact(value);
+            if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+                return Math.toIntExact(longValue);
             }
         }
         return obj;
