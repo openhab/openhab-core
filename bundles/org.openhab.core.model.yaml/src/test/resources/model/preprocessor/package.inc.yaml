@@ -1,3 +1,8 @@
+variables:
+  label: DefaultLabel
+  package_id: default_package
+  thingname: default_thing
+
 things:
   !sub ${thingname}:
     label: !sub ${label}
