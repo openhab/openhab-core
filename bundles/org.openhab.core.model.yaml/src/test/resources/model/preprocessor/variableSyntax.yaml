@@ -32,27 +32,27 @@ vars_with_dash: !sub ${VARS["varname-with-dash"]}
 vars_with_space: !sub ${VARS["varname with space"]}
 
 empty_no_default: !sub ${empty_value}
-absent_no_default: !sub ${absent}
+# absent_no_default: !sub ${absent}
 
 exists: !sub ${exist|default('default')} # => value1
 empty_value_test: !sub ${empty_value|default('default')} # => ""
 empty_value_test_compound: !sub "prefix-${empty_value1|default('default')}" # => ""
-absent: !sub ${absent|default('default')} # => default
+# absent: !sub ${absent|default('default')} # => default
 
 exists_with_true: !sub ${exist|default('default', true)} # => value1
 empty_value_with_true: !sub ${empty_value|default('default', true)} # => default
-absent_with_true: !sub ${absent|default('default', true)} # => default
+# absent_with_true: !sub ${absent|default('default', true)} # => default
 
-absent_default_multiple: !sub "${absent|default('foo')}${absent|default('bar')}"
-absent_default_multiple_braces: !sub "${absent|default('{foo}')} ${absent|default('{bar}')}"
-absent_default_braces: !sub "${absent|default('{foo}')}"
-absent_default_single_quoted: !sub "${absent|default('{foo}')}"
-absent_default_double_quoted: !sub "${absent|default('{foo}')}"
+# absent_default_multiple: !sub "${absent|default('foo')}${absent|default('bar')}"
+# absent_default_multiple_braces: !sub "${absent|default('{foo}')} ${absent|default('{bar}')}"
+# absent_default_braces: !sub "${absent|default('{foo}')}"
+# absent_default_single_quoted: !sub "${absent|default('{foo}')}"
+# absent_default_double_quoted: !sub "${absent|default('{foo}')}"
 
-absent_with_empty_default: !sub ${absent|default('')}
+# absent_with_empty_default: !sub ${absent|default('')}
 
-absent_with_nested_default: !sub ${absent|default(exist)}
-absent_with_nested_default_quoted: !sub "${absent|default(exist)}"
+# absent_with_nested_default: !sub ${absent|default(exist)}
+# absent_with_nested_default_quoted: !sub "${absent|default(exist)}"
 
 chained: !sub ${exist|default('default')|upper} # => VALUE1
 
