@@ -50,6 +50,8 @@ import org.yaml.snakeyaml.nodes.Tag;
 @NonNullByDefault
 class ModelConstructor extends Constructor {
 
+    private static final Tag SUB_TAG = new Tag("!sub");
+
     private static final Tag INCLUDE_TAG = new Tag("!include");
     private static final Tag REPLACE_TAG = new Tag("!replace");
     private static final Tag REMOVE_TAG = new Tag("!remove");
@@ -61,11 +63,11 @@ class ModelConstructor extends Constructor {
      *
      * Examples:
      * - ${name} : Simple variable substitution
-     * - ${name|capitalize} : Apply capitalize filter
-     * - ${name|default('value')} : Use default if variable is not set
-     * - ${name|upper} : Convert to uppercase
+     * - ${ name|capitalize } : Apply capitalize filter
+     * - ${ name|default('value') } : Use default if variable is not set
+     * - ${ name|upper } : Convert to uppercase
      */
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("""
+    private static final Pattern SUBSTITUTION_PATTERN = Pattern.compile("""
             \\$\\{
             (?<content>
                 (?:
@@ -76,17 +78,6 @@ class ModelConstructor extends Constructor {
             )
             \\}
             """, Pattern.COMMENTS);
-
-    // Variable name pattern
-    private static final String VAR_NAME_REGEX = "[a-zA-Z_][a-zA-Z0-9_]*";
-
-    // Pattern for simple variable names (no pipes, operators)
-    private static final Pattern SIMPLE_VAR_PATTERN = Pattern.compile("^\\s*" + VAR_NAME_REGEX + "\\s*$");
-
-    // Pattern for matching plain YAML scalar where the whole value is just key: ${varname}
-    // and not part of a larger string
-    private static final Pattern SIMPLE_VAR_INTERPOLATION = Pattern
-            .compile("^\\$\\{\\s*(?<name>" + VAR_NAME_REGEX + ")\\s*\\}$");
 
     private final Logger logger = LoggerFactory.getLogger(ModelConstructor.class);
 
@@ -100,13 +91,13 @@ class ModelConstructor extends Constructor {
         this.currentFile = currentFile;
 
         this.yamlConstructors.put(Tag.NULL, new ConstructNull());
-        this.yamlConstructors.put(INCLUDE_TAG, new ConstructInclude());
-        this.yamlConstructors.put(REPLACE_TAG, new ConstructReplace());
-        this.yamlConstructors.put(REMOVE_TAG, new ConstructRemove());
 
-        if (finalPass) {
-            this.yamlConstructors.put(Tag.STR, new ConstructInterpolation());
-        }
+        // The first pass is only to gather variables, so we use a no-op constructor for efficiency
+        this.yamlConstructors.put(SUB_TAG, finalPass ? new ConstructInterpolation() : new ConstructEmpty());
+        this.yamlConstructors.put(INCLUDE_TAG, finalPass ? new ConstructInclude() : new ConstructEmpty());
+        this.yamlConstructors.put(REPLACE_TAG, finalPass ? new ConstructReplace() : new ConstructEmpty());
+        this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
+
         logger.trace("ModelConstructor created with vars: {}", variables);
     }
 
@@ -114,103 +105,88 @@ class ModelConstructor extends Constructor {
 
         @Override
         public Object construct(@Nullable Node node) {
-            if (node == null) {
-                return "";
-            }
 
-            ScalarNode scalarNode = (ScalarNode) node;
-            DumperOptions.ScalarStyle scalarStyle = scalarNode.getScalarStyle();
-            String value = (String) constructScalar(scalarNode);
+            if (node instanceof ScalarNode scalarNode) {
+                String value = (String) constructScalar(scalarNode);
+                DumperOptions.ScalarStyle scalarStyle = scalarNode.getScalarStyle();
+                logger.debug("ConstructInterpolation: value='{}' (null={})", value, value == null);
 
-            logger.debug("ConstructInterpolation: value='{}' (null={}), style={}", value, value == null, scalarStyle);
-
-            if (value == null) {
-                logger.warn("{}: constructScalar() returned null on node {}!", currentFile, node);
-                return "";
-            }
-
-            // don't interpolate single quoted strings
-            if (scalarStyle == DumperOptions.ScalarStyle.SINGLE_QUOTED) {
-                return value;
-            }
-
-            if (scalarStyle == DumperOptions.ScalarStyle.PLAIN) {
-                Matcher simpleMatch = SIMPLE_VAR_INTERPOLATION.matcher(value);
-                if (simpleMatch.matches()) {
-                    // Direct variable lookup without Jinja for unquoted ${varname}
-                    // This is a special case to return non-string types like integers, booleans, lists, maps
-                    String varName = simpleMatch.group("name");
-                    Object varValue = variables.get(varName);
-                    logger.debug("Simple variable lookup: ${{}} => '{}'", varName, varValue);
-                    return varValue == null ? "" : varValue;
-                }
-            }
-
-            Matcher matcher = VARIABLE_PATTERN.matcher(value);
-            if (!matcher.find()) {
-                logger.debug("No variable pattern match for '{}'", value);
-                return value;
-            }
-
-            // Replace ${...} with content (simple variables directly, complex expressions via Jinja)
-            String interpolated = matcher.replaceAll(match -> {
-                String content = match.group("content");
-
-                // Check if this is a simple variable name (no filters, operators)
-                if (SIMPLE_VAR_PATTERN.matcher(content).matches()) {
-                    // Direct variable lookup without Jinja
-                    Object varValue = variables.get(content.strip());
-                    String renderedValue = varValue == null ? "" : varValue.toString();
-                    logger.debug("Simple variable lookup: ${{}} => '{}'", content, renderedValue);
-                    return Matcher.quoteReplacement(renderedValue);
+                Matcher matcher = SUBSTITUTION_PATTERN.matcher(value);
+                if (!matcher.find()) {
+                    logger.debug("No variable pattern match for '{}'", value);
+                    return value;
                 }
 
-                // Complex expression - use Jinja
-                String template = "{{ " + content + " }}";
-                String rendered = JinjavaTemplateEngine.render(template, variables, currentFile);
-                logger.debug("Jinja expression: ${{}} => '{}'", content, rendered);
-                return Matcher.quoteReplacement(rendered);
-            });
+                // If the whole value is exactly one ${...}, evaluate via Jinjava and return the native object.
+                // This preserves non-string types (maps, lists, numbers, booleans) when the value is a plain
+                // placeholder.
+                if (matcher.matches()) {
+                    String content = matcher.group("content").trim();
+                    Object rendered = JinjavaTemplateEngine.renderObject(content, variables, currentFile);
+                    logger.debug("Jinja object expression: ${{}} => '{}' (type: {})", content, rendered,
+                            rendered == null ? "null" : rendered.getClass().getSimpleName());
+                    return Objects.requireNonNullElse(rendered, "");
+                }
 
-            if (interpolated.isEmpty()) {
-                return interpolated;
-            }
+                // Replace ${...} with content (simple variables directly, complex expressions via Jinja)
+                String interpolated = matcher.replaceAll(match -> {
+                    String content = match.group("content");
+                    String template = "{{ " + content + " }}";
+                    String rendered = JinjavaTemplateEngine.render(template, variables, currentFile);
+                    logger.debug("Jinja expression: ${{}} => '{}'", content, rendered);
+                    return Matcher.quoteReplacement(rendered);
+                });
 
-            // Preserve quoted strings: if original was quoted (double or single), keep it as string
-            if (scalarStyle == DumperOptions.ScalarStyle.DOUBLE_QUOTED
-                    || scalarStyle == DumperOptions.ScalarStyle.LITERAL
-                    || scalarStyle == DumperOptions.ScalarStyle.FOLDED) {
-                return interpolated;
-            }
+                if (interpolated.isEmpty()) {
+                    return interpolated;
+                }
 
-            // For plain (unquoted) scalars, allow type inference.
-            // Resolve the interpolated node because the type might change e.g.
-            // ${var1} => 1: originally a STR, it now becomes !!int 1
-            ModelResolver resolver = new ModelResolver();
-            Tag newTag = resolver.resolve(NodeId.scalar, interpolated, true);
-            // now find the correct constructor for the new node
-            Construct constructor = yamlConstructors.get(newTag);
-            if (constructor == null) {
-                throw new YAMLException("%s: no constructor found for substituted value '%s' => '%s' with tag %s"
-                        .formatted(currentFile, value, interpolated, newTag));
+                // Preserve quoted strings: if original was quoted (double or single), keep it as string
+                if (scalarStyle != DumperOptions.ScalarStyle.PLAIN) {
+                    return interpolated;
+                }
+
+                // For plain (unquoted) scalars, allow type inference.
+                // Resolve the interpolated node because the type might change e.g.
+                // ${var1} => 1: originally a STR, it now becomes !!int 1
+                ModelResolver resolver = new ModelResolver();
+                Tag newTag = resolver.resolve(NodeId.scalar, interpolated, true);
+                // now find the correct constructor for the new node
+                Construct constructor = yamlConstructors.get(newTag);
+                if (constructor == null) {
+                    throw new YAMLException("%s: no constructor found for substituted value '%s' => '%s' with tag %s"
+                            .formatted(currentFile, value, interpolated, newTag));
+                }
+                ScalarNode replacedNode = new ScalarNode(newTag, interpolated, scalarNode.getStartMark(),
+                        scalarNode.getEndMark(), scalarStyle);
+                // finally, construct the new node
+                Object result = constructor.construct(replacedNode);
+                logger.debug("ConstructInterpolation result: {} (type: {})", result,
+                        result == null ? "null" : result.getClass().getSimpleName());
+                return Objects.requireNonNullElse(result, "");
+            } else {
+                throw new YAMLException(
+                        "%s: !sub can only be applied to scalar nodes, but found: %s".formatted(currentFile, node));
             }
-            ScalarNode replacedNode = new ScalarNode(newTag, interpolated, scalarNode.getStartMark(),
-                    scalarNode.getEndMark(), scalarStyle);
-            // finally, construct the new node
-            Object result = constructor.construct(replacedNode);
-            logger.debug("ConstructInterpolation result: {} (type: {})", result,
-                    result == null ? "null" : result.getClass().getSimpleName());
-            return Objects.requireNonNullElse(result, "");
         }
     }
 
-    private class ConstructNull extends AbstractConstruct {
+    private static class ConstructNull extends AbstractConstruct {
 
         // Return an empty string for null values so that the keys are not removed from the map
         // This matches the behavior of Jackson's parser, otherwise some tests will fail
         @Override
         public Object construct(@Nullable Node node) {
             // Always return empty string, regardless of node content
+            return "";
+        }
+    }
+
+    private static class ConstructEmpty extends AbstractConstruct {
+
+        // During non-final pass, ignore special tags and return empty string
+        @Override
+        public Object construct(@Nullable Node node) {
             return "";
         }
     }

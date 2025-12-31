@@ -1,4 +1,4 @@
-file: ${__FILE__}
-filename: ${__FILE_NAME__}
-ext: ${__FILE_EXT__}
-path: ${__DIRECTORY__}
+file: !sub ${__FILE__}
+filename: !sub ${__FILE_NAME__}
+ext: !sub ${__FILE_EXT__}
+path: !sub ${__DIRECTORY__}
