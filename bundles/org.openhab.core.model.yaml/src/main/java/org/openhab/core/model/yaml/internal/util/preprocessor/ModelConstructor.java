@@ -13,6 +13,8 @@
 package org.openhab.core.model.yaml.internal.util.preprocessor;
 
 import java.nio.file.Path;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -28,12 +30,10 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.AbstractConstruct;
-import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -42,8 +42,11 @@ import org.yaml.snakeyaml.nodes.Tag;
  * The {@link ModelConstructor} adds extended functionality to the
  * {@link Constructor} class to support:
  *
- * - Nested variable interpolation
+ * - Returning empty strings for null values to maintain compatibility with Jackson parser
+ * - <code>!sub</code> tag for variable interpolation
  * - <code>!include</code> tag for including other YAML files
+ * - <code>!replace</code> tag for replacing parts of the model in a package
+ * - <code>!remove</code> tag for removing parts of the model in a package
  *
  * @author Jimmy Tanagra - Initial contribution
  */
@@ -51,6 +54,7 @@ import org.yaml.snakeyaml.nodes.Tag;
 class ModelConstructor extends Constructor {
 
     private static final Tag SUB_TAG = new Tag("!sub");
+    private static final Tag NOSUB_TAG = new Tag("!nosub");
 
     private static final Tag INCLUDE_TAG = new Tag("!include");
     private static final Tag REPLACE_TAG = new Tag("!replace");
@@ -83,108 +87,131 @@ class ModelConstructor extends Constructor {
 
     private final Map<String, Object> variables;
     private final Path currentFile;
+    private final Deque<Boolean> substitutionStack = new ArrayDeque<>();
 
     public ModelConstructor(LoaderOptions options, Map<String, Object> variables, Path currentFile, boolean finalPass) {
         super(options);
 
         this.variables = variables;
         this.currentFile = currentFile;
+        this.substitutionStack.push(false);
 
         this.yamlConstructors.put(Tag.NULL, new ConstructNull());
 
         // The first pass is only to gather variables, so we use a no-op constructor for efficiency
-        this.yamlConstructors.put(SUB_TAG, finalPass ? new ConstructInterpolation() : new ConstructEmpty());
+        this.yamlConstructors.put(SUB_TAG, finalPass ? new ConstructDefault() : new ConstructEmpty());
+        this.yamlConstructors.put(NOSUB_TAG, finalPass ? new ConstructDefault() : new ConstructEmpty());
         this.yamlConstructors.put(INCLUDE_TAG, finalPass ? new ConstructInclude() : new ConstructEmpty());
         this.yamlConstructors.put(REPLACE_TAG, finalPass ? new ConstructReplace() : new ConstructEmpty());
         this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
 
+        // We do need to resolve strings even in the first pass so everything doesn't resolve to an empty string!
+        this.yamlConstructors.put(Tag.STR, finalPass ? new ConstructInterpolation() : new ConstructYamlStr());
+
         logger.trace("ModelConstructor created with vars: {}", variables);
     }
 
-    public class ConstructInterpolation extends AbstractConstruct {
-
-        @Override
-        public Object construct(@Nullable Node node) {
-
-            if (node instanceof ScalarNode scalarNode) {
-                String value = (String) constructScalar(scalarNode);
-                DumperOptions.ScalarStyle scalarStyle = scalarNode.getScalarStyle();
-                logger.debug("ConstructInterpolation: value='{}' (null={})", value, value == null);
-
-                Matcher matcher = SUBSTITUTION_PATTERN.matcher(value);
-                if (!matcher.find()) {
-                    logger.debug("No variable pattern match for '{}'", value);
-                    return value;
-                }
-
-                // If the whole value is exactly one ${...}, evaluate via Jinjava and return the native object.
-                // This preserves non-string types (maps, lists, numbers, booleans) when the value is a plain
-                // placeholder.
-                if (matcher.matches()) {
-                    String content = matcher.group("content").trim();
-                    Object rendered = JinjavaTemplateEngine.renderObject(content, variables, currentFile);
-                    logger.debug("Jinja object expression: ${{}} => '{}' (type: {})", content, rendered,
-                            rendered == null ? "null" : rendered.getClass().getSimpleName());
-                    return Objects.requireNonNullElse(rendered, "");
-                }
-
-                // Replace ${...} with content (simple variables directly, complex expressions via Jinja)
-                String interpolated = matcher.replaceAll(match -> {
-                    String content = match.group("content");
-                    String template = "{{ " + content + " }}";
-                    String rendered = JinjavaTemplateEngine.render(template, variables, currentFile);
-                    logger.debug("Jinja expression: ${{}} => '{}'", content, rendered);
-                    return Matcher.quoteReplacement(rendered);
-                });
-
-                if (interpolated.isEmpty()) {
-                    return interpolated;
-                }
-
-                // Preserve quoted strings: if original was quoted (double or single), keep it as string
-                if (scalarStyle != DumperOptions.ScalarStyle.PLAIN) {
-                    return interpolated;
-                }
-
-                // For plain (unquoted) scalars, allow type inference.
-                // Resolve the interpolated node because the type might change e.g.
-                // ${var1} => 1: originally a STR, it now becomes !!int 1
-                ModelResolver resolver = new ModelResolver();
-                Tag newTag = resolver.resolve(NodeId.scalar, interpolated, true);
-                // now find the correct constructor for the new node
-                Construct constructor = yamlConstructors.get(newTag);
-                if (constructor == null) {
-                    throw new YAMLException("%s: no constructor found for substituted value '%s' => '%s' with tag %s"
-                            .formatted(currentFile, value, interpolated, newTag));
-                }
-                ScalarNode replacedNode = new ScalarNode(newTag, interpolated, scalarNode.getStartMark(),
-                        scalarNode.getEndMark(), scalarStyle);
-                // finally, construct the new node
-                Object result = constructor.construct(replacedNode);
-                logger.debug("ConstructInterpolation result: {} (type: {})", result,
-                        result == null ? "null" : result.getClass().getSimpleName());
-                return Objects.requireNonNullElse(result, "");
-            } else {
-                throw new YAMLException(
-                        "%s: !sub can only be applied to scalar nodes, but found: %s".formatted(currentFile, node));
-            }
+    @Override
+    protected Object constructObject(@Nullable Node node) {
+        boolean parent = substitutionStack.peek();
+        boolean enabled = resolveSubstitution(node.getTag(), parent);
+        substitutionStack.push(enabled);
+        try {
+            return super.constructObject(node);
+        } finally {
+            substitutionStack.pop();
         }
     }
 
-    private static class ConstructNull extends AbstractConstruct {
+    private boolean resolveSubstitution(Tag tag, boolean parent) {
+        if (NOSUB_TAG.equals(tag)) {
+            return false;
+        }
+        if (SUB_TAG.equals(tag)) {
+            return true;
+        }
+        return parent;
+    }
 
-        // Return an empty string for null values so that the keys are not removed from the map
-        // This matches the behavior of Jackson's parser, otherwise some tests will fail
+    public class ConstructInterpolation extends AbstractConstruct {
         @Override
         public Object construct(@Nullable Node node) {
-            // Always return empty string, regardless of node content
+            if (!(node instanceof ScalarNode scalarNode)) {
+                String nodeType = node == null ? "null" : node.getNodeId().name();
+                throw new YAMLException(
+                        "%s: !sub can only be applied to scalar nodes, but found: %s".formatted(currentFile, nodeType));
+            }
+
+            String value = (String) constructScalar(scalarNode);
+            DumperOptions.ScalarStyle scalarStyle = scalarNode.getScalarStyle();
+
+            boolean enabled = substitutionStack.peek();
+            if (enabled || SUB_TAG.equals(scalarNode.getTag())) {
+                return performSubstitution(value, scalarStyle);
+            }
+
+            return value;
+        }
+    }
+
+    public class ConstructDefault extends AbstractConstruct {
+        @Override
+        public Object construct(@Nullable Node node) {
+            if (node == null) {
+                return "";
+            }
+
+            return switch (node) {
+                case MappingNode map -> constructMapping(map);
+                case SequenceNode seq -> constructSequence(seq);
+                case ScalarNode scalar -> yamlConstructors.get(Tag.STR).construct(scalar);
+                default -> constructObject(node);
+            };
+        }
+    }
+
+    private Object performSubstitution(String value, DumperOptions.ScalarStyle scalarStyle) {
+        Matcher matcher = SUBSTITUTION_PATTERN.matcher(value);
+        if (!matcher.find()) {
+            logger.debug("No variable pattern match for '{}'", value);
+            return value;
+        }
+
+        if (scalarStyle == DumperOptions.ScalarStyle.PLAIN && matcher.matches()) {
+            // If the whole value is exactly one ${...}, evaluate via Jinjava and return the native object.
+            // This preserves non-string types (maps, lists, numbers, booleans) when the value is a plain
+            // placeholder.
+            String content = matcher.group("content").trim();
+            Object rendered = JinjavaTemplateEngine.renderObject(content, variables, currentFile);
+            logger.debug("Jinja object expression: ${{}} => '{}' (type: {})", content, rendered,
+                    rendered == null ? "null" : rendered.getClass().getSimpleName());
+            return Objects.requireNonNullElse(rendered, "");
+        }
+
+        // Replace ${...} with content (simple variables directly, complex expressions via Jinja)
+        String interpolated = matcher.replaceAll(match -> {
+            String content = match.group("content");
+            String template = "{{ " + content + " }}";
+            String rendered = JinjavaTemplateEngine.render(template, variables, currentFile);
+            logger.debug("Jinja expression: ${{}} => '{}'", content, rendered);
+            return Matcher.quoteReplacement(rendered);
+        });
+
+        // Return as String
+        return interpolated;
+    }
+
+    // Return an empty string for null values so that the keys are not removed from the map
+    // This matches the behavior of Jackson's parser, otherwise some tests will fail
+    private static class ConstructNull extends AbstractConstruct {
+        @Override
+        public Object construct(@Nullable Node node) {
             return "";
         }
     }
 
+    // Used during non-final pass to avoid processing special tags and just return an empty string
     private static class ConstructEmpty extends AbstractConstruct {
-
-        // During non-final pass, ignore special tags and return empty string
         @Override
         public Object construct(@Nullable Node node) {
             return "";
@@ -192,16 +219,16 @@ class ModelConstructor extends Constructor {
     }
 
     private class ConstructInclude extends AbstractConstruct {
-
         @Override
-        @SuppressWarnings("unchecked")
         public Object construct(@Nullable Node node) {
             logger.debug("Constructing !include node: {}", node);
             if (node instanceof ScalarNode scalarNode) {
                 // ScalarNode's constructor ensured that its value is not null
+                // so scalarNode.getValue() and therefore constructScalar cannot be null here
                 String value = constructScalar(scalarNode).trim();
                 return new IncludeObject(value, Map.of());
             } else if (node instanceof MappingNode mappingNode) {
+                @SuppressWarnings("unchecked")
                 Map<Object, Object> includeOptions = constructMapping(mappingNode);
 
                 String fileName = (String) includeOptions.get("file");
@@ -220,7 +247,7 @@ class ModelConstructor extends Constructor {
                 }
             }
             throw new YAMLException(currentFile + ": invalid !include argument type: "
-                    + (node == null ? null : node.getClass().getName()));
+                    + (node == null ? null : node.getNodeId().name()));
         }
     }
 
