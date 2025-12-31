@@ -1,1 +1,1 @@
-include: !include { file: "${__FILE_NAME__}.inc.yaml" }
+include: !include { file: !sub "${__FILE_NAME__}.inc.yaml" }

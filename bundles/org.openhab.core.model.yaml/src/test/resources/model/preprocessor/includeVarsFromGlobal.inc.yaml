@@ -1,1 +1,1 @@
-includedkey: ${bar}
+includedkey: !sub ${bar}

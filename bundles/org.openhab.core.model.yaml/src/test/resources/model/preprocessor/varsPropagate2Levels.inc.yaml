@@ -2,5 +2,5 @@ variables:
   var: level2
 
 data: !include
-  file: "${__FILE_NAME__}.inc.yaml"
+  file: varsPropagate2Levels.inc.inc.yaml
 

@@ -1,8 +1,8 @@
 things:
-  ${thingname}:
-    label: ${label}
+  !sub ${thingname}:
+    label: !sub ${label}
     scalar: package
-    packageid: ${package_id}
+    packageid: !sub ${package_id}
 
     map1:
       scalar1: package
@@ -33,5 +33,5 @@ things:
         - package
 
 items:
-  item_for_${thingname}:
-    label: item ${label}
+  !sub item_for_${thingname}:
+    label: !sub item ${label}

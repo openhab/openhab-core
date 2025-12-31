@@ -1,4 +1,4 @@
 variables:
   topvar: set_locally
 
-level1: ${topvar}
+level1: !sub ${topvar}

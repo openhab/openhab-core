@@ -1,0 +1,12 @@
+variables:
+  foo: bar
+
+# These are deliberately untagged patterns (no !sub) that should NOT be interpolated
+plain: ${foo}
+double_quoted: "${foo}"
+single_quoted: '${foo}'
+spaced_pattern: ${ foo }
+multiline: |
+  do not interpolate me ${foo}
+folded: >
+  do not interpolate me ${foo} either
