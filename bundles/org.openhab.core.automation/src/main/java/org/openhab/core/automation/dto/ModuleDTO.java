@@ -14,11 +14,14 @@ package org.openhab.core.automation.dto;
 
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize the respective class.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@Schema(name = "Module")
 public class ModuleDTO {
 
     public String id;

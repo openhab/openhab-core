@@ -20,11 +20,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize rules.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@Schema(name = "Rule")
 public class RuleDTO {
 
     public List<@NonNull TriggerDTO> triggers;

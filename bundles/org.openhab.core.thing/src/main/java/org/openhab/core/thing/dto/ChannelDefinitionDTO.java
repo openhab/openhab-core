@@ -17,12 +17,15 @@ import java.util.Set;
 
 import org.openhab.core.types.StateDescription;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize channel definitions.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Chris Jackson - Added properties
  */
+@Schema(name = "ChannelDefinition")
 public class ChannelDefinitionDTO {
 
     public String description;

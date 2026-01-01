@@ -21,12 +21,15 @@ import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.StateDescription;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used with to serialize channel types.
  *
  * @author Chris Jackson - Initial contribution
  * @author Mark Herwege - added unit hint
  */
+@Schema(name = "ChannelType")
 public class ChannelTypeDTO {
 
     public List<ConfigDescriptionParameterDTO> parameters;

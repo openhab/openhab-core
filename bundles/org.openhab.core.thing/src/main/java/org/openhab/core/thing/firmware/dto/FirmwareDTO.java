@@ -15,19 +15,25 @@ package org.openhab.core.thing.firmware.dto;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize firmware information.
  *
  * @author Aoun Bukhari - Initial contribution
  * @author Dimitar Ivanov - enriched with thing type UID
  */
+@Schema(name = "Firmware")
 @NonNullByDefault
 public class FirmwareDTO {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public final String thingTypeUID;
     public final @Nullable String vendor;
     public final @Nullable String model;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public final boolean modelRestricted;
     public final @Nullable String description;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public final String version;
     public final @Nullable String changelog;
     public final @Nullable String prerequisiteVersion;

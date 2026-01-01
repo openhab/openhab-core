@@ -15,6 +15,8 @@ package org.openhab.core.items.dto;
 import java.util.List;
 import java.util.Set;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize items.
  *
@@ -22,8 +24,9 @@ import java.util.Set;
  * @author Andre Fuechsel - added tag support
  */
 public class ItemDTO {
-
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String type;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String name;
     public String label;
     public String category;

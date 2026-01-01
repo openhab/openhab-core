@@ -22,6 +22,8 @@ import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
 import org.openhab.core.thing.type.ChannelKind;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize channels.
  *
@@ -29,17 +31,24 @@ import org.openhab.core.thing.type.ChannelKind;
  * @author Chris Jackson - Added properties and configuration
  * @author Kai Kreuzer - Added default tags
  */
+@Schema(name = "Channel")
 public class ChannelDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String uid;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
     public String channelTypeUID;
     public String itemType;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String kind;
     public String label;
     public String description;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Set<String> defaultTags;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, String> properties;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, Object> configuration;
     public String autoUpdatePolicy;
 

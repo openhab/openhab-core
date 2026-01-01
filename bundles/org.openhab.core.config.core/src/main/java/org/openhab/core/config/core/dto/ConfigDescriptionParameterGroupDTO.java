@@ -12,16 +12,21 @@
  */
 package org.openhab.core.config.core.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize options of a
  * parameter group.
  *
  * @author Chris Jackson - Initial contribution
  */
+@Schema(name = "ConfigDescriptionParameterGroup")
 public class ConfigDescriptionParameterGroupDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String name;
     public String context;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Boolean advanced;
     public String label;
     public String description;
