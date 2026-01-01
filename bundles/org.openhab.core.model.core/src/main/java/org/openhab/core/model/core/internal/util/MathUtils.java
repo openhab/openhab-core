@@ -33,7 +33,7 @@ public class MathUtils {
     }
 
     /**
-     * Calculates the greatest common divisor (GCD) of two integers using
+     * Calculates the greatest common divisor (GCD) of two integers usinghe o
      * the Euclidean algorithm.
      * <p>
      * The GCD is always a non-negative number. If both arguments are zero,

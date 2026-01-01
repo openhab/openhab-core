@@ -24,8 +24,8 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class AddonParameter {
-    private @NonNullByDefault({}) String name;
-    private @NonNullByDefault({}) String value;
+    private final String name;
+    private final String value;
 
     /**
      * Creates a new add-on parameter instance.
@@ -35,20 +35,39 @@ public class AddonParameter {
      * @throws IllegalArgumentException if name or value is null or blank
      */
     public AddonParameter(String name, String value) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("name must not be null or empty");
-        }
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("value must not be null or empty");
-        }
-        this.name = name;
-        this.value = value;
+        this.name = validateAndNormalize("AddonParameter.name", name);
+        this.value = validateAndNormalize("AddonParameter.value", value);
     }
 
+    /**
+     * Validates that a string field is not null or blank, and normalizes it by trimming whitespace.
+     *
+     * @param fieldName the name of the field for error messages (e.g., "AddonParameter.name")
+     * @param value the value to validate and normalize
+     * @return the trimmed value
+     * @throws IllegalArgumentException if value is null or blank
+     */
+    private static String validateAndNormalize(String fieldName, String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " must not be null or blank");
+        }
+        return value.trim();
+    }
+
+    /**
+     * Gets the add-on parameter name.
+     *
+     * @return the add-on parameter name, never null or blank
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the add-on parameter value.
+     *
+     * @return the add-on parameter value, never null or blank
+     */
     public String getValue() {
         return value;
     }
