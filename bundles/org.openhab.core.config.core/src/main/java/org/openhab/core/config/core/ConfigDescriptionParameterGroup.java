@@ -29,7 +29,6 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class ConfigDescriptionParameterGroup {
-
     private final String name;
     private final @Nullable String context;
     private final boolean advanced;

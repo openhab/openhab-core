@@ -34,15 +34,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "Channel")
 public class ChannelDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String uid;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
     public String channelTypeUID;
     public String itemType;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String kind;
     public String label;
     public String description;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Set<String> defaultTags;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, String> properties;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, Object> configuration;
     public String autoUpdatePolicy;
 

@@ -23,8 +23,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "ConfigDescriptionParameterGroup")
 public class ConfigDescriptionParameterGroupDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String name;
     public String context;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Boolean advanced;
     public String label;
     public String description;

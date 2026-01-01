@@ -17,6 +17,8 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A {@link ThingStatusInfo} represents status information of a thing which consists of
  * <ul>
@@ -31,8 +33,10 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class ThingStatusInfo {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final ThingStatus status;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final ThingStatusDetail statusDetail;
 
     private @Nullable String description;

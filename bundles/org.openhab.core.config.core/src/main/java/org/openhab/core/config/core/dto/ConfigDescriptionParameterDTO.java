@@ -37,8 +37,10 @@ public class ConfigDescriptionParameterDTO {
     public String defaultValue;
     public String description;
     public String label;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String name;
     public boolean required;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Type type;
     public BigDecimal min;
     public BigDecimal max;

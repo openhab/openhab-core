@@ -33,9 +33,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "EnrichedThing")
 public class EnrichedThingDTO extends AbstractThingDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<EnrichedChannelDTO> channels;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public ThingStatusInfo statusInfo;
     public FirmwareStatusDTO firmwareStatus;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public boolean editable;
 
     /**
