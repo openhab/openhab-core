@@ -14,11 +14,14 @@ package org.openhab.core.io.rest.core.link;
 
 import org.openhab.core.thing.link.ItemChannelLinkRegistry.ItemChannelLinkProblem;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Transfer object for broken item channel links.
  *
  * @author Arne Seime - Initial contribution
  */
+@Schema(name = "BrokenItemChannelLink")
 public class BrokenItemChannelLinkDTO {
     public EnrichedItemChannelLinkDTO itemChannelLink;
 

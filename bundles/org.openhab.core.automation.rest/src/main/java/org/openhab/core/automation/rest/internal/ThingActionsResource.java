@@ -275,12 +275,15 @@ public class ThingActionsResource implements RESTResource {
 
     @Schema(name = "ThingAction")
     private static class ThingActionDTO {
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         public String actionUid = "";
 
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         public @Nullable String label;
         public @Nullable String description;
         public @Nullable Visibility visibility;
 
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         public List<Input> inputs = new ArrayList<>();
 
         public @Nullable List<ConfigDescriptionParameterDTO> inputConfigDescriptions;

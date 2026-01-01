@@ -26,11 +26,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "Firmware")
 @NonNullByDefault
 public class FirmwareDTO {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public final String thingTypeUID;
     public final @Nullable String vendor;
     public final @Nullable String model;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public final boolean modelRestricted;
     public final @Nullable String description;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public final String version;
     public final @Nullable String changelog;
     public final @Nullable String prerequisiteVersion;

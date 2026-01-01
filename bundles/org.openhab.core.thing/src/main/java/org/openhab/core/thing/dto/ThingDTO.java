@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "Thing")
 public class ThingDTO extends AbstractThingDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<ChannelDTO> channels;
 
     public ThingDTO() {

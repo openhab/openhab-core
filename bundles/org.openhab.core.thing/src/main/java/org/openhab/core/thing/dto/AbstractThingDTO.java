@@ -14,6 +14,8 @@ package org.openhab.core.thing.dto;
 
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize things.
  *
@@ -28,9 +30,13 @@ public abstract class AbstractThingDTO {
 
     public String label;
     public String bridgeUID;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, Object> configuration;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, String> properties;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String UID;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String thingTypeUID;
     public String location;
     public String semanticEquipmentTag;

@@ -27,9 +27,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class ConfigDescriptionDTO {
 
     public String uri;
-
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<ConfigDescriptionParameterDTO> parameters;
-
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<ConfigDescriptionParameterGroupDTO> parameterGroups;
 
     public ConfigDescriptionDTO() {

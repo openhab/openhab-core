@@ -32,7 +32,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "EnrichedItem")
 public class EnrichedItemDTO extends ItemDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String link;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String state;
     public String transformedState;
     public StateDescription stateDescription;
@@ -43,6 +45,7 @@ public class EnrichedItemDTO extends ItemDTO {
     public String unitSymbol;
     public Map<String, Object> metadata;
     public EnrichedItemDTO[] parents = null;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Boolean editable;
 
     public EnrichedItemDTO(ItemDTO itemDTO, String link, String state, String lastState, Long lastStateUpdate,
