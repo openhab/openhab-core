@@ -25,6 +25,7 @@ import org.openhab.core.types.State;
  */
 @NonNullByDefault
 public enum PlayPauseType implements PrimitiveType, State, Command {
+    NONE,
     PLAY,
     PAUSE;
 

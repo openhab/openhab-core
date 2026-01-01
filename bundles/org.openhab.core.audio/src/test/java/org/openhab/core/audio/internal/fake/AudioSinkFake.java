@@ -58,6 +58,21 @@ public class AudioSinkFake implements AudioSink {
     }
 
     @Override
+    public String getName() {
+        return "testSinkId";
+    }
+
+    @Override
+    public String getBinding() {
+        return "core.audio";
+    }
+
+    @Override
+    public String getType() {
+        return "";
+    }
+
+    @Override
     public @Nullable String getLabel(@Nullable Locale locale) {
         return "testSinkLabel";
     }
