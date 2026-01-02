@@ -140,8 +140,9 @@ public class ChannelTypeResource implements RESTResource {
     @Path("/{channelTypeUID}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getChannelTypeByUID", summary = "Gets channel type by UID.", responses = {
-            @ApiResponse(responseCode = "200", description = "Channel type with provided channelTypeUID does not exist.", content = @Content(schema = @Schema(implementation = ChannelTypeDTO.class))),
-            @ApiResponse(responseCode = "404", description = "No content") })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ChannelTypeDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "404", description = "Channel type with provided channelTypeUID does not exist.") })
     public Response getByUID(
             @PathParam("channelTypeUID") @Parameter(description = "channelTypeUID") String channelTypeUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
@@ -150,7 +151,7 @@ public class ChannelTypeResource implements RESTResource {
         if (channelType != null) {
             return Response.ok(convertToChannelTypeDTO(channelType, locale)).build();
         } else {
-            return Response.noContent().build();
+            return Response.status(Status.NOT_FOUND).build();
         }
     }
 

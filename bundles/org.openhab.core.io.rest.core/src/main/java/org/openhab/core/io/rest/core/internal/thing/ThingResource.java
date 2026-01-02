@@ -682,7 +682,7 @@ public class ThingResource implements RESTResource {
         ThingUID thingUIDObject = new ThingUID(thingUID);
         FirmwareStatusDTO firmwareStatusDto = getThingFirmwareStatusInfo(thingUIDObject);
         if (firmwareStatusDto == null) {
-            return Response.status(Status.NO_CONTENT).build();
+            return Response.noContent().build();
         }
 
         return Response.ok(firmwareStatusDto, MediaType.APPLICATION_JSON).build();
