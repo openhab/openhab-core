@@ -1,5 +1,0 @@
-plain: !include subNosubVsInclude.inc.yaml
-sub: !sub
-  data: !include subNosubVsInclude.inc.yaml
-nosub: !nosub
-  data: !include subNosubVsInclude.inc.yaml

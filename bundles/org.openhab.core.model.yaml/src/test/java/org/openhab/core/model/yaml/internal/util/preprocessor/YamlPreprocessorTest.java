@@ -274,24 +274,53 @@ public class YamlPreprocessorTest {
         }
 
         @Test
-        void subNosubVsInclude() throws IOException {
-            Map<String, Object> data = loadFixture(PATH + "subNosubVsInclude.yaml");
+        void subOnInclude() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "subOnInclude.yaml");
 
             // !include without !sub / !nosub should behave as plain inclusion
             // leaving the behavior inside the included file unaffected
-            assertThat(getNestedValue(data, "plain", "plain"), equalTo("${foo}"));
-            assertThat(getNestedValue(data, "plain", "sub"), equalTo("bar"));
-            assertThat(getNestedValue(data, "plain", "nosub"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "plain", "data", "plain"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "plain", "data", "sub"), equalTo("bar"));
+            assertThat(getNestedValue(data, "plain", "data", "nosub"), equalTo("${foo}"));
+
+            assertThat(getNestedValue(data, "plain", "data", "moo_plain"), equalTo("${moo}"));
+            assertThat(getNestedValue(data, "plain", "data", "moo_sub"), equalTo("${mainmoo}"));
 
             // !sub in the main file should NOT alter the behavior inside the included file
             assertThat(getNestedValue(data, "sub", "data", "plain"), equalTo("${foo}"));
             assertThat(getNestedValue(data, "sub", "data", "sub"), equalTo("bar"));
             assertThat(getNestedValue(data, "sub", "data", "nosub"), equalTo("${foo}"));
 
+            assertThat(getNestedValue(data, "sub", "data", "moo_plain"), equalTo("${moo}"));
+            assertThat(getNestedValue(data, "sub", "data", "moo_sub"), equalTo("cow"));
+
             // !nosub in the main file should NOT alter the behavior inside the included file
             assertThat(getNestedValue(data, "nosub", "data", "plain"), equalTo("${foo}"));
             assertThat(getNestedValue(data, "nosub", "data", "sub"), equalTo("bar"));
             assertThat(getNestedValue(data, "nosub", "data", "nosub"), equalTo("${foo}"));
+
+            assertThat(getNestedValue(data, "nosub", "data", "moo_plain"), equalTo("${moo}"));
+            assertThat(getNestedValue(data, "nosub", "data", "moo_sub"), equalTo("${mainmoo}"));
+        }
+
+        @Test
+        void subOnAnchor() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "subOnAnchor.yaml");
+
+            assertThat(getNestedValue(data, "sub_anchor", "obj", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "nosub_anchor", "obj", "foo"), equalTo("${foo}"));
+
+            assertThat(getNestedValue(data, "plain_plain", "foo"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "plain_sub", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "plain_nosub", "foo"), equalTo("${foo}"));
+
+            assertThat(getNestedValue(data, "sub_plain", "foo"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "sub_sub", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "sub_nosub", "foo"), equalTo("${foo}"));
+
+            assertThat(getNestedValue(data, "nosub_plain", "foo"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "nosub_sub", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "nosub_nosub", "foo"), equalTo("${foo}"));
         }
     }
 
