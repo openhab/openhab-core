@@ -55,6 +55,13 @@ public class ConfigUtil {
     private static final Pattern DEFAULT_LIST_SPLITTER = Pattern.compile("(?<!\\\\),");
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private ConfigUtil() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
+    /**
      * Maps the provided (default) value of the given {@link ConfigDescriptionParameter} to the corresponding Java type.
      *
      * In case the provided (default) value is supposed to be a number and cannot be converted into the target type
@@ -156,7 +163,9 @@ public class ConfigUtil {
      * @return normalized configuration
      */
     public static Map<String, @Nullable Object> normalizeTypes(Map<String, @Nullable Object> configuration) {
-        Map<String, @Nullable Object> convertedConfiguration = new HashMap<>(configuration.size());
+        // Calculate initial capacity to avoid resizing: (size / loadFactor) + 1
+        int initialCapacity = (int) (configuration.size() / 0.75f) + 1;
+        Map<String, @Nullable Object> convertedConfiguration = new HashMap<>(initialCapacity);
         for (Entry<String, @Nullable Object> parameter : configuration.entrySet()) {
             String name = parameter.getKey();
             Object value = parameter.getValue();
@@ -217,9 +226,14 @@ public class ConfigUtil {
             throw new IllegalArgumentException("Config description must not be empty.");
         }
 
-        Map<String, @Nullable Object> convertedConfiguration = new HashMap<>();
+        // Calculate initial capacity based on configuration size to avoid resizing
+        int configCapacity = (int) (configuration.size() / 0.75f) + 1;
+        Map<String, @Nullable Object> convertedConfiguration = new HashMap<>(configCapacity);
 
-        Map<String, ConfigDescriptionParameter> configParams = new HashMap<>();
+        // Estimate capacity for configParams: sum of all parameters from all descriptions
+        int estimatedParamsSize = configDescriptions.stream().mapToInt(desc -> desc.getParameters().size()).sum();
+        int paramsCapacity = (int) (estimatedParamsSize / 0.75f) + 1;
+        Map<String, ConfigDescriptionParameter> configParams = new HashMap<>(paramsCapacity);
         for (int i = configDescriptions.size() - 1; i >= 0; i--) {
             configParams.putAll(configDescriptions.get(i).toParametersMap());
         }
