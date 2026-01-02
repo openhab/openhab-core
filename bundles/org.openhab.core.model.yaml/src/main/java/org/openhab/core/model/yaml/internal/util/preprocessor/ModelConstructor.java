@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -53,7 +55,8 @@ import org.yaml.snakeyaml.nodes.Tag;
 @NonNullByDefault
 class ModelConstructor extends Constructor {
 
-    private static final Tag SUB_TAG = new Tag("!sub");
+    // This is implemented as a multi-constructor below.
+    private static final String SUB_TAG = "!sub";
     private static final Tag NOSUB_TAG = new Tag("!nosub");
 
     private static final Tag INCLUDE_TAG = new Tag("!include");
@@ -83,11 +86,16 @@ class ModelConstructor extends Constructor {
             \\}
             """, Pattern.COMMENTS);
 
-    private final Logger logger = LoggerFactory.getLogger(ModelConstructor.class);
+    private static final String DEFAULT_BEGIN = "${";
+    private static final String DEFAULT_END = "}";
 
     private final Map<String, Object> variables;
     private final Path currentFile;
+
     private final Deque<Boolean> substitutionStack = new ArrayDeque<>();
+    private final Deque<Pattern> substitutionPatternStack = new ArrayDeque<>();
+
+    private final Logger logger = LoggerFactory.getLogger(ModelConstructor.class);
 
     public ModelConstructor(LoaderOptions options, Map<String, Object> variables, Path currentFile, boolean finalPass) {
         super(options);
@@ -95,18 +103,20 @@ class ModelConstructor extends Constructor {
         this.variables = variables;
         this.currentFile = currentFile;
         this.substitutionStack.push(false);
+        this.substitutionPatternStack.push(compileSubstitutionPattern(DEFAULT_BEGIN, DEFAULT_END));
 
         this.yamlConstructors.put(Tag.NULL, new ConstructNull());
+        this.yamlConstructors.put(NOSUB_TAG, new ConstructDefault());
 
         // The first pass is only to gather variables, so we use a no-op constructor for efficiency
-        this.yamlConstructors.put(SUB_TAG, finalPass ? new ConstructDefault() : new ConstructEmpty());
-        this.yamlConstructors.put(NOSUB_TAG, finalPass ? new ConstructDefault() : new ConstructEmpty());
         this.yamlConstructors.put(INCLUDE_TAG, finalPass ? new ConstructInclude() : new ConstructEmpty());
         this.yamlConstructors.put(REPLACE_TAG, finalPass ? new ConstructReplace() : new ConstructEmpty());
         this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
 
-        // We do need to resolve strings even in the first pass so everything doesn't resolve to an empty string!
+        // We do need to resolve strings normally in the first pass - don't resolve to an empty string
         this.yamlConstructors.put(Tag.STR, finalPass ? new ConstructInterpolation() : new ConstructYamlStr());
+
+        this.yamlMultiConstructors.put(SUB_TAG, new ConstructSub());
 
         logger.trace("ModelConstructor created with vars: {}", variables);
     }
@@ -116,9 +126,11 @@ class ModelConstructor extends Constructor {
         boolean parent = substitutionStack.peek();
         boolean enabled = resolveSubstitution(node.getTag(), parent);
         substitutionStack.push(enabled);
+        substitutionPatternStack.push(substitutionPatternStack.peek());
         try {
             return super.constructObject(node);
         } finally {
+            substitutionPatternStack.pop();
             substitutionStack.pop();
         }
     }
@@ -127,10 +139,18 @@ class ModelConstructor extends Constructor {
         if (NOSUB_TAG.equals(tag)) {
             return false;
         }
-        if (SUB_TAG.equals(tag)) {
+
+        if (isSubTag(tag)) {
             return true;
         }
         return parent;
+    }
+
+    private boolean isSubTag(Tag tag) {
+        if (tag.getValue() instanceof String tagValue && tagValue.startsWith(SUB_TAG)) {
+            return true;
+        }
+        return false;
     }
 
     public class ConstructInterpolation extends AbstractConstruct {
@@ -146,7 +166,7 @@ class ModelConstructor extends Constructor {
             DumperOptions.ScalarStyle scalarStyle = scalarNode.getScalarStyle();
 
             boolean enabled = substitutionStack.peek();
-            if (enabled || SUB_TAG.equals(scalarNode.getTag())) {
+            if (enabled || isSubTag(scalarNode.getTag())) {
                 return performSubstitution(value, scalarStyle);
             }
 
@@ -170,8 +190,67 @@ class ModelConstructor extends Constructor {
         }
     }
 
+    /**
+     * The syntax of the tag is: !sub[:pattern=begin..end]
+     * where `begin` and `end` are symbols that consist of one or more characters
+     * that denote the start and end of the substitution pattern.
+     *
+     * The tag is URLDecoded before use.
+     *
+     * In the absence of the pattern parameter, the default ${..} is used.
+     *
+     * Examples:
+     * - !sub ${variable}
+     * - !sub:pattern=$[..] $[..]
+     * - !sub:pattern=@(..) @(..)
+     * - !sub:pattern=%23%7B%7B..%7D%7D #{{..}} # The characters are URLEncoded because # and {} are not allowed in tags
+     */
+    public class ConstructSub extends ConstructDefault {
+        @Override
+        public Object construct(@Nullable Node node) {
+            if (node == null) {
+                return "";
+            }
+            Pattern pattern = Objects.requireNonNullElseGet(extractPattern(node.getTag()),
+                    () -> compileSubstitutionPattern(DEFAULT_BEGIN, DEFAULT_END));
+
+            substitutionPatternStack.pop();
+            substitutionPatternStack.push(pattern);
+            return super.construct(node);
+        }
+    }
+
+    private @Nullable Pattern extractPattern(Tag tag) {
+        String raw = tag.getValue();
+        String decoded = URLDecoder.decode(raw, StandardCharsets.UTF_8);
+
+        if (!decoded.startsWith(SUB_TAG)) {
+            return null;
+        }
+
+        String suffix = decoded.substring(SUB_TAG.length());
+        if (!suffix.startsWith(":pattern=")) {
+            return null;
+        }
+
+        String patternSpec = suffix.substring(":pattern=".length());
+        int separator = patternSpec.indexOf("..");
+        if (separator <= 0 || separator >= patternSpec.length() - 2) {
+            return null;
+        }
+
+        String begin = patternSpec.substring(0, separator);
+        String end = patternSpec.substring(separator + 2);
+        if (begin.isEmpty() || end.isEmpty()) {
+            return null;
+        }
+
+        return compileSubstitutionPattern(begin, end);
+    }
+
     private Object performSubstitution(String value, DumperOptions.ScalarStyle scalarStyle) {
-        Matcher matcher = SUBSTITUTION_PATTERN.matcher(value);
+        Pattern pattern = substitutionPatternStack.peek();
+        Matcher matcher = pattern.matcher(value);
         if (!matcher.find()) {
             logger.debug("No variable pattern match for '{}'", value);
             return value;
@@ -199,6 +278,20 @@ class ModelConstructor extends Constructor {
 
         // Return as String
         return interpolated;
+    }
+
+    private Pattern compileSubstitutionPattern(String begin, String end) {
+        if (DEFAULT_BEGIN.equals(begin) && DEFAULT_END.equals(end)) {
+            return SUBSTITUTION_PATTERN;
+        }
+        String quotedBegin = Pattern.quote(begin);
+        String quotedEnd = Pattern.quote(end);
+        // Allow quoted segments to contain the end delimiter; otherwise stop at the first closing delimiter.
+        String content = """
+                "[^"]*"|'[^']*'|(?:(?!%s).)
+                """.formatted(quotedEnd).strip();
+        String regex = quotedBegin + "(?<content>(" + content + ")+?)" + quotedEnd;
+        return Pattern.compile(regex, Pattern.DOTALL);
     }
 
     // Return an empty string for null values so that the keys are not removed from the map
