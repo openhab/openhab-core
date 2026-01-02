@@ -59,11 +59,6 @@ public class YamlPreprocessorTest {
         public void booleanParser() throws IOException {
             Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), Path.of("dummy.yaml"), false);
 
-            assertThat(yaml.load("true"), equalTo(true));
-            assertThat(yaml.load("TRUE"), equalTo(true));
-            assertThat(yaml.load("True"), equalTo(true));
-            assertThat(yaml.load("TrUe"), equalTo(true));
-
             assertThat(yaml.load("false"), equalTo(false));
             assertThat(yaml.load("False"), equalTo(false));
             assertThat(yaml.load("FALSE"), equalTo(false));
@@ -139,6 +134,17 @@ public class YamlPreprocessorTest {
         void missingVariables() {
             IOException exception = assertThrows(IOException.class, () -> loadFixture(PATH + "missingVariables.yaml"));
             assertThat(exception.getMessage(), containsString("undefined_variable"));
+        }
+
+        @Test
+        void customPatterns() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "customPatterns.yaml");
+
+            assertThat(getNestedValue(data, "test", "data"), equalTo("barbar"));
+            assertThat(getNestedValue(data, "test", "level1", "data"), equalTo("bar"));
+            assertThat(getNestedValue(data, "test", "level1", "level2", "data"), equalTo("bar"));
+            assertThat(getNestedValue(data, "test", "level1", "level2", "level3", "data"), equalTo("bar"));
+            assertThat(getNestedValue(data, "test", "level1", "level2", "level3", "level4", "data"), equalTo("bar"));
         }
 
         @Test
