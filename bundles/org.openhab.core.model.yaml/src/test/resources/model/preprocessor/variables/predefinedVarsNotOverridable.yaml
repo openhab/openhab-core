@@ -1,0 +1,18 @@
+variables:
+  __FILE__: main
+  __FILE_NAME__: main
+  __FILE_EXT__: main
+  __DIRECTORY__: main
+
+file: !sub ${__FILE__}
+filename: !sub ${__FILE_NAME__}
+ext: !sub ${__FILE_EXT__}
+path: !sub ${__DIRECTORY__}
+
+include: !include
+  file: predefinedVarsNotOverridable.inc.yaml
+  vars:
+    __FILE__: includevar
+    __FILE_NAME__: includevar
+    __FILE_EXT__: includevar
+    __DIRECTORY__: includevar

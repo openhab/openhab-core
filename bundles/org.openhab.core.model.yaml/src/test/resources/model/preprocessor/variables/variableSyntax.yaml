@@ -1,0 +1,78 @@
+variables:
+  exist: value1
+  empty_value:
+  empty_value1:
+
+  one: 1 # numeric
+
+  mapping:
+    foo: bar
+    baz: qux
+  key: foo
+
+  list:
+    - item1
+    - item2
+
+  if: reserved # reserved word as variable name
+  varname-with-dash: dashvalue
+  varname with space: spacevalue
+
+plain: !sub ${exist} # => value1
+double_quoted: !sub "${exist}" # => value1
+single_quoted: !sub '${exist}' # => value1
+
+spaces_inside_delimiters: !sub ${   exist    }
+
+# since 'if' will cause an error in jinja expressions but are allowed in simple form,
+# use it here to prove that they are handled using the simple syntax
+vars_bracket_double: !sub ${VARS["if"]}
+vars_bracket_single: !sub ${VARS['if']}
+vars_with_dash: !sub ${VARS["varname-with-dash"]}
+vars_with_space: !sub ${VARS["varname with space"]}
+
+empty_no_default: !sub ${empty_value}
+
+exists: !sub ${exist|default('default')} # => value1
+empty_value_test: !sub ${empty_value|default('default')} # => ""
+empty_value_test_compound: !sub "prefix-${empty_value1|default('default')}" # => ""
+
+exists_with_true: !sub ${exist|default('default', true)} # => value1
+empty_value_with_true: !sub ${empty_value|default('default', true)} # => default
+
+chained: !sub ${exist|default('default')|upper} # => VALUE1
+
+compound_value: !sub Value is ${exist|default('default')} # => Value is: value1
+compound_quoted: !sub "Value is ${exist|default('default')}" # => Value is: value1
+
+multiple_patterns: !sub ${exist}-${one}
+
+string_const: !sub "${'1'}"
+string_const_literal: !sub |
+  ${'1'}
+string_const_folded: !sub >
+  ${'1'}
+int_const: !sub ${1}
+int_const_quoted: !sub "${1}"
+int_var: !sub ${one}
+int_var_VARS: !sub ${VARS.one * 1}
+
+map_var: !sub ${mapping}
+map_lookup: !sub ${mapping[key]} # => bar
+map_literal_key: !sub ${mapping['baz']} # => qux
+map_literal_key_dbl: !sub ${mapping["foo"]} # => bar
+map_literal_chained: !sub ${mapping.baz} # => qux
+
+list_var: !sub ${list}
+list_index_0: !sub ${list[0]} # => item1
+list_index_1: !sub ${list[1]} # => item2
+list_index_lookup: !sub ${list[one]} # => item2
+
+!sub ${key}: dynamickey
+
+level1:
+  level2a: !sub ${exist}
+  level2b:
+    level3: !sub ${key}
+
+jinja_expression: !sub ${ mapping[key].repeat(2) + 'ian' }

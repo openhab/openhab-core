@@ -1,0 +1,64 @@
+variables:
+  foo: bar
+
+# What happens inside this anchor is self-contained and predictable.
+# Substitutions will _only_ happen if you specify !sub _here_.
+# The context where the anchor gets merged later does not affect this.
+.plain: &PLAIN
+  foo: ${foo}
+
+# If you want substitution to happen inside the anchor,
+# you must specify !sub here
+.sub: &SUB
+  foo: !sub ${foo}
+
+# Because the global file default is to disallow substitutions,
+# this is therefore unnecessary, but included for completeness.
+# It may be needed to ensure !nosub if we started allowing *configurable* default!
+.nosub: &NOSUB
+  foo: !nosub ${foo}
+
+#################################################################
+# Now we merge the above anchors into various contexts
+# to see how substitutions behave in each case.
+
+### MERGED INTO PLAIN PARENT CONTEXT
+
+final_plain_plain:
+    <<: *PLAIN # No substitutions requested anywhere
+
+final_plain_sub:
+  <<: *SUB   # Already substituted in the anchor
+
+final_plain_nosub:
+  <<: *NOSUB  # Substitutions prohibited inside the anchor
+
+
+### MERGED INTO !sub PARENT CONTEXT
+
+final_sub_plain: !sub
+  <<: *PLAIN # Not substituted inside the anchor
+             # inserted here after !sub
+             # !sub doesn't apply to what's inside the anchor
+
+final_sub_sub: !sub
+  <<: *SUB   # Already substituted in the anchor
+             # before it's inserted here
+
+final_sub_nosub: !sub
+  <<: *NOSUB  # Substitutions prohibited inside the anchor
+              # inserted here after !sub
+              # !sub doesn't apply to what's inside the anchor
+
+
+### MERGED INTO !nosub PARENT CONTEXT
+
+final_nosub_plain: !nosub
+  <<: *PLAIN # No substitutions requested anywhere
+
+final_nosub_sub: !nosub
+  <<: *SUB   # Already substituted in the anchor
+             # before it's inserted here
+
+final_nosub_nosub: !nosub
+  <<: *NOSUB  # Substitutions prohibited everywhere

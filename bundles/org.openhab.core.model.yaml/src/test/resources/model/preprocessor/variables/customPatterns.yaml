@@ -1,0 +1,13 @@
+variables:
+  foo: bar
+
+test: !sub:pattern=$[[..]]
+  data: '$[[ foo ]]$[[ foo ]]'
+  level1: !sub:pattern=$((..))
+    data: '$(( foo ))'
+    level2: !sub:pattern=@[..]
+      data: '@[foo]'
+      level3: !sub:pattern=%23%7B%7B..%7D%7D # This is URLEncoded '#{{..}}' because we can't use plain # nor {}
+        data: '#{{ foo }}'
+        level4: !sub # use the default pattern
+          data: '${ foo }'
