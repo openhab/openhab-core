@@ -219,9 +219,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
+        boolean removeModel = false;
         try {
             if (kind == Kind.DELETE) {
-                removeModel(modelName);
+                removeModel = true;
             } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
                 Object yamlObject = YamlPreprocessor.load(fullPath, includePath -> {
                     modelIncludes.put(modelName, includePath);
@@ -233,6 +234,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             }
         } catch (IOException e) {
             errors.add("Failed to process model: %s".formatted(e.getMessage()));
+            removeModel = true; // remove model in case of error during MODIFY
         }
         errors.forEach(error -> {
             logger.warn("YAML model {}: {}", modelName, error);
@@ -240,6 +242,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         warnings.forEach(warning -> {
             logger.info("YAML model {}: {}", modelName, warning);
         });
+        if (removeModel) {
+            removeModel(modelName);
+        }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -378,13 +383,15 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         };
         logger.info("An include file '{}' was {}", fullPath, action);
 
-        // When an include file was deleted, process the depending models as if they were deleted too.
-        // This avoids having to reload and reparse the main model file only to find out that it is invalid
-        // Otherwise, process them as modified/updated so they are reloaded.
-        Kind modelChangeKind = (kind == Kind.DELETE) ? kind : Kind.MODIFY;
+        // Force a reload of all models that depend on this include file.
+        // If the include file was deleted, we emit a MODIFY event rather than
+        // removing the models or sending a DELETE event.
+        // This is less efficient than unloading the models outright, but it guarantees
+        // that all dependent models are refreshed correctly and that the logs clearly
+        // indicate why the unload occurred (which include is missing from where).
         dependingModels.forEach(modelName -> {
             Path modelPath = mainWatchPath.resolve(modelName);
-            processWatchEvent(modelChangeKind, modelPath);
+            processWatchEvent(Kind.MODIFY, modelPath);
         });
 
         return true;
