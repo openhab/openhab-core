@@ -33,12 +33,15 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.AbstractConstruct;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
+
+import com.hubspot.jinjava.interpret.InterpretException;
 
 /**
  * The {@link ModelConstructor} adds extended functionality to the
@@ -157,17 +160,15 @@ class ModelConstructor extends Constructor {
         @Override
         public Object construct(@Nullable Node node) {
             if (!(node instanceof ScalarNode scalarNode)) {
-                String nodeType = node == null ? "null" : node.getNodeId().name();
+                String location = node == null ? "" : formatLocation(node);
                 throw new YAMLException(
-                        "%s: !sub can only be applied to scalar nodes, but found: %s".formatted(currentFile, nodeType));
+                        "%s:%s Expected a ScalarNode but got: %s".formatted(currentFile, location, node));
             }
 
             String value = (String) constructScalar(scalarNode);
-            DumperOptions.ScalarStyle scalarStyle = scalarNode.getScalarStyle();
-
             boolean enabled = substitutionStack.peek();
             if (enabled || isSubTag(scalarNode.getTag())) {
-                return performSubstitution(value, scalarStyle);
+                return performSubstitution(value, scalarNode);
             }
 
             return value;
@@ -248,7 +249,7 @@ class ModelConstructor extends Constructor {
         return compileSubstitutionPattern(begin, end);
     }
 
-    private Object performSubstitution(String value, DumperOptions.ScalarStyle scalarStyle) {
+    private Object performSubstitution(String value, ScalarNode scalarNode) {
         Pattern pattern = substitutionPatternStack.peek();
         Matcher matcher = pattern.matcher(value);
         if (!matcher.find()) {
@@ -256,28 +257,48 @@ class ModelConstructor extends Constructor {
             return value;
         }
 
-        if (scalarStyle == DumperOptions.ScalarStyle.PLAIN && matcher.matches()) {
-            // If the whole value is exactly one ${...}, evaluate via Jinjava and return the native object.
-            // This preserves non-string types (maps, lists, numbers, booleans) when the value is a plain
-            // placeholder.
-            String content = matcher.group("content").trim();
-            Object rendered = JinjavaTemplateEngine.renderObject(content, variables, currentFile);
-            logger.debug("Jinja object expression: ${{}} => '{}' (type: {})", content, rendered,
-                    rendered == null ? "null" : rendered.getClass().getSimpleName());
-            return Objects.requireNonNullElse(rendered, "");
+        // If the whole value is exactly one ${...}, evaluate via Jinjava and return the native object.
+        // This preserves non-string types (maps, lists, numbers, booleans) when the value is a plain
+        // placeholder.
+        if (scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.PLAIN && matcher.matches()) {
+            String content = matcher.group("content");
+            return evaluateExpression(content, variables, scalarNode);
         }
 
         // Replace ${...} with content (simple variables directly, complex expressions via Jinja)
         String interpolated = matcher.replaceAll(match -> {
             String content = match.group("content");
-            String template = "{{ " + content + " }}";
-            String rendered = JinjavaTemplateEngine.render(template, variables, currentFile);
-            logger.debug("Jinja expression: ${{}} => '{}'", content, rendered);
-            return Matcher.quoteReplacement(rendered);
+            return evaluateExpression(content, variables, scalarNode).toString();
         });
 
         // Return as String
         return interpolated;
+    }
+
+    private Object evaluateExpression(String expression, Map<String, Object> variables, ScalarNode scalarNode) {
+        try {
+            Object rendered = JinjavaTemplateEngine.renderObject(expression, variables);
+            return Objects.requireNonNullElse(rendered, "");
+        } catch (InterpretException e) {
+            // Format this as `path:[line,col] <rest of msg>` so it's clickable in vscode
+            throw new YAMLException("%s:%s %s".formatted(currentFile, formatLocation(scalarNode), e.getMessage()), e);
+        }
+    }
+
+    private String formatLocation(Node node) {
+        Mark startMark = node.getStartMark();
+        Mark endMark = node.getEndMark();
+        if (startMark != null && endMark != null) {
+            return formatMark(startMark) + " to " + formatMark(endMark);
+        } else if (startMark != null) {
+            return formatMark(startMark);
+        }
+        return "";
+    }
+
+    private String formatMark(Mark mark) {
+        // SnakeYAML marks are 0-based; present as 1-based line/column for readability.
+        return "[%d:%d]".formatted(mark.getLine() + 1, mark.getColumn() + 1);
     }
 
     private Pattern compileSubstitutionPattern(String begin, String end) {
