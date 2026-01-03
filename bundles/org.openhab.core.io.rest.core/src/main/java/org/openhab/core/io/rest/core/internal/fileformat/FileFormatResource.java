@@ -903,6 +903,37 @@ public class FileFormatResource implements RESTResource {
         if (!things.isEmpty()) {
             dto.things = new ArrayList<>();
             things.forEach(thing -> {
+                // Normalize thing configuration
+                @Nullable
+                Map<String, @Nullable Object> normalizedConfig = normalizeConfiguration(
+                        thing.getConfiguration().getProperties(), thing.getThingTypeUID(), thing.getUID());
+                if (normalizedConfig != null) {
+                    thing.getConfiguration().keySet().forEach(paramName -> {
+                        @Nullable
+                        Object normalizedValue = normalizedConfig.get(paramName);
+                        if (normalizedValue != null) {
+                            thing.getConfiguration().put(paramName, normalizedValue);
+                        }
+                    });
+                }
+                // Normalize channel configuration
+                thing.getChannels().forEach(channel -> {
+                    ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
+                    if (channelTypeUID != null) {
+                        @Nullable
+                        Map<String, @Nullable Object> normalizedConfig2 = normalizeConfiguration(
+                                channel.getConfiguration().getProperties(), channelTypeUID, channel.getUID());
+                        if (normalizedConfig2 != null) {
+                            channel.getConfiguration().keySet().forEach(paramName -> {
+                                @Nullable
+                                Object normalizedValue = normalizedConfig2.get(paramName);
+                                if (normalizedValue != null) {
+                                    channel.getConfiguration().put(paramName, normalizedValue);
+                                }
+                            });
+                        }
+                    }
+                });
                 dto.things.add(ThingDTOMapper.map(thing));
             });
         }

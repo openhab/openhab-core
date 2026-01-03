@@ -133,9 +133,9 @@ public class NormalizerTest {
         assertThat(normalizer.normalize(42), is(equalTo("42")));
         assertThat(normalizer.normalize(42L), is(equalTo("42")));
         assertThat(normalizer.normalize((byte) 42), is(equalTo("42")));
-        assertThat(normalizer.normalize(42.0), is(equalTo("42.0")));
-        assertThat(normalizer.normalize(42.0f), is(equalTo("42.0")));
-        assertThat(normalizer.normalize(42.0d), is(equalTo("42.0")));
+        assertThat(normalizer.normalize(42.0), is(equalTo("42")));
+        assertThat(normalizer.normalize(42.0f), is(equalTo("42")));
+        assertThat(normalizer.normalize(42.0d), is(equalTo("42")));
         assertThat(normalizer.normalize(42.1), is(equalTo("42.1")));
         assertThat(normalizer.normalize(42.88f), is(equalTo("42.88")));
         assertThat(normalizer.normalize(42.88d), is(equalTo("42.88")));

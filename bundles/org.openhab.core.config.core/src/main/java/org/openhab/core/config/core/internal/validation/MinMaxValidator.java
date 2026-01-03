@@ -49,15 +49,15 @@ final class MinMaxValidator implements ConfigDescriptionParameterValidator {
         }
 
         TypeIntrospection typeIntrospection = TypeIntrospections.get(parameter.getType());
-        if (parameter.getMinimum() != null) {
-            BigDecimal min = parameter.getMinimum();
+        BigDecimal min = parameter.getMinimum();
+        if (min != null) {
             if (typeIntrospection.isMinViolated(value, min)) {
                 return createMinMaxViolationMessage(parameter.getName(), typeIntrospection.getMinViolationMessageKey(),
                         min);
             }
         }
-        if (parameter.getMaximum() != null) {
-            BigDecimal max = parameter.getMaximum();
+        BigDecimal max = parameter.getMaximum();
+        if (max != null) {
             if (typeIntrospection.isMaxViolated(value, max)) {
                 return createMinMaxViolationMessage(parameter.getName(), typeIntrospection.getMaxViolationMessageKey(),
                         max);
