@@ -814,12 +814,6 @@ public class FileFormatResource implements RESTResource {
 
                 if (thingData.bridgeUID != null) {
                     bridgeUID = new ThingUID(thingData.bridgeUID);
-                    if (thingUID != null && !thingUID.getBindingId().equals(bridgeUID.getBindingId())) {
-                        errors.add("Thing UID '" + thingUID + "' and bridge UID '" + bridgeUID
-                                + "' are from different bindings");
-                        ok = false;
-                        continue;
-                    }
                 }
 
                 // turn the ThingDTO's configuration into a Configuration
