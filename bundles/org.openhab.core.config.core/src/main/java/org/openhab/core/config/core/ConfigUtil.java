@@ -263,6 +263,9 @@ public class ConfigUtil {
             final List<Object> lst = new ArrayList<>(collection.size());
             for (final Object it : collection) {
                 final Object normalized = normalizeType(it, null);
+                if (normalized == null) {
+                    continue;
+                }
                 lst.add(normalized);
                 if (normalized.getClass() != lst.getFirst().getClass()) {
                     throw new IllegalArgumentException(

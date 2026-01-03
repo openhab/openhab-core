@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.core.internal.normalization;
 
+import java.math.BigDecimal;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 
@@ -27,6 +29,15 @@ final class TextNormalizer extends AbstractNormalizer {
 
     @Override
     public Object doNormalize(Object value) {
-        return value instanceof String ? value : value.toString();
+        if (value instanceof Float floatValue && Math.floor(floatValue) == floatValue) {
+            return String.valueOf(floatValue.longValue());
+        } else if (value instanceof Double doubleValue && Math.floor(doubleValue) == doubleValue) {
+            return String.valueOf(doubleValue.longValue());
+        } else if (value instanceof BigDecimal bigDecimalValue
+                && Math.floor(bigDecimalValue.doubleValue()) == bigDecimalValue.doubleValue()) {
+            return String.valueOf(bigDecimalValue.longValue());
+        } else {
+            return value instanceof String ? value : value.toString();
+        }
     }
 }
