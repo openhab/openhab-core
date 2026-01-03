@@ -28,6 +28,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -160,7 +161,7 @@ public class ThingTypeResource implements RESTResource {
         if (thingType != null) {
             return Response.ok(convertToThingTypeDTO(thingType, locale)).build();
         } else {
-            return Response.status(404).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
     }
 

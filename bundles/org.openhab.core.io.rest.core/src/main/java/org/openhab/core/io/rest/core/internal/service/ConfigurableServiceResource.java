@@ -150,7 +150,7 @@ public class ConfigurableServiceResource implements RESTResource {
         if (configurableService != null) {
             return Response.ok(configurableService).build();
         } else {
-            return Response.status(404).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
     }
 
@@ -277,7 +277,8 @@ public class ConfigurableServiceResource implements RESTResource {
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
             configurationService.delete(serviceId);
-            return oldConfiguration != null ? Response.ok(oldConfiguration).build() : Response.status(404).build();
+            return oldConfiguration != null ? Response.ok(oldConfiguration).build()
+                    : Response.status(Status.NOT_FOUND).build();
         } catch (IOException ex) {
             logger.error("Cannot delete configuration for service {}: {}", serviceId, ex.getMessage(), ex);
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();

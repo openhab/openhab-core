@@ -150,7 +150,7 @@ public class ChannelTypeResource implements RESTResource {
         if (channelType != null) {
             return Response.ok(convertToChannelTypeDTO(channelType, locale)).build();
         } else {
-            return Response.status(404).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
     }
 
