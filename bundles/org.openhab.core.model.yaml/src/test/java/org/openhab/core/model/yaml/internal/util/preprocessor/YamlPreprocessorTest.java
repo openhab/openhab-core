@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 
 /**
  * The {@link YamlPreprocessorTest} contains tests for the {@link YamlPreprocessor} class.
@@ -131,9 +132,19 @@ public class YamlPreprocessorTest {
         }
 
         @Test
-        void missingVariables() {
-            IOException exception = assertThrows(IOException.class, () -> loadFixture(PATH + "missingVariables.yaml"));
+        void errorHandling() {
+            // Create a Yaml parser with finalPass = true to trigger substitutions
+            Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), Path.of("dummy.yaml"), true);
+
+            YAMLException exception;
+
+            exception = assertThrows(YAMLException.class, () -> yaml.load("test: !sub ${undefined_variable}"));
             assertThat(exception.getMessage(), containsString("undefined_variable"));
+
+            // Jinjava will silently pass this expression as "2" without error, but
+            // we specifically want to error on undefined variables
+            exception = assertThrows(YAMLException.class, () -> yaml.load("test: !sub ${2 + foo}"));
+            assertThat(exception.getMessage(), containsString("foo"));
         }
 
         @Test

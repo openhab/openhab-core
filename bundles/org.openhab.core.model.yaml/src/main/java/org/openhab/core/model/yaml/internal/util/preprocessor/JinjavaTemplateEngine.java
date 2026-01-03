@@ -12,18 +12,17 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor;
 
-import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.yaml.snakeyaml.error.YAMLException;
 
 import com.hubspot.jinjava.Jinjava;
 import com.hubspot.jinjava.JinjavaConfig;
 import com.hubspot.jinjava.interpret.Context;
 import com.hubspot.jinjava.interpret.InterpretException;
 import com.hubspot.jinjava.interpret.JinjavaInterpreter;
+import com.hubspot.jinjava.interpret.TemplateError;
 
 /**
  * Wrapper around Jinjava template engine for rendering ${...} expressions.
@@ -45,39 +44,31 @@ class JinjavaTemplateEngine {
     }
 
     /**
-     * Render a Jinjava template with the given variables.
-     *
-     * @param template the Jinjava template string (e.g., "{{ name|capitalize }}")
-     * @param variables the variable context
-     * @param currentFile the current file being processed (for error messages)
-     * @return the rendered string
-     */
-    public static String render(String template, Map<String, Object> variables, Path currentFile) {
-        try {
-            return JINJAVA.render(template, new HashMap<>(variables));
-        } catch (InterpretException e) {
-            throw new YAMLException(currentFile + ": (Jinjava) " + e.getMessage(), e);
-        }
-    }
-
-    /**
      * Evaluate a Jinjava expression and return the raw object result (no string coercion).
      *
      * @param expression the expression content without delimiters (e.g., "user.profile")
      * @param variables the variable context
-     * @param currentFile the current file being processed (for error messages)
      * @return the evaluated object (map/list/number/boolean/string)
      */
-    public static Object renderObject(String expression, Map<String, Object> variables, Path currentFile) {
-        try {
-            Context context = new Context(JINJAVA.getGlobalContext());
-            context.putAll(variables);
-            JinjavaInterpreter interpreter = new JinjavaInterpreter(JINJAVA, context, JINJAVA_CONFIG);
-            Object result = interpreter.resolveELExpression(expression, 0);
-            return normalizeType(result);
-        } catch (InterpretException e) {
-            throw new YAMLException(currentFile + ": (Jinjava) " + e.getMessage(), e);
+    public static Object renderObject(String expression, Map<String, Object> variables) throws InterpretException {
+        Context context = new Context(JINJAVA.getGlobalContext());
+        // This lets us detect undefined variables and throw an exception
+        // The default behavior is to coerce to empty string (or zero) within an arithmetic expression,
+        // e.g. 2 + undefined_variable => 2 + 0 => 2
+        context.setDynamicVariableResolver(var -> {
+            if (variables.containsKey(var)) {
+                return variables.get(var);
+            }
+            throw new InterpretException("Undefined variable: " + var);
+        });
+        JinjavaInterpreter interpreter = new JinjavaInterpreter(JINJAVA, context, JINJAVA_CONFIG);
+        Object result = interpreter.resolveELExpression(expression, 0);
+        List<TemplateError> errors = interpreter.getErrorsCopy();
+        if (!errors.isEmpty()) {
+            String message = errors.getFirst().getMessage().replaceAll("InterpretException: ", "");
+            throw new InterpretException(message);
         }
+        return normalizeType(result);
     }
 
     /**
