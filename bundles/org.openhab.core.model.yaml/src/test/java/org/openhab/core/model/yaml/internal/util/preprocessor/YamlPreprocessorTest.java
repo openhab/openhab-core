@@ -339,6 +339,13 @@ public class YamlPreprocessorTest {
             assertThat(getNestedValue(data, "nosub_sub", "foo"), equalTo("bar"));
             assertThat(getNestedValue(data, "nosub_nosub", "foo"), equalTo("${foo}"));
         }
+
+        @Test
+        void subOnReplace() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "subOnReplace.yaml");
+
+            assertThat(getNestedValue(data, "things", "MyThing", "foo"), equalTo(Map.of("qux", "cow")));
+        }
     }
 
     @Nested
