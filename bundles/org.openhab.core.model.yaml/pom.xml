@@ -96,6 +96,7 @@
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
+      <!-- Use the version defined in the main pom.xml -->
       <version>${commons.net.version}</version>
     </dependency>
     <dependency>
