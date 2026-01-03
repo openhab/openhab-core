@@ -219,22 +219,22 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        boolean removeModel = false;
+        boolean removeModel = true;
         try {
             if (kind == Kind.DELETE) {
-                removeModel = true;
+                // remove model below
             } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
                 Object yamlObject = YamlPreprocessor.load(fullPath, includePath -> {
                     modelIncludes.put(modelName, includePath);
                 });
                 processModelContent(modelName, kind, objectMapper.valueToTree(yamlObject), errors,
                         warnings);
+                removeModel = false;
             } else {
                 logger.trace("Ignored {}", fullPath);
             }
         } catch (IOException e) {
             errors.add("Failed to process model: %s".formatted(e.getMessage()));
-            removeModel = true; // remove model in case of error during MODIFY
         }
         errors.forEach(error -> {
             logger.warn("YAML model {}: {}", modelName, error);
