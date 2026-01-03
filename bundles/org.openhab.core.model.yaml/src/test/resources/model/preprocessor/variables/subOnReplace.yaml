@@ -1,0 +1,13 @@
+variables:
+  moo: cow
+
+packages:
+  things:
+    MyThing:
+      foo:
+        bar: baz
+
+things:
+  MyThing: !sub
+    foo: !replace
+      qux: ${moo}
