@@ -150,7 +150,7 @@ public class ConfigurableServiceResource implements RESTResource {
         if (configurableService != null) {
             return Response.ok(configurableService).build();
         } else {
-            return Response.status(404).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
     }
 
@@ -270,14 +270,15 @@ public class ConfigurableServiceResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "deleteServiceConfig", summary = "Deletes a service configuration for given service ID and returns the old configuration.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "204", description = "No old configuration"),
+            @ApiResponse(responseCode = "404", description = "Configuration not found"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be deleted due to internal error") })
     public Response deleteConfiguration(
             @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
             configurationService.delete(serviceId);
-            return oldConfiguration != null ? Response.ok(oldConfiguration).build() : Response.noContent().build();
+            return oldConfiguration != null ? Response.ok(oldConfiguration).build()
+                    : Response.status(Status.NOT_FOUND).build();
         } catch (IOException ex) {
             logger.error("Cannot delete configuration for service {}: {}", serviceId, ex.getMessage(), ex);
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
