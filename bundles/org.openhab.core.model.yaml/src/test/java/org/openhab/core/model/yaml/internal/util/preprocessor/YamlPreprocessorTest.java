@@ -27,6 +27,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -119,6 +121,17 @@ public class YamlPreprocessorTest {
     class VariableTests {
         static final String PATH = "variables/";
 
+        // Make sure that these invalid patterns are parsed by Jinjava and throw an error
+        // rather than being silently not recognized and returning the raw string
+        @ParameterizedTest
+        @ValueSource(strings = { "${{}", "${'}", "${\"}", "${'\"}", "${\"'}", "${${}}", "${${}" })
+        void invalidPatternHandling(String data) throws IOException {
+            // Create a Yaml parser with finalPass = true to trigger substitutions
+            Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), Path.of("dummy.yaml"), true);
+
+            assertThrows(YAMLException.class, () -> yaml.load("!sub " + data));
+        }
+
         @Test
         void untaggedPatternsNotInterpolated() throws IOException {
             Map<String, Object> data = loadFixture(PATH + "untaggedPatternsNotInterpolated.yaml");
@@ -132,7 +145,7 @@ public class YamlPreprocessorTest {
         }
 
         @Test
-        void errorHandling() {
+        void jinjaUndefinedVariables() {
             // Create a Yaml parser with finalPass = true to trigger substitutions
             Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), Path.of("dummy.yaml"), true);
 
@@ -148,8 +161,8 @@ public class YamlPreprocessorTest {
         }
 
         @Test
-        void customPatterns() throws IOException {
-            Map<String, Object> data = loadFixture(PATH + "customPatterns.yaml");
+        void customDelimiters() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "customDelimiters.yaml");
 
             assertThat(getNestedValue(data, "test", "data"), equalTo("barbar"));
             assertThat(getNestedValue(data, "test", "level1", "data"), equalTo("bar"));
@@ -162,11 +175,14 @@ public class YamlPreprocessorTest {
         void variableSyntax() throws IOException {
             Map<String, Object> data = loadFixture(PATH + "variableSyntax.yaml");
 
+            assertThat(data.get("empty"), equalTo(""));
             assertThat(data.get("plain"), equalTo("value1"));
             assertThat(data.get("double_quoted"), equalTo("value1"));
             assertThat(data.get("single_quoted"), equalTo("value1"));
 
             assertThat(data.get("spaces_inside_delimiters"), equalTo("value1"));
+            assertThat(data.get("braces_in_double_quotes"), equalTo("${}"));
+            assertThat(data.get("braces_in_single_quotes"), equalTo("${}"));
 
             assertThat(data.get("vars_bracket_double"), equalTo("reserved"));
             assertThat(data.get("vars_bracket_single"), equalTo("reserved"));

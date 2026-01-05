@@ -18,14 +18,16 @@ variables:
   varname-with-dash: dashvalue
   varname with space: spacevalue
 
+empty: !sub ${} # => ""
 plain: !sub ${exist} # => value1
 double_quoted: !sub "${exist}" # => value1
 single_quoted: !sub '${exist}' # => value1
 
 spaces_inside_delimiters: !sub ${   exist    }
+braces_in_single_quotes: !sub "${'${}'}" # => "${}"
+braces_in_double_quotes: !sub '${"${}"}' # => "${}"
 
-# since 'if' will cause an error in jinja expressions but are allowed in simple form,
-# use it here to prove that they are handled using the simple syntax
+
 vars_bracket_double: !sub ${VARS["if"]}
 vars_bracket_single: !sub ${VARS['if']}
 vars_with_dash: !sub ${VARS["varname-with-dash"]}

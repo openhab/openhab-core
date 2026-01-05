@@ -81,10 +81,10 @@ class ModelConstructor extends Constructor {
             \\$\\{
             (?<content>
                 (?:
-                    [^}"']+ |
                     "[^"]*" |
-                    '[^']*'
-                )+
+                    '[^']*' |
+                    [^}]+
+                )*
             )
             \\}
             """, Pattern.COMMENTS);
@@ -268,7 +268,8 @@ class ModelConstructor extends Constructor {
         // Replace ${...} with content (simple variables directly, complex expressions via Jinja)
         String interpolated = matcher.replaceAll(match -> {
             String content = match.group("content");
-            return evaluateExpression(content, variables, scalarNode).toString();
+            String rendered = evaluateExpression(content, variables, scalarNode).toString();
+            return Matcher.quoteReplacement(rendered);
         });
 
         // Return as String
