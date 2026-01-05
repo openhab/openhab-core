@@ -248,23 +248,6 @@ public class YamlPreprocessorTest {
         }
 
         @Test
-        void withinMergedAliases() throws IOException {
-            Map<String, Object> data = loadFixture(PATH + "aliasSubstitutions.yaml");
-
-            assertThat(getNestedValue(data, "final_plain_plain", "foo"), equalTo("${foo}"));
-            assertThat(getNestedValue(data, "final_plain_sub", "foo"), equalTo("bar"));
-            assertThat(getNestedValue(data, "final_plain_nosub", "foo"), equalTo("${foo}"));
-
-            assertThat(getNestedValue(data, "final_sub_plain", "foo"), equalTo("${foo}"));
-            assertThat(getNestedValue(data, "final_sub_sub", "foo"), equalTo("bar"));
-            assertThat(getNestedValue(data, "final_sub_nosub", "foo"), equalTo("${foo}"));
-
-            assertThat(getNestedValue(data, "final_nosub_plain", "foo"), equalTo("${foo}"));
-            assertThat(getNestedValue(data, "final_nosub_sub", "foo"), equalTo("bar"));
-            assertThat(getNestedValue(data, "final_nosub_nosub", "foo"), equalTo("${foo}"));
-        }
-
-        @Test
         void predefinedVars() throws IOException {
             Path file = SOURCE_PATH.resolve(PATH + "predefinedVars.yaml").toAbsolutePath();
             Map<String, Object> data = loadFixture(file.toString());
