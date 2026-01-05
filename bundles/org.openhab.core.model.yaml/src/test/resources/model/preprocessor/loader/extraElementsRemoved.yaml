@@ -1,3 +1,9 @@
+preprocessor:
+  # these must be set to generate: false, load_into_openhab: true
+  # otherwise the test will fail
+  generate_compiled: false
+  load_into_openhab: true
+
 variables:
   foo: bar
   baz: qux
@@ -5,4 +11,3 @@ variables:
 packages:
   foo: bar
   baz: qux
-
