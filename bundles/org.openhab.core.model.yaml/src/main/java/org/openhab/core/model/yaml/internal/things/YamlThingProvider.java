@@ -529,7 +529,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     private Configuration processThingConfiguration(ThingTypeUID thingTypeUID, ThingUID thingUID,
             Configuration configuration) {
-        Set<String> thingStringParams = configuration.keySet().size() > 0
+        Set<String> thingStringParams = !configuration.keySet().isEmpty()
                 ? getThingConfigStringParameters(thingTypeUID, thingUID)
                 : Set.of();
         return processConfiguration(configuration, thingStringParams);
@@ -537,7 +537,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     private Configuration processChannelConfiguration(@Nullable ChannelTypeUID channelTypeUID, ChannelUID channelUID,
             Configuration configuration) {
-        Set<String> channelStringParams = configuration.keySet().size() > 0
+        Set<String> channelStringParams = !configuration.keySet().isEmpty()
                 ? getChannelConfigStringParameters(channelTypeUID, channelUID)
                 : Set.of();
         return processConfiguration(configuration, channelStringParams);
@@ -565,7 +565,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             } catch (ArithmeticException e) {
                 // Ignore error and return the original value
             }
-            logger.debug("config param {}: {} => {} type {}", name, configuration.get(name), value,
+            logger.trace("config param {}: {} => {} type {}", name, configuration.get(name), value,
                     value.getClass().getSimpleName());
             params.put(name, value);
         });
@@ -588,6 +588,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         try {
             params.addAll(getStringParameters(new URI("thing:" + thingUID)));
         } catch (URISyntaxException e) {
+            // Ignore exception, this will never happen with a valid thing UID
         }
 
         return params;
@@ -609,6 +610,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         try {
             params.addAll(getStringParameters(new URI("channel:" + channelUID)));
         } catch (URISyntaxException e) {
+            // Ignore exception, this will never happen with a valid channel UID
         }
 
         return params;
