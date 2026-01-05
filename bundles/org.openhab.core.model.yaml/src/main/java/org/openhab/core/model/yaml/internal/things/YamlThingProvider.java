@@ -14,12 +14,16 @@ package org.openhab.core.model.yaml.internal.things;
 
 import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
 
+import java.math.BigDecimal;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +34,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.AbstractUID;
 import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
@@ -475,8 +481,10 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         target.setLocation(source.getLocation());
         target.setBridgeUID(source.getBridgeUID());
 
-        source.getConfiguration().keySet().forEach(paramName -> {
-            target.getConfiguration().put(paramName, source.getConfiguration().get(paramName));
+        Configuration thingConfig = processThingConfiguration(target.getThingTypeUID(), target.getUID(),
+                source.getConfiguration());
+        thingConfig.keySet().forEach(paramName -> {
+            target.getConfiguration().put(paramName, thingConfig.get(paramName));
         });
 
         List<Channel> channelsToAdd = new ArrayList<>();
@@ -484,17 +492,21 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             Channel targetChannel = target.getChannels().stream().filter(c -> c.getUID().equals(channel.getUID()))
                     .findFirst().orElse(null);
             if (targetChannel != null) {
-                channel.getConfiguration().keySet().forEach(paramName -> {
-                    targetChannel.getConfiguration().put(paramName, channel.getConfiguration().get(paramName));
+                Configuration channelConfig = processChannelConfiguration(targetChannel.getChannelTypeUID(),
+                        targetChannel.getUID(), channel.getConfiguration());
+                channelConfig.keySet().forEach(paramName -> {
+                    targetChannel.getConfiguration().put(paramName, channelConfig.get(paramName));
                 });
             } else {
                 Channel newChannel = channel;
                 if (channel.getChannelTypeUID() != null) {
                     // We create again the user defined channel because channel type was potentially not yet
                     // in the registry when the channel was initially created
+                    Configuration channelConfig = processChannelConfiguration(channel.getChannelTypeUID(),
+                            channel.getUID(), channel.getConfiguration());
                     newChannel = createChannel(target.getUID(), channel.getUID().getId(), channel.getChannelTypeUID(),
                             channel.getKind(), channel.getAcceptedItemType(), channel.getLabel(),
-                            channel.getDescription(), channel.getAutoUpdatePolicy(), channel.getConfiguration(), false);
+                            channel.getDescription(), channel.getAutoUpdatePolicy(), channelConfig, false);
                 }
                 channelsToAdd.add(newChannel);
             }
@@ -513,5 +525,107 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             lazyRetryThread = thread;
             thread.start();
         }
+    }
+
+    private Configuration processThingConfiguration(ThingTypeUID thingTypeUID, ThingUID thingUID,
+            Configuration configuration) {
+        Set<String> thingStringParams = !configuration.keySet().isEmpty()
+                ? getThingConfigStringParameters(thingTypeUID, thingUID)
+                : Set.of();
+        return processConfiguration(configuration, thingStringParams);
+    }
+
+    private Configuration processChannelConfiguration(@Nullable ChannelTypeUID channelTypeUID, ChannelUID channelUID,
+            Configuration configuration) {
+        Set<String> channelStringParams = !configuration.keySet().isEmpty()
+                ? getChannelConfigStringParameters(channelTypeUID, channelUID)
+                : Set.of();
+        return processConfiguration(configuration, channelStringParams);
+    }
+
+    private Configuration processConfiguration(Configuration configuration, Set<String> stringParameters) {
+        Map<String, Object> params = new HashMap<>();
+
+        configuration.keySet().forEach(name -> {
+            Object value = configuration.get(name);
+            try {
+                // For configuration parameter of type text only, if the value in YAML is an unquoted number
+                // (value is then of type BigDecimal in that method) and there is no decimal, we convert it to
+                // an integer and return a String from that integer.
+                // Value 1 in YAML is converted into String "1"
+                // Value 1.0 in YAML is converted into String "1"
+                // Value 1.5 in YAML is untouched
+                // Value "1" in YAML is untouched
+                // Value "1.0" in YAML is untouched
+                // Value "1.5" in YAML is untouched
+                if (stringParameters.contains(name) && value instanceof BigDecimal bigDecimalValue
+                        && bigDecimalValue.stripTrailingZeros().scale() <= 0) {
+                    value = String.valueOf(bigDecimalValue.toBigIntegerExact().longValue());
+                }
+            } catch (ArithmeticException e) {
+                // Ignore error and return the original value
+            }
+            logger.trace("config param {}: {} => {} type {}", name, configuration.get(name), value,
+                    value.getClass().getSimpleName());
+            params.put(name, value);
+        });
+
+        return new Configuration(params);
+    }
+
+    private Set<String> getThingConfigStringParameters(ThingTypeUID thingTypeUID, ThingUID thingUID) {
+        Set<String> params = new HashSet<>();
+
+        ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
+        if (thingType == null) {
+            return params;
+        }
+
+        URI descURI = thingType.getConfigDescriptionURI();
+        if (descURI != null) {
+            params.addAll(getStringParameters(descURI));
+        }
+        try {
+            params.addAll(getStringParameters(new URI("thing:" + thingUID)));
+        } catch (URISyntaxException e) {
+            // Ignore exception, this will never happen with a valid thing UID
+        }
+
+        return params;
+    }
+
+    private Set<String> getChannelConfigStringParameters(@Nullable ChannelTypeUID channelTypeUID,
+            ChannelUID channelUID) {
+        Set<String> params = new HashSet<>();
+
+        ChannelType channelType = channelTypeUID == null ? null : channelTypeRegistry.getChannelType(channelTypeUID);
+        if (channelType == null) {
+            return params;
+        }
+
+        URI descURI = channelType.getConfigDescriptionURI();
+        if (descURI != null) {
+            params.addAll(getStringParameters(descURI));
+        }
+        try {
+            params.addAll(getStringParameters(new URI("channel:" + channelUID)));
+        } catch (URISyntaxException e) {
+            // Ignore exception, this will never happen with a valid channel UID
+        }
+
+        return params;
+    }
+
+    private Set<String> getStringParameters(URI uri) {
+        Set<String> params = new HashSet<>();
+        ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(uri);
+        if (configDescription != null) {
+            for (Entry<String, ConfigDescriptionParameter> param : configDescription.toParametersMap().entrySet()) {
+                if (param.getValue().getType() == ConfigDescriptionParameter.Type.TEXT) {
+                    params.add(param.getKey());
+                }
+            }
+        }
+        return params;
     }
 }
