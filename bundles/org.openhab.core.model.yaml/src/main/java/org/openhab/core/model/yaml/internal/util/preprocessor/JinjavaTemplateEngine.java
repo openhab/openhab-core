@@ -19,6 +19,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.hubspot.jinjava.Jinjava;
 import com.hubspot.jinjava.JinjavaConfig;
+import com.hubspot.jinjava.features.FeatureConfig;
+import com.hubspot.jinjava.features.FeatureStrategies;
 import com.hubspot.jinjava.interpret.Context;
 import com.hubspot.jinjava.interpret.InterpretException;
 import com.hubspot.jinjava.interpret.JinjavaInterpreter;
@@ -37,7 +39,9 @@ class JinjavaTemplateEngine {
 
     static {
         JINJAVA_CONFIG = JinjavaConfig.newBuilder() //
-                .withFailOnUnknownTokens(true) // surface undefined variables instead of silently ignoring
+                .withFeatureConfig(FeatureConfig.newBuilder()
+                        .add(JinjavaInterpreter.OUTPUT_UNDEFINED_VARIABLES_ERROR, FeatureStrategies.ACTIVE).build())
+                .withFailOnUnknownTokens(true) //
                 .withMaxRenderDepth(10) //
                 .build();
         JINJAVA = new Jinjava(JINJAVA_CONFIG);
@@ -51,16 +55,7 @@ class JinjavaTemplateEngine {
      * @return the evaluated object (map/list/number/boolean/string)
      */
     public static Object renderObject(String expression, Map<String, Object> variables) throws InterpretException {
-        Context context = new Context(JINJAVA.getGlobalContext());
-        // This lets us detect undefined variables and throw an exception
-        // The default behavior is to coerce to empty string (or zero) within an arithmetic expression,
-        // e.g. 2 + undefined_variable => 2 + 0 => 2
-        context.setDynamicVariableResolver(var -> {
-            if (variables.containsKey(var)) {
-                return variables.get(var);
-            }
-            throw new InterpretException("Undefined variable: " + var);
-        });
+        Context context = new Context(JINJAVA.getGlobalContext(), variables); // Jinjava will create a copy of variables
         JinjavaInterpreter interpreter = new JinjavaInterpreter(JINJAVA, context, JINJAVA_CONFIG);
         Object result = interpreter.resolveELExpression(expression, 0);
         List<TemplateError> errors = interpreter.getErrorsCopy();
@@ -72,8 +67,11 @@ class JinjavaTemplateEngine {
     }
 
     /**
-     * Normalize types returned by Jinjava to avoid Long where Integer is expected.
-     * This is to maintain the same behavior as SnakeYAML which uses Integer for small integers.
+     * Normalize types returned by Jinjava to match SnakeYAML's
+     *
+     * Jinjava tends to return Long for all integer numbers.
+     * SnakeYAML, however, uses Integer for small integers.
+     * Normalize accordingly to avoid type mismatches.
      *
      * Example:
      *
