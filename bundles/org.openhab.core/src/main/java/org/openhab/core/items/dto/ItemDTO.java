@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - added tag support
  */
+@Schema(name = "Item")
 public class ItemDTO {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String type;

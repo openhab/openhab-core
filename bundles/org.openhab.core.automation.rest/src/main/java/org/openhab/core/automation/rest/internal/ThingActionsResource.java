@@ -278,7 +278,6 @@ public class ThingActionsResource implements RESTResource {
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         public String actionUid = "";
 
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         public @Nullable String label;
         public @Nullable String description;
         public @Nullable Visibility visibility;
