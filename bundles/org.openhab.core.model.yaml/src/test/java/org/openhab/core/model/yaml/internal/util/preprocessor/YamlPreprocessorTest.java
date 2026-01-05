@@ -99,6 +99,7 @@ public class YamlPreprocessorTest {
 
             assertThat(data, not(hasKey("variables")));
             assertThat(data, not(hasKey("packages")));
+            assertThat(data, not(hasKey("preprocessors")));
         }
 
         @Test

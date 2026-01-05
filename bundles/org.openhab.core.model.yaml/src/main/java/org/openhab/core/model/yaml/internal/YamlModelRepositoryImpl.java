@@ -94,7 +94,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
             // "version", "readOnly" are reserved keys
-            // "variables" and "packages" are reserved elements for YamlPreprocessor
+            // "preprocessor", "variables" and "packages" are reserved elements for YamlPreprocessor
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
             getElementName(YamlItemDTO.class) // "items"
@@ -227,8 +227,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 Object yamlObject = YamlPreprocessor.load(fullPath, includePath -> {
                     modelIncludes.put(modelName, includePath);
                 });
-                processModelContent(modelName, kind, objectMapper.valueToTree(yamlObject), errors,
-                        warnings);
+                processModelContent(modelName, kind, objectMapper.valueToTree(yamlObject), errors, warnings);
                 removeModel = false;
             } else {
                 logger.trace("Ignored {}", fullPath);

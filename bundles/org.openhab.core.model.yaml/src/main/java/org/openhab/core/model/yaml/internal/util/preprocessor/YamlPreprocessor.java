@@ -14,6 +14,7 @@ package org.openhab.core.model.yaml.internal.util.preprocessor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.model.yaml.internal.util.preprocessor.tags.IncludeObject;
 import org.openhab.core.model.yaml.internal.util.preprocessor.tags.RemoveObject;
 import org.openhab.core.model.yaml.internal.util.preprocessor.tags.ReplaceObject;
@@ -58,23 +60,32 @@ public class YamlPreprocessor {
 
     private static final int MAX_INCLUDE_DEPTH = 100;
 
+    private static final String PREPROCESSOR_KEY = "preprocessor";
+    private static final String GENERATE_COMPILED_KEY = "generate_compiled";
+    private static final String LOAD_INTO_OPENHAB_KEY = "load_into_openhab";
     private static final String VARIABLES_KEY = "variables";
     private static final String PACKAGES_KEY = "packages";
     private static final String PACKAGE_ID_VAR = "package_id";
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(YamlPreprocessor.class);
 
+    private final Path configRoot;
     private final Path currentFile;
+    private final Path currentFileRelative;
     private final Map<String, Object> variables;
     private final Set<Path> includeStack;
     private final Consumer<Path> includeCallback;
 
     private YamlPreprocessor(Path file, Map<String, Object> variables, Set<Path> includeStack,
             Consumer<Path> includeCallback) {
-        this.currentFile = file;
         this.variables = new LinkedHashMap<>(variables);
         this.includeStack = new HashSet<>(includeStack);
         this.includeCallback = includeCallback;
+        this.currentFile = file.toAbsolutePath().normalize();
+
+        this.configRoot = Path.of(OpenHAB.getConfigFolder()).toAbsolutePath().normalize();
+        this.currentFileRelative = currentFile.startsWith(configRoot) ? configRoot.relativize(currentFile)
+                : currentFile;
 
         // Validate circular inclusion and depth before processing
         if (!this.includeStack.add(currentFile)) {
@@ -104,7 +115,7 @@ public class YamlPreprocessor {
         Object yamlData = loadYaml(false);
         if (yamlData instanceof Map) {
             if (!extractVariables((Map<String, Object>) yamlData)) {
-                LOGGER.warn("{}: 'variables' is not a map", currentFile);
+                LOGGER.warn("YAML model {}: 'variables' is not a map", currentFileRelative);
             }
         } else {
             return yamlData;
@@ -123,6 +134,14 @@ public class YamlPreprocessor {
         dataMap.remove(VARIABLES_KEY); // we've already extracted the variables in the first pass
         LOGGER.debug("Loaded data from {}: {}", currentFile, dataMap);
 
+        boolean generateCompiled = false;
+        boolean allowLoading = true;
+        if (includeStack.size() == 1) { // only check preprocessor settings for the top-level file
+            Object preprocessorSection = dataMap.remove(PREPROCESSOR_KEY);
+            generateCompiled = shouldGenerateCompiled(preprocessorSection);
+            allowLoading = shouldAllowLoading(preprocessorSection);
+        }
+
         // Extract packages before processing includes so we can handle them separately
         Object packagesObj = dataMap.remove(PACKAGES_KEY);
 
@@ -134,12 +153,22 @@ public class YamlPreprocessor {
         if (packagesObj instanceof Map<?, ?> packages) {
             mergePackages(dataMap, (Map<String, Object>) packages);
         } else if (packagesObj != null) {
-            LOGGER.warn("{}: The 'packages' section is not a map", currentFile);
+            LOGGER.warn("YAML model {}: The 'packages' section is not a map", currentFileRelative);
         }
 
         LOGGER.debug("Combined data from {}: {}", currentFile, dataMap);
 
         dataMap = excludeHiddenKeys(dataMap);
+
+        if (generateCompiled) {
+            writeCompiledOutput(dataMap);
+        }
+
+        if (!allowLoading) {
+            throw new YAMLException(
+                    "'%s.%s' is false; loading is disabled".formatted(PREPROCESSOR_KEY, LOAD_INTO_OPENHAB_KEY));
+        }
+
         return dataMap;
     }
 
@@ -162,8 +191,8 @@ public class YamlPreprocessor {
             Map<String, Object> newVariables = new LinkedHashMap<>();
             variablesMap.forEach((key, value) -> {
                 if (key == null) {
-                    LOGGER.warn("Encountered null key in '{}' section; value '{}' will be ignored", VARIABLES_KEY,
-                            value);
+                    LOGGER.warn("YAML model {}: Encountered null key in '{}' section; value '{}' will be ignored",
+                            currentFileRelative, VARIABLES_KEY, value);
                     return;
                 }
 
@@ -187,8 +216,7 @@ public class YamlPreprocessor {
     // Add special variables so they get interpolated in the second pass
     // Special variables will override any user-defined variables with the same name
     private void addSpecialVariables() {
-        Path absolutePath = currentFile.toAbsolutePath();
-        variables.put("__FILE__", absolutePath.toString());
+        variables.put("__FILE__", currentFile.toString());
         Path fileNamePath = currentFile.getFileName();
         String fullFileName = fileNamePath != null ? fileNamePath.toString() : "";
         int dotIndex = fullFileName.lastIndexOf(".");
@@ -200,7 +228,7 @@ public class YamlPreprocessor {
         }
         variables.put("__FILE_NAME__", fileName);
         variables.put("__FILE_EXT__", fileExtension);
-        Path parentPath = absolutePath.getParent();
+        Path parentPath = currentFile.getParent();
         String directory = parentPath != null ? parentPath.toString() : "";
         variables.put("__DIRECTORY__", directory);
         variables.put("__DIR__", directory);
@@ -237,8 +265,9 @@ public class YamlPreprocessor {
         // include vars override current vars
         includeVars.putAll(includeObject.vars());
         try {
-            includeCallback.accept(includeFilePath);
-            return new YamlPreprocessor(includeFilePath, includeVars, includeStack, includeCallback).load();
+            Object data = new YamlPreprocessor(includeFilePath, includeVars, includeStack, includeCallback).load();
+            includeCallback.accept(includeFilePath); // do this after successful load
+            return data;
         } catch (IOException | YAMLException e) {
             // Only wrap the exception if it's not already an "Error loading include file" message
             // to avoid repeating the wrapper message in nested includes
@@ -277,7 +306,8 @@ public class YamlPreprocessor {
                 pkgWithId = (Map<String, Object>) processIncludes(pkgWithId);
                 mergeElements(mainData, pkgWithId);
             } else {
-                LOGGER.warn("Package '{}' did not resolve to a map: {}", packageId, processedPkg);
+                LOGGER.warn("YAML model {}: Package '{}' did not resolve to a map: {}", currentFileRelative, packageId,
+                        processedPkg);
             }
         });
 
@@ -394,6 +424,66 @@ public class YamlPreprocessor {
         // Exclude keys that start with a dot
         return dataMap.entrySet().stream().filter(entry -> !entry.getKey().startsWith(".")).collect(Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> replacement, LinkedHashMap::new));
+    }
+
+    private boolean shouldGenerateCompiled(Object preprocessorSection) {
+        return getPreprocessorBoolean(preprocessorSection, GENERATE_COMPILED_KEY, false);
+    }
+
+    private boolean shouldAllowLoading(Object preprocessorSection) {
+        return getPreprocessorBoolean(preprocessorSection, LOAD_INTO_OPENHAB_KEY, true);
+    }
+
+    private boolean getPreprocessorBoolean(Object preprocessorSection, String key, boolean defaultValue) {
+        if (preprocessorSection == null) {
+            return defaultValue;
+        }
+        if (preprocessorSection instanceof Map<?, ?> preprocessorMap) {
+            Object value = preprocessorMap.get(key);
+            if (value instanceof Boolean flag) {
+                return flag;
+            }
+            if (value != null) {
+                LOGGER.warn("YAML model {}: '{}.{}' is not a boolean; using default {}", currentFileRelative,
+                        PREPROCESSOR_KEY, key, defaultValue);
+            }
+            return defaultValue;
+        }
+
+        LOGGER.warn("YAML model {}: '{}' section is not a map; using default {} for '{}'", currentFileRelative,
+                PREPROCESSOR_KEY, defaultValue, key);
+        return defaultValue;
+    }
+
+    private void writeCompiledOutput(Map<String, Object> dataMap) throws IOException {
+        Path outputFile;
+        Path outputDisplay;
+        if (currentFile.startsWith(configRoot)) {
+            Path outputRoot = configRoot.resolve("_generated");
+            outputFile = outputRoot.resolve(currentFileRelative);
+            outputDisplay = configRoot.relativize(outputFile);
+        } else {
+            LOGGER.warn("YAML model {}: Cannot place compiled output under config folder '{}'; writing next to source",
+                    currentFileRelative, configRoot);
+            Path fallbackDir = currentFile.resolveSibling("_generated");
+            outputFile = fallbackDir.resolve(currentFile.getFileName());
+            outputDisplay = outputFile;
+        }
+
+        Path outputDir = outputFile.getParent();
+        if (outputDir != null) {
+            Files.createDirectories(outputDir);
+        }
+
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setPrettyFlow(true);
+
+        Yaml yaml = new Yaml(dumperOptions);
+        String compiledYaml = yaml.dump(dataMap);
+
+        Files.writeString(outputFile, compiledYaml, StandardCharsets.UTF_8);
+        LOGGER.info("YAML model {}: Generated compiled YAML output to {}", currentFileRelative, outputFile);
     }
 
     static Yaml newYaml(Map<String, Object> variables, Path path, boolean finalPass) {
