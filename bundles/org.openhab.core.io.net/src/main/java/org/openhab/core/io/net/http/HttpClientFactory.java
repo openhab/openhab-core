@@ -12,9 +12,10 @@
  */
 package org.openhab.core.io.net.http;
 
+import java.net.http.HttpClient;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.http2.client.HTTP2Client;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 

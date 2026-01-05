@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**

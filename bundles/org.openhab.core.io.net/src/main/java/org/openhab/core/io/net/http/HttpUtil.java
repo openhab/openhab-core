@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -29,10 +30,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.client.ProxyConfiguration;
-import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
 import org.eclipse.jetty.client.api.Authentication;
 import org.eclipse.jetty.client.api.AuthenticationStore;
 import org.eclipse.jetty.client.api.ContentResponse;
@@ -45,8 +44,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.core.library.types.RawType;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Some common methods to be used in HTTP-In-Binding, HTTP-Out-Binding and other bindings

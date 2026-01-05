@@ -12,9 +12,11 @@
  */
 package org.openhab.core.io.net.http.internal;
 
+import java.net.http.HttpClient;
 import java.nio.ByteBuffer;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -23,11 +25,9 @@ import javax.net.ssl.TrustManager;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpDestination;
 import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.client.HttpProxy;
-import org.eclipse.jetty.client.api.Connection;
 import org.eclipse.jetty.client.http.HttpChannelOverHTTP;
 import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.client.http.HttpConnectionOverHTTP;
@@ -50,7 +50,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
