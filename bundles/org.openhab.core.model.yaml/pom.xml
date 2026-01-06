@@ -14,10 +14,6 @@
 
   <name>openHAB Core :: Bundles :: Model YAML</name>
 
-  <properties>
-    <jackson.version>2.19.2</jackson.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
@@ -71,7 +67,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>${jackson.version}</version>
+      <version>${jackson.annotations.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -91,7 +87,8 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.18.0</version>
+      <!-- Use the version defined in the main pom.xml -->
+      <version>${commons.lang3.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-net</groupId>
