@@ -477,6 +477,8 @@ public class YamlPreprocessor {
 
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setIndentWithIndicator(true);
+        dumperOptions.setIndicatorIndent(2);
         dumperOptions.setPrettyFlow(true);
 
         Yaml yaml = new Yaml(dumperOptions);
