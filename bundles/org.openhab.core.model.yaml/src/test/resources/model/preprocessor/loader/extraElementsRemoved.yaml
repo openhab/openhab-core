@@ -1,8 +1,6 @@
 preprocessor:
-  # these must be set to generate: false, load_into_openhab: true
-  # otherwise the test will fail
-  generate_compiled: false
-  load_into_openhab: true
+  generate_resolved_file: false # don't generate resolved files during tests
+  load_into_openhab: true # the tests rely on this being true
 
 variables:
   foo: bar

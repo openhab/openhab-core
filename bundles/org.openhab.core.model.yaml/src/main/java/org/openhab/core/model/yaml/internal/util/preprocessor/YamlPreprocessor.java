@@ -61,7 +61,7 @@ public class YamlPreprocessor {
     private static final int MAX_INCLUDE_DEPTH = 100;
 
     private static final String PREPROCESSOR_KEY = "preprocessor";
-    private static final String GENERATE_COMPILED_KEY = "generate_compiled";
+    private static final String GENERATE_RESOLVED_FILE_KEY = "generate_resolved_file";
     private static final String LOAD_INTO_OPENHAB_KEY = "load_into_openhab";
     private static final String VARIABLES_KEY = "variables";
     private static final String PACKAGES_KEY = "packages";
@@ -138,7 +138,7 @@ public class YamlPreprocessor {
         boolean allowLoading = true;
         if (includeStack.size() == 1) { // only check preprocessor settings for the top-level file
             Object preprocessorSection = dataMap.remove(PREPROCESSOR_KEY);
-            generateCompiled = shouldGenerateCompiled(preprocessorSection);
+            generateCompiled = shouldGenerateResolvedFile(preprocessorSection);
             allowLoading = shouldAllowLoading(preprocessorSection);
         }
 
@@ -426,8 +426,8 @@ public class YamlPreprocessor {
                 Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> replacement, LinkedHashMap::new));
     }
 
-    private boolean shouldGenerateCompiled(Object preprocessorSection) {
-        return getPreprocessorBoolean(preprocessorSection, GENERATE_COMPILED_KEY, false);
+    private boolean shouldGenerateResolvedFile(Object preprocessorSection) {
+        return getPreprocessorBoolean(preprocessorSection, GENERATE_RESOLVED_FILE_KEY, false);
     }
 
     private boolean shouldAllowLoading(Object preprocessorSection) {
