@@ -34,17 +34,26 @@ import com.hubspot.jinjava.interpret.TemplateError;
 @NonNullByDefault
 class JinjavaTemplateEngine {
 
-    private static final JinjavaConfig JINJAVA_CONFIG;
-    private static final Jinjava JINJAVA;
+    private static final JinjavaConfig STRICT_CONFIG;
+    private static final JinjavaConfig LENIENT_CONFIG;
+    private static final Jinjava STRICT_JINJAVA;
+    private static final Jinjava LENIENT_JINJAVA;
 
     static {
-        JINJAVA_CONFIG = JinjavaConfig.newBuilder() //
+        STRICT_CONFIG = JinjavaConfig.newBuilder() //
                 .withFeatureConfig(FeatureConfig.newBuilder()
                         .add(JinjavaInterpreter.OUTPUT_UNDEFINED_VARIABLES_ERROR, FeatureStrategies.ACTIVE).build())
                 .withFailOnUnknownTokens(true) //
                 .withMaxRenderDepth(10) //
                 .build();
-        JINJAVA = new Jinjava(JINJAVA_CONFIG);
+
+        LENIENT_CONFIG = JinjavaConfig.newBuilder() //
+                .withFailOnUnknownTokens(false) //
+                .withMaxRenderDepth(10) //
+                .build();
+
+        STRICT_JINJAVA = new Jinjava(STRICT_CONFIG);
+        LENIENT_JINJAVA = new Jinjava(LENIENT_CONFIG);
     }
 
     /**
@@ -54,9 +63,13 @@ class JinjavaTemplateEngine {
      * @param variables the variable context
      * @return the evaluated object (map/list/number/boolean/string)
      */
-    public static Object renderObject(String expression, Map<String, Object> variables) throws InterpretException {
-        Context context = new Context(JINJAVA.getGlobalContext(), variables); // Jinjava will create a copy of variables
-        JinjavaInterpreter interpreter = new JinjavaInterpreter(JINJAVA, context, JINJAVA_CONFIG);
+    public static Object renderObject(String expression, Map<String, Object> variables, boolean finalPass)
+            throws InterpretException {
+        Jinjava jinjava = finalPass ? STRICT_JINJAVA : LENIENT_JINJAVA;
+        JinjavaConfig config = finalPass ? STRICT_CONFIG : LENIENT_CONFIG;
+
+        Context context = new Context(jinjava.getGlobalContext(), variables); // Jinjava will create a copy of variables
+        JinjavaInterpreter interpreter = new JinjavaInterpreter(jinjava, context, config);
         Object result = interpreter.resolveELExpression(expression, 0);
         List<TemplateError> errors = interpreter.getErrorsCopy();
         if (!errors.isEmpty()) {

@@ -92,6 +92,7 @@ class ModelConstructor extends Constructor {
     private static final String DEFAULT_BEGIN = "${";
     private static final String DEFAULT_END = "}";
 
+    private final boolean finalPass;
     private final Map<String, Object> variables;
     private final Path currentFile;
 
@@ -103,6 +104,7 @@ class ModelConstructor extends Constructor {
     public ModelConstructor(LoaderOptions options, Map<String, Object> variables, Path currentFile, boolean finalPass) {
         super(options);
 
+        this.finalPass = finalPass;
         this.variables = variables;
         this.currentFile = currentFile;
         this.substitutionStack.push(false);
@@ -116,8 +118,8 @@ class ModelConstructor extends Constructor {
         this.yamlConstructors.put(REPLACE_TAG, finalPass ? new ConstructReplace() : new ConstructEmpty());
         this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
 
-        // We do need to resolve strings normally in the first pass - don't resolve to an empty string
-        this.yamlConstructors.put(Tag.STR, finalPass ? new ConstructInterpolation() : new ConstructYamlStr());
+        // We need to perform substitution in the first pass so that variables themselves can refer to other variables
+        this.yamlConstructors.put(Tag.STR, new ConstructInterpolation());
 
         this.yamlMultiConstructors.put(SUB_TAG, new ConstructSub());
 
@@ -278,7 +280,7 @@ class ModelConstructor extends Constructor {
 
     private Object evaluateExpression(String expression, Map<String, Object> variables, ScalarNode scalarNode) {
         try {
-            Object rendered = JinjavaTemplateEngine.renderObject(expression, variables);
+            Object rendered = JinjavaTemplateEngine.renderObject(expression, variables, finalPass);
             return Objects.requireNonNullElse(rendered, "");
         } catch (InterpretException e) {
             // Format this as `path:[line,col] <rest of msg>` so it's clickable in vscode
