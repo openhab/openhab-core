@@ -18,8 +18,6 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Function;
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.Player;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.FloatControl;
@@ -33,6 +31,7 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSinkAsync;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.JavaSoundAudioSink;
 import org.openhab.core.audio.PipedAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
@@ -46,6 +45,9 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
+
 /**
  * This is an audio sink that is registered as a service, which can play wave files to the hosts outputs (e.g. speaker,
  * line-out).
@@ -56,10 +58,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @NonNullByDefault
-@Component(service = AudioSink.class, immediate = true)
-public class JavaSoundAudioSink extends AudioSinkAsync {
+@Component(service = { JavaSoundAudioSink.class, AudioSink.class }, immediate = true)
+public class JavaSoundAudioSinkImpl extends AudioSinkAsync implements JavaSoundAudioSink {
 
-    private final Logger logger = LoggerFactory.getLogger(JavaSoundAudioSink.class);
+    private final Logger logger = LoggerFactory.getLogger(JavaSoundAudioSinkImpl.class);
 
     private boolean isMac = false;
     private @Nullable PercentType macVolumeValue = null;
@@ -143,6 +145,11 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
         threadFactory.newThread(() -> {
             try {
                 streamPlayerFinal.play();
+
+                while (!streamPlayerFinal.isComplete()) {
+                    int pos = streamPlayerFinal.getPosition();
+                    Thread.sleep(1000);
+                }
             } catch (Exception e) {
                 logger.error("An exception occurred while playing audio : '{}'", e.getMessage());
             } finally {
@@ -177,7 +184,22 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
 
     @Override
     public @Nullable String getLabel(@Nullable Locale locale) {
-        return "System Speaker";
+        return "Internal Audio";
+    }
+
+    @Override
+    public String getName() {
+        return "internalaudio";
+    }
+
+    @Override
+    public String getBinding() {
+        return "audio";
+    }
+
+    @Override
+    public String getType() {
+        return "internal";
     }
 
     @Override

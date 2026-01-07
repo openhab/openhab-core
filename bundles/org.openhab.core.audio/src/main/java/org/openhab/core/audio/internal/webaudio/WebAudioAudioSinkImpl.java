@@ -26,6 +26,7 @@ import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.StreamServed;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.audio.WebAudioAudioSink;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.library.types.PercentType;
 import org.osgi.service.component.annotations.Activate;
@@ -43,10 +44,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @NonNullByDefault
-@Component(service = AudioSink.class, immediate = true)
-public class WebAudioAudioSink extends AudioSinkAsync {
+@Component(service = { WebAudioAudioSink.class, AudioSink.class }, immediate = true)
+public class WebAudioAudioSinkImpl extends AudioSinkAsync implements WebAudioAudioSink {
 
-    private final Logger logger = LoggerFactory.getLogger(WebAudioAudioSink.class);
+    private final Logger logger = LoggerFactory.getLogger(WebAudioAudioSinkImpl.class);
 
     private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
     private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Set.of(AudioStream.class);
@@ -55,7 +56,7 @@ public class WebAudioAudioSink extends AudioSinkAsync {
     private EventPublisher eventPublisher;
 
     @Activate
-    public WebAudioAudioSink(@Reference AudioHTTPServer audioHTTPServer, @Reference EventPublisher eventPublisher) {
+    public WebAudioAudioSinkImpl(@Reference AudioHTTPServer audioHTTPServer, @Reference EventPublisher eventPublisher) {
         this.audioHTTPServer = audioHTTPServer;
         this.eventPublisher = eventPublisher;
     }
@@ -105,6 +106,21 @@ public class WebAudioAudioSink extends AudioSinkAsync {
     @Override
     public @Nullable String getLabel(@Nullable Locale locale) {
         return "Web Audio";
+    }
+
+    @Override
+    public String getName() {
+        return "webaudio";
+    }
+
+    @Override
+    public String getBinding() {
+        return "audio";
+    }
+
+    @Override
+    public String getType() {
+        return "internal";
     }
 
     @Override

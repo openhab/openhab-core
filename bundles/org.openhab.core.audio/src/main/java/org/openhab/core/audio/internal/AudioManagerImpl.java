@@ -51,6 +51,7 @@ import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.media.MediaService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -89,11 +90,22 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     private final Map<String, AudioSource> audioSources = new ConcurrentHashMap<>();
     private final Map<String, AudioSink> audioSinks = new ConcurrentHashMap<>();
 
+    private @Nullable MediaService mediaService;
+
     /**
      * default settings filled through the service configuration
      */
     private @Nullable String defaultSource;
     private @Nullable String defaultSink;
+
+    public AudioManagerImpl() {
+
+    }
+
+    @Activate
+    public AudioManagerImpl(@Reference MediaService mediaService) {
+        this.mediaService = mediaService;
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -445,7 +457,14 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addAudioSink(AudioSink audioSink) {
+        logger.info("register audioSink: {} {}", mediaService, audioSink.getId());
         this.audioSinks.put(audioSink.getId(), audioSink);
+        if (mediaService != null) {
+            this.mediaService.addMediaSink(audioSink);
+        } else {
+            logger.debug("problem");
+        }
+
     }
 
     protected void removeAudioSink(AudioSink audioSink) {

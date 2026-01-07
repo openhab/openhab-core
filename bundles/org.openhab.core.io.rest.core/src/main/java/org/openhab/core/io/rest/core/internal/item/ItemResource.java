@@ -429,7 +429,7 @@ public class ItemResource implements RESTResource {
     public Response getBinaryItemState(@HeaderParam("Accept") @Nullable String mediaType,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         List<String> acceptedMediaTypes = Arrays.stream(Objects.requireNonNullElse(mediaType, "").split(","))
-                .map(String::trim).toList();
+                .map(String::trim).map(s -> s.split(";")[0]).toList();
 
         Item item = getItem(itemname);
 
@@ -441,6 +441,8 @@ public class ItemResource implements RESTResource {
                 byte[] data = type.getBytes();
                 if ((acceptedMediaTypes.contains("image/*") && mimeType.startsWith("image/"))
                         || acceptedMediaTypes.contains(mimeType)) {
+                    return Response.ok(data).type(mimeType).build();
+                } else if (acceptedMediaTypes.contains("*/*")) {
                     return Response.ok(data).type(mimeType).build();
                 } else if (acceptedMediaTypes.contains(MediaType.APPLICATION_OCTET_STREAM)) {
                     return Response.ok(data).type(MediaType.APPLICATION_OCTET_STREAM).build();

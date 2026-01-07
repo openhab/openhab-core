@@ -556,7 +556,11 @@ public class GenericItemProvider extends AbstractProvider<Item>
         };
 
         Item baseItem = createItemOfType(baseItemType, modelItem.getName());
-        return applyGroupFunction(baseItem, modelItem, function);
+        if (baseItem != null) {
+            return applyGroupFunction(baseItem, modelItem, function);
+        } else {
+            return null;
+        }
     }
 
     /**

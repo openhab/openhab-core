@@ -326,18 +326,26 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         final Switch playerItemSwitch = SitemapFactory.eINSTANCE.createSwitch();
         final List<Mapping> mappings = playerItemSwitch.getMappings();
         Mapping commandMapping;
+
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(NextPreviousType.PREVIOUS.name());
         commandMapping.setLabel("<<");
+
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(PlayPauseType.PAUSE.name());
         commandMapping.setLabel("||");
+
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(PlayPauseType.PLAY.name());
         commandMapping.setLabel(">");
+
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(NextPreviousType.NEXT.name());
         commandMapping.setLabel(">>");
+
+        // mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        // commandMapping.setCmd(MediaType.CHANGE.name());
+        // commandMapping.setLabel(".");
         return playerItemSwitch;
     }
 
