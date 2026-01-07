@@ -18,26 +18,24 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Custom deserializer for {@link YamlMetadataDTO} to allow scalar values.
- * A scalar represents the metadata value with an empty config.
+ * Custom deserializer for {@link YamlMetadataDTO} that converts any YAML scalar
+ * (string, integer, boolean, or float) into a metadata String {@code value} with an empty config.
  *
  * @author Jimmy Tanagra - Initial contribution
  */
 class YamlMetadataDTODeserializer extends JsonDeserializer<YamlMetadataDTO> {
 
-    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
-    };
-
     @Override
     public YamlMetadataDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonToken token = p.currentToken();
-        if (token == JsonToken.VALUE_STRING) {
+        if (token == JsonToken.VALUE_STRING || token == JsonToken.VALUE_NUMBER_INT
+                || token == JsonToken.VALUE_NUMBER_FLOAT || token == JsonToken.VALUE_TRUE
+                || token == JsonToken.VALUE_FALSE) {
             YamlMetadataDTO dto = new YamlMetadataDTO();
             dto.value = p.getValueAsString("");
             return dto;
