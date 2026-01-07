@@ -48,6 +48,14 @@ public class YamlItemFileConverterTest {
     }
 
     @Test
+    public void testExpireMetadataEmptyStringStaysInShortForm() {
+        Metadata expireMetadata = new Metadata(new MetadataKey("expire", "item_name"), "", Map.of());
+        YamlItemDTO dto = convertWithMetadata(expireMetadata, "String");
+        assertEquals("", dto.expire);
+        assertNull(dto.metadata);
+    }
+
+    @Test
     public void testExpireMetadataWithConfigStaysMetadata() {
         Metadata expireMetadata = new Metadata(new MetadataKey("expire", "item_name"), "10m", Map.of("command", "OFF"));
         YamlItemDTO dto = convertWithMetadata(expireMetadata, "String");
@@ -67,10 +75,26 @@ public class YamlItemFileConverterTest {
     }
 
     @Test
+    public void testAutoupdateMetadataEmptyStringIsTreatedAsNotSet() {
+        Metadata autoupdate = new Metadata(new MetadataKey("autoupdate", "item_name"), "", Map.of());
+        YamlItemDTO dto = convertWithMetadata(autoupdate, "String");
+        assertNull(dto.autoupdate);
+        assertNull(dto.metadata);
+    }
+
+    @Test
     public void testUnitMetadataSetsField() {
         Metadata unit = new Metadata(new MetadataKey("unit", "item_name"), "kWh", Map.of());
         YamlItemDTO dto = convertWithMetadata(unit, "Number");
         assertEquals("kWh", dto.unit);
+        assertNull(dto.metadata);
+    }
+
+    @Test
+    public void testUnitMetadataEmptyStringStaysInShortForm() {
+        Metadata unit = new Metadata(new MetadataKey("unit", "item_name"), "", Map.of());
+        YamlItemDTO dto = convertWithMetadata(unit, "Number");
+        assertEquals("", dto.unit);
         assertNull(dto.metadata);
     }
 

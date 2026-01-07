@@ -185,14 +185,18 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
         for (Metadata md : metadata) {
             String namespace = md.getUID().getNamespace();
             if ("autoupdate".equals(namespace)) {
-                dto.autoupdate = Boolean.valueOf(md.getValue());
+                String value = md.getValue();
+                // When autoupdate value is an empty string, treat it as not set since dto.autoupdate only accepts
+                // true/false
+                if (value != null && !value.isEmpty()) {
+                    dto.autoupdate = Boolean.valueOf(md.getValue());
+                }
             } else if ("unit".equals(namespace)) {
-                dto.unit = md.getValue();
+                dto.unit = md.getValue(); // When unit value is empty string, keep it as empty string
             } else if ("expire".equals(namespace)) {
                 Map<String, Object> configuration = md.getConfiguration();
                 if (configuration.isEmpty()) {
-                    String value = md.getValue();
-                    dto.expire = value.isEmpty() ? null : value;
+                    dto.expire = md.getValue(); // When expire value is empty string, keep it as empty string
                 } else {
                     YamlMetadataDTO mdDto = new YamlMetadataDTO();
                     mdDto.value = md.getValue().isEmpty() ? null : md.getValue();
