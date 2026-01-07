@@ -35,7 +35,7 @@ class YamlMetadataDTODeserializerTest {
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     @ParameterizedTest
-    @ValueSource(strings = { "", "string value", "123", "45.67", "true", "false" })
+    @ValueSource(strings = { "string value", "123", "45.67", "true", "false" })
     void shouldDeserializeScalarAsValueWithEmptyConfig(String scalar) throws IOException {
         String yaml = "ns: " + scalar;
         YamlMetadataDTO dto = mapper.treeToValue(mapper.readTree(yaml).get("ns"), YamlMetadataDTO.class);
@@ -84,9 +84,10 @@ class YamlMetadataDTODeserializerTest {
         assertNull(dto.config);
     }
 
-    @Test
-    void shouldDeserializeNullAsEmptyDto() throws IOException {
-        String yaml = "ns: null";
+    @ParameterizedTest
+    @ValueSource(strings = { "null", "", "''" })
+    void shouldDeserializeNullAndEmptyStringAsEmptyDto(String scalar) throws IOException {
+        String yaml = "ns: " + scalar;
         YamlMetadataDTO dto = mapper.treeToValue(mapper.readTree(yaml).get("ns"), YamlMetadataDTO.class);
         assertNotNull(dto);
         assertEquals("", dto.getValue());
