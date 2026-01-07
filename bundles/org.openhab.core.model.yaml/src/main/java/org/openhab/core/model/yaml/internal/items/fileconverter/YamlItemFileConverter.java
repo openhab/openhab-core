@@ -188,6 +188,17 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
                 dto.autoupdate = Boolean.valueOf(md.getValue());
             } else if ("unit".equals(namespace)) {
                 dto.unit = md.getValue();
+            } else if ("expire".equals(namespace)) {
+                Map<String, Object> configuration = md.getConfiguration();
+                if (configuration.isEmpty()) {
+                    String value = md.getValue();
+                    dto.expire = value.isEmpty() ? null : value;
+                } else {
+                    YamlMetadataDTO mdDto = new YamlMetadataDTO();
+                    mdDto.value = md.getValue().isEmpty() ? null : md.getValue();
+                    mdDto.config = configuration;
+                    metadataDto.put(namespace, mdDto);
+                }
             } else {
                 YamlMetadataDTO mdDto = new YamlMetadataDTO();
                 mdDto.value = md.getValue().isEmpty() ? null : md.getValue();
