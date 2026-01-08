@@ -1,0 +1,42 @@
+variables:
+  # Variables can reference earlier variables using !sub
+  first: hello
+  second: !sub ${first} world
+  third: !sub ${second}!!!
+  plain_scalar: !sub ${1}
+  string_scalar: !sub "${1}"
+
+  !sub ${first}: value_for_key_hello
+
+  # URL building with variable chaining
+  base_url: https://example.com
+  api_path: /api/v1
+  full_url: !sub ${base_url}${api_path}
+
+  # Name building with chaining
+  prefix: test_
+  name: myitem
+  full_name: !sub ${prefix}${name}
+
+  # Map variable with substitutions
+  map_var:
+    first: !sub ${first}
+
+  # List variable with substitutions
+  list_var:
+    - !sub ${map_var.first}
+
+# Use the chained variables
+data:
+  greeting: !sub ${second}
+  exclamation: !sub ${third}
+  url: !sub ${full_url}
+  item: !sub ${full_name}
+  plain_scalar: !sub ${plain_scalar}
+  string_scalar: !sub ${string_scalar}
+
+  hello_value: !sub ${hello}
+
+  # Reference the map and list variables to test their resolved values
+  map_substitution: !sub ${map_var}
+  list_substitution: !sub ${list_var}
