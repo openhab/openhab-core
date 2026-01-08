@@ -19,14 +19,14 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.IncludeObject;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.RemoveObject;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.ReplaceObject;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.IncludePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.RemovePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.ReplacePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.tags.SubstitutionPlaceholder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
@@ -40,8 +40,6 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
-
-import com.hubspot.jinjava.interpret.InterpretException;
 
 /**
  * The {@link ModelConstructor} adds extended functionality to the
@@ -66,29 +64,6 @@ class ModelConstructor extends Constructor {
     private static final Tag REPLACE_TAG = new Tag("!replace");
     private static final Tag REMOVE_TAG = new Tag("!remove");
 
-    /**
-     * Matches ${...} interpolation patterns in YAML strings.
-     *
-     * Allows nested quotes like default('{foo}') without prematurely stopping at the inner '}'
-     *
-     * Examples:
-     * - ${name} : Simple variable substitution
-     * - ${ name|capitalize } : Apply capitalize filter
-     * - ${ name|default('value') } : Use default if variable is not set
-     * - ${ name|upper } : Convert to uppercase
-     */
-    private static final Pattern SUBSTITUTION_PATTERN = Pattern.compile("""
-            \\$\\{
-            (?<content>
-                (?:
-                    "[^"]*" |
-                    '[^']*' |
-                    [^}]+
-                )*
-            )
-            \\}
-            """, Pattern.COMMENTS);
-
     private static final String DEFAULT_BEGIN = "${";
     private static final String DEFAULT_END = "}";
 
@@ -108,7 +83,8 @@ class ModelConstructor extends Constructor {
         this.variables = variables;
         this.currentFile = currentFile;
         this.substitutionStack.push(false);
-        this.substitutionPatternStack.push(compileSubstitutionPattern(DEFAULT_BEGIN, DEFAULT_END));
+        this.substitutionPatternStack
+                .push(VariableInterpolationHelper.compileSubstitutionPattern(DEFAULT_BEGIN, DEFAULT_END));
 
         this.yamlConstructors.put(Tag.NULL, new ConstructNull());
         this.yamlConstructors.put(NOSUB_TAG, new ConstructDefault());
@@ -161,19 +137,52 @@ class ModelConstructor extends Constructor {
     public class ConstructInterpolation extends AbstractConstruct {
         @Override
         public Object construct(@Nullable Node node) {
-            if (!(node instanceof ScalarNode scalarNode)) {
-                String location = node == null ? "" : formatLocation(node);
-                throw new YAMLException(
-                        "%s:%s Expected a ScalarNode but got: %s".formatted(currentFile, location, node));
-            }
+            if (node instanceof ScalarNode scalarNode) {
+                String value = (String) constructScalar(scalarNode);
+                boolean enabled = substitutionStack.peek();
+                if (enabled || isSubTag(scalarNode.getTag())) {
+                    boolean isPlainScalar = scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.PLAIN;
+                    if (finalPass) {
+                        Pattern pattern = substitutionPatternStack.peek();
+                        String contextDescription = VariableInterpolationHelper.formatContext(currentFile,
+                                formatLocation(scalarNode));
+                        try {
+                            return VariableInterpolationHelper.evaluateValue(value, pattern, isPlainScalar, variables,
+                                    contextDescription, true);
+                        } catch (IllegalArgumentException e) {
+                            // Re-wrap as YAMLException for consistency with YAML error handling
+                            throw new YAMLException(e.getMessage(), e);
+                        }
+                    } else {
+                        // Defer substitution until after variables are progressively populated
+                        // so we can do variable chaining
+                        return new SubstitutionPlaceholder(value, substitutionPatternStack.peek(), isPlainScalar);
+                    }
+                }
 
-            String value = (String) constructScalar(scalarNode);
-            boolean enabled = substitutionStack.peek();
-            if (enabled || isSubTag(scalarNode.getTag())) {
-                return performSubstitution(value, scalarNode);
+                return value;
             }
+            throw new YAMLException(
+                    "%s:%s Expected a ScalarNode but got: %s".formatted(currentFile, formatLocation(node), node));
+        }
 
-            return value;
+        private String formatLocation(@Nullable Node node) {
+            if (node == null) {
+                return "";
+            }
+            Mark startMark = node.getStartMark();
+            Mark endMark = node.getEndMark();
+            if (startMark != null && endMark != null) {
+                return formatMark(startMark) + " to " + formatMark(endMark);
+            } else if (startMark != null) {
+                return formatMark(startMark);
+            }
+            return "";
+        }
+
+        private String formatMark(Mark mark) {
+            // SnakeYAML marks are 0-based; present as 1-based line/column for readability.
+            return "[%d:%d]".formatted(mark.getLine() + 1, mark.getColumn() + 1);
         }
     }
 
@@ -215,107 +224,40 @@ class ModelConstructor extends Constructor {
                 return "";
             }
             Pattern pattern = Objects.requireNonNullElseGet(extractPattern(node.getTag()),
-                    () -> compileSubstitutionPattern(DEFAULT_BEGIN, DEFAULT_END));
+                    () -> VariableInterpolationHelper.compileSubstitutionPattern(DEFAULT_BEGIN, DEFAULT_END));
 
             substitutionPatternStack.pop();
             substitutionPatternStack.push(pattern);
             return super.construct(node);
         }
-    }
 
-    private @Nullable Pattern extractPattern(Tag tag) {
-        String raw = tag.getValue();
-        String decoded = URLDecoder.decode(raw, StandardCharsets.UTF_8);
+        private @Nullable Pattern extractPattern(Tag tag) {
+            String raw = tag.getValue();
+            String decoded = URLDecoder.decode(raw, StandardCharsets.UTF_8);
 
-        if (!decoded.startsWith(SUB_TAG)) {
-            return null;
+            if (!decoded.startsWith(SUB_TAG)) {
+                return null;
+            }
+
+            String suffix = decoded.substring(SUB_TAG.length());
+            if (!suffix.startsWith(":pattern=")) {
+                return null;
+            }
+
+            String patternSpec = suffix.substring(":pattern=".length());
+            int separator = patternSpec.indexOf("..");
+            if (separator <= 0 || separator >= patternSpec.length() - 2) {
+                return null;
+            }
+
+            String begin = patternSpec.substring(0, separator);
+            String end = patternSpec.substring(separator + 2);
+            if (begin.isEmpty() || end.isEmpty()) {
+                return null;
+            }
+
+            return VariableInterpolationHelper.compileSubstitutionPattern(begin, end);
         }
-
-        String suffix = decoded.substring(SUB_TAG.length());
-        if (!suffix.startsWith(":pattern=")) {
-            return null;
-        }
-
-        String patternSpec = suffix.substring(":pattern=".length());
-        int separator = patternSpec.indexOf("..");
-        if (separator <= 0 || separator >= patternSpec.length() - 2) {
-            return null;
-        }
-
-        String begin = patternSpec.substring(0, separator);
-        String end = patternSpec.substring(separator + 2);
-        if (begin.isEmpty() || end.isEmpty()) {
-            return null;
-        }
-
-        return compileSubstitutionPattern(begin, end);
-    }
-
-    private Object performSubstitution(String value, ScalarNode scalarNode) {
-        Pattern pattern = substitutionPatternStack.peek();
-        Matcher matcher = pattern.matcher(value);
-        if (!matcher.find()) {
-            logger.debug("No variable pattern match for '{}'", value);
-            return value;
-        }
-
-        // If the whole value is exactly one ${...}, evaluate via Jinjava and return the native object.
-        // This preserves non-string types (maps, lists, numbers, booleans) when the value is a plain
-        // placeholder.
-        if (scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.PLAIN && matcher.matches()) {
-            String content = matcher.group("content");
-            return evaluateExpression(content, variables, scalarNode);
-        }
-
-        // Replace ${...} with content (simple variables directly, complex expressions via Jinja)
-        String interpolated = matcher.replaceAll(match -> {
-            String content = match.group("content");
-            String rendered = evaluateExpression(content, variables, scalarNode).toString();
-            return Matcher.quoteReplacement(rendered);
-        });
-
-        // Return as String
-        return interpolated;
-    }
-
-    private Object evaluateExpression(String expression, Map<String, Object> variables, ScalarNode scalarNode) {
-        try {
-            Object rendered = JinjavaTemplateEngine.renderObject(expression, variables, finalPass);
-            return Objects.requireNonNullElse(rendered, "");
-        } catch (InterpretException e) {
-            // Format this as `path:[line,col] <rest of msg>` so it's clickable in vscode
-            throw new YAMLException("%s:%s %s".formatted(currentFile, formatLocation(scalarNode), e.getMessage()), e);
-        }
-    }
-
-    private String formatLocation(Node node) {
-        Mark startMark = node.getStartMark();
-        Mark endMark = node.getEndMark();
-        if (startMark != null && endMark != null) {
-            return formatMark(startMark) + " to " + formatMark(endMark);
-        } else if (startMark != null) {
-            return formatMark(startMark);
-        }
-        return "";
-    }
-
-    private String formatMark(Mark mark) {
-        // SnakeYAML marks are 0-based; present as 1-based line/column for readability.
-        return "[%d:%d]".formatted(mark.getLine() + 1, mark.getColumn() + 1);
-    }
-
-    private Pattern compileSubstitutionPattern(String begin, String end) {
-        if (DEFAULT_BEGIN.equals(begin) && DEFAULT_END.equals(end)) {
-            return SUBSTITUTION_PATTERN;
-        }
-        String quotedBegin = Pattern.quote(begin);
-        String quotedEnd = Pattern.quote(end);
-        // Allow quoted segments to contain the end delimiter; otherwise stop at the first closing delimiter.
-        String content = """
-                "[^"]*"|'[^']*'|(?:(?!%s).)
-                """.formatted(quotedEnd).strip();
-        String regex = quotedBegin + "(?<content>(" + content + ")+?)" + quotedEnd;
-        return Pattern.compile(regex, Pattern.DOTALL);
     }
 
     // Return an empty string for null values so that the keys are not removed from the map
@@ -343,7 +285,7 @@ class ModelConstructor extends Constructor {
                 // ScalarNode's constructor ensured that its value is not null
                 // so scalarNode.getValue() and therefore constructScalar cannot be null here
                 String value = constructScalar(scalarNode).trim();
-                return new IncludeObject(value, Map.of());
+                return new IncludePlaceholder(value, Map.of());
             } else if (node instanceof MappingNode mappingNode) {
                 @SuppressWarnings("unchecked")
                 Map<Object, Object> includeOptions = constructMapping(mappingNode);
@@ -355,9 +297,9 @@ class ModelConstructor extends Constructor {
 
                 Object varsObj = includeOptions.get("vars");
                 if (varsObj == null) {
-                    return new IncludeObject(fileName, Map.of());
+                    return new IncludePlaceholder(fileName, Map.of());
                 } else if (varsObj instanceof Map<?, ?>) {
-                    return new IncludeObject(fileName, (Map<String, Object>) varsObj);
+                    return new IncludePlaceholder(fileName, (Map<String, Object>) varsObj);
                 } else {
                     throw new YAMLException(currentFile + ": invalid 'vars' type in !include file: " + fileName
                             + ", vars: " + varsObj + " (not a map)");
@@ -374,11 +316,11 @@ class ModelConstructor extends Constructor {
             if (node instanceof MappingNode mappingNode) {
                 Map<Object, Object> map = constructMapping(mappingNode);
                 logger.debug("Constructing !replace map node: {}", map);
-                return new ReplaceObject(map);
+                return new ReplacePlaceholder(map);
             } else if (node instanceof SequenceNode sequenceNode) {
                 Object list = constructSequence(sequenceNode);
                 logger.debug("Constructing !replace sequence node: {}", list);
-                return new ReplaceObject(list);
+                return new ReplacePlaceholder(list);
             }
             throw new YAMLException(currentFile + ": invalid !replace argument. Expected a map or a list.");
         }
@@ -388,7 +330,7 @@ class ModelConstructor extends Constructor {
         @Override
         public Object construct(@Nullable Node node) {
             logger.debug("Constructing !remove node: {}", node);
-            return new RemoveObject();
+            return new RemovePlaceholder();
         }
     }
 }

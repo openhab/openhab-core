@@ -5,6 +5,8 @@ variables:
 
   one: 1 # numeric
 
+  null_var: null
+
   mapping:
     foo: bar
     baz: qux
@@ -23,10 +25,11 @@ plain: !sub ${exist} # => value1
 double_quoted: !sub "${exist}" # => value1
 single_quoted: !sub '${exist}' # => value1
 
+null_value: !sub ${null_var} # => ""
+
 spaces_inside_delimiters: !sub ${   exist    }
 braces_in_single_quotes: !sub "${'${}'}" # => "${}"
 braces_in_double_quotes: !sub '${"${}"}' # => "${}"
-
 
 vars_bracket_double: !sub ${VARS["if"]}
 vars_bracket_single: !sub ${VARS['if']}

@@ -12,13 +12,15 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor.tags;
 
+import java.util.Map;
+
 import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 
 /**
- * The {@link ReplaceObject} represents an object constructed from a <code>!replace</code> node
+ * The {@link IncludePlaceholder} represents an object constructed from an <code>!include</code> node
  * to be processed by the {@link YamlPreprocessor}.
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-public record ReplaceObject(Object object) {
+public record IncludePlaceholder(String fileName, Map<String, Object> vars) {
 }

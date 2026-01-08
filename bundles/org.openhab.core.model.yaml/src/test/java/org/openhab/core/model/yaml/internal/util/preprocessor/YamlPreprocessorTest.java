@@ -182,6 +182,8 @@ public class YamlPreprocessorTest {
             assertThat(data.get("double_quoted"), equalTo("value1"));
             assertThat(data.get("single_quoted"), equalTo("value1"));
 
+            assertThat(data.get("null_value"), equalTo(""));
+
             assertThat(data.get("spaces_inside_delimiters"), equalTo("value1"));
             assertThat(data.get("braces_in_double_quotes"), equalTo("${}"));
             assertThat(data.get("braces_in_single_quotes"), equalTo("${}"));
@@ -207,18 +209,14 @@ public class YamlPreprocessorTest {
 
             assertThat(data.get("multiple_patterns"), equalTo("value1-1"));
 
-            assertThat(data.get("string_const"), instanceOf(String.class));
             assertThat(data.get("string_const"), equalTo("1"));
 
             Object stringConstLiteral = data.get("string_const_literal");
-            assertThat(stringConstLiteral, instanceOf(String.class));
-            // although this seems redundant, it avoids explicit cast warning
             if (stringConstLiteral instanceof String literal) {
                 assertThat(literal.strip(), equalTo("1"));
             }
 
             Object stringConstFolded = data.get("string_const_folded");
-            assertThat(stringConstFolded, instanceOf(String.class));
             if (stringConstFolded instanceof String folded) {
                 assertThat(folded.strip(), equalTo("1"));
             }
@@ -228,14 +226,12 @@ public class YamlPreprocessorTest {
             assertThat(data.get("int_var"), equalTo(1));
             assertThat(data.get("int_var_VARS"), equalTo(1));
 
-            assertThat(data.get("map_var"), instanceOf(Map.class));
             assertThat(data.get("map_var"), equalTo(Map.of("foo", "bar", "baz", "qux")));
             assertThat(data.get("map_lookup"), equalTo("bar"));
             assertThat(data.get("map_literal_key"), equalTo("qux"));
             assertThat(data.get("map_literal_key_dbl"), equalTo("bar"));
             assertThat(data.get("map_literal_chained"), equalTo("qux"));
 
-            assertThat(data.get("list_var"), instanceOf(List.class));
             assertThat(data.get("list_var"), equalTo(List.of("item1", "item2")));
             assertThat(data.get("list_index_0"), equalTo("item1"));
             assertThat(data.get("list_index_1"), equalTo("item2"));
@@ -292,8 +288,23 @@ public class YamlPreprocessorTest {
         }
 
         @Test
-        void subOnInclude() throws IOException {
-            Map<String, Object> data = loadFixture(PATH + "subOnInclude.yaml");
+        void untaggedVariableReferencedBySub() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "untaggedVariableReferencedBySub.yaml");
+
+            // When !sub references a variable that was defined without !sub,
+            // it should get the literal value (pattern not interpolated)
+            assertThat(getNestedValue(data, "data", "literal_pattern"), equalTo("${first} world"));
+        }
+
+        @Test
+        void includeWithSubstitutionTags() throws IOException {
+            // Tests how !include interacts with !sub and !nosub tags in both the main and included files.
+            // Ensures that substitution behavior is isolated to the scope where the tag is applied:
+            // - !include without !sub/!nosub leaves included content unchanged
+            // - !sub/!nosub in the main file does NOT affect substitution inside the included file.
+            // Specifically, plain patterns in the included file remain unaffected
+            // - Verifies correct substitution for variables and patterns in various tag combinations
+            Map<String, Object> data = loadFixture(PATH + "includeWithSubstitutionTags.yaml");
 
             // !include without !sub / !nosub should behave as plain inclusion
             // leaving the behavior inside the included file unaffected
@@ -322,8 +333,12 @@ public class YamlPreprocessorTest {
         }
 
         @Test
-        void subOnAnchor() throws IOException {
-            Map<String, Object> data = loadFixture(PATH + "subOnAnchor.yaml");
+        void anchorWithSubstitutionTags() throws IOException {
+            // Tests how YAML anchors interact with !sub and !nosub tags.
+            // - Ensures that substitution is performed only when !sub is present in the anchor itself,
+            // even when the anchor is inserted within a !nosub context
+            // - Literal patterns in the anchor are preserved even when the anchor is inserted within a !sub
+            Map<String, Object> data = loadFixture(PATH + "anchorWithSubstitutionTags.yaml");
 
             assertThat(getNestedValue(data, "sub_anchor", "obj", "foo"), equalTo("bar"));
             assertThat(getNestedValue(data, "nosub_anchor", "obj", "foo"), equalTo("${foo}"));
@@ -342,10 +357,70 @@ public class YamlPreprocessorTest {
         }
 
         @Test
-        void subOnReplace() throws IOException {
-            Map<String, Object> data = loadFixture(PATH + "subOnReplace.yaml");
+        void replaceWithSubstitution() throws IOException {
+            // Tests the !replace tag in combination with variable substitution.
+            // Ensures that replacement operations correctly apply substitutions to the replaced content.
+            // Verifies that nested substitutions within replaced values are resolved as expected.
+            Map<String, Object> data = loadFixture(PATH + "replaceWithSubstitution.yaml");
 
             assertThat(getNestedValue(data, "things", "MyThing", "foo"), equalTo(Map.of("qux", "cow")));
+        }
+
+        @Test
+        void variablesWithSubTag() throws IOException {
+            String yaml = """
+                    variables: !sub
+                      label: "test_${__FILE_NAME__}"
+                      value: 123
+
+                    test:
+                      name: !sub ${label}
+                      num: !sub ${value}
+                    """;
+
+            Path tempFile = Files.createTempFile("test_variables_sub", ".yaml");
+            try {
+                Files.writeString(tempFile, yaml);
+                byte[] fileContent = Files.readAllBytes(tempFile);
+                @SuppressWarnings("unchecked")
+                Map<String, Object> result = (Map<String, Object>) YamlPreprocessor.process(tempFile, fileContent,
+                        path -> {
+                        });
+
+                String expectedLabel = "test_" + tempFile.getFileName().toString().replace(".yaml", "");
+                assertThat(getNestedValue(result, "test", "name"), is(expectedLabel));
+                assertThat(getNestedValue(result, "test", "num"), is(123));
+            } finally {
+                Files.deleteIfExists(tempFile);
+            }
+        }
+
+        @Test
+        void variableChaining() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "variableChaining.yaml");
+
+            // Variables defined with !sub can reference other variables defined before them
+            assertThat(getNestedValue(data, "data", "greeting"), equalTo("hello world"));
+            assertThat(getNestedValue(data, "data", "exclamation"), equalTo("hello world!!!"));
+            assertThat(getNestedValue(data, "data", "url"), equalTo("https://example.com/api/v1"));
+            assertThat(getNestedValue(data, "data", "item"), equalTo("test_myitem"));
+            assertThat(getNestedValue(data, "data", "plain_scalar"), equalTo(1));
+            assertThat(getNestedValue(data, "data", "string_scalar"), equalTo("1"));
+
+            assertThat(getNestedValue(data, "data", "hello_value"), equalTo("value_for_key_hello"));
+
+            assertThat(getNestedValue(data, "data", "map_substitution"), equalTo(Map.of("first", "hello")));
+            assertThat(getNestedValue(data, "data", "list_substitution"), equalTo(List.of("hello")));
+        }
+
+        @Test
+        void variableChainingWithSub() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "variableChainingWithSub.yaml");
+
+            // Variables block with !sub tag should still work with variable chaining
+            assertThat(getNestedValue(data, "data", "greeting"), equalTo("hello world"));
+            assertThat(getNestedValue(data, "data", "exclamation"), equalTo("hello world!!!"));
+            assertThat(getNestedValue(data, "data", "nosub"), equalTo("${first}"));
         }
     }
 

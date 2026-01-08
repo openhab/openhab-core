@@ -12,13 +12,18 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor.tags;
 
+import java.util.regex.Pattern;
+
 import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 
 /**
- * The {@link RemoveObject} represents an object constructed from an <code>!remove</code> node
- * to be processed by the {@link YamlPreprocessor}.
+ * The {@link SubstitutionPlaceholder} represents a deferred string interpolation constructed from a <code>!sub</code>
+ * node to be processed by the {@link YamlPreprocessor}.
+ *
+ * <p>
+ * It preserves the raw scalar value and the delimiter pattern that was active (from !sub or parent !sub).
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-public record RemoveObject() {
+public record SubstitutionPlaceholder(String value, Pattern pattern, boolean isPlainScalar) {
 }
