@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -557,7 +558,9 @@ public class YamlPreprocessorTest {
      */
     @SuppressWarnings("unchecked")
     private Map<String, Object> loadFixture(String filename) throws IOException {
-        return (Map<String, Object>) YamlPreprocessor.load(SOURCE_PATH.resolve(filename), path -> {
+        Path filePath = SOURCE_PATH.resolve(filename);
+        byte[] fileContent = Files.readAllBytes(filePath);
+        return (Map<String, Object>) YamlPreprocessor.process(filePath, fileContent, path -> {
         });
     }
 

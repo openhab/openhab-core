@@ -12,8 +12,8 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -98,9 +98,20 @@ public class YamlPreprocessor {
         }
     }
 
-    public static Object load(Path file, Consumer<Path> includeCallback) throws IOException {
+    /**
+     * Load and preprocess a YAML file from memory.
+     * This avoids re-reading the file from disk because we're doing several passes.
+     *
+     * @param path the file path for resolving relative includes
+     * @param fileBytes the content of the YAML file
+     * @param includeCallback callback invoked for each included file
+     * @return the processed YAML fileByteData
+     * @throws IOException if there is an error reading or processing the YAML
+     */
+    public static Object process(Path path, byte[] fileBytes, Consumer<Path> includeCallback) throws IOException {
         try {
-            return new YamlPreprocessor(file, new LinkedHashMap<>(), new HashSet<>(), includeCallback).load();
+            return new YamlPreprocessor(path, new LinkedHashMap<>(), new HashSet<>(), includeCallback)
+                    .process(fileBytes);
         } catch (YAMLException e) {
             // rethrow as IOException so the caller has a simpler error handling and avoids dependency on SnakeYAML
             throw new IOException(e.getMessage(), e);
@@ -108,11 +119,11 @@ public class YamlPreprocessor {
     }
 
     @SuppressWarnings("unchecked")
-    private Object load() throws IOException, YAMLException {
+    private Object process(byte[] fileBytes) throws IOException, YAMLException {
         LOGGER.debug("Loading file({}): {} with given vars {}", includeStack.size(), currentFile, variables);
 
         // first pass: load the file to extract variables
-        Object yamlData = loadYaml(false);
+        Object yamlData = loadYaml(fileBytes, false);
         if (yamlData instanceof Map) {
             if (!extractVariables((Map<String, Object>) yamlData)) {
                 LOGGER.warn("YAML model {}: 'variables' is not a map", currentFileRelative);
@@ -130,7 +141,7 @@ public class YamlPreprocessor {
         // This cannot be avoided, because SnakeYAML executes interpolation during the construction phase itself.
         // Once the object graph is built, substitutions cannot be applied retroactively,
         // so a full reload with the resolved variables is required.
-        Map<String, Object> dataMap = (Map<String, Object>) loadYaml(true);
+        Map<String, Object> dataMap = (Map<String, Object>) loadYaml(fileBytes, true);
         dataMap.remove(VARIABLES_KEY); // we've already extracted the variables in the first pass
         LOGGER.debug("Loaded data from {}: {}", currentFile, dataMap);
 
@@ -172,11 +183,9 @@ public class YamlPreprocessor {
         return dataMap;
     }
 
-    private Object loadYaml(boolean finalPass) throws IOException {
-        try (InputStream inputStream = Files.newInputStream(currentFile)) {
-            Yaml yaml = newYaml(variables, currentFile, finalPass);
-            return yaml.load(inputStream);
-        } // let the caller catch the exception and log a message
+    private Object loadYaml(byte[] fileBytes, boolean finalPass) throws IOException {
+        Yaml yaml = newYaml(variables, currentFile, finalPass);
+        return yaml.load(new ByteArrayInputStream(fileBytes));
     }
 
     /**
@@ -265,7 +274,8 @@ public class YamlPreprocessor {
         // include vars override current vars
         includeVars.putAll(includeObject.vars());
         try {
-            Object data = new YamlPreprocessor(includeFilePath, includeVars, includeStack, includeCallback).load();
+            byte[] includeFileContent = Files.readAllBytes(includeFilePath);
+            Object data = new YamlPreprocessor(includeFilePath, includeVars, includeStack, includeCallback).process(includeFileContent);
             includeCallback.accept(includeFilePath); // do this after successful load
             return data;
         } catch (IOException | YAMLException e) {

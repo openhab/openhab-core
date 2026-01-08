@@ -89,12 +89,15 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 @NonNullByDefault
 @Component(immediate = true)
 public class YamlModelRepositoryImpl implements WatchService.WatchEventListener, YamlModelRepository {
-    private static final int DEFAULT_MODEL_VERSION = 1;
+    private static final int DEFAULT_MODEL_VERSION = 2;
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
             // "version", "readOnly" are reserved keys
-            // "preprocessor", "variables" and "packages" are reserved elements for YamlPreprocessor
+            // "preprocessor", "variables" and "packages" are reserved elements for YamlPreprocessor.
+            // They are listed here so we don't use them in the future as model elements
+            // but they are not added here because they stripped off by the Preprocessor before
+            // producing the final model
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
             getElementName(YamlItemDTO.class) // "items"
@@ -224,11 +227,28 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             if (kind == Kind.DELETE) {
                 // remove model below
             } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
-                Object yamlObject = YamlPreprocessor.load(fullPath, includePath -> {
-                    modelIncludes.put(modelName, includePath);
-                });
-                processModelContent(modelName, kind, objectMapper.valueToTree(yamlObject), errors, warnings);
-                removeModel = false;
+                // Read file once into memory to avoid multiple I/O operations
+                byte[] fileBytes = Files.readAllBytes(fullPath);
+                JsonNode rawNode = objectMapper.readTree(fileBytes);
+                if (rawNode == null) {
+                    errors.add("Failed to process model: empty content");
+                } else {
+                    int modelVersion = extractModelVersion(rawNode);
+                    boolean usePreprocessor = modelVersion >= 2;
+
+                    JsonNode contentNode;
+                    if (usePreprocessor) {
+                        Object yamlObject = YamlPreprocessor.process(fullPath, fileBytes, includePath -> {
+                            modelIncludes.put(modelName, includePath);
+                        });
+                        contentNode = objectMapper.valueToTree(yamlObject);
+                    } else {
+                        contentNode = rawNode;
+                    }
+
+                    processModelContent(modelName, kind, contentNode, errors, warnings);
+                    removeModel = false;
+                }
             } else {
                 logger.trace("Ignored {}", fullPath);
             }
@@ -250,14 +270,12 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private boolean processModelContent(String modelName, Kind kind, JsonNode fileContent, List<String> errors,
             List<String> warnings) {
         // check version
-        JsonNode versionNode = fileContent.get(VERSION);
-        if (versionNode == null || !versionNode.canConvertToInt()) {
-            errors.add("version is missing or not a number. Ignoring model.");
+        int modelVersion = extractModelVersion(fileContent);
+        if (modelVersion < 1) {
+            errors.add("version is missing or not a valid number. Ignoring model.");
             removeModel(modelName);
             return false;
-        }
-        int modelVersion = versionNode.asInt();
-        if (modelVersion < 1 || modelVersion > DEFAULT_MODEL_VERSION) {
+        } else if (modelVersion > DEFAULT_MODEL_VERSION) {
             errors.add("model has version %d, but only versions between 1 and %d are supported. Ignoring model."
                     .formatted(modelVersion, DEFAULT_MODEL_VERSION));
             removeModel(modelName);
@@ -720,6 +738,14 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private List<YamlModelListener<?>> getElementListeners(String elementName, int version) {
         return getElementListeners(elementName).stream().filter(l -> l.isVersionSupported(version)).toList();
+    }
+
+    private static int extractModelVersion(@Nullable JsonNode fileContent) {
+        JsonNode versionNode = fileContent == null ? null : fileContent.get(VERSION);
+        if (versionNode != null && versionNode.canConvertToInt()) {
+            return versionNode.asInt();
+        }
+        return -1;
     }
 
     private Map<String, ? extends YamlElement> listToMap(List<? extends YamlElement> elements) {
