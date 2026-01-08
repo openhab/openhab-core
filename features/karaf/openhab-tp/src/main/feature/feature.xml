@@ -13,7 +13,7 @@
 	SPDX-License-Identifier: EPL-2.0
 
 -->
-<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
 	<feature name="openhab.tp-base" description="openHAB Core Target Platform Base" version="${project.version}">
 		<capability>openhab.tp;feature=base;version=1.0.0</capability>
