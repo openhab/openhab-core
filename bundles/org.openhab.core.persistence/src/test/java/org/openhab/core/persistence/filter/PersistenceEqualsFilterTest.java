@@ -13,8 +13,7 @@
 package org.openhab.core.persistence.filter;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -47,9 +46,8 @@ import org.openhab.core.types.State;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class PersistenceEqualsFilterTest {
-    private static final String ITEM_NAME = "itemName";
 
-    private @NonNullByDefault({}) @Mock GenericItem item;
+    private @Mock @NonNullByDefault({}) GenericItem item;
 
     @ParameterizedTest
     @MethodSource("argumentProvider")

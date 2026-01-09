@@ -12,6 +12,8 @@
  */
 package org.openhab.core.persistence;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.Set;
@@ -22,7 +24,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.types.State;
-import org.openhab.core.types.UnDefType;
 
 /**
  * A queryable persistence service which can be used to store and retrieve
@@ -64,6 +65,11 @@ public interface QueryablePersistenceService extends PersistenceService {
         if (itemName != null && alias != null) {
             FilterCriteria aliasFilter = new FilterCriteria(filter).setItemName(alias);
             return StreamSupport.stream(query(aliasFilter).spliterator(), false).map(hi -> new HistoricItem() {
+
+                @Override
+                public Instant getInstant() {
+                    return hi.getInstant();
+                }
 
                 @Override
                 public ZonedDateTime getTimestamp() {
@@ -111,8 +117,8 @@ public interface QueryablePersistenceService extends PersistenceService {
      * @return a {@link PersistedItem} or null if the item has not been persisted
      */
     default @Nullable PersistedItem persistedItem(String itemName, @Nullable String alias) {
-        State currentState = UnDefType.NULL;
-        ZonedDateTime lastUpdate = null;
+        State currentState;
+        Instant lastUpdate;
 
         FilterCriteria filter = new FilterCriteria().setItemName(itemName).setEndDate(ZonedDateTime.now())
                 .setOrdering(Ordering.DESCENDING).setPageSize(1).setPageNumber(0);
@@ -120,19 +126,23 @@ public interface QueryablePersistenceService extends PersistenceService {
         if (it.hasNext()) {
             HistoricItem historicItem = it.next();
             currentState = historicItem.getState();
-            lastUpdate = historicItem.getTimestamp();
+            lastUpdate = historicItem.getInstant();
         } else {
             return null;
         }
 
         final State state = currentState;
-        final ZonedDateTime lastStateUpdate = lastUpdate;
+        final Instant lastStateUpdate = lastUpdate;
 
         return new PersistedItem() {
+            @Override
+            public Instant getInstant() {
+                return lastStateUpdate;
+            }
 
             @Override
             public ZonedDateTime getTimestamp() {
-                return lastStateUpdate;
+                return lastStateUpdate.atZone(ZoneId.systemDefault());
             }
 
             @Override

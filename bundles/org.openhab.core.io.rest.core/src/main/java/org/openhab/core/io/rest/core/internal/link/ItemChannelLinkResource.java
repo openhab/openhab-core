@@ -273,6 +273,7 @@ public class ItemChannelLinkResource implements RESTResource {
     @Operation(operationId = "unlinkItemFromChannel", summary = "Unlinks an item from a channel.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "400", description = "Invalid channel UID."),
                     @ApiResponse(responseCode = "404", description = "Link not found."),
                     @ApiResponse(responseCode = "405", description = "Link not editable.") })
     public Response unlink(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
@@ -320,8 +321,9 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Path("/orphans")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getOrphanLinks", summary = "Get orphan links between items and broken/non-existent thing channels", responses = {
-            @ApiResponse(responseCode = "200", description = "List of broken links") })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BrokenItemChannelLinkDTO.class)))) })
     public Response getOrphanLinks() {
         Map<ItemChannelLink, ItemChannelLinkProblem> orphanLinks = itemChannelLinkRegistry.getOrphanLinks();
         List<BrokenItemChannelLinkDTO> brokenLinks = orphanLinks.entrySet().stream()
@@ -329,6 +331,6 @@ public class ItemChannelLinkResource implements RESTResource {
                         managedItemChannelLinkProvider.get(e.getKey().getUID()) != null), e.getValue()))
                 .toList();
 
-        return Response.ok(brokenLinks).build();
+        return JSONResponse.createResponse(Status.OK, brokenLinks, null);
     }
 }

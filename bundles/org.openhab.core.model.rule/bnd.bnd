@@ -28,7 +28,6 @@ Import-Package: \
  org.openhab.core.types,\
  org.openhab.core.model.core,\
  org.openhab.core.model.items,\
- org.openhab.core.model.persistence.extensions,\
  org.openhab.core.model.script,\
  org.openhab.core.model.script.engine.action,\
  org.openhab.core.automation.module.script.rulesupport.shared,\
@@ -45,7 +44,6 @@ Require-Bundle: org.antlr.runtime,\
  org.eclipse.emf.mwe2.launch;resolution:=optional,\
  org.openhab.core.model.item,\
  org.openhab.core.model.script,\
- org.eclipse.xtend.lib;resolution:=optional,\
  org.eclipse.xtext.common.types,\
  org.eclipse.xtext.xtext.generator;resolution:=optional,\
  org.eclipse.xtext.util,\

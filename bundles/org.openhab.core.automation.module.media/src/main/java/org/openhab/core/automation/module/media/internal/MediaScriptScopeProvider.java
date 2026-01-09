@@ -34,34 +34,38 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class MediaScriptScopeProvider implements ScriptExtensionProvider {
 
+    private static final String MEDIA_PRESET_NAME = "media";
+    private static final String AUDIO_MANAGER_NAME = "audio";
+    private static final String VOICE_MANAGER_NAME = "voice";
+
     private final Map<String, Object> elements = new HashMap<>();
 
     @Reference
     protected void setAudioManager(AudioManager audioManager) {
-        elements.put("audio", audioManager);
+        elements.put(AUDIO_MANAGER_NAME, audioManager);
     }
 
     protected void unsetAudioManager(AudioManager audioManager) {
-        elements.remove("audio");
+        elements.remove(AUDIO_MANAGER_NAME);
     }
 
     @Reference
     protected void setVoiceManager(VoiceManager voiceManager) {
-        elements.put("voice", voiceManager);
+        elements.put(VOICE_MANAGER_NAME, voiceManager);
     }
 
     protected void unsetVoiceManager(VoiceManager voiceManager) {
-        elements.remove("voice");
+        elements.remove(VOICE_MANAGER_NAME);
     }
 
     @Override
     public Collection<String> getDefaultPresets() {
-        return Set.of("media");
+        return Set.of(MEDIA_PRESET_NAME);
     }
 
     @Override
     public Collection<String> getPresets() {
-        return Set.of("media");
+        return Set.of(MEDIA_PRESET_NAME);
     }
 
     @Override

@@ -23,6 +23,9 @@ import java.util.Locale;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -36,6 +39,21 @@ import org.openhab.core.library.unit.Units;
  */
 @NonNullByDefault
 public class DecimalTypeTest {
+
+    @Nullable
+    private static Locale initialLocale;
+
+    @BeforeAll
+    public static void setUpClass() {
+        initialLocale = Locale.getDefault();
+    }
+
+    @AfterAll
+    @SuppressWarnings("PMD.SetDefaultLocale")
+    public static void tearDownClass() {
+        // Set the default locale to its initial value.
+        Locale.setDefault(initialLocale);
+    }
 
     /**
      * Locales having a different decimal and grouping separators to test string parsing and generation.
@@ -52,6 +70,7 @@ public class DecimalTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testKnownInvalidConstructors(Locale locale) {
         Locale.setDefault(locale);
 
@@ -98,6 +117,7 @@ public class DecimalTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testLocalizedStringConstruction(Locale defaultLocale) {
         Locale.setDefault(defaultLocale);
 

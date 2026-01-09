@@ -23,12 +23,12 @@ import org.openhab.core.semantics.SemanticTag;
  * @author Laurent Garnier - Class renamed and members uid, description and editable added
  */
 public class EnrichedSemanticTagDTO {
-    String uid;
-    String name;
-    String label;
-    String description;
-    List<String> synonyms;
-    boolean editable;
+    public String uid;
+    public String name;
+    public String label;
+    public String description;
+    public List<String> synonyms;
+    public boolean editable;
 
     public EnrichedSemanticTagDTO(SemanticTag tag, boolean editable) {
         this.uid = tag.getUID();

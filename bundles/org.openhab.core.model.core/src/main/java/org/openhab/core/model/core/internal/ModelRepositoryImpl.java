@@ -102,6 +102,10 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
+        if (isIsolatedModel(name)) {
+            logger.info("Ignoring DSL model '{}'", name);
+            return false;
+        }
         return addOrRefreshModel(name, originalInputStream, null, null);
     }
 
@@ -261,14 +265,14 @@ public class ModelRepositoryImpl implements ModelRepository {
     @Override
     public @Nullable String createIsolatedModel(String modelType, InputStream inputStream, List<String> errors,
             List<String> warnings) {
-        String name = "%sDSL_model_%d.%s".formatted(PREFIX_TMP_MODEL, ++counter, modelType);
+        String name = "%smodel_%d.%s".formatted(PREFIX_TMP_MODEL, ++counter, modelType);
         return addOrRefreshModel(name, inputStream, errors, warnings) ? name : null;
     }
 
     @Override
     public void generateFileFormat(OutputStream out, String modelType, EObject modelContent) {
         synchronized (resourceSet) {
-            String name = "%sgenerated_DSL_%d.%s".formatted(PREFIX_TMP_MODEL, ++counter, modelType);
+            String name = "%sgenerated_%d.%s".formatted(PREFIX_TMP_MODEL, ++counter, modelType);
             Resource resource = resourceSet.createResource(URI.createURI(name));
             try {
                 resource.getContents().add(modelContent);

@@ -20,27 +20,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Kelly Davis - Initial contribution
  */
 @NonNullByDefault
-public class KSErrorEvent implements KSEvent {
-    /**
-     * The message describing the error
-     */
-    private final String message;
-
+public class KSErrorEvent extends DTErrorEvent implements KSEvent {
     /**
      * Constructs an instance with the passed {@code message}.
      *
      * @param message The message describing the error
      */
     public KSErrorEvent(String message) {
-        this.message = message;
-    }
-
-    /**
-     * Gets the message describing this error
-     *
-     * @return The message describing this error
-     */
-    public String getMessage() {
-        return this.message;
+        super(message);
     }
 }

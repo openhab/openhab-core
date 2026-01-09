@@ -25,7 +25,7 @@ public class ModelCoreConstants {
     /** The service pid used for the managed service (without the "org.openhab.core" prefix */
     public static final String SERVICE_PID = "folder";
 
-    public static final String PREFIX_TMP_MODEL = "tmp_";
+    public static final String PREFIX_TMP_MODEL = "___tmp_";
 
     /**
      * Indicates if a model is an isolated model

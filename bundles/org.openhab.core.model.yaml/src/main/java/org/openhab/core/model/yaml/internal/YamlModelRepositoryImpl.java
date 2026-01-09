@@ -120,6 +120,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
                 .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
                 .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
+                .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as
+                                                                               // strings
                 .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build(); // do not parse ON/OFF/... as
                                                                                          // booleans
         this.objectMapper = new ObjectMapper(yamlFactory);
@@ -584,7 +586,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @Override
     public synchronized @Nullable String createIsolatedModel(InputStream inputStream, List<String> errors,
             List<String> warnings) {
-        String modelName = "%sYAML_model_%d.yaml".formatted(PREFIX_TMP_MODEL, ++counter);
+        String modelName = "%smodel_%d.yaml".formatted(PREFIX_TMP_MODEL, ++counter);
         boolean valid;
         try {
             valid = processModelContent(modelName, Kind.CREATE, objectMapper.readTree(inputStream), errors, warnings);

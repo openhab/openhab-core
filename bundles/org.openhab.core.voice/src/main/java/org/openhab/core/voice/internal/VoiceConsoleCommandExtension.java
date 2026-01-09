@@ -406,7 +406,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         Collection<DialogContext> dialogContexts = voiceManager.getDialogsContexts();
         if (!dialogContexts.isEmpty()) {
             dialogContexts.stream().sorted(comparing(s -> s.source().getId())).forEach(c -> {
-                var ks = c.ks();
+                var ks = c.dt();
                 String ksText = ks != null ? String.format(", KS: %s, Keyword: %s", ks.getId(), c.keyword()) : "";
                 String locationText = c.locationItem() != null ? String.format(" Location: %s", c.locationItem()) : "";
                 console.println(String.format(

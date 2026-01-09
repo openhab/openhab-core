@@ -114,11 +114,10 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
         String defaultPattern = getDefaultStatePattern(item);
         if (label != null && !label.isEmpty()) {
             dto.label = item.getLabel();
-            String patterToSet = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter
-                    : null;
-            dto.format = patterToSet;
-            patternSet = patterToSet != null;
         }
+        String patternToSet = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter : null;
+        dto.format = patternToSet;
+        patternSet = patternToSet != null;
 
         dto.type = item.getType();
         String mainType = ItemUtil.getMainItemType(item.getType());

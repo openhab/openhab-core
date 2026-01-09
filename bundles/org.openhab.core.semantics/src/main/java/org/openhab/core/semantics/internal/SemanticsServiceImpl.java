@@ -289,7 +289,7 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
      * @return true if the semantics are valid, false otherwise
      */
     boolean checkSemantics(Item item) {
-        return getItemSemanticsProblems(item, true).size() == 0 ? true : false;
+        return getItemSemanticsProblems(item, true).isEmpty();
     }
 
     @Override

@@ -13,7 +13,7 @@
 	SPDX-License-Identifier: EPL-2.0
 
 -->
-<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0">
+<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
 	<repository>mvn:org.openhab.core.features.karaf/org.openhab.core.features.karaf.openhab-tp/${project.version}/xml/features</repository>
 
@@ -28,7 +28,7 @@
 
 		<feature dependency="true">openhab.tp-gson</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.40.0)(!(version&gt;=2.41.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.41.0)(!(version&gt;=2.42.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
 		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
@@ -239,6 +239,12 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.websocket/${project.version}</bundle>
 	</feature>
 
+	<feature name="openhab-core-io-websocket-audio" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature dependency="true">openhab-core-io-websocket</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.websocket.audio/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-io-transport-coap" version="${project.version}">
 		<feature>openhab-core-base</feature>
 
@@ -406,7 +412,7 @@
 
 	<feature name="openhab-core-model-lsp" version="${project.version}">
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.40.0)(!(version&gt;=2.41.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.41.0)(!(version&gt;=2.42.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
 		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.24.0)(!(version&gt;=0.24.1)))"</requirement>
@@ -466,6 +472,7 @@
 		<feature>openhab-core-io-rest-transform</feature>
 		<feature>openhab-core-io-rest-voice</feature>
 		<feature>openhab-core-io-websocket</feature>
+		<feature>openhab-core-io-websocket-audio</feature>
 		<feature>openhab-core-model-lsp</feature>
 		<feature>openhab-core-model-item</feature>
 		<feature>openhab-core-model-persistence</feature>

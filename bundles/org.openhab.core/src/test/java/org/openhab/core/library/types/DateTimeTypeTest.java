@@ -35,6 +35,8 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -50,6 +52,9 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 @NonNullByDefault
 public class DateTimeTypeTest {
+
+    @Nullable
+    private static TimeZone initialTimeZone;
 
     /**
      * parameter test set class.
@@ -175,6 +180,18 @@ public class DateTimeTypeTest {
         }
     }
 
+    @BeforeAll
+    public static void setUpClass() {
+        initialTimeZone = TimeZone.getDefault();
+    }
+
+    @AfterAll
+    @SuppressWarnings("PMD.SetDefaultTimeZone")
+    public static void tearDownClass() {
+        // Set the default time zone to its initial value.
+        TimeZone.setDefault(initialTimeZone);
+    }
+
     /**
      * Test parameter maps collection.
      *
@@ -296,6 +313,7 @@ public class DateTimeTypeTest {
 
     @ParameterizedTest
     @MethodSource("parameters")
+    @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void createDate(ParameterSet parameterSet) {
         TimeZone.setDefault(parameterSet.defaultTimeZone);
         // get DateTimeType from the current parameter
@@ -332,6 +350,7 @@ public class DateTimeTypeTest {
 
     @ParameterizedTest
     @MethodSource("parameters")
+    @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void formattingTest(ParameterSet parameterSet) {
         TimeZone.setDefault(parameterSet.defaultTimeZone);
         DateTimeType dt = createDateTimeType(parameterSet);

@@ -33,12 +33,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadFactoryBuilder;
 import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryService;
@@ -106,6 +109,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
     private boolean closing = false;
 
+    private ScheduledExecutorService longRunningTaskExecutor;
     private @Nullable Future<?> listenBackgroundMulticastTask = null;
     private @Nullable Future<?> listenActiveScanUnicastTask = null;
     private @Nullable ScheduledFuture<?> purgeExpiredDevicesTask = null;
@@ -116,6 +120,12 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             final @Reference TranslationProvider i18nProvider, //
             final @Reference LocaleProvider localeProvider) {
         super((int) SEARCH_LISTEN_DURATION.getSeconds());
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2, ThreadFactoryBuilder.create()
+                .withName("SDDP-discovery").withDaemonThreads(true).withUncaughtExceptionHandler((t, e) -> {
+                    logger.debug("SDDP discovery service encountered an unexpected exception", e);
+                }).build());
+        executor.allowCoreThreadTimeOut(true);
+        this.longRunningTaskExecutor = executor;
 
         this.networkAddressService = networkAddressService;
         this.i18nProvider = i18nProvider;
@@ -140,9 +150,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         foundDevicesCache.stream().filter(d -> !d.isExpired()).forEach(d -> {
             DiscoveryResult result = participant.createResult(d);
             if (result != null) {
-                DiscoveryResult localizedResult = getLocalizedDiscoveryResult(result,
-                        FrameworkUtil.getBundle(participant.getClass()));
-                thingDiscovered(localizedResult);
+                thingDiscovered(result, FrameworkUtil.getBundle(participant.getClass()));
             }
         });
     }
@@ -202,6 +210,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
         cancelTask(purgeExpiredDevicesTask);
         purgeExpiredDevicesTask = null;
+        longRunningTaskExecutor.shutdownNow();
     }
 
     @Override
@@ -339,12 +348,12 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         Future<?> multicastTask = listenBackgroundMulticastTask;
         if (multicastTask != null && !multicastTask.isDone()) {
             multicastTask.cancel(true);
-            listenBackgroundMulticastTask = scheduler.submit(() -> listenBackGroundMulticast());
+            listenBackgroundMulticastTask = longRunningTaskExecutor.submit(() -> listenBackGroundMulticast());
         }
         Future<?> unicastTask = listenActiveScanUnicastTask;
         if (unicastTask != null && !unicastTask.isDone()) {
             unicastTask.cancel(true);
-            listenActiveScanUnicastTask = scheduler.submit(() -> listenActiveScanUnicast());
+            listenActiveScanUnicastTask = longRunningTaskExecutor.submit(() -> listenActiveScanUnicast());
         }
     }
 
@@ -380,9 +389,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
                 discoveryParticipants.forEach(p -> {
                     DiscoveryResult discoveryResult = p.createResult(device);
                     if (discoveryResult != null) {
-                        DiscoveryResult localizedResult = getLocalizedDiscoveryResult(discoveryResult,
-                                FrameworkUtil.getBundle(p.getClass()));
-                        thingDiscovered(localizedResult);
+                        thingDiscovered(discoveryResult, FrameworkUtil.getBundle(p.getClass()));
                     }
                 });
                 deviceParticipants.forEach(f -> f.deviceAdded(device));
@@ -425,7 +432,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     protected void startBackgroundDiscovery() {
         Future<?> task = listenBackgroundMulticastTask;
         if (task == null || task.isDone()) {
-            listenBackgroundMulticastTask = scheduler.submit(() -> listenBackGroundMulticast());
+            listenBackgroundMulticastTask = longRunningTaskExecutor.submit(() -> listenBackGroundMulticast());
         }
     }
 
@@ -436,7 +443,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     protected void startScan() {
         Future<?> task = listenActiveScanUnicastTask;
         if (task == null || task.isDone()) {
-            listenActiveScanUnicastTask = scheduler.submit(() -> listenActiveScanUnicast());
+            listenActiveScanUnicastTask = longRunningTaskExecutor.submit(() -> listenActiveScanUnicast());
         }
     }
 

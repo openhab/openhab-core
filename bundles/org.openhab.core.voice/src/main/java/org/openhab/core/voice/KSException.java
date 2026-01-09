@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Kelly Davis - Initial contribution
  */
 @NonNullByDefault
-public class KSException extends Exception {
+public class KSException extends DTException {
 
     @Serial
     private static final long serialVersionUID = 1L;

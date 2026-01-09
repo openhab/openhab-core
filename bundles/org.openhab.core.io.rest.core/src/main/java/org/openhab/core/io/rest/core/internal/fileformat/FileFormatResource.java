@@ -814,12 +814,6 @@ public class FileFormatResource implements RESTResource {
 
                 if (thingData.bridgeUID != null) {
                     bridgeUID = new ThingUID(thingData.bridgeUID);
-                    if (thingUID != null && !thingUID.getBindingId().equals(bridgeUID.getBindingId())) {
-                        errors.add("Thing UID '" + thingUID + "' and bridge UID '" + bridgeUID
-                                + "' are from different bindings");
-                        ok = false;
-                        continue;
-                    }
                 }
 
                 // turn the ThingDTO's configuration into a Configuration
@@ -903,6 +897,37 @@ public class FileFormatResource implements RESTResource {
         if (!things.isEmpty()) {
             dto.things = new ArrayList<>();
             things.forEach(thing -> {
+                // Normalize thing configuration
+                @Nullable
+                Map<String, @Nullable Object> normalizedThingConfig = normalizeConfiguration(
+                        thing.getConfiguration().getProperties(), thing.getThingTypeUID(), thing.getUID());
+                if (normalizedThingConfig != null) {
+                    thing.getConfiguration().keySet().forEach(paramName -> {
+                        @Nullable
+                        Object normalizedValue = normalizedThingConfig.get(paramName);
+                        if (normalizedValue != null) {
+                            thing.getConfiguration().put(paramName, normalizedValue);
+                        }
+                    });
+                }
+                // Normalize channel configuration
+                thing.getChannels().forEach(channel -> {
+                    ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
+                    if (channelTypeUID != null) {
+                        @Nullable
+                        Map<String, @Nullable Object> normalizedChannelConfig = normalizeConfiguration(
+                                channel.getConfiguration().getProperties(), channelTypeUID, channel.getUID());
+                        if (normalizedChannelConfig != null) {
+                            channel.getConfiguration().keySet().forEach(paramName -> {
+                                @Nullable
+                                Object normalizedValue = normalizedChannelConfig.get(paramName);
+                                if (normalizedValue != null) {
+                                    channel.getConfiguration().put(paramName, normalizedValue);
+                                }
+                            });
+                        }
+                    }
+                });
                 dto.things.add(ThingDTOMapper.map(thing));
             });
         }

@@ -13,7 +13,7 @@
 	SPDX-License-Identifier: EPL-2.0
 
 -->
-<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
 	<feature name="openhab.tp-base" description="openHAB Core Target Platform Base" version="${project.version}">
 		<capability>openhab.tp;feature=base;version=1.0.0</capability>
@@ -23,7 +23,7 @@
 		<feature>log</feature>
 		<feature>pax-web-jetty-extras</feature>
 		<!-- Apache Commons -->
-		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.18.0</bundle>
+		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.20.0</bundle>
 		<!-- Measurement -->
 		<bundle dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/2.1.1</bundle>
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/1.0.5</bundle>
@@ -48,13 +48,13 @@
 		<bundle>mvn:org.eclipse.californium/element-connector/4.0.0-M2</bundle>
 		<bundle>mvn:org.eclipse.californium/scandium/4.0.0-M2</bundle>
 		<bundle dependency="true">mvn:org.slf4j/jul-to-slf4j/2.0.16</bundle>
-		<bundle dependency="true">mvn:org.bouncycastle/bcprov-jdk18on/1.81</bundle>
+		<bundle dependency="true">mvn:org.bouncycastle/bcprov-jdk18on/1.83</bundle>
 	</feature>
 
 	<feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
 		<capability>openhab.tp;feature=commons-net;version=3.12.0</capability>
 		<bundle dependency="true">mvn:commons-net/commons-net/3.12.0</bundle>
-		<bundle dependency="true">mvn:commons-io/commons-io/2.20.0</bundle>
+		<bundle dependency="true">mvn:commons-io/commons-io/2.21.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">
@@ -84,18 +84,18 @@
 	</feature>
 
 	<feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
-		<capability>openhab.tp;feature=jackson;version=2.19.2</capability>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.19.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.19.2</bundle>
+		<capability>openhab.tp;feature=jackson;version=2.20.1</capability>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.20</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.20.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.20.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.20.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.20.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.20.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.20.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.20.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.20.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.20.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.20.1</bundle>
 		<bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/4.2.2</bundle>
 		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.4</bundle>
 	</feature>
@@ -120,7 +120,7 @@
 	</feature>
 
 	<feature name="openhab.tp-cxf" description="Apache CXF" version="${project.version}">
-		<capability>openhab.tp;feature=cxf;version=3.6.8</capability>
+		<capability>openhab.tp;feature=cxf;version=3.6.9</capability>
 		<feature dependency="true">openhab.tp-jaxws</feature>
 		<bundle dependency="true">mvn:com.fasterxml.woodstox/woodstox-core/6.6.2</bundle>
 		<bundle dependency="true">mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
@@ -129,12 +129,12 @@
 		<bundle dependency="true">mvn:org.apache.aries.spec/org.apache.aries.javax.jax.rs-api/1.0.4</bundle>
 		<bundle dependency="true">mvn:org.apache.ws.xmlschema/xmlschema-core/2.3.1</bundle>
 		<bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/4.2.2</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-core/3.6.8</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-frontend-jaxrs/3.6.8</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-rs-client/3.6.8</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-rs-sse/3.6.8</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-security/3.6.8</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-transports-http/3.6.8</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-core/3.6.9</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-frontend-jaxrs/3.6.9</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-rs-client/3.6.9</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-rs-sse/3.6.9</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-security/3.6.9</bundle>
+		<bundle>mvn:org.apache.cxf/cxf-rt-transports-http/3.6.9</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jbbp" description="Java Binary Block Parser library" version="${project.version}">
@@ -199,11 +199,11 @@
 	</feature>
 
 	<feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
-		<capability>openhab.tp;feature=jupnp;version=3.0.3</capability>
+		<capability>openhab.tp;feature=jupnp;version=3.0.4</capability>
 		<feature dependency="true">http</feature>
 		<feature dependency="true">scr</feature>
 		<feature dependency="true">openhab.tp-httpclient</feature>
-		<bundle>mvn:org.jupnp/org.jupnp/3.0.3</bundle>
+		<bundle>mvn:org.jupnp/org.jupnp/3.0.4</bundle>
 	</feature>
 
 	<feature name="openhab.tp-lsp4j" description="Eclipse LSP4J" version="${project.version}">
@@ -249,12 +249,12 @@
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtend.lib.macro/${xtext.version}</bundle>
 
 		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.3</bundle>
-		<bundle dependency="true">mvn:com.google.guava/guava/33.4.8-jre</bundle>
+		<bundle dependency="true">mvn:com.google.guava/guava/33.5.0-jre</bundle>
 		<bundle dependency="true">mvn:com.google.inject/guice/7.0.0</bundle>
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.1</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.aopalliance/1.0.0.v201105210816</bundle>
-		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.180</bundle>
+		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.184</bundle>
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.antlr.runtime/3.2.0.v201101311130</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.19.0</bundle>

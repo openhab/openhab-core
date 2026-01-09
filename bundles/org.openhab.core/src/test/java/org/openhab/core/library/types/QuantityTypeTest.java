@@ -33,6 +33,9 @@ import javax.measure.quantity.Temperature;
 import javax.measure.quantity.Time;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -55,6 +58,21 @@ import tech.units.indriya.unit.UnitDimension;
 @SuppressWarnings("null")
 @NonNullByDefault
 public class QuantityTypeTest {
+
+    @Nullable
+    private static Locale initialLocale;
+
+    @BeforeAll
+    public static void setUpClass() {
+        initialLocale = Locale.getDefault();
+    }
+
+    @AfterAll
+    @SuppressWarnings("PMD.SetDefaultLocale")
+    public static void tearDownClass() {
+        // Set the default locale to its initial value.
+        Locale.setDefault(initialLocale);
+    }
 
     /**
      * Locales having a different decimal and grouping separators to test string parsing and generation.
@@ -82,6 +100,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testKnownInvalidConstructors(Locale locale) {
         Locale.setDefault(locale);
 
@@ -117,6 +136,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testValidConstructors(Locale locale) {
         Locale.setDefault(locale);
 
@@ -171,6 +191,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testLocalizedStringConstruction(Locale defaultLocale) {
         Locale.setDefault(defaultLocale);
 
@@ -322,6 +343,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testConversionToHSBType(Locale locale) {
         Locale.setDefault(locale);
 
@@ -332,6 +354,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testConversionToPercentType(Locale locale) {
         Locale.setDefault(locale);
 
@@ -354,6 +377,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void toFullStringShouldParseToEqualState(Locale locale) {
         Locale.setDefault(locale);
 
@@ -365,6 +389,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testAdd(Locale locale) {
         Locale.setDefault(locale);
 
@@ -399,6 +424,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testSubtract(Locale locale) {
         Locale.setDefault(locale);
 
@@ -475,6 +501,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testDivideNumber(Locale locale) {
         Locale.setDefault(locale);
 
@@ -488,6 +515,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testDivideQuantityType(Locale locale) {
         Locale.setDefault(locale);
 
@@ -544,6 +572,7 @@ public class QuantityTypeTest {
 
     @ParameterizedTest
     @MethodSource("locales")
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void testDivideZero(Locale locale) {
         Locale.setDefault(locale);
 

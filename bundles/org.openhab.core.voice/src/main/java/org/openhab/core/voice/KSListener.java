@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Kelly Davis - Initial contribution
  */
 @NonNullByDefault
-public interface KSListener {
+public interface KSListener extends DTListener {
     /**
      * Invoked when a {@link KSEvent} event occurs during keyword spotting.
      *

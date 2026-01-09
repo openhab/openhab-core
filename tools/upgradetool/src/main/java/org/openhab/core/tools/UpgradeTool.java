@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Jimmy Tanagra - Refactor upgraders into individual classes
+ * @author Mark Herwege - Added persistence strategy upgrader
  */
 @NonNullByDefault
 public class UpgradeTool {
@@ -54,7 +55,10 @@ public class UpgradeTool {
             new ItemUnitToMetadataUpgrader(), //
             new JSProfileUpgrader(), //
             new ScriptProfileUpgrader(), //
-            new YamlConfigurationV1TagsUpgrader() // Added in 5.0
+            new YamlConfigurationV1TagsUpgrader(), // Added in 5.0
+            new HomeAssistantAddonUpgrader(), // Added in 5.1
+            new HomieAddonUpgrader(), // Added in 5.1
+            new PersistenceUpgrader() // Added in 5.1
     );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeTool.class);

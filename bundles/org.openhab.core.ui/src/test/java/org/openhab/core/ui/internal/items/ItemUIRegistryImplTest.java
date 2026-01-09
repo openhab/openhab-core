@@ -30,6 +30,9 @@ import javax.measure.quantity.Temperature;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -98,6 +101,9 @@ import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 @NonNullByDefault
 public class ItemUIRegistryImplTest {
 
+    @Nullable
+    private static TimeZone initialTimeZone;
+
     // we need to get the decimal separator of the default locale for our tests
     private static final char SEP = (new DecimalFormatSymbols().getDecimalSeparator());
     private static final String ITEM_NAME = "Item";
@@ -110,7 +116,20 @@ public class ItemUIRegistryImplTest {
     private @Mock @NonNullByDefault({}) Widget widgetMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
 
+    @BeforeAll
+    public static void setUpClass() {
+        initialTimeZone = TimeZone.getDefault();
+    }
+
+    @AfterAll
+    @SuppressWarnings("PMD.SetDefaultTimeZone")
+    public static void tearDownClass() {
+        // Set the default time zone to its initial value.
+        TimeZone.setDefault(initialTimeZone);
+    }
+
     @BeforeEach
+    @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void setup() throws Exception {
         uiRegistry = new ItemUIRegistryImpl(registryMock, timeZoneProviderMock);
 

@@ -20,5 +20,5 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Kelly Davis - Initial contribution
  */
 @NonNullByDefault
-public interface KSEvent {
+public interface KSEvent extends DTEvent {
 }

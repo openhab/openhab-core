@@ -21,7 +21,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.type.ModuleType;
@@ -49,6 +52,9 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
     private static final Locale BULGARIAN = Locale.of("bg");
     private static final Locale DEFAULT = Locale.ENGLISH;
     private static final Locale GERMAN = Locale.GERMANY;
+
+    @Nullable
+    private static Locale initialLocale;
 
     private final Logger logger = LoggerFactory.getLogger(HostFragmentSupportTest.class);
     private @NonNullByDefault({}) ModuleTypeRegistry registry;
@@ -104,7 +110,20 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
 
     private boolean waiting = true;
 
+    @BeforeAll
+    public static void setUpClass() {
+        initialLocale = Locale.getDefault();
+    }
+
+    @AfterAll
+    @SuppressWarnings("PMD.SetDefaultLocale")
+    public static void tearDownClass() {
+        // Set the default locale to its initial value.
+        Locale.setDefault(initialLocale);
+    }
+
     @BeforeEach
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void before() {
         logger.info("@Before.begin");
 
