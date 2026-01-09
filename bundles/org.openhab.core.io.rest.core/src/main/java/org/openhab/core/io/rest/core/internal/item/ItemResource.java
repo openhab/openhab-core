@@ -250,7 +250,7 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getItems", summary = "Get all available items.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(anyOf = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(oneOf = {
                     EnrichedItemDTO.class, EnrichedGroupItemDTO.class })))) })
     public Response getItems(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @Context Request request,
