@@ -464,4 +464,104 @@ public class YamlModelRepositoryImplTest {
         assertThat(secondTypeElements, hasSize(1));
         assertThat(secondTypeElements, contains(new SecondTypeDTO("Second1", "Label1")));
     }
+
+    @Test
+    public void testVersion1MetadataLoading() throws IOException {
+        // Test that version 1 files require object-form metadata (short-form causes parse error)
+        String yamlContent = """
+                version: 1
+                items:
+                  # This item has valid object-form metadata
+                  ValidItem:
+                    type: Switch
+                    metadata:
+                      alexa:
+                        value: Switchable
+                      homekit:
+                        value: Lighting
+                  # This item has short-form metadata which V1 cannot parse
+                  InvalidItem:
+                    type: Switch
+                    metadata:
+                      googleAssistant: Speaker
+                """;
+        Files.writeString(fullModelPath, yamlContent);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+
+        // Create mock item listener for V1
+        @SuppressWarnings("unchecked")
+        YamlModelListener<org.openhab.core.model.yaml.internal.items.YamlItemDTO> itemListener = mock(
+                YamlModelListener.class);
+        when(itemListener.getElementClass()).thenReturn(org.openhab.core.model.yaml.internal.items.YamlItemDTO.class);
+        when(itemListener.isVersionSupported(anyInt())).thenAnswer(inv -> inv.getArgument(0, Integer.class) == 1);
+        when(itemListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(itemListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        // Verify the listener was called
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<org.openhab.core.model.yaml.internal.items.YamlItemDTO>> captor = ArgumentCaptor
+                .forClass(Collection.class);
+        verify(itemListener).addedModel(eq(MODEL_NAME), captor.capture());
+
+        // Verify only the valid item with object-form metadata was loaded
+        // The item with short-form syntax should fail to parse and be skipped
+        Collection<org.openhab.core.model.yaml.internal.items.YamlItemDTO> items = captor.getValue();
+        assertThat(items, hasSize(1));
+
+        org.openhab.core.model.yaml.internal.items.YamlItemDTO item = items.iterator().next();
+        assertThat(item.name, is("ValidItem"));
+        assertThat(item.metadata, is(notNullValue()));
+        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit"));
+        assertThat(item.metadata.get("alexa").value, is("Switchable"));
+        assertThat(item.metadata.get("homekit").value, is("Lighting"));
+    }
+
+    @Test
+    public void testVersion2ShortFormMetadataLoading() throws IOException {
+        // Test that version 2 files support short-form metadata (scalar values)
+        String yamlContent = """
+                version: 2
+                items:
+                  TestSwitch:
+                    type: Switch
+                    metadata:
+                      alexa: Switchable
+                      homekit: Lighting
+                """;
+        Files.writeString(fullModelPath, yamlContent);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+
+        // Create mock item listener for V2
+        @SuppressWarnings("unchecked")
+        YamlModelListener<org.openhab.core.model.yaml.internal.items.v2.YamlItemDTO> itemListenerV2 = mock(
+                YamlModelListener.class);
+        when(itemListenerV2.getElementClass())
+                .thenReturn(org.openhab.core.model.yaml.internal.items.v2.YamlItemDTO.class);
+        when(itemListenerV2.isVersionSupported(anyInt())).thenAnswer(inv -> inv.getArgument(0, Integer.class) == 2);
+        when(itemListenerV2.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(itemListenerV2);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        // Verify the listener was called
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<org.openhab.core.model.yaml.internal.items.v2.YamlItemDTO>> captor = ArgumentCaptor
+                .forClass(Collection.class);
+        verify(itemListenerV2).addedModel(eq(MODEL_NAME), captor.capture());
+
+        // Verify items were loaded with short-form metadata
+        Collection<org.openhab.core.model.yaml.internal.items.v2.YamlItemDTO> items = captor.getValue();
+        assertThat(items, hasSize(1));
+
+        org.openhab.core.model.yaml.internal.items.v2.YamlItemDTO item = items.iterator().next();
+        assertThat(item.metadata, is(notNullValue()));
+        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit"));
+        // V2 deserializer converts short-form to value field
+        assertThat(item.metadata.get("alexa").value, is("Switchable"));
+        assertThat(item.metadata.get("homekit").value, is("Lighting"));
+    }
 }

@@ -47,10 +47,10 @@ import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlChannelLinkProvider;
 import org.openhab.core.model.yaml.internal.items.YamlGroupDTO;
-import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
-import org.openhab.core.model.yaml.internal.items.YamlItemProvider;
-import org.openhab.core.model.yaml.internal.items.YamlMetadataDTO;
 import org.openhab.core.model.yaml.internal.items.YamlMetadataProvider;
+import org.openhab.core.model.yaml.internal.items.v2.YamlItemDTO;
+import org.openhab.core.model.yaml.internal.items.v2.YamlItemProvider;
+import org.openhab.core.model.yaml.internal.items.v2.YamlMetadataDTO;
 import org.openhab.core.types.State;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -60,6 +60,7 @@ import org.osgi.service.component.annotations.Reference;
  * {@link YamlItemFileConverter} is the YAML file converter for {@link Item} object.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Jimmy Tanagra - Upgrade to use version 2 DTOs
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ItemFileGenerator.class, ItemFileParser.class })

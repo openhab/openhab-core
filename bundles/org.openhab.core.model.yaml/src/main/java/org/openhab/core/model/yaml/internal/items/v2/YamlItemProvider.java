@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.yaml.internal.items;
+package org.openhab.core.model.yaml.internal.items.v2;
 
 import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
 
@@ -35,6 +35,10 @@ import org.openhab.core.items.dto.GroupFunctionDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.yaml.YamlModelListener;
+import org.openhab.core.model.yaml.internal.items.YamlChannelLinkProvider;
+import org.openhab.core.model.yaml.internal.items.YamlGroupDTO;
+import org.openhab.core.model.yaml.internal.items.YamlMetadataDTO;
+import org.openhab.core.model.yaml.internal.items.YamlMetadataProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -48,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * These items are automatically exposed to the {@link org.openhab.core.items.ItemRegistry}.
  *
  * @author Laurent Garnier - Initial contribution
- * @author Jimmy Tanagra - Restricted this provider to v1 to avoid overlap with the new Model V2 provider.
+ * @author Jimmy Tanagra - Upgrade to version 2
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ItemProvider.class, YamlItemProvider.class, YamlModelListener.class })
@@ -94,7 +98,7 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
 
     @Override
     public boolean isVersionSupported(int version) {
-        return version == 1;
+        return version >= 2;
     }
 
     @Override
@@ -260,13 +264,16 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
     }
 
     private void processMetadata(String modelName, String itemName, @Nullable YamlItemDTO itemDTO) {
+        // Convert V2 metadata (which supports short-form syntax) to V1 format for the shared metadata provider.
+        // The YamlMetadataProvider is shared between V1 and V2 item providers and expects V1 DTOs.
         Map<String, YamlMetadataDTO> metadata = new HashMap<>();
         if (itemDTO != null) {
             boolean hasAutoUpdateMetadata = false;
             boolean hasUnitMetadata = false;
             boolean hasStateDescriptionMetadata = false;
             if (itemDTO.metadata != null) {
-                for (Map.Entry<String, YamlMetadataDTO> entry : itemDTO.metadata.entrySet()) {
+                for (Map.Entry<String, org.openhab.core.model.yaml.internal.items.v2.YamlMetadataDTO> entry : itemDTO.metadata
+                        .entrySet()) {
                     if ("autoupdate".equals(entry.getKey())) {
                         hasAutoUpdateMetadata = true;
                     } else if ("unit".equals(entry.getKey())) {

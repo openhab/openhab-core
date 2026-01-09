@@ -141,7 +141,7 @@ public class FileFormatResource implements RESTResource {
             """;
 
     private static final String YAML_THINGS_EXAMPLE = """
-            version: 1
+            version: 2
             things:
               binding:typeBridge:idBridge:
                 isBridge: true
@@ -165,7 +165,7 @@ public class FileFormatResource implements RESTResource {
             """;
 
     private static final String YAML_ITEMS_EXAMPLE = """
-            version: 1
+            version: 2
             items:
               Group1:
                 type: Group
@@ -198,7 +198,7 @@ public class FileFormatResource implements RESTResource {
             """;
 
     private static final String YAML_ITEMS_AND_THINGS_EXAMPLE = """
-            version: 1
+            version: 2
             things:
               binding:typeBridge:idBridge:
                 isBridge: true
