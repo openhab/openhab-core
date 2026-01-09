@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.io.EofException;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
 import org.osgi.service.component.annotations.Activate;
@@ -145,6 +146,12 @@ public class IconServlet extends HttpServlet {
             is.transferTo(resp.getOutputStream());
             resp.flushBuffer();
         } catch (IOException e) {
+            if (resp.isCommitted() && e instanceof EofException) {
+                logger.debug("Client {} disconnected while sending the icon byte stream as response",
+                        req.getRemoteAddr());
+                // don't send a response as client is already gone
+                return;
+            }
             logger.error("Failed sending the icon byte stream as a response: {}", e.getMessage());
             resp.sendError(500, e.getMessage());
         }
