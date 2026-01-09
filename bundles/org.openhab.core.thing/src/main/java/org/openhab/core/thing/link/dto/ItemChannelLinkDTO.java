@@ -14,6 +14,8 @@ package org.openhab.core.thing.link.dto;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -22,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Dennis Nobel - Initial contribution
  */
 @Schema(name = "ItemChannelLink")
+@NonNullByDefault
 public class ItemChannelLinkDTO extends AbstractLinkDTO {
 
     public String channelUID;
@@ -31,6 +34,7 @@ public class ItemChannelLinkDTO extends AbstractLinkDTO {
      * Default constructor for deserialization e.g. by Gson.
      */
     protected ItemChannelLinkDTO() {
+        this("", "", Map.of());
     }
 
     public ItemChannelLinkDTO(String itemName, String channelUID, Map<String, Object> configuration) {

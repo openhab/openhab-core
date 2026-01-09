@@ -28,7 +28,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NonNullByDefault
 public class MetadataDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public @Nullable String value;
     public @Nullable Map<String, Object> config;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public @Nullable Boolean editable;
 }

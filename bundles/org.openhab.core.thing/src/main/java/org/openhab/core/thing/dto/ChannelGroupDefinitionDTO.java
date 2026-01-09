@@ -14,6 +14,9 @@ package org.openhab.core.thing.dto;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -22,17 +25,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Dennis Nobel - Initial contribution
  */
 @Schema(name = "ChannelGroupDefinition")
+@NonNullByDefault
 public class ChannelGroupDefinitionDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
-    public String description;
-    public String label;
+    public @Nullable String description;
+    public @Nullable String label;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<ChannelDefinitionDTO> channels;
 
+    // do not remove - needed by GSON
     public ChannelGroupDefinitionDTO() {
+        this("", null, null, List.of());
     }
 
-    public ChannelGroupDefinitionDTO(String id, String label, String description, List<ChannelDefinitionDTO> channels) {
+    public ChannelGroupDefinitionDTO(String id, @Nullable String label, @Nullable String description,
+            List<ChannelDefinitionDTO> channels) {
         this.id = id;
         this.label = label;
         this.description = description;

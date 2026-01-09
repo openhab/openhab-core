@@ -31,14 +31,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class DiscoveryResultDTO {
 
     public @Nullable String bridgeUID;
-    public @Nullable DiscoveryResultFlag flag;
-    public @Nullable String label;
-    public @Nullable Map<String, Object> properties;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    public DiscoveryResultFlag flag;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    public String label;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    public Map<String, Object> properties;
     public @Nullable String representationProperty;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public @NonNullByDefault({}) String thingUID;
     public @Nullable String thingTypeUID;
 
+    // do not remove - needed by GSON
     public DiscoveryResultDTO() {
+        this("", null, null, "", DiscoveryResultFlag.NEW, Map.of(), null);
     }
 
     public DiscoveryResultDTO(String thingUID, @Nullable String bridgeUID, @Nullable String thingTypeUID, String label,

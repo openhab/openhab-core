@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "AudioSource")
 @NonNullByDefault
 public class AudioSourceDTO {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
     public @Nullable String label;
 

@@ -24,5 +24,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "Action")
 public class ActionDTO extends ModuleDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, String> inputs;
 }

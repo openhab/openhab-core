@@ -25,7 +25,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(name = "HumanLanguageInterpreter")
 public class HumanLanguageInterpreterDTO {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String label;
     public Set<String> locales;
 }

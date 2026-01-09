@@ -31,7 +31,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class ItemHistoryDTO {
 
     public String name;
-    public String totalrecords;
     public String datapoints;
 
     public List<HistoryDataBean> data = new ArrayList<>();

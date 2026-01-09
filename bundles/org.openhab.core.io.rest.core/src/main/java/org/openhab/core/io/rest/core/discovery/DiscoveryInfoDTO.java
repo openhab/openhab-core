@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NonNullByDefault
 public class DiscoveryInfoDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public boolean inputSupported;
     public @Nullable String inputLabel;
     public @Nullable String inputDescription;

@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "EnrichedChannel")
 public class EnrichedChannelDTO extends ChannelDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public final Set<String> linkedItems;
 
     public EnrichedChannelDTO(ChannelDTO channelDTO, Set<String> linkedItems) {

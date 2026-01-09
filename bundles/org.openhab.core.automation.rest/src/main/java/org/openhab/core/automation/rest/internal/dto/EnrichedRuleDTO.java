@@ -26,5 +26,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class EnrichedRuleDTO extends RuleDTO {
 
     public RuleStatusInfo status;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Boolean editable;
 }

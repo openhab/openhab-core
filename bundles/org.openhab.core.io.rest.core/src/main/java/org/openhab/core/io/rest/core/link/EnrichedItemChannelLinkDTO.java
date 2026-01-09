@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.core.link;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Christoph Weitkamp - Initial contribution
  */
 @Schema(name = "EnrichedItemChannelLink")
+@NonNullByDefault
 public class EnrichedItemChannelLinkDTO extends ItemChannelLinkDTO {
 
     public Boolean editable;
