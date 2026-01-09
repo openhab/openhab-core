@@ -30,10 +30,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.IncludePlaceholder;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.RemovePlaceholder;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.ReplacePlaceholder;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.SubstitutionPlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.IncludePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.RemovePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.ReplacePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.SubstitutionPlaceholder;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;

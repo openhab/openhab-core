@@ -10,20 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.yaml.internal.util.preprocessor.tags;
-
-import java.util.regex.Pattern;
+package org.openhab.core.model.yaml.internal.util.preprocessor.placeholders;
 
 import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 
 /**
- * The {@link SubstitutionPlaceholder} represents a deferred string interpolation constructed from a <code>!sub</code>
- * node to be processed by the {@link YamlPreprocessor}.
- *
- * <p>
- * It preserves the raw scalar value and the delimiter pattern that was active (from !sub or parent !sub).
+ * The {@link ReplacePlaceholder} represents an object constructed from a <code>!replace</code> node
+ * to be processed by the {@link YamlPreprocessor}.
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-public record SubstitutionPlaceholder(String value, Pattern pattern, boolean isPlainScalar) {
+public record ReplacePlaceholder(Object object) {
 }

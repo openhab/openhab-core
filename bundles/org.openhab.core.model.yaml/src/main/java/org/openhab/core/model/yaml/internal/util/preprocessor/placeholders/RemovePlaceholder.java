@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.yaml.internal.util.preprocessor.tags;
+package org.openhab.core.model.yaml.internal.util.preprocessor.placeholders;
 
 import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 
 /**
- * The {@link ReplacePlaceholder} represents an object constructed from a <code>!replace</code> node
+ * The {@link RemovePlaceholder} represents an object constructed from an <code>!remove</code> node
  * to be processed by the {@link YamlPreprocessor}.
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-public record ReplacePlaceholder(Object object) {
+public record RemovePlaceholder() {
 }

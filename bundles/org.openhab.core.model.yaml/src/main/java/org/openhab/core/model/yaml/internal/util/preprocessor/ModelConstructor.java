@@ -23,10 +23,10 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.IncludePlaceholder;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.RemovePlaceholder;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.ReplacePlaceholder;
-import org.openhab.core.model.yaml.internal.util.preprocessor.tags.SubstitutionPlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.IncludePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.RemovePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.ReplacePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.SubstitutionPlaceholder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
