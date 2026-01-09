@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NonNullByDefault
 public class FirmwareStatusDTO {
     public final String status;
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public final @Nullable String updatableVersion;
 
     public FirmwareStatusDTO(String status, @Nullable String updatableVersion) {

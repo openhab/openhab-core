@@ -25,5 +25,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "ExtendedFileFormat")
 public class ExtendedFileFormatDTO extends FileFormatDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public List<String> warnings;
 }

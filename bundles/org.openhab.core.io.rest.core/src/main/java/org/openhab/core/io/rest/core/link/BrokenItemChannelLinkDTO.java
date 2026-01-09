@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.core.link;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry.ItemChannelLinkProblem;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Arne Seime - Initial contribution
  */
 @Schema(name = "BrokenItemChannelLink")
+@NonNullByDefault
 public class BrokenItemChannelLinkDTO {
     public EnrichedItemChannelLinkDTO itemChannelLink;
 

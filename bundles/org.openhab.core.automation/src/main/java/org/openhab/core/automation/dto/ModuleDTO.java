@@ -24,9 +24,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "Module")
 public class ModuleDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
     public String label;
     public String description;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, Object> configuration;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String type;
 }

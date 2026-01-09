@@ -27,6 +27,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "FileFormat")
 public class FileFormatDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public List<FileFormatItemDTO> items;
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public List<ThingDTO> things;
 }

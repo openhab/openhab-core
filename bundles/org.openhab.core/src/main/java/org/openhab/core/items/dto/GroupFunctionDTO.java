@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "GroupFunction")
 public class GroupFunctionDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String name;
     public String[] params;
 }

@@ -14,6 +14,9 @@ package org.openhab.core.thing.dto;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -24,22 +27,31 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @Schema(name = "StrippedThingType")
+@NonNullByDefault
 public class StrippedThingTypeDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String UID;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String label;
-    public String description;
-    public String category;
+    public @Nullable String description;
+    public @Nullable String category;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public boolean listed;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<String> supportedBridgeTypeUIDs;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public boolean bridge;
-    public String semanticEquipmentTag;
+    public @Nullable String semanticEquipmentTag;
 
+    // do not remove - needed by GSON
     public StrippedThingTypeDTO() {
+        this("", "", null, null, true, List.of(), false, null);
     }
 
-    public StrippedThingTypeDTO(String uid, String label, String description, String category, boolean listed,
-            List<String> supportedBridgeTypeUIDs, boolean bridge, String semanticEquipmentTag) {
+    public StrippedThingTypeDTO(String uid, String label, @Nullable String description, @Nullable String category,
+            boolean listed, List<String> supportedBridgeTypeUIDs, boolean bridge,
+            @Nullable String semanticEquipmentTag) {
         this.UID = uid;
         this.label = label;
         this.description = description;

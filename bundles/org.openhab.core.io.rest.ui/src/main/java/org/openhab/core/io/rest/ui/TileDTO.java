@@ -26,9 +26,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NonNullByDefault
 public class TileDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String name;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String url;
     public @Nullable String overlay;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String imageUrl;
 
     public TileDTO(String name, String url, @Nullable String overlay, String imageUrl) {

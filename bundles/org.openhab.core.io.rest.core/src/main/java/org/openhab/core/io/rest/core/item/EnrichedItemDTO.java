@@ -32,7 +32,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "EnrichedItem")
 public class EnrichedItemDTO extends ItemDTO {
 
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String link;
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String state;
