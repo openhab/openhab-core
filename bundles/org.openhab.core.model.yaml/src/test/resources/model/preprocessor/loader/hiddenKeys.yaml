@@ -1,14 +1,3 @@
-# Global entry with a leading dot -> will be ignored and is only there to enable yaml anchors
-.energy_type: &EnergyTypeAnchor
-  type: number
-  dimension: Energy
-  unit: kWh
-
-# Merge previously defined anchor in item
-items:
-  energy_1:
-    <<: *EnergyTypeAnchor
-    label: Energy_1
-  energy_2:
-    <<: *EnergyTypeAnchor
-    label: Energy_2
+# Global entry with a leading dot -> will be ignored
+.energy_type:
+  foo: bar

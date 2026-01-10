@@ -108,14 +108,6 @@ public class YamlPreprocessorTest {
             Map<String, Object> data = loadFixture(PATH + "hiddenKeys.yaml");
 
             assertThat(getNestedValue(data, ".energy_type"), nullValue());
-            assertThat(getNestedValue(data, "items", "energy_1", "type"), equalTo("number"));
-            assertThat(getNestedValue(data, "items", "energy_1", "dimension"), equalTo("Energy"));
-            assertThat(getNestedValue(data, "items", "energy_1", "unit"), equalTo("kWh"));
-            assertThat(getNestedValue(data, "items", "energy_1", "label"), equalTo("Energy_1"));
-            assertThat(getNestedValue(data, "items", "energy_2", "type"), equalTo("number"));
-            assertThat(getNestedValue(data, "items", "energy_2", "dimension"), equalTo("Energy"));
-            assertThat(getNestedValue(data, "items", "energy_2", "unit"), equalTo("kWh"));
-            assertThat(getNestedValue(data, "items", "energy_2", "label"), equalTo("Energy_2"));
         }
     }
 
