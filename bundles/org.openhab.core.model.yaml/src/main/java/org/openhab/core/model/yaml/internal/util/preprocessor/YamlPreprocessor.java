@@ -70,7 +70,9 @@ public class YamlPreprocessor {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(YamlPreprocessor.class);
 
-    private final Path configRoot;
+    private static final Path configRoot = Path.of(OpenHAB.getConfigFolder()).toAbsolutePath().normalize();
+    private static final Path userDataRoot = Path.of(OpenHAB.getUserDataFolder()).toAbsolutePath().normalize();
+
     private final Path currentFile;
     private final Path currentFileRelative;
     private final Map<String, Object> variables;
@@ -84,7 +86,6 @@ public class YamlPreprocessor {
         this.includeCallback = includeCallback;
         this.currentFile = file.toAbsolutePath().normalize();
 
-        this.configRoot = Path.of(OpenHAB.getConfigFolder()).toAbsolutePath().normalize();
         this.currentFileRelative = currentFile.startsWith(configRoot) ? configRoot.relativize(currentFile)
                 : currentFile;
 
@@ -268,6 +269,8 @@ public class YamlPreprocessor {
         Path parentPath = currentFile.getParent();
         String directory = parentPath != null ? parentPath.toString() : "";
 
+        variables.put("OPENHAB_CONF", configRoot.toString());
+        variables.put("OPENHAB_USERDATA", userDataRoot.toString());
         variables.put("__FILE__", currentFile.toString());
         variables.put("__FILE_NAME__", fileName);
         variables.put("__FILE_EXT__", fileExtension);
