@@ -24,18 +24,19 @@ import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
-import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusDetail;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
-import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.Configuration;
 
 /**
- * convenience Rule class with an action handler. This allows to define Rules which have an execution block.
+ * Convenience {@link Rule} implementation with a {@link SimpleRuleActionHandler}.
+ * This allows defining rules from a JSR-223 language by inheriting from this class and implementing
+ * {@link SimpleRuleActionHandler}.
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - made it implement Rule
@@ -43,16 +44,15 @@ import org.openhab.core.config.core.Configuration;
 @NonNullByDefault
 public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
 
-    protected @NonNullByDefault({}) List<Trigger> triggers;
-    protected @NonNullByDefault({}) List<Condition> conditions;
-    protected @NonNullByDefault({}) List<Action> actions;
-    protected @NonNullByDefault({}) Configuration configuration;
-    protected @NonNullByDefault({}) List<ConfigDescriptionParameter> configDescriptions;
-    protected @Nullable String templateUID;
+    protected List<Trigger> triggers = new ArrayList<>();
+    protected List<Condition> conditions = new ArrayList<>();
+    protected List<Action> actions = new ArrayList<>();
+    protected Configuration configuration = new Configuration();
+    protected List<ConfigDescriptionParameter> configDescriptions = new ArrayList<>();
     protected @NonNullByDefault({}) String uid;
     protected @Nullable String name;
-    protected @NonNullByDefault({}) Set<String> tags;
-    protected @NonNullByDefault({}) Visibility visibility;
+    protected Set<String> tags = new HashSet<>();
+    protected Visibility visibility = Visibility.VISIBLE;
     protected @Nullable String description;
 
     protected transient volatile RuleStatusInfo status = new RuleStatusInfo(RuleStatus.UNINITIALIZED,
@@ -66,18 +66,18 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
         return uid;
     }
 
-    @Override
-    public @Nullable String getTemplateUID() {
-        return templateUID;
+    /**
+     * This method is used to specify the identifier of the {@link Rule}.
+     * 
+     * @param ruleUID the identifier of the {@link Rule}.
+     */
+    public void setUID(String ruleUID) {
+        uid = ruleUID;
     }
 
-    /**
-     * This method is used to specify the {@link RuleTemplate} identifier of the template that will be used to
-     * by the {@link RuleRegistry} to resolve the {@link Rule}: to validate the {@link Rule}'s configuration, as
-     * well as to create and configure the {@link Rule}'s modules.
-     */
-    public void setTemplateUID(@Nullable String templateUID) {
-        this.templateUID = templateUID;
+    @Override
+    public @Nullable String getTemplateUID() {
+        return null;
     }
 
     @Override
@@ -105,7 +105,9 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param ruleTags the {@link Rule}'s assigned tags.
      */
     public void setTags(@Nullable Set<String> ruleTags) {
-        tags = ruleTags != null ? ruleTags : new HashSet<>();
+        if (ruleTags != null) {
+            tags = ruleTags;
+        }
     }
 
     @Override
@@ -134,7 +136,9 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param visibility the {@link Rule}'s {@link Visibility} value.
      */
     public void setVisibility(@Nullable Visibility visibility) {
-        this.visibility = visibility == null ? Visibility.VISIBLE : visibility;
+        if (visibility != null) {
+            this.visibility = visibility;
+        }
     }
 
     @Override
@@ -148,7 +152,9 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param ruleConfiguration the new configuration values.
      */
     public void setConfiguration(@Nullable Configuration ruleConfiguration) {
-        this.configuration = ruleConfiguration == null ? new Configuration() : ruleConfiguration;
+        if (ruleConfiguration != null) {
+            this.configuration = ruleConfiguration;
+        }
     }
 
     @Override
@@ -161,12 +167,14 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * the meta info for configuration properties of the {@link Rule}.
      */
     public void setConfigurationDescriptions(@Nullable List<ConfigDescriptionParameter> configDescriptions) {
-        this.configDescriptions = configDescriptions == null ? new ArrayList<>() : configDescriptions;
+        if (configDescriptions != null) {
+            this.configDescriptions = configDescriptions;
+        }
     }
 
     @Override
     public List<Condition> getConditions() {
-        return conditions == null ? List.of() : conditions;
+        return conditions;
     }
 
     /**
@@ -175,17 +183,14 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param conditions a list with the conditions that should belong to this {@link Rule}.
      */
     public void setConditions(@Nullable List<Condition> conditions) {
-        this.conditions = conditions;
+        if (conditions != null) {
+            this.conditions = conditions;
+        }
     }
 
     @Override
     public List<Action> getActions() {
-        return actions == null ? List.of() : actions;
-    }
-
-    @Override
-    public List<Trigger> getTriggers() {
-        return triggers == null ? List.of() : triggers;
+        return actions;
     }
 
     /**
@@ -194,7 +199,14 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param actions a list with the actions that should belong to this {@link Rule}.
      */
     public void setActions(@Nullable List<Action> actions) {
-        this.actions = actions;
+        if (actions != null) {
+            this.actions = actions;
+        }
+    }
+
+    @Override
+    public List<Trigger> getTriggers() {
+        return triggers;
     }
 
     /**
@@ -203,7 +215,9 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param triggers a list with the triggers that should belong to this {@link Rule}.
      */
     public void setTriggers(@Nullable List<Trigger> triggers) {
-        this.triggers = triggers;
+        if (triggers != null) {
+            this.triggers = triggers;
+        }
     }
 
     @Override
