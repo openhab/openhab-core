@@ -43,6 +43,10 @@ import org.openhab.core.config.core.Configuration;
  */
 @NonNullByDefault
 public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
+    protected static final ConfigDescriptionParameter SCRIPT_TYPE_CONFIG_DESCRIPTION = ConfigDescriptionParameterBuilder
+            .create("type", ConfigDescriptionParameter.Type.TEXT).withReadOnly(true).build();
+    protected static final ConfigDescriptionParameter SOURCE_CONFIG_DESCRIPTION = ConfigDescriptionParameterBuilder
+            .create("source", ConfigDescriptionParameter.Type.TEXT).withReadOnly(true).build();
 
     protected List<Trigger> triggers = new ArrayList<>();
     protected List<Condition> conditions = new ArrayList<>();
@@ -59,6 +63,8 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
             RuleStatusDetail.NONE);
 
     public SimpleRule() {
+        configDescriptions.add(SCRIPT_TYPE_CONFIG_DESCRIPTION);
+        configDescriptions.add(SOURCE_CONFIG_DESCRIPTION);
     }
 
     @Override

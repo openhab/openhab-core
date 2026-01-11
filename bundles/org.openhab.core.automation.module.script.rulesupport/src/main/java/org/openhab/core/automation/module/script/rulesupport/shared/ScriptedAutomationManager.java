@@ -175,6 +175,7 @@ public class ScriptedAutomationManager {
             actions.add(scriptedAction);
         }
 
+        builder.withConfigurationDescriptions(element.getConfigurationDescriptions());
         builder.withConfiguration(element.getConfiguration());
         builder.withActions(actions);
 
