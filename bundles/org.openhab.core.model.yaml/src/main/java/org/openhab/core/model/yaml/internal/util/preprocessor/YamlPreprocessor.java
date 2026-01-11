@@ -79,8 +79,7 @@ public class YamlPreprocessor {
     private final Set<Path> includeStack;
     private final Consumer<Path> includeCallback;
 
-    private YamlPreprocessor(Path file, Map<String, Object> variables, Set<Path> includeStack,
-            Consumer<Path> includeCallback) {
+    YamlPreprocessor(Path file, Map<String, Object> variables, Set<Path> includeStack, Consumer<Path> includeCallback) {
         this.variables = new LinkedHashMap<>(variables);
         this.includeStack = new HashSet<>(includeStack);
         this.includeCallback = includeCallback;
@@ -112,15 +111,13 @@ public class YamlPreprocessor {
      */
     public static Object process(Path path, byte[] fileBytes, Consumer<Path> includeCallback) throws IOException {
         try {
-            return new YamlPreprocessor(path, new LinkedHashMap<>(), new HashSet<>(), includeCallback)
-                    .process(fileBytes);
+            return new YamlPreprocessor(path, Map.of(), Set.of(), includeCallback).process(fileBytes);
         } catch (YAMLException e) {
             // rethrow as IOException so the caller has a simpler error handling and avoids dependency on SnakeYAML
             throw new IOException(e.getMessage(), e);
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Object process(byte[] fileBytes) throws IOException, YAMLException {
         LOGGER.debug("Loading file({}): {} with given vars {}", includeStack.size(), currentFile, variables);
 
@@ -143,7 +140,10 @@ public class YamlPreprocessor {
         // This cannot be avoided, because SnakeYAML executes interpolation during the construction phase itself.
         // Once the object graph is built, substitutions cannot be applied retroactively,
         // so a full reload with the resolved variables is required.
-        Map<String, Object> dataMap = (Map<String, Object>) loadYaml(fileBytes, true);
+        Object finalPassData = loadYaml(fileBytes, true);
+        if (!(finalPassData instanceof Map<?, ?> dataMap)) {
+            return finalPassData;
+        }
         dataMap.remove(VARIABLES_KEY); // we've already extracted the variables in the first pass
         LOGGER.debug("Loaded data from {}: {}", currentFile, dataMap);
 
@@ -159,22 +159,22 @@ public class YamlPreprocessor {
         Object packagesObj = dataMap.remove(PACKAGES_KEY);
 
         // Process includes in everything except packages
-        dataMap = (Map<String, Object>) processIncludes(dataMap);
-        LOGGER.debug("Loaded includes from {}: {}", currentFile, dataMap);
+        @SuppressWarnings("unchecked") // resolveIncludes returns a Map when given a map
+        Map<Object, Object> resolvedDataMap = (Map<Object, Object>) resolveIncludes(dataMap);
+        LOGGER.debug("Loaded includes from {}: {}", currentFile, resolvedDataMap);
 
         // Process packages separately - this allows us to inject the package ID before processing includes
-        if (packagesObj instanceof Map<?, ?> packages) {
-            mergePackages(dataMap, (Map<String, Object>) packages);
+        if (packagesObj instanceof Map<?, ?> packagesMap) {
+            mergePackages(resolvedDataMap, packagesMap);
+            LOGGER.debug("Merged packages into data in {}: {}", currentFile, resolvedDataMap);
         } else if (packagesObj != null) {
             LOGGER.warn("YAML model {}: The 'packages' section is not a map", currentFileRelative);
         }
 
-        LOGGER.debug("Combined data from {}: {}", currentFile, dataMap);
-
-        dataMap = excludeHiddenKeys(dataMap);
+        resolvedDataMap = excludeHiddenKeys(resolvedDataMap);
 
         if (generateCompiled) {
-            writeCompiledOutput(dataMap);
+            writeCompiledOutput(resolvedDataMap);
         }
 
         if (!allowLoading) {
@@ -182,18 +182,22 @@ public class YamlPreprocessor {
                     "'%s.%s' is false; loading is disabled".formatted(PREPROCESSOR_KEY, LOAD_INTO_OPENHAB_KEY));
         }
 
-        return dataMap;
+        return resolvedDataMap;
+    }
+
+    Path getFile() {
+        return currentFile;
     }
 
     private Object loadYaml(byte[] fileBytes, boolean finalPass) throws IOException {
-        Yaml yaml = newYaml(variables, currentFile, finalPass);
+        Yaml yaml = newYaml(variables, this, finalPass);
         return yaml.load(new ByteArrayInputStream(fileBytes));
     }
 
     /**
      * Extracts variables from the given map.
      */
-    private void extractVariables(Object variablesSection) {
+    private void extractVariables(@Nullable Object variablesSection) {
         // Resolve if it's a substitution placeholder (e.g., variables: !sub)
         if (variablesSection instanceof SubstitutionPlaceholder) {
             variablesSection = resolveSubstitutionPlaceholders(variablesSection);
@@ -208,8 +212,7 @@ public class YamlPreprocessor {
                     return;
                 }
                 LOGGER.debug("Extracting variable '{}' with raw value '{}' from {}", key, value, currentFileRelative);
-                // But we need to resolve key if it's a !sub, because it's the variable name
-                String resolvedKey = resolveSubstitutionPlaceholders(key).toString();
+                String resolvedKey = String.valueOf(resolveSubstitutionPlaceholders(key));
                 if (!variables.containsKey(resolvedKey)) { // previous variables (e.g. global) take precedence
                     Object resolvedValue = resolveSubstitutionPlaceholders(value);
                     // add to main variables map so it can be used in subsequent variables
@@ -231,7 +234,7 @@ public class YamlPreprocessor {
      * Recursively resolve all SubstitutionPlaceholders in a value (map, list, or scalar),
      * now that the full variables map is available.
      */
-    private Object resolveSubstitutionPlaceholders(Object value) {
+    private @Nullable Object resolveSubstitutionPlaceholders(@Nullable Object value) {
         if (value instanceof SubstitutionPlaceholder placeholder) {
             String contextDescription = currentFileRelative + " [variables]";
             try {
@@ -253,9 +256,12 @@ public class YamlPreprocessor {
         return value;
     }
 
-    // Add special file-related variables
-    // These are added early so they're available in variable definitions during the first pass
-    // Special variables will override any user-defined variables with the same name
+    /**
+     * Add special file-related variables
+     *
+     * These are added early so they're available in variable definitions during the first pass
+     * Special variables will override any user-defined variables with the same name
+     */
     private void setSpecialVariables() {
         Path fileNamePath = currentFile.getFileName();
         String fullFileName = fileNamePath != null ? fileNamePath.toString() : "";
@@ -282,24 +288,21 @@ public class YamlPreprocessor {
      * Process special nodes in the YAML data that correspond to !include.
      * This method is called recursively for nested objects.
      */
-    @SuppressWarnings("unchecked")
-    private Object processIncludes(Object data) {
+    private @Nullable Object resolveIncludes(@Nullable Object data) {
         if (data instanceof IncludePlaceholder includeObject) {
-            return loadIncludeFile(includeObject);
-        } else if (data instanceof Map) {
-            Map<String, Object> dataMap = (Map<String, Object>) data;
+            return resolveIncludePlaceholder(includeObject);
+        } else if (data instanceof Map<?, ?> dataMap) {
             return dataMap.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> processIncludes(entry.getValue()),
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> resolveIncludes(entry.getValue()),
                             (existing, replacement) -> replacement, LinkedHashMap::new));
-        } else if (data instanceof List) {
-            List<Object> dataList = (List<Object>) data;
-            return dataList.stream().map(this::processIncludes).toList();
+        } else if (data instanceof List<?> dataList) {
+            return dataList.stream().map(this::resolveIncludes).toList();
         }
         return data;
     }
 
     // Load the included file (recursively) and return its content
-    private Object loadIncludeFile(IncludePlaceholder includeObject) {
+    Object resolveIncludePlaceholder(IncludePlaceholder includeObject) {
         String includeFile = includeObject.fileName();
         Path includeFilePath = currentFile.resolveSibling(includeFile);
         Map<String, Object> includeVars = new HashMap<>(variables);
@@ -325,11 +328,21 @@ public class YamlPreprocessor {
         }
     }
 
-    // Recursively merge packages into the main data map
-    // if the same key exists in both the main map and the package, the main map value is kept
-    @SuppressWarnings("unchecked")
-    private void mergePackages(Map<String, Object> mainData, Map<String, Object> packages) {
-        packages.forEach((packageId, pkg) -> {
+    /**
+     * Recursively merge packages into the main data map
+     * if the same key exists in both the main map and the package, the main map value is kept
+     *
+     * @param mainData the main data map to merge into
+     * @param packages the packages to merge
+     */
+    private void mergePackages(Map<Object, Object> mainData, Map<?, ?> packages) {
+        packages.forEach((pkgKey, pkg) -> {
+            if (pkgKey == null) {
+                LOGGER.warn("YAML model {}: Encountered null package key with value {}; package will be ignored",
+                        currentFileRelative, pkg);
+                return;
+            }
+            String packageId = String.valueOf(pkgKey);
             Object processedPkg = pkg;
 
             // If the package is an IncludePlaceholder, inject the ID first, then process it
@@ -337,16 +350,16 @@ public class YamlPreprocessor {
                 Map<String, Object> newVars = new HashMap<>(includeObj.vars());
                 newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                 IncludePlaceholder pkgWithId = new IncludePlaceholder(includeObj.fileName(), newVars);
-                processedPkg = processIncludes(pkgWithId);
+                processedPkg = resolveIncludes(pkgWithId);
             }
 
-            if (processedPkg instanceof Map) {
-                Map<String, Object> pkgMap = (Map<String, Object>) processedPkg;
+            if (processedPkg instanceof Map<?, ?> pkgMap) {
                 // Also inject the package ID into all nested IncludePlaceholders within the package
-                Map<String, Object> pkgWithId = injectPackageId(pkgMap, packageId);
+                Map<Object, Object> pkgWithId = injectPackageId(pkgMap, packageId);
                 // Process any remaining includes after injection
-                pkgWithId = (Map<String, Object>) processIncludes(pkgWithId);
-                mergeElements(mainData, pkgWithId);
+                @SuppressWarnings("unchecked") // resolveIncludes returns a Map when given a map
+                Map<Object, Object> resolvedPkgWithId = (Map<Object, Object>) resolveIncludes(pkgWithId);
+                mergeElements(mainData, resolvedPkgWithId);
             } else {
                 LOGGER.warn("YAML model {}: Package '{}' did not resolve to a map: {}", currentFileRelative, packageId,
                         processedPkg);
@@ -354,7 +367,7 @@ public class YamlPreprocessor {
         });
 
         // Recursively resolve all ReplacePlaceholder and RemovePlaceholder instances
-        resolveSpecialObjects(mainData);
+        resolvePlaceholders(mainData);
     }
 
     /**
@@ -365,25 +378,23 @@ public class YamlPreprocessor {
      * @param packageId the package ID to inject
      * @return the modified package data
      */
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> injectPackageId(Map<String, Object> data, String packageId) {
+    private static Map<Object, Object> injectPackageId(Map<?, ?> data, String packageId) {
         return data.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> {
             Object value = entry.getValue();
             if (value instanceof IncludePlaceholder includeObj) {
                 Map<String, Object> newVars = new HashMap<>(includeObj.vars());
                 newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                 return new IncludePlaceholder(includeObj.fileName(), newVars);
-            } else if (value instanceof Map) {
-                return injectPackageId((Map<String, Object>) value, packageId);
-            } else if (value instanceof List) {
-                List<Object> list = (List<Object>) value;
-                return list.stream().map(item -> {
+            } else if (value instanceof Map<?, ?> valueMap) {
+                return injectPackageId(valueMap, packageId);
+            } else if (value instanceof List<?> listValue) {
+                return listValue.stream().map(item -> {
                     if (item instanceof IncludePlaceholder includeObj) {
                         Map<String, Object> newVars = new HashMap<>(includeObj.vars());
                         newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                         return new IncludePlaceholder(includeObj.fileName(), newVars);
-                    } else if (item instanceof Map) {
-                        return injectPackageId((Map<String, Object>) item, packageId);
+                    } else if (item instanceof Map<?, ?> mapItem) {
+                        return injectPackageId(mapItem, packageId);
                     }
                     return item;
                 }).toList();
@@ -404,34 +415,32 @@ public class YamlPreprocessor {
      * @param mainData the main data map to merge into
      * @param packageData the package data to merge from
      */
-    @SuppressWarnings("unchecked")
-    private static void mergeElements(Map<String, Object> mainData, Map<String, Object> packageData) {
+    private static void mergeElements(Map<Object, Object> mainData, Map<?, ?> packageData) {
         packageData.forEach((key, value) -> {
             if (mainData.containsKey(key)) {
                 Object mainValue = mainData.get(key);
                 if (mainValue instanceof ReplacePlaceholder) {
                     // With !replace, we keep only the main value (discard package value entirely)
-                    // resolveSpecialObjects will unwrap the ReplacePlaceholder later
+                    // resolvePlaceholders will unwrap the ReplacePlaceholder later
                     return;
                 }
                 if (mainValue instanceof RemovePlaceholder) {
                     // If main value is !remove, we'll ignore the package value
-                    // resolveSpecialObjects will remove the key later
+                    // resolvePlaceholders will remove the key later
                     return;
                 }
                 // Default behavior: merge maps and lists
-                if (mainValue instanceof Map && value instanceof Map) {
-                    Map<String, Object> mainMap = (Map<String, Object>) mainValue;
-                    Map<String, Object> pkgMap = (Map<String, Object>) value;
+                if (mainValue instanceof Map<?, ?> && value instanceof Map<?, ?> pkgMap) {
+                    @SuppressWarnings("unchecked") // SnakeYAML constructs maps as Map<Object, Object>
+                    Map<Object, Object> mainMap = (Map<Object, Object>) mainValue;
+
                     mergeElements(mainMap, pkgMap);
                     mainData.put(key, mainMap);
                     return;
                 }
-                if (mainValue instanceof List && value instanceof List) {
-                    List<Object> mainList = (List<Object>) mainValue;
-                    List<Object> pkgList = (List<Object>) value;
+                if (mainValue instanceof List<?> mainValueList && value instanceof List<?> pkgValueList) {
                     // append main list after package list
-                    mainData.put(key, Stream.concat(pkgList.stream(), mainList.stream()).toList());
+                    mainData.put(key, Stream.concat(pkgValueList.stream(), mainValueList.stream()).toList());
                     return;
                 }
                 // For non-map/non-list values, keep the main value overwriting the package value
@@ -446,14 +455,17 @@ public class YamlPreprocessor {
      * - RemovePlaceholder: removes the key from its parent map
      * - ReplacePlaceholder: unwraps to its contained object
      */
-    @SuppressWarnings("unchecked")
-    private static void resolveSpecialObjects(Map<String, Object> data) {
+    private static void resolvePlaceholders(Map<Object, Object> data) {
         // First, recursively process nested structures
         data.forEach((key, value) -> {
-            if (value instanceof Map) {
-                resolveSpecialObjects((Map<String, Object>) value);
-            } else if (value instanceof ReplacePlaceholder replaceObj && replaceObj.object() instanceof Map) {
-                resolveSpecialObjects((Map<String, Object>) replaceObj.object());
+            if (value instanceof Map<?, ?>) {
+                @SuppressWarnings("unchecked")
+                Map<Object, Object> mapValue = (Map<Object, Object>) value;
+                resolvePlaceholders(mapValue);
+            } else if (value instanceof ReplacePlaceholder replacePlaceholder) {
+                @SuppressWarnings("unchecked")
+                Map<Object, Object> replaceObj = (Map<Object, Object>) replacePlaceholder.object();
+                resolvePlaceholders(replaceObj);
             }
         });
 
@@ -462,21 +474,23 @@ public class YamlPreprocessor {
         data.replaceAll((key, value) -> value instanceof ReplacePlaceholder replaceObj ? replaceObj.object() : value);
     }
 
-    private static Map<String, Object> excludeHiddenKeys(Map<String, Object> dataMap) {
+    private static Map<Object, Object> excludeHiddenKeys(Map<Object, Object> dataMap) {
         // Exclude keys that start with a dot
-        return dataMap.entrySet().stream().filter(entry -> !entry.getKey().startsWith(".")).collect(Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> replacement, LinkedHashMap::new));
+        return dataMap.entrySet().stream()
+                .filter(entry -> !(entry.getKey() instanceof String key && key.startsWith(".")))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (existing, replacement) -> replacement, LinkedHashMap::new));
     }
 
-    private boolean shouldGenerateResolvedFile(Object preprocessorSection) {
+    private boolean shouldGenerateResolvedFile(@Nullable Object preprocessorSection) {
         return getPreprocessorBoolean(preprocessorSection, GENERATE_RESOLVED_FILE_KEY, false);
     }
 
-    private boolean shouldAllowLoading(Object preprocessorSection) {
+    private boolean shouldAllowLoading(@Nullable Object preprocessorSection) {
         return getPreprocessorBoolean(preprocessorSection, LOAD_INTO_OPENHAB_KEY, true);
     }
 
-    private boolean getPreprocessorBoolean(Object preprocessorSection, String key, boolean defaultValue) {
+    private boolean getPreprocessorBoolean(@Nullable Object preprocessorSection, String key, boolean defaultValue) {
         if (preprocessorSection == null) {
             return defaultValue;
         }
@@ -497,7 +511,7 @@ public class YamlPreprocessor {
         return defaultValue;
     }
 
-    private void writeCompiledOutput(Map<String, Object> dataMap) throws IOException {
+    private void writeCompiledOutput(Object dataMap) throws IOException {
         Path outputFile;
         Path outputDisplay;
         if (currentFile.startsWith(configRoot)) {
@@ -539,12 +553,12 @@ public class YamlPreprocessor {
         LOGGER.info("YAML model {}: Generated compiled YAML output to {}", currentFileRelative, outputFile);
     }
 
-    static Yaml newYaml(Map<String, Object> variables, Path path, boolean finalPass) {
+    static Yaml newYaml(Map<String, Object> variables, YamlPreprocessor preprocessor, boolean finalPass) {
         LoaderOptions loaderOptions = new LoaderOptions();
-        // Throw on duplicate keys; loadIncludeFile will prepend the including
+        // Throw on duplicate keys; resolveIncludePlaceholder will prepend the including
         // file name to help users locate the error in the include chain.
         loaderOptions.setAllowDuplicateKeys(false);
-        return new Yaml(new ModelConstructor(loaderOptions, variables, path, finalPass),
+        return new Yaml(new ModelConstructor(loaderOptions, variables, preprocessor, finalPass),
                 new Representer(new DumperOptions()), new DumperOptions(), loaderOptions, new ModelResolver());
     }
 }

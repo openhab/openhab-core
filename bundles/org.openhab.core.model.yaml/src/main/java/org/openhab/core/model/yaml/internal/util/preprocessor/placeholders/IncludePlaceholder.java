@@ -20,6 +20,9 @@ import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
  * The {@link IncludePlaceholder} represents an object constructed from an <code>!include</code> node
  * to be processed by the {@link YamlPreprocessor}.
  *
+ * @param fileName The name of the file to be included
+ * @param vars The variables to be passed to the included file
+ *
  * @author Jimmy Tanagra - Initial contribution
  */
 public record IncludePlaceholder(String fileName, Map<String, Object> vars) {

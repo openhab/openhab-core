@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -61,7 +61,7 @@ public class YamlPreprocessorTest {
 
         @Test
         public void booleanParser() throws IOException {
-            Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), Path.of("dummy.yaml"), false);
+            Yaml yaml = createYamlParser(false);
 
             assertThat(yaml.load("false"), equalTo(false));
             assertThat(yaml.load("False"), equalTo(false));
@@ -109,6 +109,17 @@ public class YamlPreprocessorTest {
 
             assertThat(getNestedValue(data, ".energy_type"), nullValue());
         }
+
+        @Test
+        void mergeWithInclude() throws IOException {
+            Map<String, Object> data = loadFixture(PATH + "mergeWithInclude.yaml");
+            // assertThat(getNestedValue(data, "simple", "foo"), equalTo("include1"));
+            // assertThat(getNestedValue(data, "duplicate", "foo"), equalTo("include1"));
+            // assertThat(getNestedValue(data, "override", "foo"), equalTo("direct"));
+            // assertThat(getNestedValue(data, "with_anchor_first", "foo"), equalTo("anchor"));
+            // assertThat(getNestedValue(data, "with_anchor_last", "foo"), equalTo("include2"));
+            assertThat(getNestedValue(data, "list_merge", "foo"), equalTo("include1"));
+        }
     }
 
     @Nested
@@ -121,7 +132,7 @@ public class YamlPreprocessorTest {
         @ValueSource(strings = { "${{}", "${'}", "${\"}", "${'\"}", "${\"'}", "${${}}", "${${}" })
         void invalidPatternHandling(String data) throws IOException {
             // Create a Yaml parser with finalPass = true to trigger substitutions
-            Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), Path.of("dummy.yaml"), true);
+            Yaml yaml = createYamlParser(true);
 
             assertThrows(YAMLException.class, () -> yaml.load("!sub " + data));
         }
@@ -141,7 +152,7 @@ public class YamlPreprocessorTest {
         @Test
         void jinjaUndefinedVariables() {
             // Create a Yaml parser with finalPass = true to trigger substitutions
-            Yaml yaml = YamlPreprocessor.newYaml(new HashMap<>(), Path.of("dummy.yaml"), true);
+            Yaml yaml = createYamlParser(true);
 
             YAMLException exception;
 
@@ -375,7 +386,7 @@ public class YamlPreprocessorTest {
                 Files.writeString(tempFile, yaml);
                 byte[] fileContent = Files.readAllBytes(tempFile);
                 @SuppressWarnings("unchecked")
-                Map<String, Object> result = (Map<String, Object>) YamlPreprocessor.process(tempFile, fileContent,
+                Map<Object, Object> result = (Map<Object, Object>) YamlPreprocessor.process(tempFile, fileContent,
                         path -> {
                         });
 
@@ -623,12 +634,22 @@ public class YamlPreprocessorTest {
      * @return the parsed YAML content as a Map
      * @throws IOException if an error occurs reading the file
      */
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> loadFixture(String filename) throws IOException {
+    private Map<Object, Object> loadFixture(String filename) throws IOException {
         Path filePath = SOURCE_PATH.resolve(filename);
         byte[] fileContent = Files.readAllBytes(filePath);
-        return (Map<String, Object>) YamlPreprocessor.process(filePath, fileContent, path -> {
+
+        Object result = YamlPreprocessor.process(filePath, fileContent, path -> {
         });
+        if (!(result instanceof Map<?, ?> dataMap)) {
+            fail("Fixture file did not produce a Map structure: " + filename);
+        }
+        return (Map<Object, Object>) dataMap;
+    }
+
+    private Yaml createYamlParser(boolean finalPass) {
+        YamlPreprocessor preprocessor = new YamlPreprocessor(Path.of("dummy.yaml"), Map.of(), Set.of(), (path) -> {
+        });
+        return YamlPreprocessor.newYaml(Map.of(), preprocessor, finalPass);
     }
 
     /**

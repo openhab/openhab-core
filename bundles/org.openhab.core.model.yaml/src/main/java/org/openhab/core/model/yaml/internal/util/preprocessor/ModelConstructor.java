@@ -16,10 +16,14 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -37,9 +41,11 @@ import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * The {@link ModelConstructor} adds extended functionality to the
@@ -70,18 +76,23 @@ class ModelConstructor extends Constructor {
     private final boolean finalPass;
     private final Map<String, Object> variables;
     private final Path currentFile;
+    private final YamlPreprocessor preprocessor;
+
+    private final Representer representer = new Representer(new DumperOptions());
 
     private final Deque<Boolean> substitutionStack = new ArrayDeque<>();
     private final Deque<Pattern> substitutionPatternStack = new ArrayDeque<>();
 
     private final Logger logger = LoggerFactory.getLogger(ModelConstructor.class);
 
-    public ModelConstructor(LoaderOptions options, Map<String, Object> variables, Path currentFile, boolean finalPass) {
+    public ModelConstructor(LoaderOptions options, Map<String, Object> variables, YamlPreprocessor preprocessor,
+            boolean finalPass) {
         super(options);
 
         this.finalPass = finalPass;
         this.variables = variables;
-        this.currentFile = currentFile;
+        this.currentFile = preprocessor.getFile();
+        this.preprocessor = preprocessor;
         this.substitutionStack.push(false);
         this.substitutionPatternStack
                 .push(VariableInterpolationHelper.compileSubstitutionPattern(DEFAULT_BEGIN, DEFAULT_END));
@@ -94,7 +105,7 @@ class ModelConstructor extends Constructor {
         this.yamlConstructors.put(REPLACE_TAG, finalPass ? new ConstructReplace() : new ConstructEmpty());
         this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
 
-        // We need to perform substitution in the first pass so that variables themselves can refer to other variables
+        // Perform substitution in the first pass so that variables can refer to other variables
         this.yamlConstructors.put(Tag.STR, new ConstructInterpolation());
 
         this.yamlMultiConstructors.put(SUB_TAG, new ConstructSub());
@@ -103,7 +114,8 @@ class ModelConstructor extends Constructor {
     }
 
     @Override
-    protected Object constructObject(@Nullable Node node) {
+    @NonNullByDefault({})
+    protected Object constructObject(Node node) {
         boolean parent = substitutionStack.peek();
         boolean enabled = resolveSubstitution(node.getTag(), parent);
         substitutionStack.push(enabled);
@@ -114,6 +126,78 @@ class ModelConstructor extends Constructor {
             substitutionPatternStack.pop();
             substitutionStack.pop();
         }
+    }
+
+    /**
+     * Intercept flattenMapping to handle merge keys (<<:) with IncludePlaceholder resolution.
+     *
+     * <ul>
+     * <li>Case 1: <code><<: !include {file: other.yaml}</code>
+     * <li>Case 2: <code><<: [ !include {file: one.yaml}, !include {file: two.yaml} ]</code>
+     * </ul>
+     *
+     * Normally when SnakeYAML handles merge keys against an !include tag,
+     * it would strip the tag and treat the value as a normal mapping:
+     * <code><<: {file: other.yaml}</code>
+     * <p>
+     * We need to intercept this process to construct the !include node,
+     * resolve the resulting IncludePlaceholder, then reconstruct the node
+     * with the included content so that SnakeYAML can perform the merge as expected.
+     *
+     * @param node
+     */
+    @Override
+    @NonNullByDefault({})
+    protected void flattenMapping(MappingNode node) {
+        if (node.isMerged() && finalPass) {
+            List<NodeTuple> originalTuples = new ArrayList<>(node.getValue());
+            node.getValue().clear();
+
+            // Now process merge keys (includes)
+            // find all merge keys (<<), resolve any IncludePlaceholder found, convert the resolved data back to Nodes
+            // and replace the original node with the resolved nodes so that SnakeYAML can perform the merge as usual
+            for (var tuple : originalTuples) {
+                if (Tag.MERGE.equals(tuple.getKeyNode().getTag())) {
+                    logger.debug("Processing merge key in flattenMapping: {}", tuple);
+                    Node valueNode = tuple.getValueNode();
+                    if (valueNode instanceof MappingNode) {
+                        // Merge Key with a single mapping
+                        // Handle the case for `<<: !include {file: other.yaml}`
+                        if (constructObject(valueNode) instanceof IncludePlaceholder include) {
+                            logger.debug("Resolving !include in flattenMapping: {}", include);
+                            Node includedNode = resolveIncludePlaceholderAsNode(valueNode, include);
+                            NodeTuple resolvedTuple = new NodeTuple(tuple.getKeyNode(), includedNode);
+                            tuple = resolvedTuple;
+                        }
+                    } else if (valueNode instanceof SequenceNode seqNode) {
+                        // Merge Key with a sequence of mappings
+                        // Handle the case for `<<: [ !include {file: one.yaml}, !include {file: two.yaml} ]`
+                        ListIterator<Node> iter = seqNode.getValue().listIterator();
+                        while (iter.hasNext()) {
+                            Node subNode = iter.next();
+                            if (constructObject(subNode) instanceof IncludePlaceholder include) {
+                                logger.debug("Resolving !include in flattenMapping list: {}", include);
+                                Node includedNode = resolveIncludePlaceholderAsNode(subNode, include);
+                                // replace the original list item with the included node
+                                iter.set(includedNode);
+                            }
+                        }
+                    }
+                }
+                // Add the (possibly modified) tuple back to the mapping node
+                node.getValue().add(tuple);
+            }
+        }
+        super.flattenMapping(node);
+    }
+
+    private Node resolveIncludePlaceholderAsNode(Node nodeContext, IncludePlaceholder includePlaceholder) {
+        Object includedData = preprocessor.resolveIncludePlaceholder(includePlaceholder);
+        if (includedData instanceof Map<?, ?>) {
+            Node includedNode = representer.represent(includedData);
+            return includedNode;
+        }
+        throw new YAMLException(getContext(nodeContext) + " !include did not return a map or list: " + includedData);
     }
 
     private boolean resolveSubstitution(Tag tag, boolean parent) {
@@ -134,6 +218,29 @@ class ModelConstructor extends Constructor {
         return false;
     }
 
+    private String getContext(@Nullable Node node) {
+        return VariableInterpolationHelper.formatContext(currentFile, formatLocation(node));
+    }
+
+    private String formatLocation(@Nullable Node node) {
+        if (node == null) {
+            return "";
+        }
+        Mark startMark = node.getStartMark();
+        Mark endMark = node.getEndMark();
+        if (startMark != null && endMark != null) {
+            return formatMark(startMark) + " to " + formatMark(endMark);
+        } else if (startMark != null) {
+            return formatMark(startMark);
+        }
+        return "";
+    }
+
+    private String formatMark(Mark mark) {
+        // SnakeYAML marks are 0-based; present as 1-based line/column for readability.
+        return "[%d:%d]".formatted(mark.getLine() + 1, mark.getColumn() + 1);
+    }
+
     public class ConstructInterpolation extends AbstractConstruct {
         @Override
         public Object construct(@Nullable Node node) {
@@ -144,8 +251,7 @@ class ModelConstructor extends Constructor {
                     boolean isPlainScalar = scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.PLAIN;
                     if (finalPass) {
                         Pattern pattern = substitutionPatternStack.peek();
-                        String contextDescription = VariableInterpolationHelper.formatContext(currentFile,
-                                formatLocation(scalarNode));
+                        String contextDescription = getContext(node);
                         try {
                             return VariableInterpolationHelper.evaluateValue(value, pattern, isPlainScalar, variables,
                                     contextDescription, true);
@@ -162,27 +268,7 @@ class ModelConstructor extends Constructor {
 
                 return value;
             }
-            throw new YAMLException(
-                    "%s:%s Expected a ScalarNode but got: %s".formatted(currentFile, formatLocation(node), node));
-        }
-
-        private String formatLocation(@Nullable Node node) {
-            if (node == null) {
-                return "";
-            }
-            Mark startMark = node.getStartMark();
-            Mark endMark = node.getEndMark();
-            if (startMark != null && endMark != null) {
-                return formatMark(startMark) + " to " + formatMark(endMark);
-            } else if (startMark != null) {
-                return formatMark(startMark);
-            }
-            return "";
-        }
-
-        private String formatMark(Mark mark) {
-            // SnakeYAML marks are 0-based; present as 1-based line/column for readability.
-            return "[%d:%d]".formatted(mark.getLine() + 1, mark.getColumn() + 1);
+            throw new YAMLException(getContext(node) + " Expected a ScalarNode but got: " + node);
         }
     }
 
@@ -196,7 +282,7 @@ class ModelConstructor extends Constructor {
             return switch (node) {
                 case MappingNode map -> constructMapping(map);
                 case SequenceNode seq -> constructSequence(seq);
-                case ScalarNode scalar -> yamlConstructors.get(Tag.STR).construct(scalar);
+                case ScalarNode scalar -> Objects.requireNonNull(yamlConstructors.get(Tag.STR)).construct(scalar);
                 default -> constructObject(node);
             };
         }
@@ -287,25 +373,26 @@ class ModelConstructor extends Constructor {
                 String value = constructScalar(scalarNode).trim();
                 return new IncludePlaceholder(value, Map.of());
             } else if (node instanceof MappingNode mappingNode) {
-                @SuppressWarnings("unchecked")
                 Map<Object, Object> includeOptions = constructMapping(mappingNode);
 
                 String fileName = (String) includeOptions.get("file");
                 if (fileName == null) {
-                    throw new YAMLException(currentFile + ": missing 'file' key in !include: " + includeOptions);
+                    throw new YAMLException(getContext(node) + " missing 'file' key in !include: " + includeOptions);
                 }
 
                 Object varsObj = includeOptions.get("vars");
                 if (varsObj == null) {
                     return new IncludePlaceholder(fileName, Map.of());
-                } else if (varsObj instanceof Map<?, ?>) {
-                    return new IncludePlaceholder(fileName, (Map<String, Object>) varsObj);
+                } else if (varsObj instanceof Map<?, ?> varsMap) {
+                    Map<String, Object> vars = varsMap.entrySet().stream()
+                            .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), Map.Entry::getValue));
+                    return new IncludePlaceholder(fileName, vars);
                 } else {
-                    throw new YAMLException(currentFile + ": invalid 'vars' type in !include file: " + fileName
+                    throw new YAMLException(getContext(node) + " invalid 'vars' type in !include file: " + fileName
                             + ", vars: " + varsObj + " (not a map)");
                 }
             }
-            throw new YAMLException(currentFile + ": invalid !include argument type: "
+            throw new YAMLException(getContext(node) + " invalid !include argument type: "
                     + (node == null ? null : node.getNodeId().name()));
         }
     }
@@ -322,7 +409,7 @@ class ModelConstructor extends Constructor {
                 logger.debug("Constructing !replace sequence node: {}", list);
                 return new ReplacePlaceholder(list);
             }
-            throw new YAMLException(currentFile + ": invalid !replace argument. Expected a map or a list.");
+            throw new YAMLException(getContext(node) + " invalid !replace argument. Expected a map or a list.");
         }
     }
 
