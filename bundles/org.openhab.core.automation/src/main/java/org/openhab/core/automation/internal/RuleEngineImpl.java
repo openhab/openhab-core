@@ -872,11 +872,12 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         register(rule);
         setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
 
-        // check if we have to trigger because of the startlevel
+        // If the rule engine is started: Check if we have to trigger immediately because of the startlevel
+        // Execution of startlevel triggers during startup is handled by executeRulesWithStartlevel()
         List<Trigger> slTriggers = rule.getTriggers().stream().map(WrappedTrigger::unwrap)
                 .filter(t -> SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(t.getTypeUID())).toList();
         int startLevel = startLevelService.getStartLevel();
-        if (slTriggers.stream()
+        if (started && slTriggers.stream()
                 .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
                         .intValue() <= startLevel)) {
             runNow(rule.getUID(), true, Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES,
