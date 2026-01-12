@@ -2,3 +2,6 @@ file: !sub ${__FILE__}
 filename: !sub ${__FILE_NAME__}
 ext: !sub ${__FILE_EXT__}
 path: !sub ${__DIRECTORY__}
+
+openhab_conf: !sub ${OPENHAB_CONF}
+openhab_userdata: !sub ${OPENHAB_USERDATA}

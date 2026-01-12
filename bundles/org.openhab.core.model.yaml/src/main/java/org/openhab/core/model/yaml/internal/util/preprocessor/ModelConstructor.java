@@ -193,11 +193,7 @@ class ModelConstructor extends Constructor {
 
     private Node resolveIncludePlaceholderAsNode(Node nodeContext, IncludePlaceholder includePlaceholder) {
         Object includedData = preprocessor.resolveIncludePlaceholder(includePlaceholder);
-        if (includedData instanceof Map<?, ?>) {
-            Node includedNode = representer.represent(includedData);
-            return includedNode;
-        }
-        throw new YAMLException(getContext(nodeContext) + " !include did not return a map or list: " + includedData);
+        return representer.represent(includedData);
     }
 
     private boolean resolveSubstitution(Tag tag, boolean parent) {
@@ -218,14 +214,11 @@ class ModelConstructor extends Constructor {
         return false;
     }
 
-    private String getContext(@Nullable Node node) {
+    private String getContext(Node node) {
         return VariableInterpolationHelper.formatContext(currentFile, formatLocation(node));
     }
 
-    private String formatLocation(@Nullable Node node) {
-        if (node == null) {
-            return "";
-        }
+    private String formatLocation(Node node) {
         Mark startMark = node.getStartMark();
         Mark endMark = node.getEndMark();
         if (startMark != null && endMark != null) {
@@ -243,18 +236,18 @@ class ModelConstructor extends Constructor {
 
     public class ConstructInterpolation extends AbstractConstruct {
         @Override
-        public Object construct(@Nullable Node node) {
+        @NonNullByDefault({})
+        public Object construct(Node node) {
             if (node instanceof ScalarNode scalarNode) {
                 String value = (String) constructScalar(scalarNode);
                 boolean enabled = substitutionStack.peek();
                 if (enabled || isSubTag(scalarNode.getTag())) {
-                    boolean isPlainScalar = scalarNode.getScalarStyle() == DumperOptions.ScalarStyle.PLAIN;
                     if (finalPass) {
                         Pattern pattern = substitutionPatternStack.peek();
                         String contextDescription = getContext(node);
                         try {
-                            return VariableInterpolationHelper.evaluateValue(value, pattern, isPlainScalar, variables,
-                                    contextDescription, true);
+                            return VariableInterpolationHelper.evaluateValue(value, pattern, scalarNode.isPlain(),
+                                    variables, contextDescription, true);
                         } catch (IllegalArgumentException e) {
                             // Re-wrap as YAMLException for consistency with YAML error handling
                             throw new YAMLException(e.getMessage(), e);
@@ -262,7 +255,8 @@ class ModelConstructor extends Constructor {
                     } else {
                         // Defer substitution until after variables are progressively populated
                         // so we can do variable chaining
-                        return new SubstitutionPlaceholder(value, substitutionPatternStack.peek(), isPlainScalar);
+                        return new SubstitutionPlaceholder(value, substitutionPatternStack.peek(),
+                                scalarNode.isPlain());
                     }
                 }
 
@@ -274,11 +268,8 @@ class ModelConstructor extends Constructor {
 
     public class ConstructDefault extends AbstractConstruct {
         @Override
-        public Object construct(@Nullable Node node) {
-            if (node == null) {
-                return "";
-            }
-
+        @NonNullByDefault({})
+        public Object construct(Node node) {
             return switch (node) {
                 case MappingNode map -> constructMapping(map);
                 case SequenceNode seq -> constructSequence(seq);
@@ -305,10 +296,8 @@ class ModelConstructor extends Constructor {
      */
     public class ConstructSub extends ConstructDefault {
         @Override
-        public Object construct(@Nullable Node node) {
-            if (node == null) {
-                return "";
-            }
+        @NonNullByDefault({})
+        public Object construct(Node node) {
             Pattern pattern = Objects.requireNonNullElseGet(extractPattern(node.getTag()),
                     () -> VariableInterpolationHelper.compileSubstitutionPattern(DEFAULT_BEGIN, DEFAULT_END));
 
@@ -365,19 +354,27 @@ class ModelConstructor extends Constructor {
 
     private class ConstructInclude extends AbstractConstruct {
         @Override
-        public Object construct(@Nullable Node node) {
+        @NonNullByDefault({})
+        public Object construct(Node node) {
             logger.debug("Constructing !include node: {}", node);
             if (node instanceof ScalarNode scalarNode) {
                 // ScalarNode's constructor ensured that its value is not null
                 // so scalarNode.getValue() and therefore constructScalar cannot be null here
                 String value = constructScalar(scalarNode).trim();
+                if (value.isEmpty()) {
+                    throw new YAMLException(getContext(node) + " !include file name cannot be empty");
+                }
                 return new IncludePlaceholder(value, Map.of());
             } else if (node instanceof MappingNode mappingNode) {
                 Map<Object, Object> includeOptions = constructMapping(mappingNode);
 
-                String fileName = (String) includeOptions.get("file");
-                if (fileName == null) {
-                    throw new YAMLException(getContext(node) + " missing 'file' key in !include: " + includeOptions);
+                Object fileNameObj = includeOptions.get("file");
+                if (!(fileNameObj instanceof String || fileNameObj instanceof Number)) {
+                    throw new YAMLException(getContext(node) + " 'file' must be a string. Found: " + fileNameObj);
+                }
+                String fileName = fileNameObj.toString();
+                if (fileName.isEmpty()) {
+                    throw new YAMLException(getContext(node) + " !include file name cannot be empty");
                 }
 
                 Object varsObj = includeOptions.get("vars");
@@ -399,7 +396,8 @@ class ModelConstructor extends Constructor {
 
     private class ConstructReplace extends AbstractConstruct {
         @Override
-        public Object construct(@Nullable Node node) {
+        @NonNullByDefault({})
+        public Object construct(Node node) {
             if (node instanceof MappingNode mappingNode) {
                 Map<Object, Object> map = constructMapping(mappingNode);
                 logger.debug("Constructing !replace map node: {}", map);

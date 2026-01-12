@@ -7,5 +7,5 @@ variables:
   baz: qux
 
 packages:
-  foo: bar
-  baz: qux
+  foo: {}
+  baz: {}
