@@ -193,7 +193,29 @@ class ModelConstructor extends Constructor {
 
     private Node resolveIncludePlaceholderAsNode(Node nodeContext, IncludePlaceholder includePlaceholder) {
         Object includedData = preprocessor.resolveIncludePlaceholder(includePlaceholder);
-        return representer.represent(includedData);
+        Node result = representer.represent(includedData);
+        // Prevent substitution of the included content in the current context by
+        // tagging the entire subtree with NOSUB_TAG so ConstructInterpolation
+        // sees the !nosub tag on nested nodes as well.
+        markNoSub(result);
+        return result;
+    }
+
+    private void markNoSub(Node node) {
+        if (node == null) {
+            return;
+        }
+        node.setTag(NOSUB_TAG);
+        if (node instanceof MappingNode mapping) {
+            for (NodeTuple t : mapping.getValue()) {
+                markNoSub(t.getKeyNode());
+                markNoSub(t.getValueNode());
+            }
+        } else if (node instanceof SequenceNode seq) {
+            for (Node n : seq.getValue()) {
+                markNoSub(n);
+            }
+        }
     }
 
     private boolean resolveSubstitution(Tag tag, boolean parent) {

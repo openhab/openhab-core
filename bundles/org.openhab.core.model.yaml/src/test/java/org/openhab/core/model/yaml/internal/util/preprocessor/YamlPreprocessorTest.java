@@ -292,6 +292,7 @@ public class YamlPreprocessorTest {
             Map<Object, Object> data = loadFixture(PATH + "nosub.yaml");
 
             assertThat(getNestedValue(data, "top", "level1", "level2"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "top", "level1", "level2_a", "level3"), equalTo("${foo}"));
             assertThat(getNestedValue(data, "top", "level1", "level2_sub", "level3"), equalTo("bar"));
             assertThat(getNestedValue(data, "top", "level1", "level2_sub", "level3_nosub", "level4"),
                     equalTo("${foo}"));
@@ -334,6 +335,13 @@ public class YamlPreprocessorTest {
 
             assertThat(getNestedValue(data, "sub", "data", "moo_plain"), equalTo("${moo}"));
             assertThat(getNestedValue(data, "sub", "data", "moo_sub"), equalTo("cow"));
+
+            // !sub in the main file should NOT alter the behavior inside the included file when using merge
+            assertThat(getNestedValue(data, "submerge", "data", "plain"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "submerge", "data", "sub"), equalTo("bar"));
+            assertThat(getNestedValue(data, "submerge", "data", "nosub"), equalTo("${foo}"));
+            assertThat(getNestedValue(data, "submerge", "data", "moo_plain"), equalTo("${moo}"));
+            assertThat(getNestedValue(data, "submerge", "data", "moo_sub"), equalTo("cow"));
 
             // !nosub in the main file should NOT alter the behavior inside the included file
             assertThat(getNestedValue(data, "nosub", "data", "plain"), equalTo("${foo}"));
