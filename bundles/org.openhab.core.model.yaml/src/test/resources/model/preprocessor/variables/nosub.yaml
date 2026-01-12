@@ -4,6 +4,8 @@ variables:
 top: !sub
   level1: !nosub
     level2: ${foo} # => ${foo}
+    level2_a:
+      level3: ${foo} # => ${foo}
     level2_sub: !sub
       level3: ${foo} # => bar
       level3_nosub: !nosub
