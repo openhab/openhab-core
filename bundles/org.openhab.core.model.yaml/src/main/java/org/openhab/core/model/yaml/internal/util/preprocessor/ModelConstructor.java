@@ -101,6 +101,8 @@ class ModelConstructor extends Constructor {
         this.yamlConstructors.put(NOSUB_TAG, new ConstructDefault());
 
         // The first pass is only to gather variables, so we use a no-op constructor for efficiency
+        // also because the variables aren't populated yet for substitution, constructing includes/replaces/removes
+        // may result in errors if they rely on variables
         this.yamlConstructors.put(INCLUDE_TAG, finalPass ? new ConstructInclude() : new ConstructEmpty());
         this.yamlConstructors.put(REPLACE_TAG, finalPass ? new ConstructReplace() : new ConstructEmpty());
         this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
@@ -149,7 +151,7 @@ class ModelConstructor extends Constructor {
     @Override
     @NonNullByDefault({})
     protected void flattenMapping(MappingNode node) {
-        if (node.isMerged() && finalPass) {
+        if (node.isMerged()) {
             List<NodeTuple> originalTuples = new ArrayList<>(node.getValue());
             node.getValue().clear();
 
@@ -160,28 +162,22 @@ class ModelConstructor extends Constructor {
                 if (Tag.MERGE.equals(tuple.getKeyNode().getTag())) {
                     logger.debug("Processing merge key in flattenMapping: {}", tuple);
                     Node valueNode = tuple.getValueNode();
-                    if (valueNode instanceof MappingNode) {
-                        // Merge Key with a single mapping
-                        // Handle the case for `<<: !include {file: other.yaml}`
-                        if (constructObject(valueNode) instanceof IncludePlaceholder include) {
-                            logger.debug("Resolving !include in flattenMapping: {}", include);
-                            Node includedNode = resolveIncludePlaceholderAsNode(valueNode, include);
-                            NodeTuple resolvedTuple = new NodeTuple(tuple.getKeyNode(), includedNode);
-                            tuple = resolvedTuple;
-                        }
-                    } else if (valueNode instanceof SequenceNode seqNode) {
+                    if (valueNode instanceof SequenceNode seqNode) {
                         // Merge Key with a sequence of mappings
                         // Handle the case for `<<: [ !include {file: one.yaml}, !include {file: two.yaml} ]`
                         ListIterator<Node> iter = seqNode.getValue().listIterator();
                         while (iter.hasNext()) {
                             Node subNode = iter.next();
-                            if (constructObject(subNode) instanceof IncludePlaceholder include) {
-                                logger.debug("Resolving !include in flattenMapping list: {}", include);
-                                Node includedNode = resolveIncludePlaceholderAsNode(subNode, include);
+                            if (resolveIncludeNode(subNode) instanceof Node includedNode) {
+                                logger.debug("Resolving !include in flattenMapping list: {}", includedNode);
                                 // replace the original list item with the included node
                                 iter.set(includedNode);
                             }
                         }
+                    } else if (resolveIncludeNode(valueNode) instanceof Node includedNode) {
+                        // Merge Key with a single mapping
+                        // Handle the case for `<<: !include {file: other.yaml}`
+                        tuple = new NodeTuple(tuple.getKeyNode(), includedNode);
                     }
                 }
                 // Add the (possibly modified) tuple back to the mapping node
@@ -191,21 +187,42 @@ class ModelConstructor extends Constructor {
         super.flattenMapping(node);
     }
 
-    private Node resolveIncludePlaceholderAsNode(Node originalNode, IncludePlaceholder includePlaceholder) {
-        Object includedData = preprocessor.resolveIncludePlaceholder(includePlaceholder);
-        if (!(includedData instanceof Map<?, ?>)) {
-            throw new YAMLException(
-                    getContext(originalNode) + " Included content must be a mapping for merge key. Found: "
-                            + (includedData == null ? null : includedData.getClass().getName()));
+    /**
+     * Resolve an !include node if present.
+     *
+     * In non-final pass, the INCLUDE_TAG constructor is a no-op that returns an empty string,
+     * so we need to return an empty mapping because merge keys expect a mapping to merge into the parent.
+     * Otherwise "!include filename" will be constructed as a scalar which is invalid for merge keys.
+     *
+     * @param node
+     * @return the resolved Node, or null if the node is not an !include node
+     */
+    private @Nullable Node resolveIncludeNode(Node node) {
+        if (!INCLUDE_TAG.equals(node.getTag())) {
+            return null;
         }
-        Node result = representer.represent(includedData);
-        // Prevent substitution of the included content in the current context by
-        // tagging the entire subtree with NOSUB_TAG so ConstructInterpolation
-        // sees the !nosub tag on nested nodes as well.
-        markNoSub(result);
-        return result;
+        logger.debug("Resolving !include node: ({}), {}", substitutionStack.peek(), node);
+        if (finalPass && constructObject(node) instanceof IncludePlaceholder includePlaceholder) {
+            Object includedData = preprocessor.resolveIncludePlaceholder(includePlaceholder);
+            if (!(includedData instanceof Map<?, ?>)) {
+                throw new YAMLException(getContext(node) + " Included content must be a mapping for merge key. Found: "
+                        + (includedData == null ? null : includedData.getClass().getName()));
+            }
+            Node result = representer.represent(includedData);
+            // Prevent substitution of the included content in the current context by
+            // tagging the entire subtree with NOSUB_TAG so ConstructInterpolation
+            // sees the !nosub tag on nested nodes as well.
+            markNoSub(result);
+            return result;
+        }
+        return representer.represent(Map.of());
     }
 
+    /**
+     * Recursively mark the node and its children with NOSUB_TAG to prevent substitution.
+     *
+     * @param node
+     */
     private void markNoSub(Node node) {
         if (node == null) {
             return;
@@ -364,9 +381,12 @@ class ModelConstructor extends Constructor {
 
     // Return an empty string for null values so that the keys are not removed from the map
     // This matches the behavior of Jackson's parser, otherwise some tests will fail
-    private static class ConstructNull extends AbstractConstruct {
+    private class ConstructNull extends AbstractConstruct {
         @Override
         public Object construct(@Nullable Node node) {
+            if (node != null) {
+                constructScalar((ScalarNode) node);
+            }
             return "";
         }
     }
@@ -387,7 +407,8 @@ class ModelConstructor extends Constructor {
             if (node instanceof ScalarNode scalarNode) {
                 // ScalarNode's constructor ensured that its value is not null
                 // so scalarNode.getValue() and therefore constructScalar cannot be null here
-                String value = constructScalar(scalarNode).trim();
+                String value = Objects.requireNonNull(yamlConstructors.get(Tag.STR)).construct(scalarNode).toString()
+                        .trim();
                 if (value.isEmpty()) {
                     throw new YAMLException(getContext(node) + " !include file name cannot be empty");
                 }

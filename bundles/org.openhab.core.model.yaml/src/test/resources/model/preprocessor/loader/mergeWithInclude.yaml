@@ -28,3 +28,12 @@ list_merge:
     - !include {file: mergeWithInclude1.inc.yaml}
     - !include {file: mergeWithInclude2.inc.yaml}
     - *BAR3
+
+merge_with_scalar:
+  <<: !include mergeWithInclude1.inc.yaml
+
+variables:
+  file: mergeWithInclude1.inc.yaml
+
+merge_with_variable: !sub
+  <<: !include  "${file}"
