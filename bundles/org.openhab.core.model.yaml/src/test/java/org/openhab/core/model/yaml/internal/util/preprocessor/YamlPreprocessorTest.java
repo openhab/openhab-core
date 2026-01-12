@@ -131,6 +131,8 @@ public class YamlPreprocessorTest {
             assertThat(getNestedValue(data, "with_anchor_first", "foo"), equalTo("anchor"));
             assertThat(getNestedValue(data, "with_anchor_last", "foo"), equalTo("include2"));
             assertThat(getNestedValue(data, "list_merge", "foo"), equalTo("include1"));
+            assertThat(getNestedValue(data, "merge_with_scalar", "foo"), equalTo("include1"));
+            assertThat(getNestedValue(data, "merge_with_variable", "foo"), equalTo("include1"));
         }
     }
 
@@ -451,6 +453,13 @@ public class YamlPreprocessorTest {
         void invalidIncludeThrows(String input) throws IOException {
             Yaml yaml = createYamlParser(true);
             assertThrows(YAMLException.class, () -> yaml.load(input), input);
+        }
+
+        @Test
+        void includeSimpleWithVarFilename() throws IOException {
+            Map<Object, Object> data = loadFixture(PATH + "includeSimpleWithVarFilename.yaml");
+
+            assertThat(getNestedValue(data, "foo", "bar"), equalTo("bar"));
         }
 
         @Test
