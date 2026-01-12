@@ -466,33 +466,6 @@ public class YamlModelRepositoryImplTest {
     }
 
     @Test
-    public void testVersion1FilesSkipPreprocessor() throws IOException {
-        // Version 1 files should not invoke the preprocessor
-        // Jackson treats unknown tags like !include as plain strings
-        // The test verifies preprocessing is skipped by confirming the tag is treated literally
-        String version1Content = """
-                version: 1
-                firstType:
-                  First1:
-                    description: !include should-not-be-processed.yaml
-                """;
-
-        Files.writeString(fullModelPath, version1Content);
-
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-        modelRepository.addYamlModelListener(firstTypeListener);
-
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
-
-        verify(firstTypeListener).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
-
-        Collection<FirstTypeDTO> elements = firstTypeCaptor.getValue();
-        assertThat(elements, hasSize(1));
-        // Jackson converts !include tag to the literal filename string since preprocessor wasn't invoked
-        assertThat(elements, contains(new FirstTypeDTO("First1", "should-not-be-processed.yaml")));
-    }
-
-    @Test
     public void testIncludeFileModificationTriggersReevaluation() throws IOException {
         // Prepare main model that includes its firstType block from an include file
         String includeFileName = "firstType.inc.yaml";
@@ -506,7 +479,7 @@ public class YamlModelRepositoryImplTest {
 
         // Main model references the include for firstType
         String mainModel = ("""
-                version: 2
+                version: 1
                 firstType: !include %s
                 """).formatted(includeFileName);
 

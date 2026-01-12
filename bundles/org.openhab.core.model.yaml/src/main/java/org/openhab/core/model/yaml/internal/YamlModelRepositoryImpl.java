@@ -89,7 +89,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 @NonNullByDefault
 @Component(immediate = true)
 public class YamlModelRepositoryImpl implements WatchService.WatchEventListener, YamlModelRepository {
-    private static final int DEFAULT_MODEL_VERSION = 2;
+    private static final int DEFAULT_MODEL_VERSION = 1;
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
@@ -227,28 +227,12 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             if (kind == Kind.DELETE) {
                 // remove model below
             } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
-                // Read file once into memory to avoid multiple I/O operations
-                byte[] fileBytes = Files.readAllBytes(fullPath);
-                JsonNode rawNode = objectMapper.readTree(fileBytes);
-                if (rawNode == null) {
-                    errors.add("Failed to process model: empty content");
-                } else {
-                    int modelVersion = extractModelVersion(rawNode);
-                    boolean usePreprocessor = modelVersion >= 2;
-
-                    JsonNode contentNode;
-                    if (usePreprocessor) {
-                        Object yamlObject = YamlPreprocessor.process(fullPath, fileBytes, includePath -> {
-                            modelIncludes.put(modelName, includePath);
-                        });
-                        contentNode = objectMapper.valueToTree(yamlObject);
-                    } else {
-                        contentNode = rawNode;
-                    }
-
-                    processModelContent(modelName, kind, contentNode, errors, warnings);
-                    removeModel = false;
-                }
+                Object yamlObject = YamlPreprocessor.process(fullPath, includePath -> {
+                    modelIncludes.put(modelName, includePath);
+                });
+                JsonNode contentNode = objectMapper.valueToTree(yamlObject);
+                processModelContent(modelName, kind, contentNode, errors, warnings);
+                removeModel = false;
             } else {
                 logger.trace("Ignored {}", fullPath);
             }

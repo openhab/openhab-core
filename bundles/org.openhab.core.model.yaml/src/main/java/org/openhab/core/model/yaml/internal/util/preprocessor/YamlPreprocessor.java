@@ -102,17 +102,16 @@ public class YamlPreprocessor {
     }
 
     /**
-     * Load and preprocess a YAML file from memory.
-     * This avoids re-reading the file from disk because we're doing several passes.
+     * Load and preprocess a YAML file.
      *
      * @param path the file path for resolving relative includes
-     * @param fileBytes the content of the YAML file
      * @param includeCallback callback invoked for each included file
-     * @return the processed YAML fileByteData
+     * @return the processed Java object representation of the YAML file
      * @throws IOException if there is an error reading or processing the YAML
      */
-    public static Object process(Path path, byte[] fileBytes, Consumer<Path> includeCallback) throws IOException {
+    public static Object process(Path path, Consumer<Path> includeCallback) throws IOException {
         try {
+            byte[] fileBytes = Files.readAllBytes(path);
             return new YamlPreprocessor(path, Map.of(), Set.of(), includeCallback).process(fileBytes);
         } catch (YAMLException e) {
             // rethrow as IOException so the caller has a simpler error handling and avoids dependency on SnakeYAML

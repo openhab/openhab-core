@@ -393,11 +393,9 @@ public class YamlPreprocessorTest {
             Path tempFile = Files.createTempFile("test_variables_sub", ".yaml");
             try {
                 Files.writeString(tempFile, yaml);
-                byte[] fileContent = Files.readAllBytes(tempFile);
                 @SuppressWarnings("unchecked")
-                Map<Object, Object> result = (Map<Object, Object>) YamlPreprocessor.process(tempFile, fileContent,
-                        path -> {
-                        });
+                Map<Object, Object> result = (Map<Object, Object>) YamlPreprocessor.process(tempFile, path -> {
+                });
 
                 String expectedLabel = "test_" + tempFile.getFileName().toString().replace(".yaml", "");
                 assertThat(getNestedValue(result, "test", "name"), is(expectedLabel));
@@ -653,9 +651,7 @@ public class YamlPreprocessorTest {
     @SuppressWarnings("unchecked")
     private Map<Object, Object> loadFixture(String filename) throws IOException {
         Path filePath = SOURCE_PATH.resolve(filename);
-        byte[] fileContent = Files.readAllBytes(filePath);
-
-        Object result = YamlPreprocessor.process(filePath, fileContent, path -> {
+        Object result = YamlPreprocessor.process(filePath, path -> {
         });
         if (result instanceof Map<?, ?> dataMap) {
             return (Map<Object, Object>) dataMap;
