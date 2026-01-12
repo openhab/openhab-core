@@ -91,6 +91,7 @@ class VariableInterpolationHelper {
      * @param contextDescription description of the context for error messages (e.g., file path)
      * @param finalPass whether this is the final pass
      * @return the evaluated value
+     * @throws IllegalArgumentException if evaluation fails
      */
     static Object evaluateValue(String value, Pattern pattern, boolean isPlainScalar, Map<String, Object> variables,
             String contextDescription, boolean finalPass) {

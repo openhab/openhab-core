@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal.util.preprocessor.placeholders;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 
 /**
@@ -20,5 +21,6 @@ import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
+@NonNullByDefault
 public record RemovePlaceholder() {
 }

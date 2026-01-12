@@ -23,12 +23,14 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.IncludePlaceholder;
 import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.RemovePlaceholder;
@@ -147,12 +149,13 @@ public class YamlPreprocessor {
         dataMap.remove(VARIABLES_KEY); // we've already extracted the variables in the first pass
         LOGGER.debug("Loaded data from {}: {}", currentFile, dataMap);
 
+        // Define default preprocessor settings
         boolean generateCompiled = false;
         boolean allowLoading = true;
         if (includeStack.size() == 1) { // only check preprocessor settings for the top-level file
             Object preprocessorSection = dataMap.remove(PREPROCESSOR_KEY);
-            generateCompiled = shouldGenerateResolvedFile(preprocessorSection);
-            allowLoading = shouldAllowLoading(preprocessorSection);
+            generateCompiled = shouldGenerateResolvedFile(preprocessorSection, generateCompiled);
+            allowLoading = shouldAllowLoading(preprocessorSection, allowLoading);
         }
 
         // Extract packages before processing includes so we can handle them separately
@@ -205,12 +208,10 @@ public class YamlPreprocessor {
 
         if (variablesSection instanceof Map<?, ?> variablesMap) {
             Map<String, Object> extractedVariables = new LinkedHashMap<>();
-            variablesMap.forEach((key, value) -> {
-                if (key == null) {
-                    LOGGER.warn("YAML model {}: Encountered null key in '{}' section; value '{}' will be ignored",
-                            currentFileRelative, VARIABLES_KEY, value);
-                    return;
-                }
+            variablesMap.forEach((k, v) -> {
+                // The key/value scalars won't be null because we construct nulls as empty strings
+                Object key = Objects.requireNonNull(k, "Variable key in YAML cannot be null");
+                Object value = Objects.requireNonNull(v, () -> "Value for key '" + key + "' cannot be null");
                 LOGGER.debug("Extracting variable '{}' with raw value '{}' from {}", key, value, currentFileRelative);
                 String resolvedKey = String.valueOf(resolveSubstitutionPlaceholders(key));
                 if (!variables.containsKey(resolvedKey)) { // previous variables (e.g. global) take precedence
@@ -234,7 +235,7 @@ public class YamlPreprocessor {
      * Recursively resolve all SubstitutionPlaceholders in a value (map, list, or scalar),
      * now that the full variables map is available.
      */
-    private @Nullable Object resolveSubstitutionPlaceholders(@Nullable Object value) {
+    private Object resolveSubstitutionPlaceholders(Object value) {
         if (value instanceof SubstitutionPlaceholder placeholder) {
             String contextDescription = currentFileRelative + " [variables]";
             try {
@@ -247,7 +248,11 @@ public class YamlPreprocessor {
         }
         if (value instanceof Map<?, ?> map) {
             Map<Object, Object> resolved = new LinkedHashMap<>();
-            map.forEach((k, v) -> resolved.put(resolveSubstitutionPlaceholders(k), resolveSubstitutionPlaceholders(v)));
+            map.forEach((k, v) -> {
+                Object key = resolveSubstitutionPlaceholders(Objects.requireNonNull(k));
+                Object val = resolveSubstitutionPlaceholders(Objects.requireNonNull(v));
+                resolved.put(key, val);
+            });
             return resolved;
         }
         if (value instanceof List<?> list) {
@@ -288,10 +293,12 @@ public class YamlPreprocessor {
      * Process special nodes in the YAML data that correspond to !include.
      * This method is called recursively for nested objects.
      */
-    private @Nullable Object resolveIncludes(@Nullable Object data) {
+    private Object resolveIncludes(Object data) {
         if (data instanceof IncludePlaceholder includeObject) {
             return resolveIncludePlaceholder(includeObject);
-        } else if (data instanceof Map<?, ?> dataMap) {
+        } else if (data instanceof Map<?, ?>) {
+            @SuppressWarnings("unchecked") // Our ModelConstructor doesn't return null
+            Map<Object, Object> dataMap = (Map<Object, Object>) data;
             return dataMap.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> resolveIncludes(entry.getValue()),
                             (existing, replacement) -> replacement, LinkedHashMap::new));
@@ -337,11 +344,6 @@ public class YamlPreprocessor {
      */
     private void mergePackages(Map<Object, Object> mainData, Map<?, ?> packages) {
         packages.forEach((pkgKey, pkg) -> {
-            if (pkgKey == null) {
-                LOGGER.warn("YAML model {}: Encountered null package key with value {}; package will be ignored",
-                        currentFileRelative, pkg);
-                return;
-            }
             String packageId = String.valueOf(pkgKey);
             Object processedPkg = pkg;
 
@@ -380,7 +382,7 @@ public class YamlPreprocessor {
      */
     private static Map<Object, Object> injectPackageId(Map<?, ?> data, String packageId) {
         return data.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-            Object value = entry.getValue();
+            Object value = Objects.requireNonNull(entry.getValue());
             if (value instanceof IncludePlaceholder includeObj) {
                 Map<String, Object> newVars = new HashMap<>(includeObj.vars());
                 newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
@@ -396,7 +398,7 @@ public class YamlPreprocessor {
                     } else if (item instanceof Map<?, ?> mapItem) {
                         return injectPackageId(mapItem, packageId);
                     }
-                    return item;
+                    return Objects.requireNonNull(item);
                 }).toList();
             }
             return value;
@@ -415,8 +417,10 @@ public class YamlPreprocessor {
      * @param mainData the main data map to merge into
      * @param packageData the package data to merge from
      */
-    private static void mergeElements(Map<Object, Object> mainData, Map<?, ?> packageData) {
+    private static void mergeElements(Map<Object, Object> mainData, Map<Object, Object> packageData) {
         packageData.forEach((key, value) -> {
+            Objects.requireNonNull(key, "Encountered null key when merging package data");
+            Objects.requireNonNull(value, "Encountered null value for key '" + key + "' when merging package data");
             if (mainData.containsKey(key)) {
                 Object mainValue = mainData.get(key);
                 if (mainValue instanceof ReplacePlaceholder) {
@@ -430,10 +434,11 @@ public class YamlPreprocessor {
                     return;
                 }
                 // Default behavior: merge maps and lists
-                if (mainValue instanceof Map<?, ?> && value instanceof Map<?, ?> pkgMap) {
+                if (mainValue instanceof Map<?, ?> && value instanceof Map<?, ?> valueMap) {
                     @SuppressWarnings("unchecked") // SnakeYAML constructs maps as Map<Object, Object>
                     Map<Object, Object> mainMap = (Map<Object, Object>) mainValue;
-
+                    @SuppressWarnings("unchecked")
+                    Map<Object, Object> pkgMap = (Map<Object, Object>) valueMap;
                     mergeElements(mainMap, pkgMap);
                     mainData.put(key, mainMap);
                     return;
@@ -462,10 +467,6 @@ public class YamlPreprocessor {
                 @SuppressWarnings("unchecked")
                 Map<Object, Object> mapValue = (Map<Object, Object>) value;
                 resolvePlaceholders(mapValue);
-            } else if (value instanceof ReplacePlaceholder replacePlaceholder) {
-                @SuppressWarnings("unchecked")
-                Map<Object, Object> replaceObj = (Map<Object, Object>) replacePlaceholder.object();
-                resolvePlaceholders(replaceObj);
             }
         });
 
@@ -482,12 +483,12 @@ public class YamlPreprocessor {
                         (existing, replacement) -> replacement, LinkedHashMap::new));
     }
 
-    private boolean shouldGenerateResolvedFile(@Nullable Object preprocessorSection) {
-        return getPreprocessorBoolean(preprocessorSection, GENERATE_RESOLVED_FILE_KEY, false);
+    private boolean shouldGenerateResolvedFile(@Nullable Object preprocessorSection, boolean defaultValue) {
+        return getPreprocessorBoolean(preprocessorSection, GENERATE_RESOLVED_FILE_KEY, defaultValue);
     }
 
-    private boolean shouldAllowLoading(@Nullable Object preprocessorSection) {
-        return getPreprocessorBoolean(preprocessorSection, LOAD_INTO_OPENHAB_KEY, true);
+    private boolean shouldAllowLoading(@Nullable Object preprocessorSection, boolean defaultValue) {
+        return getPreprocessorBoolean(preprocessorSection, LOAD_INTO_OPENHAB_KEY, defaultValue);
     }
 
     private boolean getPreprocessorBoolean(@Nullable Object preprocessorSection, String key, boolean defaultValue) {
@@ -513,17 +514,14 @@ public class YamlPreprocessor {
 
     private void writeCompiledOutput(Object dataMap) throws IOException {
         Path outputFile;
-        Path outputDisplay;
         if (currentFile.startsWith(configRoot)) {
             Path outputRoot = configRoot.resolve("_generated");
             outputFile = outputRoot.resolve(currentFileRelative);
-            outputDisplay = configRoot.relativize(outputFile);
         } else {
             LOGGER.warn("YAML model {}: Cannot place compiled output under config folder '{}'; writing next to source",
                     currentFileRelative, configRoot);
             Path fallbackDir = currentFile.resolveSibling("_generated");
             outputFile = fallbackDir.resolve(currentFile.getFileName());
-            outputDisplay = outputFile;
         }
 
         Path outputDir = outputFile.getParent();
