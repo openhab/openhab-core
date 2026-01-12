@@ -191,8 +191,13 @@ class ModelConstructor extends Constructor {
         super.flattenMapping(node);
     }
 
-    private Node resolveIncludePlaceholderAsNode(Node nodeContext, IncludePlaceholder includePlaceholder) {
+    private Node resolveIncludePlaceholderAsNode(Node originalNode, IncludePlaceholder includePlaceholder) {
         Object includedData = preprocessor.resolveIncludePlaceholder(includePlaceholder);
+        if (!(includedData instanceof Map<?, ?>)) {
+            throw new YAMLException(
+                    getContext(originalNode) + " Included content must be a mapping for merge key. Found: "
+                            + (includedData == null ? null : includedData.getClass().getName()));
+        }
         Node result = representer.represent(includedData);
         // Prevent substitution of the included content in the current context by
         // tagging the entire subtree with NOSUB_TAG so ConstructInterpolation
