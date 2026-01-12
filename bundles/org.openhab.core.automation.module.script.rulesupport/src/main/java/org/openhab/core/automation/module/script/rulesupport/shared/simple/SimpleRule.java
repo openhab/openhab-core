@@ -111,9 +111,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param ruleTags the {@link Rule}'s assigned tags.
      */
     public void setTags(@Nullable Set<String> ruleTags) {
-        if (ruleTags != null) {
-            tags = ruleTags;
-        }
+        tags = ruleTags == null ? new HashSet<>() : ruleTags;
     }
 
     @Override
@@ -142,9 +140,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param visibility the {@link Rule}'s {@link Visibility} value.
      */
     public void setVisibility(@Nullable Visibility visibility) {
-        if (visibility != null) {
-            this.visibility = visibility;
-        }
+        this.visibility = visibility == null ? Visibility.VISIBLE : visibility;
     }
 
     @Override
@@ -158,9 +154,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param ruleConfiguration the new configuration values.
      */
     public void setConfiguration(@Nullable Configuration ruleConfiguration) {
-        if (ruleConfiguration != null) {
-            this.configuration = ruleConfiguration;
-        }
+        this.configuration = ruleConfiguration == null ? new Configuration() : ruleConfiguration;
     }
 
     @Override
@@ -173,9 +167,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * the meta info for configuration properties of the {@link Rule}.
      */
     public void setConfigurationDescriptions(@Nullable List<ConfigDescriptionParameter> configDescriptions) {
-        if (configDescriptions != null) {
-            this.configDescriptions = configDescriptions;
-        }
+        this.configDescriptions = configDescriptions == null ? new ArrayList<>() : configDescriptions;
     }
 
     @Override
@@ -189,9 +181,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param conditions a list with the conditions that should belong to this {@link Rule}.
      */
     public void setConditions(@Nullable List<Condition> conditions) {
-        if (conditions != null) {
-            this.conditions = conditions;
-        }
+        this.conditions = conditions == null ? new ArrayList<>() : conditions;
     }
 
     @Override
@@ -205,9 +195,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param actions a list with the actions that should belong to this {@link Rule}.
      */
     public void setActions(@Nullable List<Action> actions) {
-        if (actions != null) {
-            this.actions = actions;
-        }
+        this.actions = actions == null ? new ArrayList<>() : actions;
     }
 
     @Override
@@ -221,9 +209,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
      * @param triggers a list with the triggers that should belong to this {@link Rule}.
      */
     public void setTriggers(@Nullable List<Trigger> triggers) {
-        if (triggers != null) {
-            this.triggers = triggers;
-        }
+        this.triggers = triggers == null ? new ArrayList<>() : triggers;
     }
 
     @Override
