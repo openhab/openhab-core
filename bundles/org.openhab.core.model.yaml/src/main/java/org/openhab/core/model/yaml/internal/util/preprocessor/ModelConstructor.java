@@ -208,7 +208,7 @@ class ModelConstructor extends Constructor {
             Object includedData = preprocessor.resolveIncludePlaceholder(includePlaceholder);
             if (!(includedData instanceof Map<?, ?>)) {
                 throw new YAMLException(getContext(node) + " Included content must be a mapping for merge key. Found: "
-                        + (includedData == null ? null : includedData.getClass().getName()));
+                        + includedData.getClass().getName());
             }
             Node result = representer.represent(includedData);
             // Prevent substitution of the included content in the current context by
@@ -226,9 +226,6 @@ class ModelConstructor extends Constructor {
      * @param node
      */
     private void markNoSub(Node node) {
-        if (node == null) {
-            return;
-        }
         node.setTag(NOSUB_TAG);
         if (node instanceof MappingNode mapping) {
             for (NodeTuple t : mapping.getValue()) {
