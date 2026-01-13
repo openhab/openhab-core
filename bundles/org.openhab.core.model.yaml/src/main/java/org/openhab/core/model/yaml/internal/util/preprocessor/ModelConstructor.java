@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.AbstractConstruct;
+import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -77,6 +78,7 @@ class ModelConstructor extends Constructor {
     private final Map<String, Object> variables;
     private final Path currentFile;
     private final YamlPreprocessor preprocessor;
+    private final Construct interpolationConstruct = new ConstructInterpolation();
 
     private final Representer representer = new Representer(new DumperOptions());
 
@@ -108,7 +110,7 @@ class ModelConstructor extends Constructor {
         this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
 
         // Perform substitution in the first pass so that variables can refer to other variables
-        this.yamlConstructors.put(Tag.STR, new ConstructInterpolation());
+        this.yamlConstructors.put(Tag.STR, interpolationConstruct);
 
         this.yamlMultiConstructors.put(SUB_TAG, new ConstructSub());
 
@@ -317,7 +319,7 @@ class ModelConstructor extends Constructor {
             return switch (node) {
                 case MappingNode map -> constructMapping(map);
                 case SequenceNode seq -> constructSequence(seq);
-                case ScalarNode scalar -> Objects.requireNonNull(yamlConstructors.get(Tag.STR)).construct(scalar);
+                case ScalarNode scalar -> interpolationConstruct.construct(scalar);
                 default -> constructObject(node);
             };
         }
@@ -405,14 +407,12 @@ class ModelConstructor extends Constructor {
         public Object construct(Node node) {
             logger.debug("Constructing !include node: {}", node);
             if (node instanceof ScalarNode scalarNode) {
-                // ScalarNode's constructor ensured that its value is not null
-                // so scalarNode.getValue() and therefore constructScalar cannot be null here
-                String value = Objects.requireNonNull(yamlConstructors.get(Tag.STR)).construct(scalarNode).toString()
-                        .trim();
-                if (value.isEmpty()) {
+                Object fileNameObj = interpolationConstruct.construct(scalarNode);
+                String fileName = String.valueOf(fileNameObj).trim();
+                if (fileNameObj == null || fileName.isEmpty()) {
                     throw new YAMLException(getContext(node) + " !include file name cannot be empty");
                 }
-                return new IncludePlaceholder(value, Map.of());
+                return new IncludePlaceholder(fileName, Map.of());
             } else if (node instanceof MappingNode mappingNode) {
                 Map<Object, Object> includeOptions = constructMapping(mappingNode);
 
