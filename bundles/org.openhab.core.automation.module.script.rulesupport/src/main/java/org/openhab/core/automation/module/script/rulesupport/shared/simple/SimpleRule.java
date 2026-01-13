@@ -74,7 +74,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
 
     /**
      * This method is used to specify the identifier of the {@link Rule}.
-     * 
+     *
      * @param ruleUID the identifier of the {@link Rule}.
      */
     public void setUID(String ruleUID) {
