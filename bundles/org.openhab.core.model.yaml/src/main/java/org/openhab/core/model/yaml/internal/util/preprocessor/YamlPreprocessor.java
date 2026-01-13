@@ -513,8 +513,9 @@ public class YamlPreprocessor {
 
     private void writeCompiledOutput(Object dataMap) throws IOException {
         Path outputFile;
-        if (currentFile.startsWith(configRoot)) {
-            Path outputRoot = configRoot.resolve("_generated");
+        if (!currentFileRelative.isAbsolute()) {
+            Path elementRoot = configRoot.resolve(currentFileRelative.subpath(0, 1));
+            Path outputRoot = elementRoot.resolve("_generated");
             outputFile = outputRoot.resolve(currentFileRelative);
         } else {
             LOGGER.warn("YAML model {}: Cannot place compiled output under config folder '{}'; writing next to source",
