@@ -25,7 +25,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,7 +37,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.BidiSetBag;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
@@ -96,8 +94,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             // "version", "readOnly" are reserved keys
             // "preprocessor", "variables" and "packages" are reserved elements for YamlPreprocessor.
             // They are listed here so we don't use them in the future as model elements
-            // but they are not added here because they stripped off by the Preprocessor before
-            // producing the final model
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
             getElementName(YamlItemDTO.class) // "items"
@@ -122,9 +118,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private int counter;
 
-    // keep track of include files so we can reload the main model when they change
-    // Bidirectional Map of modelName <-> include path by this model
-    private final BidiSetBag<String, Path> modelIncludes = new BidiSetBag<>();
+    private final IncludeRegistry includeRegistry = new IncludeRegistry();
     private volatile boolean initializing = true;
 
     @Activate
@@ -195,36 +189,42 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @Deactivate
     public void deactivate() {
         watchService.unregisterListener(this);
-        modelIncludes.clear();
+        includeRegistry.clear();
     }
 
     // The method is "synchronized" to avoid concurrent files processing
     @Override
     public synchronized void processWatchEvent(Kind kind, Path fullPath) {
         Path relativePath = mainWatchPath.relativize(fullPath);
-        if (relativePath.getNameCount() > 1 && relativePath.subpath(1, 2).toString().equals("_generated")) {
-            // Ignore files in the CONF/*/_generated folder
+        if (YamlPreprocessor.isGeneratedFile(relativePath)) {
             return;
         }
 
-        // Check here because include files can have any extension
-        // We don't want to process include files during initialization to avoid reloading models multiple times
-        if (!initializing && processIncludeFile(kind, fullPath)) {
+        // When an include file is changed, reload all models depending on it
+        if (!initializing && includeRegistry.hasInclude(fullPath)) {
+            Set<String> dependingModels = includeRegistry.getModelsForInclude(fullPath);
+            String action = switch (kind) {
+                case CREATE -> "created";
+                case DELETE -> "deleted";
+                case MODIFY -> "modified";
+                default -> kind.name();
+            };
+            logger.info("An include file '{}' was {}", fullPath, action);
+            dependingModels.forEach(modelName -> {
+                Path modelPath = mainWatchPath.resolve(modelName);
+                processWatchEvent(Kind.MODIFY, modelPath);
+            });
             return;
         }
 
         String modelName = relativePath.toString();
-
-        if ((!modelName.endsWith(".yaml") && !modelName.endsWith(".yml")) || modelName.endsWith(".inc.yaml")
-                || modelName.endsWith(".inc.yml")) {
+        if ((!modelName.endsWith(".yaml") && !modelName.endsWith(".yml"))
+                || YamlPreprocessor.isIncludeFile(modelName)) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
 
-        // Always clear the list of includes for this model.
-        // If it loads correctly, it will be re-populated
-        modelIncludes.removeKey(modelName);
-
+        includeRegistry.removeModel(modelName);
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         boolean removeModel = true;
@@ -232,9 +232,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             if (kind == Kind.DELETE) {
                 // remove model below
             } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
-                Object yamlObject = YamlPreprocessor.process(fullPath, includePath -> {
-                    modelIncludes.put(modelName, includePath);
-                });
+                Object yamlObject = YamlPreprocessor.process(fullPath,
+                        includePath -> includeRegistry.registerModelInclude(modelName, includePath));
                 JsonNode contentNode = objectMapper.valueToTree(yamlObject);
                 processModelContent(modelName, kind, contentNode, errors, warnings);
                 removeModel = false;
@@ -259,12 +258,14 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private boolean processModelContent(String modelName, Kind kind, JsonNode fileContent, List<String> errors,
             List<String> warnings) {
         // check version
-        int modelVersion = extractModelVersion(fileContent);
-        if (modelVersion < 1) {
-            errors.add("version is missing or not a valid number. Ignoring model.");
+        JsonNode versionNode = fileContent.get(VERSION);
+        if (versionNode == null || !versionNode.canConvertToInt()) {
+            errors.add("version is missing or not a number. Ignoring model.");
             removeModel(modelName);
             return false;
-        } else if (modelVersion > DEFAULT_MODEL_VERSION) {
+        }
+        int modelVersion = versionNode.asInt();
+        if (modelVersion < 1 || modelVersion > DEFAULT_MODEL_VERSION) {
             errors.add("model has version %d, but only versions between 1 and %d are supported. Ignoring model."
                     .formatted(modelVersion, DEFAULT_MODEL_VERSION));
             removeModel(modelName);
@@ -373,36 +374,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         return valid;
     }
 
-    private boolean processIncludeFile(Kind kind, Path fullPath) {
-        // Take a copy of modelIncludes because it gets modified in processWatchEvent
-        Set<String> dependingModels = new HashSet<>(modelIncludes.getKeys(fullPath));
-
-        if (dependingModels.isEmpty()) {
-            return false;
-        }
-
-        String action = switch (kind) {
-            case CREATE -> "created";
-            case DELETE -> "deleted";
-            case MODIFY -> "modified";
-            default -> kind.name();
-        };
-        logger.info("An include file '{}' was {}", fullPath, action);
-
-        // Force a reload of all models that depend on this include file.
-        // If the include file was deleted, we emit a MODIFY event rather than
-        // removing the models or sending a DELETE event.
-        // This is less efficient than unloading the models outright, but it guarantees
-        // that all dependent models are refreshed correctly and that the logs clearly
-        // indicate why the unload occurred (which include is missing from where).
-        dependingModels.forEach(modelName -> {
-            Path modelPath = mainWatchPath.resolve(modelName);
-            processWatchEvent(Kind.MODIFY, modelPath);
-        });
-
-        return true;
-    }
-
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void removeModel(String modelName) {
         YamlModelWrapper removedModel = modelCache.remove(modelName);
@@ -410,8 +381,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return;
         }
         logger.info("Removing YAML model {}", modelName);
-        modelIncludes.removeKey(modelName);
-
         int version = removedModel.getVersion();
         for (Map.Entry<String, @Nullable JsonNode> modelEntry : removedModel.getNodes().entrySet()) {
             String elementName = modelEntry.getKey();
@@ -727,14 +696,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private List<YamlModelListener<?>> getElementListeners(String elementName, int version) {
         return getElementListeners(elementName).stream().filter(l -> l.isVersionSupported(version)).toList();
-    }
-
-    private static int extractModelVersion(@Nullable JsonNode fileContent) {
-        JsonNode versionNode = fileContent == null ? null : fileContent.get(VERSION);
-        if (versionNode != null && versionNode.canConvertToInt()) {
-            return versionNode.asInt();
-        }
-        return -1;
     }
 
     private Map<String, ? extends YamlElement> listToMap(List<? extends YamlElement> elements) {

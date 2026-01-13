@@ -414,25 +414,27 @@ class ModelConstructor extends Constructor {
                 Map<Object, Object> includeOptions = constructMapping(mappingNode);
 
                 Object fileNameObj = includeOptions.get("file");
-                if (!(fileNameObj instanceof String || fileNameObj instanceof Number)) {
-                    throw new YAMLException(getContext(node) + " 'file' must be a string. Found: " + fileNameObj);
-                }
-                String fileName = fileNameObj.toString();
-                if (fileName.isEmpty()) {
-                    throw new YAMLException(getContext(node) + " !include file name cannot be empty");
+                String fileName = (fileNameObj instanceof String || fileNameObj instanceof Number)
+                        ? fileNameObj.toString().trim()
+                        : "";
+
+                if (fileName.isBlank()) {
+                    throw new YAMLException(getContext(node) + " !include file name is missing or invalid.");
                 }
 
                 Object varsObj = includeOptions.get("vars");
+                Map<String, Object> vars;
                 if (varsObj == null) {
-                    return new IncludePlaceholder(fileName, Map.of());
+                    vars = Map.of();
                 } else if (varsObj instanceof Map<?, ?> varsMap) {
-                    Map<String, Object> vars = varsMap.entrySet().stream()
+                    vars = varsMap.entrySet().stream()
                             .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), Map.Entry::getValue));
-                    return new IncludePlaceholder(fileName, vars);
                 } else {
                     throw new YAMLException(getContext(node) + " invalid 'vars' type in !include file: " + fileName
                             + ", vars: " + varsObj + " (not a map)");
                 }
+
+                return new IncludePlaceholder(fileName, vars);
             }
             throw new YAMLException(getContext(node) + " invalid !include argument type: "
                     + (node == null ? null : node.getNodeId().name()));
