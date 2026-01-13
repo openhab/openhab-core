@@ -202,13 +202,18 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @Override
     public synchronized void processWatchEvent(Kind kind, Path fullPath) {
         Path relativePath = mainWatchPath.relativize(fullPath);
-        String modelName = relativePath.toString();
+        if (relativePath.getNameCount() > 1 && relativePath.subpath(1, 2).toString().equals("_generated")) {
+            // Ignore files in the CONF/*/_generated folder
+            return;
+        }
 
         // Check here because include files can have any extension
         // We don't want to process include files during initialization to avoid reloading models multiple times
         if (!initializing && processIncludeFile(kind, fullPath)) {
             return;
         }
+
+        String modelName = relativePath.toString();
 
         if ((!modelName.endsWith(".yaml") && !modelName.endsWith(".yml")) || modelName.endsWith(".inc.yaml")
                 || modelName.endsWith(".inc.yml")) {
