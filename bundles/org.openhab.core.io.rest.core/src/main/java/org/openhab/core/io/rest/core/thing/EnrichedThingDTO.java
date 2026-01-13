@@ -14,10 +14,14 @@ package org.openhab.core.io.rest.core.thing;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.dto.AbstractThingDTO;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * This is a data transfer object that is used to serialize things with dynamic data like the status.
@@ -28,11 +32,16 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
  * @author Wouter Born - Let (Enriched)ThingDTO extend AbstractThingDTO so both can define their own "channels" type
  * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
+@Schema(name = "EnrichedThing")
+@NonNullByDefault
 public class EnrichedThingDTO extends AbstractThingDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<EnrichedChannelDTO> channels;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public ThingStatusInfo statusInfo;
-    public FirmwareStatusDTO firmwareStatus;
+    public @Nullable FirmwareStatusDTO firmwareStatus;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public boolean editable;
 
     /**
@@ -45,7 +54,7 @@ public class EnrichedThingDTO extends AbstractThingDTO {
      * @param editable true if this thing can be edited
      */
     EnrichedThingDTO(ThingDTO thingDTO, List<EnrichedChannelDTO> channels, ThingStatusInfo statusInfo,
-            FirmwareStatusDTO firmwareStatus, boolean editable) {
+            @Nullable FirmwareStatusDTO firmwareStatus, boolean editable) {
         super(thingDTO.thingTypeUID, thingDTO.UID, thingDTO.label, thingDTO.bridgeUID, thingDTO.configuration,
                 thingDTO.properties, thingDTO.location, thingDTO.semanticEquipmentTag);
         this.channels = channels;

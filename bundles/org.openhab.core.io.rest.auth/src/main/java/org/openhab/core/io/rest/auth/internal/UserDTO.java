@@ -16,11 +16,14 @@ import java.util.Collection;
 
 import org.openhab.core.auth.User;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO representing a {@link User}.
  *
  * @author Yannick Schaus - initial contribution
  */
+@Schema(name = "User")
 public class UserDTO {
     public String name;
     public Collection<String> roles;

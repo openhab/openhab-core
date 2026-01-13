@@ -18,6 +18,8 @@ import java.util.List;
 
 import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize widgets.
  *
@@ -30,6 +32,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Laurent Garnier - Remove field columns
  * @author Laurent Garnier - New fields row, column, command, releaseCommand and stateless for Button element
  */
+@Schema(name = "Widget")
 public class WidgetDTO {
 
     public String widgetId;

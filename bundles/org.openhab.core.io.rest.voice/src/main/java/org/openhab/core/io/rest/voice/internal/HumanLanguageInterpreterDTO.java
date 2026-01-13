@@ -16,13 +16,18 @@ import java.util.Set;
 
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO that is used on the REST API to provide infos about {@link HumanLanguageInterpreter} to UIs.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Schema(name = "HumanLanguageInterpreter")
 public class HumanLanguageInterpreterDTO {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String label;
     public Set<String> locales;
 }

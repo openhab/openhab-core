@@ -17,11 +17,14 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.transform.Transformation;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * The {@link TransformationDTO} wraps a {@link Transformation}
  *
  * @author Jan N. Klug - Initial contribution
  */
+@Schema(name = "Transformation")
 @NonNullByDefault
 public class TransformationDTO {
     public String uid;

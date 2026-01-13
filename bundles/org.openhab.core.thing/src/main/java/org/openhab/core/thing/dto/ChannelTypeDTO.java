@@ -15,11 +15,15 @@ package org.openhab.core.thing.dto;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.StateDescription;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * This is a data transfer object that is used with to serialize channel types.
@@ -27,29 +31,41 @@ import org.openhab.core.types.StateDescription;
  * @author Chris Jackson - Initial contribution
  * @author Mark Herwege - added unit hint
  */
+@Schema(name = "ChannelType")
+@NonNullByDefault
 public class ChannelTypeDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<ConfigDescriptionParameterDTO> parameters;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<ConfigDescriptionParameterGroupDTO> parameterGroups;
-    public String description;
+    public @Nullable String description;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String label;
-    public String category;
-    public String itemType;
-    public String unitHint;
+    public @Nullable String category;
+    public @Nullable String itemType;
+    public @Nullable String unitHint;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allowableValues = { "STATE", "TRIGGER" })
     public String kind;
-    public StateDescription stateDescription;
+    public @Nullable StateDescription stateDescription;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Set<String> tags;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String UID;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public boolean advanced;
-    public CommandDescription commandDescription;
+    public @Nullable CommandDescription commandDescription;
 
+    // do not remove - needed by GSON
     public ChannelTypeDTO() {
+        this("", "", null, null, null, null, ChannelKind.STATE, List.of(), List.of(), null, Set.of(), false, null);
     }
 
-    public ChannelTypeDTO(String uid, String label, String description, String category, String itemType,
-            String unitHint, ChannelKind kind, List<ConfigDescriptionParameterDTO> parameters,
-            List<ConfigDescriptionParameterGroupDTO> parameterGroups, StateDescription stateDescription,
-            Set<String> tags, boolean advanced, CommandDescription commandDescription) {
+    public ChannelTypeDTO(String uid, String label, @Nullable String description, @Nullable String category,
+            @Nullable String itemType, @Nullable String unitHint, ChannelKind kind,
+            List<ConfigDescriptionParameterDTO> parameters, List<ConfigDescriptionParameterGroupDTO> parameterGroups,
+            @Nullable StateDescription stateDescription, Set<String> tags, boolean advanced,
+            @Nullable CommandDescription commandDescription) {
         this.UID = uid;
         this.label = label;
         this.description = description;

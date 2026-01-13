@@ -16,12 +16,15 @@ import java.util.List;
 
 import org.openhab.core.semantics.SemanticTag;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO representing a {@link SemanticTag}.
  *
  * @author Jimmy Tanagra - initial contribution
  * @author Laurent Garnier - Class renamed and members uid, description and editable added
  */
+@Schema(name = "EnrichedSemanticTag")
 public class EnrichedSemanticTagDTO {
     public String uid;
     public String name;

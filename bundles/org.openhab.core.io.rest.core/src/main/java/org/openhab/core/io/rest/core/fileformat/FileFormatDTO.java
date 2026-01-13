@@ -16,14 +16,19 @@ import java.util.List;
 
 import org.openhab.core.thing.dto.ThingDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object to serialize the different components that can be contained
  * in a file format (items, things, ...).
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "FileFormat")
 public class FileFormatDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public List<FileFormatItemDTO> items;
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public List<ThingDTO> things;
 }

@@ -16,13 +16,17 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioSink;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO that is used on the REST API to provide infos about {@link AudioSink} to UIs.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "AudioSink")
 @NonNullByDefault
 public class AudioSinkDTO {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
     public @Nullable String label;
 

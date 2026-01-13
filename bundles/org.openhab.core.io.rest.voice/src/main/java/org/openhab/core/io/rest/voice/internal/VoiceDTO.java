@@ -14,11 +14,14 @@ package org.openhab.core.io.rest.voice.internal;
 
 import org.openhab.core.voice.Voice;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO that is used on the REST API to provide infos about {@link Voice} to UIs.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "Voice")
 public class VoiceDTO {
     public String id;
     public String label;

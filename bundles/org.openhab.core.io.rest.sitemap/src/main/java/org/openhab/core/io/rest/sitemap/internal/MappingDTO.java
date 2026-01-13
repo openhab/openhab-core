@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize command mappings.
  *
@@ -20,6 +22,7 @@ package org.openhab.core.io.rest.sitemap.internal;
  * @author Laurent Garnier - Replace field position by fields row and column
  * @author Laurent Garnier - New field releaseCommand
  */
+@Schema(name = "Mapping")
 public class MappingDTO {
 
     public Integer row;
