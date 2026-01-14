@@ -14,7 +14,6 @@ package org.openhab.core.model.yaml.internal.util.preprocessor;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -76,7 +75,6 @@ class ModelConstructor extends Constructor {
 
     private final boolean finalPass;
     private final Map<String, Object> variables;
-    private final Path currentFile;
     private final YamlPreprocessor preprocessor;
     private final Construct interpolationConstruct = new ConstructInterpolation();
 
@@ -93,7 +91,6 @@ class ModelConstructor extends Constructor {
 
         this.finalPass = finalPass;
         this.variables = variables;
-        this.currentFile = preprocessor.getFile();
         this.preprocessor = preprocessor;
         this.substitutionStack.push(false);
         this.substitutionPatternStack
@@ -251,14 +248,14 @@ class ModelConstructor extends Constructor {
     }
 
     private boolean isSubTag(Tag tag) {
-        if (tag.getValue() instanceof String tagValue && tagValue.startsWith(SUB_TAG)) {
+        if (tag.getValue().startsWith(SUB_TAG)) {
             return true;
         }
         return false;
     }
 
     private String getContext(Node node) {
-        return VariableInterpolationHelper.formatContext(currentFile, formatLocation(node));
+        return VariableInterpolationHelper.formatContext(preprocessor.getPath(), formatLocation(node));
     }
 
     private String formatLocation(Node node) {
@@ -378,8 +375,10 @@ class ModelConstructor extends Constructor {
         }
     }
 
-    // Return an empty string for null values so that the keys are not removed from the map
-    // This matches the behavior of Jackson's parser, otherwise some tests will fail
+    /**
+     * Return an empty string for null values so that the keys are not removed from the map
+     * This matches the behavior of Jackson's parser, otherwise some tests will fail
+     */
     private class ConstructNull extends AbstractConstruct {
         @Override
         public Object construct(@Nullable Node node) {
@@ -390,7 +389,10 @@ class ModelConstructor extends Constructor {
         }
     }
 
-    // Used during non-final pass to avoid processing special tags and just return an empty string
+    /**
+     * A no-op constructor that returns an empty string.
+     * Used in non-final pass to skip processing of !include, !replace, !remove tags.
+     */
     private static class ConstructEmpty extends AbstractConstruct {
         @Override
         public Object construct(@Nullable Node node) {
