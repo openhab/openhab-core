@@ -404,7 +404,7 @@ public class YamlPreprocessorTest {
             try {
                 Files.writeString(tempFile, yaml);
                 @SuppressWarnings("unchecked")
-                Map<Object, Object> result = (Map<Object, Object>) YamlPreprocessor.process(tempFile, path -> {
+                Map<Object, Object> result = (Map<Object, Object>) YamlPreprocessor.load(tempFile, path -> {
                 });
 
                 String expectedLabel = "test_" + tempFile.getFileName().toString().replace(".yaml", "");
@@ -668,7 +668,7 @@ public class YamlPreprocessorTest {
     @SuppressWarnings("unchecked")
     private Map<Object, Object> loadFixture(String filename) throws IOException {
         Path filePath = SOURCE_PATH.resolve(filename);
-        Object result = YamlPreprocessor.process(filePath, path -> {
+        Object result = YamlPreprocessor.load(filePath, path -> {
         });
         if (result instanceof Map<?, ?> dataMap) {
             return (Map<Object, Object>) dataMap;

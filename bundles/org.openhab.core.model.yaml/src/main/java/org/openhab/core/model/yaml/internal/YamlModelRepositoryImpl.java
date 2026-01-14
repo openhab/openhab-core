@@ -232,7 +232,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             if (kind == Kind.DELETE) {
                 // remove model below
             } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
-                Object yamlObject = YamlPreprocessor.process(fullPath,
+                Object yamlObject = YamlPreprocessor.load(fullPath,
                         includePath -> includeRegistry.registerModelInclude(modelName, includePath));
                 JsonNode contentNode = objectMapper.valueToTree(yamlObject);
                 processModelContent(modelName, kind, contentNode, errors, warnings);

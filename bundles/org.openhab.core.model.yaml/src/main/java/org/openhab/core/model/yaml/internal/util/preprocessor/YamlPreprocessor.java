@@ -75,26 +75,26 @@ public class YamlPreprocessor {
     private static final Path configRoot = Path.of(OpenHAB.getConfigFolder()).toAbsolutePath().normalize();
     private static final Path userDataRoot = Path.of(OpenHAB.getUserDataFolder()).toAbsolutePath().normalize();
 
-    private final Path currentFile;
-    private final Path currentFileRelative;
+    private final Path currentPath;
+    private final Path currentPathRelative;
     private final Map<String, Object> variables;
     private final Set<Path> includeStack;
     private final Consumer<Path> includeCallback;
 
-    YamlPreprocessor(Path file, Map<String, Object> variables, Set<Path> includeStack, Consumer<Path> includeCallback) {
+    YamlPreprocessor(Path path, Map<String, Object> variables, Set<Path> includeStack, Consumer<Path> includeCallback) {
         this.variables = new LinkedHashMap<>(variables);
         this.includeStack = new HashSet<>(includeStack);
         this.includeCallback = includeCallback;
-        this.currentFile = file.toAbsolutePath().normalize();
+        this.currentPath = path.toAbsolutePath().normalize();
 
-        this.currentFileRelative = currentFile.startsWith(configRoot) ? configRoot.relativize(currentFile)
-                : currentFile;
+        this.currentPathRelative = currentPath.startsWith(configRoot) ? configRoot.relativize(currentPath)
+                : currentPath;
 
         // Validate circular inclusion and depth before processing
-        if (!this.includeStack.add(currentFile)) {
+        if (!this.includeStack.add(currentPath)) {
             String includeStackChain = this.includeStack.stream().map(Path::toString)
                     .collect(Collectors.joining(" -> "));
-            throw new YAMLException("Circular inclusion detected: " + includeStackChain + " -> " + currentFile);
+            throw new YAMLException("Circular inclusion detected: " + includeStackChain + " -> " + currentPath);
         }
         if (this.includeStack.size() > MAX_INCLUDE_DEPTH) {
             throw new YAMLException("Maximum include depth (" + MAX_INCLUDE_DEPTH + ") exceeded");
@@ -109,10 +109,9 @@ public class YamlPreprocessor {
      * @return the processed Java object representation of the YAML file
      * @throws IOException if there is an error reading or processing the YAML
      */
-    public static Object process(Path path, Consumer<Path> includeCallback) throws IOException {
+    public static Object load(Path path, Consumer<Path> includeCallback) throws IOException {
         try {
-            byte[] fileBytes = Files.readAllBytes(path);
-            return new YamlPreprocessor(path, Map.of(), Set.of(), includeCallback).process(fileBytes);
+            return new YamlPreprocessor(path, Map.of(), Set.of(), includeCallback).load();
         } catch (YAMLException e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -142,8 +141,9 @@ public class YamlPreprocessor {
         return modelName.endsWith(".inc.yml") || modelName.endsWith(".inc.yaml");
     }
 
-    private Object process(byte[] fileBytes) throws IOException, YAMLException {
-        LOGGER.debug("Loading file({}): {} with given vars {}", includeStack.size(), currentFile, variables);
+    private Object load() throws IOException, YAMLException {
+        LOGGER.debug("Loading file({}): {} with given vars {}", includeStack.size(), currentPath, variables);
+        byte[] fileBytes = Files.readAllBytes(currentPath);
 
         // Set special variables early so they're available in variable definitions during the first pass
         // (e.g., variables: !sub with ${__FILE_NAME__})
@@ -169,7 +169,7 @@ public class YamlPreprocessor {
             return finalPassData;
         }
         dataMap.remove(VARIABLES_KEY); // we've already extracted the variables in the first pass
-        LOGGER.debug("Loaded data from {}: {}", currentFile, dataMap);
+        LOGGER.debug("Loaded data from {}: {}", currentPath, dataMap);
 
         // Define default preprocessor settings
         boolean generateCompiled = false;
@@ -186,14 +186,14 @@ public class YamlPreprocessor {
         // Process includes in everything except packages
         @SuppressWarnings("unchecked") // resolveIncludes returns a Map when given a map
         Map<Object, Object> resolvedDataMap = (Map<Object, Object>) resolveIncludes(dataMap);
-        LOGGER.debug("Loaded includes from {}: {}", currentFile, resolvedDataMap);
+        LOGGER.debug("Loaded includes from {}: {}", currentPath, resolvedDataMap);
 
         // Process packages separately - this allows us to inject the package ID before processing includes
         if (packagesObj instanceof Map<?, ?> packagesMap) {
             mergePackages(resolvedDataMap, packagesMap);
-            LOGGER.debug("Merged packages into data in {}: {}", currentFile, resolvedDataMap);
+            LOGGER.debug("Merged packages into data in {}: {}", currentPath, resolvedDataMap);
         } else if (packagesObj != null) {
-            LOGGER.warn("YAML model {}: The 'packages' section is not a map", currentFileRelative);
+            LOGGER.warn("YAML model {}: The 'packages' section is not a map", currentPathRelative);
         }
 
         resolvedDataMap = excludeHiddenKeys(resolvedDataMap);
@@ -210,8 +210,8 @@ public class YamlPreprocessor {
         return resolvedDataMap;
     }
 
-    Path getFile() {
-        return currentFile;
+    Path getPath() {
+        return currentPath;
     }
 
     private Object loadYaml(byte[] fileBytes, boolean finalPass) throws IOException {
@@ -234,7 +234,7 @@ public class YamlPreprocessor {
                 // The key/value scalars won't be null because we construct nulls as empty strings
                 Object key = Objects.requireNonNull(k, "Variable key in YAML cannot be null");
                 Object value = Objects.requireNonNull(v, () -> "Value for key '" + key + "' cannot be null");
-                LOGGER.debug("Extracting variable '{}' with raw value '{}' from {}", key, value, currentFileRelative);
+                LOGGER.debug("Extracting variable '{}' with raw value '{}' from {}", key, value, currentPathRelative);
                 String resolvedKey = String.valueOf(resolveSubstitutionPlaceholders(key));
                 if (!variables.containsKey(resolvedKey)) { // previous variables (e.g. global) take precedence
                     Object resolvedValue = resolveSubstitutionPlaceholders(value);
@@ -243,9 +243,9 @@ public class YamlPreprocessor {
                     extractedVariables.put(resolvedKey, resolvedValue);
                 }
             });
-            LOGGER.debug("Extracted variables from {}: {}", currentFileRelative, extractedVariables);
+            LOGGER.debug("Extracted variables from {}: {}", currentPathRelative, extractedVariables);
         } else if (variablesSection != null) {
-            LOGGER.warn("YAML model {}: 'variables' is not a map", currentFileRelative);
+            LOGGER.warn("YAML model {}: 'variables' is not a map", currentPathRelative);
         }
 
         // Set VARS after extracting user-defined variables so it includes them
@@ -259,7 +259,7 @@ public class YamlPreprocessor {
      */
     private Object resolveSubstitutionPlaceholders(Object value) {
         if (value instanceof SubstitutionPlaceholder placeholder) {
-            String contextDescription = currentFileRelative + " [variables]";
+            String contextDescription = currentPathRelative + " [variables]";
             try {
                 return VariableInterpolationHelper.evaluateValue(placeholder.value(), placeholder.pattern(),
                         placeholder.isPlainScalar(), variables, contextDescription, false);
@@ -290,7 +290,7 @@ public class YamlPreprocessor {
      * Special variables will override any user-defined variables with the same name
      */
     private void setSpecialVariables() {
-        Path fileNamePath = currentFile.getFileName();
+        Path fileNamePath = currentPath.getFileName();
         String fullFileName = fileNamePath != null ? fileNamePath.toString() : "";
         int dotIndex = fullFileName.lastIndexOf(".");
         String fileName = fullFileName;
@@ -299,12 +299,12 @@ public class YamlPreprocessor {
             fileName = fullFileName.substring(0, dotIndex);
             fileExtension = fullFileName.substring(dotIndex + 1);
         }
-        Path parentPath = currentFile.getParent();
+        Path parentPath = currentPath.getParent();
         String directory = parentPath != null ? parentPath.toString() : "";
 
         variables.put("OPENHAB_CONF", configRoot.toString());
         variables.put("OPENHAB_USERDATA", userDataRoot.toString());
-        variables.put("__FILE__", currentFile.toString());
+        variables.put("__FILE__", currentPath.toString());
         variables.put("__FILE_NAME__", fileName);
         variables.put("__FILE_EXT__", fileExtension);
         variables.put("__DIRECTORY__", directory);
@@ -331,31 +331,32 @@ public class YamlPreprocessor {
     }
 
     /**
-* Resolves an {@code IncludePlaceholder}, loads the referenced file (recursively
-* following any nested includes), and returns the fully expanded content.
+     * Resolves an {@code IncludePlaceholder}, loads the referenced file (recursively
+     * following any nested includes), and returns the fully expanded content.
      */
     Object resolveIncludePlaceholder(IncludePlaceholder includeObject) {
-        String includeFile = includeObject.fileName();
-        Path includeFilePath = currentFile.resolveSibling(includeFile);
+        String includeFileName = includeObject.fileName();
+        Path includeFilePath = currentPath.resolveSibling(includeFileName);
         Map<String, Object> includeVars = new HashMap<>(variables);
         // include vars override current vars
         includeVars.putAll(includeObject.vars());
         try {
-            byte[] includeFileContent = Files.readAllBytes(includeFilePath);
-            includeCallback.accept(includeFilePath);
-            return new YamlPreprocessor(includeFilePath, includeVars, includeStack, includeCallback).process(includeFileContent);
+            YamlPreprocessor includePreprocessor = new YamlPreprocessor(includeFilePath, includeVars,
+                    includeStack, includeCallback);
+            includeCallback.accept(includePreprocessor.getPath()); // use the normalized absolute path
+            return includePreprocessor.load();
         } catch (IOException | YAMLException e) {
             // Only wrap the exception if it's not already an "Error loading include file" message
             // to avoid repeating the wrapper message in nested includes
             String errorMessage = switch (e.getMessage()) {
                 case null -> "";
                 case String msg when msg.startsWith("Error loading include file") -> throw new YAMLException(msg, e);
-                case String msg when !msg.isEmpty() && !msg.equals(includeFile) -> ": " + msg;
+                case String msg when !msg.isEmpty() && !msg.equals(includeFilePath) -> ": " + msg;
                 default -> "";
             };
             // Wrap the exception to indicate where the error occurred
             throw new YAMLException("Error loading include file '" + includeObject.fileName() + "' (included from '"
-                    + currentFile + "')" + errorMessage, e);
+                    + currentPath + "')" + errorMessage, e);
         }
     }
 
@@ -387,7 +388,7 @@ public class YamlPreprocessor {
                 Map<Object, Object> resolvedPkgWithId = (Map<Object, Object>) resolveIncludes(pkgWithId);
                 mergeElements(mainData, resolvedPkgWithId);
             } else {
-                LOGGER.warn("YAML model {}: Package '{}' did not resolve to a map: {}", currentFileRelative, packageId,
+                LOGGER.warn("YAML model {}: Package '{}' did not resolve to a map: {}", currentPathRelative, packageId,
                         processedPkg);
             }
         });
@@ -525,29 +526,29 @@ public class YamlPreprocessor {
                 return flag;
             }
             if (value != null) {
-                LOGGER.warn("YAML model {}: '{}.{}' is not a boolean; using default {}", currentFileRelative,
+                LOGGER.warn("YAML model {}: '{}.{}' is not a boolean; using default {}", currentPathRelative,
                         PREPROCESSOR_KEY, key, defaultValue);
             }
             return defaultValue;
         }
 
-        LOGGER.warn("YAML model {}: '{}' section is not a map; using default {} for '{}'", currentFileRelative,
+        LOGGER.warn("YAML model {}: '{}' section is not a map; using default {} for '{}'", currentPathRelative,
                 PREPROCESSOR_KEY, defaultValue, key);
         return defaultValue;
     }
 
     private void writeCompiledOutput(Object dataMap) throws IOException {
         Path outputFile;
-        if (currentFile.startsWith(configRoot) && currentFileRelative.getNameCount() >= 2) {
-            Path elementRoot = configRoot.resolve(currentFileRelative.subpath(0, 1));
+        if (currentPath.startsWith(configRoot) && currentPathRelative.getNameCount() >= 2) {
+            Path elementRoot = configRoot.resolve(currentPathRelative.subpath(0, 1));
             Path outputRoot = elementRoot.resolve("_generated");
-            Path currentFileRelativeToElementRoot = elementRoot.relativize(currentFile);
-            outputFile = outputRoot.resolve(currentFileRelativeToElementRoot);
+            Path currentPathRelativeToElementRoot = elementRoot.relativize(currentPath);
+            outputFile = outputRoot.resolve(currentPathRelativeToElementRoot);
         } else {
             LOGGER.warn("YAML model {}: Cannot place compiled output under config folder '{}'; writing next to source",
-                    currentFileRelative, configRoot);
-            Path fallbackDir = currentFile.resolveSibling("_generated");
-            outputFile = fallbackDir.resolve(currentFile.getFileName());
+                    currentPathRelative, configRoot);
+            Path fallbackDir = currentPath.resolveSibling("_generated");
+            outputFile = fallbackDir.resolve(currentPath.getFileName());
         }
 
         Path outputDir = outputFile.getParent();
@@ -570,17 +571,15 @@ public class YamlPreprocessor {
                 # Source:    %s
                 # Generated: %s
                 # ==============================================================================
-                                """.strip().formatted(OpenHAB.getVersion(), OpenHAB.buildString(), currentFileRelative,
+                                """.strip().formatted(OpenHAB.getVersion(), OpenHAB.buildString(), currentPathRelative,
                 java.time.ZonedDateTime.now()) + "\n" + compiledYaml;
 
         Files.writeString(outputFile, compiledYaml, StandardCharsets.UTF_8);
-        LOGGER.info("YAML model {}: Generated compiled YAML output to {}", currentFileRelative, outputFile);
+        LOGGER.info("YAML model {}: Generated compiled YAML output to {}", currentPathRelative, outputFile);
     }
 
     static Yaml newYaml(Map<String, Object> variables, YamlPreprocessor preprocessor, boolean finalPass) {
         LoaderOptions loaderOptions = new LoaderOptions();
-        // Throw on duplicate keys; resolveIncludePlaceholder will prepend the including
-        // file name to help users locate the error in the include chain.
         loaderOptions.setAllowDuplicateKeys(false);
         return new Yaml(new ModelConstructor(loaderOptions, variables, preprocessor, finalPass),
                 new Representer(new DumperOptions()), new DumperOptions(), loaderOptions, new ModelResolver());
