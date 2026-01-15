@@ -135,24 +135,24 @@
           <configuration>
             <bnd><![CDATA[Bundle-SymbolicName: ${project.artifactId}
 Automatic-Module-Name: ${def;bsn}
-Import-Package: \\
-  io.swagger.v3.oas.annotations.*;resolution:=optional,\\
-  javax.annotation.security.*;resolution:=optional,\\
-  org.eclipse.jdt.annotation.*;resolution:=optional,\\
-  org.openhab.core.automation.annotation.*;resolution:=optional,\\
-  com.google.common.*;version="14.0",\\
+Import-Package: \
+  io.swagger.v3.oas.annotations.*;resolution:=optional,\
+  javax.annotation.security.*;resolution:=optional,\
+  org.eclipse.jdt.annotation.*;resolution:=optional,\
+  org.openhab.core.automation.annotation.*;resolution:=optional,\
+  com.google.common.*;version="14.0",\
   *
--exportcontents: \\
-  !*.internal.*,\\
-  !*.impl.*, \\
-  org.openhab.*,\\
+-exportcontents: \
+  !*.internal.*,\
+  !*.impl.*, \
+  org.openhab.*,\
   org.openhab.core.*
 -noimportjava: true
 -sources: false
 -contract: *
 -includeresource: -${.}/NOTICE, -${.}/*.xsd
--fixupmessages: \\
-  'Unused Import-Package instructions';is:=ignore,\\
+-fixupmessages: \
+  'Unused Import-Package instructions';is:=ignore,\
   'Unused Export-Package instructions';is:=ignore]]></bnd>
             <!-- Bundle-SymbolicName: ${project.groupId}.${project.artifactId} -->
             <skipIfEmpty>true</skipIfEmpty>
