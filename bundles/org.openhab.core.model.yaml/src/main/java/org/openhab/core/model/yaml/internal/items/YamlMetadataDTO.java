@@ -20,14 +20,16 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * The {@link YamlMetadataDTO} is a data transfer object used to serialize a metadata for a particular namespace
  * in a YAML configuration file.
  *
  * @author Laurent Garnier - Initial contribution
- * @author Jimmy Tanagra - Added {@link YamlMetadataDTODeserializer}
+ * @author Jimmy Tanagra - Support scalar metadata namespace
  */
+@JsonSerialize(using = YamlMetadataDTOSerializer.class)
 @JsonDeserialize(using = YamlMetadataDTODeserializer.class)
 public class YamlMetadataDTO {
 
