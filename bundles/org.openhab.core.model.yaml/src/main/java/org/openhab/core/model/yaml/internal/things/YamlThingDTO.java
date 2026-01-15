@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
@@ -89,6 +90,14 @@ public class YamlThingDTO implements YamlElement, Cloneable {
             } catch (IllegalArgumentException e) {
                 addToList(errors, "invalid thing \"%s\": invalid value \"%s\" for \"bridge\" field: %s".formatted(uid,
                         bridge, e.getMessage()));
+                ok = false;
+            }
+        }
+        if (config != null) {
+            try {
+                new Configuration(config);
+            } catch (IllegalArgumentException e) {
+                addToList(errors, "invalid thing \"%s\": config: %s".formatted(uid, e.getMessage()));
                 ok = false;
             }
         }
