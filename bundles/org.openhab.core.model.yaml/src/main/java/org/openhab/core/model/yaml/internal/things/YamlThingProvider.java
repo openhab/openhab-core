@@ -552,18 +552,20 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             Object valueOut = valueIn;
             // For configuration parameter of type text only
             if (stringParameters.contains(name)) {
-                if (!(valueIn instanceof String)) {
+                if (valueIn != null && !(valueIn instanceof String)) {
                     logger.info(
-                            "\"{}\": the value of the configuration TEXT parameter \"{}\" is not interpreted as a string and will be automatically converted. Enclose your value in double quotes to prevent conversion,",
+                            "\"{}\": the value of the configuration TEXT parameter \"{}\" is not interpreted as a string and will be automatically converted. Enclose your value in double quotes to prevent conversion.",
                             uid, name);
                 }
                 // if the value in YAML is an unquoted number, the value resulting of the parsing can then be
-                // of type BigDecimal or BigInteger. If the value is of type BigDecimal, we convert it into
-                // a String. If there is no decimal, we convert it to an integer and return a String from that
-                // integer.
-                // Value 1 in YAML is converted into String "1"
-                // Value 1.0 in YAML is converted into String "1"
-                // Value 1.5 in YAML is converted into String "1.5"
+                // of type BigDecimal or BigInteger.
+                // If the value is of type BigDecimal, we convert it into a String. If there is no decimal,
+                // we convert it to an integer and return a String from that integer.
+                // - Value 1 in YAML is converted into String "1"
+                // - Value 1.0 in YAML is converted into String "1"
+                // - Value 1.5 in YAML is converted into String "1.5"
+                // If the value is not of type BigDecimal, it is kept unchanged. Conversion to a String will
+                // be applied at a next step during configuration normalization.
                 if (valueIn instanceof BigDecimal bigDecimalValue) {
                     try {
                         valueOut = bigDecimalValue.stripTrailingZeros().scale() <= 0
