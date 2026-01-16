@@ -134,6 +134,29 @@ public class YamlPreprocessorTest {
             assertThat(getNestedValue(data, "merge_with_scalar", "foo"), equalTo("include1"));
             assertThat(getNestedValue(data, "merge_with_variable", "foo"), equalTo("include1"));
         }
+
+        @Test
+        void mergeWithSubstitution() throws IOException {
+            Map<Object, Object> data = loadFixture(PATH + "mergeWithSubstitution.yaml");
+            assertThat(getNestedValue(data, "simple", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "simple", "baz"), equalTo("${foo}"));
+
+            assertThat(getNestedValue(data, "parent_sub", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "parent_sub", "baz"), equalTo("${foo}"));
+
+            assertThat(getNestedValue(data, "conditionally_empty"), equalTo(Map.of()));
+
+            assertThat(getNestedValue(data, "array_merge"),
+                    equalTo(Map.of("foo", "bar", "baz", "${foo}", "qux", "quux")));
+        }
+
+        @Test
+        void mergeWithSubstitutionMustResolveToMapping() throws IOException {
+            Yaml yaml = createYamlParser(true);
+
+            YAMLException exception = assertThrows(YAMLException.class, () -> yaml.load("simple:\n  <<: !sub scalar"));
+            assertThat(exception.getMessage(), containsString("Substituted content must be a mapping for merge key"));
+        }
     }
 
     @Nested
