@@ -273,10 +273,12 @@ public class PersistenceResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of items available via a specific persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))) })
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))),
+                    @ApiResponse(responseCode = "400", description = "Not supported for persistence service") })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
-            @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId) {
-        return getServiceItemList(serviceId);
+            @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
+            @Parameter(description = "An item name, response will only contain information for this item") @QueryParam("itemname") @Nullable String itemName) {
+        return getServiceItemList(serviceId, itemName);
     }
 
     @GET
@@ -620,7 +622,7 @@ public class PersistenceResource implements RESTResource {
         return dtoList;
     }
 
-    private Response getServiceItemList(@Nullable String serviceId) {
+    private Response getServiceItemList(@Nullable String serviceId, @Nullable String itemName) {
         // If serviceId is null, then use the default service
         PersistenceService service;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
@@ -646,9 +648,26 @@ public class PersistenceResource implements RESTResource {
         QueryablePersistenceService qService = (QueryablePersistenceService) service;
 
         PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
-        Map<String, String> aliases = config != null ? config.getAliases() : Map.of();
-        Set<PersistenceItemInfo> itemInfo = qService.getItemInfo().stream().map(info -> {
-            String alias = aliases.get(info.getName());
+        Map<String, String> itemToAlias = config != null ? config.getAliases() : Map.of();
+        Map<String, String> aliasToItem = itemToAlias.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (existing, ignored) -> existing));
+
+        Set<PersistenceItemInfo> itemInfo = null;
+        if (itemName != null) {
+            String alias = itemToAlias.get(itemName);
+            PersistenceItemInfo singleItemInfo = qService.getItemInfo(itemName, alias);
+            if (singleItemInfo != null) {
+                itemInfo = Set.of(singleItemInfo);
+            }
+        } else {
+            itemInfo = qService.getItemInfo();
+        }
+        if (itemInfo == null) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Not supported for persistence service:" + effectiveServiceId);
+        }
+        Set<PersistenceItemInfo> mappedItemInfo = itemInfo.stream().map(info -> {
+            String alias = aliasToItem.get(info.getName());
             if (alias != null) {
                 return new PersistenceItemInfo() {
 
@@ -676,7 +695,7 @@ public class PersistenceResource implements RESTResource {
                 return info;
             }
         }).collect(Collectors.toSet());
-        return JSONResponse.createResponse(Status.OK, itemInfo, "");
+        return JSONResponse.createResponse(Status.OK, mappedItemInfo, "");
     }
 
     private Response deletePersistenceItemData(@Nullable String serviceId, String itemName, @Nullable String timeBegin,

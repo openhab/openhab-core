@@ -15,6 +15,7 @@ package org.openhab.core.persistence;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -92,17 +93,57 @@ public interface QueryablePersistenceService extends PersistenceService {
 
     /**
      * Returns a set of {@link PersistenceItemInfo} about items that are stored in the persistence service. This allows
-     * the persistence service to return information about items that are no long available as an
-     * {@link org.openhab.core.items.Item} in openHAB. If it is not possible to retrieve the information an empty set
-     * should be returned.
+     * the persistence service to return information about items that are no longer available as an
+     * {@link org.openhab.core.items.Item} in openHAB. If it is not possible, or it would be costly to retrieve the
+     * information null should be returned.
      *
-     * Note that implementations for method callers that this method may return an alias for an existing item if the
-     * database does not store the mapping between item name and alias or the reverse mapping is not implemented in the
-     * persistence service.
+     * Note that this method will return the names for items as stored in persistence. If aliases are used, the calling
+     * method is responsible for mapping back to the real item name.
      *
-     * @return a set of information about the persisted items
+     * @return a set of information about the persisted items or null if the persistence service does not support this
      */
+    @Nullable
     Set<PersistenceItemInfo> getItemInfo();
+
+    /**
+     * Returns {@link PersistenceItemInfo} for an item stored in the persistence service. A {@link PersistenceItemInfo}
+     * should always be returned if the persistence service has implemented this method. Null should only be returned if
+     * the persistence service cannot get, or it would be too costly to retrieve, this information. Partial information
+     * is allowed.
+     * The default implementation will query the persistence service for the last value in the persistence store and
+     * set the latest timestamp, leaving the {@link PersistenceItemInfo} count to null.
+     *
+     * Note that the method should return the alias for the item in its response if an alias is being used.
+     *
+     * @return information about the persisted item or null if the persistence service does not support this
+     */
+    default @Nullable PersistenceItemInfo getItemInfo(String itemName, @Nullable String alias) {
+        PersistedItem item = persistedItem(itemName, alias);
+        Date latest = item != null ? Date.from(item.getInstant()) : null;
+        Integer count = item != null ? null : 0; // If we found the item, we do not know how many are in the store
+        return new PersistenceItemInfo() {
+
+            @Override
+            public String getName() {
+                return alias != null ? alias : itemName;
+            }
+
+            @Override
+            public @Nullable Integer getCount() {
+                return count;
+            }
+
+            @Override
+            public @Nullable Date getEarliest() {
+                return null;
+            }
+
+            @Override
+            public @Nullable Date getLatest() {
+                return latest;
+            }
+        };
+    }
 
     /**
      * Returns a {@link PersistedItem} representing the persisted state, last update and change timestamps and previous
