@@ -11,3 +11,5 @@ test: !sub:pattern=$[[..]]
         data: '#{{ foo }}'
         level4: !sub # use the default pattern
           data: '${ foo }'
+      data2: '@[foo]'
+    data2: '$(( foo ))'
