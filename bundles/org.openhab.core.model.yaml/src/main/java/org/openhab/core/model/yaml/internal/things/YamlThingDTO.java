@@ -97,7 +97,8 @@ public class YamlThingDTO implements YamlElement, Cloneable {
             try {
                 new Configuration(config);
             } catch (IllegalArgumentException e) {
-                addToList(errors, "invalid thing \"%s\": config: %s".formatted(uid, e.getMessage()));
+                addToList(errors,
+                        "invalid thing \"%s\": invalid data in \"config\" field: %s".formatted(uid, e.getMessage()));
                 ok = false;
             }
         }
