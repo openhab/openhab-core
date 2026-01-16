@@ -15,6 +15,7 @@ package org.openhab.core.model.yaml.internal.items;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -377,6 +378,34 @@ public class YamlItemDTOTest {
     }
 
     @Test
+    public void testEqualsWithExpire() throws IOException {
+        YamlItemDTO item1 = new YamlItemDTO();
+        YamlItemDTO item2 = new YamlItemDTO();
+
+        item1.name = "item_name";
+        item2.name = "item_name";
+        item1.type = "Switch";
+        item2.type = "Switch";
+
+        item1.expire = null;
+        item2.expire = null;
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item1.expire = "5m";
+        item2.expire = null;
+        assertFalse(item1.equals(item2));
+        item1.expire = null;
+        item2.expire = "5m";
+        assertFalse(item1.equals(item2));
+        item1.expire = "5m";
+        item2.expire = "1h";
+        assertFalse(item1.equals(item2));
+        item2.expire = "5m";
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+    }
+
+    @Test
     public void testEqualsWithGroups() throws IOException {
         YamlItemDTO item1 = new YamlItemDTO();
         YamlItemDTO item2 = new YamlItemDTO();
@@ -550,5 +579,27 @@ public class YamlItemDTOTest {
         assertEquals(item1.hashCode(), item2.hashCode());
         item2.metadata = Map.of("namespace", md3, "namespace2", md2);
         assertFalse(item1.equals(item2));
+    }
+
+    @Test
+    public void testExpireMetadataWarning() throws IOException {
+        YamlItemDTO item = new YamlItemDTO();
+        item.name = "item_name";
+        item.type = "String";
+        item.expire = "10m";
+
+        YamlMetadataDTO md = new YamlMetadataDTO();
+        md.value = "5m";
+        item.metadata = Map.of("expire", md);
+
+        List<String> errors = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+
+        assertTrue(item.isValid(errors, warnings));
+        assertTrue(errors.isEmpty());
+        assertEquals(1, warnings.size());
+        assertEquals(
+                "item \"item_name\": \"expire\" field is redundant with \"expire\" metadata; value \"5m\" will be considered",
+                warnings.get(0));
     }
 }

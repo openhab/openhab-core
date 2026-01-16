@@ -184,13 +184,28 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
         Map<String, YamlMetadataDTO> metadataDto = new LinkedHashMap<>();
         for (Metadata md : metadata) {
             String namespace = md.getUID().getNamespace();
+            String value = md.getValue();
             if ("autoupdate".equals(namespace)) {
-                dto.autoupdate = Boolean.valueOf(md.getValue());
+                // When autoupdate value is an empty string, treat it as not set since dto.autoupdate only accepts
+                // true/false
+                if (value != null && !value.isEmpty()) {
+                    dto.autoupdate = Boolean.valueOf(value);
+                }
             } else if ("unit".equals(namespace)) {
-                dto.unit = md.getValue();
+                dto.unit = value; // When unit value is empty string, keep it as empty string
+            } else if ("expire".equals(namespace)) {
+                Map<String, Object> configuration = md.getConfiguration();
+                if (configuration.isEmpty()) {
+                    dto.expire = value; // When expire value is empty string, keep it as empty string
+                } else {
+                    YamlMetadataDTO mdDto = new YamlMetadataDTO();
+                    mdDto.value = value.isEmpty() ? null : value;
+                    mdDto.config = configuration;
+                    metadataDto.put(namespace, mdDto);
+                }
             } else {
                 YamlMetadataDTO mdDto = new YamlMetadataDTO();
-                mdDto.value = md.getValue().isEmpty() ? null : md.getValue();
+                mdDto.value = value.isEmpty() ? null : value;
                 Map<String, Object> configuration = new LinkedHashMap<>();
                 String statePattern = null;
                 for (ConfigParameter param : getConfigurationParameters(md)) {

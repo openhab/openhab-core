@@ -49,6 +49,7 @@ public class YamlItemDTO implements YamlElement, Cloneable {
     public String icon;
     public String format;
     public String unit;
+    public String expire;
     public Boolean autoupdate;
     public List<@NonNull String> groups;
     public Set<@NonNull String> tags;
@@ -195,6 +196,12 @@ public class YamlItemDTO implements YamlElement, Cloneable {
                         "item \"%s\": \"format\" field is redundant with pattern in \"stateDescription\" metadata; \"%s\" will be considered"
                                 .formatted(name, pattern));
             }
+            md = metadata.get("expire");
+            if (md != null && expire != null) {
+                addToList(warnings,
+                        "item \"%s\": \"expire\" field is redundant with \"expire\" metadata; value \"%s\" will be considered"
+                                .formatted(name, md.getValue()));
+            }
         }
         return ok;
     }
@@ -266,8 +273,8 @@ public class YamlItemDTO implements YamlElement, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, getType(), group, label, icon, format, unit, autoupdate, getGroups(), getTags(),
-                channel);
+        return Objects.hash(name, getType(), group, label, icon, format, unit, expire, autoupdate, getGroups(),
+                getTags(), channel);
     }
 
     @Override
@@ -281,10 +288,10 @@ public class YamlItemDTO implements YamlElement, Cloneable {
         return Objects.equals(name, other.name) && Objects.equals(getType(), other.getType())
                 && Objects.equals(group, other.group) && Objects.equals(label, other.label)
                 && Objects.equals(icon, other.icon) && Objects.equals(format, other.format)
-                && Objects.equals(unit, other.unit) && Objects.equals(autoupdate, other.autoupdate)
-                && Objects.equals(getGroups(), other.getGroups()) && Objects.equals(getTags(), other.getTags())
-                && Objects.equals(channel, other.channel) && equalsChannels(channels, other.channels)
-                && equalsMetadata(metadata, other.metadata);
+                && Objects.equals(unit, other.unit) && Objects.equals(expire, other.expire)
+                && Objects.equals(autoupdate, other.autoupdate) && Objects.equals(getGroups(), other.getGroups())
+                && Objects.equals(getTags(), other.getTags()) && Objects.equals(channel, other.channel)
+                && equalsChannels(channels, other.channels) && equalsMetadata(metadata, other.metadata);
     }
 
     private boolean equalsChannels(@Nullable Map<@NonNull String, @NonNull Map<@NonNull String, @NonNull Object>> first,
