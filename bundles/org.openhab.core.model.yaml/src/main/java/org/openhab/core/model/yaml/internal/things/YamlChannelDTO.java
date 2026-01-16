@@ -43,11 +43,13 @@ public class YamlChannelDTO {
 
     public boolean isValid(@NonNull List<@NonNull String> errors, @NonNull List<@NonNull String> warnings) {
         boolean ok = true;
-        try {
-            new Configuration(config);
-        } catch (IllegalArgumentException e) {
-            errors.add("invalid data in \"config\" field: %s".formatted(e.getMessage()));
-            ok = false;
+        if (config != null) {
+            try {
+                new Configuration(config);
+            } catch (IllegalArgumentException e) {
+                errors.add("invalid data in \"config\" field: %s".formatted(e.getMessage()));
+                ok = false;
+            }
         }
         if (type != null) {
             try {
