@@ -18,12 +18,14 @@ import static org.hamcrest.Matchers.contains;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,6 +42,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.model.yaml.YamlModelListener;
+import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
 import org.openhab.core.model.yaml.test.FirstTypeDTO;
 import org.openhab.core.model.yaml.test.SecondTypeDTO;
 import org.openhab.core.service.WatchService;
@@ -463,5 +466,114 @@ public class YamlModelRepositoryImplTest {
         Collection<SecondTypeDTO> secondTypeElements = secondTypeCaptor1.getValue();
         assertThat(secondTypeElements, hasSize(1));
         assertThat(secondTypeElements, contains(new SecondTypeDTO("Second1", "Label1")));
+    }
+
+    @Test
+    public void testObjectFormMetadataLoadingAndGeneration() throws IOException {
+        String yamlContent = """
+                version: 1
+                items:
+                  # This item has the object-form metadata
+                  ValidItem:
+                    type: Switch
+                    metadata:
+                      alexa:
+                        value: Switchable
+                        config:
+                          setting1: value1
+                      homekit:
+                        value: Lighting
+                """;
+        Files.writeString(fullModelPath, yamlContent);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+
+        @SuppressWarnings("unchecked")
+        YamlModelListener<YamlItemDTO> itemListener = mock(YamlModelListener.class);
+        when(itemListener.getElementClass()).thenReturn(YamlItemDTO.class);
+        when(itemListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(itemListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(itemListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        // Verify the listener was called
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<YamlItemDTO>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(itemListener).addedModel(eq(MODEL_NAME), captor.capture());
+
+        // Verify that the valid item with object-form metadata was loaded
+        Collection<YamlItemDTO> items = captor.getValue();
+        assertThat(items, hasSize(1));
+
+        YamlItemDTO item = items.iterator().next();
+        assertThat(item.name, is("ValidItem"));
+        assertThat(item.metadata, is(notNullValue()));
+        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit"));
+        assertThat(item.metadata.get("alexa").value, is("Switchable"));
+        assertThat(item.metadata.get("alexa").config, is(Map.of("setting1", "value1")));
+        assertThat(item.metadata.get("homekit").value, is("Lighting"));
+
+        // Verify YAML output contains object form metadata
+        modelRepository.addElementsToBeGenerated("items", List.copyOf(items));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        modelRepository.generateFileFormat("items", out);
+        String yaml = out.toString();
+        // Should contain object form metadata for 'alexa'
+        assertThat(yaml, containsString("alexa:"));
+        assertThat(yaml, containsString("value: Switchable"));
+        assertThat(yaml, containsString("config:"));
+        assertThat(yaml, containsString("setting1: value1"));
+    }
+
+    @Test
+    public void testShortFormMetadataLoadingAndGeneration() throws IOException {
+        String yamlContent = """
+                version: 1
+                items:
+                  TestSwitch:
+                    type: Switch
+                    metadata:
+                      alexa: Switchable
+                      homekit: Lighting
+                """;
+        Files.writeString(fullModelPath, yamlContent);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+
+        @SuppressWarnings("unchecked")
+        YamlModelListener<YamlItemDTO> itemListener = mock(YamlModelListener.class);
+        when(itemListener.getElementClass()).thenReturn(YamlItemDTO.class);
+        when(itemListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(itemListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(itemListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        // Verify the listener was called
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<YamlItemDTO>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(itemListener).addedModel(eq(MODEL_NAME), captor.capture());
+        // Verify items were loaded with short-form metadata
+        Collection<YamlItemDTO> items = captor.getValue();
+        assertThat(items, hasSize(1));
+
+        YamlItemDTO item = items.iterator().next();
+        assertThat(item.metadata, is(notNullValue()));
+        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit"));
+        // deserializer converts short-form to value field
+        assertThat(item.metadata.get("alexa").value, is("Switchable"));
+        assertThat(item.metadata.get("homekit").value, is("Lighting"));
+
+        // Verify YAML output contains short form metadata
+        modelRepository.addElementsToBeGenerated("items", List.copyOf(items));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        modelRepository.generateFileFormat("items", out);
+        String yaml = out.toString();
+        assertThat(yaml, containsString("alexa: Switchable"));
+        assertThat(yaml, containsString("homekit: Lighting"));
+        // Should not contain object form keys
+        assertThat(yaml, not(containsString("value:")));
+        assertThat(yaml, not(containsString("config:")));
     }
 }
