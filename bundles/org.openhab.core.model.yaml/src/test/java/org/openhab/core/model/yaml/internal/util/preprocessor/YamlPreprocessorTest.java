@@ -180,7 +180,9 @@ public class YamlPreprocessorTest {
 
             assertThat(getNestedValue(data, "test", "data"), equalTo("barbar"));
             assertThat(getNestedValue(data, "test", "level1", "data"), equalTo("bar"));
+            assertThat(getNestedValue(data, "test", "level1", "data2"), equalTo("bar"));
             assertThat(getNestedValue(data, "test", "level1", "level2", "data"), equalTo("bar"));
+            assertThat(getNestedValue(data, "test", "level1", "level2", "data2"), equalTo("bar"));
             assertThat(getNestedValue(data, "test", "level1", "level2", "level3", "data"), equalTo("bar"));
             assertThat(getNestedValue(data, "test", "level1", "level2", "level3", "level4", "data"), equalTo("bar"));
         }
