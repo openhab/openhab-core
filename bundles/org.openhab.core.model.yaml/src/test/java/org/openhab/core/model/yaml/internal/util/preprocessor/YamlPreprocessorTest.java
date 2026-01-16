@@ -144,6 +144,9 @@ public class YamlPreprocessorTest {
             assertThat(getNestedValue(data, "parent_sub", "foo"), equalTo("bar"));
             assertThat(getNestedValue(data, "parent_sub", "baz"), equalTo("${foo}"));
 
+            assertThat(getNestedValue(data, "parent_nosub", "foo"), equalTo("bar"));
+            assertThat(getNestedValue(data, "parent_nosub", "baz"), equalTo("${foo}"));
+
             assertThat(getNestedValue(data, "conditionally_empty"), equalTo(Map.of()));
 
             assertThat(getNestedValue(data, "array_merge"),
