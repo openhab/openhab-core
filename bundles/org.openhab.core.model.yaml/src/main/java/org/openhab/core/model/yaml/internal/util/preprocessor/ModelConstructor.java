@@ -163,20 +163,24 @@ class ModelConstructor extends Constructor {
                     Node valueNode = tuple.getValueNode();
                     if (valueNode instanceof SequenceNode seqNode) {
                         // Merge Key with a sequence of mappings
-                        // Handle the case for `<<: [ !include {file: one.yaml}, !include {file: two.yaml} ]`
+                        // Handle the case for `<<: [ !include {file: xxx.yaml} | !sub <scalar>, ... ]`
                         ListIterator<Node> iter = seqNode.getValue().listIterator();
                         while (iter.hasNext()) {
-                            Node subNode = iter.next();
-                            if (resolveIncludeNode(subNode) instanceof Node includedNode) {
-                                logger.debug("Resolving !include in flattenMapping list: {}", includedNode);
-                                // replace the original list item with the included node
+                            Node sequenceItem = iter.next();
+                            if (resolveIncludeNode(sequenceItem) instanceof Node includedNode) {
                                 iter.set(includedNode);
+                            } else if (resolveScalarSubNode(sequenceItem) instanceof Node subNode) {
+                                iter.set(subNode);
                             }
                         }
                     } else if (resolveIncludeNode(valueNode) instanceof Node includedNode) {
                         // Merge Key with a single mapping
                         // Handle the case for `<<: !include {file: other.yaml}`
                         tuple = new NodeTuple(tuple.getKeyNode(), includedNode);
+                    } else if (resolveScalarSubNode(valueNode) instanceof Node subNode) {
+                        // Merge Key with a single mapping with substitution
+                        // Handle the case for `<<: !sub ...`
+                        tuple = new NodeTuple(tuple.getKeyNode(), subNode);
                     }
                 }
                 // Add the (possibly modified) tuple back to the mapping node
@@ -200,7 +204,7 @@ class ModelConstructor extends Constructor {
         if (!INCLUDE_TAG.equals(node.getTag())) {
             return null;
         }
-        logger.debug("Resolving !include node: ({}), {}", substitutionStack.peek(), node);
+        logger.debug("Resolving !include node: {}", node);
         if (finalPass && constructObject(node) instanceof IncludePlaceholder includePlaceholder) {
             Object includedData = preprocessor.resolveIncludePlaceholder(includePlaceholder);
             if (!(includedData instanceof Map<?, ?>)) {
@@ -209,6 +213,28 @@ class ModelConstructor extends Constructor {
             }
             Node result = representer.represent(includedData);
             // Prevent substitution of the included content in the current context by
+            // tagging the entire subtree with NOSUB_TAG so ConstructInterpolation
+            // sees the !nosub tag on nested nodes as well.
+            markNoSub(result);
+            return result;
+        }
+        return representer.represent(Map.of());
+    }
+
+    private @Nullable Node resolveScalarSubNode(Node node) {
+        if (!(node instanceof ScalarNode && isSubTag(node.getTag()))) {
+            return null;
+        }
+        logger.debug("Resolving a scalar !sub node: {}", node);
+        if (finalPass) {
+            Object interpolated = interpolationConstruct.construct(node);
+            if (!(interpolated instanceof Map<?, ?>)) {
+                throw new YAMLException(
+                        getContext(node) + " Substituted content must be a mapping for merge key. Found: "
+                                + (interpolated == null ? "null" : interpolated.getClass().getName()));
+            }
+            Node result = representer.represent(interpolated);
+            // Prevent further substitution of the substituted content in the current context by
             // tagging the entire subtree with NOSUB_TAG so ConstructInterpolation
             // sees the !nosub tag on nested nodes as well.
             markNoSub(result);
