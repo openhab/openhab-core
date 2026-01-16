@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -872,14 +872,16 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         register(rule);
         setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
 
-        // check if we have to trigger because of the startlevel
+        // If the rule engine is started: Check if we have to trigger immediately because of the startlevel
+        // Execution of startlevel triggers during startup is handled by executeRulesWithStartlevel()
         List<Trigger> slTriggers = rule.getTriggers().stream().map(WrappedTrigger::unwrap)
                 .filter(t -> SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(t.getTypeUID())).toList();
-        if (slTriggers.stream()
+        int startLevel = startLevelService.getStartLevel();
+        if (started && slTriggers.stream()
                 .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
-                        .intValue() <= startLevelService.getStartLevel())) {
+                        .intValue() <= startLevel)) {
             runNow(rule.getUID(), true, Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES,
-                    "event", SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES)));
+                    "event", SystemEventFactory.createStartlevelEvent(startLevel)));
         }
 
         return true;
