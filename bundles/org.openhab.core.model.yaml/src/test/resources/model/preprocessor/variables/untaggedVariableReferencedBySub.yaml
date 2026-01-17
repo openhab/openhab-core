@@ -1,0 +1,9 @@
+variables:
+  # Variables without !sub tag store patterns literally
+  first: hello
+  second: ${first} world
+
+# When we use !sub to reference 'second', it should get the literal value "${first} world"
+# because 'second' was defined without !sub
+data:
+  literal_pattern: !sub ${second}

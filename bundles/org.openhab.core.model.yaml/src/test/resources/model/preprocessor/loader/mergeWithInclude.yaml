@@ -1,0 +1,39 @@
+.bar3: &BAR3
+  foo: anchor
+
+simple:
+  <<: !include {file: mergeWithInclude1.inc.yaml}
+
+duplicate:
+  <<: !include {file: mergeWithInclude1.inc.yaml}
+  <<: !include {file: mergeWithInclude2.inc.yaml}
+
+override:
+  <<: !include {file: mergeWithInclude1.inc.yaml}
+  <<: !include {file: mergeWithInclude2.inc.yaml}
+  foo: direct
+
+with_anchor_first:
+  <<: *BAR3
+  <<: !include {file: mergeWithInclude1.inc.yaml}
+  <<: !include {file: mergeWithInclude2.inc.yaml}
+
+with_anchor_last:
+  <<: !include {file: mergeWithInclude2.inc.yaml}
+  <<: !include {file: mergeWithInclude1.inc.yaml}
+  <<: *BAR3
+
+list_merge:
+  <<:
+    - !include {file: mergeWithInclude1.inc.yaml}
+    - !include {file: mergeWithInclude2.inc.yaml}
+    - *BAR3
+
+merge_with_scalar:
+  <<: !include mergeWithInclude1.inc.yaml
+
+variables:
+  file: mergeWithInclude1.inc.yaml
+
+merge_with_variable: !sub
+  <<: !include  "${file}"

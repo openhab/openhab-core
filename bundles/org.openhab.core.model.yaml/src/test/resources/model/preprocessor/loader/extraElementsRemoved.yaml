@@ -1,0 +1,11 @@
+preprocessor:
+  generate_resolved_file: false # don't generate resolved files during tests
+  load_into_openhab: true # the tests rely on this being true
+
+variables:
+  foo: bar
+  baz: qux
+
+packages:
+  foo: {}
+  baz: {}

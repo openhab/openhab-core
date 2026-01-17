@@ -1,0 +1,26 @@
+variables:
+  map1:
+    foo: bar
+    baz: ${foo}
+
+  map2:
+    qux: quux
+
+  empty_map: {}
+
+simple:
+  <<: !sub ${map1}
+
+parent_sub: !sub
+  <<: !sub ${map1}
+
+parent_nosub: !nosub
+  <<: !sub ${map1}
+
+conditionally_empty:
+  <<: !sub ${map1 if false else empty_map}
+
+array_merge:
+  <<:
+    - !sub ${map1}
+    - !sub ${map2}

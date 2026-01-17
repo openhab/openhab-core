@@ -1,0 +1,5 @@
+variables:
+  file: includeSimpleWithVarFilename.inc.yaml
+
+foo: !sub
+  bar: !include "${file}"

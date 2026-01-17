@@ -1,0 +1,10 @@
+variables:
+  foo: bar2 # this is superdeded by the main file
+
+plain: ${foo} # => ${foo}
+sub: !sub ${foo} # => bar
+nosub: !nosub ${foo} # => ${foo}
+
+# moo is defined in !include vars
+moo_plain: ${moo} # should never be substituted
+moo_sub: !sub ${moo}

@@ -1,0 +1,6 @@
+variables:
+  var: toplevel
+
+toplevel: !include
+  file: varsPropagate2Levels.inc.yaml
+

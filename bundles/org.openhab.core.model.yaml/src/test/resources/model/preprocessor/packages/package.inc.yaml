@@ -1,0 +1,42 @@
+variables:
+  label: DefaultLabel
+  package_id: default_package
+  thingname: default_thing
+
+things:
+  !sub ${thingname}:
+    label: !sub ${label}
+    scalar: package
+    packageid: !sub ${package_id}
+
+    map1:
+      scalar1: package
+      scalar2: package
+    map2:
+      scalar1: package
+      scalar2: package
+
+    list1:
+      - package
+    list2:
+      - package
+
+    config:
+      scalar1: package
+      scalar2: package
+
+      map1:
+        scalar1: package
+        scalar2: package
+      map2:
+        scalar1: package
+        scalar2: package
+
+      list1:
+        - package
+      list2:
+        - package
+
+items:
+  !sub item_for_${thingname}:
+    label: !sub item ${label}

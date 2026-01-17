@@ -1,0 +1,6 @@
+variables:
+  var: level2
+
+data: !include
+  file: varsPropagate2Levels.inc.inc.yaml
+
