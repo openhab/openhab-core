@@ -231,7 +231,6 @@ public class YamlPreprocessor {
         if (variablesSection instanceof Map<?, ?> variablesMap) {
             Map<String, Object> extractedVariables = new LinkedHashMap<>();
             variablesMap.forEach((k, v) -> {
-                // The key/value scalars won't be null because we construct nulls as empty strings
                 Object key = Objects.requireNonNull(k, "Variable key in YAML cannot be null");
                 Object value = Objects.requireNonNull(v, () -> "Value for key '" + key + "' cannot be null");
                 LOGGER.debug("Extracting variable '{}' with raw value '{}' from {}", key, value, currentPathRelative);
@@ -249,7 +248,6 @@ public class YamlPreprocessor {
         }
 
         // Set VARS after extracting user-defined variables so it includes them
-        // This ensures VARS contains both special variables and user-defined variables
         variables.put("VARS", Collections.unmodifiableMap(new LinkedHashMap<>(variables)));
     }
 
@@ -258,6 +256,16 @@ public class YamlPreprocessor {
      * now that the full variables map is available.
      */
     private Object resolveSubstitutionPlaceholders(Object value) {
+        // If the value is an IncludePlaceholder, resolve its fileName and vars
+        if (value instanceof IncludePlaceholder includePlaceholder) {
+            String resolvedFileName = String.valueOf(resolveSubstitutionPlaceholders(includePlaceholder.fileName()));
+            Map<Object, Object> resolvedVars = new LinkedHashMap<>();
+            includePlaceholder.vars().forEach((vk, vv) -> {
+                resolvedVars.put(resolveSubstitutionPlaceholders(vk), resolveSubstitutionPlaceholders(vv));
+            });
+            IncludePlaceholder resolvedIncludePlaceholder = new IncludePlaceholder(resolvedFileName, resolvedVars);
+            return resolveIncludePlaceholder(resolvedIncludePlaceholder);
+        }
         if (value instanceof SubstitutionPlaceholder placeholder) {
             String contextDescription = currentPathRelative + " [variables]";
             try {
@@ -335,11 +343,21 @@ public class YamlPreprocessor {
      * following any nested includes), and returns the fully expanded content.
      */
     Object resolveIncludePlaceholder(IncludePlaceholder includeObject) {
-        String includeFileName = includeObject.fileName();
+        String includeFileName = String.valueOf(includeObject.fileName());
+        if (includeFileName.isBlank()) {
+            // We do another check here in case the includeFileName was a variable that resolved to empty
+            throw new YAMLException("Include file name cannot be empty (included from '" + currentPath + "')");
+        }
         Path includeFilePath = currentPath.resolveSibling(includeFileName);
         Map<String, Object> includeVars = new HashMap<>(variables);
         // include vars override current vars
-        includeVars.putAll(includeObject.vars());
+        includeObject.vars().forEach((k, v) -> {
+            Object key = Objects.requireNonNull(k, "Include variable key in YAML cannot be null");
+            Object value = Objects.requireNonNull(v,
+                    () -> "Value for include variable key '" + key + "' cannot be null");
+            String resolvedKey = String.valueOf(key);
+            includeVars.put(resolvedKey, value);
+        });
         try {
             YamlPreprocessor includePreprocessor = new YamlPreprocessor(includeFilePath, includeVars,
                     includeStack, includeCallback);
@@ -355,8 +373,8 @@ public class YamlPreprocessor {
                 default -> "";
             };
             // Wrap the exception to indicate where the error occurred
-            throw new YAMLException("Error loading include file '" + includeObject.fileName() + "' (included from '"
-                    + currentPath + "')" + errorMessage, e);
+            throw new YAMLException("Error loading include file '" + includeFileName + "' (included from '"
+                    + currentPath + ")" + errorMessage, e);
         }
     }
 
@@ -374,7 +392,7 @@ public class YamlPreprocessor {
 
             // If the package is an IncludePlaceholder, inject the ID first, then process it
             if (pkg instanceof IncludePlaceholder includeObj) {
-                Map<String, Object> newVars = new HashMap<>(includeObj.vars());
+                Map<Object, Object> newVars = new HashMap<>(includeObj.vars());
                 newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                 IncludePlaceholder pkgWithId = new IncludePlaceholder(includeObj.fileName(), newVars);
                 processedPkg = resolveIncludes(pkgWithId);
@@ -409,7 +427,7 @@ public class YamlPreprocessor {
         return data.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> {
             Object value = Objects.requireNonNull(entry.getValue());
             if (value instanceof IncludePlaceholder includeObj) {
-                Map<String, Object> newVars = new HashMap<>(includeObj.vars());
+                Map<Object, Object> newVars = new HashMap<>(includeObj.vars());
                 newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                 return new IncludePlaceholder(includeObj.fileName(), newVars);
             } else if (value instanceof Map<?, ?> valueMap) {
@@ -417,7 +435,7 @@ public class YamlPreprocessor {
             } else if (value instanceof List<?> listValue) {
                 return listValue.stream().map(item -> {
                     if (item instanceof IncludePlaceholder includeObj) {
-                        Map<String, Object> newVars = new HashMap<>(includeObj.vars());
+                        Map<Object, Object> newVars = new HashMap<>(includeObj.vars());
                         newVars.putIfAbsent(PACKAGE_ID_VAR, packageId);
                         return new IncludePlaceholder(includeObj.fileName(), newVars);
                     } else if (item instanceof Map<?, ?> mapItem) {

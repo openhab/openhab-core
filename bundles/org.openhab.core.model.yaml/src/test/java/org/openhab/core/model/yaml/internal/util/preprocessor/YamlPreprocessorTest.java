@@ -331,6 +331,15 @@ public class YamlPreprocessorTest {
         }
 
         @Test
+        void includeInVariables() throws IOException {
+            Map<Object, Object> data = loadFixture(PATH + "includeInVariables.yaml");
+
+            assertThat(getNestedValue(data, "static_value"), equalTo("qux"));
+            assertThat(getNestedValue(data, "scalar_subst_include"), equalTo("qux"));
+            assertThat(getNestedValue(data, "map_subst_include"), equalTo("qux"));
+        }
+
+        @Test
         void untaggedVariableReferencedBySub() throws IOException {
             Map<Object, Object> data = loadFixture(PATH + "untaggedVariableReferencedBySub.yaml");
 
@@ -477,7 +486,7 @@ public class YamlPreprocessorTest {
         static final String PATH = "include/";
 
         @ParameterizedTest
-        @ValueSource(strings = { "!include", "!include {}", "!include { file: null }" })
+        @ValueSource(strings = { "!include", "!include ''", "!include {}", "!include { file: null }" })
         void invalidIncludeThrows(String input) throws IOException {
             Yaml yaml = createYamlParser(true);
             assertThrows(YAMLException.class, () -> yaml.load(input), input);
