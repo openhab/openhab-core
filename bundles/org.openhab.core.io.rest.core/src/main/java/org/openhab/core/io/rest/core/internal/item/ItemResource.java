@@ -748,7 +748,6 @@ public class ItemResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = { //
                     @ApiResponse(responseCode = "200", description = "OK"), //
                     @ApiResponse(responseCode = "201", description = "Created"), //
-                    @ApiResponse(responseCode = "400", description = "Metadata value empty."), //
                     @ApiResponse(responseCode = "404", description = "Item not found."), //
                     @ApiResponse(responseCode = "405", description = "Metadata not editable.") })
     public Response addMetadata(@PathParam("itemname") @Parameter(description = "item name") String itemname,
@@ -761,8 +760,8 @@ public class ItemResource implements RESTResource {
         }
 
         String value = metadata.value;
-        if (value == null || value.isEmpty()) {
-            return Response.status(Status.BAD_REQUEST).build();
+        if (value == null) {
+            value = "";
         }
 
         MetadataKey key = new MetadataKey(namespace, itemname);
