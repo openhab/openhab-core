@@ -25,7 +25,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -398,7 +400,7 @@ public class ActionInputHelperTest {
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
         assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll("-", " ")));
+                () -> helper.mapSerializedInputToActionInput(input, valAsString.replace("-", " ")));
     }
 
     @Test
@@ -409,7 +411,7 @@ public class ActionInputHelperTest {
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
         assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll(":", " ")));
+                () -> helper.mapSerializedInputToActionInput(input, valAsString.replace(":", " ")));
     }
 
     @Test
@@ -420,7 +422,7 @@ public class ActionInputHelperTest {
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
         assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll("T", " ")));
+                () -> helper.mapSerializedInputToActionInput(input, valAsString.replace("T", " ")));
     }
 
     @Test
@@ -430,8 +432,21 @@ public class ActionInputHelperTest {
         Input input = buildInput("java.time.ZonedDateTime");
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
-        assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll("T", " ")));
+        String s1 = valAsString.replace("T", " ");
+        assertThrows(IllegalArgumentException.class, () -> helper.mapSerializedInputToActionInput(input, s1));
+
+        valAsString = "2007-12-03T10:15:30+04:00";
+        val = ZonedDateTime.parse(valAsString, DateTimeFormatter.ISO_DATE_TIME);
+        assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
+        assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
+        assertThat(val.getOffset(), is(ZoneOffset.of("+04:00")));
+
+        // The offset intentionally mismatches with the specified zone, to verify that the zone parsing works
+        valAsString = "2007-12-03T10:15:30+04:00[Europe/Kyiv]";
+        val = ZonedDateTime.parse(valAsString, DateTimeFormatter.ISO_DATE_TIME);
+        assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
+        assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
+        assertThat(val.getOffset(), is(ZoneOffset.of("+02:00")));
     }
 
     @Test
@@ -448,7 +463,7 @@ public class ActionInputHelperTest {
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
         assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll("T", " ")));
+                () -> helper.mapSerializedInputToActionInput(input, valAsString.replace("T", " ")));
     }
 
     @Test
@@ -459,7 +474,7 @@ public class ActionInputHelperTest {
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
         assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll("T", " ")));
+                () -> helper.mapSerializedInputToActionInput(input, valAsString.replace("T", " ")));
     }
 
     @Test
@@ -470,7 +485,7 @@ public class ActionInputHelperTest {
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
         assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll("T", " ")));
+                () -> helper.mapSerializedInputToActionInput(input, valAsString.replace("T", " ")));
     }
 
     @Test
