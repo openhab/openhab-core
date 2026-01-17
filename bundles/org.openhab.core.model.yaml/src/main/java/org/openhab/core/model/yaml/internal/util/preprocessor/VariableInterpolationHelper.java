@@ -88,13 +88,12 @@ class VariableInterpolationHelper {
      * @param pattern the substitution pattern to use
      * @param isPlainScalar whether the scalar uses plain style (for preserving type)
      * @param variables the variable map
-     * @param contextDescription description of the context for error messages (e.g., file path)
      * @param finalPass whether this is the final pass
      * @return the evaluated value
      * @throws IllegalArgumentException if evaluation fails
      */
     static Object evaluateValue(String value, Pattern pattern, boolean isPlainScalar, Map<String, Object> variables,
-            String contextDescription, boolean finalPass) {
+            boolean finalPass) {
         Matcher matcher = pattern.matcher(value);
         if (!matcher.find()) {
             return value;
@@ -105,13 +104,13 @@ class VariableInterpolationHelper {
         // placeholder.
         if (isPlainScalar && matcher.matches()) {
             String content = matcher.group("content");
-            return evaluateExpression(content, variables, finalPass, contextDescription);
+            return evaluateExpression(content, variables, finalPass);
         }
 
         // Replace ${...} with content (simple variables directly, complex expressions via Jinja)
         String interpolated = matcher.replaceAll(match -> {
             String content = match.group("content");
-            String rendered = evaluateExpression(content, variables, finalPass, contextDescription).toString();
+            String rendered = evaluateExpression(content, variables, finalPass).toString();
             return Matcher.quoteReplacement(rendered);
         });
 
@@ -124,17 +123,15 @@ class VariableInterpolationHelper {
      * @param expression the expression to evaluate
      * @param variables the variable map
      * @param finalPass whether this is the final pass
-     * @param contextDescription description of the context for error messages
      * @return the evaluated result
      * @throws IllegalArgumentException if evaluation fails
      */
-    static Object evaluateExpression(String expression, Map<String, Object> variables, boolean finalPass,
-            String contextDescription) {
+    static Object evaluateExpression(String expression, Map<String, Object> variables, boolean finalPass) {
         try {
             Object rendered = JinjavaTemplateEngine.renderObject(expression, variables, finalPass);
             return Objects.requireNonNullElse(rendered, "");
         } catch (InterpretException e) {
-            throw new IllegalArgumentException("%s: %s".formatted(contextDescription, e.getMessage()), e);
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
 

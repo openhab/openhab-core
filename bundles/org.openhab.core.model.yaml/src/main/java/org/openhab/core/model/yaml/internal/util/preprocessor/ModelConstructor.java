@@ -312,21 +312,21 @@ class ModelConstructor extends Constructor {
                 String value = (String) constructScalar(scalarNode);
                 boolean enabled = substitutionStack.peek();
                 if (enabled || isSubTag(scalarNode.getTag())) {
+                    String contextDescription = getContext(node);
                     if (finalPass) {
                         Pattern pattern = substitutionPatternStack.peek();
-                        String contextDescription = getContext(node);
                         try {
                             return VariableInterpolationHelper.evaluateValue(value, pattern, scalarNode.isPlain(),
-                                    variables, contextDescription, true);
+                                    variables, true);
                         } catch (IllegalArgumentException e) {
                             // Re-wrap as YAMLException for consistency with YAML error handling
-                            throw new YAMLException(e.getMessage(), e);
+                            throw new YAMLException(contextDescription + ": " + e.getMessage(), e);
                         }
                     } else {
                         // Defer substitution until after variables are progressively populated
                         // so we can do variable chaining
-                        return new SubstitutionPlaceholder(value, substitutionPatternStack.peek(),
-                                scalarNode.isPlain());
+                        return new SubstitutionPlaceholder(value, substitutionPatternStack.peek(), scalarNode.isPlain(),
+                                contextDescription);
                     }
                 }
 

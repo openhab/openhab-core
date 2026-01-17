@@ -27,5 +27,5 @@ import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
  * @author Jimmy Tanagra - Initial contribution
  */
 @NonNullByDefault
-public record SubstitutionPlaceholder(String value, Pattern pattern, boolean isPlainScalar) {
+public record SubstitutionPlaceholder(String value, Pattern pattern, boolean isPlainScalar, String contextDescription) {
 }

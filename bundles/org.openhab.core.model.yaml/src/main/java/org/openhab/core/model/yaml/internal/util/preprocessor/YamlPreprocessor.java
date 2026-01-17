@@ -267,13 +267,12 @@ public class YamlPreprocessor {
             return resolveIncludePlaceholder(resolvedIncludePlaceholder);
         }
         if (value instanceof SubstitutionPlaceholder placeholder) {
-            String contextDescription = currentPathRelative + " [variables]";
             try {
                 return VariableInterpolationHelper.evaluateValue(placeholder.value(), placeholder.pattern(),
-                        placeholder.isPlainScalar(), variables, contextDescription, false);
+                        placeholder.isPlainScalar(), variables, false);
             } catch (IllegalArgumentException e) {
                 // Re-wrap as YAMLException for consistency with YAML error handling
-                throw new YAMLException(e.getMessage(), e);
+                throw new YAMLException(placeholder.contextDescription() + ": " + e.getMessage(), e);
             }
         }
         if (value instanceof Map<?, ?> map) {
