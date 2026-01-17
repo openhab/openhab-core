@@ -50,6 +50,7 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingProvider;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.UID;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.thing.binding.builder.BridgeBuilder;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
@@ -532,7 +533,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         Set<String> thingStringParams = !configuration.keySet().isEmpty()
                 ? getThingConfigStringParameters(thingTypeUID, thingUID)
                 : Set.of();
-        return processConfiguration(configuration, thingStringParams);
+        return processConfiguration(thingUID, configuration, thingStringParams);
     }
 
     private Configuration processChannelConfiguration(@Nullable ChannelTypeUID channelTypeUID, ChannelUID channelUID,
@@ -540,34 +541,44 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         Set<String> channelStringParams = !configuration.keySet().isEmpty()
                 ? getChannelConfigStringParameters(channelTypeUID, channelUID)
                 : Set.of();
-        return processConfiguration(configuration, channelStringParams);
+        return processConfiguration(channelUID, configuration, channelStringParams);
     }
 
-    private Configuration processConfiguration(Configuration configuration, Set<String> stringParameters) {
+    private Configuration processConfiguration(UID uid, Configuration configuration, Set<String> stringParameters) {
         Map<String, Object> params = new HashMap<>();
 
         configuration.keySet().forEach(name -> {
-            Object value = configuration.get(name);
-            try {
-                // For configuration parameter of type text only, if the value in YAML is an unquoted number
-                // (value is then of type BigDecimal in that method) and there is no decimal, we convert it to
-                // an integer and return a String from that integer.
-                // Value 1 in YAML is converted into String "1"
-                // Value 1.0 in YAML is converted into String "1"
-                // Value 1.5 in YAML is untouched
-                // Value "1" in YAML is untouched
-                // Value "1.0" in YAML is untouched
-                // Value "1.5" in YAML is untouched
-                if (stringParameters.contains(name) && value instanceof BigDecimal bigDecimalValue
-                        && bigDecimalValue.stripTrailingZeros().scale() <= 0) {
-                    value = String.valueOf(bigDecimalValue.toBigIntegerExact().longValue());
+            Object valueIn = configuration.get(name);
+            Object valueOut = valueIn;
+            // For configuration parameter of type text only
+            if (stringParameters.contains(name)) {
+                if (valueIn != null && !(valueIn instanceof String)) {
+                    logger.info(
+                            "\"{}\": the value of the configuration TEXT parameter \"{}\" is not interpreted as a string and will be automatically converted. Enclose your value in double quotes to prevent conversion.",
+                            uid, name);
                 }
-            } catch (ArithmeticException e) {
-                // Ignore error and return the original value
+                // if the value in YAML is an unquoted number, the value resulting of the parsing can then be
+                // of type BigDecimal or BigInteger.
+                // If the value is of type BigDecimal, we convert it into a String. If there is no decimal,
+                // we convert it to an integer and return a String from that integer.
+                // - Value 1 in YAML is converted into String "1"
+                // - Value 1.0 in YAML is converted into String "1"
+                // - Value 1.5 in YAML is converted into String "1.5"
+                // If the value is not of type BigDecimal, it is kept unchanged. Conversion to a String will
+                // be applied at a next step during configuration normalization.
+                if (valueIn instanceof BigDecimal bigDecimalValue) {
+                    try {
+                        valueOut = bigDecimalValue.stripTrailingZeros().scale() <= 0
+                                ? String.valueOf(bigDecimalValue.toBigIntegerExact().longValue())
+                                : bigDecimalValue.toString();
+                        logger.trace("config param {}: {} ({}) converted into {} ({})", name, valueIn,
+                                valueIn.getClass().getSimpleName(), valueOut, valueOut.getClass().getSimpleName());
+                    } catch (ArithmeticException e) {
+                        // Ignore error and return the original value
+                    }
+                }
             }
-            logger.trace("config param {}: {} => {} type {}", name, configuration.get(name), value,
-                    value.getClass().getSimpleName());
-            params.put(name, value);
+            params.put(name, valueOut);
         });
 
         return new Configuration(params);
