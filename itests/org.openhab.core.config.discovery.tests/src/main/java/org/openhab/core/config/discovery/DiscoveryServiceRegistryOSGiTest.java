@@ -299,7 +299,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         discoveryServiceRegistry.startScan(ANY_BINDING_ID_3_ANY_THING_TYPE_3_UID, null, mockScanListener1);
 
         waitForAssert(() -> verify(mockScanListener1, times(1)).onFinished());
-        verify(discoveryListenerMock, times(2)).thingDiscovered(any(), any());
+        verify(discoveryListenerMock, timeout(2000).times(2)).thingDiscovered(any(), any());
 
         // 2 discovery services for the same thing type with different bridges - inbox must contain 2 elements
         assertThat(inbox.getAll().size(), is(2));
@@ -323,7 +323,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
                 mockScanListener1);
 
         waitForAssert(() -> verify(mockScanListener1, times(1)).onFinished());
-        verify(discoveryListenerMock, times(4)).thingDiscovered(any(), any());
+        verify(discoveryListenerMock, timeout(2000).times(4)).thingDiscovered(any(), any());
 
         // 2 discovery services for the same thing type with different bridges - inbox must now contain 4 elements
         assertThat(inbox.getAll().size(), is(4));

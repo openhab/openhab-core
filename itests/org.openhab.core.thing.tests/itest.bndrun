@@ -72,7 +72,7 @@ Fragment-Host: org.openhab.core.thing
 	org.openhab.core.thing;version='[5.2.0,5.2.1)',\
 	org.openhab.core.thing.tests;version='[5.2.0,5.2.1)',\
 	org.openhab.core.transform;version='[5.2.0,5.2.1)',\
-	biz.aQute.tester.junit-platform;version='[7.1.0,7.1.1)',\
+	biz.aQute.tester.junit-platform;version='[7.2.1,7.2.2)',\
 	org.openhab.core.semantics;version='[5.2.0,5.2.1)',\
 	com.google.inject;version='[7.0.0,7.0.1)',\
 	de.focus_shift.jollyday-core;version='[1.8.1,1.8.2)',\
