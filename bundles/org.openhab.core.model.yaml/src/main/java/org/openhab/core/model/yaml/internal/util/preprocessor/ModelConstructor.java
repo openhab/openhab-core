@@ -17,12 +17,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -96,20 +96,24 @@ class ModelConstructor extends Constructor {
         this.substitutionPatternStack
                 .push(VariableInterpolationHelper.compileSubstitutionPattern(DEFAULT_BEGIN, DEFAULT_END));
 
+        this.yamlMultiConstructors.put(SUB_TAG, new ConstructSub());
+
         this.yamlConstructors.put(Tag.NULL, new ConstructNull());
         this.yamlConstructors.put(NOSUB_TAG, new ConstructDefault());
 
-        // The first pass is only to gather variables, so we use a no-op constructor for efficiency
-        // also because the variables aren't populated yet for substitution, constructing includes/replaces/removes
-        // may result in errors if they rely on variables
-        this.yamlConstructors.put(INCLUDE_TAG, finalPass ? new ConstructInclude() : new ConstructEmpty());
-        this.yamlConstructors.put(REPLACE_TAG, finalPass ? new ConstructReplace() : new ConstructEmpty());
-        this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
-
         // Perform substitution in the first pass so that variables can refer to other variables
         this.yamlConstructors.put(Tag.STR, interpolationConstruct);
+        // Construct include in both passes:
+        // the first pass to extract variables from included files in the variable definitions (if any)
+        // the final pass to include content in the model body
+        this.yamlConstructors.put(INCLUDE_TAG, new ConstructInclude());
 
-        this.yamlMultiConstructors.put(SUB_TAG, new ConstructSub());
+        // The first pass is only to gather variables, so we use a no-op constructor for efficiency
+        // also because the variables aren't populated yet for substitution, constructing replace/remove
+        // may result in errors if they rely on variables
+        this.yamlConstructors.put(REPLACE_TAG, new ConstructReplace());
+        // this.yamlConstructors.put(REPLACE_TAG, finalPass ? new ConstructReplace() : new ConstructEmpty());
+        this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
 
         logger.trace("ModelConstructor created with vars: {}", variables);
     }
@@ -426,46 +430,74 @@ class ModelConstructor extends Constructor {
         }
     }
 
+    /**
+     * Constructs an IncludePlaceholder from an !include node.
+     *
+     * This is done in both passes.
+     *
+     * In the first pass the IncludePlaceholder may be used to load variables from include files.
+     * During the first pass, the file name and vars may contain SubstitutionPlaceholder objects.
+     * They will be resolved in the YamlPreprocessor extractVariables method incrementally so that
+     * they can refer to variables defined before them.
+     *
+     * Only !include tags found in variable definitions will be processed in the first pass.
+     * They won't be processed again in the final pass because extractVariables is only done in the first pass.
+     *
+     * Only !include tags found in the model content will be processed in the final pass.
+     */
     private class ConstructInclude extends AbstractConstruct {
         @Override
         @NonNullByDefault({})
         public Object construct(Node node) {
             logger.debug("Constructing !include node: {}", node);
+            Object fileName;
+            Map<Object, Object> vars;
+
             if (node instanceof ScalarNode scalarNode) {
-                Object fileNameObj = interpolationConstruct.construct(scalarNode);
-                String fileName = String.valueOf(fileNameObj).trim();
-                if (fileNameObj == null || fileName.isEmpty()) {
-                    throw new YAMLException(getContext(node) + " !include file name cannot be empty");
-                }
-                return new IncludePlaceholder(fileName, Map.of());
+                // Accept any scalar, including unresolved variable expressions
+                fileName = interpolationConstruct.construct(scalarNode);
+                logger.debug("Include fileName scalar: {} from node {}", fileName, node);
+                vars = Map.of();
             } else if (node instanceof MappingNode mappingNode) {
-                Map<Object, Object> includeOptions = constructMapping(mappingNode);
-
-                Object fileNameObj = includeOptions.get("file");
-                String fileName = (fileNameObj instanceof String || fileNameObj instanceof Number)
-                        ? fileNameObj.toString().trim()
-                        : "";
-
-                if (fileName.isBlank()) {
-                    throw new YAMLException(getContext(node) + " !include file name is missing or invalid.");
+                Map<String, Object> includeOptions = new HashMap<>();
+                for (NodeTuple t : mappingNode.getValue()) {
+                    if (!(t.getKeyNode() instanceof ScalarNode keyNode)) {
+                        throw new YAMLException(getContext(node) + " !include option keys must be scalars. Found: "
+                                + t.getKeyNode().getNodeId().name());
+                    } else if (isSubTag(keyNode.getTag())) {
+                        throw new YAMLException(
+                                getContext(keyNode) + " !include option keys cannot use !sub tag for substitution.");
+                    }
+                    String key = String.valueOf(constructScalar(keyNode));
+                    Object value = constructObject(t.getValueNode());
+                    includeOptions.put(key, value);
                 }
+
+                fileName = includeOptions.get("file");
 
                 Object varsObj = includeOptions.get("vars");
-                Map<String, Object> vars;
-                if (varsObj == null) {
+                if (varsObj instanceof Map<?, ?>) {
+                    @SuppressWarnings("unchecked")
+                    Map<Object, Object> varsMap = (Map<Object, Object>) varsObj;
+                    vars = varsMap;
+                } else if (varsObj == null) {
                     vars = Map.of();
-                } else if (varsObj instanceof Map<?, ?> varsMap) {
-                    vars = varsMap.entrySet().stream()
-                            .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), Map.Entry::getValue));
                 } else {
-                    throw new YAMLException(getContext(node) + " invalid 'vars' type in !include file: " + fileName
-                            + ", vars: " + varsObj + " (not a map)");
+                    throw new YAMLException(getContext(node) + " !include vars expected a map but found: "
+                            + varsObj.getClass().getName());
                 }
-
-                return new IncludePlaceholder(fileName, vars);
+            } else {
+                throw new YAMLException(getContext(node) + " invalid !include argument type: "
+                        + (node == null ? null : node.getNodeId().name()));
             }
-            throw new YAMLException(getContext(node) + " invalid !include argument type: "
-                    + (node == null ? null : node.getNodeId().name()));
+
+            if (fileName == null || (fileName instanceof String str && str.isBlank())) {
+                throw new YAMLException(getContext(node) + " !include missing or empty 'file' option.");
+            }
+
+            // Check the fileName validity after variable substitution in the resolution process
+            logger.debug("Created IncludePlaceholder with fileName: {}, vars: {}", fileName, vars);
+            return new IncludePlaceholder(fileName, vars);
         }
     }
 

@@ -1,0 +1,11 @@
+variables: !sub
+  foo: !include includeInVariables.inc.yaml
+  bar: !include ${__FILE_NAME__}.inc.yaml
+  baz: !include
+    file: !sub ${__FILE_NAME__}.inc.yaml
+
+
+
+static_value: !sub ${foo}
+scalar_subst_include: !sub ${bar}
+map_subst_include: !sub ${baz}

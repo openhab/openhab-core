@@ -27,5 +27,5 @@ import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
  * @author Jimmy Tanagra - Initial contribution
  */
 @NonNullByDefault
-public record IncludePlaceholder(String fileName, Map<String, Object> vars) {
+public record IncludePlaceholder(Object fileName, Map<Object, Object> vars) {
 }
