@@ -27,8 +27,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -554,5 +558,74 @@ public class YamlModelRepositoryImplTest {
         // Should not contain object form keys
         assertThat(yaml, not(containsString("value:")));
         assertThat(yaml, not(containsString("config:")));
+    }
+
+    @Test
+    public void testMixedFormMetadataLoadingAndGeneration() throws IOException {
+        Files.copy(SOURCE_PATH.resolve("itemWithMixedFormMetadata.yaml"), fullModelPath);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+
+        @SuppressWarnings("unchecked")
+        YamlModelListener<YamlItemDTO> itemListener = mock(YamlModelListener.class);
+        when(itemListener.getElementClass()).thenReturn(YamlItemDTO.class);
+        when(itemListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(itemListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(itemListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        // Verify the listener was called
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<YamlItemDTO>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(itemListener).addedModel(eq(MODEL_NAME), captor.capture());
+
+        // Verify that the valid item with mixed-form metadata was loaded
+        Collection<YamlItemDTO> items = captor.getValue();
+        assertThat(items, hasSize(1));
+
+        YamlItemDTO item = items.iterator().next();
+        assertThat(item.name, is("ValidItem"));
+        assertThat(item.metadata, is(notNullValue()));
+        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit"));
+        assertThat(item.metadata.get("alexa").value, is("Switchable"));
+        assertThat(item.metadata.get("alexa").config, is(Map.of("setting1", "value1")));
+        assertThat(item.metadata.get("homekit").value, is("Lighting"));
+        assertThat(item.metadata.get("homekit").config, is(nullValue()));
+
+        // Verify YAML output contains metadata in both forms
+        modelRepository.addElementsToBeGenerated("items", List.copyOf(items));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        modelRepository.generateFileFormat("items", out);
+        String yaml = out.toString();
+        // Should contain object form metadata for 'alexa'
+        assertThat(yaml, containsString("alexa:"));
+        assertThat(yaml, containsString("value: Switchable"));
+        assertThat(yaml, containsOnlyOnce("config:"));
+        assertThat(yaml, containsString("setting1: value1"));
+        // Should contain short form metadata for 'homekit'
+        assertThat(yaml, containsString("homekit: Lighting"));
+    }
+
+    private static Matcher<String> containsOnlyOnce(String substring) {
+        return new TypeSafeMatcher<String>() {
+            @Override
+            protected boolean matchesSafely(String item) {
+                return StringUtils.countMatches(item, substring) == 1;
+            }
+
+            @Override
+            @NonNullByDefault({})
+            public void describeTo(Description description) {
+                description.appendText("string appearing exactly once: ").appendValue(substring);
+            }
+
+            @Override
+            @NonNullByDefault({})
+            protected void describeMismatchSafely(String item, Description mismatchDescription) {
+                int count = StringUtils.countMatches(item, substring);
+                mismatchDescription.appendText("was found ").appendValue(count).appendText(" times");
+            }
+        };
     }
 }
