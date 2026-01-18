@@ -513,7 +513,7 @@ public class YamlModelRepositoryImplTest {
         // Should contain object form metadata for 'alexa'
         assertThat(yaml, containsString("alexa:"));
         assertThat(yaml, containsString("value: Switchable"));
-        assertThat(yaml, containsString("config:"));
+        assertThat(yaml, containsOnlyOnce("config:"));
         assertThat(yaml, containsString("setting1: value1"));
     }
 
