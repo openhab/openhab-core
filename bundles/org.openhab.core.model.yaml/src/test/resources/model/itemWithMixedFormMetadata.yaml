@@ -1,6 +1,6 @@
 version: 1
 items:
-  # This item has the object-form metadata
+  # This item has metadata in both short and object forms
   ValidItem:
     type: Switch
     metadata:
