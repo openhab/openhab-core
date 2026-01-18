@@ -8,4 +8,6 @@ items:
         value: Switchable
         config:
           setting1: value1
-      homekit: Lighting
+      homekit:
+        value: Lighting
+      matter: OnOffLight

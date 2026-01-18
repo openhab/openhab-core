@@ -587,11 +587,13 @@ public class YamlModelRepositoryImplTest {
         YamlItemDTO item = items.iterator().next();
         assertThat(item.name, is("ValidItem"));
         assertThat(item.metadata, is(notNullValue()));
-        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit"));
+        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit", "matter"));
         assertThat(item.metadata.get("alexa").value, is("Switchable"));
         assertThat(item.metadata.get("alexa").config, is(Map.of("setting1", "value1")));
         assertThat(item.metadata.get("homekit").value, is("Lighting"));
         assertThat(item.metadata.get("homekit").config, is(nullValue()));
+        assertThat(item.metadata.get("matter").value, is("OnOffLight"));
+        assertThat(item.metadata.get("matter").config, is(nullValue()));
 
         // Verify YAML output contains metadata in both forms
         modelRepository.addElementsToBeGenerated("items", List.copyOf(items));
@@ -603,8 +605,10 @@ public class YamlModelRepositoryImplTest {
         assertThat(yaml, containsString("value: Switchable"));
         assertThat(yaml, containsOnlyOnce("config:"));
         assertThat(yaml, containsString("setting1: value1"));
-        // Should contain short form metadata for 'homekit'
+
+        // Should contain short form metadata for 'homekit' and 'matter'
         assertThat(yaml, containsString("homekit: Lighting"));
+        assertThat(yaml, containsString("matter: OnOffLight"));
     }
 
     private static Matcher<String> containsOnlyOnce(String substring) {
