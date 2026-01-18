@@ -1,0 +1,14 @@
+# Basic package test with !include
+packages:
+  basic1: !include
+    file: package.inc.yaml
+    vars:
+      name: basic1
+      thing_label: Basic1 Thing
+      item_label: Basic1 Item
+  basic2: !include
+    file: package.inc.yaml
+    vars:
+      name: basic2
+      thing_label: Basic2 Thing
+      item_label: Basic2 Item

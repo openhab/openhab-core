@@ -1,0 +1,26 @@
+packages:
+  remove props: !include
+    file: package.inc.yaml
+    vars:
+      name: thing
+
+  remove the entire thing: !include
+    file: package.inc.yaml
+    vars:
+      name: whole_thing_removed
+
+things:
+  thing:
+    label: !remove
+    list1: !remove
+    config:
+      scalar1: !remove
+      map1: !remove
+      map2:
+        scalar1: !remove
+      list1: !remove
+
+  whole_thing_removed: !remove
+
+  thing_retained:
+    label: retained_thing

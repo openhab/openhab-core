@@ -1,0 +1,11 @@
+templates:
+  plain_scalar_template: "bar"
+  plain_map_template:
+    foo: bar
+  plain_list_template:
+    - foo
+    - baz
+
+plain_scalar: !insert plain_scalar_template
+plain_map: !insert plain_map_template
+plain_list: !insert plain_list_template

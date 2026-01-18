@@ -1,0 +1,25 @@
+variables:
+  foo: bar
+
+templates:
+  map1:
+    foo: bar
+    baz: ${foo}
+    qux: !sub ${foo}
+
+  map2:
+    corge: grault
+
+  empty_map: {}
+
+simple:
+  <<: !insert map1
+
+parent_sub: !sub
+  <<: !insert map1
+
+parent_nosub: !nosub
+  <<: !insert map1
+
+array_merge:
+  <<: [ !insert map1, !insert map2 ]

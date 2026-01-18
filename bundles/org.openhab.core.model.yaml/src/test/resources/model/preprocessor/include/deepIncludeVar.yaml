@@ -2,5 +2,5 @@ variables:
   var: toplevel
 
 toplevel: !include
-  file: varsPropagate2Levels.inc.yaml
+  file: deepIncludeVar_1.inc.yaml
 

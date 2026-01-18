@@ -18,15 +18,15 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 
 /**
- * The {@link IncludePlaceholder} represents an object constructed from an <code>!include</code> node
+ * The {@link InsertPlaceholder} represents an object constructed from an <code>!insert</code> node
  * to be processed by the {@link YamlPreprocessor}.
  *
- * @param fileName The name of the file to be included
- * @param vars The variables to be passed to the included file
+ * @param template The template object to be inserted
+ * @param vars The variables to be passed to the inserted template
  * @param contextDescription A description of the context where this placeholder was created (for logging/debugging)
  *
  * @author Jimmy Tanagra - Initial contribution
  */
 @NonNullByDefault
-public record IncludePlaceholder(Object fileName, Map<Object, Object> vars, String contextDescription) {
+public record InsertPlaceholder(Object template, Map<Object, Object> vars, String contextDescription) {
 }

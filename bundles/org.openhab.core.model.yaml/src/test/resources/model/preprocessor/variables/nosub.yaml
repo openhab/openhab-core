@@ -12,3 +12,4 @@ top: !sub
         level4: ${foo} # => ${foo}
         level4_sub: !sub
           level5: ${foo} # => bar
+  level1_a: ${foo}

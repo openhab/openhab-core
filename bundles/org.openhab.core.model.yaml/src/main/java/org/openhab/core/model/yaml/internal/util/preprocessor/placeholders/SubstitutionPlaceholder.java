@@ -24,6 +24,11 @@ import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
  * <p>
  * It preserves the raw scalar value and the delimiter pattern that was active (from !sub or parent !sub).
  *
+ * @param value The raw string value containing variable interpolation patterns
+ * @param pattern The pattern used to identify variable interpolation expressions
+ * @param isPlainScalar Whether the original YAML node was a plain scalar
+ * @param contextDescription A description of the context where this placeholder was created (for logging/debugging)
+ *
  * @author Jimmy Tanagra - Initial contribution
  */
 @NonNullByDefault

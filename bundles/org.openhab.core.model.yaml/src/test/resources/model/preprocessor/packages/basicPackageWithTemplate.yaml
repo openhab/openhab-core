@@ -1,0 +1,24 @@
+# Basic package test with template
+templates: !sub # The test must pass with this !sub here
+  package_template:
+    items: !sub
+      ${name}:
+        type: Switch
+        label: ${item_label}
+    things: !sub
+      ${name}:
+        label: ${thing_label}
+
+packages:
+  basic1: !insert
+    template: package_template
+    vars:
+      name: basic1
+      item_label: Basic1 Item
+      thing_label: Basic1 Thing
+  basic2: !insert
+    template: package_template
+    vars:
+      name: basic2
+      item_label: Basic2 Item
+      thing_label: Basic2 Thing

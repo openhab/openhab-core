@@ -68,7 +68,9 @@ class JinjavaTemplateEngine {
         Jinjava jinjava = finalPass ? STRICT_JINJAVA : LENIENT_JINJAVA;
         JinjavaConfig config = finalPass ? STRICT_CONFIG : LENIENT_CONFIG;
 
-        Context context = new Context(jinjava.getGlobalContext(), variables); // Jinjava will create a copy of variables
+        @SuppressWarnings("null")
+        Context context = new Context(jinjava.getGlobalContext(), variables); // Jinjava will create a
+                                                                              // copy of variables
         JinjavaInterpreter interpreter = new JinjavaInterpreter(jinjava, context, config);
         Object result = interpreter.resolveELExpression(expression, 0);
         List<TemplateError> errors = interpreter.getErrorsCopy();

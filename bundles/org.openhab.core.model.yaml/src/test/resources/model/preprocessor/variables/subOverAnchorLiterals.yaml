@@ -1,3 +1,7 @@
+# Test the behavior of anchors when its alias is inserted inside !sub
+# When the anchored data contains literal patterns, it shouldn't be substituted
+# even when the alias is inserted within a !sub context
+
 variables:
   foo: bar
 

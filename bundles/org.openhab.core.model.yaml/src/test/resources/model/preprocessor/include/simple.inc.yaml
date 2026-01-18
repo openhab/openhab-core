@@ -1,0 +1,5 @@
+# A simple included file
+# used by
+# - includeWithScalarArgument.yaml
+# - includeWithMapArgument.yaml
+includedkey: value

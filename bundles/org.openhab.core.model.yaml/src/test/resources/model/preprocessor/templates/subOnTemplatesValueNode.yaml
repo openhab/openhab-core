@@ -1,0 +1,8 @@
+variables:
+  tplname: my_template
+  value: foo
+
+templates: !sub # Test when !sub is here
+  ${tplname}: ${value}
+
+data: !insert my_template

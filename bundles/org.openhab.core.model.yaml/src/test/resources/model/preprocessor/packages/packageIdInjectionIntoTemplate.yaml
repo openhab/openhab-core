@@ -1,0 +1,8 @@
+# package_id is available in the template context
+templates:
+  package_id:
+    things: !sub
+      ${package_id}: ${package_id} Value
+
+packages:
+  id_test: !insert package_id

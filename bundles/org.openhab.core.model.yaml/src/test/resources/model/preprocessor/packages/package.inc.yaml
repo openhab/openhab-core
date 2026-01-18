@@ -1,13 +1,12 @@
 variables:
-  label: DefaultLabel
-  package_id: default_package
-  thingname: default_thing
+  name: default
+  thing_label: Default Thing Label
+  item_label: Default Item Label
 
 things:
-  !sub ${thingname}:
-    label: !sub ${label}
+  !sub ${name}:
+    label: !sub ${thing_label}
     scalar: package
-    packageid: !sub ${package_id}
 
     map1:
       scalar1: package
@@ -37,6 +36,7 @@ things:
       list2:
         - package
 
-items:
-  !sub item_for_${thingname}:
-    label: !sub item ${label}
+items: !sub
+  ${name}:
+    type: Switch
+    label: ${item_label}

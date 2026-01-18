@@ -1,0 +1,3 @@
+# package_id is available in the include file
+packages:
+  id_test: !include package_id.inc.yaml

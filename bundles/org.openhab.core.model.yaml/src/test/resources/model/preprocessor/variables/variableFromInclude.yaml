@@ -1,10 +1,12 @@
+
 variables: !sub
-  foo: !include includeInVariables.inc.yaml
+  foo: !include variableFromInclude.inc.yaml
+  # variable substitutions work within the arguments of an !include
+  # both in scalar form
   bar: !include ${__FILE_NAME__}.inc.yaml
+  # and in map form
   baz: !include
     file: !sub ${__FILE_NAME__}.inc.yaml
-
-
 
 static_value: !sub ${foo}
 scalar_subst_include: !sub ${bar}

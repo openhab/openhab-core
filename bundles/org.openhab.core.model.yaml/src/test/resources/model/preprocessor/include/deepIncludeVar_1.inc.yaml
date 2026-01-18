@@ -1,0 +1,6 @@
+variables:
+  var: level1
+
+data: !include
+  file: deepIncludeVar_2.inc.yaml
+

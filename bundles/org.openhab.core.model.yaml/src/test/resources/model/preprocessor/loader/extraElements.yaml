@@ -6,6 +6,9 @@ variables:
   foo: bar
   baz: qux
 
+templates:
+  sample_template: foo
+
 packages:
   foo: {}
   baz: {}

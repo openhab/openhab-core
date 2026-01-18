@@ -2,6 +2,6 @@ variables:
   foo: globalFoo
 
 data: !include
-  file: includeVarsFromGlobal.inc.yaml
+  file: includeArgumentsResolveFromGlobalVars.inc.yaml
   vars:
     bar: !sub ${foo}

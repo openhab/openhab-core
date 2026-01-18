@@ -1,5 +1,6 @@
 variables: !sub
-  # Test when variables block itself has !sub tag
+  # Variable chaining should work
+  # when the variables block itself has a !sub tag
   first: hello
   second: ${first} world
   third_key: third

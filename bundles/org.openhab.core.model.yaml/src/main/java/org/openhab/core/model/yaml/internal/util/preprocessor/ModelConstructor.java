@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.IncludePlaceholder;
+import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.InsertPlaceholder;
 import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.RemovePlaceholder;
 import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.ReplacePlaceholder;
 import org.openhab.core.model.yaml.internal.util.preprocessor.placeholders.SubstitutionPlaceholder;
@@ -70,18 +71,25 @@ class ModelConstructor extends Constructor {
     private static final Tag REPLACE_TAG = new Tag("!replace");
     private static final Tag REMOVE_TAG = new Tag("!remove");
 
+    private static final Tag INSERT_TAG = new Tag("!insert");
+
     private static final String DEFAULT_BEGIN = "${";
     private static final String DEFAULT_END = "}";
 
     private final boolean finalPass;
     private final Map<String, Object> variables;
     private final YamlPreprocessor preprocessor;
-    private final Construct interpolationConstruct = new ConstructInterpolation();
+    private final Construct interpolationConstruct;
 
     private final Representer representer = new Representer(new DumperOptions());
 
+    // We always have at least one element in the stack, so peek() is safe.
     private final Deque<Boolean> substitutionStack = new ArrayDeque<>();
     private final Deque<Pattern> substitutionPatternStack = new ArrayDeque<>();
+
+    private boolean inTemplatesSection = false;
+    // Stack to track the current mapping key path
+    private final Deque<@Nullable String> mappingKeyPath = new ArrayDeque<>();
 
     private final Logger logger = LoggerFactory.getLogger(ModelConstructor.class);
 
@@ -101,19 +109,13 @@ class ModelConstructor extends Constructor {
         this.yamlConstructors.put(Tag.NULL, new ConstructNull());
         this.yamlConstructors.put(NOSUB_TAG, new ConstructDefault());
 
-        // Perform substitution in the first pass so that variables can refer to other variables
+        this.interpolationConstruct = new ConstructInterpolation();
         this.yamlConstructors.put(Tag.STR, interpolationConstruct);
-        // Construct include in both passes:
-        // the first pass to extract variables from included files in the variable definitions (if any)
-        // the final pass to include content in the model body
         this.yamlConstructors.put(INCLUDE_TAG, new ConstructInclude());
+        this.yamlConstructors.put(INSERT_TAG, new ConstructInsert());
 
-        // The first pass is only to gather variables, so we use a no-op constructor for efficiency
-        // also because the variables aren't populated yet for substitution, constructing replace/remove
-        // may result in errors if they rely on variables
         this.yamlConstructors.put(REPLACE_TAG, new ConstructReplace());
-        // this.yamlConstructors.put(REPLACE_TAG, finalPass ? new ConstructReplace() : new ConstructEmpty());
-        this.yamlConstructors.put(REMOVE_TAG, finalPass ? new ConstructRemove() : new ConstructEmpty());
+        this.yamlConstructors.put(REMOVE_TAG, new ConstructRemove());
 
         logger.trace("ModelConstructor created with vars: {}", variables);
     }
@@ -121,10 +123,10 @@ class ModelConstructor extends Constructor {
     @Override
     @NonNullByDefault({})
     protected Object constructObject(Node node) {
-        boolean parent = substitutionStack.peek();
+        boolean parent = Objects.requireNonNull(substitutionStack.peek());
         boolean enabled = resolveSubstitution(node.getTag(), parent);
         substitutionStack.push(enabled);
-        substitutionPatternStack.push(substitutionPatternStack.peek());
+        substitutionPatternStack.push(Objects.requireNonNull(substitutionPatternStack.peek()));
         try {
             return super.constructObject(node);
         } finally {
@@ -134,7 +136,46 @@ class ModelConstructor extends Constructor {
     }
 
     /**
-     * Intercept flattenMapping to handle merge keys (<<:) with IncludePlaceholder resolution.
+     * The whole purpose of overriding this method is to keep track of whether we're
+     * in the templates section or not, so that we can skip substitution there during final pass.
+     *
+     * @param node
+     * @param mapping
+     */
+    @Override
+    @NonNullByDefault({})
+    protected void constructMapping2ndStep(MappingNode node, Map<Object, Object> mapping) {
+        flattenMapping(node);
+
+        // Determine the parent key for this mapping
+        String parentKey = mappingKeyPath.peek();
+        boolean enteredTemplatesSection = false;
+        if (mappingKeyPath.size() == 1 && YamlPreprocessor.TEMPLATES_KEY.equals(parentKey)) {
+            inTemplatesSection = true;
+            enteredTemplatesSection = true;
+        }
+
+        for (NodeTuple tuple : node.getValue()) {
+            String key = null;
+            Node keyNode = tuple.getKeyNode();
+            if (keyNode instanceof ScalarNode scalar) {
+                key = scalar.getValue();
+            }
+            Object keyObj = constructObject(keyNode);
+            mappingKeyPath.push(key);
+            Object value = constructObject(tuple.getValueNode());
+            mappingKeyPath.pop();
+            mapping.put(keyObj, value);
+        }
+
+        if (enteredTemplatesSection) {
+            inTemplatesSection = false;
+        }
+    }
+
+    /**
+     * Intercept flattenMapping to handle merge keys (<<:) with
+     * IncludePlaceholder and TemplatePlaceholder resolutions.
      *
      * <ul>
      * <li>Case 1: <code><<: !include {file: other.yaml}</code>
@@ -173,6 +214,8 @@ class ModelConstructor extends Constructor {
                             Node sequenceItem = iter.next();
                             if (resolveIncludeNode(sequenceItem) instanceof Node includedNode) {
                                 iter.set(includedNode);
+                            } else if (resolveInsertNode(sequenceItem) instanceof Node insertedNode) {
+                                iter.set(insertedNode);
                             } else if (resolveScalarSubNode(sequenceItem) instanceof Node subNode) {
                                 iter.set(subNode);
                             }
@@ -181,6 +224,10 @@ class ModelConstructor extends Constructor {
                         // Merge Key with a single mapping
                         // Handle the case for `<<: !include {file: other.yaml}`
                         tuple = new NodeTuple(tuple.getKeyNode(), includedNode);
+                    } else if (resolveInsertNode(valueNode) instanceof Node insertedNode) {
+                        // Merge Key with a single mapping
+                        // Handle the case for `<<: !insert template_name`
+                        tuple = new NodeTuple(tuple.getKeyNode(), insertedNode);
                     } else if (resolveScalarSubNode(valueNode) instanceof Node subNode) {
                         // Merge Key with a single mapping with substitution
                         // Handle the case for `<<: !sub ...`
@@ -195,10 +242,9 @@ class ModelConstructor extends Constructor {
     }
 
     /**
-     * Resolve an !include node if present.
+     * Resolve an !include node if present for merge key processing.
      *
-     * In non-final pass, the INCLUDE_TAG constructor is a no-op that returns an empty string,
-     * so we need to return an empty mapping because merge keys expect a mapping to merge into the parent.
+     * In non-final pass, return an empty mapping because we haven't got the full variable context.
      * Otherwise "!include filename" will be constructed as a scalar which is invalid for merge keys.
      *
      * @param node
@@ -225,6 +271,39 @@ class ModelConstructor extends Constructor {
         return representer.represent(Map.of());
     }
 
+    /**
+     * Resolve an !insert node if present for merge key processing.
+     *
+     * @param node
+     * @return
+     */
+    private @Nullable Node resolveInsertNode(Node node) {
+        if (!INSERT_TAG.equals(node.getTag())) {
+            return null;
+        }
+        logger.debug("Resolving !insert node: {}", node);
+        if (finalPass && constructObject(node) instanceof InsertPlaceholder insertPlaceholder) {
+            Object includedData = preprocessor.resolveInsertPlaceholder(insertPlaceholder);
+            if (!(includedData instanceof Map<?, ?>)) {
+                throw new YAMLException(getContext(node) + " Inserted content must be a mapping for merge key. Found: "
+                        + includedData.getClass().getName());
+            }
+            Node result = representer.represent(includedData);
+            // Prevent substitution of the included content in the current context by
+            // tagging the entire subtree with NOSUB_TAG so ConstructInterpolation
+            // sees the !nosub tag on nested nodes as well.
+            markNoSub(result);
+            return result;
+        }
+        return representer.represent(Map.of());
+    }
+
+    /**
+     * Resolve a !sub scalar node if present for merge key processing.
+     *
+     * @param node
+     * @return the interpolated Node, or null if the node is not a !sub scalar node
+     */
     private @Nullable Node resolveScalarSubNode(Node node) {
         if (!(node instanceof ScalarNode && isSubTag(node.getTag()))) {
             return null;
@@ -310,11 +389,13 @@ class ModelConstructor extends Constructor {
         public Object construct(Node node) {
             if (node instanceof ScalarNode scalarNode) {
                 String value = (String) constructScalar(scalarNode);
-                boolean enabled = substitutionStack.peek();
+                boolean enabled = Objects.requireNonNull(substitutionStack.peek());
                 if (enabled || isSubTag(scalarNode.getTag())) {
                     String contextDescription = getContext(node);
-                    if (finalPass) {
-                        Pattern pattern = substitutionPatternStack.peek();
+                    // We don't want to resolve substitutions in the templates section during final pass.
+                    // Template substitutions are resolved at insertion time to include insertion context.
+                    if (finalPass && !inTemplatesSection) {
+                        Pattern pattern = Objects.requireNonNull(substitutionPatternStack.peek());
                         try {
                             return VariableInterpolationHelper.evaluateValue(value, pattern, scalarNode.isPlain(),
                                     variables, true);
@@ -325,8 +406,8 @@ class ModelConstructor extends Constructor {
                     } else {
                         // Defer substitution until after variables are progressively populated
                         // so we can do variable chaining
-                        return new SubstitutionPlaceholder(value, substitutionPatternStack.peek(), scalarNode.isPlain(),
-                                contextDescription);
+                        Pattern pattern = Objects.requireNonNull(substitutionPatternStack.peek());
+                        return new SubstitutionPlaceholder(value, pattern, scalarNode.isPlain(), contextDescription);
                     }
                 }
 
@@ -420,17 +501,6 @@ class ModelConstructor extends Constructor {
     }
 
     /**
-     * A no-op constructor that returns an empty string.
-     * Used in non-final pass to skip processing of !include, !replace, !remove tags.
-     */
-    private static class ConstructEmpty extends AbstractConstruct {
-        @Override
-        public Object construct(@Nullable Node node) {
-            return "";
-        }
-    }
-
-    /**
      * Constructs an IncludePlaceholder from an !include node.
      *
      * This is done in both passes.
@@ -451,41 +521,19 @@ class ModelConstructor extends Constructor {
         public Object construct(Node node) {
             logger.debug("Constructing !include node: {}", node);
             Object fileName;
-            Map<Object, Object> vars;
+            Map<Object, Object> localVars = Map.of();
 
             if (node instanceof ScalarNode scalarNode) {
                 // Accept any scalar, including unresolved variable expressions
                 fileName = interpolationConstruct.construct(scalarNode);
-                logger.debug("Include fileName scalar: {} from node {}", fileName, node);
-                vars = Map.of();
             } else if (node instanceof MappingNode mappingNode) {
-                Map<String, Object> includeOptions = new HashMap<>();
-                for (NodeTuple t : mappingNode.getValue()) {
-                    if (!(t.getKeyNode() instanceof ScalarNode keyNode)) {
-                        throw new YAMLException(getContext(node) + " !include option keys must be scalars. Found: "
-                                + t.getKeyNode().getNodeId().name());
-                    } else if (isSubTag(keyNode.getTag())) {
-                        throw new YAMLException(
-                                getContext(keyNode) + " !include option keys cannot use !sub tag for substitution.");
-                    }
-                    String key = String.valueOf(constructScalar(keyNode));
-                    Object value = constructObject(t.getValueNode());
-                    includeOptions.put(key, value);
-                }
-
+                @SuppressWarnings("null")
+                Map<String, Object> includeOptions = extractOptions(mappingNode, INCLUDE_TAG.getValue());
                 fileName = includeOptions.get("file");
 
-                Object varsObj = includeOptions.get("vars");
-                if (varsObj instanceof Map<?, ?>) {
-                    @SuppressWarnings("unchecked")
-                    Map<Object, Object> varsMap = (Map<Object, Object>) varsObj;
-                    vars = varsMap;
-                } else if (varsObj == null) {
-                    vars = Map.of();
-                } else {
-                    throw new YAMLException(getContext(node) + " !include vars expected a map but found: "
-                            + varsObj.getClass().getName());
-                }
+                @SuppressWarnings("unchecked")
+                Map<Object, Object> varsMap = (Map<Object, Object>) includeOptions.get("vars");
+                localVars = varsMap != null ? varsMap : Map.of();
             } else {
                 throw new YAMLException(getContext(node) + " invalid !include argument type: "
                         + (node == null ? null : node.getNodeId().name()));
@@ -496,9 +544,84 @@ class ModelConstructor extends Constructor {
             }
 
             // Check the fileName validity after variable substitution in the resolution process
-            logger.debug("Created IncludePlaceholder with fileName: {}, vars: {}", fileName, vars);
-            return new IncludePlaceholder(fileName, vars);
+            return new IncludePlaceholder(fileName, localVars, getContext(node));
         }
+    }
+
+    /**
+     * Handles !insert tag: returns an InsertPlaceholder to be processed later.
+     *
+     * Syntax:
+     * <ul>
+     * <li>!insert template_name
+     * <li>!insert { template: template_name, vars: { ... } }
+     * </ul>
+     */
+    private class ConstructInsert extends AbstractConstruct {
+        @Override
+        @NonNullByDefault({})
+        public Object construct(Node node) {
+            logger.debug("Constructing !insert node: {}", node);
+            Object templateName = null;
+            Map<Object, Object> localVars = Map.of();
+
+            if (node instanceof ScalarNode scalarNode) {
+                // Accept any scalar, including unresolved variable expressions
+                templateName = interpolationConstruct.construct(scalarNode);
+            } else if (node instanceof MappingNode mappingNode) {
+                @SuppressWarnings("null")
+                Map<String, Object> insertOptions = extractOptions(mappingNode, INSERT_TAG.getValue());
+                templateName = insertOptions.get("template");
+
+                @SuppressWarnings("unchecked")
+                Map<Object, Object> varsMap = (Map<Object, Object>) insertOptions.get("vars");
+                localVars = varsMap != null ? varsMap : Map.of();
+            } else {
+                throw new YAMLException(getContext(node) + " invalid !insert argument type: "
+                        + (node == null ? null : node.getNodeId().name()));
+            }
+            if (templateName == null || (templateName instanceof String str && str.isBlank())) {
+                throw new YAMLException(getContext(node) + " !insert missing or empty 'template' option.");
+            }
+
+            return new InsertPlaceholder(templateName, localVars, getContext(node));
+        }
+    }
+
+    /**
+     * A helper method to extract options from a MappingNode for !include and !insert tags.
+     *
+     * This ensures that the keys are scalars and do not use !sub tag for substitution.
+     * The values (options) are constructed as normal objects, which may include SubstitutionPlaceholder objects.
+     *
+     * It also ensures that the 'vars' option is always present as a Map (empty if not provided).
+     *
+     * @param mappingNode the node to extract options from
+     * @param tagName the tag name for error messages
+     * @return the options map
+     */
+    private Map<String, Object> extractOptions(MappingNode mappingNode, String tagName) {
+        Map<String, Object> options = new HashMap<>();
+        for (NodeTuple t : mappingNode.getValue()) {
+            if (!(t.getKeyNode() instanceof ScalarNode keyNode)) {
+                throw new YAMLException("%s %s option keys must be scalars. Found: %s"
+                        .formatted(getContext(mappingNode), tagName, t.getKeyNode().getNodeId().name()));
+            } else if (isSubTag(keyNode.getTag())) {
+                throw new YAMLException("%s %s option keys cannot use !sub tag for substitution."
+                        .formatted(getContext(keyNode), tagName));
+            }
+            String key = String.valueOf(constructScalar(keyNode));
+            Object value = constructObject(t.getValueNode());
+            options.put(key, value);
+        }
+
+        Object varsObj = options.get("vars");
+        if (varsObj != null && !(varsObj instanceof Map<?, ?>)) {
+            throw new YAMLException("%s %s vars expected a map but found: %s".formatted(getContext(mappingNode),
+                    tagName, varsObj.getClass().getName()));
+        }
+
+        return options;
     }
 
     private class ConstructReplace extends AbstractConstruct {

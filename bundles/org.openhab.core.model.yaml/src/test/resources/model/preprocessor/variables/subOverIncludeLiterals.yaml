@@ -1,25 +1,27 @@
+# Verify that included content remains literal
+# when the !include tag is nested inside a !sub block.
 variables:
   mainmoo: cow
   foo: bar
 
 plain:
   data: !include
-    file: includeWithSubstitutionTags.inc.yaml
+    file: subOverIncludeLiterals.inc.yaml
     vars:
       moo: ${mainmoo}
 sub: !sub
   data: !include
-    file: includeWithSubstitutionTags.inc.yaml
+    file: subOverIncludeLiterals.inc.yaml
     vars:
       moo: ${mainmoo} # This gets substituted to 'cow' then passed into the include
 submerge: !sub
   data:
     <<: !include
-      file: includeWithSubstitutionTags.inc.yaml
+      file: subOverIncludeLiterals.inc.yaml
       vars:
         moo: ${mainmoo}
 nosub: !nosub
   data: !include
-    file: includeWithSubstitutionTags.inc.yaml
+    file: subOverIncludeLiterals.inc.yaml
     vars:
       moo: ${mainmoo}
