@@ -470,21 +470,7 @@ public class YamlModelRepositoryImplTest {
 
     @Test
     public void testObjectFormMetadataLoadingAndGeneration() throws IOException {
-        String yamlContent = """
-                version: 1
-                items:
-                  # This item has the object-form metadata
-                  ValidItem:
-                    type: Switch
-                    metadata:
-                      alexa:
-                        value: Switchable
-                        config:
-                          setting1: value1
-                      homekit:
-                        value: Lighting
-                """;
-        Files.writeString(fullModelPath, yamlContent);
+        Files.copy(SOURCE_PATH.resolve("itemWithObjectFormMetadata.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
 
@@ -513,6 +499,7 @@ public class YamlModelRepositoryImplTest {
         assertThat(item.metadata.get("alexa").value, is("Switchable"));
         assertThat(item.metadata.get("alexa").config, is(Map.of("setting1", "value1")));
         assertThat(item.metadata.get("homekit").value, is("Lighting"));
+        assertThat(item.metadata.get("homekit").config, is(nullValue()));
 
         // Verify YAML output contains object form metadata
         modelRepository.addElementsToBeGenerated("items", List.copyOf(items));
@@ -528,17 +515,7 @@ public class YamlModelRepositoryImplTest {
 
     @Test
     public void testShortFormMetadataLoadingAndGeneration() throws IOException {
-        String yamlContent = """
-                version: 1
-                items:
-                  TestSwitch:
-                    type: Switch
-                    metadata:
-                      alexa: Switchable
-                      homekit: Lighting
-                """;
-        Files.writeString(fullModelPath, yamlContent);
-
+        Files.copy(SOURCE_PATH.resolve("itemWithShortFormMetadata.yaml"), fullModelPath);
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
 
         @SuppressWarnings("unchecked")
@@ -563,7 +540,9 @@ public class YamlModelRepositoryImplTest {
         assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit"));
         // deserializer converts short-form to value field
         assertThat(item.metadata.get("alexa").value, is("Switchable"));
+        assertThat(item.metadata.get("alexa").config, is(nullValue()));
         assertThat(item.metadata.get("homekit").value, is("Lighting"));
+        assertThat(item.metadata.get("homekit").config, is(nullValue()));
 
         // Verify YAML output contains short form metadata
         modelRepository.addElementsToBeGenerated("items", List.copyOf(items));
