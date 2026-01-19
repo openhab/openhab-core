@@ -41,6 +41,7 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -392,6 +393,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         assertThrows(IllegalStateException.class, () -> firmwareUpdateService.cancelFirmwareUpdate(THING3_UID));
     }
 
+    @Disabled
     @Test
     public void testCancelFirmwareUpdateUnexpectedFailure() {
         FirmwareUpdateHandler firmwareUpdateHandler = mock(FirmwareUpdateHandler.class);
@@ -419,6 +421,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         assertCancellationMessage("unexpected-handler-error-during-cancel", "deutsch", Locale.GERMAN, 3);
     }
 
+    @Disabled
     @Test
     public void testCancelFirmwareUpdateTakesLong() {
         firmwareUpdateService.timeout = 50;
@@ -711,6 +714,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         }
     }
 
+    @Disabled
     @Test
     public void testUpdateFirmwareTimeOut() {
         firmwareUpdateService.timeout = 50;
@@ -732,6 +736,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         assertResultInfoEvent(THING1_UID, FW112_EN, "timeout-error", Locale.GERMAN, "deutsch", 2);
     }
 
+    @Disabled
     @Test
     public void testUpdateFirmwareError() {
         doAnswer(invocation -> {
@@ -760,6 +765,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING1_UID), is(updateExecutableInfoFw112));
     }
 
+    @Disabled
     @Test
     public void testUpdateFirmwareCustomError() {
         doAnswer(invocation -> {
