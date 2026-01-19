@@ -141,7 +141,8 @@ public class UsbSerialDiscoveryServiceTest extends JavaOSGiTest {
         when(discoveryParticipantA.createResult(deviceInfoA)).thenReturn(discoveryResultA);
         usbSerialDiscoveryService.usbSerialDeviceDiscovered(deviceInfoA);
         ArgumentCaptor<DiscoveryResult> captor = ArgumentCaptor.forClass(DiscoveryResult.class);
-        verify(discoveryListener, times(1)).thingDiscovered(eq(usbSerialDiscoveryService), captor.capture());
+        verify(discoveryListener, timeout(2000).times(1)).thingDiscovered(eq(usbSerialDiscoveryService),
+                captor.capture());
         DiscoveryResult actualDiscoveryResultA = captor.getValue();
         assertThat(actualDiscoveryResultA.getProperties(),
                 is(createUsbPropertiesMap(discoveryResultA.getProperties(), deviceInfoA)));
@@ -154,7 +155,8 @@ public class UsbSerialDiscoveryServiceTest extends JavaOSGiTest {
         when(discoveryResultB.getTimeToLive()).thenReturn(10L);
         when(discoveryParticipantB.createResult(deviceInfoB)).thenReturn(discoveryResultB);
         usbSerialDiscoveryService.usbSerialDeviceDiscovered(deviceInfoB);
-        verify(discoveryListener, times(1)).thingDiscovered(eq(usbSerialDiscoveryService), captor.capture());
+        verify(discoveryListener, timeout(2000).times(1)).thingDiscovered(eq(usbSerialDiscoveryService),
+                captor.capture());
         DiscoveryResult actualDiscoveryResultB = captor.getValue();
         assertThat(actualDiscoveryResultB.getProperties(),
                 is(createUsbPropertiesMap(discoveryResultB.getProperties(), deviceInfoB)));

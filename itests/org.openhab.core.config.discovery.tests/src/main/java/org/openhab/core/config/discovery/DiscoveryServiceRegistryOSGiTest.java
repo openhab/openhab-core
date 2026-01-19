@@ -371,7 +371,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
                 mockScanListener1);
 
         waitForAssert(mockScanListener1::onFinished);
-        verify(discoveryListenerMock, times(2)).thingDiscovered(any(), any());
+        verify(discoveryListenerMock, timeout(2000).times(2)).thingDiscovered(any(), any());
     }
 
     @Test

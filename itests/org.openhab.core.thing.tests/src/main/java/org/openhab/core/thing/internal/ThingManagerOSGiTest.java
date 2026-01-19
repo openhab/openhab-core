@@ -925,7 +925,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         ItemStateEvent itemUpdateEvent = (ItemStateEvent) receivedEvents.getFirst();
         assertThat(itemUpdateEvent.getTopic(), is("openhab/items/name/state"));
         assertThat(itemUpdateEvent.getItemName(), is(itemName));
-        assertThat(itemUpdateEvent.getSource(), is(CHANNEL_PREFIX +CHANNEL_UID.toString()));
+        assertThat(itemUpdateEvent.getSource(), is(CHANNEL_PREFIX + CHANNEL_UID.toString()));
         assertThat(itemUpdateEvent.getItemState(), is(instanceOf(StringType.class)));
         assertThat(itemUpdateEvent.getItemState(), is("Value"));
 
