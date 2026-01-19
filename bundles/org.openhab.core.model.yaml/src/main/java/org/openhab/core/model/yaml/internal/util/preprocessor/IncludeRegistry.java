@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.yaml.internal;
+package org.openhab.core.model.yaml.internal.util.preprocessor;
 
 import java.nio.file.Path;
 import java.util.HashSet;

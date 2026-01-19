@@ -44,6 +44,7 @@ import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
+import org.openhab.core.model.yaml.internal.util.preprocessor.IncludeRegistry;
 import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
