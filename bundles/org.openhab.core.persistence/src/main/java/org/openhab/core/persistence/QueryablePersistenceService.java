@@ -115,6 +115,8 @@ public interface QueryablePersistenceService extends PersistenceService {
      *
      * Note that the method should return the alias for the item in its response if an alias is being used.
      *
+     * @param itemName
+     * @param alias for item name in database
      * @return information about the persisted item or null if the persistence service does not support this
      */
     default @Nullable PersistenceItemInfo getItemInfo(String itemName, @Nullable String alias) {
