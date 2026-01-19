@@ -82,8 +82,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Laurent Garnier - new parameters to retrieve errors and warnings when loading a file
  * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createIsolatedModel and
  *         removeIsolatedModel
- * @author Jimmy Tanagra - Added Yaml preprocessor to support variable substitutions, packages, and include-file
- *         processing
+ * @author Jimmy Tanagra - Added Yaml preprocessor to support variable substitutions, templates, packages, and
+ *         include-file processing
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -93,7 +93,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
             // "version", "readOnly" are reserved keys
-            // "preprocessor", "variables" and "packages" are reserved elements for YamlPreprocessor.
+            // "preprocessor", "variables", "templates", and "packages" are reserved elements for YamlPreprocessor.
             // They are listed here so we don't use them in the future as model elements
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
