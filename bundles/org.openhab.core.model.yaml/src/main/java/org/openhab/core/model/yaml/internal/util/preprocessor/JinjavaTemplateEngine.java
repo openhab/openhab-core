@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.util.StringUtils;
 
 import com.hubspot.jinjava.Jinjava;
 import com.hubspot.jinjava.JinjavaConfig;
@@ -25,6 +27,7 @@ import com.hubspot.jinjava.interpret.Context;
 import com.hubspot.jinjava.interpret.InterpretException;
 import com.hubspot.jinjava.interpret.JinjavaInterpreter;
 import com.hubspot.jinjava.interpret.TemplateError;
+import com.hubspot.jinjava.lib.filter.Filter;
 
 /**
  * Wrapper around Jinjava template engine for rendering ${...} expressions.
@@ -57,7 +60,34 @@ class JinjavaTemplateEngine {
                 .build();
 
         STRICT_JINJAVA = new Jinjava(STRICT_CONFIG);
+        STRICT_JINJAVA.getGlobalContext().registerFilter(new LabelFilter());
         LENIENT_JINJAVA = new Jinjava(LENIENT_CONFIG);
+        LENIENT_JINJAVA.getGlobalContext().registerFilter(new LabelFilter());
+    }
+
+    /**
+     * Custom Jinjava filter to convert a string to a label: insert spaces before capitals, replace _ and - with space,
+     * and titlecase.
+     */
+    private static class LabelFilter implements Filter {
+        @Override
+        @NonNullByDefault({})
+        public Object filter(@Nullable Object var, JinjavaInterpreter interpreter, String... args) {
+            if (var == null) {
+                return null;
+            }
+            String input = var.toString();
+            // Insert space before capital letters, replace _ and - with space
+            String result = input.replaceAll("([a-z])([A-Z][a-z])", "$1 $2").replaceAll("[_-]+", " ");
+            // Title case
+            result = StringUtils.capitalizeByWhitespace(result);
+            return result;
+        }
+
+        @Override
+        public String getName() {
+            return "label";
+        }
     }
 
     /**

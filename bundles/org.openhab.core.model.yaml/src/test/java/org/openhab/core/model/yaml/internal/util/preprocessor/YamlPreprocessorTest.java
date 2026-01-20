@@ -252,6 +252,29 @@ public class YamlPreprocessorTest {
         }
 
         @Test
+        void labelFilterSupported() throws IOException {
+            Yaml yaml = createYamlParser(true);
+
+            Map.of( //
+                    "foo bar", "Foo Bar", //
+                    "one two Three", "One Two Three", //
+                    "multi   space", "Multi Space", //
+                    "fooBar", "Foo Bar", //
+                    "FooBar", "Foo Bar", //
+                    "FOOBAR", "FOOBAR", //
+                    "openHAB", "OpenHAB", //
+                    "foo-bar_baz", "Foo Bar Baz", //
+                    "multiple---separators___here", "Multiple Separators Here" //
+            ).forEach((input, expected) -> {
+                try {
+                    assertThat(yaml.load("!sub ${'" + input + "' | label}"), equalTo(expected));
+                } catch (YAMLException e) {
+                    fail("YAMLException thrown during test execution: " + e.getMessage());
+                }
+            });
+        }
+
+        @Test
         void predefinedVarsResolved() throws IOException {
             Path file = SOURCE_PATH.resolve(PATH).resolve("predefinedVars.yaml").toAbsolutePath();
             Map<Object, Object> data = loadFixture(file);
