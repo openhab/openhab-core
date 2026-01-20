@@ -401,7 +401,7 @@ class ModelConstructor extends Constructor {
                                     variables, true);
                         } catch (IllegalArgumentException e) {
                             // Re-wrap as YAMLException for consistency with YAML error handling
-                            throw new YAMLException(contextDescription + ": " + e.getMessage(), e);
+                            throw new YAMLException(contextDescription + " " + e.getMessage(), e);
                         }
                     } else {
                         // Defer substitution until after variables are progressively populated
