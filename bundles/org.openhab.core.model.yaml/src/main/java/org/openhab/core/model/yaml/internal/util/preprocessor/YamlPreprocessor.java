@@ -467,14 +467,15 @@ public class YamlPreprocessor {
             Object processedPkg = Objects.requireNonNull(pkg);
 
             Object pkgWithId = injectPackageId(processedPkg, packageId);
-            if (resolveCompositionPlaceholders(pkgWithId) instanceof Map<?, ?> resolvedPkg) {
+            Object resolvedPkg = resolveCompositionPlaceholders(pkgWithId);
+            if (resolvedPkg instanceof Map<?, ?> resolvedPkgMap) {
                 @SuppressWarnings("unchecked")
-                Map<Object, Object> resolvedPkgMap = (Map<Object, Object>) resolvedPkg;
-                LOGGER.debug("Merging package '{}' {} into main data: {}", packageId, resolvedPkgMap, mainData);
-                mergeElements(mainData, resolvedPkgMap);
+                Map<Object, Object> resolvedPkgMapCast = (Map<Object, Object>) resolvedPkg;
+                LOGGER.debug("Merging package '{}' {} into main data: {}", packageId, resolvedPkgMapCast, mainData);
+                mergeElements(mainData, resolvedPkgMapCast);
             } else {
                 LOGGER.warn("YAML model {}: Package '{}' did not resolve to a map: {}", currentPathRelative, packageId,
-                        processedPkg);
+                        resolvedPkg);
             }
         });
 
