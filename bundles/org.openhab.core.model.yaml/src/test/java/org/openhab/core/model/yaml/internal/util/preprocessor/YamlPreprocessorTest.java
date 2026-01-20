@@ -262,7 +262,7 @@ public class YamlPreprocessorTest {
                     "fooBar", "Foo Bar", //
                     "FooBar", "Foo Bar", //
                     "FOOBAR", "FOOBAR", //
-                    "openHAB", "OpenHAB", //
+                    "StatusLED", "Status LED", //
                     "foo-bar_baz", "Foo Bar Baz", //
                     "multiple---separators___here", "Multiple Separators Here" //
             ).forEach((input, expected) -> {

@@ -78,7 +78,7 @@ class JinjavaTemplateEngine {
             }
             String input = var.toString();
             // Insert space before capital letters, replace _ and - with space
-            String result = input.replaceAll("([a-z])([A-Z][a-z])", "$1 $2").replaceAll("[_-]+", " ");
+            String result = input.replaceAll("([a-z])([A-Z])", "$1 $2").replaceAll("[_-]+", " ");
             // Title case
             result = StringUtils.capitalizeByWhitespace(result);
             return result;
