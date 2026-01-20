@@ -44,12 +44,16 @@ class JinjavaTemplateEngine {
                 .withFeatureConfig(FeatureConfig.newBuilder()
                         .add(JinjavaInterpreter.OUTPUT_UNDEFINED_VARIABLES_ERROR, FeatureStrategies.ACTIVE).build())
                 .withFailOnUnknownTokens(true) //
-                .withMaxRenderDepth(10) //
+                .withMaxRenderDepth(1) //
+                .withMaxMacroRecursionDepth(0) // We don't use macros, disable recursion limit
+                .withEnableRecursiveMacroCalls(false) //
                 .build();
 
         LENIENT_CONFIG = JinjavaConfig.newBuilder() //
                 .withFailOnUnknownTokens(false) //
-                .withMaxRenderDepth(10) //
+                .withMaxRenderDepth(1) //
+                .withMaxMacroRecursionDepth(0) // We don't use macros, disable recursion limit
+                .withEnableRecursiveMacroCalls(false) //
                 .build();
 
         STRICT_JINJAVA = new Jinjava(STRICT_CONFIG);
@@ -69,8 +73,7 @@ class JinjavaTemplateEngine {
         JinjavaConfig config = finalPass ? STRICT_CONFIG : LENIENT_CONFIG;
 
         @SuppressWarnings("null")
-        Context context = new Context(jinjava.getGlobalContext(), variables); // Jinjava will create a
-                                                                              // copy of variables
+        Context context = new Context(jinjava.getGlobalContext(), variables);
         JinjavaInterpreter interpreter = new JinjavaInterpreter(jinjava, context, config);
         Object result = interpreter.resolveELExpression(expression, 0);
         List<TemplateError> errors = interpreter.getErrorsCopy();
