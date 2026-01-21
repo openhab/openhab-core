@@ -109,11 +109,11 @@ Fragment-Host: org.openhab.core.thing
 	org.openhab.core.voice;version='[5.2.0,5.2.1)',\
 	org.threeten.extra;version='[1.8.0,1.8.1)',\
 	stax2-api;version='[4.2.2,4.2.3)',\
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.20.0,2.20.1)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.20.1,2.20.2)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.20.1,2.20.2)',\
-	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.20.1,2.20.2)',\
-	com.fasterxml.jackson.dataformat.jackson-dataformat-yaml;version='[2.20.1,2.20.2)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.21.0,2.21.1)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.21.0,2.21.1)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.21.0,2.21.1)',\
+	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.21.0,2.21.1)',\
+	com.fasterxml.jackson.dataformat.jackson-dataformat-yaml;version='[2.21.0,2.21.1)',\
 	com.google.guava;version='[33.5.0,33.5.1)',\
 	com.google.guava.failureaccess;version='[1.0.3,1.0.4)',\
 	org.eclipse.emf.common;version='[2.30.0,2.30.1)',\
