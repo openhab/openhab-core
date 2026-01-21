@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -298,20 +299,41 @@ public class ActionInputsHelper {
                         case "java.time.ZonedDateTime" -> {
                             /*
                              * Accepted format is one of:
+                             * - 2007-12-03T09:15:30Z
                              * - 2007-12-03T10:15:30
                              * - 2007-12-03T10:15:30+01:00
                              * - 2007-12-03T10:15:30+01:00[Europe/Paris]
                              */
-                            TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString,
-                                    ZonedDateTime::from, LocalDateTime::from);
-                            if (dt instanceof ZonedDateTime zdt) {
-                                yield zdt;
+                            if (valueString.endsWith("Z")) {
+                                yield Instant.parse(valueString).atZone(timeZoneProvider.getTimeZone());
+                            } else {
+                                TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString,
+                                        ZonedDateTime::from, LocalDateTime::from);
+                                if (dt instanceof ZonedDateTime zdt) {
+                                    yield zdt;
+                                }
+                                yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone());
                             }
-                            yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone());
                         }
-                        case "java.time.Instant" ->
-                            // Accepted format is: 2007-12-03T10:15:30
-                            LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone()).toInstant();
+                        case "java.time.Instant" -> {
+                            /*
+                             * Accepted format is one of:
+                             * - 2007-12-03T09:15:30Z
+                             * - 2007-12-03T10:15:30
+                             * - 2007-12-03T10:15:30+01:00
+                             * - 2007-12-03T10:15:30+01:00[Europe/Paris]
+                             */
+                            if (valueString.endsWith("Z")) {
+                                yield Instant.parse(valueString);
+                            } else {
+                                TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString,
+                                        ZonedDateTime::from, LocalDateTime::from);
+                                if (dt instanceof ZonedDateTime zdt) {
+                                    yield zdt.toInstant();
+                                }
+                                yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone()).toInstant();
+                            }
+                        }
                         case "java.time.Duration" ->
                             // Accepted format is: P2DT17H25M30.5S
                             Duration.parse(valueString);

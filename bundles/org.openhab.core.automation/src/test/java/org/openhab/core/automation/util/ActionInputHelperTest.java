@@ -427,9 +427,14 @@ public class ActionInputHelperTest {
 
     @Test
     public void testMapSerializedInputToActionInputWhenZonedDateTime() {
-        String valAsString = "2007-12-03T10:15:30";
-        ZonedDateTime val = LocalDateTime.parse(valAsString).atZone(timeZoneProvider.getTimeZone());
+        String valAsString = "2007-12-03T09:15:30Z";
+        ZonedDateTime val = Instant.parse(valAsString).atZone(timeZoneProvider.getTimeZone());
         Input input = buildInput("java.time.ZonedDateTime");
+        assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
+        assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
+
+        valAsString = "2007-12-03T10:15:30";
+        val = LocalDateTime.parse(valAsString).atZone(timeZoneProvider.getTimeZone());
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
         String s1 = valAsString.replace("T", " ");
@@ -468,13 +473,28 @@ public class ActionInputHelperTest {
 
     @Test
     public void testMapSerializedInputToActionInputWhenInstant() {
-        String valAsString = "2017-12-09T20:15:30.00";
-        Instant val = LocalDateTime.parse(valAsString).atZone(timeZoneProvider.getTimeZone()).toInstant();
+        String valAsString = "2017-12-09T19:15:30.00Z";
+        Instant val = Instant.parse(valAsString);
         Input input = buildInput("java.time.Instant");
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
-        assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replace("T", " ")));
+
+        valAsString = "2017-12-09T20:15:30.00";
+        val = LocalDateTime.parse(valAsString).atZone(timeZoneProvider.getTimeZone()).toInstant();
+        assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
+        assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
+        String s1 = valAsString.replace("T", " ");
+        assertThrows(IllegalArgumentException.class, () -> helper.mapSerializedInputToActionInput(input, s1));
+
+        valAsString = "2007-12-09T20:15:30+04:00";
+        val = ZonedDateTime.parse(valAsString, DateTimeFormatter.ISO_DATE_TIME).toInstant();
+        assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
+        assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
+
+        valAsString = "2007-12-09T20:15:30+04:00[Europe/Kyiv]";
+        val = ZonedDateTime.parse(valAsString, DateTimeFormatter.ISO_DATE_TIME).toInstant();
+        assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
+        assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
     }
 
     @Test
