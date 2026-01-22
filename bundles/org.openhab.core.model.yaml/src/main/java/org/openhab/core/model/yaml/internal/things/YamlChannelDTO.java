@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -42,6 +43,14 @@ public class YamlChannelDTO {
 
     public boolean isValid(@NonNull List<@NonNull String> errors, @NonNull List<@NonNull String> warnings) {
         boolean ok = true;
+        if (config != null) {
+            try {
+                new Configuration(config);
+            } catch (IllegalArgumentException e) {
+                errors.add("invalid data in \"config\" field: %s".formatted(e.getMessage()));
+                ok = false;
+            }
+        }
         if (type != null) {
             try {
                 new ChannelTypeUID("dummy", type);

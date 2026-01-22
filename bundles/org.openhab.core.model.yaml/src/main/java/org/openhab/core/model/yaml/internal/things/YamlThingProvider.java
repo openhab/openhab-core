@@ -349,49 +349,54 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     private @Nullable Thing mapThing(YamlThingDTO thingDto) {
-        ThingUID thingUID = new ThingUID(thingDto.uid);
-        String[] segments = thingUID.getAsString().split(AbstractUID.SEPARATOR);
-        ThingTypeUID thingTypeUID = new ThingTypeUID(thingUID.getBindingId(), segments[1]);
+        try {
+            ThingUID thingUID = new ThingUID(thingDto.uid);
+            String[] segments = thingUID.getAsString().split(AbstractUID.SEPARATOR);
+            ThingTypeUID thingTypeUID = new ThingTypeUID(thingUID.getBindingId(), segments[1]);
 
-        ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID, localeProvider.getLocale());
-        ThingUID bridgeUID = thingDto.bridge != null ? new ThingUID(thingDto.bridge) : null;
-        Configuration configuration = new Configuration(thingDto.config);
+            ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID, localeProvider.getLocale());
+            ThingUID bridgeUID = thingDto.bridge != null ? new ThingUID(thingDto.bridge) : null;
+            Configuration configuration = new Configuration(thingDto.config);
 
-        ThingBuilder thingBuilder = thingDto.isBridge() ? BridgeBuilder.create(thingTypeUID, thingUID)
-                : ThingBuilder.create(thingTypeUID, thingUID);
-        thingBuilder
-                .withLabel(thingDto.label != null ? thingDto.label : (thingType != null ? thingType.getLabel() : null));
-        thingBuilder.withLocation(thingDto.location);
-        thingBuilder.withBridge(bridgeUID);
-        thingBuilder.withConfiguration(configuration);
+            ThingBuilder thingBuilder = thingDto.isBridge() ? BridgeBuilder.create(thingTypeUID, thingUID)
+                    : ThingBuilder.create(thingTypeUID, thingUID);
+            thingBuilder.withLabel(
+                    thingDto.label != null ? thingDto.label : (thingType != null ? thingType.getLabel() : null));
+            thingBuilder.withLocation(thingDto.location);
+            thingBuilder.withBridge(bridgeUID);
+            thingBuilder.withConfiguration(configuration);
 
-        List<Channel> channels = createChannels(thingTypeUID, thingUID,
-                thingDto.channels != null ? thingDto.channels : Map.of(),
-                thingType != null ? thingType.getChannelDefinitions() : List.of());
-        thingBuilder.withChannels(channels);
+            List<Channel> channels = createChannels(thingTypeUID, thingUID,
+                    thingDto.channels != null ? thingDto.channels : Map.of(),
+                    thingType != null ? thingType.getChannelDefinitions() : List.of());
+            thingBuilder.withChannels(channels);
 
-        Thing thing = thingBuilder.build();
+            Thing thing = thingBuilder.build();
 
-        Thing thingFromHandler = null;
-        ThingHandlerFactory handlerFactory = thingHandlerFactories.stream()
-                .filter(thf -> isThingHandlerFactoryReady(thf) && thf.supportsThingType(thingTypeUID)).findFirst()
-                .orElse(null);
-        if (handlerFactory != null) {
-            thingFromHandler = handlerFactory.createThing(thingTypeUID, configuration, thingUID, bridgeUID);
-            if (thingFromHandler != null) {
-                mergeThing(thingFromHandler, thing);
-                logger.debug("Successfully loaded thing \'{}\'", thingUID);
-            } else {
-                // Possible cause: Asynchronous loading of the XML files
-                // Add the data to the queue in order to retry it later
-                logger.debug(
-                        "ThingHandlerFactory \'{}\' claimed it can handle \'{}\' type but actually did not. Queued for later refresh.",
-                        handlerFactory.getClass().getSimpleName(), thingTypeUID);
-                queueRetryThingCreation(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID);
+            Thing thingFromHandler = null;
+            ThingHandlerFactory handlerFactory = thingHandlerFactories.stream()
+                    .filter(thf -> isThingHandlerFactoryReady(thf) && thf.supportsThingType(thingTypeUID)).findFirst()
+                    .orElse(null);
+            if (handlerFactory != null) {
+                thingFromHandler = handlerFactory.createThing(thingTypeUID, configuration, thingUID, bridgeUID);
+                if (thingFromHandler != null) {
+                    mergeThing(thingFromHandler, thing);
+                    logger.debug("Successfully loaded thing \'{}\'", thingUID);
+                } else {
+                    // Possible cause: Asynchronous loading of the XML files
+                    // Add the data to the queue in order to retry it later
+                    logger.debug(
+                            "ThingHandlerFactory \'{}\' claimed it can handle \'{}\' type but actually did not. Queued for later refresh.",
+                            handlerFactory.getClass().getSimpleName(), thingTypeUID);
+                    queueRetryThingCreation(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID);
+                }
             }
-        }
 
-        return thingFromHandler != null ? thingFromHandler : thing;
+            return thingFromHandler != null ? thingFromHandler : thing;
+        } catch (IllegalArgumentException e) {
+            logger.warn("Error creating thing '{}', thing will be ignored: {}", thingDto.uid, e.getMessage());
+            return null;
+        }
     }
 
     private List<Channel> createChannels(ThingTypeUID thingTypeUID, ThingUID thingUID,
