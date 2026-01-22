@@ -12,12 +12,15 @@
  */
 package org.openhab.core.config.core.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize options of a
  * parameter.
  *
  * @author Alex Tugarev - Initial contribution
  */
+@Schema(name = "ParameterOption")
 public class ParameterOptionDTO {
 
     public String label;

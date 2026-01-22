@@ -18,6 +18,8 @@ import org.openhab.core.items.dto.ItemDTO;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.StateDescription;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is an enriched data transfer object that is used to serialize items with dynamic data like the state, the state
  * description and the link.
@@ -27,9 +29,11 @@ import org.openhab.core.types.StateDescription;
  * @author Mark Herwege - Added default unit symbol
  * @author Mark Herwege - Added parent groups
  */
+@Schema(name = "EnrichedItem")
 public class EnrichedItemDTO extends ItemDTO {
 
     public String link;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String state;
     public String transformedState;
     public StateDescription stateDescription;
@@ -40,6 +44,7 @@ public class EnrichedItemDTO extends ItemDTO {
     public String unitSymbol;
     public Map<String, Object> metadata;
     public EnrichedItemDTO[] parents = null;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Boolean editable;
 
     public EnrichedItemDTO(ItemDTO itemDTO, String link, String state, String lastState, Long lastStateUpdate,

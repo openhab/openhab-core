@@ -18,17 +18,24 @@ import java.util.Set;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize the respective class.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@Schema(name = "ModuleType")
 public class ModuleTypeDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String uid;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Visibility visibility;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Set<String> tags;
     public String label;
     public String description;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<ConfigDescriptionParameterDTO> configDescriptions;
 }

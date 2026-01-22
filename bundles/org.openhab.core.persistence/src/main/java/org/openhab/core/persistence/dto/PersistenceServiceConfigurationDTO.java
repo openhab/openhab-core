@@ -19,12 +19,15 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * The {@link PersistenceServiceConfigurationDTO} is used for transferring persistence service configurations
  *
  * @author Jan N. Klug - Initial contribution
  * @author Mark Herwege - Make default strategy to be only a configuration suggestion
  */
+@Schema(name = "PersistenceServiceConfiguration")
 @NonNullByDefault
 public class PersistenceServiceConfigurationDTO {
     public String serviceId = "";

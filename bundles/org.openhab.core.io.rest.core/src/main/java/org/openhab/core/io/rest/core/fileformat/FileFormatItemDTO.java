@@ -20,11 +20,14 @@ import org.openhab.core.items.dto.GroupItemDTO;
 import org.openhab.core.items.dto.ItemDTO;
 import org.openhab.core.items.dto.MetadataDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object to serialize an item contained in a file format.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "FileFormatItem")
 public class FileFormatItemDTO extends ItemDTO {
 
     public String groupType;

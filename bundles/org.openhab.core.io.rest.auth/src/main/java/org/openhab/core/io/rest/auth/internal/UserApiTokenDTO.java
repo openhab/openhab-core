@@ -14,11 +14,14 @@ package org.openhab.core.io.rest.auth.internal;
 
 import java.util.Date;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO representing a user API token, without the sensible information.
  *
  * @author Yannick Schaus - initial contribution
  */
+@Schema(name = "UserApiToken")
 public class UserApiTokenDTO {
     public String name;
     public Date createdTime;

@@ -12,21 +12,32 @@
  */
 package org.openhab.core.io.rest.core.service;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * {@link ConfigurableServiceDTO} is a data transfer object for configurable services.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Stefan Triller - added multiple field
  */
+@Schema(name = "ConfigurableService")
+@NonNullByDefault
 public class ConfigurableServiceDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String label;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String category;
-    public String configDescriptionURI;
+    public @Nullable String configDescriptionURI;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public boolean multiple;
 
-    public ConfigurableServiceDTO(String id, String label, String category, String configDescriptionURI,
+    public ConfigurableServiceDTO(String id, String label, String category, @Nullable String configDescriptionURI,
             boolean multiple) {
         this.id = id;
         this.label = label;

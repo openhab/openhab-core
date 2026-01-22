@@ -12,12 +12,15 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize sitemaps.
  * 
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
  */
+@Schema(name = "Sitemap")
 public class SitemapDTO {
 
     public String name;
