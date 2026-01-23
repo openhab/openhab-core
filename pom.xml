@@ -67,6 +67,9 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <oh.java.version>21</oh.java.version>
     <maven.compiler.release>${oh.java.version}</maven.compiler.release>
+    <!-- source/target is required by xtend, otherwise Java 11 is used for some files -->
+    <maven.compiler.source>${oh.java.version}</maven.compiler.source>
+    <maven.compiler.target>${oh.java.version}</maven.compiler.target>
 
     <bnd.version>7.2.1</bnd.version>
     <commons.net.version>3.12.0</commons.net.version>
