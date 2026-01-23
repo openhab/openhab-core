@@ -323,16 +323,12 @@ public class ActionInputsHelper {
                              * - 2007-12-03T10:15:30+01:00
                              * - 2007-12-03T10:15:30+01:00[Europe/Paris]
                              */
-                            if (valueString.endsWith("Z")) {
-                                yield Instant.parse(valueString);
-                            } else {
-                                TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString,
-                                        ZonedDateTime::from, LocalDateTime::from);
-                                if (dt instanceof ZonedDateTime zdt) {
-                                    yield zdt.toInstant();
-                                }
-                                yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone()).toInstant();
+                            TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString,
+                                    ZonedDateTime::from, LocalDateTime::from);
+                            if (dt instanceof ZonedDateTime zdt) {
+                                yield zdt.toInstant();
                             }
+                            yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone()).toInstant();
                         }
                         case "java.time.Duration" ->
                             // Accepted format is: P2DT17H25M30.5S
