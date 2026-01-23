@@ -1,0 +1,22 @@
+packages:
+  overridden package: !include
+    file: package.inc.yaml
+    vars:
+      name: thing
+
+things:
+  # normal merge behavior applies (deep merge of maps and lists)
+  # unless overridden with !replace
+  thing:
+    map1: !replace # with !replace, the map from the package is completely discarded
+      scalar1: main
+    list1: !replace
+      - main
+    # map2 and list2 from package should merge as normal
+
+    config:
+      # Replace sub-map and sub-list
+      map1: !replace
+        mainkey: main
+      list1: !replace
+        - main

@@ -1,0 +1,13 @@
+variables: !sub
+  # Variable chaining should work
+  # when the variables block itself has a !sub tag
+  first: hello
+  second: ${first} world
+  third_key: third
+  ${third_key}: ${second}!!!
+  nosub: !nosub ${first}
+
+data:
+  greeting: !sub ${second}
+  exclamation: !sub ${third}
+  nosub: !sub ${nosub}

@@ -1,0 +1,2 @@
+toplevel: !include
+  file: simple.inc.yaml

@@ -1,0 +1,5 @@
+variables:
+  var: level2
+
+data: !sub ${var}
+

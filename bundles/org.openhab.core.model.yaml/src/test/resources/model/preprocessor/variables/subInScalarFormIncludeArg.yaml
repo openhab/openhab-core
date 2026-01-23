@@ -1,0 +1,5 @@
+variables:
+  file: subInScalarFormIncludeArg.inc.yaml
+
+foo: !sub
+  bar: !include "${file}"

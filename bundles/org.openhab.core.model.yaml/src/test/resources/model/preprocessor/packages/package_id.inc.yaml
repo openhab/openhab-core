@@ -1,0 +1,2 @@
+things: !sub
+  ${package_id}: ${package_id} Value

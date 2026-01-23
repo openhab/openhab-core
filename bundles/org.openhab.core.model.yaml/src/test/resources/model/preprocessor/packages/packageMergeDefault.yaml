@@ -1,0 +1,27 @@
+packages:
+  thing: !include
+    file: package.inc.yaml
+    vars:
+      name: thing
+
+# Customizations in main model that merge with package content
+things:
+  thing:
+    # these are not in the package
+    mainscalar: main
+    mainmap:
+      mainkey: main
+    mainlist1:
+      - main
+
+    config:
+      scalar2: main
+      scalar3: new
+      map1:
+        scalar2: main
+        scalar3: main
+      map2:
+        mainkey: main
+      list1:
+        - main
+

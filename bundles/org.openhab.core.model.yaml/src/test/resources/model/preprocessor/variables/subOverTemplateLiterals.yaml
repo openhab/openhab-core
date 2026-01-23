@@ -1,0 +1,40 @@
+# Test the behavior of templates when they are inserted inside !sub
+# When the template data contains literal patterns, it shouldn't be substituted
+# even when the template is inserted within a !sub context
+
+variables:
+  foo: bar
+
+## Template definitions
+templates:
+  plain_template: ${foo}
+  sub_template: !sub ${foo}
+  nosub_template: !nosub ${foo}
+
+## Template insertions
+plain_plain:
+  foo: !insert plain_template # => foo: ${foo}
+
+plain_sub:
+  foo: !insert sub_template # => foo: bar
+
+plain_nosub:
+  foo: !insert nosub_template # => foo: ${foo}
+
+sub_plain: !sub
+  foo: !insert plain_template # => foo: ${foo}
+
+sub_sub: !sub
+  foo: !insert sub_template # => foo: bar
+
+sub_nosub: !sub
+  foo: !insert nosub_template # => foo: ${foo}
+
+nosub_plain: !nosub
+  foo: !insert plain_template # => foo: ${foo}
+
+nosub_sub: !nosub
+  foo: !insert sub_template # => foo: bar
+
+nosub_nosub: !nosub
+  foo: !insert nosub_template # => foo: ${foo}

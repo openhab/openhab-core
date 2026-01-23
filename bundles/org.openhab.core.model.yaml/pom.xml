@@ -35,5 +35,71 @@
       <artifactId>org.openhab.core.thing</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.openhab.osgiify</groupId>
+      <artifactId>com.hubspot.jinjava.jinjava</artifactId>
+      <version>2.7.4</version>
+    </dependency>
+
+    <!--
+      Jinjava's transitive dependencies (Guava, Jackson, re2j, etc.)
+      are packaged in the openhab.tp-jinjava which is referenced
+      within feature.xml, so they aren't needed here for build or runtime.
+
+      However, without adding them here, the tests will fail.
+      And we can't just use test scope either, otherwise they'll break the compilation.
+     -->
+    <dependency>
+      <groupId>com.google.re2j</groupId>
+      <artifactId>re2j</artifactId>
+      <version>1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>33.4.8-jre</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.annotations.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <!-- Use the version defined in the main pom.xml -->
+      <version>${commons.lang3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <!-- Use the version defined in the main pom.xml -->
+      <version>${commons.net.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.osgiify</groupId>
+      <artifactId>com.hubspot.immutables.immutables-exceptions</artifactId>
+      <version>1.9</version>
+    </dependency>
   </dependencies>
 </project>

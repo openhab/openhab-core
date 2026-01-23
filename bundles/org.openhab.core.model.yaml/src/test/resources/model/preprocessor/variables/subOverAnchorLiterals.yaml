@@ -1,0 +1,49 @@
+# Test the behavior of anchors when its alias is inserted inside !sub
+# When the anchored data contains literal patterns, it shouldn't be substituted
+# even when the alias is inserted within a !sub context
+
+variables:
+  foo: bar
+
+## Anchor definitions
+
+plain_anchor:
+  obj: &PLAIN_ANCHOR
+    foo: ${foo}
+
+sub_anchor: !sub
+  obj: &SUB_ANCHOR
+    foo: ${foo}
+
+nosub_anchor: !nosub
+  obj: &NOSUB_ANCHOR
+    foo: ${foo}
+
+## Alias insertions
+
+plain_plain:
+  <<: *PLAIN_ANCHOR # => foo: ${foo}
+
+plain_sub:
+  <<: *SUB_ANCHOR # => foo: bar
+
+plain_nosub:
+  <<: *NOSUB_ANCHOR # => foo: ${foo}
+
+sub_plain: !sub
+  <<: *PLAIN_ANCHOR # => foo: ${foo}
+
+sub_sub: !sub
+  <<: *SUB_ANCHOR # => foo: bar
+
+sub_nosub: !sub
+  <<: *NOSUB_ANCHOR # => foo: ${foo}
+
+nosub_plain: !nosub
+  <<: *PLAIN_ANCHOR # => foo: ${foo}
+
+nosub_sub: !nosub
+  <<: *SUB_ANCHOR # => foo: bar
+
+nosub_nosub: !nosub
+  <<: *NOSUB_ANCHOR # => foo: ${foo}

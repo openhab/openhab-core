@@ -1,0 +1,7 @@
+packages:
+  thing1: !include package.inc.yaml
+
+things:
+  # thing_only_in_main is not part of any package, so remains as-is
+  thing_only_in_main:
+    label: label3

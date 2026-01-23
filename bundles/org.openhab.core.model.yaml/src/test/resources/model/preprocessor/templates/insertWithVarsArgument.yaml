@@ -1,0 +1,10 @@
+variables:
+  foo: bar
+
+templates:
+  vartpl: !sub ${foo}
+
+foo: !insert
+  template: vartpl
+  vars:
+    foo: overridden

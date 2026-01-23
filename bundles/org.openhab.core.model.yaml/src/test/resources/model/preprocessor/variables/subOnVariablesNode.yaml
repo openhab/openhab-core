@@ -1,0 +1,7 @@
+variables: !sub
+  label: the label
+  value: 123
+
+test:
+  name: !sub ${label}
+  num: !sub ${value}

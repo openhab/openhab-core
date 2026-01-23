@@ -1,0 +1,42 @@
+variables:
+  name: default
+  thing_label: Default Thing Label
+  item_label: Default Item Label
+
+things:
+  !sub ${name}:
+    label: !sub ${thing_label}
+    scalar: package
+
+    map1:
+      scalar1: package
+      scalar2: package
+    map2:
+      scalar1: package
+      scalar2: package
+
+    list1:
+      - package
+    list2:
+      - package
+
+    config:
+      scalar1: package
+      scalar2: package
+
+      map1:
+        scalar1: package
+        scalar2: package
+      map2:
+        scalar1: package
+        scalar2: package
+
+      list1:
+        - package
+      list2:
+        - package
+
+items: !sub
+  ${name}:
+    type: Switch
+    label: ${item_label}

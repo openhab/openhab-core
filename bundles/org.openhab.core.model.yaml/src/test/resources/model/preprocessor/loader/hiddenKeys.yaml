@@ -1,0 +1,3 @@
+# Global entry with a leading dot -> will be ignored
+.energy_type:
+  foo: bar

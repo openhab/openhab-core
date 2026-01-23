@@ -1,0 +1,7 @@
+variables:
+  foo: globalFoo
+
+data: !include
+  file: includeArgumentsResolveFromGlobalVars.inc.yaml
+  vars:
+    bar: !sub ${foo}

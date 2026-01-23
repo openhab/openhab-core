@@ -1,0 +1,7 @@
+# override package ID via vars in include
+
+packages:
+  original_package_id: !include
+    file: package_id.inc.yaml
+    vars:
+      package_id: custom_id
