@@ -371,7 +371,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             thingBuilder.withBridge(bridgeUID);
             thingBuilder.withConfiguration(configuration);
 
-            List<Channel> channels = createChannels(isolatedModel, thingTypeUID, thingUID,
+            List<Channel> channels = createChannels(!isolatedModel, thingTypeUID, thingUID,
                     thingDto.channels != null ? thingDto.channels : Map.of(),
                     thingType != null ? thingType.getChannelDefinitions() : List.of());
             thingBuilder.withChannels(channels);
@@ -405,14 +405,14 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         }
     }
 
-    private List<Channel> createChannels(boolean keepConfigUnchanged, ThingTypeUID thingTypeUID, ThingUID thingUID,
+    private List<Channel> createChannels(boolean applyDefaultConfig, ThingTypeUID thingTypeUID, ThingUID thingUID,
             Map<String, YamlChannelDTO> channelsDto, List<ChannelDefinition> channelDefinitions) {
         Set<String> addedChannelIds = new HashSet<>();
         List<Channel> channels = new ArrayList<>();
         channelsDto.forEach((channelId, channelDto) -> {
             ChannelTypeUID channelTypeUID = channelDto.type == null ? null
                     : new ChannelTypeUID(thingUID.getBindingId(), channelDto.type);
-            Channel channel = createChannel(keepConfigUnchanged, thingUID, channelId, channelTypeUID,
+            Channel channel = createChannel(applyDefaultConfig, thingUID, channelId, channelTypeUID,
                     channelDto.getKind(), channelDto.getItemType(), channelDto.label, channelDto.description, null,
                     new Configuration(channelDto.config), true);
             channels.add(channel);
@@ -439,7 +439,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         return channels;
     }
 
-    private Channel createChannel(boolean keepConfigUnchanged, ThingUID thingUID, String channelId,
+    private Channel createChannel(boolean applyDefaultConfig, ThingUID thingUID, String channelId,
             @Nullable ChannelTypeUID channelTypeUID, ChannelKind channelKind, @Nullable String channelItemType,
             @Nullable String channelLabel, @Nullable String channelDescription,
             @Nullable AutoUpdatePolicy channelAutoUpdatePolicy, Configuration channelConfiguration,
@@ -463,7 +463,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 }
                 autoUpdatePolicy = channelType.getAutoUpdatePolicy();
                 URI descUriO = channelType.getConfigDescriptionURI();
-                if (!keepConfigUnchanged && descUriO != null) {
+                if (applyDefaultConfig && descUriO != null) {
                     ConfigUtil.applyDefaultConfiguration(configuration,
                             configDescriptionRegistry.getConfigDescription(descUriO));
                 }
@@ -522,7 +522,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     // in the registry when the channel was initially created
                     Configuration channelConfig = processChannelConfiguration(channel.getChannelTypeUID(),
                             channel.getUID(), channel.getConfiguration());
-                    newChannel = createChannel(keepSourceConfig, target.getUID(), channel.getUID().getId(),
+                    newChannel = createChannel(!keepSourceConfig, target.getUID(), channel.getUID().getId(),
                             channel.getChannelTypeUID(), channel.getKind(), channel.getAcceptedItemType(),
                             channel.getLabel(), channel.getDescription(), channel.getAutoUpdatePolicy(), channelConfig,
                             false);

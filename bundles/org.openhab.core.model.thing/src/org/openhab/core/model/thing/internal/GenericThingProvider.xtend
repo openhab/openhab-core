@@ -263,7 +263,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         thingBuilder.withLabel(label)
         thingBuilder.withLocation(location)
 
-        val channels = createChannels(isolatedModel, thingTypeUID, thingUID, modelThing.channels,
+        val channels = createChannels(!isolatedModel, thingTypeUID, thingUID, modelThing.channels,
             thingType?.channelDefinitions ?: newArrayList)
         thingBuilder.withChannels(channels)
 
@@ -374,7 +374,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         return bridgeIds
     }
 
-    def private List<Channel> createChannels(boolean keepConfigUnchanged, ThingTypeUID thingTypeUID,
+    def private List<Channel> createChannels(boolean applyDefaultConfig, ThingTypeUID thingTypeUID,
         ThingUID thingUID, List<ModelChannel> modelChannels, List<ChannelDefinition> channelDefinitions) {
         val Set<String> addedChannelIds = newHashSet
         val List<Channel> channels = newArrayList
@@ -397,7 +397,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                         }
                         autoUpdatePolicy = resolvedChannelType.autoUpdatePolicy
                         val cfgDescUriOfresolvedChannelType = resolvedChannelType.configDescriptionURI
-                        if (!keepConfigUnchanged && cfgDescUriOfresolvedChannelType !== null) {
+                        if (applyDefaultConfig && cfgDescUriOfresolvedChannelType !== null) {
                             ConfigUtil.applyDefaultConfiguration(configuration,
                                 configDescriptionRegistry.getConfigDescription(
                                 cfgDescUriOfresolvedChannelType))
