@@ -216,7 +216,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     }
 
     def private void createThing(ModelThing modelThing, Collection<Thing> thingList,
-        ThingHandlerFactory thingHandlerFactory) {
+        ThingHandlerFactory thingHandlerFactory, boolean isolatedModel) {
         val ThingUID thingUID = getThingUID(modelThing, null)
         if (thingUID === null) {
             // ignore the Thing because its definition is broken
@@ -249,8 +249,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         val location = modelThing.location
 
         val ThingUID bridgeUID = if(modelThing.bridgeUID !== null) new ThingUID(modelThing.bridgeUID)
-        val thingFromHandler = getThingFromThingHandlerFactories(thingTypeUID, label, configuration, thingUID,
-            bridgeUID, thingHandlerFactory)
+        val thingFromHandler = getThingFromThingHandlerFactories(thingTypeUID, label, new Configuration(configuration),
+            thingUID, bridgeUID, thingHandlerFactory, isolatedModel)
 
         val thingBuilder = if (modelThing instanceof ModelBridge) {
                 BridgeBuilder.create(thingTypeUID, thingUID)
@@ -263,7 +263,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         thingBuilder.withLabel(label)
         thingBuilder.withLocation(location)
 
-        val channels = createChannels(thingTypeUID, thingUID, modelThing.channels,
+        val channels = createChannels(isolatedModel, thingTypeUID, thingUID, modelThing.channels,
             thingType?.channelDefinitions ?: newArrayList)
         thingBuilder.withChannels(channels)
 
@@ -273,7 +273,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         if (thingFromHandler !== null) {
 
             // If a thingHandlerFactory could create a thing, merge the content of the modelThing to it
-            thingFromHandler.merge(thing)
+            thingFromHandler.merge(thing, isolatedModel)
         }
 
         thingList += thingFromHandler ?: thing
@@ -292,25 +292,27 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     }
 
     def private Thing getThingFromThingHandlerFactories(ThingTypeUID thingTypeUID, String label,
-        Configuration configuration, ThingUID thingUID, ThingUID bridgeUID, ThingHandlerFactory specific) {
+        Configuration configuration, ThingUID thingUID, ThingUID bridgeUID, ThingHandlerFactory specific,
+        boolean isolatedModel) {
         if (specific !== null && specific.supportsThingType(thingTypeUID)) {
             logger.trace("Creating thing from specific ThingHandlerFactory {} for thingType {}", specific, thingTypeUID)
-            return getThingFromThingHandlerFactory(thingTypeUID, label, configuration, thingUID, bridgeUID, specific)
+            return getThingFromThingHandlerFactory(thingTypeUID, label, configuration, thingUID, bridgeUID,
+                specific, isolatedModel)
         }
         for (ThingHandlerFactory thingHandlerFactory : thingHandlerFactories) {
             logger.trace("Searching thingHandlerFactory for thingType: {}", thingTypeUID)
             if (thingHandlerFactory.supportsThingType(thingTypeUID)) {
                 return getThingFromThingHandlerFactory(thingTypeUID, label, configuration, thingUID, bridgeUID,
-                    thingHandlerFactory)
+                    thingHandlerFactory, isolatedModel)
             }
         }
         null
     }
 
     def private getThingFromThingHandlerFactory(ThingTypeUID thingTypeUID, String label, Configuration configuration,
-        ThingUID thingUID, ThingUID bridgeUID, ThingHandlerFactory thingHandlerFactory) {
+        ThingUID thingUID, ThingUID bridgeUID, ThingHandlerFactory thingHandlerFactory, boolean isolatedModel) {
         val thing = thingHandlerFactory.createThing(thingTypeUID, configuration, thingUID, bridgeUID)
-        if (thing === null) {
+        if (!isolatedModel && thing === null) {
             // Apparently the HandlerFactory's eyes were bigger than its stomach...
             // Possible cause: Asynchronous loading of the XML files
             // Add the data to the queue in order to retry it later
@@ -322,32 +324,35 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                 lazyRetryThread = new Thread(lazyRetryRunnable)
                 lazyRetryThread.start
             }
-        } else {
+        } else if (thing !== null) {
             thing.label = label
         }
         return thing
     }
 
-    def dispatch void merge(Thing targetThing, Thing sourceThing) {
+    def dispatch void merge(Thing targetThing, Thing sourceThing, boolean keepSourceConfig) {
         targetThing.bridgeUID = sourceThing.bridgeUID
-        targetThing.configuration.merge(sourceThing.configuration)
-        targetThing.merge(sourceThing.channels)
+        targetThing.configuration.merge(sourceThing.configuration, keepSourceConfig)
+        targetThing.merge(sourceThing.channels, keepSourceConfig)
         targetThing.location = sourceThing.location
         targetThing.label = sourceThing.label
     }
 
-    def dispatch void merge(Configuration target, Configuration source) {
+    def dispatch void merge(Configuration target, Configuration source, boolean keepSourceConfig) {
+        if (keepSourceConfig) {
+            target.setProperties(Map.of())
+        }
         source.keySet.forEach [
             target.put(it, source.get(it))
         ]
     }
 
-    def dispatch void merge(Thing targetThing, List<Channel> source) {
+    def dispatch void merge(Thing targetThing, List<Channel> source, boolean keepSourceConfig) {
         val List<Channel> channelsToAdd = newArrayList()
         source.forEach [ sourceChannel |
             val targetChannels = targetThing.channels.filter[it.UID.equals(sourceChannel.UID)]
             targetChannels.forEach [
-                merge(sourceChannel)
+                merge(sourceChannel, keepSourceConfig)
             ]
             if (targetChannels.empty) {
                 channelsToAdd.add(sourceChannel)
@@ -358,8 +363,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         ThingHelper.addChannelsToThing(targetThing, channelsToAdd)
     }
 
-    def dispatch void merge(Channel target, Channel source) {
-        target.configuration.merge(source.configuration)
+    def dispatch void merge(Channel target, Channel source, boolean keepSourceConfig) {
+        target.configuration.merge(source.configuration, keepSourceConfig)
     }
 
     def private getParentPath(ThingUID bridgeUID) {
@@ -369,8 +374,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         return bridgeIds
     }
 
-    def private List<Channel> createChannels(ThingTypeUID thingTypeUID, ThingUID thingUID,
-        List<ModelChannel> modelChannels, List<ChannelDefinition> channelDefinitions) {
+    def private List<Channel> createChannels(boolean keepConfigUnchanged, ThingTypeUID thingTypeUID,
+        ThingUID thingUID, List<ModelChannel> modelChannels, List<ChannelDefinition> channelDefinitions) {
         val Set<String> addedChannelIds = newHashSet
         val List<Channel> channels = newArrayList
         modelChannels.forEach [
@@ -392,7 +397,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                         }
                         autoUpdatePolicy = resolvedChannelType.autoUpdatePolicy
                         val cfgDescUriOfresolvedChannelType = resolvedChannelType.configDescriptionURI
-                        if (cfgDescUriOfresolvedChannelType !== null) {
+                        if (!keepConfigUnchanged && cfgDescUriOfresolvedChannelType !== null) {
                             ConfigUtil.applyDefaultConfiguration(configuration,
                                 configDescriptionRegistry.getConfigDescription(
                                 cfgDescUriOfresolvedChannelType))
@@ -574,7 +579,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     }
 
     def thingHandlerFactoryAdded(ThingHandlerFactory thingHandlerFactory) {
-        thingsMap.keySet.forEach [
+        thingsMap.keySet.filter[!isIsolatedModel(it)].forEach [
             // create things for this specific thingHandlerFactory from the model.
             createThingsFromModelForThingHandlerFactory(it, thingHandlerFactory)
         ]
@@ -628,7 +633,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         val model = modelRepository.getModel(modelName) as ThingModel
         if (model !== null) {
             flattenModelThings(model.things).forEach [
-                createThing(newThings, factory)
+                createThing(newThings, factory, isIsolatedModel(modelName))
             ]
         }
 
@@ -661,8 +666,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                     val newThings = new ArrayList
                     queue.forEach [ qc |
                         logger.trace("Searching thingHandlerFactory for thingType: {}", qc.thingTypeUID)
-                        val thing = qc.thingHandlerFactory.createThing(qc.thingTypeUID, qc.configuration, qc.thingUID,
-                            qc.bridgeUID)
+                        val thing = qc.thingHandlerFactory.createThing(qc.thingTypeUID,
+                            new Configuration(qc.configuration), qc.thingUID, qc.bridgeUID)
                         if (thing !== null) {
                             queue.remove(qc)
                             logger.debug("Successfully loaded '{}' during retry", qc.thingUID)
@@ -676,7 +681,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                             ]
                             val oldThing = thingsMap.get(modelName).findFirst[it.UID == newThing.UID]
                             if (oldThing !== null) {
-                                newThing.merge(oldThing)
+                                newThing.merge(oldThing, false)
                                 thingsMap.get(modelName).remove(oldThing)
                                 thingsMap.get(modelName).add(newThing)
                                 logger.debug("Refreshing thing '{}' after successful retry", newThing.UID)
