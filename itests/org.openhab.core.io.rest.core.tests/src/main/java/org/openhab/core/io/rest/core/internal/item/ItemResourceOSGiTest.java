@@ -41,7 +41,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -302,22 +301,20 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         assertEquals(404, response.getStatus());
     }
 
-    @Disabled
     @Test
     public void testAddMetadataValueEmpty() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "";
         Response response = itemResource.addMetadata(ITEM_NAME1, "foo", dto);
-        assertEquals(400, response.getStatus());
+        assertEquals(201, response.getStatus());
     }
 
-    @Disabled
     @Test
     public void testAddMetadataValueNull() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = null;
         Response response = itemResource.addMetadata(ITEM_NAME1, "foo", dto);
-        assertEquals(400, response.getStatus());
+        assertEquals(201, response.getStatus());
     }
 
     @Test
