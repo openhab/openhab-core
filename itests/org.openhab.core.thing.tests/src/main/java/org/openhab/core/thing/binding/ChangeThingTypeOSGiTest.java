@@ -163,7 +163,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         ThingTypeRegistry thingTypeRegistry = mock(ThingTypeRegistry.class);
         when(thingTypeRegistry.getThingType(any(), any()))
                 .thenAnswer(invocation -> thingTypes.get(invocation.getArgument(0)));
-        registerService(thingTypeRegistry);
+        registerService(thingTypeRegistry, ThingTypeRegistry.class.getName());
 
         ConfigDescriptionProvider configDescriptionProvider = mock(ConfigDescriptionProvider.class);
         when(configDescriptionProvider.getConfigDescription(any(), any()))

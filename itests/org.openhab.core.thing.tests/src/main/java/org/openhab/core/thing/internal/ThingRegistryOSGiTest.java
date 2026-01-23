@@ -266,6 +266,6 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
         ThingTypeRegistry thingTypeRegistry = mock(ThingTypeRegistry.class);
         when(thingTypeRegistry.getThingType(any(ThingTypeUID.class))).thenReturn(thingType);
-        registerService(thingTypeRegistry);
+        registerService(thingTypeRegistry, ThingTypeRegistry.class.getName());
     }
 }
