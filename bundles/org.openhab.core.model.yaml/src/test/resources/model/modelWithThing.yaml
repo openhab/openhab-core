@@ -1,0 +1,24 @@
+version: 1
+things:
+  ntp:ntp:paris:
+    label: NTP Paris
+    location: Paris
+    config:
+      hostname: 0.fr.pool.ntp.org
+      timeZone: Europe/Paris
+      serverPort: 123 # default value
+    channels:
+      dateTime:
+        type: dateTime-channel
+      string:
+        type: string-channel
+        label: string channel
+        description: The string channel
+        config:
+          DateTimeFormat: dd-MM-yyyy HH:mm
+      string2:
+        type: string-channel
+        label: string2 channel
+        description: The string2 channel
+        config:
+          DateTimeFormat: dd-MM-yyyy

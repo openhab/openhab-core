@@ -1,0 +1,18 @@
+version: 1
+things:
+  ntp:ntp:paris:
+    config:
+      other: A parameter that is not in the thing config description.
+    channels:
+      dateTime:
+        type: dateTime-channel
+        config:
+          other: A parameter that is not in the channel config description.
+      string:
+        type: string-channel
+        config:
+          other: A parameter that is not in the channel config description.
+      string2:
+        type: string-channel
+        config:
+          other: A parameter that is not in the channel config description.

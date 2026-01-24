@@ -1,0 +1,10 @@
+version: 1
+things:
+  ntp:ntp:paris:
+    channels:
+      dateTime:
+        type: dateTime-channel
+      string:
+        type: string-channel
+      string2:
+        type: string-channel

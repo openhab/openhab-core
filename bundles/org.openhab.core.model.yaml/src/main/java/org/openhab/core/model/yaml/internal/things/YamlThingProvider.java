@@ -239,13 +239,13 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addThingHandlerFactory(final ThingHandlerFactory thingHandlerFactory) {
+    public void addThingHandlerFactory(final ThingHandlerFactory thingHandlerFactory) {
         logger.debug("addThingHandlerFactory {}", thingHandlerFactory.getClass().getSimpleName());
         thingHandlerFactories.add(thingHandlerFactory);
         thingHandlerFactoryAdded(thingHandlerFactory);
     }
 
-    protected void removeThingHandlerFactory(final ThingHandlerFactory thingHandlerFactory) {
+    public void removeThingHandlerFactory(final ThingHandlerFactory thingHandlerFactory) {
         thingHandlerFactories.remove(thingHandlerFactory);
     }
 
