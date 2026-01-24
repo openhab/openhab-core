@@ -824,12 +824,13 @@ public class YamlModelRepositoryImplTest {
         assertEquals(0, thing.getProperties().size());
 
         // 2 parameters injected with default value
-        assertThat(thing.getConfiguration().keySet(), hasSize(5));
+        assertThat(thing.getConfiguration().keySet(), hasSize(6));
         assertThat(thing.getConfiguration().keySet(),
-                containsInAnyOrder("hostname", "refreshInterval", "refreshNtp", "serverPort", "timeZone"));
+                containsInAnyOrder("hostname", "refreshInterval", "refreshNtp", "serverPort", "timeZone", "other"));
         assertEquals("0.fr.pool.ntp.org", thing.getConfiguration().get("hostname"));
         assertEquals(BigDecimal.valueOf(123), thing.getConfiguration().get("serverPort"));
         assertEquals("Europe/Paris", thing.getConfiguration().get("timeZone"));
+        assertEquals("A parameter that is not in the thing config description.", thing.getConfiguration().get("other"));
         // default value injected for parameter refreshInterval
         assertEquals(BigDecimal.valueOf(DEFAULT_REFRESH_INTERVAL), thing.getConfiguration().get("refreshInterval"));
         // default value injected for parameter refreshNtp
@@ -850,9 +851,11 @@ public class YamlModelRepositoryImplTest {
         assertThat(channel.getDefaultTags(), hasSize(2));
         assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
         assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), hasSize(1));
-        assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
+        assertThat(channel.getConfiguration().keySet(), hasSize(2));
+        assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
         assertEquals("dd-MM-yyyy HH:mm", channel.getConfiguration().get("DateTimeFormat"));
+        assertEquals("A parameter that is not in the channel config description.",
+                channel.getConfiguration().get("other"));
         channel = it.next();
         assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
         assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
@@ -863,9 +866,11 @@ public class YamlModelRepositoryImplTest {
         assertNull(channel.getAutoUpdatePolicy());
         assertThat(channel.getDefaultTags(), hasSize(0));
         assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), hasSize(1));
-        assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
+        assertThat(channel.getConfiguration().keySet(), hasSize(2));
+        assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
         assertEquals("dd-MM-yyyy", channel.getConfiguration().get("DateTimeFormat"));
+        assertEquals("A parameter that is not in the channel config description.",
+                channel.getConfiguration().get("other"));
     }
 
     @Test
@@ -936,54 +941,6 @@ public class YamlModelRepositoryImplTest {
     }
 
     @Test
-    public void testLoadModelWithThingUnexpectedConfigParam() throws IOException {
-        Files.copy(SOURCE_PATH.resolve("modelWithThingUnexpectedConfigParam.yaml"), fullModelPath);
-
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-        modelRepository.addYamlModelListener(thingProvider);
-
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
-
-        Collection<Thing> things = thingProvider.getAll();
-        assertThat(things, hasSize(1));
-        Thing thing = things.iterator().next();
-        assertEquals(NTP_THING_UID, thing.getUID());
-
-        // 4 parameters injected with default value
-        assertThat(thing.getConfiguration().keySet(), hasSize(5));
-        assertThat(thing.getConfiguration().keySet(),
-                containsInAnyOrder("hostname", "refreshInterval", "refreshNtp", "serverPort", "other"));
-        assertEquals("A parameter that is not in the thing config description.", thing.getConfiguration().get("other"));
-        // default value injected for parameter hostname
-        assertEquals(DEFAULT_HOSTNAME, thing.getConfiguration().get("hostname"));
-        // default value injected for parameter refreshInterval
-        assertEquals(BigDecimal.valueOf(DEFAULT_REFRESH_INTERVAL), thing.getConfiguration().get("refreshInterval"));
-        // default value injected for parameter refreshNtp
-        assertEquals(BigDecimal.valueOf(DEFAULT_REFRESH_NTP), thing.getConfiguration().get("refreshNtp"));
-        // default value injected for parameter serverPort
-        assertEquals(BigDecimal.valueOf(DEFAULT_SERVER_PORT), thing.getConfiguration().get("serverPort"));
-
-        assertEquals(2, thing.getChannels().size());
-        Iterator<Channel> it = thing.getChannels().iterator();
-        Channel channel = it.next();
-        assertEquals(new ChannelUID(NTP_THING_UID, "string"), channel.getUID());
-        // Parameter DateTimeFormat injected with default value
-        assertThat(channel.getConfiguration().keySet(), hasSize(2));
-        assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
-        assertEquals(DEFAULT_DATE_TIME_FORMAT, channel.getConfiguration().get("DateTimeFormat"));
-        assertEquals("A parameter that is not in the channel config description.",
-                channel.getConfiguration().get("other"));
-        channel = it.next();
-        assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
-        // Parameter DateTimeFormat injected with default value
-        assertThat(channel.getConfiguration().keySet(), hasSize(2));
-        assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
-        assertEquals(DEFAULT_DATE_TIME_FORMAT, channel.getConfiguration().get("DateTimeFormat"));
-        assertEquals("A parameter that is not in the channel config description.",
-                channel.getConfiguration().get("other"));
-    }
-
-    @Test
     public void testCreateIsolatedModelWithThing() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelWithThing.yaml"), fullModelPath);
 
@@ -1011,11 +968,13 @@ public class YamlModelRepositoryImplTest {
         assertEquals(0, thing.getProperties().size());
 
         // No parameter injected
-        assertThat(thing.getConfiguration().keySet(), hasSize(3));
-        assertThat(thing.getConfiguration().keySet(), containsInAnyOrder("hostname", "serverPort", "timeZone"));
+        assertThat(thing.getConfiguration().keySet(), hasSize(4));
+        assertThat(thing.getConfiguration().keySet(),
+                containsInAnyOrder("hostname", "serverPort", "timeZone", "other"));
         assertEquals("0.fr.pool.ntp.org", thing.getConfiguration().get("hostname"));
         assertEquals(BigDecimal.valueOf(123), thing.getConfiguration().get("serverPort"));
         assertEquals("Europe/Paris", thing.getConfiguration().get("timeZone"));
+        assertEquals("A parameter that is not in the thing config description.", thing.getConfiguration().get("other"));
 
         assertEquals(2, thing.getChannels().size());
         Iterator<Channel> it = thing.getChannels().iterator();
@@ -1032,9 +991,11 @@ public class YamlModelRepositoryImplTest {
         assertThat(channel.getDefaultTags(), hasSize(2));
         assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
         assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), hasSize(1));
-        assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
+        assertThat(channel.getConfiguration().keySet(), hasSize(2));
+        assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
         assertEquals("dd-MM-yyyy HH:mm", channel.getConfiguration().get("DateTimeFormat"));
+        assertEquals("A parameter that is not in the channel config description.",
+                channel.getConfiguration().get("other"));
         channel = it.next();
         assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
         assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
@@ -1045,9 +1006,11 @@ public class YamlModelRepositoryImplTest {
         assertNull(channel.getAutoUpdatePolicy());
         assertThat(channel.getDefaultTags(), hasSize(0));
         assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), hasSize(1));
-        assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
+        assertThat(channel.getConfiguration().keySet(), hasSize(2));
+        assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
         assertEquals("dd-MM-yyyy", channel.getConfiguration().get("DateTimeFormat"));
+        assertEquals("A parameter that is not in the channel config description.",
+                channel.getConfiguration().get("other"));
     }
 
     @Test
@@ -1107,49 +1070,6 @@ public class YamlModelRepositoryImplTest {
         assertEquals(0, channel.getProperties().size());
         // default value not injected for parameter DateTimeFormat
         assertThat(channel.getConfiguration().keySet(), hasSize(0));
-    }
-
-    @Test
-    public void testCreateIsolatedModelWithThingUnexpectedConfigParam() throws IOException {
-        Files.copy(SOURCE_PATH.resolve("modelWithThingUnexpectedConfigParam.yaml"), fullModelPath);
-
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-        modelRepository.addYamlModelListener(thingProvider);
-
-        List<String> errors = new ArrayList<>();
-        List<String> warnings = new ArrayList<>();
-        String name = modelRepository.createIsolatedModel(new FileInputStream(fullModelPath.toFile()), errors,
-                warnings);
-        assertNotNull(name);
-        assertEquals(0, errors.size());
-        assertEquals(0, warnings.size());
-
-        Collection<Thing> things = thingProvider.getAllFromModel(name);
-        assertThat(things, hasSize(1));
-        Thing thing = things.iterator().next();
-        assertEquals(NTP_THING_UID, thing.getUID());
-
-        // No parameter injected
-        assertThat(thing.getConfiguration().keySet(), hasSize(1));
-        assertThat(thing.getConfiguration().keySet(), contains("other"));
-        assertEquals("A parameter that is not in the thing config description.", thing.getConfiguration().get("other"));
-
-        assertEquals(2, thing.getChannels().size());
-        Iterator<Channel> it = thing.getChannels().iterator();
-        Channel channel = it.next();
-        assertEquals(new ChannelUID(NTP_THING_UID, "string"), channel.getUID());
-        // default value not injected for parameter DateTimeFormat
-        assertThat(channel.getConfiguration().keySet(), hasSize(1));
-        assertThat(channel.getConfiguration().keySet(), contains("other"));
-        assertEquals("A parameter that is not in the channel config description.",
-                channel.getConfiguration().get("other"));
-        channel = it.next();
-        assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
-        // default value not injected for parameter DateTimeFormat
-        assertThat(channel.getConfiguration().keySet(), hasSize(1));
-        assertThat(channel.getConfiguration().keySet(), contains("other"));
-        assertEquals("A parameter that is not in the channel config description.",
-                channel.getConfiguration().get("other"));
     }
 
     private class NtpThingHandlerFactory implements ThingHandlerFactory {
