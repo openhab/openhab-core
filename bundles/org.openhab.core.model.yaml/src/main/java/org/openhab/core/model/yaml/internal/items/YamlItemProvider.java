@@ -264,6 +264,7 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
             boolean hasAutoUpdateMetadata = false;
             boolean hasUnitMetadata = false;
             boolean hasStateDescriptionMetadata = false;
+            boolean hasExpireMetadata = false;
             if (itemDTO.metadata != null) {
                 for (Map.Entry<String, YamlMetadataDTO> entry : itemDTO.metadata.entrySet()) {
                     if ("autoupdate".equals(entry.getKey())) {
@@ -272,6 +273,8 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
                         hasUnitMetadata = true;
                     } else if ("stateDescription".equals(entry.getKey())) {
                         hasStateDescriptionMetadata = true;
+                    } else if ("expire".equals(entry.getKey())) {
+                        hasExpireMetadata = true;
                     }
                     Map<String, Object> config = entry.getValue().config;
                     if (itemDTO.format != null && "stateDescription".equals(entry.getKey())
@@ -304,6 +307,11 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
                 YamlMetadataDTO mdDTO = new YamlMetadataDTO();
                 mdDTO.config = Map.of("pattern", itemDTO.format);
                 metadata.put("stateDescription", mdDTO);
+            }
+            if (!hasExpireMetadata && itemDTO.expire != null) {
+                YamlMetadataDTO mdDTO = new YamlMetadataDTO();
+                mdDTO.value = itemDTO.expire;
+                metadata.put("expire", mdDTO);
             }
         }
         metaDataProvider.updateMetadata(modelName, itemName, metadata);

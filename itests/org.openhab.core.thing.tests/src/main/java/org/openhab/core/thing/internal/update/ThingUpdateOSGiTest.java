@@ -355,7 +355,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
 
         ThingTypeRegistry thingTypeRegistry = mock(ThingTypeRegistry.class);
         when(thingTypeRegistry.getThingType(eq(thingTypeUID))).thenReturn(thingType);
-        registerService(thingTypeRegistry);
+        registerService(thingTypeRegistry, ThingTypeRegistry.class.getName());
     }
 
     private void registerChannelTypes(ChannelTypeUID... channelTypeUIDs) {
@@ -371,7 +371,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         }
 
         registerService(channelTypeProvider);
-        registerService(channelTypeRegistry);
+        registerService(channelTypeRegistry, ChannelTypeRegistry.class.getName());
     }
 
     static class TestThingHandlerFactory extends BaseThingHandlerFactory {

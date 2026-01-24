@@ -801,7 +801,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         }
 
         registerService(thingTypeProvider);
-        registerService(thingTypeRegistry);
+        registerService(thingTypeRegistry, ThingTypeRegistry.class.getName());
     }
 
     private void registerConfigDescriptionProvider(boolean withRequiredParameter) {

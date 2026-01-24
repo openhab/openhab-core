@@ -576,7 +576,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
         ThingTypeRegistry thingTypeRegistry = mock(ThingTypeRegistry.class);
         when(thingTypeRegistry.getThingType(any(ThingTypeUID.class))).thenReturn(thingType);
-        registerService(thingTypeRegistry);
+        registerService(thingTypeRegistry, ThingTypeRegistry.class.getName());
 
         ChannelType channelType = ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "Number", "Number").build();
 
@@ -587,6 +587,6 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
         ChannelTypeRegistry channelTypeRegistry = mock(ChannelTypeRegistry.class);
         when(channelTypeRegistry.getChannelType(any(ChannelTypeUID.class))).thenReturn(channelType);
-        registerService(channelTypeRegistry);
+        registerService(channelTypeRegistry, ChannelTypeRegistry.class.getName());
     }
 }

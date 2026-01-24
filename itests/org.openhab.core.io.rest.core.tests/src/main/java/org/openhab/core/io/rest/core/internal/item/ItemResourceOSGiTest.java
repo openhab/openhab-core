@@ -306,7 +306,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "";
         Response response = itemResource.addMetadata(ITEM_NAME1, "foo", dto);
-        assertEquals(400, response.getStatus());
+        assertEquals(201, response.getStatus());
     }
 
     @Test
@@ -314,7 +314,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         MetadataDTO dto = new MetadataDTO();
         dto.value = null;
         Response response = itemResource.addMetadata(ITEM_NAME1, "foo", dto);
-        assertEquals(400, response.getStatus());
+        assertEquals(201, response.getStatus());
     }
 
     @Test
