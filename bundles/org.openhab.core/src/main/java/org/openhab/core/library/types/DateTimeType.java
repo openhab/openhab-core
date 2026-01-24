@@ -12,13 +12,20 @@
  */
 package org.openhab.core.library.types;
 
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.Temporal;
+import java.time.zone.ZoneRulesException;
+import java.util.IllegalFormatException;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -28,6 +35,12 @@ import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
 
 /**
+ * A primitive immutable type that holds a date, time and timezone using the Christian/Gregorian calendar.
+ *
+ * @implNote This type has the concept of <i>authoritative</i> timezone. An authoritative timezone is the originating
+ *           timezone for the date and time data. If the originating timezone is unknown, an arbitrary timezone can be
+ *           used, in which case the timezone is non-authoritative. A non-authoritative {@link DateTimeType} will be
+ *           converted to the configured timezone, and made authoritative, before being published on the event bus.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Erdoan Hadzhiyusein - Refactored to use ZonedDateTime
@@ -37,6 +50,7 @@ import org.openhab.core.types.State;
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
  * @author Jimmy Tanagra - implement Comparable
  * @author Jacob Laursen - Refactored to use {@link Instant} internally
+ * @author Ravi Nadahar - Resurrected timezone
  */
 @NonNullByDefault
 public class DateTimeType implements PrimitiveType, State, Command, Comparable<DateTimeType> {
@@ -71,115 +85,330 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
     private static final DateTimeFormatter FORMATTER_TZ_RFC = DateTimeFormatter
             .ofPattern(DATE_FORMAT_PATTERN_WITH_TZ_RFC);
 
-    private Instant instant;
+    private final Instant instant;
+    private final ZoneOffset zoneOffset;
+    private final ZoneId zoneId;
+    private final boolean authoritativeZone;
 
     /**
-     * Creates a new {@link DateTimeType} representing the current
-     * instant from the system clock.
+     * Create a new {@link DateTimeType} representing the current instant from the system clock with the JVM default
+     * timezone as a non-authoritative timezone.
+     *
+     * @throws DateTimeException If the JVM default timezone has an invalid format.
+     * @throws ZoneRulesException If the JVM default timezone can't be found or if no rules are available for that ID.
      */
-    public DateTimeType() {
+    public DateTimeType() throws DateTimeException, ZoneRulesException {
         this(Instant.now());
     }
 
     /**
-     * Creates a new {@link DateTimeType} with the given value.
+     * Create a new {@link DateTimeType} representing the specified instant with the JVM default timezone as a
+     * non-authoritative timezone.
      *
-     * @param instant
+     * @param instant the moment in time.
+     * @throws DateTimeException If the JVM default timezone has an invalid format.
+     * @throws ZoneRulesException If the JVM default timezone can't be found or if no rules are available for that ID.
      */
-    public DateTimeType(Instant instant) {
+    public DateTimeType(Instant instant) throws DateTimeException, ZoneRulesException {
         this.instant = instant;
+        ZoneId zoneId = ZoneId.systemDefault();
+        this.zoneId = zoneId;
+        if (zoneId instanceof ZoneOffset zoneOffset) {
+            this.zoneOffset = zoneOffset;
+        } else {
+            this.zoneOffset = zoneId.getRules().getOffset(instant);
+        }
+        this.authoritativeZone = false;
     }
 
     /**
-     * Creates a new {@link DateTimeType} with the given value.
-     * The time-zone information will be discarded, only the
-     * resulting {@link Instant} is preserved.
+     * Create a new {@link DateTimeType} representing the specified instant and an authoritative timezone or offset.
      *
-     * @param zoned
+     * @param instant the moment in time.
+     * @param zoneId the {@link ZoneId} or {@link ZoneOffset}.
+     * @throws ZoneRulesException If no rules are available for the zone ID.
+     */
+    public DateTimeType(Instant instant, ZoneId zoneId) throws ZoneRulesException {
+        this(instant, zoneId, true);
+    }
+
+    /**
+     * Create a new {@link DateTimeType} representing the specified instant and timezone or offset. Whether the
+     * timezone is considered authoritative is decided by the specified parameter.
+     *
+     * @param instant the moment in time.
+     * @param zoneId the {@link ZoneId} or {@link ZoneOffset}.
+     * @param authoritativeZone {@code true} if the timezone should be considered authoritative, {@code false} if it
+     *            shouldn't.
+     * @throws ZoneRulesException If no rules are available for the zone ID.
+     */
+    public DateTimeType(Instant instant, ZoneId zoneId, boolean authoritativeZone) throws ZoneRulesException {
+        this.instant = instant;
+        ZoneOffset resolvedOffset;
+        if (zoneId instanceof ZoneOffset offset) {
+            resolvedOffset = offset;
+        } else {
+            resolvedOffset = zoneId.getRules().getOffset(instant);
+        }
+
+        this.zoneId = zoneId;
+        this.zoneOffset = resolvedOffset;
+        this.authoritativeZone = authoritativeZone;
+    }
+
+    /**
+     * Create a new {@link DateTimeType} representing the instant dictated by the specified local date and time in
+     * combination with the specified or default timezone or offset.
+     * <p>
+     * <b>Note:</b> The resulting {@link DateTimeType} has an authoritative timezone of offset if {@code ZoneId} is
+     * specified.
+     * If {@code ZoneId} is {@code null}, the JVM default timezone will be used to interpret the local date and time,
+     * and the timezone will be non-authoritative.
+     *
+     * @param localDateTime the local date and time without timezone information.
+     * @param zoneId the {@link ZoneId} or {@link ZoneOffset}.
+     * @throws DateTimeException If {@code zoneId} is {@code null} and the JVM default timezone has an invalid format.
+     * @throws ZoneRulesException If {@code zoneId} is {@code null} and the JVM default timezone can't be found, or if
+     *             no rules are available for the zone ID.
+     */
+    public DateTimeType(LocalDateTime localDateTime, @Nullable ZoneId zoneId)
+            throws DateTimeException, ZoneRulesException {
+        ZoneId resolvedZoneId;
+        ZoneOffset resolvedOffset;
+        boolean resolvedAuthoritative;
+        if (zoneId instanceof ZoneOffset offset) {
+            resolvedZoneId = zoneId;
+            resolvedOffset = offset;
+            resolvedAuthoritative = true;
+        } else if (zoneId == null) {
+            resolvedZoneId = ZoneId.systemDefault();
+            if (resolvedZoneId instanceof ZoneOffset offset) {
+                resolvedOffset = offset;
+            } else {
+                resolvedOffset = resolvedZoneId.getRules().getOffset(localDateTime);
+            }
+            resolvedAuthoritative = false;
+        } else {
+            resolvedZoneId = zoneId;
+            resolvedOffset = zoneId.getRules().getOffset(localDateTime);
+            resolvedAuthoritative = true;
+        }
+
+        this.instant = localDateTime.toInstant(resolvedOffset);
+        this.zoneId = resolvedZoneId;
+        this.zoneOffset = resolvedOffset;
+        this.authoritativeZone = resolvedAuthoritative;
+    }
+
+    /**
+     * Create a new {@link DateTimeType} representing the instant and authoritative timezone provided by the specified
+     * {@link ZonedDateTime}.
+     *
+     * @param zoned the moment in time and timezone.
      */
     public DateTimeType(ZonedDateTime zoned) {
-        instant = zoned.toInstant();
-    }
-
-    public DateTimeType(String zonedValue) {
-        try {
-            // direct parsing (date and time)
-            try {
-                if (DATE_PARSE_PATTERN_WITH_SPACE.matcher(zonedValue).matches()) {
-                    instant = parse(zonedValue.substring(0, 10) + "T" + zonedValue.substring(11));
-                } else {
-                    instant = parse(zonedValue);
-                }
-            } catch (DateTimeParseException fullDtException) {
-                // time only
-                try {
-                    instant = parse("1970-01-01T" + zonedValue);
-                } catch (DateTimeParseException timeOnlyException) {
-                    try {
-                        long epoch = Double.valueOf(zonedValue).longValue();
-                        int length = (int) (Math.log10(epoch >= 0 ? epoch : epoch * -1) + 1);
-                        // Assume that below 12 digits we're in seconds
-                        if (length < 12) {
-                            instant = Instant.ofEpochSecond(epoch);
-                        } else {
-                            instant = Instant.ofEpochMilli(epoch);
-                        }
-                    } catch (NumberFormatException notANumberException) {
-                        // date only
-                        if (zonedValue.length() == 10) {
-                            instant = parse(zonedValue + "T00:00:00");
-                        } else {
-                            instant = parse(zonedValue.substring(0, 10) + "T00:00:00" + zonedValue.substring(10));
-                        }
-                    }
-                }
-            }
-        } catch (DateTimeParseException invalidFormatException) {
-            throw new IllegalArgumentException(zonedValue + " is not in a valid format.", invalidFormatException);
-        }
+        this(zoned, true);
     }
 
     /**
-     * @deprecated
-     *             Get object represented as a {@link ZonedDateTime} with system
-     *             default time-zone applied
+     * Create a new {@link DateTimeType} representing the instant and timezone provided by the specified
+     * {@link ZonedDateTime}. Whether the timezone is considered authoritative is decided by the specified parameter.
      *
-     * @return a {@link ZonedDateTime} representation of the object
+     * @param zoned the moment in time and timezone.
+     * @param authoritativeZone {@code true} if the timezone should be considered authoritative, {@code false} if it
+     *            shouldn't.
      */
-    @Deprecated
-    public ZonedDateTime getZonedDateTime() {
-        return getZonedDateTime(ZoneId.systemDefault());
+    public DateTimeType(ZonedDateTime zoned, boolean authoritativeZone) {
+        this.instant = zoned.toInstant();
+        this.zoneId = zoned.getZone();
+        this.zoneOffset = zoned.getOffset();
+        this.authoritativeZone = authoritativeZone;
     }
 
     /**
-     * Get object represented as a {@link ZonedDateTime} with the
-     * the provided time-zone applied
+     * Create a new {@link DateTimeType} representing the date, time and potentially timezone or offset parsed from the
+     * provided string.
+     * <p>
+     * If a timezone is parsed, the timezone is considered authoritative, unless the string starts with a {@code ?}. If
+     * a timezone isn't parsed, the JVM default timezone is used, and the timezone is considered non-authoritative.
+     * <p>
+     * For details about the supported formats, see {@link #parseDateTime(String)}.
      *
-     * @return a {@link ZonedDateTime} representation of the object
+     * @param value the string to parse.
+     * @throws DateTimeException If no timezone could be parsed and the JVM default zone ID has an invalid format.
+     * @throws IllegalArgumentException If the specified value can't be parsed.
+     * @throws ZoneRulesException If no timezone could be parsed and the JVM default zone ID cannot be found.
      */
-    public ZonedDateTime getZonedDateTime(ZoneId zoneId) {
+    public DateTimeType(String value) throws DateTimeException, IllegalArgumentException, ZoneRulesException {
+        ParsedDateTimeResult result = parseDateTime(value);
+        instant = result.zdt.toInstant();
+        zoneId = result.zdt.getZone();
+        zoneOffset = result.zdt.getOffset();
+        authoritativeZone = result.authoritativeZone;
+    }
+
+    /**
+     * Get this date and time represented as a {@link ZonedDateTime}.
+     * <p>
+     * <b>Note:</b> Since `ZonedDateTime` has no authoritative timezone concept, the current timezone will be used
+     * whether this {@link DateTimeType} is authoritative or not.
+     *
+     * @return The {@link ZonedDateTime} representation.
+     * @throws DateTimeException If the result exceeds the supported range.
+     */
+    public ZonedDateTime getZonedDateTime() throws DateTimeException {
+        return getZonedDateTime(zoneId);
+    }
+
+    /**
+     * Get this date and time represented as a {@link ZonedDateTime} with the the provided timezone applied.
+     *
+     * @return The {@link ZonedDateTime} representation.
+     * @throws DateTimeException If the result exceeds the supported range.
+     */
+    public ZonedDateTime getZonedDateTime(ZoneId zoneId) throws DateTimeException {
         return instant.atZone(zoneId);
     }
 
     /**
-     * Get the {@link Instant} value of the object
+     * Get this date and time represented as a {@link OffsetDateTime}.
+     * <p>
+     * <b>Note:</b> Since `OffsetDateTime` has no authoritative timezone concept, the current offset will be used
+     * whether this {@link DateTimeType} is authoritative or not.
      *
-     * @return the {@link Instant} value of the object
+     * @return The {@link OffsetDateTime} representation.
+     * @throws DateTimeException If the result exceeds the supported range.
+     */
+    public OffsetDateTime getOffsetDateTime() throws DateTimeException {
+        return OffsetDateTime.ofInstant(instant, zoneOffset);
+    }
+
+    /**
+     * Get the date and time represented in UTC as an {@link Instant}.
+     *
+     * @return The UTC-aligned {@link Instant}.
      */
     public Instant getInstant() {
         return instant;
     }
 
-    public static DateTimeType valueOf(String value) {
+    /**
+     * @return The {@link ZoneId} of this {@link DateTimeType}.
+     */
+    public ZoneId getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     * @return The {@link ZoneOffset} of this {@link DateTimeType}.
+     */
+    public ZoneOffset getZoneOffset() {
+        return zoneOffset;
+    }
+
+    /**
+     * @return {@code true} if this {@link DateTimeType} has an authoritative timezone, {@code false} otherwise.
+     */
+    public boolean isZoneAuthoritative() {
+        return authoritativeZone;
+    }
+
+    /**
+     * Parse the given string and create a new {@link DateTimeType}.
+     *
+     * @param value the string to parse.
+     * @return a new {@link DateTimeType} representing the parsed date, time and zone information.
+     * @throws DateTimeException If no timezone could be parsed and the JVM default zone ID has an invalid format.
+     * @throws IllegalArgumentException If the specified value can't be parsed.
+     * @throws ZoneRulesException If no timezone could be parsed and the JVM default zone ID cannot be found.
+     */
+    public static DateTimeType valueOf(String value)
+            throws DateTimeException, IllegalArgumentException, ZoneRulesException {
         return new DateTimeType(value);
     }
 
-    @Override
-    public String format(@Nullable String pattern) {
-        return format(pattern, ZoneId.systemDefault());
+    /**
+     * Create a new {@link DateTimeType} representing the current moment from the system clock with the JVM default
+     * timezone as a non-authoritative timezone.
+     *
+     * @return The new {@link DateTimeType}.
+     * @throws DateTimeException If the JVM default timezone has an invalid format.
+     * @throws ZoneRulesException If the JVM default timezone can't be found or if no rules are available for that ID.
+     */
+    public static DateTimeType now() throws DateTimeException, ZoneRulesException {
+        return new DateTimeType(Instant.now());
     }
 
-    public String format(@Nullable String pattern, ZoneId zoneId) {
+    /**
+     * Create a new {@link DateTimeType} representing the current moment from the system clock and the specified
+     * authoritative timezone or offset. For details about the supported format,
+     * see {@link ZoneId#of(String)}.
+     *
+     * @param zone the string to parse as a zone ID or offset.
+     * @return The new {@link DateTimeType} instance.
+     * @throws DateTimeException If the zone has an invalid format or the result exceeds the supported date range.
+     * @throws ZoneRulesException If the zone is a region ID that cannot be found or if no rules are available for the
+     *             zone ID.
+     */
+    public static DateTimeType now(String zone) throws DateTimeException, ZoneRulesException {
+        return new DateTimeType(Instant.now(), ZoneId.of(zone));
+    }
+
+    /**
+     * Create a new {@link DateTimeType} representing the current moment from the system clock and the specified
+     * authoritative timezone or offset.
+     *
+     * @param zoneId the {@link ZoneId} or {@link ZoneOffset}.
+     * @return The new {@link DateTimeType} instance.
+     * @throws ZoneRulesException If no rules are available for the zone ID.
+     */
+    public static DateTimeType now(ZoneId zoneId) throws ZoneRulesException {
+        return new DateTimeType(Instant.now(), zoneId);
+    }
+
+    /**
+     * Format this {@link DateTimeType} using an optional {@code pattern}.
+     * <p>
+     * If {@code pattern} is {@code null} a default pattern ({@link #DATE_PATTERN}) is used.
+     * <p>
+     * <b>Note:</b> This method uses the current timezone of this {@link DateTimeType} for formatting, whether it is
+     * authoritative or not. For more control over the timezone used for formatting, use {@link #format(String, ZoneId)}
+     * or {@link #format(Locale, String, ZoneId)}.
+     *
+     * @param pattern the format pattern, or {@code null} to use the default.
+     * @return The formatted date-time string.
+     * @throws IllegalFormatException If a format string contains an illegal syntax, a format specifier that is
+     *             incompatible with the given arguments, insufficient arguments given the format string, or other
+     *             illegal conditions.
+     * @throws DateTimeException If the result exceeds the supported range or if an error occurs during formatting.
+     *
+     * @deprecated This method uses the JVM default locale for formatting the date-time. Use
+     *             {@link #format(Locale, String)} for correct presentation.
+     */
+    @Deprecated(forRemoval = false)
+    @Override
+    public String format(@Nullable String pattern) throws IllegalFormatException, DateTimeException {
+        return format(pattern, zoneId);
+    }
+
+    /**
+     * Format this {@link DateTimeType} using an optional {@code pattern} and the specified timezone.
+     * <p>
+     * If {@code pattern} is {@code null} a default pattern ({@link #DATE_PATTERN}) is used.
+     *
+     * @param pattern the format pattern, or {@code null} to use the default.
+     * @param zoneId the zone to use for formatting.
+     * @return The formatted date-time string.
+     * @throws IllegalFormatException If a format string contains an illegal syntax, a format specifier that is
+     *             incompatible with the given arguments, insufficient arguments given the format string, or other
+     *             illegal conditions.
+     * @throws DateTimeException If the result exceeds the supported range or if an error occurs during formatting.
+     *
+     * @deprecated This method uses the JVM default locale for formatting the date-time. Use
+     *             {@link #format(Locale, String, ZoneId)} for correct presentation.
+     */
+    @Deprecated(forRemoval = false)
+    public String format(@Nullable String pattern, ZoneId zoneId) throws IllegalFormatException, DateTimeException {
         ZonedDateTime zonedDateTime = instant.atZone(zoneId);
         if (pattern == null) {
             return DateTimeFormatter.ofPattern(DATE_PATTERN).format(zonedDateTime);
@@ -188,44 +417,170 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
         return String.format(pattern, zonedDateTime);
     }
 
-    public String format(Locale locale, String pattern) {
-        return String.format(locale, pattern, getZonedDateTime());
+    /**
+     * Format this {@link DateTimeType} using the provided {@code locale} and optional {@code pattern}.
+     * <p>
+     * If {@code pattern} is {@code null} a default pattern ({@link #DATE_PATTERN}) is used.
+     * <p>
+     * <b>Note:</b> This method uses the current timezone of this {@link DateTimeType} for formatting, whether it is
+     * authoritative or not. For more control over the timezone used for formatting, use
+     * {@link #format(Locale, String, ZoneId)} instead.
+     *
+     * @param locale the locale to use for formatting.
+     * @param pattern the format pattern, or {@code null} to use the default.
+     * @return The formatted date-time string.
+     * @throws IllegalFormatException If a format string contains an illegal syntax, a format specifier that is
+     *             incompatible with the given arguments, insufficient arguments given the format string, or other
+     *             illegal conditions.
+     * @throws DateTimeException If the result exceeds the supported range or if an error occurs during formatting.
+     */
+    public String format(Locale locale, @Nullable String pattern) throws IllegalFormatException, DateTimeException {
+        return format(locale, pattern, zoneId);
+    }
+
+    /**
+     * Format this {@link DateTimeType} using the provided {@code locale}, optional {@code pattern} and specified
+     * {@code zoneId}.
+     * <p>
+     * If {@code pattern} is {@code null} a default pattern ({@link #DATE_PATTERN}) is used.
+     *
+     * @param locale the locale to use for formatting.
+     * @param pattern the format pattern, or {@code null} to use the default.
+     * @param zoneId the zone to use for formatting.
+     * @return The formatted date-time string.
+     * @throws IllegalFormatException If a format string contains an illegal syntax, a format specifier that is
+     *             incompatible with the given arguments, insufficient arguments given the format string, or other
+     *             illegal conditions.
+     * @throws DateTimeException If the result exceeds the supported range or if an error occurs during formatting.
+     */
+    public String format(Locale locale, @Nullable String pattern, ZoneId zoneId)
+            throws IllegalFormatException, DateTimeException {
+        ZonedDateTime zonedDateTime = instant.atZone(zoneId);
+        if (pattern == null) {
+            return DateTimeFormatter.ofPattern(DATE_PATTERN, locale).format(zonedDateTime);
+        }
+
+        return String.format(locale, pattern, zonedDateTime);
+    }
+
+    /**
+     * Return a {@link DateTimeType} with a fixed offset zone. If this instance already has a fixed offset zone it is
+     * returned unchanged, otherwise a new instance with the current offset is returned.
+     * <p>
+     * The returned {@link DateTimeType} has an authoritative timezone.
+     *
+     * @return The {@link DateTimeType} using a fixed offset zone.
+     * @throws DateTimeException If the result exceeds the supported date range.
+     */
+    public DateTimeType toFixedOffset() throws DateTimeException {
+        return authoritativeZone && zoneId instanceof ZoneOffset ? this : toZone(zoneOffset);
+    }
+
+    /**
+     * Parse the specified timezone (zone ID, zone offset or zone name), and returns a new {@link DateTimeType} that
+     * represents the same moment in time, expressed in the parsed timezone. For details about the supported format,
+     * see {@link ZoneId#of(String)}.
+     * <p>
+     * The returned {@link DateTimeType} has an authoritative timezone.
+     *
+     * @param zone the target zone as a string.
+     * @return The {@link DateTimeType} translated to the specified zone.
+     * @throws DateTimeException If the zone has an invalid format or the result exceeds the supported date range.
+     * @throws ZoneRulesException If the zone is a region ID that cannot be found or if no rules are available for the
+     *             zone ID.
+     */
+    public DateTimeType toZone(String zone) throws DateTimeException, ZoneRulesException {
+        return toZone(ZoneId.of(zone));
+    }
+
+    /**
+     * Return a {@link DateTimeType} representing this instant with the supplied fixed {@link ZoneOffset}.
+     * <p>
+     * The returned {@link DateTimeType} has an authoritative timezone.
+     *
+     * @param offset the fixed offset to use.
+     * @return The {@link DateTimeType} adjusted to the provided offset.
+     * @throws DateTimeException If the result exceeds the supported date range.
+     */
+    public DateTimeType toOffset(ZoneOffset offset) throws DateTimeException {
+        return toZone(offset);
+    }
+
+    /**
+     * Create a new {@link DateTimeType} that represents the same moment in time, expressed in the specified timezone.
+     * <p>
+     * The returned {@link DateTimeType} has an authoritative timezone.
+     *
+     * @param zoneId the target {@link ZoneId} or {@link ZoneOffset}.
+     * @return The new {@link DateTimeType} translated to the given zone.
+     * @throws DateTimeException If the result exceeds the supported date range.
+     * @throws ZoneRulesException If no rules are available for the zone ID.
+     */
+    public DateTimeType toZone(ZoneId zoneId) throws DateTimeException, ZoneRulesException {
+        return this.authoritativeZone && this.zoneId.equals(zoneId) ? this : new DateTimeType(instant, zoneId);
     }
 
     @Override
     public String toString() {
-        return toFullString();
+        return toString(zoneId);
+    }
+
+    public String toString(ZoneId zoneId) {
+        try {
+            String formatted = instant.atZone(zoneId).format(FORMATTER_TZ_RFC);
+            if (formatted.contains(".")) {
+                String sign = "";
+                if (formatted.contains("+")) {
+                    sign = "+";
+                } else if (formatted.contains("-")) {
+                    sign = "-";
+                }
+                if (!sign.isEmpty()) {
+                    // the formatted string contains 9 fraction-of-second digits
+                    // truncate at most 2 trailing groups of 000s
+                    return formatted.replace("000" + sign, sign).replace("000" + sign, sign);
+                }
+            }
+            return formatted;
+        } catch (DateTimeException e) {
+            return "DateTimeException: " + e.getMessage();
+        }
     }
 
     @Override
     public String toFullString() {
-        return toFullString(ZoneId.systemDefault());
+        return toFullString(zoneId, false);
     }
 
     public String toFullString(ZoneId zoneId) {
-        String formatted = instant.atZone(zoneId).format(FORMATTER_TZ_RFC);
-        if (formatted.contains(".")) {
-            String sign = "";
-            if (formatted.contains("+")) {
-                sign = "+";
-            } else if (formatted.contains("-")) {
-                sign = "-";
+        return toFullString(zoneId, true);
+    }
+
+    private String toFullString(ZoneId zoneId, boolean explicitZone) {
+        try {
+            String formatted = instant.atZone(zoneId).format(DateTimeFormatter.ISO_DATE_TIME);
+            if (formatted.contains(".")) {
+                String sign = "";
+                if (formatted.contains("+")) {
+                    sign = "+";
+                } else if (formatted.contains("-")) {
+                    sign = "-";
+                }
+                if (!sign.isEmpty()) {
+                    // the formatted string contains 9 fraction-of-second digits
+                    // truncate at most 2 trailing groups of 000s
+                    return formatted.replace("000" + sign, sign).replace("000" + sign, sign);
+                }
             }
-            if (!sign.isEmpty()) {
-                // the formatted string contains 9 fraction-of-second digits
-                // truncate at most 2 trailing groups of 000s
-                return formatted.replace("000" + sign, sign).replace("000" + sign, sign);
-            }
+            return explicitZone || authoritativeZone ? formatted : '?' + formatted;
+        } catch (DateTimeException e) {
+            return "DateTimeException: " + e.getMessage();
         }
-        return formatted;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + instant.hashCode();
-        return result;
+        return Objects.hash(authoritativeZone, instant, zoneId, zoneOffset);
     }
 
     @Override
@@ -233,42 +588,176 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof DateTimeType)) {
             return false;
         }
         DateTimeType other = (DateTimeType) obj;
-        return instant.compareTo(other.instant) == 0;
+        return authoritativeZone == other.authoritativeZone && Objects.equals(instant, other.instant)
+                && Objects.equals(zoneId, other.zoneId) && Objects.equals(zoneOffset, other.zoneOffset);
     }
 
     @Override
     public int compareTo(DateTimeType o) {
-        return instant.compareTo(o.getInstant());
+        return instant.compareTo(o.instant);
     }
 
-    private Instant parse(String value) throws DateTimeParseException {
-        ZonedDateTime date;
+    /**
+     * A record containing a {@link ZonedDateTime} and whether the timezone is considered authoritative or not. The
+     * timezone is considered authoritative if it was parsed from the value itself, and non-authoritative if it was
+     * otherwise inferred, guessed or a default was applied.
+     */
+    public static record ParsedDateTimeResult(ZonedDateTime zdt, boolean authoritativeZone) {
+    }
+
+    /**
+     * Parse the specified string into a date, time and optionally a timezone (a zone with rules or a fixed offset from
+     * UTC).
+     * <p>
+     * Several different formats are attempted, in order, until one succeeds or parsing fails. For any of the supported
+     * formats, a {@code ?} prefix means that the timezone will be considered non-authoritative, even if it is
+     * successfully parsed from the specified string.
+     * <p>
+     * Formats are processed in this order:
+     * <ul>
+     * <li>{@code 2022-12-22 12:22*} is changed to {@code 2022-12-22T12:22*} to conform with the ISO syntax. All the
+     * following variants are then attempted on the resulting string.</li>
+     * <li>{@code 2022-12-22T12:22+00:00} / {@code 2022-12-22T12:22:11+0000} / {@code 2022-12-22T12:22:11.000+00:00}<br>
+     * The zone offset is always 4 digits, with or without {@code :}</li>
+     * <li>{@code 2022-12-22T12:22Z} / {@code 2022-12-22T12:22:11+0000} / {@code 2022-12-22T12:22:11.000+00:00}<br>
+     * The zone offset is the letter Z for UTC, or 2, 4 or 6 digits, with or without {@code :}</li>
+     * <li>{@code 2022-12-22T12:22} / {@code 2022-12-22T12:22:11+01:00} /
+     * {@code 2022-12-22T12:22:11.000+01:00[Europe/Paris]}<br>
+     * The time zone is specified both as an offset and optionally as a zone ID</li>
+     * <li>{@code 2022-12-22T12:22PST} / {@code 2022-12-22T12:22:11CET} /
+     * {@code 2022-12-22T12:22:11.000Central European Time}<br>
+     * The time zone is the time zone name in either abbreviated or full form</li>
+     * <li>{@code 2022-12-22T12:22} / {@code 2022-12-22T12:22:11} / {@code 2022-12-22T12:22:11.000}<br>
+     * No time zone information, results in a {@link LocalDateTime}</li>
+     * </ul>
+     * If none of the above succeeds, {@code 1970-01-01T} is prepended in case the specified string is a time only. All
+     * the above formats are then attempted again.
+     * <p>
+     * If this too fails, an attempt is made to parse the string as a number. If that succeeds, it will be interpreted
+     * as the number of seconds or milliseconds since {@code 1970-01-01T00:00:00Z}. If the number of digits are below
+     * 12, it is assumed to be seconds. If it's 12 or more, it's assumed to be milliseconds.
+     * <p>
+     * If the value isn't a number either, a final attempt is made to append {@code T00:00:00} to the string, in case
+     * it's a date only. All the above formats are then attempted again.
+     * <p>
+     * If that fails as well, an {@link IllegalArgumentException} is thrown and the parsing is considered a failure.
+     *
+     * @param value the string to parse into a date-time and timezone.
+     * @return The resulting {@link ParsedDateTimeResult}.
+     * @throws DateTimeException If no timezone could be parsed and the JVM default zone ID has an invalid format.
+     * @throws IllegalArgumentException If the specified value can't be parsed.
+     * @throws ZoneRulesException If no timezone could be parsed and the JVM default zone ID cannot be found.
+     */
+    public static ParsedDateTimeResult parseDateTime(String value)
+            throws DateTimeException, IllegalArgumentException, ZoneRulesException {
+        String dateTime;
+        boolean explicitNotAuthoritative;
+        if (value.charAt(0) == '?') {
+            dateTime = value.substring(1);
+            explicitNotAuthoritative = true;
+        } else {
+            dateTime = value;
+            explicitNotAuthoritative = false;
+        }
         try {
-            date = ZonedDateTime.parse(value, PARSER_TZ_RFC);
+            // direct parsing (date and time)
+            Temporal temporal;
+            try {
+                if (DATE_PARSE_PATTERN_WITH_SPACE.matcher(dateTime).matches()) {
+                    temporal = parse(dateTime.substring(0, 10) + "T" + dateTime.substring(11));
+                } else {
+                    temporal = parse(dateTime);
+                }
+            } catch (DateTimeParseException fullDtException) {
+                // time only
+                try {
+                    temporal = parse("1970-01-01T" + dateTime);
+                } catch (DateTimeParseException timeOnlyException) {
+                    try {
+                        long epoch = Double.valueOf(dateTime).longValue();
+                        int length = (int) (Math.log10(epoch >= 0 ? epoch : epoch * -1) + 1);
+                        // Assume that below 12 digits we're in seconds
+                        if (length < 12) {
+                            temporal = Instant.ofEpochSecond(epoch);
+                        } else {
+                            temporal = Instant.ofEpochMilli(epoch);
+                        }
+                    } catch (NumberFormatException notANumberException) {
+                        // date only
+                        if (dateTime.length() == 10) {
+                            temporal = parse(dateTime + "T00:00:00");
+                        } else {
+                            temporal = parse(dateTime.substring(0, 10) + "T00:00:00" + dateTime.substring(10));
+                        }
+                    }
+                }
+            }
+
+            boolean authoritativeZone;
+            if (temporal instanceof LocalDateTime localDateTime) {
+                temporal = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+                authoritativeZone = false;
+            } else if (temporal instanceof Instant instant) {
+                temporal = instant.atZone(ZoneId.systemDefault());
+                authoritativeZone = false;
+            } else {
+                authoritativeZone = true;
+            }
+            return new ParsedDateTimeResult((ZonedDateTime) temporal, !explicitNotAuthoritative && authoritativeZone);
+        } catch (DateTimeParseException invalidFormatException) {
+            throw new IllegalArgumentException(dateTime + " is not in a valid format.", invalidFormatException);
+        }
+    }
+
+    /**
+     * Attempt to parse the specified string using 4 different parsing patterns in the following order:
+     * <ul>
+     * <li>{@code 2022-12-22T12:22+00:00} / {@code 2022-12-22T12:22:11+0000} / {@code 2022-12-22T12:22:11.000+00:00}<br>
+     * The zone offset is always 4 digits, with or without {@code :}</li>
+     * <li>{@code 2022-12-22T12:22Z} / {@code 2022-12-22T12:22:11+0000} / {@code 2022-12-22T12:22:11.000+00:00}<br>
+     * The zone offset is the letter Z for UTC, or 2, 4 or 6 digits, with or without {@code :}</li>
+     * <li>{@code 2022-12-22T12:22} / {@code 2022-12-22T12:22:11+01:00} /
+     * {@code 2022-12-22T12:22:11.000+01:00[Europe/Paris]}<br>
+     * The time zone is specified both as an offset and optionally as a zone ID</li>
+     * <li>{@code 2022-12-22T12:22PST} / {@code 2022-12-22T12:22:11CET} /
+     * {@code 2022-12-22T12:22:11.000Central European Time}<br>
+     * The time zone is the time zone name in either abbreviated or full form</li>
+     * <li>{@code 2022-12-22T12:22} / {@code 2022-12-22T12:22:11} / {@code 2022-12-22T12:22:11.000}<br>
+     * No time zone information, results in a {@link LocalDateTime}</li>
+     * </ul>
+     *
+     * The result is always a {@link ZonedDateTime} or a {@link LocalDateTime}.
+     *
+     * @param value the string to parse.
+     * @return the resulting {@link ZonedDateTime} or {@link LocalDateTime}.
+     * @throws DateTimeParseException If the parsing fails.
+     */
+    private static Temporal parse(String value) throws DateTimeParseException {
+        try {
+            return ZonedDateTime.parse(value, PARSER_TZ_RFC);
         } catch (DateTimeParseException tzMsRfcException) {
             try {
-                date = ZonedDateTime.parse(value, PARSER_TZ_ISO);
+                return ZonedDateTime.parse(value, PARSER_TZ_ISO);
             } catch (DateTimeParseException tzMsIsoException) {
                 try {
-                    date = ZonedDateTime.parse(value, PARSER_TZ);
+                    return (Temporal) DateTimeFormatter.ISO_DATE_TIME.parseBest(value, ZonedDateTime::from,
+                            LocalDateTime::from);
                 } catch (DateTimeParseException tzException) {
                     try {
-                        date = ZonedDateTime.parse(value);
-                    } catch (DateTimeParseException e) {
-                        LocalDateTime localDateTime = LocalDateTime.parse(value, PARSER);
-                        date = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+                        return ZonedDateTime.parse(value, PARSER_TZ);
+                    } catch (DateTimeParseException isoException) {
+                        try {
+                            return ZonedDateTime.parse(value);
+                        } catch (DateTimeParseException e) {
+                            return LocalDateTime.parse(value, PARSER);
+                        }
                     }
                 }
             }
         }
-
-        return date.toInstant();
     }
 }

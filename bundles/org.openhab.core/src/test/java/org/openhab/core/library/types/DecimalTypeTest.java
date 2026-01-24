@@ -18,8 +18,10 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormatSymbols;
+import java.time.ZoneOffset;
 import java.util.IllegalFormatConversionException;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -227,13 +229,19 @@ public class DecimalTypeTest {
     @Test
     public void testConversionToDateTimeType() {
         assertEquals(new DateTimeType("2014-03-30T10:58:47+0000"),
-                new DecimalType("1396177127").as(DateTimeType.class));
-        assertEquals(new DateTimeType("1969-12-31T23:59:59+0000"), new DecimalType("-1").as(DateTimeType.class));
-        assertEquals(new DateTimeType("1970-01-01T00:00:00+0000"), DecimalType.ZERO.as(DateTimeType.class));
-        assertEquals(new DateTimeType("1970-01-01T00:00:01+0000"), new DecimalType("1").as(DateTimeType.class));
-        assertEquals(new DateTimeType("1970-01-01T00:00:01+0000"), new DecimalType("1.0").as(DateTimeType.class));
-        assertEquals(new DateTimeType("1970-01-01T00:00:01+0000"), new DecimalType("1.5").as(DateTimeType.class));
-        assertEquals(new DateTimeType("1969-12-31T23:59:59+0000"), new DecimalType("-1.0").as(DateTimeType.class));
+                Objects.requireNonNull(new DecimalType("1396177127").as(DateTimeType.class)).toZone(ZoneOffset.UTC));
+        assertEquals(new DateTimeType("1969-12-31T23:59:59+0000"),
+                Objects.requireNonNull(new DecimalType("-1").as(DateTimeType.class)).toZone(ZoneOffset.UTC));
+        assertEquals(new DateTimeType("1970-01-01T00:00:00+0000"),
+                Objects.requireNonNull(DecimalType.ZERO.as(DateTimeType.class)).toZone(ZoneOffset.UTC));
+        assertEquals(new DateTimeType("1970-01-01T00:00:01+0000"),
+                Objects.requireNonNull(new DecimalType("1").as(DateTimeType.class)).toZone(ZoneOffset.UTC));
+        assertEquals(new DateTimeType("1970-01-01T00:00:01+0000"),
+                Objects.requireNonNull(new DecimalType("1.0").as(DateTimeType.class)).toZone(ZoneOffset.UTC));
+        assertEquals(new DateTimeType("1970-01-01T00:00:01+0000"),
+                Objects.requireNonNull(new DecimalType("1.5").as(DateTimeType.class)).toZone(ZoneOffset.UTC));
+        assertEquals(new DateTimeType("1969-12-31T23:59:59+0000"),
+                Objects.requireNonNull(new DecimalType("-1.0").as(DateTimeType.class)).toZone(ZoneOffset.UTC));
     }
 
     @Test
