@@ -428,7 +428,7 @@ public class ActionInputHelperTest {
     @Test
     public void testMapSerializedInputToActionInputWhenZonedDateTime() {
         String valAsString = "2007-12-03T09:15:30Z";
-        ZonedDateTime val = Instant.parse(valAsString).atZone(timeZoneProvider.getTimeZone());
+        ZonedDateTime val = ZonedDateTime.parse(valAsString, DateTimeFormatter.ISO_DATE_TIME);
         Input input = buildInput("java.time.ZonedDateTime");
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
