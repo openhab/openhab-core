@@ -1,10 +1,8 @@
 version: 1
 things:
-  ntp:ntp:paris:
+  ntp:ntp:local:
     channels:
-      dateTime:
-        type: dateTime-channel
       string:
         type: string-channel
-      string2:
+      date-only-string:
         type: string-channel
