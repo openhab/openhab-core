@@ -256,6 +256,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         ScanListener mockScanListener1 = mock(ScanListener.class);
 
         discoveryServiceRegistry.addDiscoveryListener(discoveryListenerMock);
+        reset(discoveryListenerMock); // Reset mock to ignore cached result replays
         discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1), null,
                 mockScanListener1);
 
@@ -296,6 +297,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         ScanListener mockScanListener1 = mock(ScanListener.class);
 
         discoveryServiceRegistry.addDiscoveryListener(discoveryListenerMock);
+        reset(discoveryListenerMock); // Reset mock to ignore cached result replays
         discoveryServiceRegistry.startScan(ANY_BINDING_ID_3_ANY_THING_TYPE_3_UID, null, mockScanListener1);
 
         waitForAssert(() -> verify(mockScanListener1, times(1)).onFinished());
