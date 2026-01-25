@@ -15,8 +15,12 @@ package org.openhab.core.thing.dto;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * This is a data transfer object that is used with to serialize thing types.
@@ -27,6 +31,8 @@ import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
  * @author Miki Jankov - Introducing StrippedThingTypeDTO
  * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
+@Schema(name = "ThingType")
+@NonNullByDefault
 public class ThingTypeDTO extends StrippedThingTypeDTO {
 
     public List<ChannelDefinitionDTO> channels;
@@ -36,14 +42,17 @@ public class ThingTypeDTO extends StrippedThingTypeDTO {
     public Map<String, String> properties;
     public List<String> extensibleChannelTypeIds;
 
+    // do not remove - needed by GSON
     public ThingTypeDTO() {
+        this("", "", null, null, true, List.of(), List.of(), List.of(), List.of(), Map.of(), false, List.of(),
+                List.of(), null);
     }
 
-    public ThingTypeDTO(String uid, String label, String description, String category, boolean listed,
-            List<ConfigDescriptionParameterDTO> configParameters, List<ChannelDefinitionDTO> channels,
+    public ThingTypeDTO(String uid, String label, @Nullable String description, @Nullable String category,
+            boolean listed, List<ConfigDescriptionParameterDTO> configParameters, List<ChannelDefinitionDTO> channels,
             List<ChannelGroupDefinitionDTO> channelGroups, List<String> supportedBridgeTypeUIDs,
             Map<String, String> properties, boolean bridge, List<ConfigDescriptionParameterGroupDTO> parameterGroups,
-            List<String> extensibleChannelTypeIds, String semanticEquipmentTag) {
+            List<String> extensibleChannelTypeIds, @Nullable String semanticEquipmentTag) {
         this.UID = uid;
         this.label = label;
         this.description = description;

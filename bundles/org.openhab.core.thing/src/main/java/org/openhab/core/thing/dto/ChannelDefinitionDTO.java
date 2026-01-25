@@ -15,7 +15,11 @@ package org.openhab.core.thing.dto;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.StateDescription;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * This is a data transfer object that is used to serialize channel definitions.
@@ -23,23 +27,34 @@ import org.openhab.core.types.StateDescription;
  * @author Dennis Nobel - Initial contribution
  * @author Chris Jackson - Added properties
  */
+@Schema(name = "ChannelDefinition")
+@NonNullByDefault
 public class ChannelDefinitionDTO {
 
-    public String description;
+    public @Nullable String description;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String label;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Set<String> tags;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, String> properties;
-    public String category;
-    public StateDescription stateDescription;
+    public @Nullable String category;
+    public @Nullable StateDescription stateDescription;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public boolean advanced;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String typeUID;
 
+    // do not remove - needed by GSON
     public ChannelDefinitionDTO() {
+        this("", "", "", null, Set.of(), null, null, false, Map.of());
     }
 
-    public ChannelDefinitionDTO(String id, String typeUID, String label, String description, Set<String> tags,
-            String category, StateDescription stateDescription, boolean advanced, Map<String, String> properties) {
+    public ChannelDefinitionDTO(String id, String typeUID, String label, @Nullable String description, Set<String> tags,
+            @Nullable String category, @Nullable StateDescription stateDescription, boolean advanced,
+            Map<String, String> properties) {
         this.description = description;
         this.label = label;
         this.id = id;

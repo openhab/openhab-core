@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ '21' ]
+        java: [ '21', '25' ]
         os: [ 'ubuntu-24.04' ]
     name: Build (Java ${{ matrix.java }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -176,7 +176,7 @@ jobs:
           mode: inline
 
       - name: Remove Label
-        if: ${{ always() && github.event.label.name == 'rebuild' }}
+        if: ${{ matrix.java == '21' && always() && github.event.label.name == 'rebuild' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.number }}

@@ -14,17 +14,25 @@ package org.openhab.core.io.rest.core.fileformat;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object to serialize a channel link for an item contained in a file format.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "FileFormatChannelLink")
+@NonNullByDefault
 public class FileFormatChannelLinkDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String channelUID;
-    public Map<String, Object> configuration;
+    public @Nullable Map<String, Object> configuration;
 
-    public FileFormatChannelLinkDTO(String channelUID, Map<String, Object> configuration) {
+    public FileFormatChannelLinkDTO(String channelUID, @Nullable Map<String, Object> configuration) {
         this.channelUID = channelUID;
         this.configuration = configuration;
     }

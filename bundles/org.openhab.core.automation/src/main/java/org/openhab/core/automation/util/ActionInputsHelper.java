@@ -299,6 +299,7 @@ public class ActionInputsHelper {
                             /*
                              * Accepted format is one of:
                              * - 2007-12-03T10:15:30
+                             * - 2007-12-03T09:15:30Z
                              * - 2007-12-03T10:15:30+01:00
                              * - 2007-12-03T10:15:30+01:00[Europe/Paris]
                              */
@@ -309,9 +310,21 @@ public class ActionInputsHelper {
                             }
                             yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone());
                         }
-                        case "java.time.Instant" ->
-                            // Accepted format is: 2007-12-03T10:15:30
-                            LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone()).toInstant();
+                        case "java.time.Instant" -> {
+                            /*
+                             * Accepted format is one of:
+                             * - 2007-12-03T10:15:30
+                             * - 2007-12-03T09:15:30Z
+                             * - 2007-12-03T10:15:30+01:00
+                             * - 2007-12-03T10:15:30+01:00[Europe/Paris]
+                             */
+                            TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString,
+                                    ZonedDateTime::from, LocalDateTime::from);
+                            if (dt instanceof ZonedDateTime zdt) {
+                                yield zdt.toInstant();
+                            }
+                            yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone()).toInstant();
+                        }
                         case "java.time.Duration" ->
                             // Accepted format is: P2DT17H25M30.5S
                             Duration.parse(valueString);

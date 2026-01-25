@@ -20,23 +20,35 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize rules.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@Schema(name = "Rule")
 public class RuleDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<@NonNull TriggerDTO> triggers;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<@NonNull ConditionDTO> conditions;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<@NonNull ActionDTO> actions;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<@NonNull String, @NonNull Object> configuration;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<@NonNull ConfigDescriptionParameterDTO> configDescriptions;
     public String templateUID;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String templateState;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String uid;
     public String name;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Set<@NonNull String> tags;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Visibility visibility;
     public String description;
 }

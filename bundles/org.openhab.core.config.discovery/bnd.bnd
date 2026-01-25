@@ -1,4 +1,0 @@
-Bundle-SymbolicName: ${project.artifactId}
-Import-Package: \
-  org.jupnp.*;resolution:=optional,\
-  *

@@ -15,6 +15,8 @@ package org.openhab.core.thing.dto;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize things.
  *
@@ -25,8 +27,10 @@ import java.util.Map;
  * @author Wouter Born - Let (Enriched)ThingDTO extend AbstractThingDTO so both can define their own "channels" type
  * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
+@Schema(name = "Thing")
 public class ThingDTO extends AbstractThingDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public List<ChannelDTO> channels;
 
     public ThingDTO() {

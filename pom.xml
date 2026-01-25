@@ -67,8 +67,11 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <oh.java.version>21</oh.java.version>
     <maven.compiler.release>${oh.java.version}</maven.compiler.release>
+    <!-- source/target is required by xtend, otherwise Java 11 is used for some files -->
+    <maven.compiler.source>${oh.java.version}</maven.compiler.source>
+    <maven.compiler.target>${oh.java.version}</maven.compiler.target>
 
-    <bnd.version>7.1.0</bnd.version>
+    <bnd.version>7.2.1</bnd.version>
     <commons.net.version>3.12.0</commons.net.version>
     <eea.version>2.4.0</eea.version>
     <karaf.compile.version>4.4.9</karaf.compile.version>
@@ -80,6 +83,7 @@
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>
     <spotless.eclipse.wtp.version>4.21.0</spotless.eclipse.wtp.version>
+    <swagger.version>2.2.35</swagger.version>
 
     <!-- TEST -->
     <!-- cxf can be updated independently, karaf only uses it in tests -->
@@ -135,24 +139,24 @@
           <configuration>
             <bnd><![CDATA[Bundle-SymbolicName: ${project.artifactId}
 Automatic-Module-Name: ${def;bsn}
-Import-Package: \\
-  io.swagger.v3.oas.annotations.*;resolution:=optional,\\
-  javax.annotation.security.*;resolution:=optional,\\
-  org.eclipse.jdt.annotation.*;resolution:=optional,\\
-  org.openhab.core.automation.annotation.*;resolution:=optional,\\
-  com.google.common.*;version="14.0",\\
+Import-Package: \
+  io.swagger.v3.oas.annotations.*;resolution:=optional,\
+  javax.annotation.security.*;resolution:=optional,\
+  org.eclipse.jdt.annotation.*;resolution:=optional,\
+  org.openhab.core.automation.annotation.*;resolution:=optional,\
+  com.google.common.*;version="14.0",\
   *
--exportcontents: \\
-  !*.internal.*,\\
-  !*.impl.*, \\
-  org.openhab.*,\\
+-exportcontents: \
+  !*.internal.*,\
+  !*.impl.*, \
+  org.openhab.*,\
   org.openhab.core.*
 -noimportjava: true
 -sources: false
 -contract: *
 -includeresource: -${.}/NOTICE, -${.}/*.xsd
--fixupmessages: \\
-  'Unused Import-Package instructions';is:=ignore,\\
+-fixupmessages: \
+  'Unused Import-Package instructions';is:=ignore,\
   'Unused Export-Package instructions';is:=ignore]]></bnd>
             <!-- Bundle-SymbolicName: ${project.groupId}.${project.artifactId} -->
             <skipIfEmpty>true</skipIfEmpty>
@@ -367,6 +371,14 @@ Import-Package: \\
                 <head>Implementation note:</head>
               </tag>
             </tags>
+            <additionalDependencies>
+              <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+                <scope>compile</scope>
+              </dependency>
+            </additionalDependencies>
           </configuration>
         </plugin>
 
@@ -645,7 +657,16 @@ Import-Package: \\
                   <version>3.9.6</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
+                  <version>[21.0,22.0),[25.0,26.0)</version>
+                </requireJavaVersion>
+                <requireJavaVersion>
                   <version>[21.0,22.0)</version>
+                  <message>++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++
+JDK 25 compiler is in use, generating Java 21 bytecode.
+This is not officially supported.
+Consider using JDK 21 for building and testing.
+++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++ WARNING ++</message>
+                  <level>WARN</level>
                 </requireJavaVersion>
               </rules>
             </configuration>

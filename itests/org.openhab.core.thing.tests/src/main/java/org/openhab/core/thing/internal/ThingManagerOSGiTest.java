@@ -116,6 +116,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     private static final URI THING_CONFIG_URI = URI.create("test:test");
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "id");
+    private static final String CHANNEL_PREFIX = "org.openhab.core.thing$";
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel");
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("binding:channelType");
 
@@ -924,7 +925,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         ItemStateEvent itemUpdateEvent = (ItemStateEvent) receivedEvents.getFirst();
         assertThat(itemUpdateEvent.getTopic(), is("openhab/items/name/state"));
         assertThat(itemUpdateEvent.getItemName(), is(itemName));
-        assertThat(itemUpdateEvent.getSource(), is(CHANNEL_UID.toString()));
+        assertThat(itemUpdateEvent.getSource(), is(CHANNEL_PREFIX + CHANNEL_UID.toString()));
         assertThat(itemUpdateEvent.getItemState(), is(instanceOf(StringType.class)));
         assertThat(itemUpdateEvent.getItemState(), is("Value"));
 
@@ -940,7 +941,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         itemUpdateEvent = (ItemStateEvent) receivedEvents.getFirst();
         assertThat(itemUpdateEvent.getTopic(), is("openhab/items/name/state"));
         assertThat(itemUpdateEvent.getItemName(), is(itemName));
-        assertThat(itemUpdateEvent.getSource(), is(CHANNEL_UID.toString()));
+        assertThat(itemUpdateEvent.getSource(), is(CHANNEL_PREFIX + CHANNEL_UID.toString()));
         assertThat(itemUpdateEvent.getItemState(), is(instanceOf(StringType.class)));
         assertThat(itemUpdateEvent.getItemState(), is("Value"));
         waitForAssert(() -> assertThat(state.thingUpdatedWasCalled, is(true)));
@@ -2066,7 +2067,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         ThingTypeRegistry thingTypeRegistry = mock(ThingTypeRegistry.class);
         when(thingTypeRegistry.getThingType(any(ThingTypeUID.class))).thenReturn(thingType);
-        registerService(thingTypeRegistry);
+        registerService(thingTypeRegistry, ThingTypeRegistry.class.getName());
     }
 
     private void registerConfigDescriptionProvider(boolean withRequiredParameter) {

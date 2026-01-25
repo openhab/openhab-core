@@ -18,8 +18,8 @@
   <description>A tool for upgrading openHAB</description>
 
   <properties>
-    <jackson.annotations.version>2.20</jackson.annotations.version>
-    <jackson.version>2.20.1</jackson.version>
+    <jackson.annotations.version>2.21</jackson.annotations.version>
+    <jackson.version>2.21.0</jackson.version>
   </properties>
 
   <dependencies>

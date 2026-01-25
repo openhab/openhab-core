@@ -14,7 +14,10 @@ package org.openhab.core.io.rest.core.link;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * This is an enriched data transfer object that is used to serialize items channel links with dynamic data like the
@@ -22,6 +25,8 @@ import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@Schema(name = "EnrichedItemChannelLink")
+@NonNullByDefault
 public class EnrichedItemChannelLinkDTO extends ItemChannelLinkDTO {
 
     public Boolean editable;
