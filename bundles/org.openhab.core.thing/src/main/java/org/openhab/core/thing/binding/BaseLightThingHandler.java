@@ -29,7 +29,7 @@ public abstract class BaseLightThingHandler extends BaseThingHandler {
     /**
      * Light state machine model to manage light capabilities, configuration, and runtime state
      */
-    private final LightModel model = new LightModel();
+    protected final LightModel model = new LightModel();
 
     public BaseLightThingHandler(Thing thing) {
         super(thing);

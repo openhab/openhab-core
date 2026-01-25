@@ -176,9 +176,11 @@ import org.openhab.core.types.UnDefType;
 @NonNullByDefault
 public class LightModel {
 
-    /*********************************************************************************
+    /*
+     * ================================================================================
      * SECTION: Common Enumerators for light capabilities.
-     *********************************************************************************/
+     * ================================================================================
+     */
 
     /**
      * Enum for the capabilities of different types of lights
@@ -188,11 +190,16 @@ public class LightModel {
      * defines the different combinations of capabilities that a light may support.
      */
     public static enum LightCapabilities {
-        ON_OFF, // on-off only
-        BRIGHTNESS, // on-off with brightness
-        BRIGHTNESS_WITH_COLOR_TEMPERATURE, // on-off with brightness and color temperature
-        COLOR, // on-off with brightness and color
-        COLOR_WITH_COLOR_TEMPERATURE; // on-off with brightness, color and color temperature
+        /** on-off only */
+        ON_OFF,
+        /** on-off with brightness */
+        BRIGHTNESS,
+        /** on-off with brightness and color temperature */
+        BRIGHTNESS_WITH_COLOR_TEMPERATURE,
+        /** on-off with brightness and color */
+        COLOR,
+        /** on-off with brightness, color and color temperature */
+        COLOR_WITH_COLOR_TEMPERATURE;
 
         public boolean supportsBrightness() {
             return this != ON_OFF;
@@ -217,10 +224,14 @@ public class LightModel {
      * hue, saturation and brightness all together (all the HSB parts).
      */
     public static enum RgbDataType {
-        DEFAULT, // supports plain RGB with brightness (i.e. full HSBType)
-        RGB_NO_BRIGHTNESS, // supports plain RGB but ignores brightness (i.e. only HS parts of HSBType)
-        RGB_W, // supports 4-element RGB with white channel
-        RGB_C_W // supports 5-element RGB with cold and warm white channels
+        /** supports plain RGB with brightness (i.e. full HSBType) */
+        DEFAULT,
+        /** supports plain RGB but ignores brightness (i.e. only HS parts of HSBType) */
+        RGB_NO_BRIGHTNESS,
+        /** supports 4-element RGB with white channel */
+        RGB_W,
+        /** supports 5-element RGB with cold and warm white channels */
+        RGB_C_W
     }
 
     /**
@@ -233,14 +244,19 @@ public class LightModel {
      * the same. If the light does not support color then the mode is forced to WHITE_ONLY.
      */
     public static enum LedOperatingMode {
-        RGB_ONLY, // operating with RGB LEDs only
-        COMBINED, // operating with RGB and white LEDs together
-        WHITE_ONLY // operating with white LED(s) only
+        /** operating with RGB LEDs only */
+        RGB_ONLY,
+        /** operating with RGB and white LEDs together */
+        COMBINED,
+        /** operating with white LED(s) only */
+        WHITE_ONLY
     }
 
-    /*********************************************************************************
+    /*
+     * ================================================================================
      * SECTION: Default Parameters. May be modified during initialization.
-     *********************************************************************************/
+     * ================================================================================
+     */
 
     /**
      * Minimum brightness percent to consider as light "ON"
@@ -262,9 +278,11 @@ public class LightModel {
      */
     private double stepSize = 10.0; // step size for IncreaseDecreaseType commands
 
-    /*********************************************************************************
+    /*
+     * ================================================================================
      * SECTION: Capabilities. May be modified during initialization.
-     *********************************************************************************/
+     * ================================================================================
+     */
 
     /**
      * The capabilities supported by the light
@@ -286,9 +304,11 @@ public class LightModel {
      */
     private WhiteLED warmWhiteLed = new WhiteLED(mirekControlWarmest);
 
-    /*********************************************************************************
+    /*
+     * ================================================================================
      * SECTION: Light state variables. Used at run time only.
-     *********************************************************************************/
+     * ================================================================================
+     */
 
     /**
      * Cached Brightness state, never null
@@ -315,9 +335,11 @@ public class LightModel {
      */
     private LedOperatingMode ledOperatingMode = LedOperatingMode.WHITE_ONLY;
 
-    /*********************************************************************************
+    /*
+     * ================================================================================
      * SECTION: Constructors
-     *********************************************************************************/
+     * ================================================================================
+     */
 
     /**
      * Create a {@link LightModel} with default capabilities and parameters as follows:
@@ -387,35 +409,37 @@ public class LightModel {
         }
     }
 
-    /*********************************************************************************
+    /*
+     * ================================================================================
      * SECTION: Configuration getters and setters. May be used during initialization.
-     *********************************************************************************/
+     * ================================================================================
+     */
 
     /**
      * Configuration: get the step size for IncreaseDecreaseType commands.
      */
-    public double configGetIncreaseDecreaseStep() {
+    public synchronized double configGetIncreaseDecreaseStep() {
         return stepSize;
     }
 
     /**
      * Configuration: get the light capabilities.
      */
-    public LightCapabilities configGetLightCapabilities() {
+    public synchronized LightCapabilities configGetLightCapabilities() {
         return lightCapabilities;
     }
 
     /**
      * Configuration: get the minimum brightness percent to consider as light "ON".
      */
-    public double configGetMinimumOnBrightness() {
+    public synchronized double configGetMinimumOnBrightness() {
         return minimumOnBrightness;
     }
 
     /**
      * Configuration: get the coolest color temperature in Mirek/Mired.
      */
-    public double configGetMirekControlCoolest() {
+    public synchronized double configGetMirekControlCoolest() {
         return mirekControlCoolest;
     }
 
@@ -424,14 +448,14 @@ public class LightModel {
      *
      * @return the color temperature of the cool white LED.
      */
-    public double configGetMirekCoolWhiteLed() {
+    public synchronized double configGetMirekCoolWhiteLed() {
         return coolWhiteLed.getMirek();
     }
 
     /**
      * Configuration: get the warmest color temperature in Mirek/Mired.
      */
-    public double configGetMirekControlWarmest() {
+    public synchronized double configGetMirekControlWarmest() {
         return mirekControlWarmest;
     }
 
@@ -440,14 +464,14 @@ public class LightModel {
      *
      * @return the color temperature of the warm white LED.
      */
-    public double configGetMirekWarmWhiteLed() {
+    public synchronized double configGetMirekWarmWhiteLed() {
         return warmWhiteLed.getMirek();
     }
 
     /**
      * Configuration: get the supported RGB data type.
      */
-    public RgbDataType configGetRgbDataType() {
+    public synchronized RgbDataType configGetRgbDataType() {
         return rgbDataType;
     }
 
@@ -457,7 +481,7 @@ public class LightModel {
      * @param stepSize the step size in percent.
      * @throws IllegalArgumentException if the stepSize parameter is out of range.
      */
-    public void configSetIncreaseDecreaseStep(double stepSize) throws IllegalArgumentException {
+    public synchronized void configSetIncreaseDecreaseStep(double stepSize) throws IllegalArgumentException {
         if (stepSize < 1.0 || stepSize > 50.0) {
             throw new IllegalArgumentException("Step size '%.1f' out of range [1.0..50.0]".formatted(stepSize));
         }
@@ -467,7 +491,7 @@ public class LightModel {
     /**
      * Configuration: set the light capabilities.
      */
-    public void configSetLightCapabilities(LightCapabilities lightCapabilities) {
+    public synchronized void configSetLightCapabilities(LightCapabilities lightCapabilities) {
         this.lightCapabilities = lightCapabilities;
         switch (lightCapabilities) {
             case COLOR:
@@ -487,7 +511,7 @@ public class LightModel {
      * @param minimumOnBrightness the minimum brightness percent.
      * @throws IllegalArgumentException if the minimumBrightness parameter is out of range.
      */
-    public void configSetMinimumOnBrightness(double minimumOnBrightness) throws IllegalArgumentException {
+    public synchronized void configSetMinimumOnBrightness(double minimumOnBrightness) throws IllegalArgumentException {
         if (minimumOnBrightness < 0.1 || minimumOnBrightness > 10.0) {
             throw new IllegalArgumentException(
                     "Minimum brightness '%.1f' out of range [0.1..10.0]".formatted(minimumOnBrightness));
@@ -502,7 +526,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the mirekControlCoolest parameter is out of range or not less than
      *             mirekControlWarmest.
      */
-    public void configSetMirekControlCoolest(double mirekControlCoolest) throws IllegalArgumentException {
+    public synchronized void configSetMirekControlCoolest(double mirekControlCoolest) throws IllegalArgumentException {
         if (mirekControlCoolest < 100.0 || mirekControlCoolest > 1000.0) {
             throw new IllegalArgumentException(
                     "Coolest Mirek/Mired '%.1f' out of range [100.0..1000.0]".formatted(mirekControlCoolest));
@@ -521,7 +545,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the mirekControlWarmest parameter is out of range or not greater than
      *             mirekControlCoolest.
      */
-    public void configSetMirekControlWarmest(double mirekControlWarmest) throws IllegalArgumentException {
+    public synchronized void configSetMirekControlWarmest(double mirekControlWarmest) throws IllegalArgumentException {
         if (mirekControlWarmest < 100.0 || mirekControlWarmest > 1000.0) {
             throw new IllegalArgumentException(
                     "Warmest Mirek/Mired '%.1f' out of range [100.0..1000.0]".formatted(mirekControlWarmest));
@@ -543,7 +567,7 @@ public class LightModel {
      * @param coolLedMirek the color temperature in Mirek/Mired of the cool white LED.
      * @throws IllegalArgumentException if the coolLedMirek parameter is out of range.
      */
-    public void configSetMirekCoolWhiteLED(double coolLedMirek) throws IllegalArgumentException {
+    public synchronized void configSetMirekCoolWhiteLED(double coolLedMirek) throws IllegalArgumentException {
         if (coolLedMirek < 100.0 || coolLedMirek > 1000.0) {
             throw new IllegalArgumentException(
                     "Cool LED Mirek/Mired '%.1f' out of range [100.0..1000.0]".formatted(coolLedMirek));
@@ -560,7 +584,7 @@ public class LightModel {
      *
      * @param warmLedMirek the color temperature in Mirek/Mired of the warm white LED.
      */
-    public void configSetMirekWarmWhiteLED(double warmLedMirek) {
+    public synchronized void configSetMirekWarmWhiteLED(double warmLedMirek) {
         if (warmLedMirek < 100.0 || warmLedMirek > 1000.0) {
             throw new IllegalArgumentException(
                     "Warm LED Mirek/Mired '%.1f' out of range [100.0..1000.0]".formatted(warmLedMirek));
@@ -573,7 +597,7 @@ public class LightModel {
      *
      * @param rgbType the supported RGB type.
      */
-    public void configSetRgbDataType(RgbDataType rgbType) {
+    public synchronized void configSetRgbDataType(RgbDataType rgbType) {
         this.rgbDataType = rgbType;
         switch (rgbType) {
             case DEFAULT:
@@ -583,16 +607,18 @@ public class LightModel {
         }
     }
 
-    /*********************************************************************************
+    /*
+     * ================================================================================
      * SECTION: Runtime State getters, setters, and handlers. Only used at runtime.
-     *********************************************************************************/
+     * ================================================================================
+     */
 
     /**
      * Runtime State: get the brightness or return null if the capability is not supported.
      *
      * @return PercentType, or null if not supported.
      */
-    public @Nullable PercentType getBrightness() {
+    public synchronized @Nullable PercentType getBrightness() {
         return getBrightness(false);
     }
 
@@ -602,7 +628,7 @@ public class LightModel {
      * @param forceChannelVisible if true return a non-null value even when color is supported.
      * @return PercentType, or null if not supported.
      */
-    public @Nullable PercentType getBrightness(boolean forceChannelVisible) {
+    public synchronized @Nullable PercentType getBrightness(boolean forceChannelVisible) {
         return lightCapabilities.supportsBrightness() && (!lightCapabilities.supportsColor() || forceChannelVisible)
                 ? cachedHSB.getBrightness()
                 : null;
@@ -613,8 +639,8 @@ public class LightModel {
      *
      * @return HSBType, or null if not supported.
      */
-    public @Nullable HSBType getColor() {
-        return lightCapabilities.supportsColor() ? cachedHSB : null;
+    public synchronized @Nullable HSBType getColor() {
+        return lightCapabilities.supportsColor() ? copyHsb(cachedHSB) : null;
     }
 
     /**
@@ -624,7 +650,7 @@ public class LightModel {
      * @return QuantityType in Kelvin representing the color temperature, or null if not supported
      *         or the Mirek/Mired value is not known.
      */
-    public @Nullable QuantityType<?> getColorTemperature() {
+    public synchronized @Nullable QuantityType<?> getColorTemperature() {
         if (lightCapabilities.supportsColorTemperature() && !Double.isNaN(cachedMirek)) {
             return Objects.requireNonNull( // Mired always converts to Kelvin
                     QuantityType.valueOf(cachedMirek, Units.MIRED).toInvertibleUnit(Units.KELVIN));
@@ -639,7 +665,7 @@ public class LightModel {
      * @return PercentType in range [0..100] representing [coolest..warmest], or null if not supported
      *         or the Mirek/Mired value is not known.
      */
-    public @Nullable PercentType getColorTemperaturePercent() {
+    public synchronized @Nullable PercentType getColorTemperaturePercent() {
         if (lightCapabilities.supportsColorTemperature() && !Double.isNaN(cachedMirek)) {
             double percent = 100 * (cachedMirek - mirekControlCoolest) / (mirekControlWarmest - mirekControlCoolest);
             return new PercentType(new BigDecimal(Math.min(Math.max(percent, 0.0), 100.0)));
@@ -652,7 +678,7 @@ public class LightModel {
      *
      * @return double representing the hue in range [0..360].
      */
-    public double getHue() {
+    public synchronized double getHue() {
         return cachedHSB.getHue().doubleValue();
     }
 
@@ -661,8 +687,8 @@ public class LightModel {
      *
      * @return HSBType representing the color.
      */
-    public HSBType getHsb() {
-        return new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), cachedHSB.getBrightness());
+    public synchronized HSBType getHsb() {
+        return copyHsb(cachedHSB);
     }
 
     /**
@@ -670,7 +696,7 @@ public class LightModel {
      *
      * @return double representing the color temperature in Mirek/Mired.
      */
-    public double getMirek() {
+    public synchronized double getMirek() {
         return cachedMirek;
     }
 
@@ -679,7 +705,7 @@ public class LightModel {
      *
      * @return OnOffType representing the on/off state or null if not supported.
      */
-    public @Nullable OnOffType getOnOff() {
+    public synchronized @Nullable OnOffType getOnOff() {
         return getOnOff(false);
     }
 
@@ -689,7 +715,7 @@ public class LightModel {
      * @param forceChannelVisible if true return a non-null value even if brightness or color are supported.
      * @return OnOffType representing the on/off state or null if not supported.
      */
-    public @Nullable OnOffType getOnOff(boolean forceChannelVisible) {
+    public synchronized @Nullable OnOffType getOnOff(boolean forceChannelVisible) {
         return (!lightCapabilities.supportsColor() && !lightCapabilities.supportsBrightness()) || forceChannelVisible
                 ? OnOffType.from(cachedHSB.getBrightness().doubleValue() >= minimumOnBrightness)
                 : null;
@@ -714,7 +740,7 @@ public class LightModel {
      * @return double[] representing the RGB(C)(W) components in range [0..255.0]
      * @throws IllegalStateException if the RGB data type is not compatible with the current LED operating mode.
      */
-    public double[] getRGBx() throws IllegalStateException {
+    public synchronized double[] getRGBx() throws IllegalStateException {
         HSBType hsb = RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType
                 ? new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.HUNDRED)
                 : cachedHSB;
@@ -737,7 +763,7 @@ public class LightModel {
              */
             if (RgbDataType.RGB_C_W == rgbDataType) {
                 double ratio = (cachedMirek - coolWhiteLed.getMirek())
-                        / (warmWhiteLed.getMirek() + coolWhiteLed.getMirek());
+                        / (warmWhiteLed.getMirek() - coolWhiteLed.getMirek());
                 double bri = cachedHSB.getBrightness().doubleValue() * 255.0 / 100.0;
                 double cool = bri * ratio;
                 double warm = bri - cool;
@@ -805,7 +831,7 @@ public class LightModel {
      *
      * @return double representing the saturation in range [0..100].
      */
-    public double getSaturation() {
+    public synchronized double getSaturation() {
         return cachedHSB.getSaturation().doubleValue();
     }
 
@@ -814,7 +840,7 @@ public class LightModel {
      *
      * @return double[] representing the XY components in range [0.0..1.0].
      */
-    public double[] getXY() {
+    public synchronized double[] getXY() {
         return ColorUtil.hsbToXY(new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.HUNDRED));
     }
 
@@ -829,7 +855,7 @@ public class LightModel {
      * @param command the command to handle.
      * @throws IllegalArgumentException if the command type is not supported.
      */
-    public void handleColorTemperatureCommand(Command command) throws IllegalArgumentException {
+    public synchronized void handleColorTemperatureCommand(Command command) throws IllegalArgumentException {
         if (command instanceof PercentType warmness) {
             zHandleColorTemperature(warmness);
         } else if (command instanceof QuantityType<?> temperature) {
@@ -853,7 +879,7 @@ public class LightModel {
      * @param command the command to handle.
      * @throws IllegalArgumentException if the command type is not supported.
      */
-    public void handleCommand(Command command) throws IllegalArgumentException {
+    public synchronized void handleCommand(Command command) throws IllegalArgumentException {
         if (command instanceof HSBType color) {
             zHandleHSBType(color);
         } else if (command instanceof PercentType brightness) {
@@ -876,7 +902,7 @@ public class LightModel {
      * @param brightness in the range [0..100]
      * @throws IllegalArgumentException if the value is outside the range [0.0 to 100.0]
      */
-    public void setBrightness(double brightness) throws IllegalArgumentException {
+    public synchronized void setBrightness(double brightness) throws IllegalArgumentException {
         zHandleBrightness(zPercentTypeFrom(brightness));
     }
 
@@ -888,7 +914,7 @@ public class LightModel {
      * consistent with the new mode, while keeping the brightness the same. If the light does not support color
      * then the mode is forced to WHITE_ONLY.
      */
-    public void setLedOperatingMode(LedOperatingMode newOperatingMode) {
+    public synchronized void setLedOperatingMode(LedOperatingMode newOperatingMode) {
         switch (lightCapabilities) {
             case COLOR:
             case COLOR_WITH_COLOR_TEMPERATURE:
@@ -903,7 +929,8 @@ public class LightModel {
                              * temperature. This ensures that the color changes to one that is consistent with the
                              * prior color temperature. Keeps the original brightness.
                              */
-                            newMirek = Double.isNaN(cachedMirek) ? 250 : cachedMirek; // default to 4000 K
+                            newMirek = Double.isNaN(cachedMirek) ? (mirekControlCoolest + mirekControlWarmest) / 2
+                                    : cachedMirek; // default to mid-point if unknown
                             break;
                         case WHITE_ONLY:
                             /*
@@ -934,7 +961,7 @@ public class LightModel {
      * @param hue in the range [0..360]
      * @throws IllegalArgumentException if the hue parameter is not in the range 0.0 to 360.0
      */
-    public void setHue(double hue) throws IllegalArgumentException {
+    public synchronized void setHue(double hue) throws IllegalArgumentException {
         HSBType hsb = new HSBType(new DecimalType(hue), cachedHSB.getSaturation(), cachedHSB.getBrightness());
         cachedHSB = hsb;
         cachedMirek = zMirekFrom(hsb);
@@ -949,7 +976,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the mirek parameter is not in the range
      *             [mirekControlCoolest..mirekControlWarmest]
      */
-    public void setMirek(double mirek) throws IllegalArgumentException {
+    public synchronized void setMirek(double mirek) throws IllegalArgumentException {
         if (mirek < mirekControlCoolest || mirek > mirekControlWarmest) { // NaN is not < or > anything // anything
             throw new IllegalArgumentException("Mirek/Mired value '%.1f' out of range [%.1f..%.1f]".formatted(mirek,
                     mirekControlCoolest, mirekControlWarmest));
@@ -966,7 +993,7 @@ public class LightModel {
      *
      * @param on true for ON, false for OFF
      */
-    public void setOnOff(boolean on) {
+    public synchronized void setOnOff(boolean on) {
         zHandleOnOff(OnOffType.from(on));
     }
 
@@ -991,7 +1018,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the array length is not 3, 4, or 5 depending on the light's capabilities,
      *             or if any of the values are outside the range [0.0 to 255.0]
      */
-    public void setRGBx(double[] rgbxParameter) throws IllegalArgumentException {
+    public synchronized void setRGBx(double[] rgbxParameter) throws IllegalArgumentException {
         if (rgbxParameter.length > 5) {
             throw new IllegalArgumentException("Too many arguments in RGBx array");
         }
@@ -1022,8 +1049,10 @@ public class LightModel {
                      * determined by the ratio of the two white channels.
                      */
                     white = (rgbxParameter[3] + rgbxParameter[4]) / 2.0;
-                    mirek = (coolWhiteLed.getMirek() * rgbxParameter[3] / white)
-                            + (warmWhiteLed.getMirek() * rgbxParameter[4] / white);
+                    mirek = white > 0.0 // avoid division by zero
+                            ? (coolWhiteLed.getMirek() * rgbxParameter[3] / white)
+                                    + (warmWhiteLed.getMirek() * rgbxParameter[4] / white)
+                            : cachedMirek;
                 } else {
                     /*
                      * At this point the rgbxParameter.length can only be 4 so we create a white
@@ -1078,9 +1107,6 @@ public class LightModel {
 
         cachedHSB = hsb;
         cachedMirek = zMirekFrom(hsb);
-        if (RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType) {
-            zHandleBrightness(brightness);
-        }
     }
 
     /**
@@ -1089,7 +1115,7 @@ public class LightModel {
      * @param saturation in the range [0..100]
      * @throws IllegalArgumentException if the value is outside the range [0.0..100.0]
      */
-    public void setSaturation(double saturation) throws IllegalArgumentException {
+    public synchronized void setSaturation(double saturation) throws IllegalArgumentException {
         HSBType hsb = new HSBType(cachedHSB.getHue(), zPercentTypeFrom(saturation), cachedHSB.getBrightness());
         cachedHSB = hsb;
         cachedMirek = zMirekFrom(hsb);
@@ -1103,7 +1129,7 @@ public class LightModel {
      * @param y the y field in range [0.0..1.0]
      * @throws IllegalArgumentException if any of the XY values are out of range [0.0..1.0]
      */
-    public void setXY(double x, double y) throws IllegalArgumentException {
+    public synchronized void setXY(double x, double y) throws IllegalArgumentException {
         double[] xy = new double[] { x, y };
         HSBType hsb = ColorUtil.xyToHsb(xy);
         cachedHSB = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedHSB.getBrightness());
@@ -1118,7 +1144,7 @@ public class LightModel {
      * @param state the input State, which may be null.
      * @return the input State if it is not null, otherwise 'UnDefType.UNDEF'.
      */
-    public State toNonNull(@Nullable State state) {
+    public static State toNonNull(@Nullable State state) {
         return state != null ? state : UnDefType.UNDEF;
     }
 
@@ -1128,7 +1154,7 @@ public class LightModel {
      *
      * @return a copy of this LightModel.
      */
-    public LightModel copy() {
+    public synchronized LightModel copy() {
         OnOffType tempOnOff = cachedOnOff;
         LightModel copy = new LightModel(lightCapabilities, rgbDataType, minimumOnBrightness, mirekControlCoolest,
                 mirekControlWarmest, stepSize, coolWhiteLed.getMirek(), warmWhiteLed.getMirek());
@@ -1140,9 +1166,11 @@ public class LightModel {
         return copy;
     }
 
-    /*********************************************************************************
+    /*
+     * ================================================================================
      * SECTION: Internal private methods. Names have 'z' prefix to indicate private.
-     *********************************************************************************/
+     * ================================================================================
+     */
 
     /**
      * Internal: handle a write brightness command from OH core.
@@ -1155,7 +1183,7 @@ public class LightModel {
             cachedHSB = new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), brightness);
             cachedOnOff = OnOffType.ON;
         } else {
-            if (OnOffType.ON == cachedOnOff) {
+            if (OnOffType.ON == cachedOnOff && cachedHSB.getBrightness().doubleValue() >= minimumOnBrightness) {
                 cachedBrightness = cachedHSB.getBrightness(); // cache the last 'ON' state brightness
             }
             cachedHSB = new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.ZERO);
@@ -1239,16 +1267,28 @@ public class LightModel {
      * @return a {@link PercentType} representing the input value, constrained to the range [0.0..100.0]
      * @throws IllegalArgumentException if the value is outside the range [0.0..100.0]
      */
-    private PercentType zPercentTypeFrom(double value) throws IllegalArgumentException {
+    private static PercentType zPercentTypeFrom(double value) throws IllegalArgumentException {
         if (value < 0.0 || value > 100.0) {
             throw new IllegalArgumentException("PercentType value must be in range [0.0..100.0]: " + value);
         }
         return new PercentType(new BigDecimal(value));
     }
 
-    /*********************************************************************************
+    /**
+     * Internal: create and return a copy of the given {@link HSBType}.
+     *
+     * @param hsb the {@link HSBType} to copy.
+     * @return a copy of the given {@link HSBType}.
+     */
+    private static HSBType copyHsb(HSBType hsb) {
+        return new HSBType(hsb.getHue(), hsb.getSaturation(), hsb.getBrightness());
+    }
+
+    /*
+     * ================================================================================
      * SECTION: Internal private classes.
-     *********************************************************************************/
+     * ================================================================================
+     */
 
     /**
      * Internal: a class that models the RGB LED sub-components of a white LED light. The RGB component
