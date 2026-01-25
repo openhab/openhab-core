@@ -101,7 +101,8 @@ public class YamlItemFileConverterTest {
 
     @Test
     public void testStateDescriptionMetadataConvertedToShortForm() {
-        Metadata expireMetadata = new Metadata(new MetadataKey("stateDescription", "item_name"), "", Map.of("pattern", "%d"));
+        Metadata expireMetadata = new Metadata(new MetadataKey("stateDescription", "item_name"), "",
+                Map.of("pattern", "%d"));
         YamlItemDTO dto = convertWithMetadata(expireMetadata, "Number");
         assertEquals("%d", dto.format);
         assertNull(dto.metadata);
