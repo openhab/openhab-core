@@ -170,6 +170,12 @@ import org.openhab.core.types.UnDefType;
  * }
  * }
  * </pre>
+ * <p>
+ * DEVELOPER NOTE:
+ * <p>
+ * This is a HERMETIC class that represents the complete state of a light. The state consists in the entirety of
+ * all the fields within a class instance. In other words, if any one field changes, then the entire state changes.
+ * Therefore all public methods MUST be (and indeed are) synchronized to prevent read/write of "half- ready" states.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -1037,7 +1043,6 @@ public class LightModel {
         }
 
         HSBType hsb;
-        PercentType brightness;
         switch (ledOperatingMode) {
             case WHITE_ONLY:
                 double white;
@@ -1066,7 +1071,6 @@ public class LightModel {
                 }
                 hsb = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / mirek));
                 hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), PercentType.HUNDRED);
-                brightness = zPercentTypeFrom(white * 100.0 / 255.0);
                 break;
 
             case RGB_ONLY:
@@ -1095,7 +1099,6 @@ public class LightModel {
                 hsb = ColorUtil.rgbToHsb(Arrays.stream(rgbx).map(d -> d * 100.0 / 255.0)
                         .mapToObj(d -> zPercentTypeFrom(d)).toArray(PercentType[]::new));
 
-                brightness = hsb.getBrightness();
                 if (RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType) {
                     hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedHSB.getBrightness());
                 }
