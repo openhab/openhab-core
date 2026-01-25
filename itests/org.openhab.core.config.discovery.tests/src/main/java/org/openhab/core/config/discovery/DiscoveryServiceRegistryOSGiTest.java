@@ -210,6 +210,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     @Test
     public void testRemoveOlderResults() {
         discoveryServiceRegistry.addDiscoveryListener(discoveryListenerMock);
+        reset(discoveryListenerMock); // Reset mock to ignore cached result replays
         discoveryServiceMockForBinding1.removeOlderResults(discoveryServiceMockForBinding1.getTimestampOfLastScan());
 
         waitForAssert(() -> {
