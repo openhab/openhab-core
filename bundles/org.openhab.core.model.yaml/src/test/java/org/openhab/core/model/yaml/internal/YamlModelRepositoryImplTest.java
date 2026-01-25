@@ -66,6 +66,7 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.model.yaml.YamlModelListener;
+import org.openhab.core.model.yaml.YamlModelUtils;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingProvider;
 import org.openhab.core.model.yaml.test.FirstTypeDTO;
@@ -162,7 +163,7 @@ public class YamlModelRepositoryImplTest {
 
     private @Mock @NonNullByDefault({}) Bundle bundle;
 
-    private @NonNullByDefault({}) YamlThingProvider thingProvider;
+    private @NonNullByDefault({}) YamlThingProvider thingListener;
 
     @BeforeEach
     public void setup() {
@@ -256,12 +257,6 @@ public class YamlModelRepositoryImplTest {
         when(configDescriptionRegistry.getConfigDescription(eq(uriChannel2))).thenReturn(null);
 
         when(localeProvider.getLocale()).thenReturn(Locale.FRENCH);
-
-        NtpThingHandlerFactory thingHandlerFactory = new NtpThingHandlerFactory();
-        thingProvider = new YamlThingProvider(bundleResolver, thingTypeRegistry, channelTypeRegistry,
-                configDescriptionRegistry, localeProvider);
-        thingProvider.onReadyMarkerAdded(new ReadyMarker(XML_THING_TYPE, NTP_BUNDLE_SYMBOLIC_NAME));
-        thingProvider.addThingHandlerFactory(thingHandlerFactory);
     }
 
     @Test
@@ -806,12 +801,20 @@ public class YamlModelRepositoryImplTest {
     public void testLoadModelWithThing() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelWithThing.yaml"), fullModelPath);
 
+        NtpThingHandlerFactory thingHandlerFactory = new NtpThingHandlerFactory();
+        thingListener = new YamlThingProvider(bundleResolver, thingTypeRegistry, channelTypeRegistry,
+                configDescriptionRegistry, localeProvider);
+        thingListener.onReadyMarkerAdded(new ReadyMarker(XML_THING_TYPE, NTP_BUNDLE_SYMBOLIC_NAME));
+        thingListener.addThingHandlerFactory(thingHandlerFactory);
+
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-        modelRepository.addYamlModelListener(thingProvider);
+        modelRepository.addYamlModelListener(thingListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
-        Collection<Thing> things = thingProvider.getAll();
+        assertFalse(YamlModelUtils.isIsolatedModel(MODEL_NAME));
+        assertThat(thingListener.getAllFromModel(MODEL_NAME), hasSize(1));
+        Collection<Thing> things = thingListener.getAll();
         assertThat(things, hasSize(1));
         Thing thing = things.iterator().next();
         assertFalse(thing instanceof Bridge);
@@ -824,7 +827,6 @@ public class YamlModelRepositoryImplTest {
         assertEquals(0, thing.getProperties().size());
 
         // 2 parameters injected with default value
-        assertThat(thing.getConfiguration().keySet(), hasSize(6));
         assertThat(thing.getConfiguration().keySet(),
                 containsInAnyOrder("hostname", "refreshInterval", "refreshNtp", "serverPort", "timeZone", "other"));
         assertEquals("0.fr.pool.ntp.org", thing.getConfiguration().get("hostname"));
@@ -848,10 +850,8 @@ public class YamlModelRepositoryImplTest {
         // description in YAML is ignored for a channel provided by the channel type
         assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
         assertNull(channel.getAutoUpdatePolicy());
-        assertThat(channel.getDefaultTags(), hasSize(2));
         assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
         assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), hasSize(2));
         assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
         assertEquals("dd-MM-yyyy HH:mm", channel.getConfiguration().get("DateTimeFormat"));
         assertEquals("A parameter that is not in the channel config description.",
@@ -866,7 +866,6 @@ public class YamlModelRepositoryImplTest {
         assertNull(channel.getAutoUpdatePolicy());
         assertThat(channel.getDefaultTags(), hasSize(0));
         assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), hasSize(2));
         assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
         assertEquals("dd-MM-yyyy", channel.getConfiguration().get("DateTimeFormat"));
         assertEquals("A parameter that is not in the channel config description.",
@@ -877,12 +876,20 @@ public class YamlModelRepositoryImplTest {
     public void testLoadModelWithThingEmptyConfig() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelWithThingEmptyConfig.yaml"), fullModelPath);
 
+        NtpThingHandlerFactory thingHandlerFactory = new NtpThingHandlerFactory();
+        thingListener = new YamlThingProvider(bundleResolver, thingTypeRegistry, channelTypeRegistry,
+                configDescriptionRegistry, localeProvider);
+        thingListener.onReadyMarkerAdded(new ReadyMarker(XML_THING_TYPE, NTP_BUNDLE_SYMBOLIC_NAME));
+        thingListener.addThingHandlerFactory(thingHandlerFactory);
+
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-        modelRepository.addYamlModelListener(thingProvider);
+        modelRepository.addYamlModelListener(thingListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
-        Collection<Thing> things = thingProvider.getAll();
+        assertFalse(YamlModelUtils.isIsolatedModel(MODEL_NAME));
+        assertThat(thingListener.getAllFromModel(MODEL_NAME), hasSize(1));
+        Collection<Thing> things = thingListener.getAll();
         assertThat(things, hasSize(1));
         Thing thing = things.iterator().next();
         assertFalse(thing instanceof Bridge);
@@ -895,7 +902,6 @@ public class YamlModelRepositoryImplTest {
         assertEquals(0, thing.getProperties().size());
 
         // 4 parameters injected with default value
-        assertThat(thing.getConfiguration().keySet(), hasSize(4));
         assertThat(thing.getConfiguration().keySet(),
                 containsInAnyOrder("hostname", "refreshInterval", "refreshNtp", "serverPort"));
         // default value injected for parameter hostname
@@ -917,11 +923,9 @@ public class YamlModelRepositoryImplTest {
         assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_LABEL, channel.getLabel());
         assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
         assertNull(channel.getAutoUpdatePolicy());
-        assertThat(channel.getDefaultTags(), hasSize(2));
         assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
         assertEquals(0, channel.getProperties().size());
         // Parameter DateTimeFormat injected with default value
-        assertThat(channel.getConfiguration().keySet(), hasSize(1));
         assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
         assertEquals(DEFAULT_DATE_TIME_FORMAT, channel.getConfiguration().get("DateTimeFormat"));
         channel = it.next();
@@ -935,7 +939,6 @@ public class YamlModelRepositoryImplTest {
         assertThat(channel.getDefaultTags(), hasSize(0));
         assertEquals(0, channel.getProperties().size());
         // Parameter DateTimeFormat injected with default value
-        assertThat(channel.getConfiguration().keySet(), hasSize(1));
         assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
         assertEquals(DEFAULT_DATE_TIME_FORMAT, channel.getConfiguration().get("DateTimeFormat"));
     }
@@ -944,8 +947,14 @@ public class YamlModelRepositoryImplTest {
     public void testCreateIsolatedModelWithThing() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelWithThing.yaml"), fullModelPath);
 
+        NtpThingHandlerFactory thingHandlerFactory = new NtpThingHandlerFactory();
+        thingListener = new YamlThingProvider(bundleResolver, thingTypeRegistry, channelTypeRegistry,
+                configDescriptionRegistry, localeProvider);
+        thingListener.onReadyMarkerAdded(new ReadyMarker(XML_THING_TYPE, NTP_BUNDLE_SYMBOLIC_NAME));
+        thingListener.addThingHandlerFactory(thingHandlerFactory);
+
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-        modelRepository.addYamlModelListener(thingProvider);
+        modelRepository.addYamlModelListener(thingListener);
 
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
@@ -955,7 +964,9 @@ public class YamlModelRepositoryImplTest {
         assertEquals(0, errors.size());
         assertEquals(0, warnings.size());
 
-        Collection<Thing> things = thingProvider.getAllFromModel(name);
+        assertTrue(YamlModelUtils.isIsolatedModel(name));
+        assertThat(thingListener.getAll(), hasSize(0)); // No thing for the registry
+        Collection<Thing> things = thingListener.getAllFromModel(name);
         assertThat(things, hasSize(1));
         Thing thing = things.iterator().next();
         assertFalse(thing instanceof Bridge);
@@ -968,7 +979,6 @@ public class YamlModelRepositoryImplTest {
         assertEquals(0, thing.getProperties().size());
 
         // No parameter injected
-        assertThat(thing.getConfiguration().keySet(), hasSize(4));
         assertThat(thing.getConfiguration().keySet(),
                 containsInAnyOrder("hostname", "serverPort", "timeZone", "other"));
         assertEquals("0.fr.pool.ntp.org", thing.getConfiguration().get("hostname"));
@@ -988,10 +998,8 @@ public class YamlModelRepositoryImplTest {
         // description in YAML is ignored for a channel provided by the thing type
         assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
         assertNull(channel.getAutoUpdatePolicy());
-        assertThat(channel.getDefaultTags(), hasSize(2));
         assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
         assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), hasSize(2));
         assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
         assertEquals("dd-MM-yyyy HH:mm", channel.getConfiguration().get("DateTimeFormat"));
         assertEquals("A parameter that is not in the channel config description.",
@@ -1006,7 +1014,6 @@ public class YamlModelRepositoryImplTest {
         assertNull(channel.getAutoUpdatePolicy());
         assertThat(channel.getDefaultTags(), hasSize(0));
         assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), hasSize(2));
         assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
         assertEquals("dd-MM-yyyy", channel.getConfiguration().get("DateTimeFormat"));
         assertEquals("A parameter that is not in the channel config description.",
@@ -1017,8 +1024,14 @@ public class YamlModelRepositoryImplTest {
     public void testCreateIsolatedModelWithThingEmptyConfig() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelWithThingEmptyConfig.yaml"), fullModelPath);
 
+        NtpThingHandlerFactory thingHandlerFactory = new NtpThingHandlerFactory();
+        thingListener = new YamlThingProvider(bundleResolver, thingTypeRegistry, channelTypeRegistry,
+                configDescriptionRegistry, localeProvider);
+        thingListener.onReadyMarkerAdded(new ReadyMarker(XML_THING_TYPE, NTP_BUNDLE_SYMBOLIC_NAME));
+        thingListener.addThingHandlerFactory(thingHandlerFactory);
+
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-        modelRepository.addYamlModelListener(thingProvider);
+        modelRepository.addYamlModelListener(thingListener);
 
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
@@ -1028,7 +1041,9 @@ public class YamlModelRepositoryImplTest {
         assertEquals(0, errors.size());
         assertEquals(0, warnings.size());
 
-        Collection<Thing> things = thingProvider.getAllFromModel(name);
+        assertTrue(YamlModelUtils.isIsolatedModel(name));
+        assertThat(thingListener.getAll(), hasSize(0)); // No thing for the registry
+        Collection<Thing> things = thingListener.getAllFromModel(name);
         assertThat(things, hasSize(1));
         Thing thing = things.iterator().next();
         assertFalse(thing instanceof Bridge);
@@ -1053,7 +1068,6 @@ public class YamlModelRepositoryImplTest {
         assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_LABEL, channel.getLabel());
         assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
         assertNull(channel.getAutoUpdatePolicy());
-        assertThat(channel.getDefaultTags(), hasSize(2));
         assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
         assertEquals(0, channel.getProperties().size());
         // default value not injected for parameter DateTimeFormat
@@ -1070,6 +1084,43 @@ public class YamlModelRepositoryImplTest {
         assertEquals(0, channel.getProperties().size());
         // default value not injected for parameter DateTimeFormat
         assertThat(channel.getConfiguration().keySet(), hasSize(0));
+    }
+
+    @Test
+    public void testConversionForConfigWithTextParam() throws IOException {
+        Files.copy(SOURCE_PATH.resolve("modelWithThingNumberInTextParam.yaml"), fullModelPath);
+
+        NtpThingHandlerFactory thingHandlerFactory = new NtpThingHandlerFactory();
+        thingListener = new YamlThingProvider(bundleResolver, thingTypeRegistry, channelTypeRegistry,
+                configDescriptionRegistry, localeProvider);
+        thingListener.onReadyMarkerAdded(new ReadyMarker(XML_THING_TYPE, NTP_BUNDLE_SYMBOLIC_NAME));
+        thingListener.addThingHandlerFactory(thingHandlerFactory);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.addYamlModelListener(thingListener);
+
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        Collection<Thing> things = thingListener.getAllFromModel(MODEL_NAME);
+        assertThat(things, hasSize(1));
+        Thing thing = things.iterator().next();
+        assertEquals(NTP_THING_UID, thing.getUID());
+
+        assertThat(thing.getConfiguration().keySet(),
+                containsInAnyOrder("hostname", "timeZone", "refreshInterval", "refreshNtp", "serverPort"));
+        assertEquals("12345", thing.getConfiguration().get("hostname"));
+        assertEquals("12.3", thing.getConfiguration().get("timeZone"));
+
+        assertEquals(2, thing.getChannels().size());
+        Iterator<Channel> it = thing.getChannels().iterator();
+        Channel channel = it.next();
+        assertEquals(new ChannelUID(NTP_THING_UID, "string"), channel.getUID());
+        assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
+        assertEquals("100", channel.getConfiguration().get("DateTimeFormat"));
+        channel = it.next();
+        assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
+        assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
+        assertEquals("123.45", channel.getConfiguration().get("DateTimeFormat"));
     }
 
     private class NtpThingHandlerFactory implements ThingHandlerFactory {
