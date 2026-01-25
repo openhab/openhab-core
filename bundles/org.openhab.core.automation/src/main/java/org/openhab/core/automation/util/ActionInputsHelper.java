@@ -19,7 +19,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -177,8 +180,9 @@ public class ActionInputsHelper {
                 .create(input.getName(), parameterType).withLabel(input.getLabel())
                 .withDescription(input.getDescription()).withReadOnly(false)
                 .withRequired(required || input.isRequired()).withContext(context);
-        if (input.getDefaultValue() != null && !input.getDefaultValue().isEmpty()) {
-            builder = builder.withDefault(input.getDefaultValue());
+        String inputDefaultValue = input.getDefaultValue();
+        if (inputDefaultValue != null && !inputDefaultValue.isEmpty()) {
+            builder = builder.withDefault(inputDefaultValue);
         } else if (defaultValue != null) {
             builder = builder.withDefault(defaultValue);
         }
@@ -291,9 +295,20 @@ public class ActionInputsHelper {
                         case "java.util.Date" ->
                             // Accepted format is: 2007-12-03T10:15:30
                             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(valueString);
-                        case "java.time.ZonedDateTime" ->
-                            // Accepted format is: 2007-12-03T10:15:30
-                            LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone());
+                        case "java.time.ZonedDateTime" -> {
+                            /*
+                             * Accepted format is one of:
+                             * - 2007-12-03T10:15:30
+                             * - 2007-12-03T10:15:30+01:00
+                             * - 2007-12-03T10:15:30+01:00[Europe/Paris]
+                             */
+                            TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString,
+                                    ZonedDateTime::from, LocalDateTime::from);
+                            if (dt instanceof ZonedDateTime zdt) {
+                                yield zdt;
+                            }
+                            yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone());
+                        }
                         case "java.time.Instant" ->
                             // Accepted format is: 2007-12-03T10:15:30
                             LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone()).toInstant();

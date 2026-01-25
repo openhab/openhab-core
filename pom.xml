@@ -84,8 +84,8 @@
     <!-- TEST -->
     <!-- cxf can be updated independently, karaf only uses it in tests -->
     <cxf.version>3.6.9</cxf.version>
-    <junit.version>5.13.4</junit.version>
-    <mockito.version>5.19.0</mockito.version>
+    <junit.version>5.14.2</junit.version>
+    <mockito.version>5.21.0</mockito.version>
   </properties>
 
   <dependencyManagement>
