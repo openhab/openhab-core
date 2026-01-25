@@ -197,6 +197,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         ScanListener mockScanListener = mock(ScanListener.class);
 
         discoveryServiceRegistry.addDiscoveryListener(discoveryListenerMock);
+        reset(discoveryListenerMock); // Reset mock to ignore cached result replays
         discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1), null,
                 mockScanListener);
 
@@ -224,6 +225,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         ScanListener mockScanListener2 = mock(ScanListener.class);
 
         discoveryServiceRegistry.addDiscoveryListener(discoveryListenerMock);
+        reset(discoveryListenerMock); // Reset mock to ignore cached result replays
         discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1), null,
                 mockScanListener1);
         discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_2, ANY_THING_TYPE_2), null,
@@ -369,6 +371,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         serviceRegs.add(
                 bundleContext.registerService(DiscoveryService.class.getName(), anotherDiscoveryServiceMock, null));
         discoveryServiceRegistry.addDiscoveryListener(discoveryListenerMock);
+        reset(discoveryListenerMock); // Reset mock to ignore cached result replays
         discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1), null,
                 mockScanListener1);
 
