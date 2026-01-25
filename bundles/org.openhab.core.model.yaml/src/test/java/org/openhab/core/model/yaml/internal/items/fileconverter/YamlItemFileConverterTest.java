@@ -34,6 +34,7 @@ import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlChannelLinkProvider;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
 import org.openhab.core.model.yaml.internal.items.YamlItemProvider;
+import org.openhab.core.model.yaml.internal.items.YamlMetadataDTO;
 import org.openhab.core.model.yaml.internal.items.YamlMetadataProvider;
 
 @NonNullByDefault
@@ -96,6 +97,29 @@ public class YamlItemFileConverterTest {
         YamlItemDTO dto = convertWithMetadata(unit, "Number");
         assertEquals("", dto.unit);
         assertNull(dto.metadata);
+    }
+
+    @Test
+    public void testStateDescriptionMetadataConvertedToShortForm() {
+        Metadata expireMetadata = new Metadata(new MetadataKey("stateDescription", "item_name"), "", Map.of("pattern", "%d"));
+        YamlItemDTO dto = convertWithMetadata(expireMetadata, "Number");
+        assertEquals("%d", dto.format);
+        assertNull(dto.metadata);
+    }
+
+    @Test
+    public void testStateDescriptionMetadataWithOtherConfigStaysInMetadata() {
+        Metadata expireMetadata = new Metadata(new MetadataKey("stateDescription", "item_name"), "",
+                Map.of("pattern", "%d", "min", 0, "max", 100));
+        YamlItemDTO dto = convertWithMetadata(expireMetadata, "Number");
+        assertNull(dto.format);
+        assertNotNull(dto.metadata);
+        YamlMetadataDTO stateDescDto = dto.metadata.get("stateDescription");
+        assertNotNull(stateDescDto);
+        assertEquals("", stateDescDto.getValue());
+        assertEquals("%d", stateDescDto.config.get("pattern"));
+        assertEquals(0, stateDescDto.config.get("min"));
+        assertEquals(100, stateDescDto.config.get("max"));
     }
 
     private YamlItemDTO convertWithMetadata(Metadata metadata, String itemType) {
