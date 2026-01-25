@@ -762,8 +762,8 @@ public class LightModel {
              * by the brightness and the color temperature.
              */
             if (RgbDataType.RGB_C_W == rgbDataType) {
-                double ratio = (cachedMirek - coolWhiteLed.getMirek())
-                        / (warmWhiteLed.getMirek() - coolWhiteLed.getMirek());
+                double denominator = warmWhiteLed.getMirek() - coolWhiteLed.getMirek();
+                double ratio = denominator > 0 ? (cachedMirek - coolWhiteLed.getMirek()) / denominator : 0.5;
                 double bri = cachedHSB.getBrightness().doubleValue() * 255.0 / 100.0;
                 double cool = bri * ratio;
                 double warm = bri - cool;
