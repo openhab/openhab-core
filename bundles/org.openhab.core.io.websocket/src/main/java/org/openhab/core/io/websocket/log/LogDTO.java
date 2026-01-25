@@ -45,6 +45,6 @@ public class LogDTO implements Comparable<LogDTO> {
 
     @Override
     public int compareTo(LogDTO o) {
-        return (int) (sequence - o.sequence);
+        return Long.compare(sequence, o.sequence);
     }
 }
