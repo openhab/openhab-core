@@ -279,7 +279,7 @@ public class LightModel {
      */
     private double mirekControlWarmest = 500;
 
-    /*
+    /**
      * Step size for IncreaseDecreaseType commands
      */
     private double stepSize = 10.0; // step size for IncreaseDecreaseType commands
