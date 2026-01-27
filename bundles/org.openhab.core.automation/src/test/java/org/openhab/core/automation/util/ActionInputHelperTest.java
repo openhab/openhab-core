@@ -17,8 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -456,19 +454,28 @@ public class ActionInputHelperTest {
 
     @Test
     public void testMapSerializedInputToActionInputWhenDate() {
-        String valAsString = "2024-11-05T09:45:12";
-        Date val;
-        try {
-            val = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(valAsString);
-        } catch (IllegalArgumentException | ParseException e) {
-            val = null;
-        }
-        assertNotNull(val);
+        String valAsString = "2024-11-05T08:45:12Z";
+        Date val = Date.from(Instant.parse(valAsString));
         Input input = buildInput("java.util.Date");
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
-        assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replace("T", " ")));
+
+        valAsString = "2024-11-05T09:45:12";
+        val = Date.from(LocalDateTime.parse(valAsString).atZone(timeZoneProvider.getTimeZone()).toInstant());
+        assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
+        assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
+        String s1 = valAsString.replace("T", " ");
+        assertThrows(IllegalArgumentException.class, () -> helper.mapSerializedInputToActionInput(input, s1));
+
+        valAsString = "2024-11-05T09:45:12+04:00";
+        val = Date.from(ZonedDateTime.parse(valAsString, DateTimeFormatter.ISO_DATE_TIME).toInstant());
+        assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
+        assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
+
+        valAsString = "2024-11-05T09:45:12+04:00[Europe/Kyiv]";
+        val = Date.from(ZonedDateTime.parse(valAsString, DateTimeFormatter.ISO_DATE_TIME).toInstant());
+        assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
+        assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
     }
 
     @Test
