@@ -675,7 +675,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 @Nullable
                 T elt = null;
                 JsonNode node = mapNode.get(id);
-                if (node.isEmpty()) {
+                if (node == null || node.isNull() || node.isMissingNode()
+                        || (node.isTextual() && node.asText().isBlank())) {
                     try {
                         elt = elementClass.getDeclaredConstructor().newInstance();
                         elt.setId(id);
