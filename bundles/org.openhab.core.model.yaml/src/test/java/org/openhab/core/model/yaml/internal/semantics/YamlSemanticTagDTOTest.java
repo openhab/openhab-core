@@ -133,4 +133,44 @@ class YamlSemanticTagDTOTest {
         assertThat(result.get("tag1").label, is("Simple"));
         assertThat(result.get("tag2").description, is("With Desc"));
     }
+
+    /**
+     * Verifies that a tag with only a description is serialized in map-form
+     * and does not include empty label or synonyms fields.
+     */
+    @Test
+    void serializesDescriptionOnlyAsMapForm() throws Exception {
+        Map<String, YamlSemanticTagDTO> tags = new HashMap<>();
+
+        YamlSemanticTagDTO tag = new YamlSemanticTagDTO();
+        tag.description = "Only description";
+        tags.put("Tag_desc_only", tag);
+
+        String json = mapper.writeValueAsString(tags);
+
+        assertThat(json, containsString("\"Tag_desc_only\":{"));
+        assertThat(json, containsString("\"description\":\"Only description\""));
+        assertThat(json, not(containsString("\"label\"")));
+        assertThat(json, not(containsString("\"synonyms\"")));
+    }
+
+    /**
+     * Verifies that a tag with only synonyms is serialized in map-form
+     * and does not include empty label or description fields.
+     */
+    @Test
+    void serializesSynonymsOnlyAsMapForm() throws Exception {
+        Map<String, YamlSemanticTagDTO> tags = new HashMap<>();
+
+        YamlSemanticTagDTO tag = new YamlSemanticTagDTO();
+        tag.synonyms = List.of("s1", "s2");
+        tags.put("Tag_syn_only", tag);
+
+        String json = mapper.writeValueAsString(tags);
+
+        assertThat(json, containsString("\"Tag_syn_only\":{"));
+        assertThat(json, containsString("\"synonyms\":[\"s1\",\"s2\"]"));
+        assertThat(json, not(containsString("\"label\"")));
+        assertThat(json, not(containsString("\"description\"")));
+    }
 }

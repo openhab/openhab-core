@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  *
  * @author Laurent Garnier - Initial contribution
  * @author Laurent Garnier - Added methods setId and cloneWithoutId
+ * @author Jimmy Tanagra - Added JsonCreator and JsonValue to support short-form syntax
  */
 @YamlElementName("tags")
 public class YamlSemanticTagDTO implements YamlElement, Cloneable {
@@ -52,13 +53,19 @@ public class YamlSemanticTagDTO implements YamlElement, Cloneable {
 
     @JsonValue
     public Object serialize() {
-        if (description == null && (synonyms == null || synonyms.isEmpty())) {
+        if ((description == null || description.isBlank()) && (synonyms == null || synonyms.isEmpty())) {
             return label;
         }
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("label", label);
-        map.put("description", description);
-        map.put("synonyms", synonyms);
+        if (label != null && !label.isBlank()) {
+            map.put("label", label);
+        }
+        if (description != null && !description.isBlank()) {
+            map.put("description", description);
+        }
+        if (synonyms != null && !synonyms.isEmpty()) {
+            map.put("synonyms", synonyms);
+        }
         return map;
     }
 
