@@ -141,7 +141,7 @@ public class ChannelTypeResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getChannelTypeByUID", summary = "Gets channel type by UID.", responses = {
             @ApiResponse(responseCode = "200", description = "Channel type with provided channelTypeUID does not exist.", content = @Content(schema = @Schema(implementation = ChannelTypeDTO.class))),
-            @ApiResponse(responseCode = "404", description = "No content") })
+            @ApiResponse(responseCode = "204", description = "No content") })
     public Response getByUID(
             @PathParam("channelTypeUID") @Parameter(description = "channelTypeUID") String channelTypeUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
