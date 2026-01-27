@@ -181,13 +181,14 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public void addedModel(String modelName, Collection<YamlThingDTO> elements) {
-        List<Thing> added = elements.stream().map(this::mapThing).filter(Objects::nonNull).toList();
+        boolean isolated = isIsolatedModel(modelName);
+        List<Thing> added = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = Objects
                 .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
         modelThings.addAll(added);
         added.forEach(t -> {
             logger.debug("model {} added thing {}", modelName, t.getUID());
-            if (!isIsolatedModel(modelName)) {
+            if (!isolated) {
                 notifyListenersAboutAddedElement(t);
             }
         });
@@ -195,7 +196,8 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public void updatedModel(String modelName, Collection<YamlThingDTO> elements) {
-        List<Thing> updated = elements.stream().map(this::mapThing).filter(Objects::nonNull).toList();
+        boolean isolated = isIsolatedModel(modelName);
+        List<Thing> updated = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = Objects
                 .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
         updated.forEach(t -> {
@@ -203,13 +205,13 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 modelThings.remove(oldThing);
                 modelThings.add(t);
                 logger.debug("model {} updated thing {}", modelName, t.getUID());
-                if (!isIsolatedModel(modelName)) {
+                if (!isolated) {
                     notifyListenersAboutUpdatedElement(oldThing, t);
                 }
             }, () -> {
                 modelThings.add(t);
                 logger.debug("model {} added thing {}", modelName, t.getUID());
-                if (!isIsolatedModel(modelName)) {
+                if (!isolated) {
                     notifyListenersAboutAddedElement(t);
                 }
             });
@@ -218,13 +220,14 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public void removedModel(String modelName, Collection<YamlThingDTO> elements) {
-        List<Thing> removed = elements.stream().map(this::mapThing).filter(Objects::nonNull).toList();
+        boolean isolated = isIsolatedModel(modelName);
+        List<Thing> removed = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, List.of());
         removed.forEach(t -> {
             modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
                 logger.debug("model {} removed thing {}", modelName, t.getUID());
-                if (!isIsolatedModel(modelName)) {
+                if (!isolated) {
                     notifyListenersAboutRemovedElement(oldThing);
                 }
             }, () -> logger.debug("model {} thing {} not found", modelName, t.getUID()));
@@ -235,13 +238,13 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addThingHandlerFactory(final ThingHandlerFactory thingHandlerFactory) {
+    public void addThingHandlerFactory(final ThingHandlerFactory thingHandlerFactory) {
         logger.debug("addThingHandlerFactory {}", thingHandlerFactory.getClass().getSimpleName());
         thingHandlerFactories.add(thingHandlerFactory);
         thingHandlerFactoryAdded(thingHandlerFactory);
     }
 
-    protected void removeThingHandlerFactory(final ThingHandlerFactory thingHandlerFactory) {
+    public void removeThingHandlerFactory(final ThingHandlerFactory thingHandlerFactory) {
         thingHandlerFactories.remove(thingHandlerFactory);
     }
 
@@ -280,7 +283,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             if (!thingsMap.isEmpty()) {
                 logger.debug("Refreshing models due to new thing handler factory {}",
                         handlerFactory.getClass().getSimpleName());
-                thingsMap.keySet().forEach(modelName -> {
+                thingsMap.keySet().stream().filter(name -> !isIsolatedModel(name)).forEach(modelName -> {
                     List<Thing> things = thingsMap.getOrDefault(modelName, List.of()).stream()
                             .filter(th -> handlerFactory.supportsThingType(th.getThingTypeUID())).toList();
                     if (!things.isEmpty()) {
@@ -311,7 +314,8 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     private boolean retryCreateThing(ThingHandlerFactory handlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
         logger.trace("Retry creating thing {}", thingUID);
-        Thing newThing = handlerFactory.createThing(thingTypeUID, configuration, thingUID, bridgeUID);
+        Thing newThing = handlerFactory.createThing(thingTypeUID, new Configuration(configuration), thingUID,
+                bridgeUID);
         if (newThing != null) {
             logger.debug("Successfully loaded thing \'{}\' during retry", thingUID);
             Thing oldThing = null;
@@ -320,7 +324,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 oldThing = modelThings.stream().filter(t -> t.getUID().equals(newThing.getUID())).findFirst()
                         .orElse(null);
                 if (oldThing != null) {
-                    mergeThing(newThing, oldThing);
+                    mergeThing(newThing, oldThing, false);
                     modelThings.remove(oldThing);
                     modelThings.add(newThing);
                     logger.debug("Refreshing thing \'{}\' after successful retry", newThing.getUID());
@@ -348,7 +352,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         return bundle == null ? null : bundle.getSymbolicName();
     }
 
-    private @Nullable Thing mapThing(YamlThingDTO thingDto) {
+    private @Nullable Thing mapThing(YamlThingDTO thingDto, boolean isolatedModel) {
         try {
             ThingUID thingUID = new ThingUID(thingDto.uid);
             String[] segments = thingUID.getAsString().split(AbstractUID.SEPARATOR);
@@ -366,7 +370,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             thingBuilder.withBridge(bridgeUID);
             thingBuilder.withConfiguration(configuration);
 
-            List<Channel> channels = createChannels(thingTypeUID, thingUID,
+            List<Channel> channels = createChannels(!isolatedModel, thingTypeUID, thingUID,
                     thingDto.channels != null ? thingDto.channels : Map.of(),
                     thingType != null ? thingType.getChannelDefinitions() : List.of());
             thingBuilder.withChannels(channels);
@@ -378,11 +382,12 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     .filter(thf -> isThingHandlerFactoryReady(thf) && thf.supportsThingType(thingTypeUID)).findFirst()
                     .orElse(null);
             if (handlerFactory != null) {
-                thingFromHandler = handlerFactory.createThing(thingTypeUID, configuration, thingUID, bridgeUID);
+                thingFromHandler = handlerFactory.createThing(thingTypeUID, new Configuration(thingDto.config),
+                        thingUID, bridgeUID);
                 if (thingFromHandler != null) {
-                    mergeThing(thingFromHandler, thing);
+                    mergeThing(thingFromHandler, thing, isolatedModel);
                     logger.debug("Successfully loaded thing \'{}\'", thingUID);
-                } else {
+                } else if (!isolatedModel) {
                     // Possible cause: Asynchronous loading of the XML files
                     // Add the data to the queue in order to retry it later
                     logger.debug(
@@ -399,15 +404,15 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         }
     }
 
-    private List<Channel> createChannels(ThingTypeUID thingTypeUID, ThingUID thingUID,
+    private List<Channel> createChannels(boolean applyDefaultConfig, ThingTypeUID thingTypeUID, ThingUID thingUID,
             Map<String, YamlChannelDTO> channelsDto, List<ChannelDefinition> channelDefinitions) {
         Set<String> addedChannelIds = new HashSet<>();
         List<Channel> channels = new ArrayList<>();
         channelsDto.forEach((channelId, channelDto) -> {
             ChannelTypeUID channelTypeUID = channelDto.type == null ? null
                     : new ChannelTypeUID(thingUID.getBindingId(), channelDto.type);
-            Channel channel = createChannel(thingUID, channelId, channelTypeUID, channelDto.getKind(),
-                    channelDto.getItemType(), channelDto.label, channelDto.description, null,
+            Channel channel = createChannel(applyDefaultConfig, thingUID, channelId, channelTypeUID,
+                    channelDto.getKind(), channelDto.getItemType(), channelDto.label, channelDto.description, null,
                     new Configuration(channelDto.config), true);
             channels.add(channel);
             addedChannelIds.add(channelId);
@@ -433,10 +438,11 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         return channels;
     }
 
-    private Channel createChannel(ThingUID thingUID, String channelId, @Nullable ChannelTypeUID channelTypeUID,
-            ChannelKind channelKind, @Nullable String channelItemType, @Nullable String channelLabel,
-            @Nullable String channelDescription, @Nullable AutoUpdatePolicy channelAutoUpdatePolicy,
-            Configuration channelConfiguration, boolean ignoreMissingChannelType) {
+    private Channel createChannel(boolean applyDefaultConfig, ThingUID thingUID, String channelId,
+            @Nullable ChannelTypeUID channelTypeUID, ChannelKind channelKind, @Nullable String channelItemType,
+            @Nullable String channelLabel, @Nullable String channelDescription,
+            @Nullable AutoUpdatePolicy channelAutoUpdatePolicy, Configuration channelConfiguration,
+            boolean ignoreMissingChannelType) {
         ChannelKind kind = channelKind;
         String itemType = channelItemType;
         String label = channelLabel;
@@ -456,7 +462,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 }
                 autoUpdatePolicy = channelType.getAutoUpdatePolicy();
                 URI descUriO = channelType.getConfigDescriptionURI();
-                if (descUriO != null) {
+                if (applyDefaultConfig && descUriO != null) {
                     ConfigUtil.applyDefaultConfiguration(configuration,
                             configDescriptionRegistry.getConfigDescription(descUriO));
                 }
@@ -476,7 +482,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         return builder.build();
     }
 
-    private void mergeThing(Thing target, Thing source) {
+    private void mergeThing(Thing target, Thing source, boolean keepSourceConfig) {
         String label = source.getLabel();
         if (label == null) {
             ThingType thingType = thingTypeRegistry.getThingType(target.getThingTypeUID(), localeProvider.getLocale());
@@ -486,6 +492,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         target.setLocation(source.getLocation());
         target.setBridgeUID(source.getBridgeUID());
 
+        if (keepSourceConfig) {
+            target.getConfiguration().setProperties(Map.of());
+        }
         Configuration thingConfig = processThingConfiguration(target.getThingTypeUID(), target.getUID(),
                 source.getConfiguration());
         thingConfig.keySet().forEach(paramName -> {
@@ -497,6 +506,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             Channel targetChannel = target.getChannels().stream().filter(c -> c.getUID().equals(channel.getUID()))
                     .findFirst().orElse(null);
             if (targetChannel != null) {
+                if (keepSourceConfig) {
+                    targetChannel.getConfiguration().setProperties(Map.of());
+                }
                 Configuration channelConfig = processChannelConfiguration(targetChannel.getChannelTypeUID(),
                         targetChannel.getUID(), channel.getConfiguration());
                 channelConfig.keySet().forEach(paramName -> {
@@ -509,9 +521,10 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     // in the registry when the channel was initially created
                     Configuration channelConfig = processChannelConfiguration(channel.getChannelTypeUID(),
                             channel.getUID(), channel.getConfiguration());
-                    newChannel = createChannel(target.getUID(), channel.getUID().getId(), channel.getChannelTypeUID(),
-                            channel.getKind(), channel.getAcceptedItemType(), channel.getLabel(),
-                            channel.getDescription(), channel.getAutoUpdatePolicy(), channelConfig, false);
+                    newChannel = createChannel(!keepSourceConfig, target.getUID(), channel.getUID().getId(),
+                            channel.getChannelTypeUID(), channel.getKind(), channel.getAcceptedItemType(),
+                            channel.getLabel(), channel.getDescription(), channel.getAutoUpdatePolicy(), channelConfig,
+                            false);
                 }
                 channelsToAdd.add(newChannel);
             }
