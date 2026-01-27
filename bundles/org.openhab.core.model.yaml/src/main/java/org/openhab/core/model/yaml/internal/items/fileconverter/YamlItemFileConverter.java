@@ -199,7 +199,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
                 continue;
             }
 
-            if ("stateDescription".equals(namespace) && value.isBlank()) {
+            if ("stateDescription".equals(namespace) && (value == null || value.isBlank())) {
                 Map<String, Object> config = md.getConfiguration();
 
                 String defaultPattern = getDefaultStatePattern(item);
@@ -215,7 +215,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
             }
 
             YamlMetadataDTO mdDto = new YamlMetadataDTO();
-            mdDto.value = value.isEmpty() ? null : value;
+            mdDto.value = value;
             Map<String, Object> configuration = new LinkedHashMap<>();
             for (ConfigParameter param : getConfigurationParameters(md)) {
                 configuration.put(param.name(), param.value());
