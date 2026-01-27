@@ -48,6 +48,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
+import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
 import org.openhab.core.model.yaml.test.FirstTypeDTO;
 import org.openhab.core.model.yaml.test.SecondTypeDTO;
 import org.openhab.core.service.WatchService;
@@ -611,6 +612,78 @@ public class YamlModelRepositoryImplTest {
         // Should contain short form metadata for 'homekit' and 'matter'
         assertThat(yaml, containsString("homekit: Lighting"));
         assertThat(yaml, containsString("matter: OnOffLight"));
+    }
+
+    @Test
+    public void testShortFormTagsLoadingAndGeneration() throws IOException {
+        Files.copy(SOURCE_PATH.resolve("tagWithShortFormSyntax.yaml"), fullModelPath);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+
+        @SuppressWarnings("unchecked")
+        YamlModelListener<YamlSemanticTagDTO> tagListener = mock(YamlModelListener.class);
+        when(tagListener.getElementClass()).thenReturn(YamlSemanticTagDTO.class);
+        when(tagListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(tagListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(tagListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<YamlSemanticTagDTO>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(tagListener).addedModel(eq(MODEL_NAME), captor.capture());
+
+        Collection<YamlSemanticTagDTO> tags = captor.getValue();
+        assertThat(tags, hasSize(1));
+        YamlSemanticTagDTO tag = tags.iterator().next();
+        assertThat(tag.getId(), is("Tag_uid"));
+        assertThat(tag.label, is("TagLabel"));
+        assertThat(tag.description, is(nullValue()));
+
+        // Verify YAML output contains short form
+        modelRepository.addElementsToBeGenerated("tags", List.copyOf(tags));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        modelRepository.generateFileFormat("tags", out);
+        String outYaml = out.toString();
+        assertThat(outYaml, containsString("Tag_uid: TagLabel"));
+    }
+
+    @Test
+    public void testMapFormTagsLoadingAndGeneration() throws IOException {
+        Files.copy(SOURCE_PATH.resolve("tagWithMapForm.yaml"), fullModelPath);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+
+        @SuppressWarnings("unchecked")
+        YamlModelListener<YamlSemanticTagDTO> tagListener = mock(YamlModelListener.class);
+        when(tagListener.getElementClass()).thenReturn(YamlSemanticTagDTO.class);
+        when(tagListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(tagListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(tagListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<YamlSemanticTagDTO>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(tagListener).addedModel(eq(MODEL_NAME), captor.capture());
+
+        Collection<YamlSemanticTagDTO> tags = captor.getValue();
+        assertThat(tags, hasSize(1));
+        YamlSemanticTagDTO tag = tags.iterator().next();
+        assertThat(tag.getId(), is("Tag_uid"));
+        assertThat(tag.label, is("TagLabel"));
+        assertThat(tag.description, is("Some description"));
+        assertThat(tag.synonyms, contains("syn1", "syn2"));
+
+        // Verify YAML output contains map form
+        modelRepository.addElementsToBeGenerated("tags", List.copyOf(tags));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        modelRepository.generateFileFormat("tags", out);
+        String outYaml = out.toString();
+        assertThat(outYaml, containsString("label: TagLabel"));
+        assertThat(outYaml, containsString("description: Some description"));
+        assertThat(outYaml, containsString("syn1"));
+        assertThat(outYaml, containsString("syn2"));
     }
 
     private static Matcher<String> containsOnlyOnce(String substring) {
