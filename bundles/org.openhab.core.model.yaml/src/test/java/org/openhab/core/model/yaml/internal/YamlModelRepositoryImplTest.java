@@ -686,6 +686,46 @@ public class YamlModelRepositoryImplTest {
         assertThat(outYaml, containsString("syn2"));
     }
 
+    @Test
+    public void testShortFormTagWithNullLabelDeserializesAndSerializes() throws IOException {
+        String content = "version: 1\n\n" + "tags:\n" + "  Tag_null: null\n";
+        Files.writeString(fullModelPath, content);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+
+        @SuppressWarnings("unchecked")
+        YamlModelListener<YamlSemanticTagDTO> tagListener = mock(YamlModelListener.class);
+        when(tagListener.getElementClass()).thenReturn(YamlSemanticTagDTO.class);
+        when(tagListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(tagListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(tagListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<YamlSemanticTagDTO>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(tagListener).addedModel(eq(MODEL_NAME), captor.capture());
+
+        Collection<YamlSemanticTagDTO> tags = captor.getValue();
+        assertThat(tags, hasSize(1));
+        YamlSemanticTagDTO tag = tags.iterator().next();
+        assertThat(tag.getId(), is("Tag_null"));
+        // DTO currently represents an explicit null label as null
+        assertThat(tag.label, is(nullValue()));
+        assertThat(tag.description, nullValue());
+
+        modelRepository.addElementsToBeGenerated("tags", List.copyOf(tags));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        modelRepository.generateFileFormat("tags", out);
+        String outYaml = out.toString();
+
+        // Generation should contain the tag key but should not emit label/description/synonyms
+        assertThat(outYaml, containsString("Tag_null:"));
+        assertThat(outYaml, not(containsString("label:")));
+        assertThat(outYaml, not(containsString("description:")));
+        assertThat(outYaml, not(containsString("synonyms:")));
+    }
+
     private static Matcher<String> containsOnlyOnce(String substring) {
         return new TypeSafeMatcher<String>() {
             @Override
