@@ -490,7 +490,7 @@ public class DefaultSemanticTags {
                 "Property_Price", //
                 "Price", //
                 "", //
-                "Cost,Fee,Rate");
+                "Cost, Fee, Rate");
         public static final SemanticTag PROGRESS = new SemanticTagImpl( //
                 "Property_Progress", //
                 "Progress", //
@@ -756,9 +756,9 @@ public class DefaultSemanticTags {
                 "");
         public static final SemanticTag AIR_CONDITIONER = new SemanticTagImpl( //
                 "Equipment_HVAC_AirConditioner", //
-                "Air Conditioner, Air Conditioning, A/C, AC, A/Cs", //
+                "Air Conditioner", //
                 "", //
-                "");
+                "Air Conditioning, A/C, AC, A/Cs");
         public static final SemanticTag AIR_FILTER = new SemanticTagImpl( //
                 "Equipment_HVAC_AirFilter", //
                 "Air Filter", //
