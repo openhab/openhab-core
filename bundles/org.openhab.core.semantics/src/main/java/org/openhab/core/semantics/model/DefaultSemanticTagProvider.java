@@ -137,6 +137,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.SMOKE);
         defaultTags.add(DefaultSemanticTags.Property.SOUND_VOLUME);
         defaultTags.add(DefaultSemanticTags.Property.SPEED);
+        defaultTags.add(DefaultSemanticTags.Property.STATE_OF_CHARGE);
         defaultTags.add(DefaultSemanticTags.Property.TAMPERED);
         defaultTags.add(DefaultSemanticTags.Property.TEMPERATURE);
         defaultTags.add(DefaultSemanticTags.Property.TILT);

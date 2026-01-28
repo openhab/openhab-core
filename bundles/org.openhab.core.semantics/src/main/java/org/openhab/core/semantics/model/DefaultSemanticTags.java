@@ -526,6 +526,11 @@ public class DefaultSemanticTags {
                 "Speed", //
                 "", //
                 "");
+        public static final SemanticTag STATE_OF_CHARGE = new SemanticTagImpl( //
+                "Property_StateOfCharge", //
+                "State of Charge", //
+                "", //
+                "BatteryLevel");
         public static final SemanticTag TAMPERED = new SemanticTagImpl( //
                 "Property_Tampered", //
                 "Tampered", //
