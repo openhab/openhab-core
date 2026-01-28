@@ -245,8 +245,8 @@
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.lib/${xtext.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.smap/${xtext.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.util/${xtext.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtend.lib/${xtext.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtend.lib.macro/${xtext.version}</bundle>
+		<bundle dependency="true" start="false">mvn:org.eclipse.xtext/org.eclipse.xtend.lib/${xtext.version}</bundle>
+		<bundle dependency="true" start="false">mvn:org.eclipse.xtext/org.eclipse.xtend.lib.macro/${xtext.version}</bundle>
 
 		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.3</bundle>
 		<bundle dependency="true">mvn:com.google.guava/guava/33.5.0-jre</bundle>
