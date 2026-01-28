@@ -60,8 +60,9 @@ def loadCsv(def semanticTagsCsv) {
     def schema = CsvSchema.emptySchema().withHeader()
 
     def reader = mapper.readerFor(Map).with(schema)
-    def it = reader.readValues(new File(semanticTagsCsv))
-    def tags = it.readAll()
+    def tags = reader.readValues(new File(semanticTagsCsv)).withCloseable { it ->
+        it.readAll()
+    }
 
     def sorted = sortAndGroupByHierarchy(tags)
     if (tags == sorted) {
