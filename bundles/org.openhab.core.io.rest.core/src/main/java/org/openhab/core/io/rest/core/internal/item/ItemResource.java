@@ -317,31 +317,31 @@ public class ItemResource implements RESTResource {
 
     /**
      *
-     * @param itemname name of the item
+     * @param itemName name of the item
      * @return the namesspace of that item
      */
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/namespaces")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/metadata/namespaces")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getItemNamespaces", summary = "Gets the namespace of an item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getItemNamespaces(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public Response getItemNamespaces(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
-        final Item item = getItem(itemname);
+        final Item item = getItem(itemName);
 
         if (item != null) {
-            final Collection<String> namespaces = metadataRegistry.getAllNamespaces(itemname);
+            final Collection<String> namespaces = metadataRegistry.getAllNamespaces(itemName);
             return Response.ok(new Stream2JSONInputStream(namespaces.stream())).build();
         } else {
-            return getItemNotFoundResponse(itemname);
+            return getItemNotFoundResponse(itemName);
         }
     }
 
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getItemByName", summary = "Gets a single item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
@@ -351,13 +351,13 @@ public class ItemResource implements RESTResource {
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("true") @QueryParam("recursive") @Parameter(description = "get member items if the item is a group item") boolean recursive,
             @DefaultValue("false") @QueryParam("parents") @Parameter(description = "get parent group items recursively") boolean parents,
-            @PathParam("itemname") @Parameter(description = "item name") String itemname) {
+            @PathParam("itemName") @Parameter(description = "item name") String itemName) {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
         final Set<String> namespaces = splitAndFilterNamespaces(namespaceSelector, locale);
 
         // get item
-        Item item = getItem(itemname);
+        Item item = getItem(itemName);
 
         // if it exists
         if (item != null) {
@@ -380,7 +380,7 @@ public class ItemResource implements RESTResource {
             }
             return JSONResponse.createResponse(Status.OK, dto, null);
         } else {
-            return getItemNotFoundResponse(itemname);
+            return getItemNotFoundResponse(itemName);
         }
     }
 
@@ -390,19 +390,19 @@ public class ItemResource implements RESTResource {
 
     /**
      *
-     * @param itemname item name to get the state from
+     * @param itemName item name to get the state from
      * @return the state of the item as mime-type text/plain
      */
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/state")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/state")
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "getItemState", summary = "Gets the state of an item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getPlainItemState(@PathParam("itemname") @Parameter(description = "item name") String itemname) {
+    public Response getPlainItemState(@PathParam("itemName") @Parameter(description = "item name") String itemName) {
         // get item
-        Item item = getItem(itemname);
+        Item item = getItem(itemName);
 
         // if it exists
         if (item != null) {
@@ -410,29 +410,29 @@ public class ItemResource implements RESTResource {
             // return JSONResponse.createResponse(Status.OK, item.getState().toString(), null);
             return Response.ok(item.getState().toFullString()).build();
         } else {
-            return getItemNotFoundResponse(itemname);
+            return getItemNotFoundResponse(itemName);
         }
     }
 
     /**
      *
-     * @param itemname the item from which to get the binary state
+     * @param itemName the item from which to get the binary state
      * @return the binary state of the item
      */
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/state")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/state")
     @Operation(operationId = "getItemState", summary = "Gets the state of an item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Item state is not RawType"),
             @ApiResponse(responseCode = "404", description = "Item not found"),
             @ApiResponse(responseCode = "415", description = "MediaType not supported by item state") })
     public Response getBinaryItemState(@HeaderParam("Accept") @Nullable String mediaType,
-            @PathParam("itemname") @Parameter(description = "item name") String itemname) {
+            @PathParam("itemName") @Parameter(description = "item name") String itemName) {
         List<String> acceptedMediaTypes = Arrays.stream(Objects.requireNonNullElse(mediaType, "").split(","))
                 .map(String::trim).toList();
 
-        Item item = getItem(itemname);
+        Item item = getItem(itemName);
 
         // if it exists
         if (item != null) {
@@ -457,7 +457,7 @@ public class ItemResource implements RESTResource {
 
     @PUT
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/state")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/state")
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "updateItemState", summary = "Updates the state of an item.", requestBody = @RequestBody(description = "Valid item state (e.g., ON, OFF) either as plain text or JSON", required = true, content = {
             @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(type = "string", example = "ON")),
@@ -468,21 +468,21 @@ public class ItemResource implements RESTResource {
     public Response putItemStatePlain(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @HeaderParam("X-OpenHAB-Source") @Parameter(description = "the source of the event; takes priority over the query parameter or JSON body if multiple are set") @Nullable String headerSource,
-            @PathParam("itemname") @Parameter(description = "item name") String itemname,
+            @PathParam("itemName") @Parameter(description = "item name") String itemName,
             @Parameter(description = "valid item state (e.g. ON, OFF)", required = true) String value,
             @QueryParam("source") @Parameter(description = "the source of the event") @Nullable String querySource,
             @Context SecurityContext securityContext) {
         String source = headerSource != null ? headerSource : querySource;
-        return sendItemStateInternal(language, itemname, value, source, securityContext);
+        return sendItemStateInternal(language, itemName, value, source, securityContext);
     }
 
     @PUT
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/state")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/state")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response putItemStateJson(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Nullable String language,
             @HeaderParam("X-OpenHAB-Source") @Nullable String headerSource,
-            @QueryParam("source") @Nullable String querySource, @PathParam("itemname") String itemname,
+            @QueryParam("source") @Nullable String querySource, @PathParam("itemName") String itemName,
             @Context SecurityContext securityContext, ValueContainer valueContainer) {
         String source;
         if (headerSource != null) {
@@ -492,10 +492,10 @@ public class ItemResource implements RESTResource {
         } else {
             source = querySource;
         }
-        return sendItemStateInternal(language, itemname, valueContainer.value(), source, securityContext);
+        return sendItemStateInternal(language, itemName, valueContainer.value(), source, securityContext);
     }
 
-    private Response sendItemStateInternal(@Nullable String language, String itemname, String value,
+    private Response sendItemStateInternal(@Nullable String language, String itemName, String value,
             @Nullable String source, SecurityContext securityContext) {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
@@ -503,7 +503,7 @@ public class ItemResource implements RESTResource {
         source = buildSource(source, securityContext);
 
         // get Item
-        Item item = getItem(itemname);
+        Item item = getItem(itemName);
 
         // if Item exists
         if (item != null) {
@@ -512,7 +512,7 @@ public class ItemResource implements RESTResource {
 
             if (state != null) {
                 // set State and report OK
-                eventPublisher.post(ItemEventFactory.createStateEvent(itemname, state, source));
+                eventPublisher.post(ItemEventFactory.createStateEvent(itemName, state, source));
                 return getItemResponse(null, Status.ACCEPTED, null, locale, zoneId, null);
             } else {
                 // State could not be parsed
@@ -520,13 +520,13 @@ public class ItemResource implements RESTResource {
             }
         } else {
             // Item does not exist
-            return getItemNotFoundResponse(itemname);
+            return getItemNotFoundResponse(itemName);
         }
     }
 
     @POST
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "sendItemCommand", summary = "Sends a command to an item.", requestBody = @RequestBody(description = "Valid item command (e.g., ON, OFF) either as plain text or JSON", required = true, content = {
             @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(type = "string", example = "ON")),
@@ -536,20 +536,20 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "400", description = "Command cannot be parsed") })
     public Response postItemCommandPlain(
             @HeaderParam("X-OpenHAB-Source") @Parameter(description = "the source of the command; takes priority over the query parameter or JSON body if multiple are set") @Nullable String headerSource,
-            @PathParam("itemname") @Parameter(description = "item name") String itemname,
+            @PathParam("itemName") @Parameter(description = "item name") String itemName,
             @Parameter(description = "valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)", required = true) String value,
             @QueryParam("source") @Parameter(description = "the source of the command") @Nullable String querySource,
             @Context SecurityContext securityContext) {
         String source = headerSource != null ? headerSource : querySource;
-        return sendItemCommandInternal(itemname, value, source, securityContext);
+        return sendItemCommandInternal(itemName, value, source, securityContext);
     }
 
     @POST
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postItemCommandJson(@HeaderParam("X-OpenHAB-Source") @Nullable String headerSource,
-            @PathParam("itemname") String itemname, @QueryParam("source") @Nullable String querySource,
+            @PathParam("itemName") String itemName, @QueryParam("source") @Nullable String querySource,
             @Context SecurityContext securityContext, ValueContainer valueContainer) {
         String source;
         if (headerSource != null) {
@@ -559,12 +559,12 @@ public class ItemResource implements RESTResource {
         } else {
             source = querySource;
         }
-        return sendItemCommandInternal(itemname, valueContainer.value(), source, securityContext);
+        return sendItemCommandInternal(itemName, valueContainer.value(), source, securityContext);
     }
 
-    private Response sendItemCommandInternal(String itemname, String value, @Nullable String source,
+    private Response sendItemCommandInternal(String itemName, String value, @Nullable String source,
             SecurityContext securityContext) {
-        Item item = getItem(itemname);
+        Item item = getItem(itemName);
         Command command = null;
         source = buildSource(source, securityContext);
         if (item != null) {
@@ -585,7 +585,7 @@ public class ItemResource implements RESTResource {
                 command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), value);
             }
             if (command != null) {
-                eventPublisher.post(ItemEventFactory.createCommandEvent(itemname, command, source));
+                eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command, source));
                 ResponseBuilder resbuilder = Response.ok();
                 resbuilder.type(MediaType.TEXT_PLAIN);
                 return resbuilder.build();
@@ -593,7 +593,7 @@ public class ItemResource implements RESTResource {
                 return Response.status(Status.BAD_REQUEST).build();
             }
         } else {
-            return getItemNotFoundResponse(itemname);
+            return getItemNotFoundResponse(itemName);
         }
     }
 
@@ -677,13 +677,13 @@ public class ItemResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}")
     @Operation(operationId = "removeItemFromRegistry", summary = "Removes an item from the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found or item is not editable.") })
-    public Response removeItem(@PathParam("itemname") @Parameter(description = "item name") String itemname) {
-        if (managedItemProvider.remove(itemname) == null) {
+    public Response removeItem(@PathParam("itemName") @Parameter(description = "item name") String itemName) {
+        if (managedItemProvider.remove(itemName) == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
@@ -691,21 +691,21 @@ public class ItemResource implements RESTResource {
 
     @PUT
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/tags/{tag}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/tags/{tag}")
     @Operation(operationId = "addTagToItem", summary = "Adds a tag to an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found."),
                     @ApiResponse(responseCode = "405", description = "Item not editable.") })
-    public Response addTag(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public Response addTag(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("tag") @Parameter(description = "tag") String tag) {
-        Item item = getItem(itemname);
+        Item item = getItem(itemName);
 
         if (item == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        if (managedItemProvider.get(itemname) == null) {
+        if (managedItemProvider.get(itemName) == null) {
             return Response.status(Status.METHOD_NOT_ALLOWED).build();
         }
 
@@ -717,21 +717,21 @@ public class ItemResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/tags/{tag}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/tags/{tag}")
     @Operation(operationId = "removeTagFromItem", summary = "Removes a tag from an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found."),
                     @ApiResponse(responseCode = "405", description = "Item not editable.") })
-    public Response removeTag(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public Response removeTag(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("tag") @Parameter(description = "tag") String tag) {
-        Item item = getItem(itemname);
+        Item item = getItem(itemName);
 
         if (item == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        if (managedItemProvider.get(itemname) == null) {
+        if (managedItemProvider.get(itemName) == null) {
             return Response.status(Status.METHOD_NOT_ALLOWED).build();
         }
 
@@ -743,7 +743,7 @@ public class ItemResource implements RESTResource {
 
     @PUT
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/metadata/{namespace}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(operationId = "addMetadataToItem", summary = "Adds metadata to an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = { //
@@ -751,10 +751,10 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "201", description = "Created"), //
                     @ApiResponse(responseCode = "404", description = "Item not found."), //
                     @ApiResponse(responseCode = "405", description = "Metadata not editable.") })
-    public Response addMetadata(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public Response addMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("namespace") @Parameter(description = "namespace") String namespace,
             @Parameter(description = "metadata", required = true) MetadataDTO metadata) {
-        Item item = getItem(itemname);
+        Item item = getItem(itemName);
 
         if (item == null) {
             return Response.status(Status.NOT_FOUND).build();
@@ -765,7 +765,7 @@ public class ItemResource implements RESTResource {
             value = "";
         }
 
-        MetadataKey key = new MetadataKey(namespace, itemname);
+        MetadataKey key = new MetadataKey(namespace, itemName);
         Metadata md = new Metadata(key, value, metadata.config);
         if (metadataRegistry.get(key) == null) {
             metadataRegistry.add(md);
@@ -778,24 +778,24 @@ public class ItemResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/metadata/{namespace}")
     @Operation(operationId = "removeMetadataFromItem", summary = "Removes metadata from an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found."),
                     @ApiResponse(responseCode = "405", description = "Meta data not editable.") })
-    public Response removeMetadata(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    public Response removeMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @Nullable @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
-        Item item = getItem(itemname);
+        Item item = getItem(itemName);
 
         if (item == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
 
         if (namespace == null) {
-            metadataRegistry.removeItemMetadata(itemname);
+            metadataRegistry.removeItemMetadata(itemName);
         } else {
-            MetadataKey key = new MetadataKey(namespace, itemname);
+            MetadataKey key = new MetadataKey(namespace, itemName);
             if (metadataRegistry.get(key) != null) {
                 if (metadataRegistry.remove(key) == null) {
                     return Response.status(Status.CONFLICT).build();
@@ -826,13 +826,13 @@ public class ItemResource implements RESTResource {
     /**
      * Create or Update an item by supplying an item bean.
      *
-     * @param itemname the item name
+     * @param itemName the item name
      * @param item the item bean.
      * @return Response configured to represent the Item in depending on the status
      */
     @PUT
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(operationId = "addOrUpdateItemInRegistry", summary = "Adds a new item to the registry or updates the existing item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -843,7 +843,7 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "405", description = "Item not editable.") })
     public Response createOrUpdateItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @PathParam("itemname") @Parameter(description = "item name") String itemname,
+            @PathParam("itemName") @Parameter(description = "item name") String itemName,
             @Parameter(description = "item data", required = true) @Nullable GroupItemDTO item) {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
@@ -851,7 +851,7 @@ public class ItemResource implements RESTResource {
         // If we didn't get an item bean, then return!
         if (item == null) {
             return Response.status(Status.BAD_REQUEST).build();
-        } else if (!itemname.equalsIgnoreCase((item.name))) {
+        } else if (!itemName.equalsIgnoreCase((item.name))) {
             logger.warn(
                     "Received HTTP PUT request at '{}' with an item name '{}' that does not match the one in the url.",
                     uriInfo.getPath(), item.name);
@@ -867,21 +867,21 @@ public class ItemResource implements RESTResource {
             }
 
             // Save the item
-            if (getItem(itemname) == null) {
+            if (getItem(itemName) == null) {
                 // item does not yet exist, create it
                 managedItemProvider.add(newItem);
-                return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.CREATED, itemRegistry.get(itemname),
+                return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.CREATED, itemRegistry.get(itemName),
                         locale, zoneId, null);
-            } else if (managedItemProvider.get(itemname) != null) {
+            } else if (managedItemProvider.get(itemName) != null) {
                 // item already exists as a managed item, update it
                 managedItemProvider.update(newItem);
-                return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.OK, itemRegistry.get(itemname), locale,
+                return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.OK, itemRegistry.get(itemName), locale,
                         zoneId, null);
             } else {
                 // Item exists but cannot be updated
-                logger.warn("Cannot update existing item '{}', because is not managed.", itemname);
+                logger.warn("Cannot update existing item '{}', because is not managed.", itemName);
                 return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
-                        "Cannot update non-managed Item " + itemname);
+                        "Cannot update non-managed Item " + itemName);
             }
         } catch (IllegalArgumentException e) {
             logger.warn("Received HTTP PUT request at '{}' with an invalid item name '{}'.", uriInfo.getPath(),
@@ -1041,11 +1041,11 @@ public class ItemResource implements RESTResource {
     /**
      * helper: Response to be sent to client if an item cannot be found
      *
-     * @param itemname item name that could not be found
+     * @param itemName item name that could not be found
      * @return Response configured for 'item not found'
      */
-    private static Response getItemNotFoundResponse(String itemname) {
-        String message = "Item " + itemname + " does not exist!";
+    private static Response getItemNotFoundResponse(String itemName) {
+        String message = "Item " + itemName + " does not exist!";
         return JSONResponse.createResponse(Status.NOT_FOUND, null, message);
     }
 
@@ -1068,11 +1068,11 @@ public class ItemResource implements RESTResource {
     /**
      * convenience shortcut
      *
-     * @param itemname the name of the item to be retrieved
-     * @return Item addressed by itemname
+     * @param itemName the name of the item to be retrieved
+     * @return Item addressed by itemName
      */
-    private @Nullable Item getItem(String itemname) {
-        return itemRegistry.get(itemname);
+    private @Nullable Item getItem(String itemName) {
+        return itemRegistry.get(itemName);
     }
 
     private Collection<Item> getItems(@Nullable String type, @Nullable String tags) {

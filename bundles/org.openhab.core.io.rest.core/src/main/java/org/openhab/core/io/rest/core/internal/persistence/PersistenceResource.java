@@ -281,14 +281,14 @@ public class PersistenceResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/items/{itemname: [a-zA-Z_0-9]+}")
+    @Path("/items/{itemName: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getItemDataFromPersistenceService", summary = "Gets item persistence data from the persistence service.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
             @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
     public Response httpGetPersistenceItemData(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @Parameter(description = "The item name") @PathParam("itemname") String itemName,
+            @Parameter(description = "The item name") @PathParam("itemName") String itemName,
             @Parameter(description = "Start time of the data to return. Will default to 1 day before endtime. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]") @QueryParam("starttime") @Nullable String startTime,
@@ -303,7 +303,7 @@ public class PersistenceResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/items/{itemname: [a-zA-Z_0-9]+}")
+    @Path("/items/{itemName: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "deleteItemFromPersistenceService", summary = "Deletes item persistence data from a specific persistence service in a given time range.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -312,7 +312,7 @@ public class PersistenceResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "Unknown persistence service") })
     public Response httpDeletePersistenceServiceItem(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.", required = true) @QueryParam("serviceId") String serviceId,
-            @Parameter(description = "The item name.") @PathParam("itemname") String itemName,
+            @Parameter(description = "The item name.") @PathParam("itemName") String itemName,
             @Parameter(description = "Start of the time range to be deleted. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]", required = true) @QueryParam("starttime") String startTime,
@@ -323,7 +323,7 @@ public class PersistenceResource implements RESTResource {
 
     @PUT
     @RolesAllowed({ Role.ADMIN })
-    @Path("/items/{itemname: [a-zA-Z_0-9]+}")
+    @Path("/items/{itemName: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "storeItemDataInPersistenceService", summary = "Stores item persistence data into the persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -332,7 +332,7 @@ public class PersistenceResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
     public Response httpPutPersistenceItemData(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @Parameter(description = "The item name.") @PathParam("itemname") String itemName,
+            @Parameter(description = "The item name.") @PathParam("itemName") String itemName,
             @Parameter(description = "Time of the data to be stored. Will default to current time. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]", required = true) @QueryParam("time") String time,
             @Parameter(description = "The state to store.", required = true) @QueryParam("state") String value) {

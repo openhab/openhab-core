@@ -1,0 +1,15 @@
+version: 1
+things:
+  ntp:ntp:local:
+    config:
+      hostname: 12345
+      timeZone: 12.3
+    channels:
+      string:
+        type: string-channel
+        config:
+          DateTimeFormat: 100
+      date-only-string:
+        type: string-channel
+        config:
+          DateTimeFormat: 123.45
