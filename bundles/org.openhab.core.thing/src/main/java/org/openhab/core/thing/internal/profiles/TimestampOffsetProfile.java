@@ -12,10 +12,13 @@
  */
 package org.openhab.core.thing.internal.profiles;
 
+import java.time.DateTimeException;
 import java.time.Duration;
-import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
@@ -38,12 +41,14 @@ import org.slf4j.LoggerFactory;
 public class TimestampOffsetProfile implements StateProfile {
 
     static final String OFFSET_PARAM = "offset";
+    static final String TIMEZONE_PARAM = "timezone";
 
     private final Logger logger = LoggerFactory.getLogger(TimestampOffsetProfile.class);
 
     private final ProfileCallback callback;
 
     private final Duration offset;
+    private final @Nullable ZoneId timeZone;
 
     public TimestampOffsetProfile(ProfileCallback callback, ProfileContext context) {
         this.callback = callback;
@@ -60,6 +65,22 @@ public class TimestampOffsetProfile implements StateProfile {
                     OFFSET_PARAM);
             offset = Duration.ZERO;
         }
+
+        Object param = context.getConfiguration().get(TIMEZONE_PARAM);
+        String timeZoneParam = param == null ? null : param.toString();
+        ZoneId zone;
+        if (timeZoneParam == null || timeZoneParam.isBlank()) {
+            zone = null;
+        } else {
+            logger.debug("Configuring profile with {} parameter '{}'", TIMEZONE_PARAM, timeZoneParam);
+            try {
+                zone = ZoneId.of(timeZoneParam);
+            } catch (DateTimeException e) {
+                logger.debug("Error setting time zone '{}': {}", timeZoneParam, e.getMessage());
+                zone = null;
+            }
+        }
+        timeZone = zone;
     }
 
     @Override
@@ -73,20 +94,20 @@ public class TimestampOffsetProfile implements StateProfile {
 
     @Override
     public void onCommandFromItem(Command command) {
-        callback.handleCommand((Command) applyOffset(command, false));
+        callback.handleCommand((Command) applyOffsetAndTimezone(command, false));
     }
 
     @Override
     public void onCommandFromHandler(Command command) {
-        callback.sendCommand((Command) applyOffset(command, true));
+        callback.sendCommand((Command) applyOffsetAndTimezone(command, true));
     }
 
     @Override
     public void onStateUpdateFromHandler(State state) {
-        callback.sendUpdate((State) applyOffset(state, true));
+        callback.sendUpdate((State) applyOffsetAndTimezone(state, true));
     }
 
-    private Type applyOffset(Type type, boolean towardsItem) {
+    private Type applyOffsetAndTimezone(Type type, boolean towardsItem) {
         if (type instanceof UnDefType) {
             // we cannot adjust UNDEF or NULL values, thus we simply return them without reporting an error or warning
             return type;
@@ -95,15 +116,20 @@ public class TimestampOffsetProfile implements StateProfile {
         Duration finalOffset = towardsItem ? offset : offset.negated();
         Type result;
         if (type instanceof DateTimeType timeType) {
-            Instant instant = timeType.getInstant();
+            ZonedDateTime zdt = timeType.getZonedDateTime();
 
             // apply offset
             if (!Duration.ZERO.equals(offset)) {
                 // we do not need apply an offset equals to 0
-                instant = instant.plus(finalOffset);
+                zdt = zdt.plus(finalOffset);
             }
 
-            result = new DateTimeType(instant);
+            // apply time zone
+            ZoneId timeZone = this.timeZone;
+            if (timeZone != null && !zdt.getZone().equals(timeZone)) {
+                zdt = zdt.withZoneSameInstant(timeZone);
+            }
+            result = new DateTimeType(zdt);
         } else {
             logger.warn(
                     "Offset '{}' cannot be applied to the incompatible state '{}' sent from the binding. Returning original state.",
