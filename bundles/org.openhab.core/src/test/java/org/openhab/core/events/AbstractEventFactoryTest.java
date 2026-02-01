@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.events.ItemEventFactory;
 
 /**
@@ -25,7 +27,8 @@ import org.openhab.core.items.events.ItemEventFactory;
  */
 @NonNullByDefault
 public class AbstractEventFactoryTest {
-    private final ItemEventFactory factory = new ItemEventFactory();
+    private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProvider;
+    private final ItemEventFactory factory = new ItemEventFactory(timeZoneProvider);
 
     private static final String SOURCE = "binding:type:id:channel";
     private static final String EVENT_TYPE = "SOME_EVENT_TYPE";
