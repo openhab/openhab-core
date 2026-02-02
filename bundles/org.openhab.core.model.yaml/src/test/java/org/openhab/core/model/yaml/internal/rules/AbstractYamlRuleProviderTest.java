@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
@@ -56,7 +55,6 @@ public class AbstractYamlRuleProviderTest {
         assertThat(ids, is(hasSize(1)));
     }
 
-    @SuppressWarnings("null")
     @Test
     public void testMapModules() throws SerializationException {
         AbstractYamlRuleProvider<Rule> provider = new AbstractYamlRuleProvider<Rule>() {
@@ -86,8 +84,7 @@ public class AbstractYamlRuleProviderTest {
         YamlConditionDTO cond3 = new YamlConditionDTO();
         cond3.id = "4";
         cond3.type = "type3";
-        HashSet<@Nullable String> otherModuleIds = new HashSet<>(Set.of("1", "3", "otherId2"));
-        otherModuleIds.add(null);
+        HashSet<String> otherModuleIds = new HashSet<>(Set.of("1", "3", "otherId2"));
         conditions = provider.mapModules(List.of(cond1, cond2, cond3), otherModuleIds, Condition.class);
         assertThat(conditions, is(hasSize(3)));
         assertThat(conditions.get(0).getId(), is("2"));
