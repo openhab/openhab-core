@@ -74,8 +74,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
             Principal userPrincipal = new GenericUser(name);
             Subject subject = new Subject(true, Set.of(userPrincipal), Set.of(), Set.of(userCredentials));
 
-            Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
-            LoginContext loginContext = new LoginContext(realmName, subject, new CallbackHandler() {
+            CallbackHandler callbackHandler = new CallbackHandler() {
                 @Override
                 public void handle(@NonNullByDefault({}) Callback[] callbacks)
                         throws IOException, UnsupportedCallbackException {
@@ -89,7 +88,16 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
                         }
                     }
                 }
-            }, new ManagedUserLoginConfiguration());
+            };
+
+            LoginContext loginContext;
+            if (DEFAULT_REALM.equals(realmName)) {
+                Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
+                loginContext = new LoginContext(realmName, subject, callbackHandler,
+                        new ManagedUserLoginConfiguration());
+            } else {
+                loginContext = new LoginContext(realmName, subject, callbackHandler);
+            }
             loginContext.login();
 
             return getAuthentication(name, loginContext.getSubject());
