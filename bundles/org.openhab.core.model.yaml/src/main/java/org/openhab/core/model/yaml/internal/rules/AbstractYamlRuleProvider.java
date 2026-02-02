@@ -34,6 +34,8 @@ import org.openhab.core.io.dto.SerializationException;
  * {@link AbstractYamlRuleProvider} is an abstract class that contains some methods common for {@link YamlRuleProvider}
  * and {@link YamlRuleTemplateProvider}.
  *
+ * @param <E> the type of the provided elements
+ *
  * @author Ravi Nadahar - Initial contribution
  */
 @NonNullByDefault

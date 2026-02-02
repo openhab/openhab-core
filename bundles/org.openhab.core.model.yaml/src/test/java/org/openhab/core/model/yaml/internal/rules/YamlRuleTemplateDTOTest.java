@@ -17,10 +17,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Condition;
+import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
+import org.openhab.core.automation.template.RuleTemplate;
+import org.openhab.core.automation.util.ActionBuilder;
+import org.openhab.core.automation.util.ConditionBuilder;
+import org.openhab.core.automation.util.TriggerBuilder;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 
 /**
  * The {@link YamlRuleTemplateDTOTest} contains tests for the {@link YamlRuleTemplateDTO} class.
@@ -29,6 +40,33 @@ import org.openhab.core.automation.Visibility;
  */
 @NonNullByDefault
 public class YamlRuleTemplateDTOTest {
+
+    @Test
+    public void testConstructor() {
+        Action action = ActionBuilder.create().withId("action1").withTypeUID("type1").build();
+        RuleTemplate template = new RuleTemplate("template1", "Foo Template", "Foo rule template", Set.of("test"),
+                List.of(), List.of(), List.of(action), List.of(), Visibility.VISIBLE);
+        assertNotNull(new YamlRuleTemplateDTO(template));
+
+        Condition condition = ConditionBuilder.create().withId("condition1").withTypeUID("type1").build();
+        template = new RuleTemplate("template1", "Foo Template", "Foo rule template", Set.of("test"), List.of(),
+                List.of(condition), List.of(action), List.of(), Visibility.VISIBLE);
+        assertNotNull(new YamlRuleTemplateDTO(template));
+
+        Trigger trigger = TriggerBuilder.create().withId("trigger1").withTypeUID("type1").build();
+        template = new RuleTemplate("template1", "Foo Template", "Foo rule template", Set.of("test"), List.of(trigger),
+                List.of(condition), List.of(action), List.of(), Visibility.VISIBLE);
+        assertNotNull(new YamlRuleTemplateDTO(template));
+
+        template = new RuleTemplate("template1", "Foo Template", "Foo rule template", Set.of("test"), List.of(trigger),
+                List.of(condition), List.of(action),
+                List.of(ConfigDescriptionParameterBuilder.create("number", Type.DECIMAL).build()), Visibility.VISIBLE);
+        YamlRuleTemplateDTO templateDTO = new YamlRuleTemplateDTO(template);
+        assertNotNull(templateDTO);
+        assertEquals(
+                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, visibility=VISIBLE, configDescriptions=[YamlConfigDescriptionParameterDTO [name=number, required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]], conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], actions=[YamlActionDTO [inputs={}, id=action1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                templateDTO.toString());
+    }
 
     @Test
     public void testIsValid() throws IOException {
@@ -138,6 +176,7 @@ public class YamlRuleTemplateDTOTest {
 
         assertNotNull(template1);
         assertTrue(template1.equals(template1));
+        assertFalse(template1.equals(new Object()));
         assertEquals(template1.hashCode(), template2.hashCode());
 
         template1.uid = "template:id";

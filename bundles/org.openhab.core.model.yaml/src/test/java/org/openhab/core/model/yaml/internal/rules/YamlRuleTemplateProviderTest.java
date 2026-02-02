@@ -59,7 +59,7 @@ import org.openhab.core.service.WatchService;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class YamlRuleTemplateProviderTest {
-    private static final Path SOURCE_PATH = Path.of("src/test/resources/rule-templates");
+    private static final Path SOURCE_PATH = Path.of("src/test/resources/model/rule-templates");
     private static final String TEMPLATES_NAME = "rule-templates.yaml";
     private static final Path TEMPLATES_PATH = Path.of(TEMPLATES_NAME);
 

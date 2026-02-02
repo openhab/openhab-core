@@ -215,7 +215,7 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
     }
 
     @Override
-    public YamlElement cloneWithoutId() {
+    public YamlRuleDTO cloneWithoutId() {
         YamlRuleDTO copy;
         try {
             copy = (YamlRuleDTO) super.clone();

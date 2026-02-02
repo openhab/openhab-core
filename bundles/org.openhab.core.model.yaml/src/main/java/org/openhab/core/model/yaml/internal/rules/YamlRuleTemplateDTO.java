@@ -140,8 +140,6 @@ public class YamlRuleTemplateDTO
             }
             result.configDescriptions = partial.configDescriptions;
 
-            Map<@NonNull String, @NonNull Object> config;
-            String translatedType;
             if (partial.actions != null && !partial.actions.isEmpty()) {
                 if (!partial.actions.isArray()) {
                     throw new SerializationException("Expected actions to be an array node");
@@ -208,7 +206,7 @@ public class YamlRuleTemplateDTO
     }
 
     @Override
-    public YamlElement cloneWithoutId() {
+    public YamlRuleTemplateDTO cloneWithoutId() {
         YamlRuleTemplateDTO copy;
         try {
             copy = (YamlRuleTemplateDTO) super.clone();

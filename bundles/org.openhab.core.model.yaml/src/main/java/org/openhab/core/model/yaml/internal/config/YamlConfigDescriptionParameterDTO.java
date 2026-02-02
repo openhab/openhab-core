@@ -28,6 +28,7 @@ import org.openhab.core.config.core.dto.FilterCriteriaDTO;
 import org.openhab.core.config.core.dto.ParameterOptionDTO;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This is a data transfer object used to serialize a parameter of a configuration description in a YAML configuration.
@@ -37,7 +38,8 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 public class YamlConfigDescriptionParameterDTO {
 
     public String context;
-    @JsonAlias({ "default", "defaultValue" })
+    @JsonProperty("default")
+    @JsonAlias("defaultValue")
     public String defaultValue;
     public String description;
     public String label;
@@ -46,8 +48,8 @@ public class YamlConfigDescriptionParameterDTO {
     public Type type;
     public BigDecimal min;
     public BigDecimal max;
-    @JsonAlias({ "step", "stepsize" })
-    public BigDecimal stepsize;
+    @JsonAlias({ "stepsize" })
+    public BigDecimal step;
     public String pattern;
     public Boolean readOnly;
     public Boolean multiple;
@@ -78,7 +80,7 @@ public class YamlConfigDescriptionParameterDTO {
         this.type = parameter.getType();
         this.min = parameter.getMinimum();
         this.max = parameter.getMaximum();
-        this.stepsize = parameter.getStepSize();
+        this.step = parameter.getStepSize();
         this.pattern = parameter.getPattern();
         this.readOnly = parameter.isReadOnly();
         this.multiple = parameter.isMultiple();
@@ -96,7 +98,7 @@ public class YamlConfigDescriptionParameterDTO {
             this.options = optionDtos;
         }
         List<@NonNull FilterCriteria> filterCriterias = parameter.getFilterCriteria();
-        if (!filterCriteria.isEmpty()) {
+        if (!filterCriterias.isEmpty()) {
             List<FilterCriteriaDTO> filterCriteriaDtos = new ArrayList<>(filterCriteria.size());
             for (FilterCriteria filterCriteria : filterCriterias) {
                 filterCriteriaDtos.add(new FilterCriteriaDTO(filterCriteria.getName(), filterCriteria.getValue()));
@@ -115,7 +117,7 @@ public class YamlConfigDescriptionParameterDTO {
     @Override
     public int hashCode() {
         return Objects.hash(advanced, context, defaultValue, description, filterCriteria, groupName, label,
-                limitToOptions, max, min, multiple, multipleLimit, name, options, pattern, readOnly, required, stepsize,
+                limitToOptions, max, min, multiple, multipleLimit, name, options, pattern, readOnly, required, step,
                 type, unit, unitLabel, verify);
     }
 
@@ -136,7 +138,7 @@ public class YamlConfigDescriptionParameterDTO {
                 && Objects.equals(multiple, other.multiple) && Objects.equals(multipleLimit, other.multipleLimit)
                 && Objects.equals(name, other.name) && Objects.equals(options, other.options)
                 && Objects.equals(pattern, other.pattern) && Objects.equals(readOnly, other.readOnly)
-                && required == other.required && Objects.equals(stepsize, other.stepsize) && type == other.type
+                && required == other.required && Objects.equals(step, other.step) && type == other.type
                 && Objects.equals(unit, other.unit) && Objects.equals(unitLabel, other.unitLabel)
                 && Objects.equals(verify, other.verify);
     }
@@ -170,8 +172,8 @@ public class YamlConfigDescriptionParameterDTO {
         if (max != null) {
             builder.append("max=").append(max).append(", ");
         }
-        if (stepsize != null) {
-            builder.append("stepsize=").append(stepsize).append(", ");
+        if (step != null) {
+            builder.append("step=").append(step).append(", ");
         }
         if (pattern != null) {
             builder.append("pattern=").append(pattern).append(", ");
@@ -238,8 +240,8 @@ public class YamlConfigDescriptionParameterDTO {
                     .withMinimum(parameterDto.min).withMultiple(parameterDto.multiple)
                     .withMultipleLimit(parameterDto.multipleLimit).withPattern(parameterDto.pattern)
                     .withReadOnly(parameterDto.readOnly).withRequired(parameterDto.required)
-                    .withStepSize(parameterDto.stepsize).withUnit(parameterDto.unit)
-                    .withUnitLabel(parameterDto.unitLabel).withVerify(parameterDto.verify);
+                    .withStepSize(parameterDto.step).withUnit(parameterDto.unit).withUnitLabel(parameterDto.unitLabel)
+                    .withVerify(parameterDto.verify);
             filterCriteriaDtos = parameterDto.filterCriteria;
             if (filterCriteriaDtos != null) {
                 filterCriterias = new ArrayList<>(filterCriteriaDtos.size());
