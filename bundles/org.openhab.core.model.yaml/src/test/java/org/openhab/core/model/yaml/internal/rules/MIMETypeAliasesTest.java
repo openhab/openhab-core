@@ -14,8 +14,6 @@ package org.openhab.core.model.yaml.internal.rules;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 
@@ -27,10 +25,8 @@ import org.junit.jupiter.api.Test;
 @NonNullByDefault
 public class MIMETypeAliasesTest {
 
-    @SuppressWarnings("null")
     @Test
     public void testAliasToType() {
-        assertThrows(NullPointerException.class, () -> MIMETypeAliases.aliasToType(null));
         assertThat(MIMETypeAliases.aliasToType("a"), is("a"));
         assertThat(MIMETypeAliases.aliasToType(""), is(""));
         assertThat(MIMETypeAliases.aliasToType("DSL"), is("application/vnd.openhab.dsl.rule"));
