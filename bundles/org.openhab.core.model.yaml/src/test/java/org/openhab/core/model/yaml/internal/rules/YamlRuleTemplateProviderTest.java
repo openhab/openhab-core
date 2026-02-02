@@ -134,6 +134,9 @@ public class YamlRuleTemplateProviderTest {
         assertThat(parameter.getOptions(), is(empty()));
         assertThat(parameter.getFilterCriteria(), is(empty()));
 
+        assertThat(template.getTags(), hasSize(1));
+        assertThat(template.getTags(), hasItem("Basic"));
+
         List<Trigger> triggers = template.getTriggers();
         assertThat(triggers, hasSize(2));
         Trigger trigger = triggers.get(0);

@@ -135,6 +135,8 @@ public class YamlRuleProviderTest {
         assertThat(rule.getConfiguration().getProperties(), is(anEmptyMap()));
         assertThat(rule.getConfigurationDescriptions(), is(empty()));
 
+        assertThat(rule.getTags(), is(empty()));
+
         List<Trigger> triggers = rule.getTriggers();
         assertThat(triggers, hasSize(2));
         Trigger trigger = triggers.get(0);
@@ -397,6 +399,8 @@ public class YamlRuleProviderTest {
                 "Command to send to the alert item (for an item linked to a Hue light alert channel, LSELECT will flash the light for a few seconds)."));
         assertThat(parameter.getDefault(), is("LSELECT"));
         assertTrue(parameter.isRequired());
+
+        assertThat(rule.getTags(), is(empty()));
 
         triggers = rule.getTriggers();
         assertThat(triggers, hasSize(1));
