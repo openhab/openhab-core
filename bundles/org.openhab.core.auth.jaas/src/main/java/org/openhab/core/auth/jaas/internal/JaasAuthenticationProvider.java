@@ -115,12 +115,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
     }
 
     private String[] getRoles(Set<Principal> principals) {
-        String[] roles = new String[principals.size()];
-        int i = 0;
-        for (Principal principal : principals) {
-            roles[i++] = principal.getName();
-        }
-        return roles;
+        return principals.stream().map(Principal::getName).distinct().toArray(String[]::new);
     }
 
     @Activate
