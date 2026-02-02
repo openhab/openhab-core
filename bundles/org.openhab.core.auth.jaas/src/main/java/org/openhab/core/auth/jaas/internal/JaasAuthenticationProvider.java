@@ -72,7 +72,8 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
         final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Principal userPrincipal = new GenericUser(name);
-            Subject subject = new Subject(true, Set.of(userPrincipal), Set.of(), Set.of(userCredentials));
+            Subject subject = new Subject(DEFAULT_REALM.equals(realmName), Set.of(userPrincipal), Set.of(),
+                    Set.of(userCredentials));
 
             CallbackHandler callbackHandler = new CallbackHandler() {
                 @Override
