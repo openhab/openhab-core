@@ -22,9 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.auth.AuthenticatedUser;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
-import org.openhab.core.auth.AuthenticatedUser;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.i18n.LocaleProvider;
@@ -102,7 +102,8 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
             String newApiToken;
 
             if (user instanceof AuthenticatedUser authenticatedUser) {
-                if (authenticatedUser.getApiTokens().stream().anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
+                if (authenticatedUser.getApiTokens().stream()
+                        .anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
                     resp.setContentType("text/html;charset=UTF-8");
                     resp.getWriter().append(
                             getPageBody(params, getLocalizedMessage("auth.createapitoken.name.unique.fail"), false));
