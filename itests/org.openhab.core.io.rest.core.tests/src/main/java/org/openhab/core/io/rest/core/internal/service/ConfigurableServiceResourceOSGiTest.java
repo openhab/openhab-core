@@ -160,6 +160,6 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
         assertThat(((Map) response.getEntity()).get("a"), nullValue());
 
         response = configurableServiceResource.deleteConfiguration("id");
-        assertThat(response.getStatus(), is(404));
+        assertThat(response.getStatus(), is(204));
     }
 }
