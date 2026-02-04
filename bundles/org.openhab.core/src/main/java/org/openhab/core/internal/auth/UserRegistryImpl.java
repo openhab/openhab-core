@@ -26,6 +26,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.auth.AuthenticatedUser;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.Credentials;
@@ -153,19 +154,20 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
                 throw new AuthenticationException("Invalid API token format");
             }
             for (User user : getAll()) {
-                ManagedUser managedUser = (ManagedUser) user;
-                for (UserApiToken userApiToken : managedUser.getApiTokens()) {
-                    // only check if the name in the token matches
-                    if (!userApiToken.getName().equals(apiTokenParts[1])) {
-                        continue;
-                    }
-                    String[] existingTokenHashAndSalt = userApiToken.getApiToken().split(":");
-                    String incomingTokenHash = hash(apiTokenCreds.getApiToken(), existingTokenHashAndSalt[1],
-                            APITOKEN_ITERATIONS).get();
+                if (user instanceof AuthenticatedUser authenticatedUser) {
+                    for (UserApiToken userApiToken : authenticatedUser.getApiTokens()) {
+                        // only check if the name in the token matches
+                        if (!userApiToken.getName().equals(apiTokenParts[1])) {
+                            continue;
+                        }
+                        String[] existingTokenHashAndSalt = userApiToken.getApiToken().split(":");
+                        String incomingTokenHash = hash(apiTokenCreds.getApiToken(), existingTokenHashAndSalt[1],
+                                APITOKEN_ITERATIONS).get();
 
-                    if (incomingTokenHash.equals(existingTokenHashAndSalt[0])) {
-                        return new Authentication(managedUser.getName(),
-                                managedUser.getRoles().stream().toArray(String[]::new), userApiToken.getScope());
+                        if (incomingTokenHash.equals(existingTokenHashAndSalt[0])) {
+                            return new Authentication(authenticatedUser.getName(),
+                                    authenticatedUser.getRoles().toArray(String[]::new), userApiToken.getScope());
+                        }
                     }
                 }
             }
@@ -192,47 +194,43 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
     @Override
     public void addUserSession(User user, UserSession session) {
-        if (!(user instanceof ManagedUser)) {
-            throw new IllegalArgumentException("User is not managed: " + user.getName());
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            throw new IllegalArgumentException("User authentication is not managed by openHAB: " + user.getName());
         }
 
-        ManagedUser managedUser = (ManagedUser) user;
-        managedUser.getSessions().add(session);
+        authenticatedUser.getSessions().add(session);
         update(user);
     }
 
     @Override
     public void removeUserSession(User user, UserSession session) {
-        if (!(user instanceof ManagedUser)) {
-            throw new IllegalArgumentException("User is not managed: " + user.getName());
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            throw new IllegalArgumentException("User authentication is not managed by openHAB: " + user.getName());
         }
 
-        ManagedUser managedUser = (ManagedUser) user;
-        managedUser.getSessions().remove(session);
+        authenticatedUser.getSessions().remove(session);
         update(user);
     }
 
     @Override
     public void clearSessions(User user) {
-        if (!(user instanceof ManagedUser)) {
-            throw new IllegalArgumentException("User is not managed: " + user.getName());
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            throw new IllegalArgumentException("User authentication is not managed by openHAB: " + user.getName());
         }
 
-        ManagedUser managedUser = (ManagedUser) user;
-        managedUser.getSessions().clear();
+        authenticatedUser.getSessions().clear();
         update(user);
     }
 
     @Override
     public String addUserApiToken(User user, String name, String scope) {
-        if (!(user instanceof ManagedUser)) {
-            throw new IllegalArgumentException("User is not managed: " + user.getName());
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            throw new IllegalArgumentException("User authentication is not managed by openHAB: " + user.getName());
         }
         if (!name.matches("[a-zA-Z0-9]*")) {
             throw new IllegalArgumentException("API token name format invalid, alphanumeric characters only");
         }
 
-        ManagedUser managedUser = (ManagedUser) user;
         String tokenSalt = generateSalt(KEY_LENGTH / 8).get();
         byte[] rnd = new byte[64];
         RAND.nextBytes(rnd);
@@ -242,7 +240,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
         UserApiToken userApiToken = new UserApiToken(name, tokenHash + ":" + tokenSalt, scope);
 
-        managedUser.getApiTokens().add(userApiToken);
+        authenticatedUser.getApiTokens().add(userApiToken);
         update(user);
 
         return token;
@@ -250,12 +248,11 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
     @Override
     public void removeUserApiToken(User user, UserApiToken userApiToken) {
-        if (!(user instanceof ManagedUser)) {
-            throw new IllegalArgumentException("User is not managed: " + user.getName());
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            throw new IllegalArgumentException("User authentication is not managed by openHAB: " + user.getName());
         }
 
-        ManagedUser managedUser = (ManagedUser) user;
-        managedUser.getApiTokens().remove(userApiToken);
+        authenticatedUser.getApiTokens().remove(userApiToken);
         update(user);
     }
 

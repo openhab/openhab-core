@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
-import org.openhab.core.auth.ManagedUser;
+import org.openhab.core.auth.AuthenticatedUser;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.i18n.LocaleProvider;
@@ -101,8 +101,8 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
             User user = login(username, password);
             String newApiToken;
 
-            if (user instanceof ManagedUser managedUser) {
-                if (managedUser.getApiTokens().stream().anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
+            if (user instanceof AuthenticatedUser authenticatedUser) {
+                if (authenticatedUser.getApiTokens().stream().anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
                     resp.setContentType("text/html;charset=UTF-8");
                     resp.getWriter().append(
                             getPageBody(params, getLocalizedMessage("auth.createapitoken.name.unique.fail"), false));
@@ -119,7 +119,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
                 }
                 newApiToken = userRegistry.addUserApiToken(user, tokenName, tokenScope);
             } else {
-                throw new AuthenticationException("User is not managed");
+                throw new AuthenticationException("User is not stateful");
             }
 
             String resultMessage = getLocalizedMessage("auth.createapitoken.success") + "<br /><br /><code>"
