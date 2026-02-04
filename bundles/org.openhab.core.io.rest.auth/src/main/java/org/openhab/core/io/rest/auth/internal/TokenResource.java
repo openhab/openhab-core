@@ -211,7 +211,8 @@ public class TokenResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "User not found");
         }
         if (!(user instanceof AuthenticatedUser authenticatedUser)) {
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "User authent by openHAB");
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "User authentication is not managed by openHAB");
         }
 
         Optional<UserApiToken> userApiToken = authenticatedUser.getApiTokens().stream()

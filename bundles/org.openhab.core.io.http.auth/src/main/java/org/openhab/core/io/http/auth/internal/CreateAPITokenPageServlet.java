@@ -120,7 +120,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
                 }
                 newApiToken = userRegistry.addUserApiToken(user, tokenName, tokenScope);
             } else {
-                throw new AuthenticationException("User is not stateful");
+                throw new AuthenticationException("User authentication is not managed by openHAB");
             }
 
             String resultMessage = getLocalizedMessage("auth.createapitoken.success") + "<br /><br /><code>"
