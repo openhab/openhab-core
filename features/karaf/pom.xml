@@ -48,8 +48,7 @@
         <plugin>
           <groupId>org.apache.karaf.tooling</groupId>
           <artifactId>karaf-maven-plugin</artifactId>
-          <!-- TODO replace fixed version 4.4.8 by ${karaf.tooling.version} one karaf#2219 is contained in future release -->
-          <version>4.4.8</version>
+          <version>${karaf.tooling.version}</version>
           <extensions>true</extensions>
           <configuration>
             <startLevel>80</startLevel>
