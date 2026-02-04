@@ -21,9 +21,9 @@
     <cxf.version>3.6.9</cxf.version>
     <jackson.annotations.version>2.21</jackson.annotations.version>
     <jackson.version>2.21.0</jackson.version>
-    <jetty.version>9.4.57.v20241219</jetty.version>
+    <jetty.version>9.4.58.v20250814</jetty.version>
     <pax.logging.version>2.3.0</pax.logging.version>
-    <pax.web.version>8.0.33</pax.web.version>
+    <pax.web.version>8.0.34</pax.web.version>
     <swagger.version>2.2.41</swagger.version>
   </properties>
 
