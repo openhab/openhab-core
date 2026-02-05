@@ -26,6 +26,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.AuthenticatedUser;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
@@ -39,6 +40,8 @@ import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UserSession;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.ManagedProvider;
+import org.openhab.core.common.registry.Provider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -254,6 +257,18 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
         authenticatedUser.getApiTokens().remove(userApiToken);
         update(user);
+    }
+
+    @Override
+    public @Nullable User update(User element) {
+        String key = element.getName();
+        Provider<User> provider = getProvider(key);
+        // If the provider of this element is a ManagedProvider, invoke the update method of that provider instead of the default one
+        // This allows for registering additional ManagedProviders, e.g., for providing LDAP users
+        if (provider instanceof ManagedProvider<User, ?> managedProvider) {
+            return managedProvider.update(element);
+        }
+        return super.update(element);
     }
 
     @Override
