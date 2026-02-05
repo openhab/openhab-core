@@ -21,13 +21,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Represents a generic {@link User} with a set of roles
  *
  * @author Yannick Schaus - initial contribution
- *
  */
 @NonNullByDefault
 public class GenericUser implements User {
-
-    private String name;
-    private Set<String> roles;
+    protected String name;
+    protected Set<String> roles;
 
     /**
      * Constructs a user attributed with a set of roles.
