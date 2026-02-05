@@ -263,7 +263,8 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     public @Nullable User update(User element) {
         String key = element.getName();
         Provider<User> provider = getProvider(key);
-        // If the provider of this element is a ManagedProvider, invoke the update method of that provider instead of the default one
+        // If the provider of this element is a ManagedProvider,
+        // invoke the update method of that provider instead of the default one
         // This allows for registering additional ManagedProviders, e.g., for providing LDAP users
         if (provider instanceof ManagedProvider<User, ?> managedProvider) {
             return managedProvider.update(element);
