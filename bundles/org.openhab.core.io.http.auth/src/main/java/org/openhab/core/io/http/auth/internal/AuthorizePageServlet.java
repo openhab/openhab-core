@@ -27,9 +27,9 @@ import javax.ws.rs.core.HttpHeaders;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.http.HttpStatus;
+import org.openhab.core.auth.AuthenticatedUser;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
-import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.Role;
 import org.openhab.core.auth.User;
@@ -168,15 +168,15 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
 
             String authorizationCode = UUID.randomUUID().toString().replace("-", "");
 
-            if (user instanceof ManagedUser managedUser) {
+            if (user instanceof AuthenticatedUser authenticatedUser) {
                 String codeChallenge = params.containsKey("code_challenge") ? params.get("code_challenge")[0] : null;
                 String codeChallengeMethod = params.containsKey("code_challenge_method")
                         ? params.get("code_challenge_method")[0]
                         : null;
                 PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope,
                         codeChallenge, codeChallengeMethod);
-                managedUser.setPendingToken(pendingToken);
-                userRegistry.update(managedUser);
+                authenticatedUser.setPendingToken(pendingToken);
+                userRegistry.update(authenticatedUser);
             }
 
             String state = params.containsKey("state") ? params.get("state")[0] : null;

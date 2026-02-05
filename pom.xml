@@ -77,7 +77,7 @@
     <karaf.compile.version>4.4.9</karaf.compile.version>
     <karaf.tooling.version>4.4.9</karaf.tooling.version>
     <sat.version>0.18.0</sat.version>
-    <slf4j.version>2.0.16</slf4j.version>
+    <slf4j.version>2.0.17</slf4j.version>
     <xtext.version>2.41.0</xtext.version>
     <spotless.version>2.44.3</spotless.version>
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
@@ -286,7 +286,7 @@ Import-Package: \
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.14.1</version>
+          <version>3.15.0</version>
           <configuration>
             <compilerId>eclipse</compilerId>
             <compilerArgs>
