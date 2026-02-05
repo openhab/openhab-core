@@ -161,6 +161,7 @@
 			<xs:enumeration value="Number:Angle"/>
 			<xs:enumeration value="Number:Area"/>
 			<xs:enumeration value="Number:ArealDensity"/>
+			<xs:enumeration value="Number:CalorificValue"/>
 			<xs:enumeration value="Number:CatalyticActivity"/>
 			<xs:enumeration value="Number:Currency"/>
 			<xs:enumeration value="Number:DataAmount"/>
