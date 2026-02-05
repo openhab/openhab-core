@@ -155,8 +155,11 @@ public class ConfigurationService {
      * @return old config or null if no old config existed
      * @throws IOException if configuration can not be removed
      */
-    public Configuration delete(String configId) throws IOException {
+    public @Nullable Configuration delete(String configId) throws IOException {
         org.osgi.service.cm.Configuration serviceConfiguration = configurationAdmin.getConfiguration(configId, null);
+        if (serviceConfiguration == null) {
+            return null;
+        }
         Configuration oldConfiguration = toConfiguration(serviceConfiguration.getProperties());
         serviceConfiguration.delete();
         return oldConfiguration;

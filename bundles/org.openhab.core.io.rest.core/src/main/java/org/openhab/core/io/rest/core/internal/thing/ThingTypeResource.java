@@ -28,6 +28,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -151,8 +152,8 @@ public class ThingTypeResource implements RESTResource {
     @Path("/{thingTypeUID}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getThingTypeById", summary = "Gets thing type by UID.", responses = {
-            @ApiResponse(responseCode = "200", description = "Thing type with provided thingTypeUID does not exist.", content = @Content(schema = @Schema(implementation = ThingTypeDTO.class))),
-            @ApiResponse(responseCode = "404", description = "No content") })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ThingTypeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Thing type not found.") })
     public Response getByUID(@PathParam("thingTypeUID") @Parameter(description = "thingTypeUID") String thingTypeUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
@@ -160,7 +161,7 @@ public class ThingTypeResource implements RESTResource {
         if (thingType != null) {
             return Response.ok(convertToThingTypeDTO(thingType, locale)).build();
         } else {
-            return Response.noContent().build();
+            return Response.status(Status.NOT_FOUND).build();
         }
     }
 
