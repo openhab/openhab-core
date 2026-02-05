@@ -26,7 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Yannick Schaus - initial contribution
  */
 @NonNullByDefault
-public class ManagedUser implements User {
+public class ManagedUser implements AuthenticatedUser {
 
     private String name;
     private String passwordHash;
@@ -118,56 +118,32 @@ public class ManagedUser implements User {
         this.roles = roles;
     }
 
-    /**
-     * Gets the pending token information for this user, if any.
-     *
-     * @return the pending token information or null if there is none
-     */
+    @Override
     public @Nullable PendingToken getPendingToken() {
         return pendingToken;
     }
 
-    /**
-     * Sets or clears the pending token information for this user.
-     *
-     * @param pendingToken the pending token information or null to clear it
-     */
+    @Override
     public void setPendingToken(@Nullable PendingToken pendingToken) {
         this.pendingToken = pendingToken;
     }
 
-    /**
-     * Gets the current persistent sessions for this user.
-     *
-     * @return the list of sessions
-     */
+    @Override
     public List<UserSession> getSessions() {
         return sessions;
     }
 
-    /**
-     * Replaces the list of sessions by a new one.
-     *
-     * @param sessions the new list of sessions
-     */
+    @Override
     public void setSessions(List<UserSession> sessions) {
         this.sessions = sessions;
     }
 
-    /**
-     * Gets the long-term API tokens for this user
-     *
-     * @return the API tokens
-     */
+    @Override
     public List<UserApiToken> getApiTokens() {
         return apiTokens;
     }
 
-    /**
-     * Replaces the list of API tokens by a new one.
-     *
-     * @param apiTokens the new API tokens
-     */
+    @Override
     public void setApiTokens(List<UserApiToken> apiTokens) {
         this.apiTokens = apiTokens;
     }
