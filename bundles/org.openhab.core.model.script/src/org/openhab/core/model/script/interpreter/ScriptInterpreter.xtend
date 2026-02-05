@@ -25,6 +25,7 @@ import org.openhab.core.model.script.scoping.StateAndCommandProvider
 import org.openhab.core.model.script.script.QuantityLiteral
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmIdentifiableElement
+import org.eclipse.xtext.common.types.JvmPrimitiveType
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
@@ -33,9 +34,12 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XFeatureCall
 import org.eclipse.xtext.xbase.XMemberFeatureCall
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
+import org.eclipse.xtext.xbase.interpreter.impl.EvaluationException
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
+import org.eclipse.xtext.xbase.typesystem.references.StandardTypeReferenceOwner
+import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices;
 
 /**
  * The script interpreter handles specific script components, which are not known
@@ -59,6 +63,9 @@ class ScriptInterpreter extends XbaseInterpreter {
 
     @Inject
     extension IJvmModelAssociations
+
+    @Inject
+    CommonTypeComputationServices services
 
     override protected _invokeFeature(JvmField jvmField, XAbstractFeatureCall featureCall, Object receiver,
         IEvaluationContext context, CancelIndicator indicator) {
@@ -152,21 +159,43 @@ class ScriptInterpreter extends XbaseInterpreter {
         return QuantityType.valueOf(literal.value + " " + literal.unit.value);
     }
 
-    override Object _doEvaluate(XCastedExpression castedExpression, IEvaluationContext context,
+    /**
+     * This is the same implementation as in XbaseInterpreter.java with the
+     * {@code "Could not cast (" + result.class + ")" + result + " to " + typeName }
+     * line being the only difference.  There is no other way to create an error message,
+     * stating what cannot be casted to what. See
+     * <a href="https://github.com/eclipse-xtext/xtext/issues/3595">github.com/eclipse-xtext/xtext/issues/3595</a>.
+     */
+    override protected _doEvaluate(XCastedExpression castedExpression, IEvaluationContext context,
         CancelIndicator indicator) {
-        try {
-            return super._doEvaluate(castedExpression, context, indicator)
-        } catch (RuntimeException e) {
-            if (e.cause instanceof ClassCastException) {
-                val Object result = internalEvaluate(castedExpression.getTarget(), context, indicator);
-                throw new ScriptExecutionException(new ScriptError(
-                    "Could not cast " + result + " to " + castedExpression.getType().getType().getQualifiedName(),
-                    castedExpression));
-                } else {
-                    throw e;
-                }
+        var result = internalEvaluate(castedExpression.target, context, indicator)
+        val owner = new StandardTypeReferenceOwner(services, castedExpression)
+        val targetType = owner.toLightweightTypeReference(castedExpression.type)
+        result = wrapOrUnwrapArray(result, targetType)
+        result = coerceArgumentType(result, castedExpression.type)
+        val castType = castedExpression.type.type
+        if (castType instanceof JvmPrimitiveType) {
+            if (result === null) {
+                throwNullPointerException(castedExpression, "Cannot cast null to primitive " + castType.identifier)
             }
+            return castToPrimitiveType(result, services.primitives.primitiveKind(castType))
         }
+        val typeName = castType.qualifiedName
+        var Class<?> expectedType = null
+        try {
+            expectedType = getJavaType(castType)
+        } catch (ClassNotFoundException e) {
+            throw new EvaluationException(new NoClassDefFoundError(typeName))
+        }
+        try {
+            expectedType.cast(result)
+        } catch (ClassCastException e) {
+            throw new EvaluationException(new ClassCastException(
+                "Could not cast (" + result.class + ")" + result + " to " + typeName
+                ))
+        }
+        return result
+    }
 
     }
     
