@@ -184,7 +184,7 @@ public class PersistenceResource implements RESTResource {
     @Operation(operationId = "getPersistenceServiceConfiguration", summary = "Gets a persistence service configuration.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PersistenceServiceConfigurationDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "Service configuration not found.") })
+                    @ApiResponse(responseCode = "204", description = "No matching service configuration.") })
     public Response httpGetPersistenceServiceConfiguration(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
         PersistenceServiceConfiguration configuration = persistenceServiceConfigurationRegistry.get(serviceId);
@@ -195,7 +195,7 @@ public class PersistenceResource implements RESTResource {
             configurationDTO.editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
             return JSONResponse.createResponse(Status.OK, configurationDTO, null);
         } else {
-            return Response.status(Status.NOT_FOUND).build();
+            return Response.noContent().build();
         }
     }
 
