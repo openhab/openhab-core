@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.thing.internal.GenericItemChannelLinkProvider;
 import org.openhab.core.model.thing.internal.GenericThingProvider;
@@ -47,6 +48,7 @@ import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -69,6 +71,7 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
     private final ModelRepository modelRepository;
     private final GenericThingProvider thingProvider;
     private final GenericItemChannelLinkProvider itemChannelLinkProvider;
+    private final LocaleProvider localeProvider;
 
     private final Map<String, ThingModel> elementsToGenerate = new ConcurrentHashMap<>();
 
@@ -78,11 +81,13 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
             final @Reference GenericItemChannelLinkProvider itemChannelLinkProvider,
             final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ChannelTypeRegistry channelTypeRegistry,
-            final @Reference ConfigDescriptionRegistry configDescRegistry) {
+            final @Reference ConfigDescriptionRegistry configDescRegistry,
+            final @Reference LocaleProvider localeProvider) {
         super(thingTypeRegistry, channelTypeRegistry, configDescRegistry);
         this.modelRepository = modelRepository;
         this.thingProvider = thingProvider;
         this.itemChannelLinkProvider = itemChannelLinkProvider;
+        this.localeProvider = localeProvider;
     }
 
     @Override
@@ -149,8 +154,10 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
             model.setThingTypeId(thing.getThingTypeUID().getId());
             model.setThingId(thing.getUID().getId());
         }
-        if (thing.getLabel() != null) {
-            model.setLabel(thing.getLabel());
+        ThingType thingType = thingTypeRegistry.getThingType(thing.getThingTypeUID(), localeProvider.getLocale());
+        String label = thingType != null && thingType.getLabel().equals(thing.getLabel()) ? null : thing.getLabel();
+        if (label != null) {
+            model.setLabel(label);
         }
         if (thing.getLocation() != null) {
             model.setLocation(thing.getLocation());
