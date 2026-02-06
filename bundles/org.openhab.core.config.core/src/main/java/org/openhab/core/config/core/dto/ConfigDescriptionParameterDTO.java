@@ -56,6 +56,7 @@ public class ConfigDescriptionParameterDTO {
     public Boolean limitToOptions;
     public String unit;
     public String unitLabel;
+    public boolean dynamic;
 
     public List<ParameterOptionDTO> options;
     public List<FilterCriteriaDTO> filterCriteria;
@@ -67,7 +68,7 @@ public class ConfigDescriptionParameterDTO {
             BigDecimal stepsize, String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context,
             String defaultValue, String label, String description, List<ParameterOptionDTO> options,
             List<FilterCriteriaDTO> filterCriteria, String groupName, Boolean advanced, Boolean limitToOptions,
-            Integer multipleLimit, String unit, String unitLabel, Boolean verify) {
+            Integer multipleLimit, String unit, String unitLabel, Boolean verify, Boolean dynamic) {
         this.name = name;
         this.type = type;
         this.min = minimum;
@@ -90,5 +91,6 @@ public class ConfigDescriptionParameterDTO {
         this.unit = unit;
         this.unitLabel = unitLabel;
         this.verify = verify;
+        this.dynamic = dynamic;
     }
 }
