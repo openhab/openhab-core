@@ -19,12 +19,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.DateTimeException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -41,6 +44,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.FieldSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -205,6 +209,9 @@ public class DateTimeTypeTest {
             sb.append("expectedFormattedResult=").append(expectedFormattedResult).append("]");
             return sb.toString();
         }
+    }
+
+    private record LocalDateTestCase(LocalDateTime ldt, @Nullable ZoneId zone, DateTimeType expectedResult) {
     }
 
     @BeforeAll
@@ -449,6 +456,251 @@ public class DateTimeTypeTest {
         DateTimeType dt = new DateTimeType(Instant.parse(instant));
         String actual = dt.format(pattern, zoneId);
         assertThat(actual, is(equalTo(expected)));
+    }
+
+    public static final List<LocalDateTestCase> LOCAL_DATE_TEST_CASES = List.of(
+            new LocalDateTestCase(LocalDateTime.parse("2002-04-08T13:50:02"), null,
+                    DateTimeType.valueOf("?2002-04-08T13:50:02PST")),
+            new LocalDateTestCase(LocalDateTime.parse("2002-04-08T13:50:02"), ZoneOffset.ofHours(4),
+                    DateTimeType.valueOf("2002-04-08T13:50:02+0400")),
+            new LocalDateTestCase(LocalDateTime.parse("2002-04-08T13:50:02"), ZoneId.of("Asia/Kathmandu"),
+                    DateTimeType.valueOf("2002-04-08T13:50:02+05:45[Asia/Kathmandu]")));
+
+    @ParameterizedTest
+    @FieldSource("LOCAL_DATE_TEST_CASES")
+    @SuppressWarnings("PMD.SetDefaultTimeZone")
+    public void localDateTimeConstructorTest(LocalDateTestCase testCase) {
+        if (testCase.zone == null) {
+            TimeZone.setDefault(TimeZone.getTimeZone("PST"));
+        }
+        DateTimeType dt = new DateTimeType(testCase.ldt, testCase.zone);
+        assertEquals(testCase.expectedResult.toFullString(), dt.toFullString());
+        assertEquals(testCase.expectedResult, dt);
+    }
+
+    @Test
+    public void variousGettersTest() {
+        DateTimeType dt = DateTimeType.valueOf("2002-04-08T13:50:02+0400");
+        LocalDateTime ldt = LocalDateTime.parse("2002-04-08T13:50:02");
+        assertEquals(ldt.atOffset(ZoneOffset.ofHours(4)), dt.getOffsetDateTime());
+        assertEquals(ldt.atZone(ZoneOffset.ofHours(4)), dt.getZonedDateTime());
+        assertEquals(ldt.atZone(ZoneOffset.ofHours(4)).withZoneSameInstant(ZoneId.of("Asia/Kathmandu")),
+                dt.getZonedDateTime(ZoneId.of("Asia/Kathmandu")));
+        assertEquals(ldt.atZone(ZoneOffset.ofHours(4)).toInstant(), dt.getInstant());
+        assertEquals(ZoneOffset.ofHours(4), dt.getZoneId());
+        assertEquals(ZoneOffset.ofHours(4), dt.getZoneOffset());
+        assertTrue(dt.isZoneAuthoritative());
+
+        dt = DateTimeType.valueOf("?2002-04-08T13:50:02+0400");
+        ldt = LocalDateTime.parse("2002-04-08T13:50:02");
+        assertEquals(ldt.atOffset(ZoneOffset.ofHours(4)), dt.getOffsetDateTime());
+        assertEquals(ldt.atZone(ZoneOffset.ofHours(4)), dt.getZonedDateTime());
+        assertEquals(ldt.atZone(ZoneOffset.ofHours(4)).withZoneSameInstant(ZoneId.of("Asia/Kathmandu")),
+                dt.getZonedDateTime(ZoneId.of("Asia/Kathmandu")));
+        assertEquals(ldt.atZone(ZoneOffset.ofHours(4)).toInstant(), dt.getInstant());
+        assertEquals(ZoneOffset.ofHours(4), dt.getZoneId());
+        assertEquals(ZoneOffset.ofHours(4), dt.getZoneOffset());
+        assertFalse(dt.isZoneAuthoritative());
+
+        dt = DateTimeType.valueOf("1989-11-19T17:32:49+01:00[Europe/Berlin]");
+        ldt = LocalDateTime.parse("1989-11-19T17:32:49");
+        assertEquals(ldt.atOffset(ZoneOffset.ofHours(1)), dt.getOffsetDateTime());
+        assertEquals(ldt.atZone(ZoneId.of("Europe/Berlin")), dt.getZonedDateTime());
+        assertEquals(ldt.atZone(ZoneId.of("Europe/Berlin")).withZoneSameInstant(ZoneId.of("Asia/Kathmandu")),
+                dt.getZonedDateTime(ZoneId.of("Asia/Kathmandu")));
+        assertEquals(ldt.atZone(ZoneId.of("Europe/Berlin")).toInstant(), dt.getInstant());
+        assertEquals(ZoneId.of("Europe/Berlin"), dt.getZoneId());
+        assertEquals(ZoneOffset.ofHours(1), dt.getZoneOffset());
+        assertTrue(dt.isZoneAuthoritative());
+
+        dt = dt.plus(6, ChronoUnit.MONTHS);
+        ldt = ldt.plus(6, ChronoUnit.MONTHS);
+        assertEquals(ldt.atOffset(ZoneOffset.ofHours(2)), dt.getOffsetDateTime());
+        assertEquals(ldt.atZone(ZoneId.of("Europe/Berlin")), dt.getZonedDateTime());
+        assertEquals(ldt.atZone(ZoneId.of("Europe/Berlin")).withZoneSameInstant(ZoneId.of("Asia/Kathmandu")),
+                dt.getZonedDateTime(ZoneId.of("Asia/Kathmandu")));
+        assertEquals(ldt.atZone(ZoneId.of("Europe/Berlin")).toInstant(), dt.getInstant());
+        assertEquals(ZoneId.of("Europe/Berlin"), dt.getZoneId());
+        assertEquals(ZoneOffset.ofHours(2), dt.getZoneOffset());
+        assertTrue(dt.isZoneAuthoritative());
+    }
+
+    @Test
+    public void variousFunctionsTest() {
+        DateTimeType dt = DateTimeType.valueOf("2002-04-08T13:50:02+0400");
+        assertEquals(DateTimeType.valueOf("2002-04-08T13:50:00+0400"), dt.truncatedTo(ChronoUnit.MINUTES));
+        assertEquals(DateTimeType.valueOf("2002-04-08T00:00:00+0400"), dt.truncatedTo(ChronoUnit.DAYS));
+        DateTimeType dt2 = dt.plus(Duration.ofHours(5));
+        assertEquals(5, dt.until(dt2, ChronoUnit.HOURS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        assertFalse(dt.isBefore(dt));
+        assertFalse(dt.isAfter(dt));
+        dt2 = dt.minus(-3, ChronoUnit.MONTHS);
+        assertEquals(3, dt.until(dt2, ChronoUnit.MONTHS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        dt2 = dt.minus(5, ChronoUnit.MONTHS);
+        assertEquals(-151, dt.until(dt2, ChronoUnit.DAYS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        dt2 = dt.plus(5, ChronoUnit.MONTHS);
+        assertEquals(3672, dt.until(dt2, ChronoUnit.HOURS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        Instant inst = Instant.parse("2002-11-11T16:50:00Z");
+        assertEquals(312899, dt.until(inst, ChronoUnit.MINUTES));
+        assertTrue(dt.isBefore(inst));
+        assertFalse(dt2.isAfter(inst));
+        dt2 = dt.minus(63, ChronoUnit.MINUTES);
+        assertEquals(-3780, dt.until(dt2, ChronoUnit.SECONDS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        dt2 = dt.minus(Period.of(1, 8, 13));
+        assertEquals(-14904, dt.until(dt2, ChronoUnit.HOURS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        ZonedDateTime zdt = ZonedDateTime.parse("2002-11-11T16:50:00-06:00");
+        assertTrue(dt.isBefore(zdt));
+        assertFalse(dt2.isAfter(zdt));
+        assertSame(dt, dt.toFixedOffset());
+        assertSame(dt, dt.toZone(ZoneOffset.ofHours(4)));
+        assertSame(dt, dt.toOffset(ZoneOffset.ofHours(4)));
+        assertEquals(new DateTimeType(Instant.parse("2002-04-08T09:50:02Z"), ZoneId.of("CET")).toFullString(),
+                dt.toZone("CET").toFullString());
+        assertEquals(DateTimeType.valueOf("2002-04-08T11:50:02+0200"), dt.toOffset(ZoneOffset.ofHours(2)));
+
+        dt = DateTimeType.valueOf("?2002-04-08T13:50:02+0400");
+        assertEquals(DateTimeType.valueOf("?2002-04-08T13:50:00+0400"), dt.truncatedTo(ChronoUnit.MINUTES));
+        assertEquals(DateTimeType.valueOf("?2002-04-08T00:00:00+0400"), dt.truncatedTo(ChronoUnit.DAYS));
+        dt2 = dt.plus(Duration.ofHours(5));
+        assertEquals(5, dt.until(dt2, ChronoUnit.HOURS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        assertFalse(dt.isBefore(dt));
+        assertFalse(dt.isAfter(dt));
+        dt2 = dt.minus(-3, ChronoUnit.MONTHS);
+        assertEquals(3, dt.until(dt2, ChronoUnit.MONTHS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        dt2 = dt.minus(5, ChronoUnit.MONTHS);
+        assertEquals(-151, dt.until(dt2, ChronoUnit.DAYS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        dt2 = dt.plus(5, ChronoUnit.MONTHS);
+        assertEquals(3672, dt.until(dt2, ChronoUnit.HOURS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        inst = Instant.parse("2002-11-11T16:50:00Z");
+        assertEquals(312899, dt.until(inst, ChronoUnit.MINUTES));
+        assertTrue(dt.isBefore(inst));
+        assertFalse(dt2.isAfter(inst));
+        dt2 = dt.minus(63, ChronoUnit.MINUTES);
+        assertEquals(-3780, dt.until(dt2, ChronoUnit.SECONDS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        dt2 = dt.minus(Period.of(1, 8, 13));
+        assertEquals(-14904, dt.until(dt2, ChronoUnit.HOURS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        zdt = ZonedDateTime.parse("2002-11-11T16:50:00-06:00");
+        assertTrue(dt.isBefore(zdt));
+        assertFalse(dt2.isAfter(zdt));
+        assertEquals(0, dt.compareTo(dt.toFixedOffset()));
+        assertEquals(0, dt.compareTo(dt.toZone(ZoneOffset.ofHours(4))));
+        assertEquals(0, dt.compareTo(dt.toOffset(ZoneOffset.ofHours(4))));
+        assertEquals(new DateTimeType(Instant.parse("2002-04-08T09:50:02Z"), ZoneId.of("CET")).toFullString(),
+                dt.toZone("CET").toFullString());
+        assertEquals(DateTimeType.valueOf("2002-04-08T11:50:02+0200"), dt.toOffset(ZoneOffset.ofHours(2)));
+
+        dt = DateTimeType.valueOf("1989-11-19T17:32:49+01:00[Europe/Berlin]");
+        assertEquals(DateTimeType.valueOf("1989-11-19T17:32:00+01:00[Europe/Berlin]"),
+                dt.truncatedTo(ChronoUnit.MINUTES));
+        assertEquals(DateTimeType.valueOf("1989-11-19T00:00:00+01:00[Europe/Berlin]"), dt.truncatedTo(ChronoUnit.DAYS));
+        dt2 = dt.plus(Duration.ofHours(5));
+        assertEquals(5, dt.until(dt2, ChronoUnit.HOURS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        assertFalse(dt.isBefore(dt));
+        assertFalse(dt.isAfter(dt));
+        dt2 = dt.minus(-3, ChronoUnit.MONTHS);
+        assertEquals(3, dt.until(dt2, ChronoUnit.MONTHS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        dt2 = dt.minus(5, ChronoUnit.MONTHS);
+        assertEquals(-153, dt.until(dt2, ChronoUnit.DAYS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        dt2 = dt.plus(5, ChronoUnit.MONTHS);
+        assertEquals(3623, dt.until(dt2, ChronoUnit.HOURS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        inst = Instant.parse("1989-11-11T16:50:00Z");
+        assertEquals(-11502, dt.until(inst, ChronoUnit.MINUTES));
+        assertFalse(dt.isBefore(inst));
+        assertTrue(dt2.isAfter(inst));
+        dt2 = dt.minus(63, ChronoUnit.MINUTES);
+        assertEquals(-3780, dt.until(dt2, ChronoUnit.SECONDS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        dt2 = dt.minus(Period.of(1, 8, 13));
+        assertEquals(-14952, dt.until(dt2, ChronoUnit.HOURS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        zdt = ZonedDateTime.parse("1989-11-11T16:50:00-06:00");
+        assertFalse(dt.isBefore(zdt));
+        assertFalse(dt2.isAfter(zdt));
+        assertEquals(DateTimeType.valueOf("1989-11-19T17:32:49+01:00"), dt.toFixedOffset());
+        assertSame(dt, dt.toZone(ZoneId.of("Europe/Berlin")));
+        assertEquals(0, dt.compareTo(dt.toOffset(ZoneOffset.ofHours(1))));
+        assertEquals(new DateTimeType(Instant.parse("1989-11-19T16:32:49Z"), ZoneId.of("CET")).toFullString(),
+                dt.toZone("CET").toFullString());
+        assertEquals(DateTimeType.valueOf("1989-11-19T18:32:49+0200"), dt.toOffset(ZoneOffset.ofHours(2)));
+
+        dt = dt.plus(6, ChronoUnit.MONTHS);
+        assertEquals(DateTimeType.valueOf("1990-05-19T17:32:00.000+02:00[Europe/Berlin]"),
+                dt.truncatedTo(ChronoUnit.MINUTES));
+        assertEquals(DateTimeType.valueOf("1990-05-19T00:00:00.000+02:00[Europe/Berlin]"),
+                dt.truncatedTo(ChronoUnit.DAYS));
+        dt2 = dt.plus(Duration.ofHours(5));
+        assertEquals(5, dt.until(dt2, ChronoUnit.HOURS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        assertFalse(dt.isBefore(dt));
+        assertFalse(dt.isAfter(dt));
+        dt2 = dt.minus(-3, ChronoUnit.MONTHS);
+        assertEquals(3, dt.until(dt2, ChronoUnit.MONTHS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        dt2 = dt.minus(5, ChronoUnit.MONTHS);
+        assertEquals(-151, dt.until(dt2, ChronoUnit.DAYS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        dt2 = dt.plus(5, ChronoUnit.MONTHS);
+        assertEquals(3673, dt.until(dt2, ChronoUnit.HOURS));
+        assertTrue(dt.isBefore(dt2));
+        assertTrue(dt2.isAfter(dt));
+        inst = Instant.parse("1990-11-11T16:50:00Z");
+        assertEquals(253517, dt.until(inst, ChronoUnit.MINUTES));
+        assertTrue(dt.isBefore(inst));
+        assertFalse(dt2.isAfter(inst));
+        dt2 = dt.minus(63, ChronoUnit.MINUTES);
+        assertEquals(-3780, dt.until(dt2, ChronoUnit.SECONDS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        dt2 = dt.minus(Period.of(1, 8, 13));
+        assertEquals(-14880, dt.until(dt2, ChronoUnit.HOURS));
+        assertFalse(dt.isBefore(dt2));
+        assertFalse(dt2.isAfter(dt));
+        zdt = ZonedDateTime.parse("2002-11-11T16:50:00-06:00");
+        assertTrue(dt.isBefore(zdt));
+        assertFalse(dt2.isAfter(zdt));
+        assertEquals(DateTimeType.valueOf("1990-05-19T17:32:49.000+0200"), dt.toFixedOffset());
+        assertSame(dt, dt.toZone(ZoneId.of("Europe/Berlin")));
+        assertEquals(0, dt.compareTo(dt.toOffset(ZoneOffset.ofHours(2))));
+        assertEquals(new DateTimeType(Instant.parse("1990-05-19T15:32:49Z"), ZoneId.of("CET")).toFullString(),
+                dt.toZone("CET").toFullString());
+        assertEquals(DateTimeType.valueOf("1990-05-19T16:32:49+01:00"), dt.toOffset(ZoneOffset.ofHours(1)));
     }
 
     private static Stream<Arguments> provideTestCasesForFormatWithZone() {

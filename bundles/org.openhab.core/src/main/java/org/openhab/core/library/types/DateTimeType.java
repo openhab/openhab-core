@@ -13,15 +13,23 @@
 package org.openhab.core.library.types;
 
 import java.time.DateTimeException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.chrono.ChronoZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
+import java.time.temporal.UnsupportedTemporalTypeException;
 import java.time.zone.ZoneRulesException;
 import java.util.IllegalFormatException;
 import java.util.Locale;
@@ -461,6 +469,274 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
         }
 
         return String.format(locale, pattern, zonedDateTime);
+    }
+
+    /**
+     * Truncation returns a copy of this {@code DateTimeType} with fields smaller than the specified unit set to zero.
+     * For example, truncating with the {@link ChronoUnit#MINUTES minutes} unit will set the second-of-minute and
+     * nano-of-second field to zero.
+     * <p>
+     * The unit must have a {@linkplain TemporalUnit#getDuration() duration} that divides into the length of a standard
+     * day without remainder. This includes all supplied time units on {@link ChronoUnit} and {@link ChronoUnit#DAYS
+     * DAYS}. Other units throw an exception.
+     * <p>
+     * This operates on the local time-line, {@link LocalDateTime#truncatedTo(TemporalUnit) truncating}, which is then
+     * converted back to a {@link DateTimeType} using the zone ID to obtain the offset.
+     * <p>
+     * When converting back to {@code DateTimeType}, if the local date-time is in an overlap, then the offset will be
+     * retained if possible, otherwise the earlier offset will be used. If in a gap, the local date-time will be
+     * adjusted forward by the length of the gap.
+     *
+     * @param unit the unit to truncate to.
+     * @return The resulting {@code DateTimeType}.
+     * @throws DateTimeException If unable to truncate.
+     * @throws UnsupportedTemporalTypeException If the unit is not supported.
+     */
+    public DateTimeType truncatedTo(TemporalUnit unit) throws DateTimeException, UnsupportedTemporalTypeException {
+        return new DateTimeType(getZonedDateTime().truncatedTo(unit), authoritativeZone);
+    }
+
+    /**
+     * Calculate the amount of time between this and a {@link Temporal} object in terms of a single
+     * {@code TemporalUnit}. The start and end points are {@code this} and the specified date-time. The result will be
+     * negative if the end is before the start.
+     * <p>
+     * The {@code Temporal} passed to this method is converted to a {@code ZonedDateTime} using
+     * {@link ZonedDateTime#from(TemporalAccessor)}. If the time-zone differs between the two zoned date-times, the
+     * specified end date-time is normalized to have the same zone as this {@code ZonedDateTime}.
+     * <p>
+     * The calculation returns a whole number, representing the number of complete units between the two date-times. For
+     * example, the amount in months between {@code 2012-06-15T00:00Z} and {@code 2012-08-14T23:59Z} will only be one
+     * month as it is one minute short of two months.
+     * <p>
+     * The calculation is implemented in this method for {@link ChronoUnit}. The units {@code NANOS}, {@code MICROS},
+     * {@code MILLIS}, {@code SECONDS}, {@code MINUTES}, {@code HOURS} and {@code HALF_DAYS}, {@code DAYS},
+     * {@code WEEKS}, {@code MONTHS}, {@code YEARS}, {@code DECADES}, {@code CENTURIES}, {@code MILLENNIA} and
+     * {@code ERAS} are supported. Other {@code ChronoUnit} values will throw an exception.
+     * <p>
+     * The calculation for date and time units differ.
+     * <p>
+     * Date units operate on the local time-line, using the local date-time. For example, the period from noon on day 1
+     * to noon the following day in days will always be counted as exactly one day, irrespective of whether there was a
+     * daylight savings change or not.
+     * <p>
+     * Time units operate on the instant time-line. The calculation effectively converts both zoned date-times to
+     * instants and then calculates the period between the instants. For example, the period from noon on day 1 to noon
+     * the following day in hours may be 23, 24 or 25 hours (or some other amount) depending on whether there was a
+     * daylight savings change or not.
+     * <p>
+     * If the unit is not a {@code ChronoUnit}, then the result of this method is obtained by invoking
+     * {@code TemporalUnit.between(Temporal, Temporal)} passing {@link #getZonedDateTime()} as the first argument and
+     * the converted input temporal as the second argument.
+     *
+     * @param endExclusive the end date-time, exclusive.
+     * @param unit the unit to measure the amount in.
+     * @return the amount of time between this {@link DateTimeType} and the end date-time.
+     * @throws ArithmeticException If numeric overflow occurs.
+     * @throws DateTimeException If the amount cannot be calculated, or the end temporal cannot be converted to a
+     *             {@code ZonedDateTime}, or if the result exceeds the supported range.
+     * @throws UnsupportedTemporalTypeException If the unit is not supported.
+     */
+    public long until(Temporal endExclusive, TemporalUnit unit)
+            throws ArithmeticException, DateTimeException, UnsupportedTemporalTypeException {
+        if (unit instanceof ChronoUnit && !unit.isDateBased()) {
+            return instant.until(endExclusive, unit);
+        }
+        return getZonedDateTime().until(endExclusive, unit);
+    }
+
+    /**
+     * Calculate the amount of time between this and another {@link DateTimeType} in terms of a single
+     * {@code TemporalUnit}. The start and end points are {@code this} and the specified {@link DateTimeType}. The
+     * result will be negative if the end is before the start.
+     * <p>
+     * The {@link DateTimeType} passed to this method is converted to a {@code ZonedDateTime} using
+     * {@link #getZonedDateTime()}. If the time-zone differs between the two zoned {@link DateTimeType}s, the specified
+     * end {@code DateTimeType} is normalized to have the same zone as this {@code DateTimeType}.
+     * <p>
+     * The calculation returns a whole number, representing the number of complete units between the two
+     * {@link DateTimeType}s. For example, the amount in months between {@code 2012-06-15T00:00Z} and
+     * {@code 2012-08-14T23:59Z} will only be one month as it is one minute short of two months.
+     * <p>
+     * The calculation is implemented in this method for {@link ChronoUnit}. The units {@code NANOS}, {@code MICROS},
+     * {@code MILLIS}, {@code SECONDS}, {@code MINUTES}, {@code HOURS} and {@code HALF_DAYS}, {@code DAYS},
+     * {@code WEEKS}, {@code MONTHS}, {@code YEARS}, {@code DECADES}, {@code CENTURIES}, {@code MILLENNIA} and
+     * {@code ERAS} are supported. Other {@code ChronoUnit} values will throw an exception.
+     * <p>
+     * The calculation for date and time units differ.
+     * <p>
+     * Date units operate on the local time-line, using the local date-time. For example, the period from noon on day 1
+     * to noon the following day in days will always be counted as exactly one day, irrespective of whether there was a
+     * daylight savings change or not.
+     * <p>
+     * Time units operate on the instant time-line. The calculation effectively converts both {@link DateTimeType}s to
+     * instants and then calculates the period between the instants. For example, the period from noon on day 1 to noon
+     * the following day in hours may be 23, 24 or 25 hours (or some other amount) depending on whether there was a
+     * daylight savings change or not.
+     * <p>
+     * If the unit is not a {@code ChronoUnit}, then the result of this method is obtained by invoking
+     * {@code TemporalUnit.between(Temporal, Temporal)} passing {@link #getZonedDateTime()} as the first argument and
+     * {@code endExclusive.getZonedDateTime()} as the second argument.
+     *
+     * @param endExclusive the end {@link DateTimeType}, exclusive.
+     * @param unit the unit to measure the amount in.
+     * @return the amount of time between this and the other {@link DateTimeType}s.
+     * @throws ArithmeticException If numeric overflow occurs.
+     * @throws DateTimeException If the amount cannot be calculated, or the end temporal cannot be converted to a
+     *             {@code ZonedDateTime}, or if the result exceeds the supported range.
+     * @throws UnsupportedTemporalTypeException If the unit is not supported.
+     */
+    public long until(DateTimeType endExclusive, TemporalUnit unit)
+            throws ArithmeticException, DateTimeException, UnsupportedTemporalTypeException {
+        return until(endExclusive.getZonedDateTime(), unit);
+    }
+
+    /**
+     * Returns a new {@link DateTimeType}, based on this one, with the specified amount added. The amount is typically
+     * {@link Period} or {@link Duration} but may be any other type implementing the {@link TemporalAmount}
+     * interface.
+     *
+     * @param amountToAdd the amount to add.
+     * @return The resulting {@code DateTimeType}.
+     * @throws ArithmeticException If numeric overflow occurs.
+     * @throws DateTimeException If the addition cannot be made or if the result exceeds the supported range.
+     */
+    public DateTimeType plus(TemporalAmount amountToAdd) throws ArithmeticException, DateTimeException {
+        return new DateTimeType(getZonedDateTime().plus(amountToAdd), authoritativeZone);
+    }
+
+    /**
+     * Return a new {@link DateTimeType}, based on this one, with the amount in terms of the unit added. If it is
+     * not possible to add the amount, because the unit is not supported or for some other reason, an exception is
+     * thrown.
+     * <p>
+     * The calculation for date and time units differ. Date units operate on the local time-line. The period is first
+     * added to the local date-time, then converted back to a zoned date-time using the zone ID.
+     * <p>
+     * Time units operate on the instant time-line.
+     * <p>
+     * If the field is not a {@code ChronoUnit}, then the result of this method is obtained by invoking
+     * {@code TemporalUnit.addTo(Temporal, long)}. In this case, the unit determines whether and how to perform the
+     * addition.
+     *
+     * @param amountToAdd the amount of the unit to add to the result, may be negative.
+     * @param unit the unit of the amount to add.
+     * @return The resulting {@code DateTimeType}.
+     * @throws ArithmeticException If numeric overflow occurs.
+     * @throws DateTimeException If the addition cannot be made or if the result exceeds the supported range.
+     * @throws UnsupportedTemporalTypeException If the unit is not supported.
+     * @throws ZoneRulesException If no rules are available for the zone ID.
+     */
+    public DateTimeType plus(long amountToAdd, TemporalUnit unit)
+            throws ArithmeticException, DateTimeException, UnsupportedTemporalTypeException, ZoneRulesException {
+        if (unit instanceof ChronoUnit && !unit.isDateBased()) {
+            return new DateTimeType(instant.plus(amountToAdd, unit), zoneId, authoritativeZone);
+        }
+        return new DateTimeType(getZonedDateTime().plus(amountToAdd, unit), authoritativeZone);
+    }
+
+    /**
+     * Return a new {@link DateTimeType}, based on this one, with the specified amount subtracted. The amount is
+     * typically {@link Period} or {@link Duration} but may be any other type implementing the {@link TemporalAmount}
+     * interface.
+     *
+     * @param amountToSubtract the amount to subtract.
+     * @return The resulting {@code DateTimeType}.
+     * @throws ArithmeticException If numeric overflow occurs.
+     * @throws DateTimeException If the subtraction cannot be made or if the result exceeds the supported range.
+     */
+    public DateTimeType minus(TemporalAmount amountToSubtract) throws ArithmeticException, DateTimeException {
+        return new DateTimeType(getZonedDateTime().minus(amountToSubtract), authoritativeZone);
+    }
+
+    /**
+     * Return a new {@link DateTimeType}, based on this one, with the amount in terms of the unit subtracted. If
+     * it is not possible to subtract the amount, because the unit is not supported or for some other reason, an
+     * exception is thrown.
+     * <p>
+     * The calculation for date and time units differ. Date units operate on the local time-line. The period is first
+     * subtracted from the local date-time, then converted back to a zoned date-time using the zone ID.
+     * <p>
+     * Time units operate on the instant time-line.
+     * <p>
+     * This method is equivalent to {@link #plus(long, TemporalUnit)} with the amount negated.
+     *
+     * @param amountToSubtract the amount of the unit to subtract.
+     * @param unit the unit of the amount to subtract.
+     * @return The resulting {@code DateTimeType}.
+     * @throws ArithmeticException If numeric overflow occurs.
+     * @throws DateTimeException If the subtracted cannot be made or if the result exceeds the supported range.
+     * @throws UnsupportedTemporalTypeException If the unit is not supported.
+     * @throws ZoneRulesException If no rules are available for the zone ID.
+     */
+    public DateTimeType minus(long amountToSubtract, TemporalUnit unit)
+            throws ArithmeticException, DateTimeException, UnsupportedTemporalTypeException, ZoneRulesException {
+        return (amountToSubtract == Long.MIN_VALUE ? plus(Long.MAX_VALUE, unit).plus(1, unit)
+                : plus(-amountToSubtract, unit));
+    }
+
+    /**
+     * Check whether this {@link DateTimeType} is after the specified {@link DateTimeType}.
+     *
+     * @param moment the {@link DateTimeType} to compare to.
+     * @return {@code true} if this is after the specified moment, {@code false} otherwise.
+     * @throws DateTimeException If the result exceeds the supported range.
+     */
+    public boolean isAfter(DateTimeType moment) throws DateTimeException {
+        return getZonedDateTime().isAfter(moment.getZonedDateTime());
+    }
+
+    /**
+     * Check whether this {@link DateTimeType} is after the specified {@link ChronoZonedDateTime}.
+     *
+     * @param moment the zoned date-time to compare to.
+     * @return {@code true} if this is after the specified moment, {@code false} otherwise.
+     * @throws DateTimeException If the result exceeds the supported range.
+     */
+    public boolean isAfter(ChronoZonedDateTime<?> moment) throws DateTimeException {
+        return getZonedDateTime().isAfter(moment);
+    }
+
+    /**
+     * Check whether this {@link DateTimeType} is after the specified {@link Instant}.
+     *
+     * @param instant the moment in time to compare to.
+     * @return {@code true} if this is after the specified instant, {@code false} otherwise.
+     */
+    public boolean isAfter(Instant instant) {
+        return this.instant.isAfter(instant);
+    }
+
+    /**
+     * Check whether this {@link DateTimeType} is before the specified {@link DateTimeType}.
+     *
+     * @param moment the {@link DateTimeType} to compare to.
+     * @return {@code true} if this is before the specified moment, {@code false} otherwise.
+     * @throws DateTimeException If the result exceeds the supported range.
+     */
+    public boolean isBefore(DateTimeType moment) throws DateTimeException {
+        return getZonedDateTime().isBefore(moment.getZonedDateTime());
+    }
+
+    /**
+     * Check whether this {@link DateTimeType} is before the specified {@link ChronoZonedDateTime}.
+     *
+     * @param moment the zoned date-time to compare to.
+     * @return {@code true} if this is before the specified moment, {@code false} otherwise.
+     * @throws DateTimeException If the result exceeds the supported range.
+     */
+    public boolean isBefore(ChronoZonedDateTime<?> moment) throws DateTimeException {
+        return getZonedDateTime().isBefore(moment);
+    }
+
+    /**
+     * Check whether this {@link DateTimeType} is before the specified {@link Instant}.
+     *
+     * @param instant the moment in time to compare to.
+     * @return {@code true} if this is before the specified instant, {@code false} otherwise.
+     */
+    public boolean isBefore(Instant instant) {
+        return this.instant.isBefore(instant);
     }
 
     /**
