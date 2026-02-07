@@ -15,6 +15,7 @@ package org.openhab.core.model.yaml.internal.rules;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.openhab.core.automation.util.ConditionBuilder;
 import org.openhab.core.automation.util.TriggerBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.model.yaml.internal.config.YamlConfigDescriptionParameterDTO;
 
 /**
  * The {@link YamlRuleTemplateDTOTest} contains tests for the {@link YamlRuleTemplateDTO} class.
@@ -301,5 +303,29 @@ public class YamlRuleTemplateDTOTest {
         trigger2.id = "trigger1";
         assertTrue(template1.equals(template2));
         assertEquals(template1.hashCode(), template2.hashCode());
+
+        YamlConfigDescriptionParameterDTO configDescParam1 = new YamlConfigDescriptionParameterDTO();
+        configDescParam1.context = "Item";
+        configDescParam1.name = "stateItem";
+        configDescParam1.type = Type.TEXT;
+        YamlConfigDescriptionParameterDTO configDescParam2 = new YamlConfigDescriptionParameterDTO();
+        configDescParam2.defaultValue = "4";
+        configDescParam2.name = "iterations";
+        configDescParam2.type = Type.INTEGER;
+        configDescParam2.step = BigDecimal.ONE;
+        template1.configDescriptions = List.of(configDescParam1, configDescParam2);
+        template2.configDescriptions = List.of(configDescParam2, configDescParam1);
+        assertFalse(template1.equals(template2));
+        assertNotEquals(template1.hashCode(), template2.hashCode());
+        template2.configDescriptions = List.of(configDescParam1, configDescParam2);
+        assertTrue(template1.equals(template2));
+        assertEquals(template1.hashCode(), template2.hashCode());
+        YamlConfigDescriptionParameterDTO configDescParam3 = new YamlConfigDescriptionParameterDTO();
+        configDescParam2.defaultValue = "true";
+        configDescParam2.name = "assertive";
+        configDescParam2.type = Type.BOOLEAN;
+        template2.configDescriptions = List.of(configDescParam1, configDescParam2, configDescParam3);
+        assertFalse(template1.equals(template2));
+        assertNotEquals(template1.hashCode(), template2.hashCode());
     }
 }
