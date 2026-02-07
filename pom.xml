@@ -73,7 +73,10 @@
 
     <bnd.version>7.2.1</bnd.version>
     <commons.net.version>3.12.0</commons.net.version>
+    <commons.lang3.version>3.20.0</commons.lang3.version>
     <eea.version>2.4.0</eea.version>
+    <jackson.annotations.version>2.21</jackson.annotations.version>
+    <jackson.version>2.21.0</jackson.version>
     <karaf.compile.version>4.4.9</karaf.compile.version>
     <karaf.tooling.version>4.4.9</karaf.tooling.version>
     <sat.version>0.18.0</sat.version>

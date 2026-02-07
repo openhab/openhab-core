@@ -57,6 +57,22 @@
 		<bundle dependency="true">mvn:commons-io/commons-io/2.21.0</bundle>
 	</feature>
 
+	<feature name="openhab.tp-jinjava" description="Jinjava" version="${project.version}">
+		<capability>openhab.tp;feature=jinjava;version=2.7.4</capability>
+		<bundle>mvn:org.openhab.osgiify/com.hubspot.jinjava.jinjava/2.7.4</bundle>
+
+		<feature dependency="true">openhab.tp-jackson</feature>
+		<feature dependency="true">openhab.tp-commons-net</feature>
+
+		<bundle dependency="true">mvn:org.openhab.osgiify/com.hubspot.immutables.immutables-exceptions/1.9</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/com.google.re2j.re2j/1.2</bundle>
+		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.3</bundle>
+		<bundle dependency="true">mvn:com.google.guava/guava/33.5.0-jre</bundle>
+		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.20.0</bundle>
+		<bundle dependency="true">mvn:ch.obermuhlner/big-math/2.3.2</bundle>
+		<bundle dependency="true">mvn:org.javassist/javassist/3.30.2-GA</bundle>
+	</feature>
+
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">
 		<capability>openhab.tp;feature=gson;version=2.13.2</capability>
 		<bundle>mvn:com.google.code.gson/gson/2.13.2</bundle>

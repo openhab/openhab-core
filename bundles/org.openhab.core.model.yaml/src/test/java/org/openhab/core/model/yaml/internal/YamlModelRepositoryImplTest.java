@@ -1275,4 +1275,62 @@ public class YamlModelRepositoryImplTest {
         public void handleRemoval() {
         }
     }
+
+    @Test
+    public void testIncludeFileModificationTriggersReevaluation() throws IOException {
+        // Prepare main model that includes its firstType block from an include file
+        String includeFileName = "firstType.inc.yaml";
+        Path includePath = watchPath.resolve(includeFileName);
+
+        // Initial include content: one element First1
+        String includeV1 = """
+                First1:
+                  description: Initial
+                """;
+
+        // Main model references the include for firstType
+        String mainModel = ("""
+                version: 1
+                firstType: !include %s
+                """).formatted(includeFileName);
+
+        Files.writeString(includePath, includeV1);
+        Files.writeString(fullModelPath, mainModel);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.addYamlModelListener(firstTypeListener);
+
+        // Initial load of the main model
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        // Verify initial addition from include content
+        verify(firstTypeListener).addedModel(eq(MODEL_NAME), any());
+
+        // Modify the include: update First1 description and add First2
+        String includeV2 = """
+                First1:
+                  description: Changed
+                First2:
+                  description: Second
+                """;
+        Files.writeString(includePath, includeV2);
+
+        // Simulate watch event for include file modification
+        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, includePath);
+
+        // After reevaluation, one element should be updated and one added
+        verify(firstTypeListener, times(2)).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
+        verify(firstTypeListener).updatedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
+        verify(firstTypeListener, never()).removedModel(any(), any());
+
+        List<Collection<FirstTypeDTO>> calls = firstTypeCaptor.getAllValues();
+        // calls order (captured): both added calls, then updated call
+        assertThat(calls, hasSize(3));
+        // the initial added call
+        assertThat(calls.get(0), contains(new FirstTypeDTO("First1", "Initial")));
+        // Added after change (second added call)
+        assertThat(calls.get(1), contains(new FirstTypeDTO("First2", "Second")));
+        // Updated after change (last captured)
+        assertThat(calls.get(2), contains(new FirstTypeDTO("First1", "Changed")));
+    }
 }

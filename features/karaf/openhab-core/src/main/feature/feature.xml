@@ -430,8 +430,12 @@
 	<feature name="openhab-core-model-yaml" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.yaml/${project.version}</bundle>
+
 		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
 		<feature dependency="true">openhab.tp-jackson</feature>
+
+		<requirement>openhab.tp;filter:="(feature=jinjava)"</requirement>
+		<feature dependency="true">openhab.tp-jinjava</feature>
 	</feature>
 
 	<feature name="openhab-core-storage-json" version="${project.version}">

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.rulesupport.internal.loader;
+package org.openhab.core.common;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *
  * @author Jonathan Gilbert - Initial contribution
  * @author Jan N. Klug - Make implementation thread-safe
+ * @author Jimmy Tanagra - Remove map when empty
  * @param <K> Type of Key
  * @param <V> Type of Value
  */
@@ -75,7 +76,7 @@ public class BidiSetBag<K, V> {
                 for (V value : values) {
                     valueToKeys.computeIfPresent(value, (k, v) -> {
                         v.remove(key);
-                        return v;
+                        return v.isEmpty() ? null : v;
                     });
                 }
                 return values;
@@ -95,13 +96,23 @@ public class BidiSetBag<K, V> {
                 for (K key : keys) {
                     keyToValues.computeIfPresent(key, (k, v) -> {
                         v.remove(value);
-                        return v;
+                        return v.isEmpty() ? null : v;
                     });
                 }
                 return keys;
             } else {
                 return Set.of();
             }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void clear() {
+        lock.writeLock().lock();
+        try {
+            keyToValues.clear();
+            valueToKeys.clear();
         } finally {
             lock.writeLock().unlock();
         }
