@@ -330,6 +330,7 @@
 			<xs:enumeration value="Smoke"/>
 			<xs:enumeration value="SoundVolume"/>
 			<xs:enumeration value="Speed"/>
+			<xs:enumeration value="StateOfCharge"/>
 			<xs:enumeration value="Tampered"/>
 			<xs:enumeration value="Temperature"/>
 			<xs:enumeration value="Tilt"/>
