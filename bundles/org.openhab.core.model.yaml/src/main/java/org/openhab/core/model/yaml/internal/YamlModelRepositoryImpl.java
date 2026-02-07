@@ -38,11 +38,15 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.dto.ModularDTO;
+import org.openhab.core.io.dto.SerializationException;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
+import org.openhab.core.model.yaml.internal.rules.YamlRuleDTO;
+import org.openhab.core.model.yaml.internal.rules.YamlRuleTemplateDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
 import org.openhab.core.service.WatchService;
@@ -89,6 +93,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
+            getElementName(YamlRuleDTO.class), // "rules"
+            getElementName(YamlRuleTemplateDTO.class), // "ruleTemplates"
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
             getElementName(YamlItemDTO.class) // "items"
@@ -97,7 +103,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
     private static final String UNWANTED_EXCEPTION_TEXT2 = "\\n \\(through reference chain: .*";
 
-    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "yaml").map(Path::of).toList();
+    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "rules", "yaml").map(Path::of)
+            .toList();
 
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
@@ -676,20 +683,22 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 T elt = null;
                 JsonNode node = mapNode.get(id);
                 if (node.isEmpty()) {
-                    try {
-                        elt = elementClass.getDeclaredConstructor().newInstance();
+                    elt = createElement(elementClass, errors);
+                    if (elt != null) {
                         elt.setId(id);
-                    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                            | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                        if (errors != null) {
-                            errors.add("could not create new instance of %s".formatted(elementClass.getSimpleName()));
-                        }
                     }
                 } else {
                     try {
-                        elt = objectMapper.treeToValue(node, elementClass);
-                        elt.setId(id);
-                    } catch (JsonProcessingException e) {
+                        if (ModularDTO.class.isAssignableFrom(elementClass)) {
+                            elt = modularToDto(node, elementClass, errors);
+                            if (elt != null) {
+                                elt.setId(id);
+                            }
+                        } else {
+                            elt = objectMapper.treeToValue(node, elementClass);
+                            elt.setId(id);
+                        }
+                    } catch (JsonProcessingException | SerializationException e) {
                         if (errors != null) {
                             String msg = e.getMessage();
                             errors.add("could not parse element with ID %s to %s: %s".formatted(id,
@@ -706,5 +715,30 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             }
         }
         return elements;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends YamlElement> @Nullable T modularToDto(JsonNode node, Class<T> elementClass,
+            @Nullable List<String> errors) throws SerializationException {
+        @Nullable
+        T result = createElement(elementClass, errors);
+        if (result != null) {
+            result = (T) ((ModularDTO<?, ObjectMapper, JsonNode>) result).toDto(node, objectMapper);
+        }
+        return result;
+    }
+
+    private <T extends YamlElement> @Nullable T createElement(Class<T> elementClass, @Nullable List<String> errors) {
+        @Nullable
+        T result = null;
+        try {
+            result = elementClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            if (errors != null) {
+                errors.add("could not create new instance of %s".formatted(elementClass.getSimpleName()));
+            }
+        }
+        return result;
     }
 }
