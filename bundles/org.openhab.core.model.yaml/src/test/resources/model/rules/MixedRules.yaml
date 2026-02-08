@@ -55,27 +55,27 @@ rules:
       timesOfDayGrp: No
       namespace: None
     configDescriptions:
-      - context: item
+      timeOfDay:
+        context: item
         description: String Item that holds the current time of day's state.
         filterCriteria:
           - name: type
             value: String
         label: Time of Day State Item
-        name: timeOfDay
         required: true
         type: TEXT
-      - context: item
+      timesOfDayGrp:
+        context: item
         description: Has as members all the DateTime Items that define time of day states.
         filterCriteria:
           - name: type
             value: Group
         label: Times of Day Group
-        name: timesOfDayGrp
         required: true
         type: TEXT
-      - description: The Item metadata namespace (e.g. "tsm").
+      namespace:
+        description: The Item metadata namespace (e.g. "tsm").
         label: Time of Day Namespace
-        name: namespace
         required: true
         type: TEXT
     description: >-

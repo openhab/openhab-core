@@ -15,8 +15,10 @@ package org.openhab.core.model.yaml.internal.rules;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -39,6 +41,7 @@ import org.openhab.core.model.yaml.internal.config.YamlConfigDescriptionParamete
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * The {@link YamlRuleTemplateDTO} is a data transfer object used to serialize a rule template in a YAML configuration
@@ -57,7 +60,7 @@ public class YamlRuleTemplateDTO
     public Set<@NonNull String> tags;
     public String description;
     public Visibility visibility;
-    public List<@NonNull YamlConfigDescriptionParameterDTO> configDescriptions;
+    public Map<@NonNull String, @NonNull YamlConfigDescriptionParameterDTO> configDescriptions;
     public List<@NonNull YamlConditionDTO> conditions;
     public List<@NonNull YamlActionDTO> actions;
     public List<@NonNull YamlModuleDTO> triggers;
@@ -81,9 +84,10 @@ public class YamlRuleTemplateDTO
         this.visibility = template.getVisibility();
         List<@NonNull ConfigDescriptionParameter> configDescriptions = template.getConfigurationDescriptions();
         if (!configDescriptions.isEmpty()) {
-            List<YamlConfigDescriptionParameterDTO> configDescriptionDtos = new ArrayList<>(configDescriptions.size());
+            Map<String, YamlConfigDescriptionParameterDTO> configDescriptionDtos = new LinkedHashMap<>(
+                    configDescriptions.size());
             for (ConfigDescriptionParameter parameter : configDescriptions) {
-                configDescriptionDtos.add(new YamlConfigDescriptionParameterDTO(parameter));
+                configDescriptionDtos.put(parameter.getName(), new YamlConfigDescriptionParameterDTO(parameter));
             }
             this.configDescriptions = configDescriptionDtos;
         }
@@ -138,7 +142,38 @@ public class YamlRuleTemplateDTO
             if (result.visibility == null) {
                 result.visibility = Visibility.VISIBLE;
             }
-            result.configDescriptions = partial.configDescriptions;
+            if (partial.configDescriptions != null && partial.configDescriptions.isContainerNode()) {
+                Map<String, YamlConfigDescriptionParameterDTO> configDescriptions = new LinkedHashMap<>(
+                        partial.configDescriptions.size());
+                YamlConfigDescriptionParameterDTO parameterDTO;
+                if (partial.configDescriptions.isArray()) {
+                    JsonNode parameterNode, nameNode;
+                    for (Iterator<JsonNode> iterator = partial.configDescriptions.elements(); iterator.hasNext();) {
+                        parameterNode = iterator.next();
+                        if (parameterNode instanceof ObjectNode objectNode
+                                && (nameNode = objectNode.remove("name")) != null && nameNode.isTextual()) {
+                            parameterDTO = mapper.treeToValue(parameterNode, YamlConfigDescriptionParameterDTO.class);
+                            configDescriptions.put(nameNode.asText(), parameterDTO);
+                        } else {
+                            if (!(parameterNode instanceof ObjectNode objectNode)) {
+                                throw new SerializationException(
+                                        "Invalid 'configDescriptions': Array must contain objects");
+                            }
+                            if (objectNode.get("name") == null) {
+                                throw new SerializationException("Invalid 'configDescription': 'name' is mandatory");
+                            }
+                            throw new SerializationException("Invalid 'configDescription': 'name' must be a string");
+                        }
+                    }
+                } else {
+                    for (Entry<String, JsonNode> parameter : partial.configDescriptions.properties()) {
+                        parameterDTO = mapper.treeToValue(parameter.getValue(),
+                                YamlConfigDescriptionParameterDTO.class);
+                        configDescriptions.put(parameter.getKey(), parameterDTO);
+                    }
+                }
+                result.configDescriptions = configDescriptions;
+            }
 
             if (partial.actions != null && !partial.actions.isEmpty()) {
                 if (!partial.actions.isArray()) {
@@ -360,7 +395,7 @@ public class YamlRuleTemplateDTO
         public Set<@NonNull String> tags;
         public String description;
         public String visibility;
-        public List<@NonNull YamlConfigDescriptionParameterDTO> configDescriptions;
+        public JsonNode configDescriptions;
         public JsonNode conditions;
         public JsonNode actions;
         public JsonNode triggers;

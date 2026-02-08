@@ -98,7 +98,7 @@ public class YamlRuleTemplateProviderTest {
     }
 
     @Test
-    public void basicRuleTest() throws IOException {
+    public void basicRuleTemplateTest() throws IOException {
         Files.copy(SOURCE_PATH.resolve("BasicRuleTemplate.yaml"), templatesPath);
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
         YamlRuleTemplateProvider ruleTemplateProvider = new YamlRuleTemplateProvider();
@@ -196,7 +196,7 @@ public class YamlRuleTemplateProviderTest {
     }
 
     @Test
-    public void fullRuleTest() throws IOException {
+    public void fullRuleTemplateTest() throws IOException {
         Files.copy(SOURCE_PATH.resolve("FullRuleTemplate.yaml"), templatesPath);
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
         YamlRuleTemplateProvider ruleTemplateProvider = new YamlRuleTemplateProvider();

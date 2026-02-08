@@ -64,7 +64,7 @@ public class YamlRuleDTOTest {
         YamlRuleDTO ruleDTO = new YamlRuleDTO(rule);
         assertNotNull(ruleDTO);
         assertEquals(
-                "YamlRuleDTO [uid=rule1, templateState=no-template, label=Rule 1, tags=[], visibility=VISIBLE, config={}, configDescriptions=[YamlConfigDescriptionParameterDTO [name=number, required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]], conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], actions=[YamlActionDTO [inputs={}, id=action1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                "YamlRuleDTO [uid=rule1, templateState=no-template, label=Rule 1, tags=[], visibility=VISIBLE, config={}, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], actions=[YamlActionDTO [inputs={}, id=action1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
                 ruleDTO.toString());
 
         rule = RuleBuilder.create(rule).withTemplateUID("templateUID").withActions(List.of())
@@ -72,7 +72,7 @@ public class YamlRuleDTOTest {
         ruleDTO = new YamlRuleDTO(rule);
         assertNotNull(ruleDTO);
         assertEquals(
-                "YamlRuleDTO [uid=rule1, template=templateUID, templateState=no-template, label=Rule 1, tags=[], description=Rule description, visibility=VISIBLE, config={}, configDescriptions=[YamlConfigDescriptionParameterDTO [name=number, required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]], conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                "YamlRuleDTO [uid=rule1, template=templateUID, templateState=no-template, label=Rule 1, tags=[], description=Rule description, visibility=VISIBLE, config={}, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
                 ruleDTO.toString());
     }
 
@@ -326,25 +326,22 @@ public class YamlRuleDTOTest {
 
         YamlConfigDescriptionParameterDTO configDescParam1 = new YamlConfigDescriptionParameterDTO();
         configDescParam1.context = "Item";
-        configDescParam1.name = "stateItem";
         configDescParam1.type = Type.TEXT;
         YamlConfigDescriptionParameterDTO configDescParam2 = new YamlConfigDescriptionParameterDTO();
         configDescParam2.defaultValue = "4";
-        configDescParam2.name = "iterations";
         configDescParam2.type = Type.INTEGER;
         configDescParam2.step = BigDecimal.ONE;
-        rule1.configDescriptions = List.of(configDescParam1, configDescParam2);
-        rule2.configDescriptions = List.of(configDescParam2, configDescParam1);
+        rule1.configDescriptions = Map.of("stateItem", configDescParam1, "iterations", configDescParam2);
         assertFalse(rule1.equals(rule2));
         assertNotEquals(rule1.hashCode(), rule2.hashCode());
-        rule2.configDescriptions = List.of(configDescParam1, configDescParam2);
+        rule2.configDescriptions = Map.of("stateItem", configDescParam1, "iterations", configDescParam2);
         assertTrue(rule1.equals(rule2));
         assertEquals(rule1.hashCode(), rule2.hashCode());
         YamlConfigDescriptionParameterDTO configDescParam3 = new YamlConfigDescriptionParameterDTO();
-        configDescParam2.defaultValue = "true";
-        configDescParam2.name = "assertive";
-        configDescParam2.type = Type.BOOLEAN;
-        rule2.configDescriptions = List.of(configDescParam1, configDescParam2, configDescParam3);
+        configDescParam3.defaultValue = "true";
+        configDescParam3.type = Type.BOOLEAN;
+        rule2.configDescriptions = Map.of("stateItem", configDescParam1, "iterations", configDescParam2, "assertive",
+                configDescParam3);
         assertFalse(rule1.equals(rule2));
         assertNotEquals(rule1.hashCode(), rule2.hashCode());
     }

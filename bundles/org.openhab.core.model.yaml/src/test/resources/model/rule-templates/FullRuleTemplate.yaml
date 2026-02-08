@@ -4,7 +4,7 @@ ruleTemplates:
     label: Full Rule Template
     description: The description of the template-based full rule
     configDescriptions:
-      - name: textParam
+      textParam:
         label: Text parameter
         description: This is a text parameter.
         default: A text
@@ -26,7 +26,7 @@ ruleTemplates:
             value: .*
           - name: filter2
             value: a.*
-      - name: integerParam
+      integerParam:
         label: Integer parameter
         description: This is an integer parameter.
         default: 70
@@ -38,7 +38,7 @@ ruleTemplates:
         readOnly: false
         unit: "%"
         unitLabel: Start Level
-      - name: itemParam
+      itemParam:
         label: Item parameter
         description: This is an item parameter
         default: CurrentPower
@@ -46,7 +46,7 @@ ruleTemplates:
         type: TEXT
         required: true
         readOnly: false
-      - name: decimalParam
+      decimalParam:
         label: Decimal parameter
         description: This is a decimal parameter.
         default: 3.25
@@ -56,7 +56,7 @@ ruleTemplates:
         step: 0.25
         advanced: true
         verify: true
-      - name: booleanParam
+      booleanParam:
         label: Boolean parameter
         description: This is a boolean parameter.
         default: true

@@ -145,7 +145,7 @@ public class YamlRuleTemplateProvider extends AbstractYamlRuleProvider<RuleTempl
     }
 
     private @Nullable RuleTemplate mapRuleTemplate(YamlRuleTemplateDTO ruleTemplateDto) {
-        List<YamlConfigDescriptionParameterDTO> configDescriptionDtos = ruleTemplateDto.configDescriptions;
+        Map<String, YamlConfigDescriptionParameterDTO> configDescriptionDtos = ruleTemplateDto.configDescriptions;
         List<ConfigDescriptionParameter> configDescriptions = null;
         if (configDescriptionDtos != null) {
             configDescriptions = YamlConfigDescriptionParameterDTO.mapConfigDescriptions(configDescriptionDtos);

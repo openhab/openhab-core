@@ -14,8 +14,9 @@ package org.openhab.core.model.yaml.internal.config;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -43,7 +44,6 @@ public class YamlConfigDescriptionParameterDTO {
     public String defaultValue;
     public String description;
     public String label;
-    public String name;
     public boolean required;
     public Type type;
     public BigDecimal min;
@@ -76,7 +76,6 @@ public class YamlConfigDescriptionParameterDTO {
      * @param parameter the {@link ConfigDescriptionParameter}.
      */
     public YamlConfigDescriptionParameterDTO(@NonNull ConfigDescriptionParameter parameter) {
-        this.name = parameter.getName();
         this.type = parameter.getType();
         this.min = parameter.getMinimum();
         this.max = parameter.getMaximum();
@@ -117,8 +116,8 @@ public class YamlConfigDescriptionParameterDTO {
     @Override
     public int hashCode() {
         return Objects.hash(advanced, context, defaultValue, description, filterCriteria, groupName, label,
-                limitToOptions, max, min, multiple, multipleLimit, name, options, pattern, readOnly, required, step,
-                type, unit, unitLabel, verify);
+                limitToOptions, max, min, multiple, multipleLimit, options, pattern, readOnly, required, step, type,
+                unit, unitLabel, verify);
     }
 
     @Override
@@ -136,11 +135,10 @@ public class YamlConfigDescriptionParameterDTO {
                 && Objects.equals(label, other.label) && Objects.equals(limitToOptions, other.limitToOptions)
                 && Objects.equals(max, other.max) && Objects.equals(min, other.min)
                 && Objects.equals(multiple, other.multiple) && Objects.equals(multipleLimit, other.multipleLimit)
-                && Objects.equals(name, other.name) && Objects.equals(options, other.options)
-                && Objects.equals(pattern, other.pattern) && Objects.equals(readOnly, other.readOnly)
-                && required == other.required && Objects.equals(step, other.step) && type == other.type
-                && Objects.equals(unit, other.unit) && Objects.equals(unitLabel, other.unitLabel)
-                && Objects.equals(verify, other.verify);
+                && Objects.equals(options, other.options) && Objects.equals(pattern, other.pattern)
+                && Objects.equals(readOnly, other.readOnly) && required == other.required
+                && Objects.equals(step, other.step) && type == other.type && Objects.equals(unit, other.unit)
+                && Objects.equals(unitLabel, other.unitLabel) && Objects.equals(verify, other.verify);
     }
 
     @Override
@@ -158,9 +156,6 @@ public class YamlConfigDescriptionParameterDTO {
         }
         if (label != null) {
             builder.append("label=").append(label).append(", ");
-        }
-        if (name != null) {
-            builder.append("name=").append(name).append(", ");
         }
         builder.append("required=").append(required).append(", ");
         if (type != null) {
@@ -216,23 +211,25 @@ public class YamlConfigDescriptionParameterDTO {
     }
 
     /**
-     * Creates a {@link List} of {@link ConfigDescriptionParameter}s from a {@link Collection} of
-     * {@link YamlConfigDescriptionParameterDTO}s,
-     * to be used during deserialization.
+     * Creates a {@link List} of {@link ConfigDescriptionParameter}s from a {@link Map} of parameter names and
+     * {@link YamlConfigDescriptionParameterDTO}s, to be used during deserialization.
      *
-     * @param configDescriptionDtos the {@link Collection} of {@link YamlConfigDescriptionParameterDTO}s.
+     * @param configDescriptionDtos the {@link Map} of {@link String} and {@link YamlConfigDescriptionParameterDTO}
+     *            pairs.
      * @return The corresponding {@link List} of {@link ConfigDescriptionParameter}s.
      */
     public static @NonNull List<@NonNull ConfigDescriptionParameter> mapConfigDescriptions(
-            @NonNull Collection<@NonNull YamlConfigDescriptionParameterDTO> configDescriptionDtos) {
+            @NonNull Map<@NonNull String, @NonNull YamlConfigDescriptionParameterDTO> configDescriptionDtos) {
         List<ConfigDescriptionParameter> result = new ArrayList<>(configDescriptionDtos.size());
         List<FilterCriteriaDTO> filterCriteriaDtos;
         List<FilterCriteria> filterCriterias;
         List<ParameterOptionDTO> parameterOptionDtos;
         List<ParameterOption> parameterOptions;
         ConfigDescriptionParameterBuilder builder;
-        for (YamlConfigDescriptionParameterDTO parameterDto : configDescriptionDtos) {
-            builder = ConfigDescriptionParameterBuilder.create(parameterDto.name, parameterDto.type)
+        YamlConfigDescriptionParameterDTO parameterDto;
+        for (Entry<String, YamlConfigDescriptionParameterDTO> parameterEntry : configDescriptionDtos.entrySet()) {
+            parameterDto = parameterEntry.getValue();
+            builder = ConfigDescriptionParameterBuilder.create(parameterEntry.getKey(), parameterDto.type)
                     .withAdvanced(parameterDto.advanced).withContext(parameterDto.context)
                     .withDefault(parameterDto.defaultValue).withDescription(parameterDto.description)
                     .withGroupName(parameterDto.groupName).withLabel(parameterDto.label)

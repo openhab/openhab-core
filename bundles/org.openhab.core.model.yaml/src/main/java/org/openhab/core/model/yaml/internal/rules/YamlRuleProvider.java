@@ -158,7 +158,7 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
         if (configuration != null) {
             ruleBuilder.withConfiguration(new Configuration(configuration));
         }
-        List<YamlConfigDescriptionParameterDTO> configDescriptionDtos = ruleDto.configDescriptions;
+        Map<String, YamlConfigDescriptionParameterDTO> configDescriptionDtos = ruleDto.configDescriptions;
         if (configDescriptionDtos != null) {
             ruleBuilder.withConfigurationDescriptions(
                     YamlConfigDescriptionParameterDTO.mapConfigDescriptions(configDescriptionDtos));

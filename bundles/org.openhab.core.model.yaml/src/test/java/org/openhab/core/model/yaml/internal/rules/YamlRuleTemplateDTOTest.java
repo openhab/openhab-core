@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -66,7 +67,7 @@ public class YamlRuleTemplateDTOTest {
         YamlRuleTemplateDTO templateDTO = new YamlRuleTemplateDTO(template);
         assertNotNull(templateDTO);
         assertEquals(
-                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, visibility=VISIBLE, configDescriptions=[YamlConfigDescriptionParameterDTO [name=number, required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]], conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], actions=[YamlActionDTO [inputs={}, id=action1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, visibility=VISIBLE, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], actions=[YamlActionDTO [inputs={}, id=action1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
                 templateDTO.toString());
     }
 
@@ -306,25 +307,22 @@ public class YamlRuleTemplateDTOTest {
 
         YamlConfigDescriptionParameterDTO configDescParam1 = new YamlConfigDescriptionParameterDTO();
         configDescParam1.context = "Item";
-        configDescParam1.name = "stateItem";
         configDescParam1.type = Type.TEXT;
         YamlConfigDescriptionParameterDTO configDescParam2 = new YamlConfigDescriptionParameterDTO();
         configDescParam2.defaultValue = "4";
-        configDescParam2.name = "iterations";
         configDescParam2.type = Type.INTEGER;
         configDescParam2.step = BigDecimal.ONE;
-        template1.configDescriptions = List.of(configDescParam1, configDescParam2);
-        template2.configDescriptions = List.of(configDescParam2, configDescParam1);
+        template1.configDescriptions = Map.of("stateItem", configDescParam1, "iterations", configDescParam2);
         assertFalse(template1.equals(template2));
         assertNotEquals(template1.hashCode(), template2.hashCode());
-        template2.configDescriptions = List.of(configDescParam1, configDescParam2);
+        template2.configDescriptions = Map.of("stateItem", configDescParam1, "iterations", configDescParam2);
         assertTrue(template1.equals(template2));
         assertEquals(template1.hashCode(), template2.hashCode());
         YamlConfigDescriptionParameterDTO configDescParam3 = new YamlConfigDescriptionParameterDTO();
-        configDescParam2.defaultValue = "true";
-        configDescParam2.name = "assertive";
-        configDescParam2.type = Type.BOOLEAN;
-        template2.configDescriptions = List.of(configDescParam1, configDescParam2, configDescParam3);
+        configDescParam3.defaultValue = "true";
+        configDescParam3.type = Type.BOOLEAN;
+        template2.configDescriptions = Map.of("stateItem", configDescParam1, "iterations", configDescParam2,
+                "assertive", configDescParam3);
         assertFalse(template1.equals(template2));
         assertNotEquals(template1.hashCode(), template2.hashCode());
     }
