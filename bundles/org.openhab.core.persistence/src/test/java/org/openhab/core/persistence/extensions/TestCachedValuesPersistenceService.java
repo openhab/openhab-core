@@ -114,8 +114,8 @@ public class TestCachedValuesPersistenceService implements ModifiablePersistence
     }
 
     @Override
-    public Set<PersistenceItemInfo> getItemInfo() {
-        return Set.of();
+    public @Nullable Set<PersistenceItemInfo> getItemInfo() {
+        return null;
     }
 
     @Override

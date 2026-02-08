@@ -221,8 +221,8 @@ public class TestPersistenceService implements QueryablePersistenceService {
     }
 
     @Override
-    public Set<PersistenceItemInfo> getItemInfo() {
-        return Set.of();
+    public @Nullable Set<PersistenceItemInfo> getItemInfo() {
+        return null;
     }
 
     @Override
