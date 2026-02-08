@@ -26,6 +26,8 @@ import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ThingUID;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 /**
  * The {@link YamlThingDTO} is a data transfer object used to serialize a thing in a YAML configuration file.
  *
@@ -39,6 +41,7 @@ public class YamlThingDTO implements YamlElement, Cloneable {
     public String bridge;
     public String label;
     public String location;
+    @JsonAlias("configuration")
     public Map<@NonNull String, @NonNull Object> config;
     public Map<@NonNull String, @NonNull YamlChannelDTO> channels;
 

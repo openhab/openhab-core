@@ -23,6 +23,8 @@ import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 /**
  * The {@link YamlChannelDTO} is a data transfer object used to serialize a channel in a YAML configuration file.
  *
@@ -36,6 +38,7 @@ public class YamlChannelDTO {
     public String itemDimension;
     public String label;
     public String description;
+    @JsonAlias("configuration")
     public Map<@NonNull String, @NonNull Object> config;
 
     public YamlChannelDTO() {
