@@ -12,7 +12,7 @@ rules:
       decimalParam: 6.75
       booleanParam: true
     configDescriptions:
-      - name: textParam
+      textParam:
         label: Text parameter
         description: This is a text parameter.
         default: A text
@@ -36,7 +36,7 @@ rules:
             value: .*
           - name: filter2
             value: a.*
-      - name: integerParam
+      integerParam:
         label: Integer parameter
         description: This is an integer parameter.
         default: 4
@@ -49,14 +49,14 @@ rules:
         groupName: Group Name
         unit: rpm
         unitLabel: Rounds per Minute
-      - name: itemParam
+      itemParam:
         label: Item parameter
         description: This is an item parameter
         context: item
         type: TEXT
         required: false
         groupName: Group Name
-      - name: decimalParam
+      decimalParam:
         label: Decimal parameter
         description: This is a decimal parameter.
         default: 3.25
@@ -67,7 +67,7 @@ rules:
         groupName: Group Name
         advanced: true
         verify: true
-      - name: booleanParam
+      booleanParam:
         label: Boolean parameter
         description: This is a boolean parameter.
         default: true

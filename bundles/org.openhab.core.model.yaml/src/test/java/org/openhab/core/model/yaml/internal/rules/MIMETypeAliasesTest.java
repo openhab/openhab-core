@@ -60,7 +60,6 @@ public class MIMETypeAliasesTest {
         assertThat(MIMETypeAliases.mimeTypeToAlias("application/javascript"), is("JavaScript"));
         assertThat(MIMETypeAliases.mimeTypeToAlias("application/python"), is("Python"));
         assertThat(MIMETypeAliases.mimeTypeToAlias("application/x-python2"), is("Jython"));
-        assertThat(MIMETypeAliases.mimeTypeToAlias("application/x-python2"), is("Jython"));
         assertThat(MIMETypeAliases.mimeTypeToAlias("application/x-ruby"), is("Ruby"));
         assertThat(MIMETypeAliases.mimeTypeToAlias("application/javascript;version=ECMAScript-5.1"), is("NashornJS"));
     }
