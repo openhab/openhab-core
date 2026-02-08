@@ -261,6 +261,10 @@ public class YamlThingDTOTest {
         th2.config = null;
         assertTrue(th1.equals(th2));
         assertEquals(th1.hashCode(), th2.hashCode());
+        th1.config = Map.of();
+        th2.config = Map.of();
+        assertTrue(th1.equals(th2));
+        assertEquals(th1.hashCode(), th2.hashCode());
         th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = null;
         assertFalse(th1.equals(th2));
@@ -270,26 +274,22 @@ public class YamlThingDTOTest {
         th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "other value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         assertFalse(th1.equals(th2));
-        th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "value", "param2", 25, "param3", true, "param4", List.of("val 1", "val 2"));
         assertFalse(th1.equals(th2));
-        th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "value", "param2", 50, "param3", false, "param4", List.of("val 1", "val 2"));
         assertFalse(th1.equals(th2));
-        th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "value 2"));
         assertFalse(th1.equals(th2));
-        th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1"));
         assertFalse(th1.equals(th2));
-        th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", 75);
         assertFalse(th1.equals(th2));
-        th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "value", "param2", 50, "param3", true);
         assertFalse(th1.equals(th2));
-        th1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         th2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        assertTrue(th1.equals(th2));
+        assertEquals(th1.hashCode(), th2.hashCode());
+        th2.config = Map.of("param4", List.of("val 1", "val 2"), "param3", true, "param2", 50, "param1", "value");
         assertTrue(th1.equals(th2));
         assertEquals(th1.hashCode(), th2.hashCode());
     }
@@ -320,11 +320,22 @@ public class YamlThingDTOTest {
         assertTrue(th1.equals(th2));
         assertEquals(th1.hashCode(), th2.hashCode());
 
+        th1.channels = Map.of("channel1", ch1, "channel2", ch2);
+        th2.channels = Map.of("channel2", ch4, "channel1", ch3);
+        assertTrue(th1.equals(th2));
+        assertEquals(th1.hashCode(), th2.hashCode());
+
         th1.channels = Map.of("channel1", ch1);
         th2.channels = null;
         assertFalse(th1.equals(th2));
+        th1.channels = Map.of("channel1", ch1);
+        th2.channels = Map.of();
+        assertFalse(th1.equals(th2));
 
         th1.channels = null;
+        th2.channels = Map.of("channel1", ch3);
+        assertFalse(th1.equals(th2));
+        th1.channels = Map.of();
         th2.channels = Map.of("channel1", ch3);
         assertFalse(th1.equals(th2));
 

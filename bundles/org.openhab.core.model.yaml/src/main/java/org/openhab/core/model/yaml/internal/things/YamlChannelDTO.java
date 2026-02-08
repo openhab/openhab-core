@@ -108,7 +108,7 @@ public class YamlChannelDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, getKind(), getItemType(), label, description);
+        return Objects.hash(type, getKind(), getItemType(), label, description, config);
     }
 
     @Override
@@ -121,7 +121,6 @@ public class YamlChannelDTO {
         YamlChannelDTO other = (YamlChannelDTO) obj;
         return Objects.equals(type, other.type) && getKind() == other.getKind()
                 && Objects.equals(getItemType(), other.getItemType()) && Objects.equals(label, other.label)
-                && Objects.equals(description, other.description)
-                && YamlElementUtils.equalsConfig(config, other.config);
+                && Objects.equals(description, other.description) && Objects.equals(config, other.config);
     }
 }

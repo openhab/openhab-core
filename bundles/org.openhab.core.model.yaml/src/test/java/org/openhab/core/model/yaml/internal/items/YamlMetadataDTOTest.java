@@ -81,6 +81,10 @@ public class YamlMetadataDTOTest {
         md2.config = null;
         assertTrue(md1.equals(md2));
         assertEquals(md1.hashCode(), md2.hashCode());
+        md1.config = Map.of();
+        md2.config = Map.of();
+        assertTrue(md1.equals(md2));
+        assertEquals(md1.hashCode(), md2.hashCode());
         md1.config = Map.of("param1", "value", "param2", 50, "param3", true);
         md2.config = null;
         assertFalse(md1.equals(md2));
@@ -97,6 +101,9 @@ public class YamlMetadataDTOTest {
         md2.config = Map.of("param1", "value", "param2", 50);
         assertFalse(md1.equals(md2));
         md2.config = Map.of("param1", "value", "param2", 50, "param3", true);
+        assertTrue(md1.equals(md2));
+        assertEquals(md1.hashCode(), md2.hashCode());
+        md2.config = Map.of("param3", true, "param2", 50, "param1", "value");
         assertTrue(md1.equals(md2));
         assertEquals(md1.hashCode(), md2.hashCode());
     }

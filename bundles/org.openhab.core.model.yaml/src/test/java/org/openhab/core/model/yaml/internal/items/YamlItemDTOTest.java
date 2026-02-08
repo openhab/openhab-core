@@ -524,6 +524,15 @@ public class YamlItemDTOTest {
         item2.channels = Map.of("binding:type:uid:channelid2", Map.of());
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
+        item2.channels = Map.of("binding:type:uid:channelid2", Map.of(), "binding:type:uid:channelid3", Map.of());
+        assertFalse(item1.equals(item2));
+        item1.channels = Map.of("binding:type:uid:channelid2", Map.of(), "binding:type:uid:channelid3", Map.of());
+        item2.channels = Map.of("binding:type:uid:channelid2", Map.of(), "binding:type:uid:channelid3", Map.of());
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item2.channels = Map.of("binding:type:uid:channelid3", Map.of(), "binding:type:uid:channelid2", Map.of());
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
         item1.channels = Map.of("binding:type:uid:channelid2",
                 Map.of("profile", "anyprofile", "param", "profile param"));
         item2.channels = Map.of("binding:type:uid:channelid2", Map.of());
@@ -532,11 +541,11 @@ public class YamlItemDTOTest {
                 Map.of("profile", "anyprofile", "param", "profile param"));
         assertTrue(item1.equals(item2));
         assertEquals(item1.hashCode(), item2.hashCode());
-        item1.channels = Map.of("binding:type:uid:channelid2", Map.of());
-        item2.channels = Map.of("binding:type:uid:channelid2", Map.of(), "binding:type:uid:channelid3", Map.of());
-        assertFalse(item1.equals(item2));
-        item1.channels = Map.of("binding:type:uid:channelid2", Map.of(), "binding:type:uid:channelid3", Map.of());
-        item2.channels = Map.of("binding:type:uid:channelid2", Map.of());
+        item2.channels = Map.of("binding:type:uid:channelid2",
+                Map.of("param", "profile param", "profile", "anyprofile"));
+        assertTrue(item1.equals(item2));
+        assertEquals(item1.hashCode(), item2.hashCode());
+        item2.channels = Map.of("binding:type:uid:channelid2", Map.of("profile", "anyprofile"));
         assertFalse(item1.equals(item2));
     }
 
