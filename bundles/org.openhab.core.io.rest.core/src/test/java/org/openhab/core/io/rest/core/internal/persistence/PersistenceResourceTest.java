@@ -123,7 +123,7 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemData() {
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false, false);
+        ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, false, false);
 
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
@@ -154,7 +154,7 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemDataWithBoundery() {
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, true, false);
+        ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, true, false);
 
         assertThat(Integer.parseInt(dto.datapoints), is(7));
         assertThat(dto.data, hasSize(7));
@@ -165,7 +165,7 @@ public class PersistenceResourceTest {
         when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
         when(itemMock.getState()).thenReturn(DecimalType.ZERO);
 
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false, true);
+        ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, false, true);
 
         assertThat(Integer.parseInt(dto.datapoints), is(6));
         assertThat(dto.data, hasSize(6));
@@ -177,7 +177,7 @@ public class PersistenceResourceTest {
         when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
         when(itemMock.getState()).thenReturn(UnDefType.UNDEF);
 
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false, true);
+        ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, false, true);
 
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
@@ -188,7 +188,7 @@ public class PersistenceResourceTest {
         when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
         when(itemMock.getState()).thenReturn(UnDefType.NULL);
 
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false, true);
+        ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, false, true);
 
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
@@ -200,7 +200,7 @@ public class PersistenceResourceTest {
         when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
         when(itemMock.getState()).thenReturn(DecimalType.ZERO);
 
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, true, true);
+        ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, true, true);
 
         assertThat(Integer.parseInt(dto.datapoints), is(7));
         assertThat(dto.data, hasSize(7));
