@@ -56,7 +56,7 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 
 /**
- * Tests for PersistenceItem Restresource
+ * Tests for PersistenceItem REST resource
  *
  * @author Stefan Triller - Initial contribution
  * @author Mark Herwege - Implement aliases
