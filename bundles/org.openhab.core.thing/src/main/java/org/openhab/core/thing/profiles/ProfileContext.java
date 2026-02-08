@@ -39,6 +39,14 @@ public interface ProfileContext {
     Configuration getConfiguration();
 
     /**
+     * Returns the configuration of the profile and transforms it to the given class.
+     *
+     * @param configurationClass configuration class
+     * @return configuration of profile in form of the given class
+     */
+    <T> T getConfigurationAs(Class<T> configurationClass);
+
+    /**
      * Get a scheduler to be used within profiles (if needed at all)
      *
      * @return the scheduler

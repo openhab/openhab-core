@@ -12,18 +12,9 @@
  */
 package org.openhab.core.automation.module.script.profile;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_COMMAND_FROM_ITEM_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_STATE_FROM_ITEM_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_HANDLER_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_ITEM_SCRIPT;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.openhab.core.automation.module.script.profile.ScriptProfile.*;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -423,6 +414,11 @@ public class ScriptProfileTest extends JavaTest {
                 @Override
                 public Configuration getConfiguration() {
                     return new Configuration(configuration);
+                }
+
+                @Override
+                public <T> T getConfigurationAs(Class<T> configurationClass) {
+                    return getConfiguration().as(configurationClass);
                 }
 
                 @Override
