@@ -103,7 +103,9 @@ public interface QueryablePersistenceService extends PersistenceService {
      * @return a set of information about the persisted items or null if the persistence service does not support this
      */
     @Nullable
-    Set<PersistenceItemInfo> getItemInfo();
+    default Set<PersistenceItemInfo> getItemInfo() {
+        return null;
+    }
 
     /**
      * Returns {@link PersistenceItemInfo} for an item stored in the persistence service. A {@link PersistenceItemInfo}
