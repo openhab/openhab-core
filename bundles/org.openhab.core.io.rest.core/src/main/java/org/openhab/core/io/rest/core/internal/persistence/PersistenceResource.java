@@ -274,10 +274,11 @@ public class PersistenceResource implements RESTResource {
     @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of items available via a specific persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))),
-                    @ApiResponse(responseCode = "400", description = "Not supported for persistence service") })
+                    @ApiResponse(responseCode = "400", description = "Not supported for persistence service"),
+                    @ApiResponse(responseCode = "404", description = "Unknown persistence service") })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @Parameter(description = "An item name, response will only contain information for this item") @QueryParam("itemname") @Nullable String itemName) {
+            @Parameter(description = "An item name, if provided response will only contain information for this item") @QueryParam("itemname") @Nullable String itemName) {
         return getServiceItemList(serviceId, itemName);
     }
 
@@ -626,14 +627,9 @@ public class PersistenceResource implements RESTResource {
         // If serviceId is null, then use the default service
         PersistenceService service;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
-        if (effectiveServiceId == null) {
-            logger.debug("Persistence service not found '{}'.", effectiveServiceId);
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
-                    "Persistence service not found: " + effectiveServiceId);
-        }
-        service = persistenceServiceRegistry.get(effectiveServiceId);
+        service = effectiveServiceId != null ? persistenceServiceRegistry.get(effectiveServiceId) : null;
 
-        if (service == null) {
+        if (effectiveServiceId == null || service == null) {
             logger.debug("Persistence service not found '{}'.", effectiveServiceId);
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
                     "Persistence service not found: " + effectiveServiceId);
@@ -667,13 +663,13 @@ public class PersistenceResource implements RESTResource {
                     "Not supported for persistence service:" + effectiveServiceId);
         }
         Set<PersistenceItemInfo> mappedItemInfo = itemInfo.stream().map(info -> {
-            String alias = aliasToItem.get(info.getName());
-            if (alias != null) {
+            String item = aliasToItem.get(info.getName());
+            if (item != null) {
                 return new PersistenceItemInfo() {
 
                     @Override
                     public String getName() {
-                        return alias;
+                        return item;
                     }
 
                     @Override
