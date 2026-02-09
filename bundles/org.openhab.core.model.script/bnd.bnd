@@ -19,16 +19,21 @@ Export-Package: org.openhab.core.model.script,\
  org.openhab.core.model.script.validation
 Import-Package: \
  org.openhab.core.audio,\
- org.openhab.core.common.registry,\
  org.openhab.core.automation.module.script.action,\
  org.openhab.core.automation.module.script.rulesupport.shared,\
+ org.openhab.core.common.registry,\
  org.openhab.core.ephemeris,\
  org.openhab.core.events,\
+ org.openhab.core.io.console,\
+ org.openhab.core.io.console.extensions,\
+ org.openhab.core.io.net.exec,\
+ org.openhab.core.io.net.http,\
  org.openhab.core.items,\
  org.openhab.core.items.events,\
  org.openhab.core.library.items,\
  org.openhab.core.library.types,\
  org.openhab.core.library.unit,\
+ org.openhab.core.model.core,\
  org.openhab.core.persistence,\
  org.openhab.core.persistence.extensions,\
  org.openhab.core.scheduler,\
@@ -42,11 +47,6 @@ Import-Package: \
  org.openhab.core.util,\
  org.openhab.core.voice,\
  org.openhab.core.voice.text,\
- org.openhab.core.io.console,\
- org.openhab.core.io.console.extensions,\
- org.openhab.core.io.net.exec,\
- org.openhab.core.io.net.http,\
- org.openhab.core.model.core,\
  com.google.common.*;version="14",\
  javax.measure,\
  javax.measure.quantity,\
@@ -61,11 +61,11 @@ Require-Bundle: org.antlr.runtime,\
  org.eclipse.emf.ecore,\
  org.eclipse.emf.mwe2.launch;resolution:=optional,\
  org.openhab.core.model.item,\
- org.eclipse.xtext.common.types,\
- org.eclipse.xtext.xtext.generator;resolution:=optional,\
- org.eclipse.xtext.util,\
- org.eclipse.xtext.xbase.lib;bundle-version="2.34.0",\
- org.eclipse.xtext.xbase;visibility:=reexport,\
  org.eclipse.xtext;visibility:=reexport,\
+ org.eclipse.xtext.common.types,\
+ org.eclipse.xtext.util,\
+ org.eclipse.xtext.xbase;visibility:=reexport,\
+ org.eclipse.xtext.xbase.lib;bundle-version="2.34.0",\
+ org.eclipse.xtext.xtext.generator;resolution:=optional,\
  org.objectweb.asm;bundle-version="[9.0.0,10.0.0)";resolution:=optional
 -includeresource: resources
