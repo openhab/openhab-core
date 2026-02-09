@@ -94,14 +94,12 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     @Override
     public void removedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
-        List<SemanticTag> removed = elements.stream().map(this::mapSemanticTag)
-                .sorted(Comparator.comparing(SemanticTag::getUID).reversed()).toList();
-        removed.forEach(t -> {
-            tags.stream().filter(tag -> tag.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldTag -> {
+        elements.stream().map(elt -> elt.uid).sorted(Comparator.reverseOrder()).forEach(uid -> {
+            tags.stream().filter(tag -> tag.getUID().equals(uid)).findFirst().ifPresentOrElse(oldTag -> {
                 tags.remove(oldTag);
-                logger.debug("model {} removed tag {}", modelName, t.getUID());
+                logger.debug("model {} removed tag {}", modelName, uid);
                 notifyListenersAboutRemovedElement(oldTag);
-            }, () -> logger.debug("model {} tag {} not found", modelName, t.getUID()));
+            }, () -> logger.debug("model {} tag {} not found", modelName, uid));
         });
     }
 

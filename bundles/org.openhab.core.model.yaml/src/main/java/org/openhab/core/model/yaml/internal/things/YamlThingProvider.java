@@ -221,17 +221,16 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public void removedModel(String modelName, Collection<YamlThingDTO> elements) {
-        boolean isolated = isIsolatedModel(modelName);
-        List<Thing> removed = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, List.of());
-        removed.forEach(t -> {
-            modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldThing -> {
-                modelThings.remove(oldThing);
-                logger.debug("model {} removed thing {}", modelName, t.getUID());
-                if (!isolated) {
-                    notifyListenersAboutRemovedElement(oldThing);
-                }
-            }, () -> logger.debug("model {} thing {} not found", modelName, t.getUID()));
+        elements.stream().map(elt -> elt.uid).forEach(uid -> {
+            modelThings.stream().filter(th -> th.getUID().getAsString().equals(uid)).findFirst()
+                    .ifPresentOrElse(oldThing -> {
+                        modelThings.remove(oldThing);
+                        logger.debug("model {} removed thing {}", modelName, uid);
+                        if (!isIsolatedModel(modelName)) {
+                            notifyListenersAboutRemovedElement(oldThing);
+                        }
+                    }, () -> logger.debug("model {} thing {} not found", modelName, uid));
         });
         if (modelThings.isEmpty()) {
             thingsMap.remove(modelName);
