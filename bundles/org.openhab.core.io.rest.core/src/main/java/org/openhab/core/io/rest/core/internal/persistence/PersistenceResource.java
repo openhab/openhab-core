@@ -274,8 +274,8 @@ public class PersistenceResource implements RESTResource {
     @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of items available via a specific persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))),
-                    @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service"),
-                    @ApiResponse(responseCode = "405", description = "Persistence service not queryable") })
+                    @ApiResponse(responseCode = "404", description = "Unknown persistence service or Item not found in persistence store"),
+                    @ApiResponse(responseCode = "405", description = "Persistence service not queryable or getting item info not allowed") })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
             @Parameter(description = "An item name, if provided response will only contain information for this item") @QueryParam("itemname") @Nullable String itemName) {
@@ -288,7 +288,7 @@ public class PersistenceResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getItemDataFromPersistenceService", summary = "Gets item persistence data from the persistence service.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service"),
+            @ApiResponse(responseCode = "404", description = "Unknown persistence service or Item not found in persistence store"),
             @ApiResponse(responseCode = "405", description = "Persistence service not queryable") })
     public Response httpGetPersistenceItemData(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
@@ -647,17 +647,20 @@ public class PersistenceResource implements RESTResource {
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (existing, ignored) -> existing));
 
         Set<PersistenceItemInfo> itemInfo = null;
-        if (itemName != null) {
-            String alias = itemToAlias.get(itemName);
-            PersistenceItemInfo singleItemInfo = qService.getItemInfo(itemName, alias);
-            if (singleItemInfo != null) {
+        try {
+            if (itemName != null) {
+                String alias = itemToAlias.get(itemName);
+                PersistenceItemInfo singleItemInfo = qService.getItemInfo(itemName, alias);
+                if (singleItemInfo == null) {
+                    return JSONResponse.createErrorResponse(Status.NOT_FOUND,
+                            "Item '" + itemName + "' not found in persistence service: " + effectiveServiceId);
+                }
                 itemInfo = Set.of(singleItemInfo);
+            } else {
+                itemInfo = qService.getItemInfo();
             }
-        } else {
-            itemInfo = qService.getItemInfo();
-        }
-        if (itemInfo == null) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND,
+        } catch (UnsupportedOperationException e) {
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
                     "Not supported for persistence service:" + effectiveServiceId);
         }
         Set<PersistenceItemInfo> mappedItemInfo = itemInfo.stream().map(info -> {

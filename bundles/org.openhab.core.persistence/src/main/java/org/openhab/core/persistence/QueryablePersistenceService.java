@@ -93,25 +93,24 @@ public interface QueryablePersistenceService extends PersistenceService {
 
     /**
      * Returns a set of {@link PersistenceItemInfo} about items that are stored in the persistence service. This allows
-     * the persistence service to return information about items that are no longer available as an
-     * {@link org.openhab.core.items.Item} in openHAB. If it is not possible, or it would be costly to retrieve the
-     * information null should be returned.
+     * the persistence service to return information about items that are no long available as an
+     * {@link org.openhab.core.items.Item} in openHAB. If it is not possible to retrieve the information or it would be
+     * too expensive to do so an {@link UnsupportedOperationException} should be thrown.
      *
      * Note that this method will return the names for items as stored in persistence. If aliases are used, the calling
      * method is responsible for mapping back to the real item name.
      *
-     * @return a set of information about the persisted items or null if the persistence service does not support this
+     * @return a set of information about the persisted items
+     * @throws UnsupportedOperationException
      */
-    @Nullable
-    default Set<PersistenceItemInfo> getItemInfo() {
-        return null;
+    default Set<PersistenceItemInfo> getItemInfo() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("getItemInfo not supported for persistence service");
     }
 
     /**
-     * Returns {@link PersistenceItemInfo} for an item stored in the persistence service. A {@link PersistenceItemInfo}
-     * should always be returned if the persistence service has implemented this method. Null should only be returned if
-     * the persistence service cannot get, or it would be too costly to retrieve, this information. Partial information
-     * is allowed.
+     * Returns {@link PersistenceItemInfo} for an item stored in the persistence service. Null can be returned when the
+     * item is not found in the persistence service. If it is not possible to retrieve the information or it would be
+     * too expensive to do so an {@link UnsupportedOperationException} should be thrown.
      * The default implementation will query the persistence service for the last value in the persistence store and
      * set the latest timestamp, leaving the {@link PersistenceItemInfo} count to null.
      *
@@ -119,12 +118,17 @@ public interface QueryablePersistenceService extends PersistenceService {
      *
      * @param itemName
      * @param alias for item name in database
-     * @return information about the persisted item or null if the persistence service does not support this
+     * @return information about the persisted item
+     * @throws UnsupportedOperationException
      */
-    default @Nullable PersistenceItemInfo getItemInfo(String itemName, @Nullable String alias) {
+    default @Nullable PersistenceItemInfo getItemInfo(String itemName, @Nullable String alias)
+            throws UnsupportedOperationException {
         PersistedItem item = persistedItem(itemName, alias);
-        Date latest = item != null ? Date.from(item.getInstant()) : null;
-        Integer count = item != null ? null : 0; // If we found the item, we do not know how many are in the store
+        if (item == null) {
+            return null;
+        }
+        Date latest = Date.from(item.getInstant());
+        Integer count = null; // If we found the item, we do not know how many are in the store
         return new PersistenceItemInfo() {
 
             @Override
