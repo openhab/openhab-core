@@ -21,6 +21,7 @@ Import-Package: \
  org.openhab.core.library.types,\
  org.openhab.core.library.unit,\
  org.openhab.core.persistence,\
+ org.openhab.core.persistence.extensions,\
  org.openhab.core.service,\
  org.openhab.core.thing,\
  org.openhab.core.thing.binding,\
