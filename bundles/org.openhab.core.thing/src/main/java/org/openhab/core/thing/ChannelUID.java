@@ -49,6 +49,7 @@ public class ChannelUID extends UID {
      */
     public ChannelUID(String channelUid) {
         super(channelUid);
+        validateThingUID();
     }
 
     /**
@@ -74,6 +75,17 @@ public class ChannelUID extends UID {
      */
     public ChannelUID(ThingUID thingUID, String groupId, String id) {
         super(toSegments(thingUID, groupId, id));
+    }
+
+    void validateThingUID() {
+        try {
+            getThingUID();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid channel UID '%s'. It contains an invalid ThingUID part: '%s'.",
+                            getAsString(), e.getMessage()),
+                    e);
+        }
     }
 
     private static List<String> toSegments(ThingUID thingUID, @Nullable String groupId, String id) {
