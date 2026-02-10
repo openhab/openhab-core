@@ -32,6 +32,7 @@ public record PersistenceServiceProblem(String reason, @Nullable String serviceI
 
     // Reasons for persistence configuration problems.
     // If one of these constants is used as reason, the UI can use these values to give a more descriptive message.
+    public static final String PERSISTENCE_DUPLICATE_CONFIG = "PERSISTENCE_DUPLICATE_CONFIG";
     public static final String PERSISTENCE_NO_DEFAULT = "PERSISTENCE_NO_DEFAULT";
     public static final String PERSISTENCE_NO_CONFIG = "PERSISTENCE_SERVICE_NO_CONFIG";
     public static final String PERSISTENCE_NO_ITEMS = "PERSISTENCE_SERVICE_NO_ITEMS";
