@@ -274,7 +274,7 @@ public class YamlItemDTO implements YamlElement, Cloneable {
     @Override
     public int hashCode() {
         return Objects.hash(name, getType(), group, label, icon, format, unit, expire, autoupdate, getGroups(),
-                getTags(), channel);
+                getTags(), channel, channels, metadata);
     }
 
     @Override
@@ -291,33 +291,6 @@ public class YamlItemDTO implements YamlElement, Cloneable {
                 && Objects.equals(unit, other.unit) && Objects.equals(expire, other.expire)
                 && Objects.equals(autoupdate, other.autoupdate) && Objects.equals(getGroups(), other.getGroups())
                 && Objects.equals(getTags(), other.getTags()) && Objects.equals(channel, other.channel)
-                && equalsChannels(channels, other.channels) && equalsMetadata(metadata, other.metadata);
-    }
-
-    private boolean equalsChannels(@Nullable Map<@NonNull String, @NonNull Map<@NonNull String, @NonNull Object>> first,
-            @Nullable Map<@NonNull String, @NonNull Map<@NonNull String, @NonNull Object>> second) {
-        if (first != null && second != null) {
-            if (first.size() != second.size()) {
-                return false;
-            } else {
-                return first.entrySet().stream()
-                        .allMatch(e -> YamlElementUtils.equalsConfig(e.getValue(), second.get(e.getKey())));
-            }
-        } else {
-            return first == null && second == null;
-        }
-    }
-
-    private boolean equalsMetadata(@Nullable Map<@NonNull String, @NonNull YamlMetadataDTO> first,
-            @Nullable Map<@NonNull String, @NonNull YamlMetadataDTO> second) {
-        if (first != null && second != null) {
-            if (first.size() != second.size()) {
-                return false;
-            } else {
-                return first.entrySet().stream().allMatch(e -> e.getValue().equals(second.get(e.getKey())));
-            }
-        } else {
-            return first == null && second == null;
-        }
+                && Objects.equals(channels, other.channels) && Objects.equals(metadata, other.metadata);
     }
 }

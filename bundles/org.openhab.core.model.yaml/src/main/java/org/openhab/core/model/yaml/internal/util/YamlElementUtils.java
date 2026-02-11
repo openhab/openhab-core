@@ -12,10 +12,6 @@
  */
 package org.openhab.core.model.yaml.internal.util;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.CoreItemFactory;
@@ -29,21 +25,6 @@ import org.openhab.core.util.StringUtils;
  */
 @NonNullByDefault
 public class YamlElementUtils {
-
-    public static boolean equalsConfig(@Nullable Map<String, Object> first, @Nullable Map<String, Object> second) {
-        if (first != null && second != null) {
-            return first.size() != second.size() ? false
-                    : first.entrySet().stream().allMatch(e -> equalsConfigValue(e.getValue(), second.get(e.getKey())));
-        } else {
-            return first == null && second == null;
-        }
-    }
-
-    private static boolean equalsConfigValue(Object first, @Nullable Object second) {
-        return (first instanceof List firstList && second instanceof List secondList)
-                ? Arrays.equals(firstList.toArray(), secondList.toArray())
-                : first.equals(second);
-    }
 
     public static @Nullable String getAdjustedItemType(@Nullable String type) {
         return type == null ? null : StringUtils.capitalize(type);
