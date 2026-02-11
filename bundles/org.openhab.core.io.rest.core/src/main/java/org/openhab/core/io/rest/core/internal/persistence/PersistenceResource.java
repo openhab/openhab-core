@@ -271,28 +271,28 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of items available via a specific persistence service.", security = {
+    @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of Items available via a specific persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))),
                     @ApiResponse(responseCode = "404", description = "Unknown persistence service or Item not found in persistence store"),
-                    @ApiResponse(responseCode = "405", description = "Persistence service not queryable or getting item info not allowed") })
+                    @ApiResponse(responseCode = "405", description = "Persistence service not queryable or getting Item info not allowed") })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @Parameter(description = "An item name, if provided response will only contain information for this item") @QueryParam("itemname") @Nullable String itemName) {
-        return getServiceItemList(serviceId, itemName);
+            @Parameter(description = "An Item name, if provided response will only contain information for this Item") @QueryParam("itemname") @Nullable String itemName) {
+        return getServiceItemListDTO(serviceId, itemName);
     }
 
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/items/{itemName: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "getItemDataFromPersistenceService", summary = "Gets item persistence data from the persistence service.", responses = {
+    @Operation(operationId = "getItemDataFromPersistenceService", summary = "Gets Item persistence data from the persistence service.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
             @ApiResponse(responseCode = "404", description = "Unknown persistence service or Item not found in persistence store"),
             @ApiResponse(responseCode = "405", description = "Persistence service not queryable") })
     public Response httpGetPersistenceItemData(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @Parameter(description = "The item name") @PathParam("itemName") String itemName,
+            @Parameter(description = "The Item name") @PathParam("itemName") String itemName,
             @Parameter(description = "Start time of the data to return. Will default to 1 day before endtime. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]") @QueryParam("starttime") @Nullable String startTime,
@@ -301,7 +301,7 @@ public class PersistenceResource implements RESTResource {
             @Parameter(description = "Page number of data to return. This parameter will enable paging.") @QueryParam("page") int pageNumber,
             @Parameter(description = "The length of each page.") @QueryParam("pagelength") int pageLength,
             @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary,
-            @Parameter(description = "Adds the current Item state into the requested period (the item state will be before or at the endtime)") @QueryParam("itemState") boolean itemState) {
+            @Parameter(description = "Adds the current Item state into the requested period (the Item state will be before or at the endtime)") @QueryParam("itemState") boolean itemState) {
         return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary, itemState);
     }
 
@@ -309,14 +309,14 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items/{itemName: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "deleteItemFromPersistenceService", summary = "Deletes item persistence data from a specific persistence service in a given time range.", security = {
+    @Operation(operationId = "deleteItemFromPersistenceService", summary = "Deletes Item persistence data from a specific persistence service in a given time range.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))),
                     @ApiResponse(responseCode = "400", description = "Invalid filter parameters"),
                     @ApiResponse(responseCode = "404", description = "Unknown persistence service") })
     public Response httpDeletePersistenceServiceItem(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.", required = true) @QueryParam("serviceId") String serviceId,
-            @Parameter(description = "The item name.") @PathParam("itemName") String itemName,
+            @Parameter(description = "The Item name.") @PathParam("itemName") String itemName,
             @Parameter(description = "Start of the time range to be deleted. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]", required = true) @QueryParam("starttime") String startTime,
@@ -329,14 +329,14 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items/{itemName: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "storeItemDataInPersistenceService", summary = "Stores item persistence data into the persistence service.", security = {
+    @Operation(operationId = "storeItemDataInPersistenceService", summary = "Stores Item persistence data into the persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "400", description = "Item not found, invalid state, invalid time format, or persistence service not found or not modifiable"),
                     @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
     public Response httpPutPersistenceItemData(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @Parameter(description = "The item name.") @PathParam("itemName") String itemName,
+            @Parameter(description = "The Item name.") @PathParam("itemName") String itemName,
             @Parameter(description = "Time of the data to be stored. Will default to current time. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]", required = true) @QueryParam("time") String time,
             @Parameter(description = "The state to store.", required = true) @QueryParam("state") String value) {
@@ -577,9 +577,9 @@ public class PersistenceResource implements RESTResource {
                 }
                 State state = itemRegistry.getItem(itemName).getState();
                 if (state instanceof UnDefType) {
-                    logger.debug("State of item '{}' is undefined, not adding it to the response.", itemName);
+                    logger.debug("State of Item '{}' is undefined, not adding it to the response.", itemName);
                 } else {
-                    logger.debug("Adding state of item '{}' to the response: {} - {}", itemName, time, state);
+                    logger.debug("Adding state of Item '{}' to the response: {} - {}", itemName, time, state);
                     dto.addData(time, state);
                     quantity++;
                     dto.sortData();
@@ -621,7 +621,7 @@ public class PersistenceResource implements RESTResource {
         return dtoList;
     }
 
-    private Response getServiceItemList(@Nullable String serviceId, @Nullable String itemName) {
+    private Response getServiceItemListDTO(@Nullable String serviceId, @Nullable String itemName) {
         // If serviceId is null, then use the default service
         PersistenceService service;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
@@ -663,7 +663,7 @@ public class PersistenceResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
                     "Not supported for persistence service:" + effectiveServiceId);
         }
-        Set<PersistenceItemInfo> mappedItemInfo = itemInfo.stream().map(info -> {
+        Set<PersistenceItemInfoDTO> mappedItemInfo = itemInfo.stream().map(info -> {
             String item = aliasToItem.get(info.getName());
             if (item != null) {
                 return new PersistenceItemInfo() {
@@ -691,8 +691,17 @@ public class PersistenceResource implements RESTResource {
             } else {
                 return info;
             }
-        }).collect(Collectors.toSet());
+        }).map(this::createDTO).collect(Collectors.toSet());
         return JSONResponse.createResponse(Status.OK, mappedItemInfo, "");
+    }
+
+    private PersistenceItemInfoDTO createDTO(PersistenceItemInfo itemInfo) {
+        return new PersistenceItemInfoDTO(itemInfo.getName(), itemInfo.getCount(), itemInfo.getEarliest(),
+                itemInfo.getLatest());
+    }
+
+    private record PersistenceItemInfoDTO(String name, @Nullable Integer count, @Nullable Date earliest,
+            @Nullable Date latest) {
     }
 
     private Response deletePersistenceItemData(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
@@ -775,7 +784,7 @@ public class PersistenceResource implements RESTResource {
         State state = TypeParser.parseState(item.getAcceptedDataTypes(), value);
         if (state == null) {
             // State could not be parsed
-            logger.warn("Can't persist item {} with invalid state '{}'.", itemName, value);
+            logger.warn("Can't persist Item {} with invalid state '{}'.", itemName, value);
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "State could not be parsed: " + value);
         }
 
