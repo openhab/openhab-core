@@ -60,6 +60,8 @@ import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.DTServiceHandle;
 import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.DialogRegistration;
+import org.openhab.core.voice.InterpretationArguments;
+import org.openhab.core.voice.InterpreterContext;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.RecognitionStartEvent;
 import org.openhab.core.voice.RecognitionStopEvent;
@@ -72,8 +74,13 @@ import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.internal.text.ConversationStorage;
+import org.openhab.core.voice.text.Conversation;
+import org.openhab.core.voice.text.ConversationException;
+import org.openhab.core.voice.text.ConversationRole;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.LLMTool;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -130,6 +137,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final Map<String, STTService> sttServices = new HashMap<>();
     private final Map<String, TTSService> ttsServices = new HashMap<>();
     private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
+    private final Map<String, LLMTool> llmTools = new HashMap<>();
 
     private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
 
@@ -138,6 +146,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
     private final Storage<DialogRegistration> dialogRegistrationStorage;
+    private final ConversationStorage conversationStorage;
 
     private @Nullable Bundle bundle;
 
@@ -168,6 +177,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         this.i18nProvider = i18nProvider;
         this.dialogRegistrationStorage = storageService.getStorage(DialogRegistration.class.getName(),
                 this.getClass().getClassLoader());
+        this.conversationStorage = new ConversationStorage(storageService, eventPublisher);
     }
 
     @Activate
@@ -388,43 +398,79 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public String interpret(String text) throws InterpretationException {
-        return interpret(text, null);
+        return interpret(text, (InterpretationArguments) null);
     }
 
     @Override
     public String interpret(String text, @Nullable String hliIdList) throws InterpretationException {
+        return interpret(text, hliIdList == null ? (InterpretationArguments) null
+                : new InterpretationArguments(hliIdList, "", "", ""));
+    }
+
+    @Override
+    public String interpret(String text, @Nullable InterpretationArguments args) throws InterpretationException {
+        if (args == null) {
+            args = new InterpretationArguments("", "", "", "");
+        }
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
-        if (hliIdList == null) {
+        if (args.hliIdList().isEmpty()) {
             HumanLanguageInterpreter interpreter = getHLI();
             if (interpreter != null) {
                 interpreters.add(interpreter);
             }
         } else {
-            interpreters = getHLIsByIds(hliIdList);
+            interpreters = getHLIsByIds(args.hliIdList());
         }
 
         if (!interpreters.isEmpty()) {
             Locale locale = localeProvider.getLocale();
+            Conversation conversation = getConversation(args.conversationId());
+            try {
+                conversation.addMessage(ConversationRole.USER, text);
+            } catch (ConversationException e) {
+                String errMsg = e.getMessage();
+                throw new InterpretationException(
+                        errMsg != null ? errMsg : "Unknown exception adding user message to conversation");
+            }
+            List<LLMTool> tools = getLLMToolsByIds(args.toolIdList());
+            String locationItem = !args.locationItem().isBlank() ? args.locationItem() : null;
+            InterpreterContext context = new InterpreterContext(conversation, tools, locationItem);
             InterpretationException exception = null;
+            String answer = "";
             for (var interpreter : interpreters) {
                 try {
-                    String answer = interpreter.interpret(locale, text);
-                    logger.debug("Interpretation result: {}", answer);
+                    interpreter.interpret(locale, context);
+                    Conversation.Message message = context.conversation().getLastMessage();
+                    if (message != null && message.getRole() == ConversationRole.OPENHAB) {
+                        answer = message.getContent();
+                    }
+                    logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
+                    persistConversation(conversation);
                     return answer;
                 } catch (InterpretationException e) {
-                    logger.debug("Interpretation exception: {}", e.getMessage());
+                    logger.debug("Interpretation exception from interpreter '{}': {}", interpreter.getId(),
+                            e.getMessage());
                     exception = e;
                 }
             }
             if (exception != null) { // this should always be the case here
+                try {
+                    String errMsg = exception.getMessage();
+                    conversation.addMessage(ConversationRole.OPENHAB,
+                            errMsg != null ? errMsg : "Unknow interpreter error");
+                } catch (ConversationException e) {
+                    String errMsg = e.getMessage();
+                    throw new InterpretationException(
+                            errMsg != null ? errMsg : "Unknown exception adding user message to conversation");
+                }
                 throw exception;
             }
         }
 
-        if (hliIdList == null) {
+        if (args.hliIdList().isEmpty()) {
             throw new InterpretationException("No human language interpreter available!");
         } else {
-            throw new InterpretationException("No human language interpreter can be found for " + hliIdList);
+            throw new InterpretationException("No human language interpreter can be found for " + args.hliIdList());
         }
     }
 
@@ -635,7 +681,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
                         context.source().getId());
                 processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                        this.i18nProvider, b);
+                        this.i18nProvider, this.conversationStorage, b);
                 dialogProcessors.put(context.source().getId(), processor);
                 return processor.start();
             } else {
@@ -692,7 +738,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
             var processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                    this.i18nProvider, b);
+                    this.i18nProvider, this.conversationStorage, b);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
@@ -830,6 +876,18 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 .anyMatch(hli -> hli.getId().equals(humanLanguageInterpreter.getId())));
     }
 
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addLLMTool(LLMTool llmTool) {
+        this.llmTools.put(llmTool.getId(), llmTool);
+        scheduleDialogRegistrations();
+    }
+
+    protected void removeLLMTool(LLMTool llmTool) {
+        this.humanLanguageInterpreters.remove(llmTool.getId());
+        stopDialogs(dialog -> dialog.dialogContext.llmTools().stream()
+                .anyMatch(tool -> tool.getId().equals(llmTool.getId())));
+    }
+
     @Override
     public @Nullable TTSService getTTS() {
         TTSService tts = null;
@@ -931,6 +989,43 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     public @Nullable HumanLanguageInterpreter getHLI(@Nullable String id) {
         return id == null ? null : humanLanguageInterpreters.get(id);
+    }
+
+    @Override
+    public List<LLMTool> getLLMToolsByIds(@Nullable String ids) {
+        return ids == null || ids.isBlank() ? List.of() : getLLMToolsByIds(Arrays.asList(ids.split(",")));
+    }
+
+    @Override
+    public List<LLMTool> getLLMToolsByIds(List<String> ids) {
+        List<LLMTool> tools = new ArrayList<>();
+        for (String id : ids) {
+            LLMTool hli = llmTools.get(id);
+            if (hli == null) {
+                logger.warn("LLMTool '{}' not available!", id);
+            } else {
+                tools.add(hli);
+            }
+        }
+        return tools;
+    }
+
+    @Override
+    public Conversation getConversation(@Nullable String id) {
+        return id != null && !id.isBlank() ? conversationStorage.getConversation(id) : new Conversation("", null);
+    }
+
+    @Override
+    public boolean persistConversation(Conversation conversation) {
+        if (!conversation.getId().isBlank()) {
+            if (conversation.getMessages().isEmpty()) {
+                conversationStorage.removeConversation(conversation);
+            } else {
+                conversationStorage.storeConversation(conversation);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

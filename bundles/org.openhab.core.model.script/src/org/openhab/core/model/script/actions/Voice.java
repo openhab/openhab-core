@@ -25,6 +25,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.engine.action.ParamDoc;
 import org.openhab.core.model.script.internal.engine.action.VoiceActionService;
+import org.openhab.core.voice.InterpretationArguments;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
@@ -169,7 +170,7 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by the default human language interpreter", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text) {
-        return interpret(text, null);
+        return interpret(text, null, null, null, null);
     }
 
     /**
@@ -182,10 +183,16 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by given human language interpreter(s)", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "interpreters") @Nullable String interpreters) {
+            @ParamDoc(name = "interpreters") @Nullable String interpreters,
+            @ParamDoc(name = "conversation") @Nullable String conversation,
+            @ParamDoc(name = "llm-tools") @Nullable String llmTools,
+            @ParamDoc(name = "location") @Nullable String location) {
         String response;
         try {
-            response = VoiceActionService.voiceManager.interpret(text.toString(), interpreters);
+            response = VoiceActionService.voiceManager.interpret(text.toString(),
+                    new InterpretationArguments(Objects.requireNonNullElse(interpreters, ""),
+                            Objects.requireNonNullElse(conversation, ""), Objects.requireNonNullElse(llmTools, ""),
+                            Objects.requireNonNullElse(location, "")));
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             say(message);
@@ -206,10 +213,12 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by given human language interpreter(s) and using the given sink", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "interpreters") String interpreters, @ParamDoc(name = "sink") @Nullable String sink) {
+            @ParamDoc(name = "interpreters") @Nullable String interpreters,
+            @ParamDoc(name = "sink") @Nullable String sink) {
         String response;
         try {
-            response = VoiceActionService.voiceManager.interpret(text.toString(), interpreters);
+            response = VoiceActionService.voiceManager.interpret(text.toString(),
+                    new InterpretationArguments(interpreters != null ? interpreters : "", "", "", ""));
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             if (sink != null) {
