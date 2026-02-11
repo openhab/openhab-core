@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.voice.DialogContext;
+import org.openhab.core.voice.InterpreterContext;
 
 /**
  * This is the interface that a human language text interpreter has to implement.
@@ -59,9 +60,32 @@ public interface HumanLanguageInterpreter {
      * @param text the text to interpret
      * @return a human language response
      */
+    @Deprecated
     default String interpret(Locale locale, String text, @Nullable DialogContext dialogContext)
             throws InterpretationException {
         return interpret(locale, text);
+    }
+
+    /**
+     * Continues the conversation provided in the {@link InterpreterContext} argument given a {@link Locale}
+     * 
+     * You can also provide {@link LLMTool} and a location item id to it.
+     *
+     * @param locale language of the text (given by a {@link Locale})
+     * @param interpreterContext the context for the interpretation
+     */
+    default void interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
+        Conversation.Message message = interpreterContext.conversation().getLastMessage();
+        if (message == null || message.getRole() != ConversationRole.USER) {
+            throw new InterpretationException("Last conversation message is not an user message");
+        }
+        String response = interpret(locale, message.getContent());
+        try {
+            interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
+        } catch (ConversationException e) {
+            String errMsg = e.getMessage();
+            throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+        }
     }
 
     /**

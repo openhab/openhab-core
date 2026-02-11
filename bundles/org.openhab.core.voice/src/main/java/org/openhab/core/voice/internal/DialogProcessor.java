@@ -41,6 +41,7 @@ import org.openhab.core.voice.DTService;
 import org.openhab.core.voice.DTServiceHandle;
 import org.openhab.core.voice.DTTriggeredEvent;
 import org.openhab.core.voice.DialogContext;
+import org.openhab.core.voice.InterpreterContext;
 import org.openhab.core.voice.KSErrorEvent;
 import org.openhab.core.voice.KSEvent;
 import org.openhab.core.voice.KSException;
@@ -57,8 +58,13 @@ import org.openhab.core.voice.SpeechRecognitionErrorEvent;
 import org.openhab.core.voice.SpeechRecognitionEvent;
 import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.Voice;
+import org.openhab.core.voice.internal.text.ConversationStorage;
+import org.openhab.core.voice.text.Conversation;
+import org.openhab.core.voice.text.ConversationException;
+import org.openhab.core.voice.text.ConversationRole;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.LLMTool;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +89,7 @@ public class DialogProcessor implements KSListener, STTListener {
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
     private final WeakHashMap<String, DialogContext> activeDialogGroups;
     public final DialogContext dialogContext;
+    private final ConversationStorage conversationStorage;
     private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
@@ -111,11 +118,13 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable ToneSynthesizer toneSynthesizer;
 
     public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
-            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider, Bundle bundle) {
+            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider,
+            ConversationStorage conversationStorage, Bundle bundle) {
         this.dialogContext = context;
         this.eventListener = eventListener;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
+        this.conversationStorage = conversationStorage;
         this.activeDialogGroups = activeDialogGroups;
         this.bundle = bundle;
         var dt = context.dt();
@@ -358,13 +367,33 @@ public class DialogProcessor implements KSListener, STTListener {
                 logger.debug("Text recognized: {}", question);
                 toggleProcessing(false);
                 eventListener.onBeforeDialogInterpretation(dialogContext);
+                @Nullable
+                String conversationId = dialogContext.conversationId();
+                Conversation conversation = conversationId != null ? conversationStorage.getConversation(conversationId)
+                        : new Conversation("", null);
+                try {
+                    conversation.addMessage(ConversationRole.USER, question);
+                } catch (ConversationException e) {
+                    logger.error("Unable to add message to conversation: {}", e.getMessage(), e);
+                    return;
+                }
+                List<LLMTool> tools = dialogContext.llmTools();
+                InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
+                        dialogContext.locationItem());
                 String answer = "";
                 String error = null;
                 for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
                     try {
-                        answer = interpreter.interpret(dialogContext.locale(), question, dialogContext);
-                        logger.debug("Interpretation result: {}", answer);
+                        interpreter.interpret(dialogContext.locale(), interpreterContext);
+                        Conversation.Message message = interpreterContext.conversation().getLastMessage();
+                        if (message != null && message.getRole() == ConversationRole.OPENHAB) {
+                            answer = message.getContent();
+                        }
                         error = null;
+                        logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
+                        if (conversationId != null) {
+                            conversationStorage.storeConversation(conversation);
+                        }
                         break;
                     } catch (InterpretationException e) {
                         logger.debug("Interpretation exception: {}", e.getMessage());

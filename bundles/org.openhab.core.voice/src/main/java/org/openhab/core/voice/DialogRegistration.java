@@ -58,6 +58,14 @@ public class DialogRegistration {
      */
     public List<String> hliIds = List.of();
     /**
+     * Conversation id.
+     */
+    public @Nullable String conversationId;
+    /**
+     * List of LLM tools
+     */
+    public List<String> llmToolIds = List.of();
+    /**
      * Dialog locale
      */
     public @Nullable Locale locale;

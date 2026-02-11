@@ -179,7 +179,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         // Wait some time to be sure that the configuration will be updated
         Thread.sleep(2000);
 
-        String result = voiceManager.interpret("something", null);
+        String result = voiceManager.interpret("something");
         assertThat(result, is("Interpreted text"));
     }
 
