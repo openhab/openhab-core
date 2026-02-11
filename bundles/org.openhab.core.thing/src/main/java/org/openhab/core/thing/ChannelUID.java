@@ -81,10 +81,7 @@ public class ChannelUID extends UID {
         try {
             getThingUID();
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(
-                    String.format("Invalid channel UID '%s'. It contains an invalid ThingUID part: '%s'.",
-                            getAsString(), e.getMessage()),
-                    e);
+            throw new IllegalArgumentException("ChannelUID contains an invalid ThingUID part: " + e.getMessage(), e);
         }
     }
 

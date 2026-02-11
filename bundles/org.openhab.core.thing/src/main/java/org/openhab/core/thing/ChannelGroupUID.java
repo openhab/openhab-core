@@ -55,9 +55,7 @@ public class ChannelGroupUID extends UID {
         try {
             getThingUID();
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(
-                    String.format("Invalid channel group UID '%s'. It contains an invalid ThingUID part: '%s'.",
-                            getAsString(), e.getMessage()),
+            throw new IllegalArgumentException("ChannelGroupUID contains an invalid ThingUID part: " + e.getMessage(),
                     e);
         }
     }
