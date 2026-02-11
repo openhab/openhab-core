@@ -375,67 +375,69 @@ public class YamlThingProviderTest {
         Files.copy(SOURCE_PATH.resolve("thing.yaml"), fullModelPath);
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        String name = modelRepository.createIsolatedModel(new FileInputStream(fullModelPath.toFile()), errors,
-                warnings);
-        assertNotNull(name);
-        assertEquals(0, errors.size());
-        assertEquals(0, warnings.size());
+        try (FileInputStream inputStream = new FileInputStream(fullModelPath.toFile())) {
+            String name = modelRepository.createIsolatedModel(inputStream, errors, warnings);
+            assertNotNull(name);
+            assertEquals(0, errors.size());
+            assertEquals(0, warnings.size());
 
-        assertTrue(YamlModelUtils.isIsolatedModel(name));
-        assertThat(thingListener.things, is(aMapWithSize(0)));
-        assertThat(thingProvider.getAll(), hasSize(0)); // No thing for the registry
-        Collection<Thing> things = thingProvider.getAllFromModel(name);
-        assertThat(things, hasSize(1));
-        Thing thing = things.iterator().next();
-        assertFalse(thing instanceof Bridge);
-        assertEquals(NTP_THING_UID, thing.getUID());
-        assertNull(thing.getBridgeUID());
-        assertEquals(NTP_THING_TYPE_UID, thing.getThingTypeUID());
-        assertEquals("NTP Local Server", thing.getLabel());
-        assertEquals("Paris", thing.getLocation());
-        assertEquals(NTP_THING_TYPE_EQUIPMENT_TAG, thing.getSemanticEquipmentTag());
-        assertEquals(0, thing.getProperties().size());
+            assertTrue(YamlModelUtils.isIsolatedModel(name));
+            assertThat(thingListener.things, is(aMapWithSize(0)));
+            assertThat(thingProvider.getAll(), hasSize(0)); // No thing for the registry
+            Collection<Thing> things = thingProvider.getAllFromModel(name);
+            assertThat(things, hasSize(1));
+            Thing thing = things.iterator().next();
+            assertFalse(thing instanceof Bridge);
+            assertEquals(NTP_THING_UID, thing.getUID());
+            assertNull(thing.getBridgeUID());
+            assertEquals(NTP_THING_TYPE_UID, thing.getThingTypeUID());
+            assertEquals("NTP Local Server", thing.getLabel());
+            assertEquals("Paris", thing.getLocation());
+            assertEquals(NTP_THING_TYPE_EQUIPMENT_TAG, thing.getSemanticEquipmentTag());
+            assertEquals(0, thing.getProperties().size());
 
-        // No parameter injected
-        assertThat(thing.getConfiguration().keySet(),
-                containsInAnyOrder("hostname", "serverPort", "timeZone", "other"));
-        assertEquals("0.fr.pool.ntp.org", thing.getConfiguration().get("hostname"));
-        assertEquals(BigDecimal.valueOf(123), thing.getConfiguration().get("serverPort"));
-        assertEquals("Europe/Paris", thing.getConfiguration().get("timeZone"));
-        assertEquals("A parameter that is not in the thing config description.", thing.getConfiguration().get("other"));
+            // No parameter injected
+            assertThat(thing.getConfiguration().keySet(),
+                    containsInAnyOrder("hostname", "serverPort", "timeZone", "other"));
+            assertEquals("0.fr.pool.ntp.org", thing.getConfiguration().get("hostname"));
+            assertEquals(BigDecimal.valueOf(123), thing.getConfiguration().get("serverPort"));
+            assertEquals("Europe/Paris", thing.getConfiguration().get("timeZone"));
+            assertEquals("A parameter that is not in the thing config description.",
+                    thing.getConfiguration().get("other"));
 
-        assertEquals(2, thing.getChannels().size());
-        Iterator<Channel> it = thing.getChannels().iterator();
-        Channel channel = it.next();
-        assertEquals(new ChannelUID(NTP_THING_UID, "string"), channel.getUID());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
-        assertEquals(ChannelKind.STATE, channel.getKind());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_ITEM_TYPE, channel.getAcceptedItemType());
-        // label in YAML is ignored for a channel provided by the thing type
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_LABEL, channel.getLabel());
-        // description in YAML is ignored for a channel provided by the thing type
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
-        assertNull(channel.getAutoUpdatePolicy());
-        assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
-        assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
-        assertEquals("dd-MM-yyyy HH:mm", channel.getConfiguration().get("DateTimeFormat"));
-        assertEquals("A parameter that is not in the channel config description.",
-                channel.getConfiguration().get("other"));
-        channel = it.next();
-        assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
-        assertEquals(ChannelKind.STATE, channel.getKind());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_ITEM_TYPE, channel.getAcceptedItemType());
-        assertEquals("Date Only", channel.getLabel());
-        assertEquals("Format with date only.", channel.getDescription());
-        assertNull(channel.getAutoUpdatePolicy());
-        assertThat(channel.getDefaultTags(), hasSize(0));
-        assertEquals(0, channel.getProperties().size());
-        assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
-        assertEquals("dd-MM-yyyy", channel.getConfiguration().get("DateTimeFormat"));
-        assertEquals("A parameter that is not in the channel config description.",
-                channel.getConfiguration().get("other"));
+            assertEquals(2, thing.getChannels().size());
+            Iterator<Channel> it = thing.getChannels().iterator();
+            Channel channel = it.next();
+            assertEquals(new ChannelUID(NTP_THING_UID, "string"), channel.getUID());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
+            assertEquals(ChannelKind.STATE, channel.getKind());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_ITEM_TYPE, channel.getAcceptedItemType());
+            // label in YAML is ignored for a channel provided by the thing type
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_LABEL, channel.getLabel());
+            // description in YAML is ignored for a channel provided by the thing type
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
+            assertNull(channel.getAutoUpdatePolicy());
+            assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
+            assertEquals(0, channel.getProperties().size());
+            assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
+            assertEquals("dd-MM-yyyy HH:mm", channel.getConfiguration().get("DateTimeFormat"));
+            assertEquals("A parameter that is not in the channel config description.",
+                    channel.getConfiguration().get("other"));
+            channel = it.next();
+            assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
+            assertEquals(ChannelKind.STATE, channel.getKind());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_ITEM_TYPE, channel.getAcceptedItemType());
+            assertEquals("Date Only", channel.getLabel());
+            assertEquals("Format with date only.", channel.getDescription());
+            assertNull(channel.getAutoUpdatePolicy());
+            assertThat(channel.getDefaultTags(), hasSize(0));
+            assertEquals(0, channel.getProperties().size());
+            assertThat(channel.getConfiguration().keySet(), containsInAnyOrder("DateTimeFormat", "other"));
+            assertEquals("dd-MM-yyyy", channel.getConfiguration().get("DateTimeFormat"));
+            assertEquals("A parameter that is not in the channel config description.",
+                    channel.getConfiguration().get("other"));
+        }
     }
 
     @Test
@@ -443,56 +445,57 @@ public class YamlThingProviderTest {
         Files.copy(SOURCE_PATH.resolve("thingWithEmptyConfig.yaml"), fullModelPath);
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        String name = modelRepository.createIsolatedModel(new FileInputStream(fullModelPath.toFile()), errors,
-                warnings);
-        assertNotNull(name);
-        assertEquals(0, errors.size());
-        assertEquals(0, warnings.size());
+        try (FileInputStream inputStream = new FileInputStream(fullModelPath.toFile())) {
+            String name = modelRepository.createIsolatedModel(inputStream, errors, warnings);
+            assertNotNull(name);
+            assertEquals(0, errors.size());
+            assertEquals(0, warnings.size());
 
-        assertTrue(YamlModelUtils.isIsolatedModel(name));
-        assertThat(thingListener.things, is(aMapWithSize(0)));
-        assertThat(thingProvider.getAll(), hasSize(0)); // No thing for the registry
-        Collection<Thing> things = thingProvider.getAllFromModel(name);
-        assertThat(things, hasSize(1));
-        Thing thing = things.iterator().next();
-        assertFalse(thing instanceof Bridge);
-        assertEquals(NTP_THING_UID, thing.getUID());
-        assertNull(thing.getBridgeUID());
-        assertEquals(NTP_THING_TYPE_UID, thing.getThingTypeUID());
-        assertEquals(NTP_THING_TYPE_LABEL, thing.getLabel());
-        assertNull(thing.getLocation());
-        assertEquals(NTP_THING_TYPE_EQUIPMENT_TAG, thing.getSemanticEquipmentTag());
-        assertEquals(0, thing.getProperties().size());
+            assertTrue(YamlModelUtils.isIsolatedModel(name));
+            assertThat(thingListener.things, is(aMapWithSize(0)));
+            assertThat(thingProvider.getAll(), hasSize(0)); // No thing for the registry
+            Collection<Thing> things = thingProvider.getAllFromModel(name);
+            assertThat(things, hasSize(1));
+            Thing thing = things.iterator().next();
+            assertFalse(thing instanceof Bridge);
+            assertEquals(NTP_THING_UID, thing.getUID());
+            assertNull(thing.getBridgeUID());
+            assertEquals(NTP_THING_TYPE_UID, thing.getThingTypeUID());
+            assertEquals(NTP_THING_TYPE_LABEL, thing.getLabel());
+            assertNull(thing.getLocation());
+            assertEquals(NTP_THING_TYPE_EQUIPMENT_TAG, thing.getSemanticEquipmentTag());
+            assertEquals(0, thing.getProperties().size());
 
-        // No parameter injected
-        assertThat(thing.getConfiguration().keySet(), hasSize(0));
+            // No parameter injected
+            assertThat(thing.getConfiguration().keySet(), hasSize(0));
 
-        assertEquals(2, thing.getChannels().size());
-        Iterator<Channel> it = thing.getChannels().iterator();
-        Channel channel = it.next();
-        assertEquals(new ChannelUID(NTP_THING_UID, "string"), channel.getUID());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
-        assertEquals(ChannelKind.STATE, channel.getKind());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_ITEM_TYPE, channel.getAcceptedItemType());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_LABEL, channel.getLabel());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
-        assertNull(channel.getAutoUpdatePolicy());
-        assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
-        assertEquals(0, channel.getProperties().size());
-        // default value not injected for parameter DateTimeFormat
-        assertThat(channel.getConfiguration().keySet(), hasSize(0));
-        channel = it.next();
-        assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
-        assertEquals(ChannelKind.STATE, channel.getKind());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_ITEM_TYPE, channel.getAcceptedItemType());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_LABEL, channel.getLabel());
-        assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
-        assertNull(channel.getAutoUpdatePolicy());
-        assertThat(channel.getDefaultTags(), hasSize(0));
-        assertEquals(0, channel.getProperties().size());
-        // default value not injected for parameter DateTimeFormat
-        assertThat(channel.getConfiguration().keySet(), hasSize(0));
+            assertEquals(2, thing.getChannels().size());
+            Iterator<Channel> it = thing.getChannels().iterator();
+            Channel channel = it.next();
+            assertEquals(new ChannelUID(NTP_THING_UID, "string"), channel.getUID());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
+            assertEquals(ChannelKind.STATE, channel.getKind());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_ITEM_TYPE, channel.getAcceptedItemType());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_LABEL, channel.getLabel());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
+            assertNull(channel.getAutoUpdatePolicy());
+            assertThat(channel.getDefaultTags(), containsInAnyOrder(TAG_STATUS, TAG_TIMESTAMP));
+            assertEquals(0, channel.getProperties().size());
+            // default value not injected for parameter DateTimeFormat
+            assertThat(channel.getConfiguration().keySet(), hasSize(0));
+            channel = it.next();
+            assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_UID, channel.getChannelTypeUID());
+            assertEquals(ChannelKind.STATE, channel.getKind());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_ITEM_TYPE, channel.getAcceptedItemType());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_LABEL, channel.getLabel());
+            assertEquals(NTP_CHANNEL_TYPE_STRING_CHANNEL_DESCRIPTION, channel.getDescription());
+            assertNull(channel.getAutoUpdatePolicy());
+            assertThat(channel.getDefaultTags(), hasSize(0));
+            assertEquals(0, channel.getProperties().size());
+            // default value not injected for parameter DateTimeFormat
+            assertThat(channel.getConfiguration().keySet(), hasSize(0));
+        }
     }
 
     @Test
@@ -622,7 +625,7 @@ public class YamlThingProviderTest {
         }
     }
 
-    private class NtpThingHandler implements ThingHandler {
+    private static class NtpThingHandler implements ThingHandler {
         Thing thing;
 
         NtpThingHandler(Thing thing) {
