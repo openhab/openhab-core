@@ -271,7 +271,7 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of Items available via a specific persistence service.", security = {
+    @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of stored Items available via a specific persistence service with their stored name.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))),
                     @ApiResponse(responseCode = "404", description = "Unknown persistence service or Item not found in persistence store"),
@@ -643,8 +643,6 @@ public class PersistenceResource implements RESTResource {
 
         PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
         Map<String, String> itemToAlias = config != null ? config.getAliases() : Map.of();
-        Map<String, String> aliasToItem = itemToAlias.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (existing, ignored) -> existing));
 
         Set<PersistenceItemInfo> itemInfo = null;
         try {
@@ -663,35 +661,7 @@ public class PersistenceResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
                     "Not supported for persistence service:" + effectiveServiceId);
         }
-        Set<PersistenceItemInfoDTO> mappedItemInfo = itemInfo.stream().map(info -> {
-            String item = aliasToItem.get(info.getName());
-            if (item != null) {
-                return new PersistenceItemInfo() {
-
-                    @Override
-                    public String getName() {
-                        return item;
-                    }
-
-                    @Override
-                    public @Nullable Integer getCount() {
-                        return info.getCount();
-                    }
-
-                    @Override
-                    public @Nullable Date getEarliest() {
-                        return info.getEarliest();
-                    }
-
-                    @Override
-                    public @Nullable Date getLatest() {
-                        return info.getLatest();
-                    }
-                };
-            } else {
-                return info;
-            }
-        }).map(this::createDTO).collect(Collectors.toSet());
+        Set<PersistenceItemInfoDTO> mappedItemInfo = itemInfo.stream().map(this::createDTO).collect(Collectors.toSet());
         return JSONResponse.createResponse(Status.OK, mappedItemInfo, "");
     }
 
