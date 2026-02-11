@@ -117,15 +117,13 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
 
     @Override
     public void removedModel(String modelName, Collection<YamlRuleDTO> elements) {
-        List<Rule> removed = elements.stream().map(this::mapRule).filter(Objects::nonNull).toList();
         Collection<Rule> modelRules = rulesMap.getOrDefault(modelName, List.of());
-        removed.forEach(r -> {
-            modelRules.stream().filter(rule -> rule.getUID().equals(r.getUID())).findFirst()
-                    .ifPresentOrElse(oldRule -> {
-                        modelRules.remove(oldRule);
-                        logger.debug("model {} removed rule {}", modelName, r.getUID());
-                        notifyListenersAboutRemovedElement(oldRule);
-                    }, () -> logger.debug("model {} rule {} not found", modelName, r.getUID()));
+        elements.stream().map(element -> element.uid).forEach(uid -> {
+            modelRules.stream().filter(rule -> rule.getUID().equals(uid)).findFirst().ifPresentOrElse(oldRule -> {
+                modelRules.remove(oldRule);
+                logger.debug("model {} removed rule {}", modelName, uid);
+                notifyListenersAboutRemovedElement(oldRule);
+            }, () -> logger.debug("model {} rule {} not found", modelName, uid));
         });
         if (modelRules.isEmpty()) {
             rulesMap.remove(modelName);
