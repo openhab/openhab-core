@@ -10,8 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-@Grab('com.xlson.groovycsv:groovycsv:1.1')
-import static com.xlson.groovycsv.CsvParser.parseCsv
+@Grab('tools.jackson.dataformat:jackson-dataformat-csv:3.0.4')
+import tools.jackson.dataformat.csv.CsvMapper
+import tools.jackson.dataformat.csv.CsvSchema
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -55,19 +56,29 @@ for (String tagSet : tagSets) {
 }
 
 def loadCsv(def semanticTagsCsv) {
-    tags = parseCsv(new FileReader(semanticTagsCsv), separator: ',').collect()
-    sorted = sortAndGroupByHierarchy(tags)
+    def mapper = new CsvMapper()
+    def schema = CsvSchema.emptySchema().withHeader()
+
+    def reader = mapper.readerFor(Map).with(schema)
+    def tags = reader.readValues(new File(semanticTagsCsv)).withCloseable { it ->
+        it.readAll()
+    }
+
+    def sorted = sortAndGroupByHierarchy(tags)
     if (tags == sorted) {
         return tags
     }
 
-    sortedTagsFile = new FileWriter(semanticTagsCsv)
-    sortedTagsFile.write(sorted.first().toMap().keySet().join(",") + "\n") // csv header
-    sorted.each { line ->
-        fields = line.toMap().values().stream().map { quoted(it) }.toList()
-        sortedTagsFile.write(fields.join(",") + "\n")
-    }
-    sortedTagsFile.close()
+    def sortedTagsFile = new FileWriter(semanticTagsCsv)
+    def headerKeys = tags[0].keySet().toList()
+    def schemaBuilder = CsvSchema.builder()
+    headerKeys.each { k -> schemaBuilder.addColumn(k) }
+    def outSchema = schemaBuilder.build().withHeader()
+
+    def seqWriter = mapper.writer(outSchema).writeValues(sortedTagsFile)
+    seqWriter.writeAll(sorted)
+    seqWriter.close()
+
     return sorted
 }
 
@@ -78,13 +89,6 @@ def sortAndGroupByHierarchy(def tags) {
         result.addAll(i + 1, children)
     }
     return result
-}
-
-def quoted(def str) {
-    if (str.contains(",")) {
-        return '"' + str + '"'
-    }
-    return str
 }
 
 def checkDuplicates(def line) {
