@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ public class YamlSemanticTagProviderTest {
 
     private @TempDir @NonNullByDefault({}) Path watchPath;
     private @NonNullByDefault({}) Path fullModelPath;
-    private @NonNullByDefault({}) YamlModelListener<YamlSemanticTagDTO> tagListener;
+    private @NonNullByDefault({}) YamlModelListener<@NonNull YamlSemanticTagDTO> tagListener;
 
     @BeforeEach
     @SuppressWarnings({ "null", "unchecked" })
