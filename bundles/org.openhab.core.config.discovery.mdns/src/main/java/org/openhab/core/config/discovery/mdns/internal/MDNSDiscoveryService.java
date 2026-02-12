@@ -190,11 +190,16 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Override
     public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        considerService(serviceEvent);
+        /**
+         * Do nothing when a service is added, as we will get a 'serviceResolved` event afterwards, which
+         * contains the fully resolved ServiceInfo. If we would already create a DiscoveryResult here, we
+         * would not have the necessary full information.
+         */
     }
 
     @Override
     public void serviceRemoved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
+        // note: {@link ServiceEvent} JavaDoc says getInfo() result can be null; but seems never to be so here.
         for (MDNSDiscoveryParticipant participant : participants) {
             if (participant.getServiceType().equals(serviceEvent.getType())) {
                 removeDiscoveryResult(participant, serviceEvent.getInfo());
@@ -204,6 +209,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Override
     public void serviceResolved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
+        // note: {@link ServiceEvent} JavaDoc says getInfo() result can be null; but seems never to be so here.
         considerService(serviceEvent);
     }
 
