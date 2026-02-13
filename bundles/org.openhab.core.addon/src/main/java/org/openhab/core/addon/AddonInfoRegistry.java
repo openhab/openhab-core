@@ -98,6 +98,13 @@ public class AddonInfoRegistry {
         if (a.getDescription().isBlank()) {
             builder.withDescription(b.getDescription());
         }
+        String keywordsA = Objects.requireNonNullElse(a.getKeywords(), "");
+        String keywordsB = Objects.requireNonNullElse(b.getKeywords(), "");
+        if (keywordsA.isBlank() || keywordsB.isBlank()) {
+            builder.withKeywords(keywordsA + keywordsB);
+        } else {
+            builder.withKeywords(keywordsA + "," + keywordsB);
+        }
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());
         }

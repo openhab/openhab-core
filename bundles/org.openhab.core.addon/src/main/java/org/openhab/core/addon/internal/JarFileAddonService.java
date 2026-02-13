@@ -157,6 +157,7 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
                 .withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
                 .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI())
                 .withDescription(Objects.requireNonNullElse(addonInfo.getDescription(), bundle.getSymbolicName()))
+                .withKeywords(Objects.requireNonNullElse(addonInfo.getKeywords(), ""))
                 .withContentType(ADDONS_CONTENT_TYPE).withLoggerPackages(List.of(bundle.getSymbolicName())).build();
     }
 

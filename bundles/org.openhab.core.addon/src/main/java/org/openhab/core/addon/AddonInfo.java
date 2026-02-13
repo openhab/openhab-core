@@ -41,6 +41,7 @@ public class AddonInfo implements Identifiable<String> {
     private final String uid;
     private final String name;
     private final String description;
+    private final @Nullable String keywords;
     private final @Nullable String connection;
     private final List<String> countries;
     private final @Nullable String configDescriptionURI;
@@ -49,8 +50,8 @@ public class AddonInfo implements Identifiable<String> {
     private @Nullable List<AddonDiscoveryMethod> discoveryMethods;
 
     private AddonInfo(String id, String type, @Nullable String uid, String name, String description,
-            @Nullable String connection, List<String> countries, @Nullable String configDescriptionURI,
-            @Nullable String serviceId, @Nullable String sourceBundle,
+            @Nullable String keywords, @Nullable String connection, List<String> countries,
+            @Nullable String configDescriptionURI, @Nullable String serviceId, @Nullable String sourceBundle,
             @Nullable List<AddonDiscoveryMethod> discoveryMethods) throws IllegalArgumentException {
         // mandatory fields
         if (id.isBlank()) {
@@ -73,6 +74,7 @@ public class AddonInfo implements Identifiable<String> {
         this.description = description;
 
         // optional fields
+        this.keywords = keywords;
         this.connection = connection;
         this.countries = countries;
         this.configDescriptionURI = configDescriptionURI;
@@ -128,6 +130,15 @@ public class AddonInfo implements Identifiable<String> {
     }
 
     /**
+     * Returns a comma-separated list of keywords related to the add-on. e.g. "bluetooth".
+     *
+     * @return a comma-separated list of keywords
+     */
+    public @Nullable String getKeywords() {
+        return keywords;
+    }
+
+    /**
      * Returns the link to a concrete {@link org.openhab.core.config.core.ConfigDescription}.
      *
      * @return the link to a concrete ConfigDescription (could be <code>null</code>>)
@@ -168,6 +179,7 @@ public class AddonInfo implements Identifiable<String> {
         private @Nullable String uid;
         private String name = "";
         private String description = "";
+        private @Nullable String keywords;
         private @Nullable String connection;
         private List<String> countries = List.of();
         private @Nullable String configDescriptionURI = "";
@@ -186,6 +198,7 @@ public class AddonInfo implements Identifiable<String> {
             this.uid = addonInfo.uid;
             this.name = addonInfo.name;
             this.description = addonInfo.description;
+            this.keywords = addonInfo.keywords;
             this.connection = addonInfo.connection;
             this.countries = addonInfo.countries;
             this.configDescriptionURI = addonInfo.configDescriptionURI;
@@ -206,6 +219,11 @@ public class AddonInfo implements Identifiable<String> {
 
         public Builder withDescription(String description) {
             this.description = description;
+            return this;
+        }
+
+        public Builder withKeywords(@Nullable String keywords) {
+            this.keywords = keywords;
             return this;
         }
 
@@ -251,8 +269,8 @@ public class AddonInfo implements Identifiable<String> {
          * @throws IllegalArgumentException if any of the information in this builder is invalid
          */
         public AddonInfo build() throws IllegalArgumentException {
-            return new AddonInfo(id, type, uid, name, description, connection, countries, configDescriptionURI,
-                    serviceId, sourceBundle, discoveryMethods);
+            return new AddonInfo(id, type, uid, name, description, keywords, connection, countries,
+                    configDescriptionURI, serviceId, sourceBundle, discoveryMethods);
         }
     }
 }
