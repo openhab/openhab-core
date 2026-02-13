@@ -334,14 +334,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
-                        if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR) {
-                            errors.add(d.getMessage());
-                        } else {
-                            warnings.add(d.getMessage());
-                        }
-                    }
-                    if (!errors.isEmpty()) {
-                        return false;
+                        warnings.add(d.getMessage());
                     }
                 } catch (NullPointerException e) {
                     // see https://github.com/eclipse/smarthome/issues/3335
