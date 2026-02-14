@@ -222,16 +222,15 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     @Override
     public void removedModel(String modelName, Collection<YamlThingDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
-        List<Thing> removed = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, List.of());
-        removed.forEach(t -> {
-            modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldThing -> {
+        elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
+            modelThings.stream().filter(th -> th.getUID().equals(uid)).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
-                logger.debug("model {} removed thing {}", modelName, t.getUID());
+                logger.debug("model {} removed thing {}", modelName, uid);
                 if (!isolated) {
                     notifyListenersAboutRemovedElement(oldThing);
                 }
-            }, () -> logger.debug("model {} thing {} not found", modelName, t.getUID()));
+            }, () -> logger.debug("model {} thing {} not found", modelName, uid));
         });
         if (modelThings.isEmpty()) {
             thingsMap.remove(modelName);
@@ -351,6 +350,14 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     private @Nullable String getBundleName(ThingHandlerFactory thingHandlerFactory) {
         Bundle bundle = bundleResolver.resolveBundle(thingHandlerFactory.getClass());
         return bundle == null ? null : bundle.getSymbolicName();
+    }
+
+    private @Nullable ThingUID buildThingUID(YamlThingDTO thingDto) {
+        try {
+            return new ThingUID(thingDto.uid);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private @Nullable Thing mapThing(YamlThingDTO thingDto, boolean isolatedModel) {
