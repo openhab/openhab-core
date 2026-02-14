@@ -106,7 +106,9 @@ public class AddonInfoRegistry {
         if (b.getKeywords() instanceof String kb) {
             Arrays.stream(kb.split(",")).map(String::trim).filter(s -> !s.isEmpty()).forEach(keywords::add);
         }
-        builder.withKeywords(keywords.stream().collect(Collectors.joining(",")));
+        if (!keywords.isEmpty()) {
+            builder.withKeywords(keywords.stream().collect(Collectors.joining(",")));
+        }
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());
         }

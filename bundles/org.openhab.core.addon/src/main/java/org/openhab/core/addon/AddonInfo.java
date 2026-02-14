@@ -132,7 +132,7 @@ public class AddonInfo implements Identifiable<String> {
     /**
      * Returns a comma-separated list of keywords related to the add-on. e.g. "bluetooth".
      *
-     * @return a comma-separated list of keywords
+     * @return a comma-separated list of keywords, or null if no keywords string available
      */
     public @Nullable String getKeywords() {
         return keywords;
