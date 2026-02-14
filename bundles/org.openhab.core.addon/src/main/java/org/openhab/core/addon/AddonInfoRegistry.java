@@ -22,7 +22,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -100,9 +99,15 @@ public class AddonInfoRegistry {
         if (a.getDescription().isBlank()) {
             builder.withDescription(b.getDescription());
         }
-        builder.withKeywords(Objects.requireNonNullElse(Stream.<String> of(a.getKeywords(), b.getKeywords())
-                .filter(Objects::nonNull).flatMap(s -> Arrays.stream(s.split(","))).map(String::trim)
-                .filter(s -> !s.isBlank()).distinct().collect(Collectors.joining(",")), ""));
+        Set<String> keywords = new HashSet<>();
+        if (a.getKeywords() instanceof String ka) {
+            Arrays.stream(ka.split(",")).map(String::trim).filter(s -> !s.isEmpty()).forEach(keywords::add);
+        }
+
+        if (b.getKeywords() instanceof String kb) {
+            Arrays.stream(kb.split(",")).map(String::trim).filter(s -> !s.isEmpty()).forEach(keywords::add);
+        }
+        builder.withKeywords(keywords.stream().collect(Collectors.joining(",")));
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());
         }
