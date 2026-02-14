@@ -131,7 +131,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                 return false;
             }
             if (!newWarnings.isEmpty()) {
-                logger.warn("Validation issues found in DSL model '{}', using it anyway:\n{}", name,
+                logger.info("Validation issues found in DSL model '{}', using it anyway:\n{}", name,
                         String.join("\n", newWarnings));
             }
         } catch (IOException e) {
