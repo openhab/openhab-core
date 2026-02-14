@@ -81,11 +81,11 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         mdnsDiscoveryService.addDiscoveryListener(mockDiscoveryListener);
 
         mdnsDiscoveryService.serviceAdded(mockServiceEvent);
-        verify(mockDiscoveryListener, timeout(2000).times(1)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
+        verify(mockDiscoveryListener, timeout(2000).times(0)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
         verifyNoMoreInteractions(mockDiscoveryListener);
 
         mdnsDiscoveryService.serviceResolved(mockServiceEvent);
-        verify(mockDiscoveryListener, timeout(2000).times(2)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
+        verify(mockDiscoveryListener, timeout(2000).times(1)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
         verifyNoMoreInteractions(mockDiscoveryListener);
 
         mdnsDiscoveryService.serviceRemoved(mockServiceEvent);
