@@ -191,9 +191,9 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     @Override
     public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         /**
-         * Do nothing when a service is added, as we will get a 'serviceResolved` event afterwards, which
-         * contains the fully resolved ServiceInfo. If we would already create a DiscoveryResult here, we
-         * would not have the necessary full information.
+         * Do nothing when a service is added, as we will get a <code>serviceResolved</code> event afterwards,
+         * which contains the fully resolved ServiceInfo. If we would already create a DiscoveryResult here,
+         * we would not have the necessary full information.
          */
     }
 
