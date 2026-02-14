@@ -100,9 +100,9 @@ public class AddonInfoRegistry {
         if (a.getDescription().isBlank()) {
             builder.withDescription(b.getDescription());
         }
-        builder.withKeywords(Stream.<String> of(a.getKeywords(), b.getKeywords()).filter(Objects::nonNull)
-                .flatMap(s -> Arrays.stream(s.split(","))).map(String::trim).filter(s -> !s.isBlank()).distinct()
-                .collect(Collectors.joining(",")));
+        builder.withKeywords(Objects.requireNonNullElse(Stream.<String> of(a.getKeywords(), b.getKeywords())
+                .filter(Objects::nonNull).flatMap(s -> Arrays.stream(s.split(","))).map(String::trim)
+                .filter(s -> !s.isBlank()).distinct().collect(Collectors.joining(",")), ""));
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());
         }
