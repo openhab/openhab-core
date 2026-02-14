@@ -37,6 +37,7 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.Fields;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.AccessTokenResponseExtraFieldsAdapterFactory;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
 import org.openhab.core.io.net.http.HttpClientFactory;
@@ -120,7 +121,7 @@ public class OAuthConnector {
                     } catch (DateTimeParseException e) {
                         return LocalDateTime.parse(json.getAsString()).atZone(ZoneId.systemDefault()).toInstant();
                     }
-                }).create();
+                }).registerTypeAdapterFactory(new AccessTokenResponseExtraFieldsAdapterFactory()).create();
     }
 
     /**

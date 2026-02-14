@@ -15,6 +15,8 @@ package org.openhab.core.auth.client.oauth2;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -101,6 +103,21 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * is produced at the server.
      */
     private Instant createdOn;
+
+    /**
+     * Extra element that possibly pass in the token by specific oAuth implementation
+     *
+     *
+     */
+    private Map<String, String> extraFields = Collections.emptyMap();
+
+    public Map<String, String> getExtraFields() {
+        return extraFields;
+    }
+
+    public void setExtraFields(Map<String, String> extraFields) {
+        this.extraFields = extraFields;
+    }
 
     /**
      * Calculate if the token is expired against the given time.
