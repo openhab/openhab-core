@@ -31,7 +31,7 @@
 		<parameter name="location" type="text">
 			<context>location</context>
 			<label>Location</label>
-			<description><![CDATA[The location of this installation.<br>Coordinates as &lt;latitude&gt;,&lt;longitude&gt;[&lt;altitude&gt;]<br>Example: "52.5200066,13.4049540" (Berlin)]]></description>
+			<description><![CDATA[The location of this installation.<br>Coordinates as &lt;latitude&gt;,&lt;longitude&gt;[&lt;altitude&gt;]<br>Example: "52.52000,13.40495" (Berlin)]]></description>
 		</parameter>
 		<parameter name="measurementSystem" type="text">
 			<label>Measurement System</label>
