@@ -12,6 +12,7 @@
  */
 package org.openhab.core.addon;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
@@ -21,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -98,13 +100,9 @@ public class AddonInfoRegistry {
         if (a.getDescription().isBlank()) {
             builder.withDescription(b.getDescription());
         }
-        String keywordsA = Objects.requireNonNullElse(a.getKeywords(), "");
-        String keywordsB = Objects.requireNonNullElse(b.getKeywords(), "");
-        if (keywordsA.isBlank() || keywordsB.isBlank()) {
-            builder.withKeywords(keywordsA + keywordsB);
-        } else {
-            builder.withKeywords(keywordsA + "," + keywordsB);
-        }
+        builder.withKeywords(Stream.<String> of(a.getKeywords(), b.getKeywords()).filter(Objects::nonNull)
+                .flatMap(s -> Arrays.stream(s.split(","))).map(String::trim).filter(s -> !s.isBlank()).distinct()
+                .collect(Collectors.joining(",")));
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());
         }
