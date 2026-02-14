@@ -682,7 +682,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 @Nullable
                 T elt = null;
                 JsonNode node = mapNode.get(id);
-                if (node == null || node.isNull() || node.isMissingNode()
+                if ((node.isContainerNode() && node.isEmpty()) || node.isNull()
                         || (node.isTextual() && node.asText().isBlank())) {
                     elt = createElement(elementClass, errors);
                     if (elt != null) {
