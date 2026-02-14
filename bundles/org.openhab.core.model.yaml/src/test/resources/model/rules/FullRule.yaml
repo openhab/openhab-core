@@ -4,7 +4,7 @@ rules:
     label: Full Rule
     description: The description of the full rule
     templateUid: template:non-existing
-    templateState: template missing
+    templateState: template-missing
     visibility: expert
     config:
       textParam: " text"

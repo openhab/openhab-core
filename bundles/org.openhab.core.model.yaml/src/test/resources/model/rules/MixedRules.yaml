@@ -83,7 +83,7 @@ rules:
       day.
     label: Time Based State Machine Test Rule
     templateUID: none
-    templateState: TEMPLATE_MISSING
+    templateState: TEMPLATE-MISSING
     triggers:
       - config:
           groupName: DemoSwitchGroup
