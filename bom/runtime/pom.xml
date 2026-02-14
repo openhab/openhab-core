@@ -22,7 +22,7 @@
     <jackson.annotations.version>2.21</jackson.annotations.version>
     <jackson.version>2.21.0</jackson.version>
     <jetty.version>9.4.58.v20250814</jetty.version>
-    <pax.logging.version>2.3.0</pax.logging.version>
+    <pax.logging.version>2.3.2</pax.logging.version>
     <pax.web.version>8.0.34</pax.web.version>
     <swagger.version>2.2.41</swagger.version>
   </properties>
@@ -786,13 +786,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.28</version>
+      <version>4.29</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.28</version>
+      <version>4.29</version>
       <scope>compile</scope>
     </dependency>
 
