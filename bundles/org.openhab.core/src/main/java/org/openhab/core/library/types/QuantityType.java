@@ -88,11 +88,13 @@ import tech.uom.lib.common.function.QuantityFunctions;
  * Examples:
  * 
  * <pre>
+ * {@code
  * new QuantityType<>("65 kWh") // 65 kWh, unit is parsed automatically
  * new QuantityType<>(22d, SIUnits.CELSIUS) // 22°C
  * new QuantityType<>(71.6d, ImperialUnits.FAHRENHEIT) // 71.6°F 
  * new QuantityType<>(1, MetricPrefix.MEGA(Units.BYTE)) // 1 MB
  * new QuantityType<>(56.78d, Units.WATT_HOUR) // 56.78 Wh
+ * }
  * </pre>
  * 
  * @param <T> the unit associated with the quantity
