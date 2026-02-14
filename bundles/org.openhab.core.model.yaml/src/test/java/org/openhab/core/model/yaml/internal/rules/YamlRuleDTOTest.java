@@ -1,0 +1,394 @@
+/*
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.model.yaml.internal.rules;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Condition;
+import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.Visibility;
+import org.openhab.core.automation.util.ActionBuilder;
+import org.openhab.core.automation.util.ConditionBuilder;
+import org.openhab.core.automation.util.RuleBuilder;
+import org.openhab.core.automation.util.TriggerBuilder;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.model.yaml.internal.config.YamlConfigDescriptionParameterDTO;
+
+/**
+ * The {@link YamlRuleDTOTest} contains tests for the {@link YamlRuleDTO} class.
+ *
+ * @author Ravi Nadahar - Initial contribution
+ */
+@NonNullByDefault
+public class YamlRuleDTOTest {
+
+    @Test
+    public void testConstructor() {
+        Action action = ActionBuilder.create().withId("action1").withTypeUID("type1").build();
+        Rule rule = RuleBuilder.create("rule1").withActions(action).withName("Rule 1").build();
+        assertNotNull(new YamlRuleDTO(rule));
+
+        Condition condition = ConditionBuilder.create().withId("condition1").withTypeUID("type1").build();
+        rule = RuleBuilder.create(rule).withConditions(condition).build();
+        assertNotNull(new YamlRuleDTO(rule));
+
+        Trigger trigger = TriggerBuilder.create().withId("trigger1").withTypeUID("type1").build();
+        rule = RuleBuilder.create(rule).withTriggers(trigger).build();
+        assertNotNull(new YamlRuleDTO(rule));
+
+        rule = RuleBuilder.create(rule).withConfigurationDescriptions(
+                List.of(ConfigDescriptionParameterBuilder.create("number", Type.DECIMAL).build())).build();
+        YamlRuleDTO ruleDTO = new YamlRuleDTO(rule);
+        assertNotNull(ruleDTO);
+        assertEquals(
+                "YamlRuleDTO [uid=rule1, templateState=no-template, label=Rule 1, tags=[], visibility=VISIBLE, config={}, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], actions=[YamlActionDTO [inputs={}, id=action1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                ruleDTO.toString());
+
+        rule = RuleBuilder.create(rule).withTemplateUID("templateUID").withActions(List.of())
+                .withDescription("Rule description").build();
+        ruleDTO = new YamlRuleDTO(rule);
+        assertNotNull(ruleDTO);
+        assertEquals(
+                "YamlRuleDTO [uid=rule1, template=templateUID, templateState=no-template, label=Rule 1, tags=[], description=Rule description, visibility=VISIBLE, config={}, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                ruleDTO.toString());
+    }
+
+    @Test
+    public void testIsValid() throws IOException {
+        YamlRuleDTO rule = new YamlRuleDTO();
+        assertFalse(rule.isValid(null, null));
+
+        rule.uid = " ";
+        assertFalse(rule.isValid(null, null));
+
+        rule.label = "Test";
+        rule.config = new HashMap<>();
+        rule.config.put("foo", "bar");
+
+        rule.uid = "id";
+        assertTrue(rule.isValid(null, null));
+
+        rule.uid = "rule:id";
+        assertTrue(rule.isValid(null, null));
+
+        rule.uid = "rule:type:@id";
+        assertFalse(rule.isValid(null, null));
+
+        rule.uid = "rule:type:id";
+        assertTrue(rule.isValid(null, null));
+
+        rule.uid = "rule:type:$subType:id";
+        assertFalse(rule.isValid(null, null));
+
+        rule.uid = "rule:type:subType:id";
+        assertTrue(rule.isValid(null, null));
+
+        rule.label = null;
+        assertFalse(rule.isValid(null, null));
+
+        rule.label = "\t";
+        assertFalse(rule.isValid(null, null));
+
+        rule.label = "Test";
+        rule.config.clear();
+        assertFalse(rule.isValid(null, null));
+
+        rule.triggers = new ArrayList<>();
+        assertFalse(rule.isValid(null, null));
+
+        rule.triggers.add(new YamlModuleDTO());
+        assertTrue(rule.isValid(null, null));
+
+        rule.triggers.clear();
+        rule.conditions = new ArrayList<>();
+        assertFalse(rule.isValid(null, null));
+
+        rule.conditions.add(new YamlConditionDTO());
+        assertTrue(rule.isValid(null, null));
+
+        rule.conditions.clear();
+        rule.actions = new ArrayList<>();
+        assertFalse(rule.isValid(null, null));
+
+        rule.actions.add(new YamlActionDTO());
+        assertTrue(rule.isValid(null, null));
+
+        YamlModuleDTO trigger = new YamlModuleDTO();
+        trigger.id = "1";
+        rule.triggers.add(trigger);
+        YamlModuleDTO trigger2 = new YamlModuleDTO();
+        trigger2.id = "1";
+        rule.triggers.add(trigger2);
+        assertFalse(rule.isValid(null, null));
+
+        trigger2.id = "3";
+        assertTrue(rule.isValid(null, null));
+
+        YamlConditionDTO condition = new YamlConditionDTO();
+        condition.id = "3";
+        rule.conditions.add(condition);
+        assertFalse(rule.isValid(null, null));
+
+        condition.id = "2";
+        assertTrue(rule.isValid(null, null));
+
+        YamlActionDTO action = new YamlActionDTO();
+        action.id = "script";
+        rule.actions.add(action);
+        assertTrue(rule.isValid(null, null));
+
+        action = new YamlActionDTO();
+        action.id = "script";
+        rule.actions.add(action);
+        assertFalse(rule.isValid(null, null));
+
+        action.id = "1";
+        assertFalse(rule.isValid(null, null));
+
+        action.id = "2";
+        assertFalse(rule.isValid(null, null));
+
+        action.id = "3";
+        assertFalse(rule.isValid(null, null));
+
+        action.id = "4";
+        assertTrue(rule.isValid(null, null));
+    }
+
+    @Test
+    public void testEquals() throws IOException {
+        YamlRuleDTO rule1 = new YamlRuleDTO();
+        YamlRuleDTO rule2 = new YamlRuleDTO();
+
+        assertNotNull(rule1);
+        assertTrue(rule1.equals(rule1));
+        assertFalse(rule1.equals(new Object()));
+        assertEquals(rule1.hashCode(), rule2.hashCode());
+
+        rule1.uid = "rule:id";
+        rule2.uid = "rule:id2";
+        assertFalse(rule1.equals(rule2));
+        assertNotEquals(rule1.hashCode(), rule2.hashCode());
+
+        rule2.uid = "rule:id";
+        assertTrue(rule1.equals(rule2));
+        assertEquals(rule1.hashCode(), rule2.hashCode());
+
+        rule1.label = "A label";
+        rule2.label = "Another label";
+        assertFalse(rule1.equals(rule2));
+        assertNotEquals(rule1.hashCode(), rule2.hashCode());
+
+        rule2.label = "A label";
+        assertTrue(rule1.equals(rule2));
+
+        rule1.description = "A description";
+        assertFalse(rule1.equals(rule2));
+
+        rule2.description = "Another description";
+        assertFalse(rule1.equals(rule2));
+
+        rule2.description = "A description";
+        assertTrue(rule1.equals(rule2));
+
+        rule1.visibility = Visibility.VISIBLE;
+        assertFalse(rule1.equals(rule2));
+
+        rule2.visibility = Visibility.EXPERT;
+        assertFalse(rule1.equals(rule2));
+
+        rule1.visibility = Visibility.EXPERT;
+        assertTrue(rule1.equals(rule2));
+
+        rule1.template = "template:1";
+        assertFalse(rule1.equals(rule2));
+
+        rule2.template = "template:2";
+        assertFalse(rule1.equals(rule2));
+
+        rule2.template = "template:1";
+        assertTrue(rule1.equals(rule2));
+
+        rule1.tags = new HashSet<>();
+        assertFalse(rule1.equals(rule2));
+
+        rule1.tags.add("Tag1");
+        assertFalse(rule1.equals(rule2));
+
+        rule2.tags = new HashSet<>();
+        assertFalse(rule1.equals(rule2));
+
+        rule2.tags.add("Tag2");
+        assertFalse(rule1.equals(rule2));
+
+        rule2.tags.add("Tag1");
+        assertFalse(rule1.equals(rule2));
+
+        rule2.tags.remove("Tag2");
+        assertTrue(rule1.equals(rule2));
+
+        rule1.actions = new ArrayList<>();
+        assertFalse(rule1.equals(rule2));
+
+        YamlActionDTO action1 = new YamlActionDTO();
+        rule1.actions.add(action1);
+        assertFalse(rule1.equals(rule2));
+
+        rule2.actions = new ArrayList<>();
+        assertFalse(rule1.equals(rule2));
+
+        YamlActionDTO action2 = new YamlActionDTO();
+        rule2.actions.add(action2);
+        assertTrue(rule1.equals(rule2));
+
+        action1.id = "action1";
+        assertFalse(rule1.equals(rule2));
+
+        action2.id = "action2";
+        assertFalse(rule1.equals(rule2));
+
+        action2.id = "action1";
+        assertTrue(rule1.equals(rule2));
+
+        rule1.conditions = new ArrayList<>();
+        assertFalse(rule1.equals(rule2));
+
+        YamlConditionDTO condition1 = new YamlConditionDTO();
+        rule1.conditions.add(condition1);
+        assertFalse(rule1.equals(rule2));
+
+        rule2.conditions = new ArrayList<>();
+        assertFalse(rule1.equals(rule2));
+
+        YamlConditionDTO condition2 = new YamlConditionDTO();
+        rule2.conditions.add(condition2);
+        assertTrue(rule1.equals(rule2));
+
+        condition1.id = "condition1";
+        assertFalse(rule1.equals(rule2));
+
+        condition2.id = "condition2";
+        assertFalse(rule1.equals(rule2));
+
+        condition2.id = "condition1";
+        assertTrue(rule1.equals(rule2));
+
+        rule1.triggers = new ArrayList<>();
+        assertFalse(rule1.equals(rule2));
+
+        YamlModuleDTO trigger1 = new YamlModuleDTO();
+        rule1.triggers.add(trigger1);
+        assertFalse(rule1.equals(rule2));
+
+        rule2.triggers = new ArrayList<>();
+        assertFalse(rule1.equals(rule2));
+
+        YamlModuleDTO trigger2 = new YamlModuleDTO();
+        rule2.triggers.add(trigger2);
+        assertTrue(rule1.equals(rule2));
+
+        trigger1.id = "trigger1";
+        assertFalse(rule1.equals(rule2));
+
+        trigger2.id = "trigger2";
+        assertFalse(rule1.equals(rule2));
+
+        trigger2.id = "trigger1";
+        assertTrue(rule1.equals(rule2));
+
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        assertTrue(rule1.equals(rule2));
+        assertEquals(rule1.hashCode(), rule2.hashCode());
+
+        YamlConfigDescriptionParameterDTO configDescParam1 = new YamlConfigDescriptionParameterDTO();
+        configDescParam1.context = "Item";
+        configDescParam1.type = Type.TEXT;
+        YamlConfigDescriptionParameterDTO configDescParam2 = new YamlConfigDescriptionParameterDTO();
+        configDescParam2.defaultValue = "4";
+        configDescParam2.type = Type.INTEGER;
+        configDescParam2.step = BigDecimal.ONE;
+        rule1.configDescriptions = Map.of("stateItem", configDescParam1, "iterations", configDescParam2);
+        assertFalse(rule1.equals(rule2));
+        assertNotEquals(rule1.hashCode(), rule2.hashCode());
+        rule2.configDescriptions = Map.of("stateItem", configDescParam1, "iterations", configDescParam2);
+        assertTrue(rule1.equals(rule2));
+        assertEquals(rule1.hashCode(), rule2.hashCode());
+        YamlConfigDescriptionParameterDTO configDescParam3 = new YamlConfigDescriptionParameterDTO();
+        configDescParam3.defaultValue = "true";
+        configDescParam3.type = Type.BOOLEAN;
+        rule2.configDescriptions = Map.of("stateItem", configDescParam1, "iterations", configDescParam2, "assertive",
+                configDescParam3);
+        assertFalse(rule1.equals(rule2));
+        assertNotEquals(rule1.hashCode(), rule2.hashCode());
+    }
+
+    @Test
+    public void testEqualsWithConfigurations() throws IOException {
+        YamlRuleDTO rule1 = new YamlRuleDTO();
+        YamlRuleDTO rule2 = new YamlRuleDTO();
+
+        rule1.uid = "rule:id";
+        rule2.uid = "rule:id";
+
+        rule1.config = null;
+        rule2.config = null;
+        assertTrue(rule1.equals(rule2));
+        assertEquals(rule1.hashCode(), rule2.hashCode());
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = null;
+        assertFalse(rule1.equals(rule2));
+        rule1.config = null;
+        rule2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        assertFalse(rule1.equals(rule2));
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = Map.of("param1", "other value", "param2", 50, "param3", true, "param4",
+                List.of("val 1", "val 2"));
+        assertFalse(rule1.equals(rule2));
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = Map.of("param1", "value", "param2", 25, "param3", true, "param4", List.of("val 1", "val 2"));
+        assertFalse(rule1.equals(rule2));
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = Map.of("param1", "value", "param2", 50, "param3", false, "param4", List.of("val 1", "val 2"));
+        assertFalse(rule1.equals(rule2));
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "value 2"));
+        assertFalse(rule1.equals(rule2));
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1"));
+        assertFalse(rule1.equals(rule2));
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", 75);
+        assertFalse(rule1.equals(rule2));
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = Map.of("param1", "value", "param2", 50, "param3", true);
+        assertFalse(rule1.equals(rule2));
+        rule1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        rule2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
+        assertTrue(rule1.equals(rule2));
+        assertEquals(rule1.hashCode(), rule2.hashCode());
+    }
+}
