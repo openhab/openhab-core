@@ -69,6 +69,7 @@ import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.CalorificValue;
 import org.openhab.core.library.dimension.Currency;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
@@ -400,6 +401,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Angle.class, Units.DEGREE_ANGLE, Units.DEGREE_ANGLE);
         addDefaultUnit(dimensionMap, Area.class, SIUnits.SQUARE_METRE, ImperialUnits.SQUARE_FOOT);
         addDefaultUnit(dimensionMap, ArealDensity.class, Units.DOBSON_UNIT);
+        addDefaultUnit(dimensionMap, CalorificValue.class, Units.KILOWATT_HOUR_PER_CUBICMETRE);
         addDefaultUnit(dimensionMap, CatalyticActivity.class, Units.KATAL);
         addDefaultUnit(dimensionMap, Currency.class, CurrencyUnits.BASE_CURRENCY);
         addDefaultUnit(dimensionMap, DataAmount.class, Units.BYTE);
