@@ -135,8 +135,8 @@ public class KarafAddonService implements AddonService {
 
         if (addonInfo != null) {
             addon = addon.withLabel(addonInfo.getName()).withDescription(addonInfo.getDescription())
-                    .withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
-                    .withLink(getDefaultDocumentationLink(type, name))
+                    .withKeywords(addonInfo.getKeywords()).withConnection(addonInfo.getConnection())
+                    .withCountries(addonInfo.getCountries()).withLink(getDefaultDocumentationLink(type, name))
                     .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI());
         } else {
             addon = addon.withLabel(feature.getDescription()).withLink(getDefaultDocumentationLink(type, name));
