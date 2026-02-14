@@ -268,4 +268,26 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         Object x = context.getValue(QualifiedName.create("x"));
         assertThat(x, is(15));
     }
+
+    @Test
+    public void testRuleWithUntypedLambdaArgsDoesNotFailToLoad() {
+        Collection<Rule> rules = dslRuleProvider.getAll();
+        assertThat(rules.size(), is(0));
+
+        String model = """
+                var lambdaWithUntypedArgs = [ foo | foo ]
+                rule "RuleWithUntypedLambdaArgs"
+                when
+                   System started
+                then
+                   logInfo('Test', 'Test')
+                end
+                """;
+
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME,
+                new ByteArrayInputStream(model.getBytes(StandardCharsets.UTF_8)));
+        Collection<Rule> actualRules = dslRuleProvider.getAll();
+
+        assertThat(actualRules.size(), is(1));
+    }
 }
