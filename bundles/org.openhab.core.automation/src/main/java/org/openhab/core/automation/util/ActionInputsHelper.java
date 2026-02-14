@@ -13,8 +13,6 @@
 package org.openhab.core.automation.util;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -293,9 +292,6 @@ public class ActionInputsHelper {
                             // Accepted format is: 2007-12-03T10:15:30
                             LocalDateTime.parse(valueString);
                         case "java.util.Date" ->
-                            // Accepted format is: 2007-12-03T10:15:30
-                            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(valueString);
-                        case "java.time.ZonedDateTime" -> {
                             /*
                              * Accepted format is one of:
                              * - 2007-12-03T10:15:30
@@ -303,14 +299,8 @@ public class ActionInputsHelper {
                              * - 2007-12-03T10:15:30+01:00
                              * - 2007-12-03T10:15:30+01:00[Europe/Paris]
                              */
-                            TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString,
-                                    ZonedDateTime::from, LocalDateTime::from);
-                            if (dt instanceof ZonedDateTime zdt) {
-                                yield zdt;
-                            }
-                            yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone());
-                        }
-                        case "java.time.Instant" -> {
+                            Date.from(parseAsIsoDateTime(valueString).toInstant());
+                        case "java.time.ZonedDateTime" ->
                             /*
                              * Accepted format is one of:
                              * - 2007-12-03T10:15:30
@@ -318,13 +308,16 @@ public class ActionInputsHelper {
                              * - 2007-12-03T10:15:30+01:00
                              * - 2007-12-03T10:15:30+01:00[Europe/Paris]
                              */
-                            TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString,
-                                    ZonedDateTime::from, LocalDateTime::from);
-                            if (dt instanceof ZonedDateTime zdt) {
-                                yield zdt.toInstant();
-                            }
-                            yield ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone()).toInstant();
-                        }
+                            parseAsIsoDateTime(valueString);
+                        case "java.time.Instant" ->
+                            /*
+                             * Accepted format is one of:
+                             * - 2007-12-03T10:15:30
+                             * - 2007-12-03T09:15:30Z
+                             * - 2007-12-03T10:15:30+01:00
+                             * - 2007-12-03T10:15:30+01:00[Europe/Paris]
+                             */
+                            parseAsIsoDateTime(valueString).toInstant();
                         case "java.time.Duration" ->
                             // Accepted format is: P2DT17H25M30.5S
                             Duration.parse(valueString);
@@ -333,7 +326,7 @@ public class ActionInputsHelper {
                 }
             }
             return argument;
-        } catch (IllegalArgumentException | DateTimeParseException | ParseException e) {
+        } catch (IllegalArgumentException | DateTimeParseException e) {
             throw new IllegalArgumentException("Input parameter '" + input.getName() + "': converting value '"
                     + argument.toString() + "' into type " + input.getType() + " failed!");
         }
@@ -345,5 +338,14 @@ public class ActionInputsHelper {
             throw new IllegalArgumentException("Unknown dimension " + dimensionName);
         }
         return unitProvider.getUnit((Class<? extends Quantity>) dimension);
+    }
+
+    private ZonedDateTime parseAsIsoDateTime(String valueString) {
+        TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString, ZonedDateTime::from,
+                LocalDateTime::from);
+        if (dt instanceof ZonedDateTime zdt) {
+            return zdt;
+        }
+        return ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone());
     }
 }
