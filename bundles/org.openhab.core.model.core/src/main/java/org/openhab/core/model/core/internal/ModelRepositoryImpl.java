@@ -336,7 +336,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
                         if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
-                                && !"rules".equals(modelType) && !"script".equals(modelType)) {
+                                && !"rules".equalsIgnoreCase(modelType) && !"script".equalsIgnoreCase(modelType)) {
                             errors.add(d.getMessage());
                         } else {
                             warnings.add(d.getMessage());
