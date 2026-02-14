@@ -103,7 +103,6 @@ public class AddonInfoRegistry {
         if (a.getKeywords() instanceof String ka) {
             Arrays.stream(ka.split(",")).map(String::trim).filter(s -> !s.isEmpty()).forEach(keywords::add);
         }
-
         if (b.getKeywords() instanceof String kb) {
             Arrays.stream(kb.split(",")).map(String::trim).filter(s -> !s.isEmpty()).forEach(keywords::add);
         }
