@@ -331,10 +331,19 @@ public class ModelRepositoryImpl implements ModelRepository {
 
                 // Check for validation errors, but log them only
                 try {
+                    String modelType = name.substring(name.lastIndexOf(".") + 1);
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
-                        warnings.add(d.getMessage());
+                        if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
+                                && !"rules".equals(modelType) && !"script".equals(modelType)) {
+                            errors.add(d.getMessage());
+                        } else {
+                            warnings.add(d.getMessage());
+                        }
+                    }
+                    if (!errors.isEmpty()) {
+                        return false;
                     }
                 } catch (NullPointerException e) {
                     // see https://github.com/eclipse/smarthome/issues/3335
