@@ -39,8 +39,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * {@link YamlRuleTemplateProvider} is an OSGi service, that allows definition of rule templates in YAML configuration
- * files. Files can
- * be added, updated or removed at runtime. The rule templates are automatically registered with
+ * files. Files can be added, updated or removed at runtime. The rule templates are automatically registered with
  * {@link org.openhab.core.automation.internal.template.RuleTemplateRegistry}.
  *
  * @author Ravi Nadahar - Initial contribution
