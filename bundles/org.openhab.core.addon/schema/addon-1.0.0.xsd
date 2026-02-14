@@ -13,6 +13,11 @@
 			<xs:element name="type" type="addon:addonType"/>
 			<xs:element name="name" type="xs:string"/>
 			<xs:element name="description" type="xs:string"/>
+			<xs:element name="keywords" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Comma-separated list of key words for search.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="connection" type="addon:connectionType" minOccurs="0"/>
 			<xs:element name="countries" type="addon:countryType" minOccurs="0">
 				<xs:annotation>

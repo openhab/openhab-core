@@ -81,6 +81,7 @@ public class AddonInfoReader extends XmlDocumentReader<AddonInfoXmlResult> {
         xstream.alias("name", NodeValue.class);
         xstream.alias("description", NodeValue.class);
         xstream.alias("type", NodeValue.class);
+        xstream.alias("keywords", NodeValue.class);
         xstream.alias("connection", NodeValue.class);
         xstream.alias("countries", NodeValue.class);
         xstream.alias("config-description", ConfigDescription.class);
