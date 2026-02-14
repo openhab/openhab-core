@@ -32,10 +32,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.micrometer.core.instrument.Meter;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.*;
 
 /**
  * The {@link RuleMetric} class implements a gauge metric for rules RUNNING events (per rule)
@@ -116,15 +113,18 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
 
         if (ruleStatus.contains(RuleStatus.RUNNING.name())) {
             logger.debug("Rule {} RUNNING - updating metric.", ruleId);
-            meterRegistry.counter(METRIC_NAME, tagsWithRule).increment();
+            Counter.builder(METRIC_NAME).description("Execution count of the rules").tags(tagsWithRule)
+                    .register(this.meterRegistry).increment();
             cache.put(topic, () -> Timer.start(meterRegistry));
         } else if (ruleStatus.contains(RuleStatus.IDLE.name())) {
             Timer.Sample sample = cache.get(topic);
             if (sample != null) {
-                logger.debug("Rule {} Finished - updating metric.", ruleId);
-                sample.stop(meterRegistry.timer(METRIC_DURATION_NAME, tagsWithRule));
+                Timer timer = Timer.builder(METRIC_DURATION_NAME).description("Execution duration of the rules")
+                        .tags(tagsWithRule).register(meterRegistry);
+                long duration = sample.stop(timer);
+                logger.debug("Rule {} Finished - updating duration metric ({}ns).", ruleId, duration);
             } else {
-                logger.debug("Rule {} Finished - but running state missed.", ruleId);
+                logger.trace("Rule {} Finished - but running state missed.", ruleId);
             }
         } else {
             logger.trace("Skipping rule status info with status {}", ruleStatus);
