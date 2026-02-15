@@ -236,29 +236,30 @@ public class DateTimeTypeTest {
         return List.of(new Object[][] {
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("UTC"),
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T10:58:47.033+0000") },
-                { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("CET"),
+                { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("Europe/Paris"),
                         "2014-03-30T10:58:47.033+0200", "2014-03-30T08:58:47.033+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30T10:58:47.23",
                         "2014-03-30T10:58:47.230+0000", "2014-03-30T10:58:47.230+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30T10:58:47UTC",
                         "2014-03-30T10:58:47.000+0000", "2014-03-30T10:58:47.000+0000") },
-                { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("UTC"),
+                { new ParameterSet(TimeZone.getTimeZone("Europe/Paris"), initTimeMap(), TimeZone.getTimeZone("UTC"),
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T12:58:47.033+0200") },
-                { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("CET"),
-                        "2014-03-30T10:58:47.033+0200", "2014-03-30T10:58:47.033+0200") },
-                { new ParameterSet(TimeZone.getTimeZone("CET"), "2014-03-30T10:58:47CET",
+                { new ParameterSet(TimeZone.getTimeZone("Europe/Paris"), initTimeMap(),
+                        TimeZone.getTimeZone("Europe/Paris"), "2014-03-30T10:58:47.033+0200",
+                        "2014-03-30T10:58:47.033+0200") },
+                { new ParameterSet(TimeZone.getTimeZone("Europe/Paris"), "2014-03-30T10:58:47Europe/Paris",
                         "2014-03-30T10:58:47.000+0200", "2014-03-30T10:58:47.000+0200") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT+5"), "2014-03-30T10:58:47.000Z",
                         "2014-03-30T10:58:47.000+0000", "2014-03-30T15:58:47.000+0500") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT+2"), null, null, "2014-03-30T10:58:47",
                         "2014-03-30T10:58:47.000+0200", "2014-03-30T10:58:47.000+0200", null,
                         "%1$td.%1$tm.%1$tY %1$tH:%1$tM", "30.03.2014 10:58") },
-                { new ParameterSet(TimeZone.getTimeZone("GMT"), initTimeMap(), TimeZone.getTimeZone("GMT"),
+                { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("UTC"),
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T10:58:47.033+0000") },
-                // Parameter set with an invalid time zone id as input, leading to GMT being considered
-                { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("+02:00"),
+                // Parameter set with an invalid time zone id as input, leading to UTC being considered
+                { new ParameterSet(TimeZone.getTimeZone("Europe/Paris"), initTimeMap(), TimeZone.getTimeZone("+02:00"),
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T12:58:47.033+0200") },
-                // Parameter set with an invalid time zone id as input, leading to GMT being considered
+                // Parameter set with an invalid time zone id as input, leading to UTC being considered
                 { new ParameterSet(TimeZone.getTimeZone("GMT+2"), initTimeMap(), TimeZone.getTimeZone("GML"),
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T12:58:47.033+0200") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT-2"), initTimeMap(), TimeZone.getTimeZone("GMT+3"), null,
@@ -270,10 +271,10 @@ public class DateTimeTypeTest {
                         "1970-01-01T10:58:47.000+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "10:58", "1970-01-01T10:58:00.000+0000",
                         "1970-01-01T10:58:00.000+0000") },
-                { new ParameterSet(TimeZone.getTimeZone("CET"), "10:58:47CET", "1970-01-01T10:58:47.000+0100",
-                        "1970-01-01T10:58:47.000+0100") },
-                { new ParameterSet(TimeZone.getTimeZone("CET"), "10:58CET", "1970-01-01T10:58:00.000+0100",
-                        "1970-01-01T10:58:00.000+0100") },
+                { new ParameterSet(TimeZone.getTimeZone("Europe/Paris"), "10:58:47Europe/Paris",
+                        "1970-01-01T10:58:47.000+0100", "1970-01-01T10:58:47.000+0100") },
+                { new ParameterSet(TimeZone.getTimeZone("Europe/Paris"), "10:58Europe/Paris",
+                        "1970-01-01T10:58:00.000+0100", "1970-01-01T10:58:00.000+0100") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30", "2014-03-30T00:00:00.000+0000",
                         "2014-03-30T00:00:00.000+0000") }, });
     }
@@ -460,7 +461,7 @@ public class DateTimeTypeTest {
 
     public static final List<LocalDateTestCase> LOCAL_DATE_TEST_CASES = List.of(
             new LocalDateTestCase(LocalDateTime.parse("2002-04-08T13:50:02"), null,
-                    DateTimeType.valueOf("?2002-04-08T13:50:02PST")),
+                    DateTimeType.valueOf("?2002-04-08T13:50:02America/Los_Angeles")),
             new LocalDateTestCase(LocalDateTime.parse("2002-04-08T13:50:02"), ZoneOffset.ofHours(4),
                     DateTimeType.valueOf("2002-04-08T13:50:02+0400")),
             new LocalDateTestCase(LocalDateTime.parse("2002-04-08T13:50:02"), ZoneId.of("Asia/Kathmandu"),
@@ -471,7 +472,7 @@ public class DateTimeTypeTest {
     @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void localDateTimeConstructorTest(LocalDateTestCase testCase) {
         if (testCase.zone == null) {
-            TimeZone.setDefault(TimeZone.getTimeZone("PST"));
+            TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
         }
         DateTimeType dt = new DateTimeType(testCase.ldt, testCase.zone);
         assertEquals(testCase.expectedResult.toFullString(), dt.toFullString());
@@ -566,8 +567,8 @@ public class DateTimeTypeTest {
         assertSame(dt, dt.toFixedOffset());
         assertSame(dt, dt.toZone(ZoneOffset.ofHours(4)));
         assertSame(dt, dt.toOffset(ZoneOffset.ofHours(4)));
-        assertEquals(new DateTimeType(Instant.parse("2002-04-08T09:50:02Z"), ZoneId.of("CET")).toFullString(),
-                dt.toZone("CET").toFullString());
+        assertEquals(new DateTimeType(Instant.parse("2002-04-08T09:50:02Z"), ZoneId.of("Europe/Paris")).toFullString(),
+                dt.toZone("Europe/Paris").toFullString());
         assertEquals(DateTimeType.valueOf("2002-04-08T11:50:02+0200"), dt.toOffset(ZoneOffset.ofHours(2)));
 
         dt = DateTimeType.valueOf("?2002-04-08T13:50:02+0400");
@@ -609,8 +610,8 @@ public class DateTimeTypeTest {
         assertEquals(0, dt.compareTo(dt.toFixedOffset()));
         assertEquals(0, dt.compareTo(dt.toZone(ZoneOffset.ofHours(4))));
         assertEquals(0, dt.compareTo(dt.toOffset(ZoneOffset.ofHours(4))));
-        assertEquals(new DateTimeType(Instant.parse("2002-04-08T09:50:02Z"), ZoneId.of("CET")).toFullString(),
-                dt.toZone("CET").toFullString());
+        assertEquals(new DateTimeType(Instant.parse("2002-04-08T09:50:02Z"), ZoneId.of("Europe/Paris")).toFullString(),
+                dt.toZone("Europe/Paris").toFullString());
         assertEquals(DateTimeType.valueOf("2002-04-08T11:50:02+0200"), dt.toOffset(ZoneOffset.ofHours(2)));
 
         dt = DateTimeType.valueOf("1989-11-19T17:32:49+01:00[Europe/Berlin]");
@@ -653,8 +654,8 @@ public class DateTimeTypeTest {
         assertEquals(DateTimeType.valueOf("1989-11-19T17:32:49+01:00"), dt.toFixedOffset());
         assertSame(dt, dt.toZone(ZoneId.of("Europe/Berlin")));
         assertEquals(0, dt.compareTo(dt.toOffset(ZoneOffset.ofHours(1))));
-        assertEquals(new DateTimeType(Instant.parse("1989-11-19T16:32:49Z"), ZoneId.of("CET")).toFullString(),
-                dt.toZone("CET").toFullString());
+        assertEquals(new DateTimeType(Instant.parse("1989-11-19T16:32:49Z"), ZoneId.of("Europe/Paris")).toFullString(),
+                dt.toZone("Europe/Paris").toFullString());
         assertEquals(DateTimeType.valueOf("1989-11-19T18:32:49+0200"), dt.toOffset(ZoneOffset.ofHours(2)));
 
         dt = dt.plus(6, ChronoUnit.MONTHS);
@@ -698,8 +699,8 @@ public class DateTimeTypeTest {
         assertEquals(DateTimeType.valueOf("1990-05-19T17:32:49.000+0200"), dt.toFixedOffset());
         assertSame(dt, dt.toZone(ZoneId.of("Europe/Berlin")));
         assertEquals(0, dt.compareTo(dt.toOffset(ZoneOffset.ofHours(2))));
-        assertEquals(new DateTimeType(Instant.parse("1990-05-19T15:32:49Z"), ZoneId.of("CET")).toFullString(),
-                dt.toZone("CET").toFullString());
+        assertEquals(new DateTimeType(Instant.parse("1990-05-19T15:32:49Z"), ZoneId.of("Europe/Paris")).toFullString(),
+                dt.toZone("Europe/Paris").toFullString());
         assertEquals(DateTimeType.valueOf("1990-05-19T16:32:49+01:00"), dt.toOffset(ZoneOffset.ofHours(1)));
     }
 
