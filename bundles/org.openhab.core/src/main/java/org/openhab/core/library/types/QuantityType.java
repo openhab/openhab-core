@@ -47,6 +47,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
 import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.library.unit.CurrencyUnits;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
@@ -62,7 +65,39 @@ import tech.units.indriya.quantity.Quantities;
 import tech.uom.lib.common.function.QuantityFunctions;
 
 /**
- * The measure type extends DecimalType to handle physical unit measurement
+ * Command type for measurable quantities, such as:
+ * 
+ * <ul>
+ * <li>Mass</li>
+ * <li>Time</li>
+ * <li>Distance</li>
+ * <li>Speed</li>
+ * <li>Temperature</li>
+ * <li>Electric Current</li>
+ * <li>Electric Potential</li>
+ * <li>Energy</li>
+ * <li>Power</li>
+ * <li>Data Amount</li>
+ * </ul>
+ * 
+ * <p>
+ * Quantities are usually specified in suitable units of measurement. All units are accessible via the openHAB classes
+ * {@link Units}, {@link SIUnits}, {@link ImperialUnits} and {@link CurrencyUnits}.
+ * 
+ * <p>
+ * Examples:
+ * 
+ * <pre>
+ * {@code
+ * new QuantityType<>("65 kWh") // 65 kWh, unit is parsed automatically
+ * new QuantityType<>(22d, SIUnits.CELSIUS) // 22°C
+ * new QuantityType<>(71.6d, ImperialUnits.FAHRENHEIT) // 71.6°F 
+ * new QuantityType<>(1, MetricPrefix.MEGA(Units.BYTE)) // 1 MB
+ * new QuantityType<>(56.78d, Units.WATT_HOUR) // 56.78 Wh
+ * }
+ * </pre>
+ * 
+ * @param <T> the unit associated with the quantity
  *
  * @author Gaël L'hopital - Initial contribution
  */
