@@ -12,7 +12,9 @@
  */
 package org.openhab.core.model.yaml.internal.semantics;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -20,12 +22,16 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * The {@link YamlSemanticTagDTO} is a data transfer object used to serialize a semantic tag
  * in a YAML configuration file.
  *
  * @author Laurent Garnier - Initial contribution
  * @author Laurent Garnier - Added methods setId and cloneWithoutId
+ * @author Jimmy Tanagra - Added JsonCreator and JsonValue to support short-form syntax
  */
 @YamlElementName("tags")
 public class YamlSemanticTagDTO implements YamlElement, Cloneable {
@@ -36,6 +42,31 @@ public class YamlSemanticTagDTO implements YamlElement, Cloneable {
     public List<String> synonyms;
 
     public YamlSemanticTagDTO() {
+    }
+
+    @JsonCreator
+    public static YamlSemanticTagDTO fromString(String value) {
+        YamlSemanticTagDTO dto = new YamlSemanticTagDTO();
+        dto.label = value;
+        return dto;
+    }
+
+    @JsonValue
+    public Object serialize() {
+        if ((description == null || description.isBlank()) && (synonyms == null || synonyms.isEmpty())) {
+            return label;
+        }
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (label != null && !label.isBlank()) {
+            map.put("label", label);
+        }
+        if (description != null && !description.isBlank()) {
+            map.put("description", description);
+        }
+        if (synonyms != null && !synonyms.isEmpty()) {
+            map.put("synonyms", synonyms);
+        }
+        return map;
     }
 
     @Override
