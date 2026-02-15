@@ -26,11 +26,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
- * Tests for {@link YamlMetadataDTODeserializer}.
+ * Tests for {@link YamlMetadataDTO} YAML deserialization through {@code @JsonCreator}.
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-class YamlMetadataDTODeserializerTest {
+class YamlMetadataDTOJsonCreatorTest {
 
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 

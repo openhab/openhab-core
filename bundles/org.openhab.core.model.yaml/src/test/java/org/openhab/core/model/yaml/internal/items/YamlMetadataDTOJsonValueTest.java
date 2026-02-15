@@ -13,6 +13,7 @@
 package org.openhab.core.model.yaml.internal.items;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,11 +24,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
- * Tests for {@link YamlMetadataDTOSerializer}.
+ * Tests for {@link YamlMetadataDTO} YAML serialization through {@code @JsonValue}.
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-class YamlMetadataDTOSerializerTest {
+class YamlMetadataDTOJsonValueTest {
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     @Test
@@ -56,11 +57,10 @@ class YamlMetadataDTOSerializerTest {
         config.put("foo", "bar");
         dto.config = config;
         String yaml = mapper.writeValueAsString(dto).trim();
-        System.out.println("YAML output:\n" + yaml);
         // Check for document start and all expected fields
-        assert yaml.startsWith("---");
-        assert yaml.contains("value: \"objectValue\"");
-        assert yaml.contains("config:");
-        assert yaml.contains("foo: \"bar\"");
+        assertTrue(yaml.startsWith("---"));
+        assertTrue(yaml.contains("value: \"objectValue\""));
+        assertTrue(yaml.contains("config:"));
+        assertTrue(yaml.contains("foo: \"bar\""));
     }
 }
