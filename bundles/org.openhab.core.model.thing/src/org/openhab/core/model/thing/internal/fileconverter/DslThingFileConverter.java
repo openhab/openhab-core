@@ -42,8 +42,8 @@ import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.fileconverter.AbstractThingFileGenerator;
-import org.openhab.core.thing.fileconverter.ThingFileGenerator;
-import org.openhab.core.thing.fileconverter.ThingFileParser;
+import org.openhab.core.thing.fileconverter.ThingParser;
+import org.openhab.core.thing.fileconverter.ThingSerializer;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
@@ -63,8 +63,8 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = { ThingFileGenerator.class, ThingFileParser.class })
-public class DslThingFileConverter extends AbstractThingFileGenerator implements ThingFileParser {
+@Component(immediate = true, service = { ThingSerializer.class, ThingParser.class })
+public class DslThingFileConverter extends AbstractThingFileGenerator implements ThingParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslThingFileConverter.class);
 
@@ -91,7 +91,7 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
     }
 
     @Override
-    public String getFileFormatGenerator() {
+    public String getGeneratedFormat() {
         return "DSL";
     }
 
@@ -114,7 +114,7 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
     }
 
     @Override
-    public void generateFileFormat(String id, OutputStream out) {
+    public void generateFormat(String id, OutputStream out) {
         ThingModel model = elementsToGenerate.remove(id);
         if (model != null) {
             // Double quotes are unexpectedly generated in thing UID when the segment contains a -.
@@ -235,18 +235,18 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
     }
 
     @Override
-    public String getFileFormatParser() {
+    public String getParserFormat() {
         return "DSL";
     }
 
     @Override
-    public @Nullable String startParsingFileFormat(String syntax, List<String> errors, List<String> warnings) {
+    public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
         return modelRepository.createIsolatedModel("things", inputStream, errors, warnings);
     }
 
     @Override
-    public Collection<Thing> getParsedThings(String modelName) {
+    public Collection<Thing> getParsedObjects(String modelName) {
         return thingProvider.getAllFromModel(modelName);
     }
 

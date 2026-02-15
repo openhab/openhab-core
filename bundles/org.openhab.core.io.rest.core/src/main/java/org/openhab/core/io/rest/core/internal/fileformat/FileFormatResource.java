@@ -64,8 +64,8 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
-import org.openhab.core.items.fileconverter.ItemFileGenerator;
-import org.openhab.core.items.fileconverter.ItemFileParser;
+import org.openhab.core.items.fileconverter.ItemParser;
+import org.openhab.core.items.fileconverter.ItemSerializer;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -76,8 +76,8 @@ import org.openhab.core.thing.binding.ThingFactory;
 import org.openhab.core.thing.dto.ChannelDTO;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.dto.ThingDTOMapper;
-import org.openhab.core.thing.fileconverter.ThingFileGenerator;
-import org.openhab.core.thing.fileconverter.ThingFileParser;
+import org.openhab.core.thing.fileconverter.ThingParser;
+import org.openhab.core.thing.fileconverter.ThingSerializer;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.type.BridgeType;
@@ -257,10 +257,10 @@ public class FileFormatResource implements RESTResource {
     private final ThingTypeRegistry thingTypeRegistry;
     private final ChannelTypeRegistry channelTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
-    private final Map<String, ItemFileGenerator> itemFileGenerators = new ConcurrentHashMap<>();
-    private final Map<String, ItemFileParser> itemFileParsers = new ConcurrentHashMap<>();
-    private final Map<String, ThingFileGenerator> thingFileGenerators = new ConcurrentHashMap<>();
-    private final Map<String, ThingFileParser> thingFileParsers = new ConcurrentHashMap<>();
+    private final Map<String, ItemSerializer> itemFileGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ItemParser> itemFileParsers = new ConcurrentHashMap<>();
+    private final Map<String, ThingSerializer> thingFileGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ThingParser> thingFileParsers = new ConcurrentHashMap<>();
 
     private int counter;
 
@@ -291,39 +291,39 @@ public class FileFormatResource implements RESTResource {
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addItemFileGenerator(ItemFileGenerator itemFileGenerator) {
-        itemFileGenerators.put(itemFileGenerator.getFileFormatGenerator(), itemFileGenerator);
+    protected void addItemFileGenerator(ItemSerializer itemFileGenerator) {
+        itemFileGenerators.put(itemFileGenerator.getGeneratedFormat(), itemFileGenerator);
     }
 
-    protected void removeItemFileGenerator(ItemFileGenerator itemFileGenerator) {
-        itemFileGenerators.remove(itemFileGenerator.getFileFormatGenerator());
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addItemFileParser(ItemFileParser itemFileParser) {
-        itemFileParsers.put(itemFileParser.getFileFormatParser(), itemFileParser);
-    }
-
-    protected void removeItemFileParser(ItemFileParser itemFileParser) {
-        itemFileParsers.remove(itemFileParser.getFileFormatParser());
+    protected void removeItemFileGenerator(ItemSerializer itemFileGenerator) {
+        itemFileGenerators.remove(itemFileGenerator.getGeneratedFormat());
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addThingFileGenerator(ThingFileGenerator thingFileGenerator) {
-        thingFileGenerators.put(thingFileGenerator.getFileFormatGenerator(), thingFileGenerator);
+    protected void addItemFileParser(ItemParser itemFileParser) {
+        itemFileParsers.put(itemFileParser.getParserFormat(), itemFileParser);
     }
 
-    protected void removeThingFileGenerator(ThingFileGenerator thingFileGenerator) {
-        thingFileGenerators.remove(thingFileGenerator.getFileFormatGenerator());
+    protected void removeItemFileParser(ItemParser itemFileParser) {
+        itemFileParsers.remove(itemFileParser.getParserFormat());
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addThingFileParser(ThingFileParser thingFileParser) {
-        thingFileParsers.put(thingFileParser.getFileFormatParser(), thingFileParser);
+    protected void addThingFileGenerator(ThingSerializer thingFileGenerator) {
+        thingFileGenerators.put(thingFileGenerator.getGeneratedFormat(), thingFileGenerator);
     }
 
-    protected void removeThingFileParser(ThingFileParser thingFileParser) {
-        thingFileParsers.remove(thingFileParser.getFileFormatParser());
+    protected void removeThingFileGenerator(ThingSerializer thingFileGenerator) {
+        thingFileGenerators.remove(thingFileGenerator.getGeneratedFormat());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addThingFileParser(ThingParser thingFileParser) {
+        thingFileParsers.put(thingFileParser.getParserFormat(), thingFileParser);
+    }
+
+    protected void removeThingFileParser(ThingParser thingFileParser) {
+        thingFileParsers.remove(thingFileParser.getParserFormat());
     }
 
     @POST
@@ -343,7 +343,7 @@ public class FileFormatResource implements RESTResource {
             @Parameter(description = "Array of item names. If empty or omitted, return all Items.") @Nullable List<String> itemNames) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForItems: mediaType = {}, itemNames = {}", acceptHeader, itemNames);
-        ItemFileGenerator generator = getItemFileGenerator(acceptHeader);
+        ItemSerializer generator = getItemFileGenerator(acceptHeader);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
@@ -373,7 +373,7 @@ public class FileFormatResource implements RESTResource {
             }
         });
         generator.setItemsToBeGenerated(genId, items, getMetadata(items), stateFormatters, hideDefaultParameters);
-        generator.generateFileFormat(genId, outputStream);
+        generator.generateFormat(genId, outputStream);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -394,7 +394,7 @@ public class FileFormatResource implements RESTResource {
             @Parameter(description = "Array of Thing UIDs. If empty or omitted, return all Things from the Registry.") @Nullable List<String> thingUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForThings: mediaType = {}, thingUIDs = {}", acceptHeader, thingUIDs);
-        ThingFileGenerator generator = getThingFileGenerator(acceptHeader);
+        ThingSerializer generator = getThingFileGenerator(acceptHeader);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
@@ -412,7 +412,7 @@ public class FileFormatResource implements RESTResource {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         String genId = newIdForGeneration();
         generator.setThingsToBeGenerated(genId, things, true, hideDefaultParameters);
-        generator.generateFileFormat(genId, outputStream);
+        generator.generateFormat(genId, outputStream);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -446,8 +446,8 @@ public class FileFormatResource implements RESTResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
         }
 
-        ThingFileGenerator thingGenerator = getThingFileGenerator(acceptHeader);
-        ItemFileGenerator itemGenerator = getItemFileGenerator(acceptHeader);
+        ThingSerializer thingGenerator = getThingFileGenerator(acceptHeader);
+        ItemSerializer itemGenerator = getItemFileGenerator(acceptHeader);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         String genId = newIdForGeneration();
         switch (acceptHeader) {
@@ -459,7 +459,7 @@ public class FileFormatResource implements RESTResource {
                     return Response.status(Response.Status.BAD_REQUEST).entity("No thing loaded from input").build();
                 }
                 thingGenerator.setThingsToBeGenerated(genId, things, hideDefaultChannels, hideDefaultParameters);
-                thingGenerator.generateFileFormat(genId, outputStream);
+                thingGenerator.generateFormat(genId, outputStream);
                 break;
             case "text/vnd.openhab.dsl.item":
                 if (itemGenerator == null) {
@@ -470,7 +470,7 @@ public class FileFormatResource implements RESTResource {
                 }
                 itemGenerator.setItemsToBeGenerated(genId, items, hideChannelLinksAndMetadata ? List.of() : metadata,
                         stateFormatters, hideDefaultParameters);
-                itemGenerator.generateFileFormat(genId, outputStream);
+                itemGenerator.generateFormat(genId, outputStream);
                 break;
             case "application/yaml":
                 if (thingGenerator != null) {
@@ -481,9 +481,9 @@ public class FileFormatResource implements RESTResource {
                             hideChannelLinksAndMetadata ? List.of() : metadata, stateFormatters, hideDefaultParameters);
                 }
                 if (thingGenerator != null) {
-                    thingGenerator.generateFileFormat(genId, outputStream);
+                    thingGenerator.generateFormat(genId, outputStream);
                 } else if (itemGenerator != null) {
-                    itemGenerator.generateFileFormat(genId, outputStream);
+                    itemGenerator.generateFormat(genId, outputStream);
                 }
                 break;
             default:
@@ -519,8 +519,8 @@ public class FileFormatResource implements RESTResource {
         Map<String, String> stateFormatters = Map.of();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        ThingFileParser thingParser = getThingFileParser(contentTypeHeader);
-        ItemFileParser itemParser = getItemFileParser(contentTypeHeader);
+        ThingParser thingParser = getThingFileParser(contentTypeHeader);
+        ItemParser itemParser = getItemFileParser(contentTypeHeader);
         String modelName = null;
         String modelName2 = null;
         switch (contentTypeHeader) {
@@ -529,11 +529,11 @@ public class FileFormatResource implements RESTResource {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                             .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
                 }
-                modelName = thingParser.startParsingFileFormat(input, errors, warnings);
+                modelName = thingParser.startParsingFormat(input, errors, warnings);
                 if (modelName == null) {
                     return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
                 }
-                things = thingParser.getParsedThings(modelName);
+                things = thingParser.getParsedObjects(modelName);
                 if (things.isEmpty()) {
                     thingParser.finishParsingFileFormat(modelName);
                     return Response.status(Response.Status.BAD_REQUEST).entity("No thing loaded from input").build();
@@ -544,11 +544,11 @@ public class FileFormatResource implements RESTResource {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                             .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
                 }
-                modelName2 = itemParser.startParsingFileFormat(input, errors, warnings);
+                modelName2 = itemParser.startParsingFormat(input, errors, warnings);
                 if (modelName2 == null) {
                     return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
                 }
-                items = itemParser.getParsedItems(modelName2);
+                items = itemParser.getParsedObjects(modelName2);
                 if (items.isEmpty()) {
                     itemParser.finishParsingFileFormat(modelName2);
                     return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
@@ -563,24 +563,24 @@ public class FileFormatResource implements RESTResource {
                 break;
             case "application/yaml":
                 if (thingParser != null) {
-                    modelName = thingParser.startParsingFileFormat(input, errors, warnings);
+                    modelName = thingParser.startParsingFormat(input, errors, warnings);
                     if (modelName == null) {
                         return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
                     }
-                    things = thingParser.getParsedThings(modelName);
+                    things = thingParser.getParsedObjects(modelName);
                     channelLinks = thingParser.getParsedChannelLinks(modelName);
                 }
                 if (itemParser != null) {
                     // Avoid parsing the input a second time
                     if (modelName == null) {
-                        modelName2 = itemParser.startParsingFileFormat(input, errors, warnings);
+                        modelName2 = itemParser.startParsingFormat(input, errors, warnings);
                         if (modelName2 == null) {
                             return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors))
                                     .build();
                         }
                     }
                     String modelNameToUse = modelName != null ? modelName : Objects.requireNonNull(modelName2);
-                    items = itemParser.getParsedItems(modelNameToUse);
+                    items = itemParser.getParsedObjects(modelNameToUse);
                     metadata = itemParser.getParsedMetadata(modelNameToUse);
                     stateFormatters = itemParser.getParsedStateFormatters(modelNameToUse);
                 }
@@ -748,7 +748,7 @@ public class FileFormatResource implements RESTResource {
                 configDescRegistry);
     }
 
-    private @Nullable ItemFileGenerator getItemFileGenerator(String mediaType) {
+    private @Nullable ItemSerializer getItemFileGenerator(String mediaType) {
         return switch (mediaType) {
             case "text/vnd.openhab.dsl.item" -> itemFileGenerators.get("DSL");
             case "application/yaml" -> itemFileGenerators.get("YAML");
@@ -756,7 +756,7 @@ public class FileFormatResource implements RESTResource {
         };
     }
 
-    private @Nullable ThingFileGenerator getThingFileGenerator(String mediaType) {
+    private @Nullable ThingSerializer getThingFileGenerator(String mediaType) {
         return switch (mediaType) {
             case "text/vnd.openhab.dsl.thing" -> thingFileGenerators.get("DSL");
             case "application/yaml" -> thingFileGenerators.get("YAML");
@@ -764,7 +764,7 @@ public class FileFormatResource implements RESTResource {
         };
     }
 
-    private @Nullable ItemFileParser getItemFileParser(String contentType) {
+    private @Nullable ItemParser getItemFileParser(String contentType) {
         return switch (contentType) {
             case "text/vnd.openhab.dsl.item" -> itemFileParsers.get("DSL");
             case "application/yaml" -> itemFileParsers.get("YAML");
@@ -772,7 +772,7 @@ public class FileFormatResource implements RESTResource {
         };
     }
 
-    private @Nullable ThingFileParser getThingFileParser(String contentType) {
+    private @Nullable ThingParser getThingFileParser(String contentType) {
         return switch (contentType) {
             case "text/vnd.openhab.dsl.thing" -> thingFileParsers.get("DSL");
             case "text/vnd.openhab.dsl.item" -> thingFileParsers.get("DSL");

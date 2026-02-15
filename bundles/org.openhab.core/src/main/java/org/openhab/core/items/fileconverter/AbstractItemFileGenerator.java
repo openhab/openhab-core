@@ -31,7 +31,7 @@ import org.openhab.core.library.CoreItemFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractItemFileGenerator implements ItemFileGenerator {
+public abstract class AbstractItemFileGenerator implements ItemSerializer {
 
     public AbstractItemFileGenerator() {
     }
