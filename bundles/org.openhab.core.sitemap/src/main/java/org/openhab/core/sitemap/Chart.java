@@ -74,11 +74,13 @@ public interface Chart extends NonLinkableWidget {
     void setPeriod(String period);
 
     /**
-     * Return true if legend should be shown.
+     * Return true if legend should be shown, false if it should not be shown, null if not explicitly set and it should
+     * be determined based on number of series in chart.
      *
      * @return legend
      */
-    boolean hasLegend();
+    @Nullable
+    Boolean hasLegend();
 
     /**
      * Set to true if legend should be shown. If not set, the legend will not be shown if there is only a single series

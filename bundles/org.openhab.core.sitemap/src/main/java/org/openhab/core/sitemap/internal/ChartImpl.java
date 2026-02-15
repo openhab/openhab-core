@@ -70,8 +70,8 @@ public class ChartImpl extends NonLinkableWidgetImpl implements Chart {
     }
 
     @Override
-    public boolean hasLegend() {
-        return legend != null ? legend : false;
+    public @Nullable Boolean hasLegend() {
+        return legend;
     }
 
     @Override
