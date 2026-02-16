@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.yaml.internal.rules;
 
+import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -68,6 +70,10 @@ public class YamlRuleTemplateProvider extends AbstractYamlRuleProvider<RuleTempl
         return getTemplates(null);
     }
 
+    public Collection<RuleTemplate> getAllFromModel(String modelName) {
+        return ruleTemplatesMap.getOrDefault(modelName, List.of());
+    }
+
     @Override
     public @Nullable RuleTemplate getTemplate(String uid, @Nullable Locale locale) {
         return ruleTemplatesMap.values().stream().flatMap(list -> list.stream()).filter(t -> uid.equals(t.getUID()))
@@ -76,7 +82,9 @@ public class YamlRuleTemplateProvider extends AbstractYamlRuleProvider<RuleTempl
 
     @Override
     public Collection<RuleTemplate> getTemplates(@Nullable Locale locale) {
-        return ruleTemplatesMap.values().stream().flatMap(list -> list.stream()).toList();
+        // Ignore isolated models
+        return ruleTemplatesMap.entrySet().stream().filter(entry -> !isIsolatedModel(entry.getKey()))
+                .flatMap(entry -> entry.getValue().stream()).toList();
     }
 
     @Override
@@ -96,18 +104,22 @@ public class YamlRuleTemplateProvider extends AbstractYamlRuleProvider<RuleTempl
 
     @Override
     public void addedModel(String modelName, Collection<YamlRuleTemplateDTO> elements) {
+        boolean isolated = isIsolatedModel(modelName);
         List<RuleTemplate> added = elements.stream().map(this::mapRuleTemplate).filter(Objects::nonNull).toList();
         Collection<RuleTemplate> modelRuleTemplates = Objects
                 .requireNonNull(ruleTemplatesMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
         modelRuleTemplates.addAll(added);
         added.forEach(t -> {
-            logger.debug("model {} added rule template {}", modelName, t.getUID());
-            notifyListenersAboutAddedElement(t);
+            logger.debug("{}model {} added rule template {}", isolated ? "isolated " : "", modelName, t.getUID());
+            if (!isolated) {
+                notifyListenersAboutAddedElement(t);
+            }
         });
     }
 
     @Override
     public void updatedModel(String modelName, Collection<YamlRuleTemplateDTO> elements) {
+        boolean isolated = isIsolatedModel(modelName);
         List<RuleTemplate> updated = elements.stream().map(this::mapRuleTemplate).filter(Objects::nonNull).toList();
         Collection<RuleTemplate> modelRuleTemplates = Objects
                 .requireNonNull(ruleTemplatesMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
@@ -116,26 +128,37 @@ public class YamlRuleTemplateProvider extends AbstractYamlRuleProvider<RuleTempl
                     .ifPresentOrElse(oldTemplate -> {
                         modelRuleTemplates.remove(oldTemplate);
                         modelRuleTemplates.add(t);
-                        logger.debug("model {} updated rule template {}", modelName, t.getUID());
-                        notifyListenersAboutUpdatedElement(oldTemplate, t);
+                        logger.debug("{}model {} updated rule template {}", isolated ? "isolated " : "", modelName,
+                                t.getUID());
+                        if (!isolated) {
+                            notifyListenersAboutUpdatedElement(oldTemplate, t);
+                        }
                     }, () -> {
                         modelRuleTemplates.add(t);
-                        logger.debug("model {} added rule template {}", modelName, t.getUID());
-                        notifyListenersAboutAddedElement(t);
+                        logger.debug("{}model {} added rule template {}", isolated ? "isolated " : "", modelName,
+                                t.getUID());
+                        if (!isolated) {
+                            notifyListenersAboutAddedElement(t);
+                        }
                     });
         });
     }
 
     @Override
     public void removedModel(String modelName, Collection<YamlRuleTemplateDTO> elements) {
+        boolean isolated = isIsolatedModel(modelName);
         Collection<RuleTemplate> modelRuleTemplates = ruleTemplatesMap.getOrDefault(modelName, List.of());
         elements.stream().map(element -> element.uid).forEach(uid -> {
             modelRuleTemplates.stream().filter(template -> template.getUID().equals(uid)).findFirst()
                     .ifPresentOrElse(oldTemplate -> {
                         modelRuleTemplates.remove(oldTemplate);
-                        logger.debug("model {} removed rule template {}", modelName, uid);
-                        notifyListenersAboutRemovedElement(oldTemplate);
-                    }, () -> logger.debug("model {} rule template {} not found", modelName, uid));
+                        logger.debug("{}model {} removed rule template {}", isolated ? "isolated " : "", modelName,
+                                uid);
+                        if (!isolated) {
+                            notifyListenersAboutRemovedElement(oldTemplate);
+                        }
+                    }, () -> logger.debug("{}model {} rule template {} not found", isolated ? "isolated " : "",
+                            modelName, uid));
         });
         if (modelRuleTemplates.isEmpty()) {
             ruleTemplatesMap.remove(modelName);
