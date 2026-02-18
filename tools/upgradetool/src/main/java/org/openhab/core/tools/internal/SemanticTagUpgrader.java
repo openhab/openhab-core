@@ -38,8 +38,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link SemanticTagUpgrader} renames custom semantic tags that are now part of standard semantic tags.
- * The custom tags will get an index appended and managed item tags will be updated accordingly.
+ * The {@link SemanticTagUpgrader} removes custom semantic tags that are now part of standard semantic tags.
+ * The custom tags will also be checked for their position in the hierarchy. If hierarchy in the default tags has
+ * changed, and a custom tag depends on it, the custom tag parent will be adjusted.
+ * Semantic tags applied to items will be cleaned, allowing only a single tag of every type.
  * This upgrader only considers managed tags and items.
  *
  * @author Mark Herwege - Initial contribution
@@ -117,10 +119,34 @@ public class SemanticTagUpgrader implements Upgrader {
 
         replacedParentUIDs = new HashMap<>();
         updateMap = new HashMap<>();
+        // Remove duplicate tags from custom tag store
         semanticTagStorage.getKeys().forEach(tagKey -> {
             SemanticTag tag = SemanticTagDTOMapper.map(semanticTagStorage.get(tagKey));
             if (tag != null) {
-                updateTag(semanticTagStorage, tag);
+                String tagUID = tag.getUID();
+                String tagName = tag.getName();
+                if (defaultTagNames.contains(tagName)) {
+                    logger.info("Removed tag '{}' with UID '{}' from custom tags", tagName, tagUID);
+                    semanticTagStorage.remove(tagUID);
+                }
+            }
+            if (tag != null) {
+                // updateTag(semanticTagStorage, tag);
+            }
+        });
+        semanticTagStorage.flush();
+
+        // Rewrite parent relationships if position in hierarchy has changed
+        semanticTagStorage.getKeys().forEach(tagKey -> {
+            SemanticTag tag = SemanticTagDTOMapper.map(semanticTagStorage.get(tagKey));
+            if (tag != null) {
+                String tagUID = tag.getUID();
+                String tagParentUID = tag.getParentUID();
+                String tagName = tag.getName();
+                if (!(defaultTags.keySet().contains(tagParentUID) || customTags.keySet().contains(tagParentUID))) {
+                    logger.info("Removed tag '{}' with UID '{}' from custom tags", tagName, tagUID);
+                    semanticTagStorage.remove(tagUID);
+                }
             }
         });
         semanticTagStorage.flush();
