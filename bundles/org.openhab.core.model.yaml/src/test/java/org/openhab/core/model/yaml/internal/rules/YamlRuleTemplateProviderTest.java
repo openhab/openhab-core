@@ -115,7 +115,7 @@ public class YamlRuleTemplateProviderTest {
 
         List<ConfigDescriptionParameter> configDescriptions = template.getConfigurationDescriptions();
         assertThat(configDescriptions, hasSize(1));
-        ConfigDescriptionParameter parameter = configDescriptions.get(0);
+        ConfigDescriptionParameter parameter = configDescriptions.getFirst();
         assertThat(parameter.getName(), is("startLevel"));
         assertThat(parameter.getLabel(), is("Start Level"));
         assertThat(parameter.getDescription(), is("The start level which will trigger the rule."));
@@ -139,7 +139,7 @@ public class YamlRuleTemplateProviderTest {
 
         List<Trigger> triggers = template.getTriggers();
         assertThat(triggers, hasSize(2));
-        Trigger trigger = triggers.get(0);
+        Trigger trigger = triggers.getFirst();
         assertThat(trigger.getId(), is("3"));
         assertThat(trigger.getLabel(), is(emptyOrNullString()));
         assertThat(trigger.getDescription(), is(emptyOrNullString()));
@@ -156,7 +156,7 @@ public class YamlRuleTemplateProviderTest {
 
         List<Condition> conditions = template.getConditions();
         assertThat(conditions, hasSize(2));
-        Condition condition = conditions.get(0);
+        Condition condition = conditions.getFirst();
         assertThat(condition.getId(), is("4"));
         assertThat(condition.getLabel(), is(emptyOrNullString()));
         assertThat(condition.getDescription(), is(emptyOrNullString()));
@@ -175,7 +175,7 @@ public class YamlRuleTemplateProviderTest {
 
         List<Action> actions = template.getActions();
         assertThat(actions, hasSize(2));
-        Action action = actions.get(0);
+        Action action = actions.getFirst();
         assertThat(action.getId(), is("1"));
         assertThat(action.getLabel(), is(emptyOrNullString()));
         assertThat(action.getDescription(), is(emptyOrNullString()));
@@ -214,7 +214,7 @@ public class YamlRuleTemplateProviderTest {
 
         List<ConfigDescriptionParameter> configDescriptions = template.getConfigurationDescriptions();
         assertThat(configDescriptions, hasSize(5));
-        ConfigDescriptionParameter parameter = configDescriptions.get(0);
+        ConfigDescriptionParameter parameter = configDescriptions.getFirst();
         assertThat(parameter.getName(), is("textParam"));
         assertThat(parameter.getLabel(), is("Text parameter"));
         assertThat(parameter.getDescription(), is("This is a text parameter."));
@@ -232,14 +232,14 @@ public class YamlRuleTemplateProviderTest {
         assertFalse(parameter.getLimitToOptions());
         List<ParameterOption> options = parameter.getOptions();
         assertThat(options, hasSize(2));
-        assertThat(options.get(0).getLabel(), is("First Option"));
-        assertThat(options.get(0).getValue(), is("Welcome"));
+        assertThat(options.getFirst().getLabel(), is("First Option"));
+        assertThat(options.getFirst().getValue(), is("Welcome"));
         assertThat(options.get(1).getLabel(), is("Second Option"));
         assertThat(options.get(1).getValue(), is("Willkommen"));
         List<FilterCriteria> filterCriterias = parameter.getFilterCriteria();
         assertThat(filterCriterias, hasSize(2));
-        assertThat(filterCriterias.get(0).getName(), is("filter1"));
-        assertThat(filterCriterias.get(0).getValue(), is(".*"));
+        assertThat(filterCriterias.getFirst().getName(), is("filter1"));
+        assertThat(filterCriterias.getFirst().getValue(), is(".*"));
         assertThat(filterCriterias.get(1).getName(), is("filter2"));
         assertThat(filterCriterias.get(1).getValue(), is("a.*"));
         parameter = configDescriptions.get(1);
@@ -313,7 +313,7 @@ public class YamlRuleTemplateProviderTest {
 
         List<Trigger> triggers = template.getTriggers();
         assertThat(triggers, hasSize(2));
-        Trigger trigger = triggers.get(0);
+        Trigger trigger = triggers.getFirst();
         assertThat(trigger.getId(), is("first"));
         assertThat(trigger.getLabel(), is("First Trigger"));
         assertThat(trigger.getDescription(), is("The first trigger."));
@@ -330,7 +330,7 @@ public class YamlRuleTemplateProviderTest {
 
         List<Condition> conditions = template.getConditions();
         assertThat(conditions, hasSize(4));
-        Condition condition = conditions.get(0);
+        Condition condition = conditions.getFirst();
         assertThat(condition.getId(), is("holiday"));
         assertThat(condition.getLabel(), is("Is Holiday"));
         assertThat(condition.getDescription(), is("It must be a holiday."));
@@ -360,7 +360,7 @@ public class YamlRuleTemplateProviderTest {
 
         List<Action> actions = template.getActions();
         assertThat(actions, hasSize(2));
-        Action action = actions.get(0);
+        Action action = actions.getFirst();
         assertThat(action.getId(), is("greet"));
         assertThat(action.getLabel(), is("Greet"));
         assertThat(action.getDescription(), is("Greets the person."));

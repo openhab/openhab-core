@@ -116,8 +116,8 @@ public class YamlItemFileConverterTest {
 
         List<YamlElement> elements = repository.getElements();
         assertEquals(1, elements.size());
-        assertInstanceOf(YamlItemDTO.class, elements.get(0));
-        return (YamlItemDTO) elements.get(0);
+        assertInstanceOf(YamlItemDTO.class, elements.getFirst());
+        return (YamlItemDTO) elements.getFirst();
     }
 
     private static class CapturingYamlModelRepository implements YamlModelRepository {
