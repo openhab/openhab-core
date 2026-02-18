@@ -93,7 +93,7 @@ public interface QueryablePersistenceService extends PersistenceService {
 
     /**
      * Returns a set of {@link PersistenceItemInfo} about items that are stored in the persistence service. This allows
-     * the persistence service to return information about items that are no long available as an
+     * the persistence service to return information about items that are no longer available as an
      * {@link org.openhab.core.items.Item} in openHAB. If it is not possible to retrieve the information or it would be
      * too expensive to do so an {@link UnsupportedOperationException} should be thrown.
      *
@@ -101,7 +101,7 @@ public interface QueryablePersistenceService extends PersistenceService {
      * method is responsible for mapping back to the real item name.
      *
      * @return a set of information about the persisted items
-     * @throws UnsupportedOperationException
+     * @throws UnsupportedOperationException if the operation is not supported or would be too expensive to perform
      */
     default Set<PersistenceItemInfo> getItemInfo() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("getItemInfo not supported for persistence service");
@@ -119,7 +119,7 @@ public interface QueryablePersistenceService extends PersistenceService {
      * @param itemName the real openHAB name as it appears in the item registry
      * @param alias for item name in database or null if no alias defined
      * @return information about the persisted item
-     * @throws UnsupportedOperationException
+     * @throws UnsupportedOperationException if the operation is not supported or would be too expensive to perform
      */
     default @Nullable PersistenceItemInfo getItemInfo(String itemName, @Nullable String alias)
             throws UnsupportedOperationException {

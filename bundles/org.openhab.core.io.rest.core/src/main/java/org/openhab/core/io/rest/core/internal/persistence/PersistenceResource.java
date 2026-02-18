@@ -433,13 +433,14 @@ public class PersistenceResource implements RESTResource {
         service = effectiveServiceId != null ? persistenceServiceRegistry.get(effectiveServiceId) : null;
         if (effectiveServiceId == null || service == null) {
             logger.debug("Persistence service not found '{}'.", effectiveServiceId);
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Persistence service not found: " + serviceId);
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND,
+                    "Persistence service not found: " + effectiveServiceId);
         }
 
         if (!(service instanceof QueryablePersistenceService)) {
             logger.debug("Persistence service not queryable '{}'.", effectiveServiceId);
             return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
-                    "Persistence service not queryable: " + serviceId);
+                    "Persistence service not queryable: " + effectiveServiceId);
         }
 
         QueryablePersistenceService qService = (QueryablePersistenceService) service;

@@ -101,7 +101,7 @@ public class PersistenceResourceTest {
                 persistenceManagerMock, persistenceServiceConfigurationRegistryMock,
                 managedPersistenceServiceConfigurationProviderMock, timeZoneProviderMock, configurationServiceMock);
 
-        items = new ArrayList<>(endValue - startValue);
+        items = new ArrayList<>(endValue - startValue + 1);
         for (int i = startValue; i <= endValue; i++) {
             final int year = i;
             items.add(new HistoricItem() {
