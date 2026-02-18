@@ -141,7 +141,7 @@ public class PersistenceResourceTest {
         assertThat(dto.data, hasSize(5));
 
         // since we added binary state type elements, all except the first have to be repeated but with the timestamp of
-        // the following ITEM
+        // the following item
         HistoryDataBean item0 = dto.data.getFirst();
         HistoryDataBean item1 = dto.data.get(1);
 
