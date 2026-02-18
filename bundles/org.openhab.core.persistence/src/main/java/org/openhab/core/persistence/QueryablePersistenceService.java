@@ -112,7 +112,7 @@ public interface QueryablePersistenceService extends PersistenceService {
      * item is not found in the persistence service. If it is not possible to retrieve the information or it would be
      * too expensive to do so an {@link UnsupportedOperationException} should be thrown.
      * The default implementation will query the persistence service for the last value in the persistence store and
-     * set the latest timestamp, leaving the {@link PersistenceItemInfo} count to null.
+     * set the latest timestamp, leaving the {@link PersistenceItemInfo} earliest timestamp and count equal to null.
      *
      * Note that the method should return the alias for the item in its response if an alias is being used.
      *

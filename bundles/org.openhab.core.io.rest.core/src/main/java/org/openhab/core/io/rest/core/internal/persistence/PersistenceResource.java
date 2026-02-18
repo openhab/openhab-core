@@ -445,11 +445,8 @@ public class PersistenceResource implements RESTResource {
 
         QueryablePersistenceService qService = (QueryablePersistenceService) service;
 
-        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
-        String alias = config != null ? config.getAliases().get(itemName) : null;
-        alias = alias != null ? alias : itemName;
         @Nullable
-        ItemHistoryDTO dto = createDTO(qService, alias, timeBegin, timeEnd, pageNumber, pageLength, boundary,
+        ItemHistoryDTO dto = createDTO(qService, itemName, timeBegin, timeEnd, pageNumber, pageLength, boundary,
                 itemState);
         if (dto == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Item not found: " + itemName);
@@ -462,6 +459,9 @@ public class PersistenceResource implements RESTResource {
     protected @Nullable ItemHistoryDTO createDTO(QueryablePersistenceService qService, String itemName,
             @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary,
             boolean itemState) {
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(qService.getId());
+        String alias = config != null ? config.getAliases().get(itemName) : null;
+
         ZonedDateTime dateTimeBegin = ZonedDateTime.now();
         ZonedDateTime dateTimeEnd = dateTimeBegin;
         if (timeBegin != null) {
@@ -507,7 +507,7 @@ public class PersistenceResource implements RESTResource {
             filterBeforeStart.setEndDate(dateTimeBegin);
             filterBeforeStart.setPageSize(1);
             filterBeforeStart.setOrdering(Ordering.DESCENDING);
-            result = qService.query(filterBeforeStart, itemName);
+            result = qService.query(filterBeforeStart, alias);
             if (result.iterator().hasNext()) {
                 dto.addData(dateTimeBegin.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
@@ -526,7 +526,7 @@ public class PersistenceResource implements RESTResource {
         filter.setBeginDate(dateTimeBegin);
         filter.setEndDate(dateTimeEnd);
         filter.setOrdering(Ordering.ASCENDING);
-        result = qService.query(filter, itemName);
+        result = qService.query(filter, alias);
         Iterator<HistoricItem> it = result.iterator();
 
         // Iterate through the data
@@ -558,7 +558,7 @@ public class PersistenceResource implements RESTResource {
             filterAfterEnd.setBeginDate(dateTimeEnd);
             filterAfterEnd.setPageSize(1);
             filterAfterEnd.setOrdering(Ordering.ASCENDING);
-            result = qService.query(filterAfterEnd, itemName);
+            result = qService.query(filterAfterEnd, alias);
             if (result.iterator().hasNext()) {
                 dto.addData(dateTimeEnd.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
