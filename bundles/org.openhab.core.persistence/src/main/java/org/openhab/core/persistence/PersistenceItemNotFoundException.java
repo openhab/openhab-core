@@ -25,6 +25,9 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class PersistenceItemNotFoundException extends Exception {
 
+    @Serial
+    private static final long serialVersionUID = 360588429692588595L;
+
     public PersistenceItemNotFoundException(String serviceId, String name) {
         this(serviceId, name, null);
     }
@@ -33,7 +36,4 @@ public class PersistenceItemNotFoundException extends Exception {
         super("Item '" + name + "' " + (alias != null ? "with alias '" + alias + "' " : "")
                 + "could not be found in persistence service '" + serviceId + "'");
     }
-
-    @Serial
-    private static final long serialVersionUID = 360588429692588595L;
 }

@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -92,7 +91,7 @@ public class PersistenceResourceTest {
     private @Mock @NonNullByDefault({}) PersistenceServiceConfiguration persistenceServiceConfigurationMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
 
-    private static final String item = "Test";
+    private static final String ITEM = "Test";
     private static final int START_VALUE = 2016;
     private static final int END_VALUE = 2018;
     private static final int VALUE_COUNT = END_VALUE - START_VALUE + 1;
@@ -123,7 +122,7 @@ public class PersistenceResourceTest {
 
                 @Override
                 public String getName() {
-                    return item;
+                    return ITEM;
                 }
             });
         }
@@ -142,7 +141,7 @@ public class PersistenceResourceTest {
         assertThat(dto.data, hasSize(5));
 
         // since we added binary state type elements, all except the first have to be repeated but with the timestamp of
-        // the following item
+        // the following ITEM
         HistoryDataBean item0 = dto.data.getFirst();
         HistoryDataBean item1 = dto.data.get(1);
 
@@ -245,7 +244,7 @@ public class PersistenceResourceTest {
 
             @Override
             public String getName() {
-                return item;
+                return ITEM;
             }
 
             @Override
@@ -267,7 +266,7 @@ public class PersistenceResourceTest {
         // Testing with a specific implementation
         Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, null);
         PersistenceItemInfoDTO itemInfo = dto.iterator().next();
-        assertThat(itemInfo.name(), is(item));
+        assertThat(itemInfo.name(), is(ITEM));
         assertThat(itemInfo.earliest(),
                 is(Date.from(ZonedDateTime.of(START_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
         assertThat(itemInfo.latest(),
@@ -277,12 +276,12 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemInfoWithItemDefault()
-            throws PersistenceItemNotFoundException, UnsupportedOperationException, IOException {
+            throws PersistenceItemNotFoundException, UnsupportedOperationException {
         when(pServiceMock.getItemInfo(any(), any())).thenReturn(new PersistenceItemInfo() {
 
             @Override
             public String getName() {
-                return item;
+                return ITEM;
             }
 
             @Override
@@ -302,10 +301,10 @@ public class PersistenceResourceTest {
         });
 
         // This is testing the default behavior when no specific implementation exists in the service
-        Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, item);
+        Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, ITEM);
         assertThat(dto.size(), is(1));
         PersistenceItemInfoDTO itemInfo = dto.iterator().next();
-        assertThat(itemInfo.name(), is(item));
+        assertThat(itemInfo.name(), is(ITEM));
         assertNull(itemInfo.earliest());
         assertThat(itemInfo.latest(),
                 is(Date.from(ZonedDateTime.of(END_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
@@ -314,11 +313,11 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemInfoWithItem()
-            throws PersistenceItemNotFoundException, UnsupportedOperationException, IOException {
+            throws PersistenceItemNotFoundException, UnsupportedOperationException {
         when(pServiceMock.getItemInfo(any(), any())).thenAnswer(invocation -> {
             String firstArg = invocation.getArgument(0);
             String secondArg = invocation.getArgument(1);
-            if (!firstArg.equals(item)) {
+            if (!firstArg.equals(ITEM)) {
                 return null;
             }
             return new PersistenceItemInfo() {
@@ -346,14 +345,14 @@ public class PersistenceResourceTest {
             };
         });
 
-        // Testing when item does not exist and getItemInfo returns null
+        // Testing when ITEM does not exist and getItemInfo returns null
         assertThrows(PersistenceItemNotFoundException.class, () -> pResource.createDTO(pServiceMock, "NotFoundTest"));
 
         // Test when specific implementation exists and no alias is used
-        Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, item);
+        Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, ITEM);
         assertThat(dto.size(), is(1));
         PersistenceItemInfoDTO itemInfo = dto.iterator().next();
-        assertThat(itemInfo.name(), is(item));
+        assertThat(itemInfo.name(), is(ITEM));
         assertThat(itemInfo.earliest(),
                 is(Date.from(ZonedDateTime.of(START_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
         assertThat(itemInfo.latest(),
@@ -362,8 +361,8 @@ public class PersistenceResourceTest {
 
         // Test when an alias exists
         when(persistenceServiceConfigurationRegistryMock.get(any())).thenReturn(persistenceServiceConfigurationMock);
-        when(persistenceServiceConfigurationMock.getAliases()).thenReturn(Map.of(item, "TestAlias"));
-        dto = pResource.createDTO(pServiceMock, item);
+        when(persistenceServiceConfigurationMock.getAliases()).thenReturn(Map.of(ITEM, "TestAlias"));
+        dto = pResource.createDTO(pServiceMock, ITEM);
         assertThat(dto.size(), is(1));
         itemInfo = dto.iterator().next();
         assertThat(itemInfo.name(), is("TestAlias"));
