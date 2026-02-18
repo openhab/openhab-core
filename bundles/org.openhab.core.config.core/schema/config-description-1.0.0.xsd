@@ -37,7 +37,7 @@
 
 	<xs:complexType name="parameter">
 		<xs:all>
-			<xs:element name="context" type="xs:string" minOccurs="0"/>
+			<xs:element name="context" type="config-description:contextType" minOccurs="0"/>
 			<!-- deprecated element "required" -->
 			<xs:element name="required" type="xs:boolean" default="false" minOccurs="0"/>
 			<xs:element name="default" type="xs:string" minOccurs="0"/>
@@ -68,11 +68,12 @@
 		<xs:all>
 			<xs:element name="label" type="xs:string" minOccurs="0"/>
 			<xs:element name="description" type="xs:string" minOccurs="0"/>
-			<xs:element name="context" type="xs:string" minOccurs="0"/>
+			<xs:element name="context" type="config-description:contextType" minOccurs="0"/>
 			<xs:element name="advanced" type="xs:boolean" minOccurs="0"/>
 		</xs:all>
 		<xs:attribute name="name" type="xs:string" use="required"/>
 	</xs:complexType>
+
 
 	<xs:complexType name="optionsType">
 		<xs:sequence>
@@ -161,5 +162,33 @@
 	<xs:complexType name="configDescriptionRef">
 		<xs:attribute name="uri" type="config-description:uriRestrictionPattern" use="required"/>
 	</xs:complexType>
+
+	<xs:simpleType name="contextType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="network-address"/>
+			<xs:enumeration value="network-interface"/>
+			<xs:enumeration value="serial-port"/>
+			<xs:enumeration value="password"/>
+			<xs:enumeration value="password-create"/>
+			<xs:enumeration value="color"/>
+			<xs:enumeration value="date"/>
+			<xs:enumeration value="datetime"/>
+			<xs:enumeration value="email"/>
+			<xs:enumeration value="month"/>
+			<xs:enumeration value="week"/>
+			<xs:enumeration value="dayOfWeek"/>
+			<xs:enumeration value="time"/>
+			<xs:enumeration value="telephone"/>
+			<xs:enumeration value="url"/>
+			<xs:enumeration value="item"/>
+			<xs:enumeration value="thing"/>
+			<xs:enumeration value="group"/>
+			<xs:enumeration value="tag"/>
+			<xs:enumeration value="service"/>
+			<xs:enumeration value="channel"/>
+			<xs:enumeration value="rule"/>
+			<xs:enumeration value="location"/>
+		</xs:restriction>
+	</xs:simpleType>
 
 </xs:schema>
