@@ -52,6 +52,7 @@ import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.core.config.ConfigurationService;
+import org.openhab.core.io.rest.core.persistence.PersistenceItemNotFoundException;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
@@ -459,7 +460,8 @@ public class PersistenceResource implements RESTResource {
     protected @Nullable ItemHistoryDTO createDTO(QueryablePersistenceService qService, String itemName,
             @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary,
             boolean itemState) {
-        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(qService.getId());
+        String serviceId = qService.getId();
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(serviceId);
         String alias = config != null ? config.getAliases().get(itemName) : null;
 
         ZonedDateTime dateTimeBegin = ZonedDateTime.now();
@@ -643,7 +645,7 @@ public class PersistenceResource implements RESTResource {
         Set<PersistenceItemInfoDTO> itemInfo = Set.of();
         try {
             itemInfo = createDTO(qService, itemName);
-        } catch (ItemNotFoundException e) {
+        } catch (PersistenceItemNotFoundException e) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, e.getMessage());
         } catch (UnsupportedOperationException e) {
             return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
@@ -654,7 +656,7 @@ public class PersistenceResource implements RESTResource {
     }
 
     protected Set<PersistenceItemInfoDTO> createDTO(QueryablePersistenceService qService, @Nullable String itemName)
-            throws ItemNotFoundException, UnsupportedOperationException {
+            throws UnsupportedOperationException, PersistenceItemNotFoundException {
         String serviceId = qService.getId();
         PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(serviceId);
         Map<String, String> itemToAlias = config != null ? config.getAliases() : Map.of();
@@ -664,8 +666,7 @@ public class PersistenceResource implements RESTResource {
             String alias = itemToAlias.get(itemName);
             PersistenceItemInfo singleItemInfo = qService.getItemInfo(itemName, alias);
             if (singleItemInfo == null) {
-                throw new ItemNotFoundException(
-                        "Item '" + itemName + "' not found in persistence service: " + serviceId);
+                throw new PersistenceItemNotFoundException(itemName, serviceId);
             }
             itemInfo = Set.of(singleItemInfo);
         } else {

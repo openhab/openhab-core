@@ -44,6 +44,7 @@ import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.core.config.ConfigurationService;
 import org.openhab.core.io.rest.core.internal.persistence.PersistenceResource.PersistenceItemInfoDTO;
+import org.openhab.core.io.rest.core.persistence.PersistenceItemNotFoundException;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
@@ -126,9 +127,9 @@ public class PersistenceResourceTest {
             });
         }
 
-        when(pServiceMock.query(any(), any())).thenReturn(items);
-
         when(persistenceServiceRegistryMock.get(PERSISTENCE_SERVICE_ID)).thenReturn(pServiceMock);
+        when(pServiceMock.getId()).thenReturn(PERSISTENCE_SERVICE_ID);
+        when(pServiceMock.query(any(), any())).thenReturn(items);
         when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.systemDefault());
     }
 
@@ -238,7 +239,7 @@ public class PersistenceResourceTest {
     }
 
     @Test
-    public void testGetPersistenceItemInfo() throws ItemNotFoundException, UnsupportedOperationException {
+    public void testGetPersistenceItemInfo() throws PersistenceItemNotFoundException, UnsupportedOperationException {
         when(pServiceMock.getItemInfo()).thenReturn(Set.of(new PersistenceItemInfo() {
 
             @Override
@@ -275,7 +276,7 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemInfoWithItemDefault()
-            throws ItemNotFoundException, UnsupportedOperationException, IOException {
+            throws PersistenceItemNotFoundException, UnsupportedOperationException, IOException {
         when(pServiceMock.getItemInfo(any(), any())).thenReturn(new PersistenceItemInfo() {
 
             @Override
@@ -312,7 +313,7 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemInfoWithItem()
-            throws ItemNotFoundException, UnsupportedOperationException, IOException {
+            throws PersistenceItemNotFoundException, UnsupportedOperationException, IOException {
         when(pServiceMock.getItemInfo(any(), any())).thenAnswer(invocation -> {
             String firstArg = invocation.getArgument(0);
             String secondArg = invocation.getArgument(1);
@@ -345,7 +346,7 @@ public class PersistenceResourceTest {
         });
 
         // Testing when item does not exist and getItemInfo returns null
-        assertThrows(ItemNotFoundException.class, () -> pResource.createDTO(pServiceMock, "NotFoundTest"));
+        assertThrows(PersistenceItemNotFoundException.class, () -> pResource.createDTO(pServiceMock, "NotFoundTest"));
 
         // Test when specific implementation exists and no alias is used
         Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, item);
