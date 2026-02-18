@@ -93,8 +93,9 @@ public class PersistenceResourceTest {
     private @Mock @NonNullByDefault({}) Item itemMock;
 
     private static final String item = "Test";
-    private static final int startValue = 2016;
-    private static final int endValue = 2018;
+    private static final int START_VALUE = 2016;
+    private static final int END_VALUE = 2018;
+    private static final int VALUE_COUNT = END_VALUE - START_VALUE + 1;
 
     @BeforeEach
     public void beforeEach() {
@@ -102,8 +103,8 @@ public class PersistenceResourceTest {
                 persistenceManagerMock, persistenceServiceConfigurationRegistryMock,
                 managedPersistenceServiceConfigurationProviderMock, timeZoneProviderMock, configurationServiceMock);
 
-        items = new ArrayList<>(endValue - startValue + 1);
-        for (int i = startValue; i <= endValue; i++) {
+        items = new ArrayList<>(VALUE_COUNT);
+        for (int i = START_VALUE; i <= END_VALUE; i++) {
             final int year = i;
             items.add(new HistoricItem() {
                 @Override
@@ -249,17 +250,17 @@ public class PersistenceResourceTest {
 
             @Override
             public @Nullable Integer getCount() {
-                return endValue - startValue + 1;
+                return VALUE_COUNT;
             }
 
             @Override
             public @Nullable Date getEarliest() {
-                return Date.from(ZonedDateTime.of(startValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
+                return Date.from(ZonedDateTime.of(START_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
             }
 
             @Override
             public @Nullable Date getLatest() {
-                return Date.from(ZonedDateTime.of(endValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
+                return Date.from(ZonedDateTime.of(END_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
             }
         }));
 
@@ -268,10 +269,10 @@ public class PersistenceResourceTest {
         PersistenceItemInfoDTO itemInfo = dto.iterator().next();
         assertThat(itemInfo.name(), is(item));
         assertThat(itemInfo.earliest(),
-                is(Date.from(ZonedDateTime.of(startValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
+                is(Date.from(ZonedDateTime.of(START_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
         assertThat(itemInfo.latest(),
-                is(Date.from(ZonedDateTime.of(endValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
-        assertThat(itemInfo.count(), is(endValue - startValue + 1));
+                is(Date.from(ZonedDateTime.of(END_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
+        assertThat(itemInfo.count(), is(VALUE_COUNT));
     }
 
     @Test
@@ -296,7 +297,7 @@ public class PersistenceResourceTest {
 
             @Override
             public @Nullable Date getLatest() {
-                return Date.from(ZonedDateTime.of(endValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
+                return Date.from(ZonedDateTime.of(END_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
             }
         });
 
@@ -307,7 +308,7 @@ public class PersistenceResourceTest {
         assertThat(itemInfo.name(), is(item));
         assertNull(itemInfo.earliest());
         assertThat(itemInfo.latest(),
-                is(Date.from(ZonedDateTime.of(endValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
+                is(Date.from(ZonedDateTime.of(END_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
         assertNull(itemInfo.count());
     }
 
@@ -329,18 +330,18 @@ public class PersistenceResourceTest {
 
                 @Override
                 public @Nullable Integer getCount() {
-                    return 3;
+                    return VALUE_COUNT;
                 }
 
                 @Override
                 public @Nullable Date getEarliest() {
                     return Date
-                            .from(ZonedDateTime.of(startValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
+                            .from(ZonedDateTime.of(START_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
                 }
 
                 @Override
                 public @Nullable Date getLatest() {
-                    return Date.from(ZonedDateTime.of(endValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
+                    return Date.from(ZonedDateTime.of(END_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
                 }
             };
         });
@@ -354,10 +355,10 @@ public class PersistenceResourceTest {
         PersistenceItemInfoDTO itemInfo = dto.iterator().next();
         assertThat(itemInfo.name(), is(item));
         assertThat(itemInfo.earliest(),
-                is(Date.from(ZonedDateTime.of(startValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
+                is(Date.from(ZonedDateTime.of(START_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
         assertThat(itemInfo.latest(),
-                is(Date.from(ZonedDateTime.of(endValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
-        assertThat(itemInfo.count(), is(endValue - startValue + 1));
+                is(Date.from(ZonedDateTime.of(END_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
+        assertThat(itemInfo.count(), is(VALUE_COUNT));
 
         // Test when an alias exists
         when(persistenceServiceConfigurationRegistryMock.get(any())).thenReturn(persistenceServiceConfigurationMock);
@@ -367,9 +368,9 @@ public class PersistenceResourceTest {
         itemInfo = dto.iterator().next();
         assertThat(itemInfo.name(), is("TestAlias"));
         assertThat(itemInfo.earliest(),
-                is(Date.from(ZonedDateTime.of(startValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
+                is(Date.from(ZonedDateTime.of(START_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
         assertThat(itemInfo.latest(),
-                is(Date.from(ZonedDateTime.of(endValue, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
-        assertThat(itemInfo.count(), is(endValue - startValue + 1));
+                is(Date.from(ZonedDateTime.of(END_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
+        assertThat(itemInfo.count(), is(VALUE_COUNT));
     }
 }
