@@ -52,7 +52,6 @@ import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.core.config.ConfigurationService;
-import org.openhab.core.io.rest.core.persistence.PersistenceItemNotFoundException;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
@@ -65,6 +64,7 @@ import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceItemInfo;
+import org.openhab.core.persistence.PersistenceItemNotFoundException;
 import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceProblem;
@@ -625,11 +625,15 @@ public class PersistenceResource implements RESTResource {
 
     private Response getServiceItemListDTO(@Nullable String serviceId, @Nullable String itemName) {
         // If serviceId is null, then use the default service
-        PersistenceService service;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
-        service = effectiveServiceId != null ? persistenceServiceRegistry.get(effectiveServiceId) : null;
 
-        if (effectiveServiceId == null || service == null) {
+        if (effectiveServiceId == null) {
+            logger.debug("No default persistence service.");
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No default persistence service.");
+        }
+
+        PersistenceService service = persistenceServiceRegistry.get(effectiveServiceId);
+        if (service == null) {
             logger.debug("Persistence service not found '{}'.", effectiveServiceId);
             return JSONResponse.createErrorResponse(Status.NOT_FOUND,
                     "Persistence service not found: " + effectiveServiceId);
@@ -666,7 +670,7 @@ public class PersistenceResource implements RESTResource {
             String alias = itemToAlias.get(itemName);
             PersistenceItemInfo singleItemInfo = qService.getItemInfo(itemName, alias);
             if (singleItemInfo == null) {
-                throw new PersistenceItemNotFoundException(itemName, serviceId);
+                throw new PersistenceItemNotFoundException(serviceId, itemName, alias);
             }
             itemInfo = Set.of(singleItemInfo);
         } else {

@@ -10,22 +10,28 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.core.persistence;
+package org.openhab.core.persistence;
 
 import java.io.Serial;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * This exception is thrown by the {@link PersistenceResource} if an item could not be found in a persistence service.
+ * This exception is thrown if an item cannot be found in a persistence service.
  *
  * @author Mark Herwege - Initial contribution
  */
 @NonNullByDefault
 public class PersistenceItemNotFoundException extends Exception {
 
-    public PersistenceItemNotFoundException(String name, String serviceId) {
-        super("Item '" + name + "' could not be found in persistence service '" + serviceId + "'");
+    public PersistenceItemNotFoundException(String serviceId, String name) {
+        this(serviceId, name, null);
+    }
+
+    public PersistenceItemNotFoundException(String serviceId, String name, @Nullable String alias) {
+        super("Item '" + name + "' " + (alias != null ? "with alias '" + alias + "' " : "")
+                + "could not be found in persistence service '" + serviceId + "'");
     }
 
     @Serial
