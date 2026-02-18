@@ -273,7 +273,7 @@ public class PersistenceResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of stored Items available via a specific persistence service with their stored name.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfoDTO.class), uniqueItems = true))),
                     @ApiResponse(responseCode = "404", description = "Unknown persistence service or Item not found in persistence store"),
                     @ApiResponse(responseCode = "405", description = "Persistence service not queryable or getting Item info not allowed") })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
@@ -433,8 +433,7 @@ public class PersistenceResource implements RESTResource {
         service = effectiveServiceId != null ? persistenceServiceRegistry.get(effectiveServiceId) : null;
         if (effectiveServiceId == null || service == null) {
             logger.debug("Persistence service not found '{}'.", effectiveServiceId);
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND,
-                    "Persistence service not queryable: " + serviceId);
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Persistence service not found: " + serviceId);
         }
 
         if (!(service instanceof QueryablePersistenceService)) {
@@ -640,37 +639,47 @@ public class PersistenceResource implements RESTResource {
         }
 
         QueryablePersistenceService qService = (QueryablePersistenceService) service;
-
-        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
-        Map<String, String> itemToAlias = config != null ? config.getAliases() : Map.of();
-
-        Set<PersistenceItemInfo> itemInfo = null;
+        Set<PersistenceItemInfoDTO> itemInfo = Set.of();
         try {
-            if (itemName != null) {
-                String alias = itemToAlias.get(itemName);
-                PersistenceItemInfo singleItemInfo = qService.getItemInfo(itemName, alias);
-                if (singleItemInfo == null) {
-                    return JSONResponse.createErrorResponse(Status.NOT_FOUND,
-                            "Item '" + itemName + "' not found in persistence service: " + effectiveServiceId);
-                }
-                itemInfo = Set.of(singleItemInfo);
-            } else {
-                itemInfo = qService.getItemInfo();
-            }
+            itemInfo = createDTO(qService, itemName);
+        } catch (ItemNotFoundException e) {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, e.getMessage());
         } catch (UnsupportedOperationException e) {
             return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
-                    "Not supported for persistence service:" + effectiveServiceId);
+                    "Not supported for persistence service: " + effectiveServiceId);
         }
-        Set<PersistenceItemInfoDTO> mappedItemInfo = itemInfo.stream().map(this::createDTO).collect(Collectors.toSet());
-        return JSONResponse.createResponse(Status.OK, mappedItemInfo, "");
+
+        return JSONResponse.createResponse(Status.OK, itemInfo, "");
     }
 
-    private PersistenceItemInfoDTO createDTO(PersistenceItemInfo itemInfo) {
-        return new PersistenceItemInfoDTO(itemInfo.getName(), itemInfo.getCount(), itemInfo.getEarliest(),
-                itemInfo.getLatest());
+    protected Set<PersistenceItemInfoDTO> createDTO(QueryablePersistenceService qService, @Nullable String itemName)
+            throws ItemNotFoundException, UnsupportedOperationException {
+        String serviceId = qService.getId();
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(serviceId);
+        Map<String, String> itemToAlias = config != null ? config.getAliases() : Map.of();
+
+        Set<PersistenceItemInfo> itemInfo = Set.of();
+        if (itemName != null) {
+            String alias = itemToAlias.get(itemName);
+            PersistenceItemInfo singleItemInfo = qService.getItemInfo(itemName, alias);
+            if (singleItemInfo == null) {
+                throw new ItemNotFoundException(
+                        "Item '" + itemName + "' not found in persistence service: " + serviceId);
+            }
+            itemInfo = Set.of(singleItemInfo);
+        } else {
+            itemInfo = qService.getItemInfo();
+        }
+
+        Set<PersistenceItemInfoDTO> mappedItemInfo = itemInfo.stream()
+                .map(info -> new PersistenceItemInfoDTO(info.getName(), info.getCount(), info.getEarliest(),
+                        info.getLatest()))
+                .collect(Collectors.toSet());
+        return mappedItemInfo;
     }
 
-    private record PersistenceItemInfoDTO(String name, @Nullable Integer count, @Nullable Date earliest,
+    @Schema(name = "PersistenceItemInfo")
+    public record PersistenceItemInfoDTO(String name, @Nullable Integer count, @Nullable Date earliest,
             @Nullable Date latest) {
     }
 

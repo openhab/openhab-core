@@ -116,8 +116,8 @@ public interface QueryablePersistenceService extends PersistenceService {
      *
      * Note that the method should return the alias for the item in its response if an alias is being used.
      *
-     * @param itemName
-     * @param alias for item name in database
+     * @param itemName the real openHAB name as it appears in the item registry
+     * @param alias for item name in database or null if no alias defined
      * @return information about the persisted item
      * @throws UnsupportedOperationException
      */
