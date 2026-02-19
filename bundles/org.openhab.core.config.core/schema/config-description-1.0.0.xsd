@@ -164,29 +164,35 @@
 
 	<xs:simpleType name="contextType">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="network-address"/>
-			<xs:enumeration value="network-interface"/>
-			<xs:enumeration value="serial-port"/>
-			<xs:enumeration value="password"/>
-			<xs:enumeration value="password-create"/>
+			<xs:enumeration value="channel"/>
+			<xs:enumeration value="channeltype"/>
 			<xs:enumeration value="color"/>
+			<xs:enumeration value="cronexpression"/>
 			<xs:enumeration value="date"/>
 			<xs:enumeration value="datetime"/>
-			<xs:enumeration value="email"/>
-			<xs:enumeration value="month"/>
-			<xs:enumeration value="week"/>
 			<xs:enumeration value="dayOfWeek"/>
-			<xs:enumeration value="time"/>
-			<xs:enumeration value="telephone"/>
-			<xs:enumeration value="url"/>
-			<xs:enumeration value="item"/>
-			<xs:enumeration value="thing"/>
+			<xs:enumeration value="email"/>
 			<xs:enumeration value="group"/>
-			<xs:enumeration value="tag"/>
-			<xs:enumeration value="service"/>
-			<xs:enumeration value="channel"/>
-			<xs:enumeration value="rule"/>
+			<xs:enumeration value="item"/>
 			<xs:enumeration value="location"/>
+			<xs:enumeration value="month"/>
+			<xs:enumeration value="network-address"/>
+			<xs:enumeration value="network-interface"/>
+			<xs:enumeration value="page"/>
+			<xs:enumeration value="password"/>
+			<xs:enumeration value="password-create"/>
+			<xs:enumeration value="persistenceService"/>
+			<xs:enumeration value="rule"/>
+			<xs:enumeration value="script"/>
+			<xs:enumeration value="serial-port"/>
+			<xs:enumeration value="service"/>
+			<xs:enumeration value="tag"/>
+			<xs:enumeration value="telephone"/>
+			<xs:enumeration value="thing"/>
+			<xs:enumeration value="time"/>
+			<xs:enumeration value="url"/>
+			<xs:enumeration value="week"/>
+			<xs:enumeration value="widget"/>
 		</xs:restriction>
 	</xs:simpleType>
 

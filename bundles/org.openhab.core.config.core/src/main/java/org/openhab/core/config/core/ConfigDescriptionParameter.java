@@ -317,41 +317,40 @@ public class ConfigDescriptionParameter {
      * </p>
      *
      * <ul>
-     * <li><b>network-address</b>: The configuration value represents an IPv4 or IPv6 address or domain name.</li>
-     * <li><b>network-interface</b>: The configuration value represents a network interface name, e.g. eth0, wlan0.</li>
-     * <li><b>serial-port</b>: The configuration value represents a serial port name, e.g. COM1, /dev/ttyS0.</li>
-     * <li><b>password</b>: A alphanumeric password value (a user-interface might obscure the visible value)</li>
-     * <li><b>password-create</b>: A alphanumeric passwort generator widget might be shown</li>
+     * <li><b>channel</b>: A valid channel UID. A UI would probably show a channel selection widget.</li>
+     * <li><b>channeltype</b>: A valid channel type UID. A UI would probably show a channel type selection widget.</li>
      * <li><b>color</b>: This value represents an RGB color value like #000000 - #ffffff or 12,12,12.</li>
+     * <li><b>cronexpression</b>: A cron expression like "* * * * *". A user interface would probably show a cron
+     * expression generator.</li>
      * <li><b>date</b>: A date string in the format "YYYY-MM-DD"</li>
      * <li><b>datetime</b>: A date and time string in the format "YYYY-MM-DD'T'hh:mm:ss", e.g.
      * "2019-12-31T23:59:59"</li>
-     * <li><b>cronexpression</b>: A cron expression like "* * * * *". A user interface would probably show a cron
-     * expression generator.</li>
-     * <li><b>email</b>: The configuration value represents an email address, e.g. username@domain.com</li>
-     * <li><b>month</b>: A month of year [1-12]</li>
-     * <li><b>week</b>: A week of year [0-52]</li>
      * <li><b>dayOfWeek</b>: A day of week [MON, TUE, WED, THU, FRI, SAT, SUN]</li>
-     * <li><b>time</b>: A time string in the format "hh:mm:ss" or as milliseconds since epoch</li>
-     * <li><b>telephone</b>: A tel no</li>
-     * <li><b>url</b>: A web address</li>
+     * <li><b>email</b>: The configuration value represents an email address, e.g. username@domain.com</li>
+     * <li><b>group</b>: A valid group item "name". A UI would probably show an item selection widget.</li>
+     * <li><b>item</b>: A valid item "name". A UI would probably show an item selection widget.</li>
+     * <li><b>location</b>: A latitude,longitude[,altitude] GPS location. A UI would probably render a world map for
+     * selection.</li>
+     * <li><b>month</b>: A month of year [1-12]</li>
+     * <li><b>network-address</b>: The configuration value represents an IPv4 or IPv6 address or domain name.</li>
+     * <li><b>network-interface</b>: The configuration value represents a network interface name, e.g. eth0, wlan0.</li>
+     * <li><b>page</b>: A valid page UID. A UI would probably show a page selection widget.</li>
+     * <li><b>password</b>: A alphanumeric password value (a UI might obscure the visible value)</li>
+     * <li><b>password-create</b>: A alphanumeric passwort generator widget might be shown</li>
+     * <li><b>persistenceService</b>: A valid persistence service ID. A UI would probably show a persistence service
+     * selection widget.</li>
+     * <li><b>rule</b>: A valid rule uid. A UI would probably show a rule selection widget.</li>
+     * <li><b>script</b>: The configuration value represents a script (javascript, python etc). A UI would probably
+     * render a multi line editor.</li>
+     * <li><b>serial-port</b>: The configuration value represents a serial port name, e.g. COM1, /dev/ttyS0.</li>
+     * <li><b>service</b>: A valid service ID. A UI would probably show a service selection widget.</li>
      * <li><b>tag</b>: One tag or multiple tags separated by comma.</li>
-     * <li><b>item</b>: A valid item "name". A user-interface would probably show an item selection widget.</li>
-     * <li><b>thing</b>: A valid thing UID. A user-interface would probably show a thing selection widget.</li>
-     * <li><b>group</b>: A valid group item "name". A user-interface would probably show an item selection widget.</li>
-     * <li><b>service</b>: A valid service ID. A user-interface would probably show a service selection widget.</li>
-     * <li><b>persistenceService</b>: A valid persistence service ID. A user-interface would probably show a persistence
-     * service selection widget.</li>
-     * <li><b>channel</b>: A valid channel UID. A user-interface would probably show a channel selection widget.</li>
-     * <li><b>channeltype</b>: A valid channel type UID. A user-interface would probably show a channel type selection
-     * widget.</li>
-     * <li><b>rule</b>: A valid rule uid. A user-interface would probably show a rule selection widget.</li>
-     * <li><b>script</b>: The configuration value represents a script (javascript, python etc). A user-interface would
-     * probably render a multi line editor.</li>
-     * <li><b>page</b>: A valid page UID. A user-interface would probably show a page selection widget.</li>
-     * <li><b>widget</b>: A valid widget UID. A user-interface would probably show a widget selection widget.</li>
-     * <li><b>location</b>: A latitude,longitude[,altitude] GPS location. A user-interface would probably render a world
-     * map for selection.</li>
+     * <li><b>telephone</b>: A tel no</li>
+     * <li><b>thing</b>: A valid thing UID. A UI would probably show a thing selection widget.</li>
+     * <li><b>time</b>: A time string in the format "hh:mm:ss" or as milliseconds since epoch</li>
+     * <li><b>url</b>: A web address</li>
+     * <li><b>week</b>: A week of year [0-52]</li>
+     * <li><b>widget</b>: A valid widget UID. A UI would probably show a widget selection widget.</li>
      * </ul>
      *
      * @return the context of the configuration parameter (could be empty)
