@@ -335,8 +335,8 @@ public class ConfigDescriptionParameter {
      * <li><b>network-address</b>: The configuration value represents an IPv4 or IPv6 address or domain name.</li>
      * <li><b>network-interface</b>: The configuration value represents a network interface name, e.g. eth0, wlan0.</li>
      * <li><b>page</b>: A valid page UID. A UI would probably show a page selection widget.</li>
-     * <li><b>password</b>: A alphanumeric password value (a UI might obscure the visible value)</li>
-     * <li><b>password-create</b>: A alphanumeric passwort generator widget might be shown</li>
+     * <li><b>password</b>: An alphanumeric password value (a UI might obscure the visible value)</li>
+     * <li><b>password-create</b>: An alphanumeric password generator widget might be shown</li>
      * <li><b>persistenceService</b>: A valid persistence service ID. A UI would probably show a persistence service
      * selection widget.</li>
      * <li><b>rule</b>: A valid rule uid. A UI would probably show a rule selection widget.</li>
