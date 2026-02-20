@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -290,7 +289,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
      */
     private @Nullable Addon convertTopicItemToAddon(DiscourseTopicItem topic, List<DiscourseUser> users) {
         try {
-            List<String> tags = Arrays.asList(Objects.requireNonNullElse(topic.tags, new String[0]));
+            List<String> tags = topic.tags == null ? List.of() : Arrays.stream(topic.tags).map(t -> t.name).toList();
 
             String uid = ADDON_ID_PREFIX + topic.id.toString();
             AddonType addonType = getAddonType(topic.categoryId, tags);
@@ -376,7 +375,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
      */
     private Addon convertTopicToAddon(DiscourseTopicResponseDTO topic) {
         String uid = ADDON_ID_PREFIX + topic.id.toString();
-        List<String> tags = Arrays.asList(Objects.requireNonNullElse(topic.tags, new String[0]));
+        List<String> tags = topic.tags == null ? List.of() : Arrays.stream(topic.tags).map(t -> t.name).toList();
 
         AddonType addonType = getAddonType(topic.categoryId, tags);
         String type = (addonType != null) ? addonType.getId() : "";

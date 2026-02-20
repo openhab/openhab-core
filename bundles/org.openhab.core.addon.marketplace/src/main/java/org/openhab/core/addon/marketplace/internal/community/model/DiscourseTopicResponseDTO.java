@@ -14,6 +14,8 @@ package org.openhab.core.addon.marketplace.internal.community.model;
 
 import java.util.Date;
 
+import org.openhab.core.addon.marketplace.internal.community.model.TagDTO.Tag;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -44,7 +46,7 @@ public class DiscourseTopicResponseDTO {
     public Integer likeCount;
     public Integer views;
 
-    public String[] tags;
+    public Tag[] tags;
     @SerializedName("category_id")
     public Integer categoryId;
 
