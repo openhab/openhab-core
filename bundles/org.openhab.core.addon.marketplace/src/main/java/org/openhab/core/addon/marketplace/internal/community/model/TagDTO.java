@@ -18,9 +18,7 @@ package org.openhab.core.addon.marketplace.internal.community.model;
  * @author Ravi Nadahar - Initial contribution
  */
 public class TagDTO {
-    public static class Tag {
-        public Integer id;
-        public String name;
-        public String slug;
-    }
+    public Integer id;
+    public String name;
+    public String slug;
 }
