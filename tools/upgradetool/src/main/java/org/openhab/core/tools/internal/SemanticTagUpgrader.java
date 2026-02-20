@@ -15,14 +15,13 @@ package org.openhab.core.tools.internal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -41,7 +40,11 @@ import org.slf4j.LoggerFactory;
  * The {@link SemanticTagUpgrader} removes custom semantic tags that are now part of standard semantic tags.
  * The custom tags will also be checked for their position in the hierarchy. If hierarchy in the default tags has
  * changed, and a custom tag depends on it, the custom tag parent will be adjusted.
- * Semantic tags applied to items will be cleaned, allowing only a single tag of every type.
+ * Semantic tags applied to items will be cleaned. If there is more then one semantic tag by class, only one will be
+ * kept and the others will be renamed to be non-semantic. Preference is given to keep the tags that moved class. If
+ * there is a Property tag, a Point tag will be added if missing.
+ * With these adjustments, the model can be further corrected from the UI without issues of double tags of the same
+ * class not being shown in the UI.
  * This upgrader only considers managed tags and items.
  *
  * @author Mark Herwege - Initial contribution
@@ -50,20 +53,10 @@ import org.slf4j.LoggerFactory;
 public class SemanticTagUpgrader implements Upgrader {
     private final Logger logger = LoggerFactory.getLogger(SemanticTagUpgrader.class);
 
-    private Map<String, SemanticTag> defaultTags = Map.of();
-    private Set<String> defaultTagNames = Set.of();
-    private Set<String> defaultTagSynonyms = Set.of();
+    // Tags known to have changed class in 5.0
+    private static final Set<String> TAGS_CHANGED_CLASS = Set.of("LowBattery", "OpenLevel", "OpenState", "Tampered");
 
-    private Map<String, SemanticTag> customTags = new HashMap<>();
-    private Set<String> customTagNames = Set.of();
-    private Set<String> customTagSynonyms = Set.of();
-
-    private Set<String> addedTagNames = new HashSet<>();
-    private Map<String, String> replacedParentUIDs = new HashMap<>();
-
-    private Set<String> itemTags = Set.of();
-
-    private Map<String, String> updateMap = new HashMap<>();
+    private static final String DEFAULT_POINT_TAG = "Status";
 
     @Override
     public String getName() {
@@ -72,7 +65,7 @@ public class SemanticTagUpgrader implements Upgrader {
 
     @Override
     public String getDescription() {
-        return "Rename custom semantic tags that have been superseded by newly provided semantic tags with the same name";
+        return "Correct custom semantic tags and item semantic tags for changes in provided default semantic tags";
     }
 
     @Override
@@ -84,167 +77,184 @@ public class SemanticTagUpgrader implements Upgrader {
 
         Path semanticsJsonDatabasePath = userdataPath
                 .resolve(Path.of("jsondb", "org.openhab.core.semantics.SemanticTag.json"));
-        Path itemJsonDatabasePath = userdataPath.resolve(Path.of("jsondb", "org.openhab.core.items.Item.json"));
         logger.info("Deduplicating custom semantic tags '{}'", semanticsJsonDatabasePath);
 
-        if (!Files.isReadable(semanticsJsonDatabasePath)) {
-            logger.warn("Cannot access semantic tags database '{}', no tags to update, check path and access rights.",
+        boolean dbUpdated = false;
+        boolean canUpdateDb = true;
+        if (!Files.exists(semanticsJsonDatabasePath)) {
+            canUpdateDb = false;
+            dbUpdated = true;
+            logger.info("Semantics tags database '{}' does not exist, no tags to update.", semanticsJsonDatabasePath);
+        } else if (!Files.isReadable(semanticsJsonDatabasePath)) {
+            canUpdateDb = false;
+            logger.warn(
+                    "Cannot access semantic tags database '{}', update may be incomplete, check path and access rights.",
                     semanticsJsonDatabasePath);
-            return false;
         }
 
-        defaultTags = (new DefaultSemanticTagProvider()).getAll().stream()
-                .collect(Collectors.toMap(tag -> tag.getUID(), tag -> tag));
-        defaultTagNames = tagNames(defaultTags);
-        defaultTagSynonyms = tagSynonyms(defaultTags);
+        Map<String, SemanticTag> defaultTags = (new DefaultSemanticTagProvider()).getAll().stream()
+                .collect(Collectors.toMap(tag -> tag.getName(), tag -> tag));
+        Map<String, SemanticTag> customTags = Map.of();
 
-        JsonStorage<SemanticTagDTO> semanticTagStorage = new JsonStorage<>(semanticsJsonDatabasePath.toFile(), null, 5,
-                0, 0, List.of());
-        customTags = new HashMap<>(semanticTagStorage.getValues().stream().map(tag -> SemanticTagDTOMapper.map(tag))
-                .filter(Objects::nonNull).collect(Collectors.toMap(tag -> tag.getUID(), tag -> tag)));
-        customTagNames = tagNames(customTags);
-        customTagSynonyms = tagSynonyms(customTags);
+        Set<String> changedTags = new HashSet<>(TAGS_CHANGED_CLASS);
 
-        boolean itemStorageExists = Files.isReadable(itemJsonDatabasePath);
-        if (!itemStorageExists) {
-            logger.error("Cannot access item database '{}', update may be incomplete.", itemJsonDatabasePath);
-        }
-        JsonStorage<ManagedItemProvider.PersistedItem> itemStorage = itemStorageExists
-                ? new JsonStorage<>(itemJsonDatabasePath.toFile(), null, 5, 0, 0, List.of())
-                : null;
-        itemTags = itemStorage != null
-                ? itemStorage.getValues().stream().filter(Objects::nonNull).map(item -> item.tags)
-                        .filter(Objects::nonNull).flatMap(Set::stream).collect(Collectors.toSet())
-                : Set.of();
+        if (canUpdateDb) {
+            JsonStorage<SemanticTagDTO> semanticTagStorage = new JsonStorage<>(semanticsJsonDatabasePath.toFile(), null,
+                    5, 0, 0, List.of());
 
-        replacedParentUIDs = new HashMap<>();
-        updateMap = new HashMap<>();
-        // Remove duplicate tags from custom tag store
-        semanticTagStorage.getKeys().forEach(tagKey -> {
-            SemanticTag tag = SemanticTagDTOMapper.map(semanticTagStorage.get(tagKey));
-            if (tag != null) {
+            // Remove duplicate tags from custom tag store
+            for (String tagKey : semanticTagStorage.getKeys()) {
+                SemanticTag tag = SemanticTagDTOMapper.map(semanticTagStorage.get(tagKey));
+                if (tag == null) {
+                    continue;
+                }
+
                 String tagUID = tag.getUID();
                 String tagName = tag.getName();
-                if (defaultTagNames.contains(tagName)) {
-                    logger.info("Removed tag '{}' with UID '{}' from custom tags", tagName, tagUID);
+                if (defaultTags.keySet().contains(tagName)) {
+                    logger.info("  Removed duplicate tag '{}' with UID '{}' from custom tags", tagName, tagUID);
                     semanticTagStorage.remove(tagUID);
+                    changedTags.add(tagName);
                 }
             }
-            if (tag != null) {
-                // updateTag(semanticTagStorage, tag);
-            }
-        });
-        semanticTagStorage.flush();
+            semanticTagStorage.flush();
 
-        // Rewrite parent relationships if position in hierarchy has changed
-        semanticTagStorage.getKeys().forEach(tagKey -> {
-            SemanticTag tag = SemanticTagDTOMapper.map(semanticTagStorage.get(tagKey));
-            if (tag != null) {
+            // Rewrite parent relationships if position in hierarchy has changed
+            for (String tagKey : semanticTagStorage.getKeys()) {
+                SemanticTag tag = SemanticTagDTOMapper.map(semanticTagStorage.get(tagKey));
+                if (tag == null) {
+                    continue;
+                }
+
                 String tagUID = tag.getUID();
-                String tagParentUID = tag.getParentUID();
+                String[] hierarchy = tagUID.split("_");
+                if (hierarchy.length <= 2) {
+                    // No need to check for update if only semantic class and tag
+                    continue;
+                }
+
                 String tagName = tag.getName();
-                if (!(defaultTags.keySet().contains(tagParentUID) || customTags.keySet().contains(tagParentUID))) {
-                    logger.info("Removed tag '{}' with UID '{}' from custom tags", tagName, tagUID);
-                    semanticTagStorage.remove(tagUID);
-                }
-            }
-        });
-        semanticTagStorage.flush();
-
-        if (itemStorage != null && !updateMap.isEmpty()) {
-            Set<String> oldTags = updateMap.keySet();
-            itemStorage.getKeys().forEach(itemKey -> {
-                ManagedItemProvider.PersistedItem item = itemStorage.get(itemKey);
-                Set<String> tags = item != null ? item.tags : null;
-                if (item != null && tags != null && !Collections.disjoint(tags, oldTags)) {
-                    Set<String> newItemTags = tags.stream().map(tag -> updateMap.getOrDefault(tag, tag))
-                            .collect(Collectors.toSet());
-                    item.tags = newItemTags;
-                    itemStorage.put(itemKey, item);
-                    logger.info("Updated semantic tags for item '{}' with new custom tag name(s)", itemKey);
-                }
-            });
-            itemStorage.flush();
-        }
-
-        return true;
-    }
-
-    private SemanticTag updateTag(JsonStorage<SemanticTagDTO> tagStorage, SemanticTag tag) {
-        SemanticTag newTag = tag;
-        String tagUID = tag.getUID();
-        String tagName = tag.getName();
-        String newTagUID = tagUID;
-        String newTagName = tagName;
-
-        // Make sure all parents exist and are in the proper place in the hierarchy.
-        // Start from the top level.
-        String[] hierarchy = tagUID.split("_");
-        if (hierarchy.length > 2) {
-            // First element of UID is always Location, Equipment, Point or Property
-            for (int i = 2; i <= hierarchy.length; i++) {
-                String tagParentUID = String.join("_", Arrays.copyOfRange(hierarchy, 0, i - 1));
-                if (!(defaultTags.keySet().contains(tagParentUID) || customTags.keySet().contains(tagParentUID))) {
-                    String newTagParentUID = replacedParentUIDs.getOrDefault(tagParentUID, tagParentUID);
-                    SemanticTag tagParent = new SemanticTagImpl(newTagParentUID, tagName(newTagParentUID), null,
-                            List.of());
-                    if (newTagParentUID.equals(tagParentUID)) {
-                        tagParent = updateTag(tagStorage, tagParent);
-                        newTagParentUID = tagParent.getUID();
-                        if (!tagParentUID.equals(newTagParentUID)) {
-                            replacedParentUIDs.put(tagParentUID, newTagParentUID);
+                for (int i = hierarchy.length - 2; i > 0; i--) {
+                    String parentName = hierarchy[i];
+                    SemanticTag newParent = defaultTags.get(parentName);
+                    if (newParent != null) {
+                        String newParentUID = newParent.getUID();
+                        String childUID = String.join("_", Arrays.copyOfRange(hierarchy, i + 1, hierarchy.length));
+                        String newUID = newParentUID + "_" + childUID;
+                        if (!tagUID.equals(newUID)) {
+                            SemanticTag newTag = new SemanticTagImpl(newUID, tag.getLabel(), tag.getDescription(),
+                                    tag.getSynonyms());
+                            semanticTagStorage.put(newUID, SemanticTagDTOMapper.map(newTag));
+                            semanticTagStorage.remove(tagUID);
+                            changedTags.add(tagName);
+                            logger.info("  Updated custom tag '{}' parent from '{}' to '{}'", tagName,
+                                    tag.getParentUID(), newTag.getParentUID());
+                            break;
                         }
                     }
-                    String newTagParentName = tagParent.getName();
-                    hierarchy[i - 2] = newTagParentName;
-                    addedTagNames.add(newTagParentName);
-                    logger.info("Added custom semantic tag parent '{}' for '{}'", newTagParentUID, newTagParentName);
                 }
             }
-            newTag = new SemanticTagImpl(String.join("_", hierarchy), tag.getLabel(), tag.getDescription(),
-                    tag.getSynonyms());
-            newTagUID = newTag.getUID();
+            semanticTagStorage.flush();
+            dbUpdated = true;
+
+            customTags = semanticTagStorage.getValues().stream().map(tag -> SemanticTagDTOMapper.map(tag))
+                    .filter(Objects::nonNull).collect(Collectors.toMap(tag -> tag.getName(), tag -> tag));
         }
 
-        // Check if the tag itself does not exist in the default tags, and if so, rename it
-        if (defaultTagNames.contains(tagName)) {
-            for (int i = 1;; i++) {
-                newTagName = tagName + String.valueOf(i);
-                if (!tagNameExists(newTagName)) {
-                    updateMap.put(tagName, newTagName);
-                    newTagUID = tagUID + String.valueOf(i);
-                    newTag = new SemanticTagImpl(newTagUID, tag.getLabel(), tag.getDescription(), tag.getSynonyms());
-                    newTagName = newTag.getName();
-                    addedTagNames.add(newTagName);
-                    logger.info("Changed custom semantic tag '{}' to '{}'", tagName, newTagName);
-                    break;
+        Path itemJsonDatabasePath = userdataPath.resolve(Path.of("jsondb", "org.openhab.core.items.Item.json"));
+        logger.info("Cleaning item semantic tags '{}'", itemJsonDatabasePath);
+
+        if (!Files.exists(itemJsonDatabasePath)) {
+            logger.info("No item database '{}', no managed items to update.", itemJsonDatabasePath);
+            return dbUpdated;
+        } else if (!Files.isReadable(itemJsonDatabasePath)) {
+            logger.warn("Cannot access item database '{}', update may be incomplete, check path and access rights.",
+                    itemJsonDatabasePath);
+            return false;
+        }
+        JsonStorage<ManagedItemProvider.PersistedItem> itemStorage = new JsonStorage<>(itemJsonDatabasePath.toFile(),
+                null, 5, 0, 0, List.of());
+
+        // Adjust item tags, make sure only 1 tag of every class exists, rename other tags
+        Map<String, SemanticTag> allSemanticTags = Stream.of(defaultTags, customTags)
+                .flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Set<String> itemTagNames = itemStorage.getValues().stream().filter(Objects::nonNull).map(item -> item.tags)
+                .filter(Objects::nonNull).flatMap(tags -> tags.stream()).collect(Collectors.toSet());
+        Set<String> allTagNames = Stream.of(allSemanticTags.keySet(), itemTagNames).flatMap(tags -> tags.stream())
+                .collect(Collectors.toSet());
+
+        for (String itemKey : itemStorage.getKeys()) {
+            ManagedItemProvider.PersistedItem item = itemStorage.get(itemKey);
+            Set<String> tags = item != null ? item.tags : null;
+            if (item == null || tags == null || tags.isEmpty()) {
+                continue;
+            }
+
+            Set<String> newTags = new HashSet<>(tags);
+            Set<String> locationTags = new HashSet<>(tags.stream()
+                    .filter(tag -> "Location".equals(tagClass(allSemanticTags.get(tag)))).collect(Collectors.toSet()));
+            Set<String> equipmentTags = new HashSet<>(tags.stream()
+                    .filter(tag -> "Equipment".equals(tagClass(allSemanticTags.get(tag)))).collect(Collectors.toSet()));
+            Set<String> pointTags = new HashSet<>(tags.stream()
+                    .filter(tag -> "Point".equals(tagClass(allSemanticTags.get(tag)))).collect(Collectors.toSet()));
+            Set<String> propertyTags = new HashSet<>(tags.stream()
+                    .filter(tag -> "Property".equals(tagClass(allSemanticTags.get(tag)))).collect(Collectors.toSet()));
+
+            Map<String, Set<String>> tagSets = Map.of("Location", locationTags, "Equipment", equipmentTags, "Point",
+                    pointTags, "Property", propertyTags);
+            for (String tagClass : tagSets.keySet()) {
+                Set<String> tagSet = tagSets.get(tagClass);
+                while (tagSet != null && tagSet.size() > 1) {
+                    String tagToRemove = tagSet.stream().filter(tag -> !changedTags.contains(tag)).findAny()
+                            .orElse(tagSet.iterator().next());
+                    if (tagToRemove != null) {
+                        String tagToAdd = newTagName(tagToRemove, allTagNames);
+                        newTags.remove(tagToRemove);
+                        newTags.add(tagToAdd);
+                        tagSet.remove(tagToRemove);
+                        logger.info("  Multiple {} tags on item '{}', renamed '{}' to '{}'", tagClass, itemKey,
+                                tagToRemove, tagToAdd);
+                    }
+                }
+                if (tagSet != null && tagSet.size() == 1 && "Property".equals(tagClass) && pointTags.isEmpty()) {
+                    // When there is a Property tag, there should also be a Point tag, add it if missing.
+                    // Status is a neutral one, easy to reconfigure if necessary.
+                    newTags.add(DEFAULT_POINT_TAG);
+                    logger.info("  Item '{}' has Property tag '{}' without Point tag, added Point tag '{}'", itemKey,
+                            tagSet.iterator().next(), DEFAULT_POINT_TAG);
                 }
             }
+
+            if (newTags.size() < tags.size()) {
+                item.tags = newTags;
+                itemStorage.put(itemKey, item);
+            }
         }
+        itemStorage.flush();
 
-        tagStorage.put(newTagUID, SemanticTagDTOMapper.map(newTag));
-        if (!newTagUID.equals(tagUID)) {
-            tagStorage.remove(tagUID);
+        return dbUpdated;
+    }
+
+    private String newTagName(String oldTagName, Set<String> allTagNames) {
+        String tagName = oldTagName;
+        int i = 0;
+        while (allTagNames.contains(tagName)) {
+            tagName = oldTagName + String.valueOf(i);
+            i++;
         }
-        return newTag;
+        return tagName;
     }
 
-    private Set<String> tagNames(Map<String, SemanticTag> tags) {
-        return tags.values().stream().map(tag -> tag.getName()).collect(Collectors.toSet());
+    private String tagClass(String tagUID) {
+        int idx = tagUID.indexOf("_");
+        return (idx >= 0 ? tagUID.substring(0, idx) : "").trim();
     }
 
-    private Set<String> tagSynonyms(Map<String, SemanticTag> tags) {
-        return tags.values().stream().flatMap(tag -> tag.getSynonyms().stream()).collect(Collectors.toSet());
-    }
-
-    private String tagName(String tagUID) {
-        int idx = tagUID.lastIndexOf("_");
-        return (idx >= 0 ? tagUID.substring(idx + 1) : tagUID).trim();
-    }
-
-    private boolean tagNameExists(String tagName) {
-        return defaultTagNames.contains(tagName) || defaultTagSynonyms.contains(tagName)
-                || customTagNames.contains(tagName) || customTagSynonyms.contains(tagName) || itemTags.contains(tagName)
-                || addedTagNames.contains(tagName);
+    private @Nullable String tagClass(@Nullable SemanticTag tag) {
+        if (tag == null) {
+            return null;
+        }
+        return tagClass(tag.getUID());
     }
 }
