@@ -26,10 +26,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.json.internal.JsonStorage;
@@ -70,14 +70,14 @@ public class UpgradeTool {
     private static final Pattern CORE_VERSION_PATTERN = Pattern.compile("^openhab-core\\s*:\\s*(\\S+)\\s*$");
 
     private static final List<Upgrader> UPGRADERS = List.of( //
-            new ItemUnitToMetadataUpgrader(), //
-            new JSProfileUpgrader(), //
-            new ScriptProfileUpgrader(), //
-            new YamlConfigurationV1TagsUpgrader(), // Added in 5.0
-            new HomeAssistantAddonUpgrader(), // Added in 5.1
-            new HomieAddonUpgrader(), // Added in 5.1
-            new PersistenceUpgrader(), // Added in 5.1
-            new SemanticTagUpgrader() // Added in 5.2
+            new ItemUnitToMetadataUpgrader(), // Since 4.0.0
+            new JSProfileUpgrader(), // Since 4.0.0
+            new ScriptProfileUpgrader(), // Since 4.2.0
+            new YamlConfigurationV1TagsUpgrader(), // Since in 5.0
+            new HomeAssistantAddonUpgrader(), // Since in 5.1
+            new HomieAddonUpgrader(), // Since in 5.1
+            new PersistenceUpgrader(), // Since in 5.1
+            new SemanticTagUpgrader() // Since in 5.2
     );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeTool.class);
@@ -90,23 +90,23 @@ public class UpgradeTool {
 
         options.addOption(Option.builder().longOpt(OPT_USERDATA_DIR).desc(
                 "USERDATA directory to process. Enclose it in double quotes to ensure that any backslashes are not ignored by your command shell.")
-                .numberOfArgs(1).build());
+                .numberOfArgs(1).get());
         options.addOption(Option.builder().longOpt(OPT_CONF_DIR).desc(
                 "CONF directory to process. Enclose it in double quotes to ensure that any backslashes are not ignored by your command shell.")
-                .numberOfArgs(1).build());
+                .numberOfArgs(1).get());
         options.addOption(Option.builder().longOpt(OPT_OH_VERSION).desc(
                 "openHAB target version. Upgraders will be executed again if they have been executed in an upgrade to an earlier openHAB version and there are new changes.")
-                .numberOfArgs(1).build());
+                .numberOfArgs(1).get());
         options.addOption(Option.builder().longOpt(OPT_COMMAND).numberOfArgs(1)
-                .desc("command to execute (executes all if omitted)").build());
-        options.addOption(Option.builder().longOpt(OPT_LIST_COMMANDS).desc("list available commands").build());
-        options.addOption(Option.builder().longOpt(OPT_LOG).numberOfArgs(1).desc("log verbosity").build());
-        options.addOption(Option.builder().longOpt(OPT_FORCE).desc("force execution (even if already done)").build());
+                .desc("command to execute (executes all if omitted)").get());
+        options.addOption(Option.builder().longOpt(OPT_LIST_COMMANDS).desc("list available commands").get());
+        options.addOption(Option.builder().longOpt(OPT_LOG).numberOfArgs(1).desc("log verbosity").get());
+        options.addOption(Option.builder().longOpt(OPT_FORCE).desc("force execution (even if already done)").get());
 
         return options;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Options options = getOptions();
         try {
             CommandLine commandLine = new DefaultParser().parse(options, args);
@@ -184,7 +184,7 @@ public class UpgradeTool {
                 }
             });
         } catch (ParseException e) {
-            HelpFormatter formatter = new HelpFormatter();
+            HelpFormatter formatter = HelpFormatter.builder().get();
             formatter.printHelp("upgradetool", "", options, "", true);
         }
 

@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
  * configuration that has no strategy defined.
  * See <a href="https://github.com/openhab/openhab-core/pull/4682">openhab/openhab-core#4682</a>.
  *
+ * @Since 5.1.0
+ *
  * @author Mark Herwege - Initial Contribution
  */
 @NonNullByDefault
@@ -123,26 +125,30 @@ public class PersistenceUpgrader implements Upgrader {
 
         // Update existing managed configurations
         persistenceStorageKeys.forEach(serviceId -> {
-            PersistenceServiceConfigurationDTO serviceConfigDTO = Objects
-                    .requireNonNull(persistenceStorage.get(serviceId));
-            Collection<String> defaults = serviceConfigDTO.defaults;
-            if (defaults != null) {
-                Collection<PersistenceItemConfigurationDTO> configs = serviceConfigDTO.configs;
-                configs.forEach(config -> {
-                    Collection<String> strategies = config.strategies;
-                    if (strategies.isEmpty()) {
-                        config.strategies = defaults;
-                    }
-                });
-                serviceConfigDTO.defaults = null;
-
-                persistenceStorage.put(serviceId, serviceConfigDTO);
-                logger.info("{}: updated strategy configurations and removed default strategies", serviceId);
-            }
+            updateConfig(persistenceStorage, serviceId);
         });
 
         persistenceStorage.flush();
         return true;
+    }
+
+    @SuppressWarnings("deprecation")
+    private void updateConfig(JsonStorage<PersistenceServiceConfigurationDTO> persistenceStorage, String serviceId) {
+        PersistenceServiceConfigurationDTO serviceConfigDTO = Objects.requireNonNull(persistenceStorage.get(serviceId));
+        Collection<String> defaults = serviceConfigDTO.defaults;
+        if (defaults != null) {
+            Collection<PersistenceItemConfigurationDTO> configs = serviceConfigDTO.configs;
+            configs.forEach(config -> {
+                Collection<String> strategies = config.strategies;
+                if (strategies.isEmpty()) {
+                    config.strategies = defaults;
+                }
+            });
+            serviceConfigDTO.defaults = null;
+
+            persistenceStorage.put(serviceId, serviceConfigDTO);
+            logger.info("{}: updated strategy configurations and removed default strategies", serviceId);
+        }
     }
 
     private List<String> installedPersistenceAddons(Path userdataPath) throws IOException {
