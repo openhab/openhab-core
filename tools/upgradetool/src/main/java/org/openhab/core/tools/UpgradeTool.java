@@ -12,11 +12,17 @@
  */
 package org.openhab.core.tools;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -44,6 +50,8 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  * @author Jimmy Tanagra - Refactor upgraders into individual classes
  * @author Mark Herwege - Added persistence strategy upgrader
+ * @author Mark Herwege - Added semantic tag upgrader
+ * @author Mark Herwege - Track OH versions and let upgraders set a target version
  */
 @NonNullByDefault
 public class UpgradeTool {
@@ -52,11 +60,14 @@ public class UpgradeTool {
     private static final String OPT_LIST_COMMANDS = "list-commands";
     private static final String OPT_USERDATA_DIR = "userdata";
     private static final String OPT_CONF_DIR = "conf";
+    private static final String OPT_OH_VERSION = "version";
     private static final String OPT_LOG = "log";
     private static final String OPT_FORCE = "force";
 
     private static final String ENV_USERDATA = "OPENHAB_USERDATA";
     private static final String ENV_CONF = "OPENHAB_CONF";
+
+    private static final Pattern CORE_VERSION_PATTERN = Pattern.compile("^openhab-core\\s*:\\s*(\\S+)\\s*$");
 
     private static final List<Upgrader> UPGRADERS = List.of( //
             new ItemUnitToMetadataUpgrader(), //
@@ -72,6 +83,8 @@ public class UpgradeTool {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeTool.class);
     private static @Nullable JsonStorage<UpgradeRecord> upgradeRecords = null;
 
+    private static @Nullable String ohVersion = null;
+
     private static Options getOptions() {
         Options options = new Options();
 
@@ -80,6 +93,9 @@ public class UpgradeTool {
                 .numberOfArgs(1).build());
         options.addOption(Option.builder().longOpt(OPT_CONF_DIR).desc(
                 "CONF directory to process. Enclose it in double quotes to ensure that any backslashes are not ignored by your command shell.")
+                .numberOfArgs(1).build());
+        options.addOption(Option.builder().longOpt(OPT_OH_VERSION).desc(
+                "openHAB target version. Upgraders will be executed again if they have been executed in an upgrade to an earlier openHAB version and there are new changes.")
                 .numberOfArgs(1).build());
         options.addOption(Option.builder().longOpt(OPT_COMMAND).numberOfArgs(1)
                 .desc("command to execute (executes all if omitted)").build());
@@ -131,15 +147,32 @@ public class UpgradeTool {
                 LOGGER.warn("Upgrade records storage is not initialized.");
             }
 
+            ohVersion = commandLine.hasOption(OPT_OH_VERSION) ? commandLine.getOptionValue(OPT_OH_VERSION)
+                    : getTargetVersion(userdataPath);
+
             UPGRADERS.forEach(upgrader -> {
                 String upgraderName = upgrader.getName();
                 if (command != null && !upgraderName.equals(command)) {
                     return;
                 }
-                if (!force && lastExecuted(upgraderName) instanceof String executionDate) {
-                    LOGGER.info("Already executed '{}' on {}. Use '--force' to execute it again.", upgraderName,
-                            executionDate);
-                    return;
+                if (!force) {
+                    if (upgrader.getTargetVersion() instanceof String targetVersion) {
+                        if (lastExecutedVersion(upgraderName) instanceof String executionVersion) {
+                            if (!isBeforeVersion(executionVersion, targetVersion)) {
+                                LOGGER.info("Already executed '{}' to version {}. Use '--force' to execute it again.",
+                                        upgraderName, executionVersion);
+                                return;
+                            }
+                        } else if (lastExecuted(upgraderName) instanceof String executionDate) {
+                            LOGGER.info("Already executed '{}' on {}. Use '--force' to execute it again.", upgraderName,
+                                    executionDate);
+                            return;
+                        }
+                    } else if (lastExecuted(upgraderName) instanceof String executionDate) {
+                        LOGGER.info("Already executed '{}' on {}. Use '--force' to execute it again.", upgraderName,
+                                executionDate);
+                        return;
+                    }
                 }
                 try {
                     LOGGER.info("Executing {}: {}", upgraderName, upgrader.getDescription());
@@ -192,6 +225,36 @@ public class UpgradeTool {
         }
     }
 
+    private static @Nullable String getTargetVersion(@Nullable Path userdataPath) {
+        if (userdataPath == null) {
+            return null;
+        }
+        String ohVersion = null;
+        Path versionFilePath = userdataPath.resolve(Path.of("etc", "version.properties"));
+        try (BufferedReader reader = Files.newBufferedReader(versionFilePath, StandardCharsets.UTF_8)) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Matcher matcher = CORE_VERSION_PATTERN.matcher(line.trim());
+                if (matcher.matches()) {
+                    ohVersion = matcher.group(1);
+                    break;
+                }
+            }
+        } catch (IOException | SecurityException e) {
+            LOGGER.warn(
+                    "Cannot retrieve OH core version from '{}' file. Some tasks may fail. You can provide the target version through the --version option.",
+                    versionFilePath);
+        }
+        return ohVersion;
+    }
+
+    private static boolean isBeforeVersion(String versionA, String versionB) {
+        String version1 = versionA.replaceFirst("[-M].*", "");
+        String version2 = versionB.replaceFirst("[-M].*", "");
+        return version1.compareTo(version2) < 0;
+    }
+
     private static @Nullable String lastExecuted(String upgrader) {
         JsonStorage<UpgradeRecord> records = upgradeRecords;
         if (records != null) {
@@ -203,10 +266,21 @@ public class UpgradeTool {
         return null;
     }
 
+    private static @Nullable String lastExecutedVersion(String upgrader) {
+        JsonStorage<UpgradeRecord> records = upgradeRecords;
+        if (records != null) {
+            UpgradeRecord upgradeRecord = records.get(upgrader);
+            if (upgradeRecord != null) {
+                return upgradeRecord.executionVersion;
+            }
+        }
+        return null;
+    }
+
     private static void updateUpgradeRecord(String upgrader) {
         JsonStorage<UpgradeRecord> records = upgradeRecords;
         if (records != null) {
-            records.put(upgrader, new UpgradeRecord(ZonedDateTime.now()));
+            records.put(upgrader, new UpgradeRecord(ZonedDateTime.now(), ohVersion));
             records.flush();
         }
     }
@@ -221,9 +295,11 @@ public class UpgradeTool {
 
     private static class UpgradeRecord {
         public final String executionDate;
+        public final @Nullable String executionVersion;
 
-        public UpgradeRecord(ZonedDateTime executionDate) {
+        public UpgradeRecord(ZonedDateTime executionDate, @Nullable String executionVersion) {
             this.executionDate = executionDate.toString();
+            this.executionVersion = executionVersion;
         }
     }
 }
