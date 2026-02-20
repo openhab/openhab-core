@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The {@link JSProfileUpgrader} upgrades JS Profile configurations
  *
+ * @Since 4.0.0
+ *
  * @author Jan N. Klug - Initial contribution
  * @author Jimmy Tanagra - Refactored into a separate class
  */
@@ -54,9 +56,9 @@ public class JSProfileUpgrader implements Upgrader {
             return false;
         }
 
-        userdataPath = userdataPath.resolve("jsondb");
+        Path dataPath = userdataPath.resolve("jsondb");
 
-        Path linkJsonDatabasePath = userdataPath.resolve("org.openhab.core.thing.link.ItemChannelLink.json");
+        Path linkJsonDatabasePath = dataPath.resolve("org.openhab.core.thing.link.ItemChannelLink.json");
         logger.info("Upgrading JS profile configuration in database '{}'", linkJsonDatabasePath);
 
         if (!Files.isWritable(linkJsonDatabasePath)) {
