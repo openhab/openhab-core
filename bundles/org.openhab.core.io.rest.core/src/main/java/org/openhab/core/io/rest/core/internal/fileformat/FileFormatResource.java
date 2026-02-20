@@ -535,7 +535,7 @@ public class FileFormatResource implements RESTResource {
                 }
                 things = thingParser.getParsedObjects(modelName);
                 if (things.isEmpty()) {
-                    thingParser.finishParsingFileFormat(modelName);
+                    thingParser.finishParsingFormat(modelName);
                     return Response.status(Response.Status.BAD_REQUEST).entity("No thing loaded from input").build();
                 }
                 break;
@@ -550,7 +550,7 @@ public class FileFormatResource implements RESTResource {
                 }
                 items = itemParser.getParsedObjects(modelName2);
                 if (items.isEmpty()) {
-                    itemParser.finishParsingFileFormat(modelName2);
+                    itemParser.finishParsingFormat(modelName2);
                     return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
                 }
                 metadata = itemParser.getParsedMetadata(modelName2);
@@ -592,10 +592,10 @@ public class FileFormatResource implements RESTResource {
         ExtendedFileFormatDTO result = convertToFileFormatDTO(things, items, metadata, stateFormatters, channelLinks,
                 warnings);
         if (modelName != null && thingParser != null) {
-            thingParser.finishParsingFileFormat(modelName);
+            thingParser.finishParsingFormat(modelName);
         }
         if (modelName2 != null && itemParser != null) {
-            itemParser.finishParsingFileFormat(modelName2);
+            itemParser.finishParsingFormat(modelName2);
         }
         return Response.ok(result).build();
     }

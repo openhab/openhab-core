@@ -17,8 +17,8 @@ import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A generic interface for serializers that serialize specific object types like Things, Items, Rules etc. into
- * strings.
+ * A generic interface for serializers that serialize specific object types like Things, Items, Rules etc. into a
+ * serialized representation that is written to an {@link OutputStream}.
  *
  * @param <T> The object type.
  *

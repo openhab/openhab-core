@@ -256,7 +256,7 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
     }
 
     @Override
-    public void finishParsingFileFormat(String modelName) {
+    public void finishParsingFormat(String modelName) {
         modelRepository.removeModel(modelName);
     }
 }

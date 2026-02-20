@@ -186,7 +186,7 @@ public class YamlThingFileConverter extends AbstractThingFileGenerator implement
     }
 
     @Override
-    public void finishParsingFileFormat(String modelName) {
+    public void finishParsingFormat(String modelName) {
         modelRepository.removeIsolatedModel(modelName);
     }
 }

@@ -40,7 +40,7 @@ public interface ObjectParser<T> {
      *
      * @param syntax the syntax in format.
      * @param errors the {@link List} to use to report errors.
-     * @param warnings the {@link List} to be use to report warnings.
+     * @param warnings the {@link List} to be used to report warnings.
      * @return The model name used for parsing if the parsing succeeded without errors; {@code null} otherwise.
      */
     @Nullable
@@ -59,5 +59,5 @@ public interface ObjectParser<T> {
      *
      * @param modelName the model name whose resources to release.
      */
-    void finishParsingFileFormat(String modelName);
+    void finishParsingFormat(String modelName);
 }

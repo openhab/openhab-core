@@ -325,7 +325,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     }
 
     @Override
-    public void finishParsingFileFormat(String modelName) {
+    public void finishParsingFormat(String modelName) {
         modelRepository.removeModel(modelName);
     }
 }
