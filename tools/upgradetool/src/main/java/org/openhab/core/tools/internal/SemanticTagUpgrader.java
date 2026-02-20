@@ -53,6 +53,8 @@ import org.slf4j.LoggerFactory;
 public class SemanticTagUpgrader implements Upgrader {
     private final Logger logger = LoggerFactory.getLogger(SemanticTagUpgrader.class);
 
+    private static final String TARGET_VERSION = "5.0.0";
+
     // Tags known to have changed class in 5.0
     private static final Set<String> TAGS_CHANGED_CLASS = Set.of("LowBattery", "OpenLevel", "OpenState", "Tampered");
 
@@ -66,6 +68,11 @@ public class SemanticTagUpgrader implements Upgrader {
     @Override
     public String getDescription() {
         return "Correct custom semantic tags and item semantic tags for changes in provided default semantic tags";
+    }
+
+    @Override
+    public @Nullable String getTargetVersion() {
+        return TARGET_VERSION;
     }
 
     @Override
