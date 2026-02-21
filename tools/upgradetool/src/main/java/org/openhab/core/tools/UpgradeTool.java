@@ -34,7 +34,14 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.json.internal.JsonStorage;
-import org.openhab.core.tools.internal.*;
+import org.openhab.core.tools.internal.HomeAssistantAddonUpgrader;
+import org.openhab.core.tools.internal.HomieAddonUpgrader;
+import org.openhab.core.tools.internal.ItemUnitToMetadataUpgrader;
+import org.openhab.core.tools.internal.JSProfileUpgrader;
+import org.openhab.core.tools.internal.PersistenceUpgrader;
+import org.openhab.core.tools.internal.ScriptProfileUpgrader;
+import org.openhab.core.tools.internal.SemanticTagUpgrader;
+import org.openhab.core.tools.internal.YamlConfigurationV1TagsUpgrader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,16 +148,14 @@ public class UpgradeTool {
             Path confPath = getPath("conf", commandLine, OPT_CONF_DIR, ENV_CONF);
 
             if (userdataPath != null) {
-                Path upgradeJsonDatabasePath = userdataPath
-                        .resolve(Path.of("jsondb", "org.openhab.core.tools.UpgradeTool"));
-                upgradeRecords = new JsonStorage<>(upgradeJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
+                upgradeRecords = getUpgradeRecordsStorage(userdataPath);
             } else {
                 LOGGER.warn("Upgrade records storage is not initialized.");
             }
 
             if (userdataPath != null) {
                 Path ohVersionJsonDatabasePath = userdataPath
-                        .resolve(Path.of("jsondb", "org.openhab.core.tools.ohVersion"));
+                        .resolve(Path.of("jsondb", "org.openhab.core.tools.ohVersion.json"));
                 ohVersionRecords = new JsonStorage<>(ohVersionJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
             } else {
                 LOGGER.warn("OH version storage is not initialized.");
@@ -204,6 +209,32 @@ public class UpgradeTool {
         }
 
         System.exit(0);
+    }
+
+    private static JsonStorage<UpgradeRecord> getUpgradeRecordsStorage(Path userdataPath) {
+        // The old storage name did not have a json extension. If the new storage name does not exist yet, create it and
+        // move the data from old to new.
+        Path upgradeJsonDatabasePath = userdataPath
+                .resolve(Path.of("jsondb", "org.openhab.core.tools.UpgradeTool.json"));
+        JsonStorage<UpgradeRecord> upgradeRecordStorage = new JsonStorage<>(upgradeJsonDatabasePath.toFile(), null, 5,
+                0, 0, List.of());
+        if (!Files.exists(upgradeJsonDatabasePath)) {
+            Path oldUpgradeJsonDatabasePath = userdataPath
+                    .resolve(Path.of("jsondb", "org.openhab.core.tools.UpgradeTool"));
+            if (Files.isReadable(oldUpgradeJsonDatabasePath)) {
+                JsonStorage<UpgradeRecord> oldUpgradeRecordStorage = new JsonStorage<>(upgradeJsonDatabasePath.toFile(),
+                        null, 5, 0, 0, List.of());
+                oldUpgradeRecordStorage.stream()
+                        .forEach(entry -> upgradeRecordStorage.put(entry.getKey(), entry.getValue()));
+                upgradeRecordStorage.flush();
+                try {
+                    Files.delete(oldUpgradeJsonDatabasePath);
+                } catch (IOException e) {
+                    LOGGER.debug("Failed to delete upgrade tool storage with old name.");
+                }
+            }
+        }
+        return upgradeRecordStorage;
     }
 
     /**
@@ -375,7 +406,7 @@ public class UpgradeTool {
         }
 
         protected boolean isDefined() {
-            return distro != null;
+            return core != null;
         }
     };
 }
