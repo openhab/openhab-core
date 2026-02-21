@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -102,7 +103,7 @@ public class SemanticTagUpgrader implements Upgrader {
         }
 
         Map<String, SemanticTag> defaultTags = (new DefaultSemanticTagProvider()).getAll().stream()
-                .collect(Collectors.toMap(tag -> tag.getName(), tag -> tag));
+                .collect(Collectors.toMap(SemanticTag::getName, Function.identity()));
         Map<String, SemanticTag> customTags = Map.of();
 
         Set<String> changedTags = new HashSet<>(TAGS_CHANGED_CLASS);
@@ -167,7 +168,7 @@ public class SemanticTagUpgrader implements Upgrader {
             dbUpdated = true;
 
             customTags = semanticTagStorage.getValues().stream().map(tag -> SemanticTagDTOMapper.map(tag))
-                    .filter(Objects::nonNull).collect(Collectors.toMap(tag -> tag.getName(), tag -> tag));
+                    .filter(Objects::nonNull).collect(Collectors.toMap(SemanticTag::getName, Function.identity()));
         }
 
         Path itemJsonDatabasePath = userdataPath.resolve(Path.of("jsondb", "org.openhab.core.items.Item.json"));
