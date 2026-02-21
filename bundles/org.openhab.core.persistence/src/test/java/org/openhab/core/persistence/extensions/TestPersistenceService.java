@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -39,7 +38,6 @@ import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
-import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.extensions.PersistenceExtensions.RiemannType;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
@@ -218,11 +216,6 @@ public class TestPersistenceService implements QueryablePersistenceService {
             }
             return stream.toList();
         }
-    }
-
-    @Override
-    public Set<PersistenceItemInfo> getItemInfo() {
-        return Set.of();
     }
 
     @Override

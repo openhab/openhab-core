@@ -15,6 +15,7 @@ package org.openhab.core.persistence.internal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -56,7 +56,6 @@ import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistedItem;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
-import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
@@ -653,11 +652,6 @@ public class PersistenceManagerTest {
                             return "item";
                         }
                     }).iterator();
-        }
-
-        @Override
-        public Set<PersistenceItemInfo> getItemInfo() {
-            return Set.of();
         }
     }
 }
