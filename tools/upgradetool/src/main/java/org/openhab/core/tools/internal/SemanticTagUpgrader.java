@@ -235,7 +235,7 @@ public class SemanticTagUpgrader implements Upgrader {
                 }
             }
 
-            if (newTags.size() < tags.size()) {
+            if (!newTags.equals(tags)) {
                 item.tags = newTags;
                 itemStorage.put(itemKey, item);
             }

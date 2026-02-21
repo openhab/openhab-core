@@ -79,11 +79,11 @@ public class UpgradeTool {
             new ItemUnitToMetadataUpgrader(), // Since 4.0.0
             new JSProfileUpgrader(), // Since 4.0.0
             new ScriptProfileUpgrader(), // Since 4.2.0
-            new YamlConfigurationV1TagsUpgrader(), // Since in 5.0
-            new HomeAssistantAddonUpgrader(), // Since in 5.1
-            new HomieAddonUpgrader(), // Since in 5.1
-            new PersistenceUpgrader(), // Since in 5.1
-            new SemanticTagUpgrader() // Since in 5.2
+            new YamlConfigurationV1TagsUpgrader(), // Since 5.0
+            new HomeAssistantAddonUpgrader(), // Since 5.1
+            new HomieAddonUpgrader(), // Since 5.1
+            new PersistenceUpgrader(), // Since 5.1
+            new SemanticTagUpgrader() // Since 5.2
     );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeTool.class);
@@ -304,7 +304,7 @@ public class UpgradeTool {
         if (upgradeRecords != null) {
             UpgradeRecord upgradeRecord = upgradeRecords.get(upgrader);
             if (upgradeRecord != null) {
-                return upgradeRecord.executionDate;
+                return upgradeRecord.executionDate();
             }
         }
         return null;
@@ -314,13 +314,13 @@ public class UpgradeTool {
         if (upgradeRecords != null) {
             UpgradeRecord upgradeRecord = upgradeRecords.get(upgrader);
             if (upgradeRecord != null) {
-                return upgradeRecord.executionVersion;
+                return upgradeRecord.executionVersion();
             }
         }
         if (ohVersionRecords != null) {
             VersionRecord versionRecord = ohVersionRecords.get(UPGRADE_TOOL_VERSION_KEY);
             if (versionRecord != null) {
-                return versionRecord.distro();
+                return versionRecord.core();
             }
         }
         return null;
@@ -350,35 +350,31 @@ public class UpgradeTool {
         }
     }
 
-    private static class UpgradeRecord {
-        public final String executionDate;
-        public final @Nullable String executionVersion;
-
+    private record UpgradeRecord(String executionDate, @Nullable String executionVersion) {
         public UpgradeRecord(ZonedDateTime executionDate, @Nullable String executionVersion) {
-            this.executionDate = executionDate.toString();
-            this.executionVersion = executionVersion;
+            this(executionDate.toString(), executionVersion);
         }
     }
 
-    private static record VersionRecord(String executionDate, @Nullable String build, @Nullable String distro,
+    private record VersionRecord(String executionDate, @Nullable String build, @Nullable String distro,
             @Nullable String core, @Nullable String addons, @Nullable String karaf) {
 
         protected VersionRecord() {
             this(null);
         }
 
-        protected VersionRecord(@Nullable String distro) {
-            this(null, distro, null, null, null);
+        protected VersionRecord(@Nullable String core) {
+            this(null, null, core, null, null);
         }
 
         protected VersionRecord(@Nullable String build, @Nullable String distro, @Nullable String core,
                 @Nullable String addons, @Nullable String karaf) {
-            this(ZonedDateTime.now(), null, distro, null, null, null);
+            this(ZonedDateTime.now(), build, distro, core, addons, karaf);
         }
 
         protected VersionRecord(ZonedDateTime executionDate, @Nullable String build, @Nullable String distro,
                 @Nullable String core, @Nullable String addons, @Nullable String karaf) {
-            this(executionDate.toString(), null, distro, null, null, null);
+            this(executionDate.toString(), build, distro, core, addons, karaf);
         }
 
         protected boolean isDefined() {
