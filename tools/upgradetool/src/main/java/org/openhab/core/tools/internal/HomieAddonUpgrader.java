@@ -20,6 +20,8 @@ import org.openhab.core.tools.ExtractedAddonUpgrader;
  * installed, and if Home Assistant things exist, and if so installs the
  * Home Assistant addon.
  *
+ * @Since 5.1.0
+ *
  * @author Cody Cutrer - Initial contribution
  */
 @NonNullByDefault

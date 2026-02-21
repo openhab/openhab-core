@@ -27,13 +27,14 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonInclude.Value;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 
 /**
@@ -66,24 +67,22 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
 
     private final Logger logger = LoggerFactory.getLogger(YamlConfigurationV1TagsUpgrader.class);
 
-    private final YAMLFactory yamlFactory;
     private final ObjectMapper objectMapper;
 
     public YamlConfigurationV1TagsUpgrader() {
         // match the options used in {@link YamlModelRepositoryImpl}
-        yamlFactory = YAMLFactory.builder() //
+        objectMapper = YAMLMapper.builder() //
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER) // omit "---" at file start
                 .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
                 .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
                 .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
-                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build(); // do not parse ON/OFF/... as
-                                                                                         // booleans
-        objectMapper = new ObjectMapper(yamlFactory);
-        objectMapper.findAndRegisterModules();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
-        objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
+                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS) // do not parse ON/OFF/... as booleans
+                .findAndAddModules() //
+                .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE) //
+                .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY) //
+                .defaultPropertyInclusion(Value.construct(Include.NON_NULL, Include.ALWAYS)) //
+                .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN) //
+                .build();
     }
 
     @Override
@@ -104,15 +103,13 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
         }
 
         String confEnv = System.getenv("OPENHAB_CONF");
-        // If confPath is set to OPENHAB_CONF, look inside /tags/ subdirectory
-        // otherwise use the given confPath as is
-        if (confEnv != null && !confEnv.isBlank() && Path.of(confEnv).toAbsolutePath().equals(confPath)) {
-            confPath = confPath.resolve("tags");
-        }
+        // If confPath is set to OPENHAB_CONF, look inside /tags/ subdirectory otherwise use the given confPath as is.
+        // Make configPath "effectively final" inside the lambda below.
+        Path configPath = confEnv != null && !confEnv.isBlank() && Path.of(confEnv).toAbsolutePath().equals(confPath)
+                ? confPath.resolve("tags")
+                : confPath;
+        logger.info("Upgrading YAML tags configurations in '{}'", configPath);
 
-        logger.info("Upgrading YAML tags configurations in '{}'", confPath);
-
-        Path configPath = confPath; // make configPath "effectively final" inside the lambda below
         try {
             Files.walkFileTree(configPath, new SimpleFileVisitor<>() {
                 @Override
