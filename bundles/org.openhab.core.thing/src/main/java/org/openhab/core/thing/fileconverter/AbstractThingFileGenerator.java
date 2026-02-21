@@ -42,7 +42,7 @@ import org.osgi.service.component.annotations.Activate;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractThingFileGenerator implements ThingFileGenerator {
+public abstract class AbstractThingFileGenerator implements ThingSerializer {
 
     protected final ThingTypeRegistry thingTypeRegistry;
     protected final ChannelTypeRegistry channelTypeRegistry;

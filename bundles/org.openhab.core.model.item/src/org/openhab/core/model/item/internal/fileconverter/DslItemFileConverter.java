@@ -38,8 +38,8 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
-import org.openhab.core.items.fileconverter.ItemFileGenerator;
-import org.openhab.core.items.fileconverter.ItemFileParser;
+import org.openhab.core.items.fileconverter.ItemParser;
+import org.openhab.core.items.fileconverter.ItemSerializer;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.item.internal.GenericItemProvider;
 import org.openhab.core.model.item.internal.GenericMetadataProvider;
@@ -62,8 +62,8 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = { ItemFileGenerator.class, ItemFileParser.class })
-public class DslItemFileConverter extends AbstractItemFileGenerator implements ItemFileParser {
+@Component(immediate = true, service = { ItemSerializer.class, ItemParser.class })
+public class DslItemFileConverter extends AbstractItemFileGenerator implements ItemParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslItemFileConverter.class);
 
@@ -86,7 +86,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     }
 
     @Override
-    public String getFileFormatGenerator() {
+    public String getGeneratedFormat() {
         return "DSL";
     }
 
@@ -105,7 +105,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     }
 
     @Override
-    public void generateFileFormat(String id, OutputStream out) {
+    public void generateFormat(String id, OutputStream out) {
         ItemModel model = elementsToGenerate.remove(id);
         if (model != null) {
             modelRepository.generateFileFormat(out, "items", model);
@@ -299,18 +299,18 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     }
 
     @Override
-    public String getFileFormatParser() {
+    public String getParserFormat() {
         return "DSL";
     }
 
     @Override
-    public @Nullable String startParsingFileFormat(String syntax, List<String> errors, List<String> warnings) {
+    public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
         return modelRepository.createIsolatedModel("items", inputStream, errors, warnings);
     }
 
     @Override
-    public Collection<Item> getParsedItems(String modelName) {
+    public Collection<Item> getParsedObjects(String modelName) {
         return itemProvider.getAllFromModel(modelName);
     }
 
@@ -325,7 +325,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     }
 
     @Override
-    public void finishParsingFileFormat(String modelName) {
+    public void finishParsingFormat(String modelName) {
         modelRepository.removeModel(modelName);
     }
 }
