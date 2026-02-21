@@ -349,7 +349,7 @@ public class UpgradeTool {
 
     private static void updateUpgradeRecord(String upgrader) {
         JsonStorage<UpgradeRecord> records = upgradeRecords;
-        if (records != null && ohTargetVersion.isDefined()) {
+        if (records != null) {
             records.put(upgrader, new UpgradeRecord(ZonedDateTime.now(), ohTargetVersion.core()));
             records.flush();
         }
