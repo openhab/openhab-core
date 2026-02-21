@@ -44,7 +44,7 @@ public class DiscourseTopicResponseDTO {
     public Integer likeCount;
     public Integer views;
 
-    public String[] tags;
+    public TagDTO[] tags;
     @SerializedName("category_id")
     public Integer categoryId;
 
