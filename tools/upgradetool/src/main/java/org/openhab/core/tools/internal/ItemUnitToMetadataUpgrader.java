@@ -12,7 +12,9 @@
  */
 package org.openhab.core.tools.internal;
 
-import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.*;
+import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_CHANNEL_TYPE_UID_ATMOSPHERIC_HUMIDITY;
+import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_CHANNEL_TYPE_UID_BATTERY_LEVEL;
+import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE_ABS;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

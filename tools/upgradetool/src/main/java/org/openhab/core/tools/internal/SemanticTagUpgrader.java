@@ -248,7 +248,7 @@ public class SemanticTagUpgrader implements Upgrader {
 
     private String newTagName(String oldTagName, Set<String> allTagNames) {
         String tagName = oldTagName;
-        int i = 0;
+        int i = 1;
         while (allTagNames.contains(tagName)) {
             tagName = oldTagName + String.valueOf(i);
             i++;
