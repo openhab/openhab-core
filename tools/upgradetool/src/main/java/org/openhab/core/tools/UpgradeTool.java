@@ -67,7 +67,13 @@ public class UpgradeTool {
     private static final String ENV_USERDATA = "OPENHAB_USERDATA";
     private static final String ENV_CONF = "OPENHAB_CONF";
 
+    private static final String UPGRADE_TOOL_VERSION_KEY = "UpgradeTool";
+
+    private static final Pattern BUILD_VERSION_PATTERN = Pattern.compile("^build-no\\s*:\\s*(\\S.*\\S)\\s*$");
+    private static final Pattern DISTRO_VERSION_PATTERN = Pattern.compile("^openhab-distro\\s*:\\s*(\\S+)\\s*$");
     private static final Pattern CORE_VERSION_PATTERN = Pattern.compile("^openhab-core\\s*:\\s*(\\S+)\\s*$");
+    private static final Pattern ADDONS_VERSION_PATTERN = Pattern.compile("^openhab-addons\\s*:\\s*(\\S+)\\s*$");
+    private static final Pattern KARAF_VERSION_PATTERN = Pattern.compile("^karaf\\s*:\\s*(\\S+)\\s*$");
 
     private static final List<Upgrader> UPGRADERS = List.of( //
             new ItemUnitToMetadataUpgrader(), // Since 4.0.0
@@ -82,8 +88,9 @@ public class UpgradeTool {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeTool.class);
     private static @Nullable JsonStorage<UpgradeRecord> upgradeRecords = null;
+    private static @Nullable JsonStorage<VersionRecord> ohVersionRecords = null;
 
-    private static @Nullable String ohVersion = null;
+    private static VersionRecord ohTargetVersion = new VersionRecord();
 
     private static Options getOptions() {
         Options options = new Options();
@@ -147,7 +154,15 @@ public class UpgradeTool {
                 LOGGER.warn("Upgrade records storage is not initialized.");
             }
 
-            ohVersion = commandLine.hasOption(OPT_OH_VERSION) ? commandLine.getOptionValue(OPT_OH_VERSION)
+            if (userdataPath != null) {
+                Path ohVersionJsonDatabasePath = userdataPath
+                        .resolve(Path.of("jsondb", "org.openhab.core.tools.ohVersion"));
+                ohVersionRecords = new JsonStorage<>(ohVersionJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
+            } else {
+                LOGGER.warn("OH version storage is not initialized.");
+            }
+            ohTargetVersion = commandLine.hasOption(OPT_OH_VERSION)
+                    ? new VersionRecord(commandLine.getOptionValue(OPT_OH_VERSION))
                     : getTargetVersion(userdataPath);
 
             UPGRADERS.forEach(upgrader -> {
@@ -183,6 +198,12 @@ public class UpgradeTool {
                     LOGGER.error("Error executing upgrader {}: {}", upgraderName, e.getMessage());
                 }
             });
+
+            // Only save version record if all upgraders have been executed
+            if (command == null) {
+                updateVersionRecord();
+            }
+
         } catch (ParseException e) {
             HelpFormatter formatter = HelpFormatter.builder().get();
             formatter.printHelp("upgradetool", "", options, "", true);
@@ -225,28 +246,52 @@ public class UpgradeTool {
         }
     }
 
-    private static @Nullable String getTargetVersion(@Nullable Path userdataPath) {
-        if (userdataPath == null) {
-            return null;
-        }
-        String ohVersion = null;
-        Path versionFilePath = userdataPath.resolve(Path.of("etc", "version.properties"));
-        try (BufferedReader reader = Files.newBufferedReader(versionFilePath, StandardCharsets.UTF_8)) {
+    private static VersionRecord getTargetVersion(@Nullable Path userdataPath) {
+        if (userdataPath != null) {
+            Path versionFilePath = userdataPath.resolve(Path.of("etc", "version.properties"));
+            try (BufferedReader reader = Files.newBufferedReader(versionFilePath, StandardCharsets.UTF_8)) {
+                String build = null;
+                String distro = null;
+                String core = null;
+                String addons = null;
+                String karaf = null;
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                Matcher matcher = CORE_VERSION_PATTERN.matcher(line.trim());
-                if (matcher.matches()) {
-                    ohVersion = matcher.group(1);
-                    break;
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    Matcher matcher = BUILD_VERSION_PATTERN.matcher(line.trim());
+                    if (matcher.matches()) {
+                        build = matcher.group(1);
+                        continue;
+                    }
+                    matcher = DISTRO_VERSION_PATTERN.matcher(line.trim());
+                    if (matcher.matches()) {
+                        distro = matcher.group(1);
+                        continue;
+                    }
+                    matcher = CORE_VERSION_PATTERN.matcher(line.trim());
+                    if (matcher.matches()) {
+                        core = matcher.group(1);
+                        continue;
+                    }
+                    matcher = ADDONS_VERSION_PATTERN.matcher(line.trim());
+                    if (matcher.matches()) {
+                        addons = matcher.group(1);
+                        continue;
+                    }
+                    matcher = KARAF_VERSION_PATTERN.matcher(line.trim());
+                    if (matcher.matches()) {
+                        karaf = matcher.group(1);
+                        continue;
+                    }
                 }
+                return new VersionRecord(build, distro, core, addons, karaf);
+            } catch (IOException | SecurityException e) {
+                LOGGER.warn(
+                        "Cannot retrieve OH core version from '{}' file. Some tasks may fail. You can provide the target version through the --version option.",
+                        versionFilePath);
             }
-        } catch (IOException | SecurityException e) {
-            LOGGER.warn(
-                    "Cannot retrieve OH core version from '{}' file. Some tasks may fail. You can provide the target version through the --version option.",
-                    versionFilePath);
         }
-        return ohVersion;
+        return new VersionRecord();
     }
 
     private static boolean isBeforeVersion(String versionA, String versionB) {
@@ -256,9 +301,8 @@ public class UpgradeTool {
     }
 
     private static @Nullable String lastExecuted(String upgrader) {
-        JsonStorage<UpgradeRecord> records = upgradeRecords;
-        if (records != null) {
-            UpgradeRecord upgradeRecord = records.get(upgrader);
+        if (upgradeRecords != null) {
+            UpgradeRecord upgradeRecord = upgradeRecords.get(upgrader);
             if (upgradeRecord != null) {
                 return upgradeRecord.executionDate;
             }
@@ -267,11 +311,16 @@ public class UpgradeTool {
     }
 
     private static @Nullable String lastExecutedVersion(String upgrader) {
-        JsonStorage<UpgradeRecord> records = upgradeRecords;
-        if (records != null) {
-            UpgradeRecord upgradeRecord = records.get(upgrader);
+        if (upgradeRecords != null) {
+            UpgradeRecord upgradeRecord = upgradeRecords.get(upgrader);
             if (upgradeRecord != null) {
                 return upgradeRecord.executionVersion;
+            }
+        }
+        if (ohVersionRecords != null) {
+            VersionRecord versionRecord = ohVersionRecords.get(UPGRADE_TOOL_VERSION_KEY);
+            if (versionRecord != null) {
+                return versionRecord.distro();
             }
         }
         return null;
@@ -279,8 +328,16 @@ public class UpgradeTool {
 
     private static void updateUpgradeRecord(String upgrader) {
         JsonStorage<UpgradeRecord> records = upgradeRecords;
-        if (records != null) {
-            records.put(upgrader, new UpgradeRecord(ZonedDateTime.now(), ohVersion));
+        if (records != null && ohTargetVersion.isDefined()) {
+            records.put(upgrader, new UpgradeRecord(ZonedDateTime.now(), ohTargetVersion.distro));
+            records.flush();
+        }
+    }
+
+    private static void updateVersionRecord() {
+        JsonStorage<VersionRecord> records = ohVersionRecords;
+        if (records != null && ohTargetVersion.isDefined()) {
+            records.put(UPGRADE_TOOL_VERSION_KEY, ohTargetVersion);
             records.flush();
         }
     }
@@ -302,4 +359,30 @@ public class UpgradeTool {
             this.executionVersion = executionVersion;
         }
     }
+
+    private static record VersionRecord(String executionDate, @Nullable String build, @Nullable String distro,
+            @Nullable String core, @Nullable String addons, @Nullable String karaf) {
+
+        protected VersionRecord() {
+            this(null);
+        }
+
+        protected VersionRecord(@Nullable String distro) {
+            this(null, distro, null, null, null);
+        }
+
+        protected VersionRecord(@Nullable String build, @Nullable String distro, @Nullable String core,
+                @Nullable String addons, @Nullable String karaf) {
+            this(ZonedDateTime.now(), null, distro, null, null, null);
+        }
+
+        protected VersionRecord(ZonedDateTime executionDate, @Nullable String build, @Nullable String distro,
+                @Nullable String core, @Nullable String addons, @Nullable String karaf) {
+            this(executionDate.toString(), null, distro, null, null, null);
+        }
+
+        protected boolean isDefined() {
+            return distro != null;
+        }
+    };
 }
