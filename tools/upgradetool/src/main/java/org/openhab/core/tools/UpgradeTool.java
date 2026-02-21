@@ -30,17 +30,11 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.help.HelpFormatter;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.json.internal.JsonStorage;
-import org.openhab.core.tools.internal.HomeAssistantAddonUpgrader;
-import org.openhab.core.tools.internal.HomieAddonUpgrader;
-import org.openhab.core.tools.internal.ItemUnitToMetadataUpgrader;
-import org.openhab.core.tools.internal.JSProfileUpgrader;
-import org.openhab.core.tools.internal.PersistenceUpgrader;
-import org.openhab.core.tools.internal.ScriptProfileUpgrader;
-import org.openhab.core.tools.internal.SemanticTagUpgrader;
-import org.openhab.core.tools.internal.YamlConfigurationV1TagsUpgrader;
+import org.openhab.core.tools.internal.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,7 +167,7 @@ public class UpgradeTool {
                 if (!force) {
                     if (upgrader.getTargetVersion() instanceof String targetVersion) {
                         if (lastExecutedVersion(upgraderName) instanceof String executionVersion) {
-                            if (!isBeforeVersion(executionVersion, targetVersion)) {
+                            if (compareVersions(executionVersion, targetVersion) < 0) {
                                 LOGGER.info("Already executed '{}' to version {}. Use '--force' to execute it again.",
                                         upgraderName, executionVersion);
                                 return;
@@ -294,15 +288,16 @@ public class UpgradeTool {
         return new VersionRecord();
     }
 
-    private static boolean isBeforeVersion(String versionA, String versionB) {
-        String version1 = versionA.replaceFirst("[-M].*", "");
-        String version2 = versionB.replaceFirst("[-M].*", "");
-        return version1.compareTo(version2) < 0;
+    private static int compareVersions(String versionA, String versionB) {
+        ComparableVersion version1 = new ComparableVersion(versionA);
+        ComparableVersion version2 = new ComparableVersion(versionB);
+        return version1.compareTo(version2);
     }
 
     private static @Nullable String lastExecuted(String upgrader) {
-        if (upgradeRecords != null) {
-            UpgradeRecord upgradeRecord = upgradeRecords.get(upgrader);
+        JsonStorage<UpgradeRecord> upgrades = upgradeRecords;
+        if (upgrades != null) {
+            UpgradeRecord upgradeRecord = upgrades.get(upgrader);
             if (upgradeRecord != null) {
                 return upgradeRecord.executionDate();
             }
@@ -311,14 +306,16 @@ public class UpgradeTool {
     }
 
     private static @Nullable String lastExecutedVersion(String upgrader) {
-        if (upgradeRecords != null) {
-            UpgradeRecord upgradeRecord = upgradeRecords.get(upgrader);
+        JsonStorage<UpgradeRecord> upgrades = upgradeRecords;
+        if (upgrades != null) {
+            UpgradeRecord upgradeRecord = upgrades.get(upgrader);
             if (upgradeRecord != null) {
                 return upgradeRecord.executionVersion();
             }
         }
-        if (ohVersionRecords != null) {
-            VersionRecord versionRecord = ohVersionRecords.get(UPGRADE_TOOL_VERSION_KEY);
+        JsonStorage<VersionRecord> versions = ohVersionRecords;
+        if (versions != null) {
+            VersionRecord versionRecord = versions.get(UPGRADE_TOOL_VERSION_KEY);
             if (versionRecord != null) {
                 return versionRecord.core();
             }
@@ -329,7 +326,7 @@ public class UpgradeTool {
     private static void updateUpgradeRecord(String upgrader) {
         JsonStorage<UpgradeRecord> records = upgradeRecords;
         if (records != null && ohTargetVersion.isDefined()) {
-            records.put(upgrader, new UpgradeRecord(ZonedDateTime.now(), ohTargetVersion.distro));
+            records.put(upgrader, new UpgradeRecord(ZonedDateTime.now(), ohTargetVersion.core()));
             records.flush();
         }
     }
