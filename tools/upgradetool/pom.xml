@@ -20,6 +20,7 @@
   <properties>
     <jackson.annotations.version>2.21</jackson.annotations.version>
     <jackson.version>2.21.0</jackson.version>
+    <maven.version>3.9.12</maven.version>
   </properties>
 
   <dependencies>
@@ -96,6 +97,11 @@
       <artifactId>jackson-dataformat-yaml</artifactId>
       <version>${jackson.version}</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <version>${maven.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
