@@ -182,6 +182,7 @@
 			<xs:enumeration value="password"/>
 			<xs:enumeration value="password-create"/>
 			<xs:enumeration value="persistenceService"/>
+			<xs:enumeration value="qrcode"/>
 			<xs:enumeration value="rule"/>
 			<xs:enumeration value="script"/>
 			<xs:enumeration value="serial-port"/>
