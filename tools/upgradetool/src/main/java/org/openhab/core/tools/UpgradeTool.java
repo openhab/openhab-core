@@ -222,8 +222,8 @@ public class UpgradeTool {
             Path oldUpgradeJsonDatabasePath = userdataPath
                     .resolve(Path.of("jsondb", "org.openhab.core.tools.UpgradeTool"));
             if (Files.isReadable(oldUpgradeJsonDatabasePath)) {
-                JsonStorage<UpgradeRecord> oldUpgradeRecordStorage = new JsonStorage<>(upgradeJsonDatabasePath.toFile(),
-                        null, 5, 0, 0, List.of());
+                JsonStorage<UpgradeRecord> oldUpgradeRecordStorage = new JsonStorage<>(
+                        oldUpgradeJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
                 oldUpgradeRecordStorage.stream()
                         .forEach(entry -> upgradeRecordStorage.put(entry.getKey(), entry.getValue()));
                 upgradeRecordStorage.flush();
