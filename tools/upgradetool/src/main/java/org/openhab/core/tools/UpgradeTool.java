@@ -172,7 +172,7 @@ public class UpgradeTool {
                 if (!force) {
                     if (upgrader.getTargetVersion() instanceof String targetVersion) {
                         if (lastExecutedVersion(upgraderName) instanceof String executionVersion) {
-                            if (compareVersions(executionVersion, targetVersion) < 0) {
+                            if (compareVersions(executionVersion, targetVersion) >= 0) {
                                 LOGGER.info("Already executed '{}' to version {}. Use '--force' to execute it again.",
                                         upgraderName, executionVersion);
                                 return;
