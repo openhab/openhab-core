@@ -82,7 +82,9 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
                 .findAndAddModules() //
                 .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE) //
                 .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY) //
-                .defaultPropertyInclusion(Value.construct(Include.NON_NULL, Include.ALWAYS)) //
+                // Correct compatible behavior with {@link YamlModelRepositoryImpl} for jackson > 2.8, don't use
+                // Include.ALWAYS as second argument (which would have been the behavior earlier)
+                .defaultPropertyInclusion(Value.construct(Include.NON_NULL, Include.NON_NULL)) //
                 .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN) //
                 .build();
     }
