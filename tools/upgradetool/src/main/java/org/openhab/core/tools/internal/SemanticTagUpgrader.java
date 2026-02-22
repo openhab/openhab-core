@@ -94,7 +94,7 @@ public class SemanticTagUpgrader implements Upgrader {
         if (!Files.exists(semanticsJsonDatabasePath)) {
             canUpdateDb = false;
             dbUpdated = true;
-            logger.info("Semantics tags database '{}' does not exist, no tags to update.", semanticsJsonDatabasePath);
+            logger.info("Semantic tags database '{}' does not exist, no tags to update.", semanticsJsonDatabasePath);
         } else if (!Files.isReadable(semanticsJsonDatabasePath)) {
             canUpdateDb = false;
             logger.warn(
@@ -258,7 +258,7 @@ public class SemanticTagUpgrader implements Upgrader {
 
     private String tagClass(String tagUID) {
         int idx = tagUID.indexOf("_");
-        return (idx >= 0 ? tagUID.substring(0, idx) : "").trim();
+        return (idx >= 0 ? tagUID.substring(0, idx) : tagUID).trim();
     }
 
     private @Nullable String tagClass(@Nullable SemanticTag tag) {
