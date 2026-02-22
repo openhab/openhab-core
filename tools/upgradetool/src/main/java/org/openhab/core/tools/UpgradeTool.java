@@ -336,12 +336,14 @@ public class UpgradeTool {
             if (upgradeRecord != null) {
                 return upgradeRecord.executionVersion();
             }
-        }
-        JsonStorage<VersionRecord> versions = ohVersionRecords;
-        if (versions != null) {
-            VersionRecord versionRecord = versions.get(UPGRADE_TOOL_VERSION_KEY);
-            if (versionRecord != null) {
-                return versionRecord.core();
+            // Legacy records may lack an executionVersion; in that case, fall back to the
+            // global core version recorded by the upgrade tool (old format).
+            JsonStorage<VersionRecord> versions = ohVersionRecords;
+            if (versions != null) {
+                VersionRecord versionRecord = versions.get(UPGRADE_TOOL_VERSION_KEY);
+                if (versionRecord != null) {
+                    return versionRecord.core();
+                }
             }
         }
         return null;

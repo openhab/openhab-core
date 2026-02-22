@@ -113,7 +113,7 @@ public class SemanticTagUpgrader implements Upgrader {
                     5, 0, 0, List.of());
 
             // Remove duplicate tags from custom tag store
-            for (String tagKey : semanticTagStorage.getKeys()) {
+            for (String tagKey : List.copyOf(semanticTagStorage.getKeys())) {
                 SemanticTag tag = SemanticTagDTOMapper.map(semanticTagStorage.get(tagKey));
                 if (tag == null) {
                     continue;
@@ -130,7 +130,7 @@ public class SemanticTagUpgrader implements Upgrader {
             semanticTagStorage.flush();
 
             // Rewrite parent relationships if position in hierarchy has changed
-            for (String tagKey : semanticTagStorage.getKeys()) {
+            for (String tagKey : List.copyOf(semanticTagStorage.getKeys())) {
                 SemanticTag tag = SemanticTagDTOMapper.map(semanticTagStorage.get(tagKey));
                 if (tag == null) {
                     continue;
