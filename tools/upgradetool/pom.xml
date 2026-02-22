@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.openhab.core.tools</groupId>
     <artifactId>org.openhab.core.reactor.tools</artifactId>
-    <version>5.1.3-SNAPSHOT</version>
+    <version>5.1.3</version>
   </parent>
 
   <artifactId>upgradetool</artifactId>

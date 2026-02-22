@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.openhab.core.itests</groupId>
     <artifactId>org.openhab.core.reactor.itests</artifactId>
-    <version>5.1.3-SNAPSHOT</version>
+    <version>5.1.3</version>
   </parent>
 
   <artifactId>org.openhab.core.model.rule.tests</artifactId>
