@@ -33,19 +33,19 @@
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
-      <version>4.2.37</version>
+      <version>4.2.38</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-core</artifactId>
-      <version>1.16.0</version>
+      <version>1.16.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-commons</artifactId>
-      <version>1.16.0</version>
+      <version>1.16.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
