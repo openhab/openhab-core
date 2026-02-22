@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * class not being shown in the UI.
  * This upgrader only considers managed tags and items.
  *
- * @Since 5.2.0
+ * @since 5.2.0
  *
  * @author Mark Herwege - Initial contribution
  */

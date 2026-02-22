@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The {@link JSProfileUpgrader} upgrades JS Profile configurations
  *
- * @Since 4.0.0
+ * @since 4.0.0
  *
  * @author Jan N. Klug - Initial contribution
  * @author Jimmy Tanagra - Refactored into a separate class

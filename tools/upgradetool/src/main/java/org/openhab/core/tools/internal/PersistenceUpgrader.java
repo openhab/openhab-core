@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * configuration that has no strategy defined.
  * See <a href="https://github.com/openhab/openhab-core/pull/4682">openhab/openhab-core#4682</a>.
  *
- * @Since 5.1.0
+ * @since 5.1.0
  *
  * @author Mark Herwege - Initial Contribution
  */

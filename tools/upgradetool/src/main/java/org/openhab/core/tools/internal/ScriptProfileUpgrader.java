@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * {@code commandFromItemScript} and {@code stateFromItemScript}.
  * See <a href="https://github.com/openhab/openhab-core/pull/4058">openhab/openhab-core#4058</a>.
  *
- * @Since 4.2.0
+ * @since 4.2.0
  *
  * @author Florian Hotze - Initial contribution
  * @author Jimmy Tanagra - Refactored into a separate class
