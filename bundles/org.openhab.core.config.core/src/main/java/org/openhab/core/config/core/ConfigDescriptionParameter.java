@@ -333,6 +333,7 @@ public class ConfigDescriptionParameter {
      * <li><b>password</b>: An alphanumeric password value (a UI might obscure the visible value)</li>
      * <li><b>password-create</b>: An alphanumeric password generator widget might be shown</li>
      * <li><b>persistenceService</b>: A valid persistence service ID. A UI would probably show a persistence service selection widget.</li>
+     * <li><b>props</b>: A set of name = value properties.</li>
      * <li><b>qrcode</b>: A text that is presented as a QR-Code image</li>
      * <li><b>rule</b>: A valid rule uid. A UI would probably show a rule selection widget.</li>
      * <li><b>script</b>: The configuration value represents a script (javascript, python etc). A UI would probably render a multi line editor.</li>
@@ -348,7 +349,7 @@ public class ConfigDescriptionParameter {
      * <!-- @formatter:on -->
      * </ul>
      *
-     * @return the context of the configuration parameter (could be empty)
+     * @return the context of the configuration parameter (could be null or empty)
      */
     public @Nullable String getContext() {
         return this.context;
