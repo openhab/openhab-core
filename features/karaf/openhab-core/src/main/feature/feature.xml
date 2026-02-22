@@ -296,6 +296,19 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.javacomm/${project.version}</bundle>
 	</feature>
 
+	<conditional>
+		<condition>req:osgi.native;filter:="(&amp;(osgi.native.osname=MacOSX)(osgi.native.processor=AArch64))"</condition>
+		<feature name="openhab-core-io-transport-serial-purejavacomm" version="${project.version}">
+			<feature>openhab-core-base</feature>
+
+			<requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=purejavacomm))"</requirement>
+			<feature dependency="true">openhab.tp-serial-purejavacomm</feature>
+
+			<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
+			<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.purejavacomm/${project.version}</bundle>
+		</feature>
+	</conditional>
+
 	<feature name="openhab-core-io-transport-upnp" version="${project.version}">
 		<feature>openhab-core-base</feature>
 
