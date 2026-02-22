@@ -187,8 +187,8 @@ public class SemanticTagUpgrader implements Upgrader {
 
         // Adjust item tags, make sure only 1 tag of every class exists, rename other tags
         Map<String, SemanticTag> allSemanticTags = Stream.of(defaultTags, customTags)
-                .flatMap(map -> map.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .flatMap(map -> map.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey,
+                        Map.Entry::getValue, (defaultTag, customTag) -> defaultTag));
         Set<String> itemTagNames = itemStorage.getValues().stream().filter(Objects::nonNull).map(item -> item.tags)
                 .filter(Objects::nonNull).flatMap(tags -> tags.stream()).collect(Collectors.toSet());
         Set<String> allTagNames = Stream.of(allSemanticTags.keySet(), itemTagNames).flatMap(tags -> tags.stream())
