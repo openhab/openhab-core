@@ -12,17 +12,15 @@
  */
 package org.openhab.core.tools;
 
-import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -62,12 +60,6 @@ public class UpgradeTool {
     private static final String ENV_CONF = "OPENHAB_CONF";
 
     private static final String UPGRADE_TOOL_VERSION_KEY = "UpgradeTool";
-
-    private static final Pattern BUILD_VERSION_PATTERN = Pattern.compile("^build-no\\s*:\\s*(\\S.*\\S)\\s*$");
-    private static final Pattern DISTRO_VERSION_PATTERN = Pattern.compile("^openhab-distro\\s*:\\s*(\\S+)\\s*$");
-    private static final Pattern CORE_VERSION_PATTERN = Pattern.compile("^openhab-core\\s*:\\s*(\\S+)\\s*$");
-    private static final Pattern ADDONS_VERSION_PATTERN = Pattern.compile("^openhab-addons\\s*:\\s*(\\S+)\\s*$");
-    private static final Pattern KARAF_VERSION_PATTERN = Pattern.compile("^karaf\\s*:\\s*(\\S+)\\s*$");
 
     private static final List<Upgrader> UPGRADERS = List.of( //
             new ItemUnitToMetadataUpgrader(), // Since 4.0.0
@@ -142,21 +134,15 @@ public class UpgradeTool {
 
             if (userdataPath != null) {
                 upgradeRecords = getUpgradeRecordsStorage(userdataPath);
-            } else {
-                LOGGER.warn("Upgrade records storage is not initialized.");
-            }
-
-            if (userdataPath != null) {
                 Path ohVersionJsonDatabasePath = userdataPath
                         .resolve(Path.of("jsondb", "org.openhab.core.tools.ohVersion.json"));
                 ohVersionRecords = new JsonStorage<>(ohVersionJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
+                ohTargetVersion = commandLine.hasOption(OPT_OH_VERSION)
+                        ? new VersionRecord(commandLine.getOptionValue(OPT_OH_VERSION))
+                        : getTargetVersion(userdataPath);
             } else {
-                LOGGER.warn("OH version storage is not initialized.");
+                LOGGER.warn("USERDATA not initialized. Unable to retrieve and save upgrade records.");
             }
-            ohTargetVersion = commandLine.hasOption(OPT_OH_VERSION)
-                    ? new VersionRecord(commandLine.getOptionValue(OPT_OH_VERSION))
-                    : getTargetVersion(userdataPath);
-
             UPGRADERS.forEach(upgrader -> {
                 String upgraderName = upgrader.getName();
                 if (command != null && !upgraderName.equals(command)) {
@@ -264,50 +250,21 @@ public class UpgradeTool {
         }
     }
 
-    private static VersionRecord getTargetVersion(@Nullable Path userdataPath) {
-        if (userdataPath != null) {
-            Path versionFilePath = userdataPath.resolve(Path.of("etc", "version.properties"));
-            try (BufferedReader reader = Files.newBufferedReader(versionFilePath, StandardCharsets.UTF_8)) {
-                String build = null;
-                String distro = null;
-                String core = null;
-                String addons = null;
-                String karaf = null;
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    Matcher matcher = BUILD_VERSION_PATTERN.matcher(line.trim());
-                    if (matcher.matches()) {
-                        build = matcher.group(1);
-                        continue;
-                    }
-                    matcher = DISTRO_VERSION_PATTERN.matcher(line.trim());
-                    if (matcher.matches()) {
-                        distro = matcher.group(1);
-                        continue;
-                    }
-                    matcher = CORE_VERSION_PATTERN.matcher(line.trim());
-                    if (matcher.matches()) {
-                        core = matcher.group(1);
-                        continue;
-                    }
-                    matcher = ADDONS_VERSION_PATTERN.matcher(line.trim());
-                    if (matcher.matches()) {
-                        addons = matcher.group(1);
-                        continue;
-                    }
-                    matcher = KARAF_VERSION_PATTERN.matcher(line.trim());
-                    if (matcher.matches()) {
-                        karaf = matcher.group(1);
-                        continue;
-                    }
-                }
-                return new VersionRecord(build, distro, core, addons, karaf);
-            } catch (IOException | SecurityException e) {
-                LOGGER.warn(
-                        "Cannot retrieve OH core version from '{}' file. Some tasks may fail. You can provide the target version through the --version option.",
-                        versionFilePath);
-            }
+    private static VersionRecord getTargetVersion(Path userdataPath) {
+        Path versionFilePath = userdataPath.resolve(Path.of("etc", "version.properties"));
+        Properties prop = new Properties();
+        try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
+            prop.load(fis);
+            String build = prop.getProperty("build-no");
+            String distro = prop.getProperty("openhab-distro");
+            String core = prop.getProperty("opehab-core");
+            String addons = prop.getProperty("openhab-addons");
+            String karaf = prop.getProperty("karaf");
+            return new VersionRecord(build, distro, core, addons, karaf);
+        } catch (IOException e) {
+            LOGGER.warn(
+                    "Cannot retrieve OH core version from '{}' file. Some tasks may fail. You can provide the target version through the --version option.",
+                    versionFilePath);
         }
         return new VersionRecord();
     }

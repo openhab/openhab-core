@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * The {@link SemanticTagUpgrader} removes custom semantic tags that are now part of standard semantic tags.
  * The custom tags will also be checked for their position in the hierarchy. If hierarchy in the default tags has
  * changed, and a custom tag depends on it, the custom tag parent will be adjusted.
- * Semantic tags applied to items will be cleaned. If there is more then one semantic tag by class, only one will be
+ * Semantic tags applied to items will be cleaned. If there is more than one semantic tag by class, only one will be
  * kept and the others will be renamed to be non-semantic. Preference is given to keep the tags that moved class. If
  * there is a Property tag, a Point tag will be added if missing.
  * With these adjustments, the model can be further corrected from the UI without issues of double tags of the same
