@@ -95,10 +95,10 @@ public class SemanticTagUpgrader implements Upgrader {
             canUpdateDb = false;
             dbUpdated = true;
             logger.info("Semantic tags database '{}' does not exist, no tags to update.", semanticsJsonDatabasePath);
-        } else if (!Files.isReadable(semanticsJsonDatabasePath)) {
+        } else if (!Files.isWritable(semanticsJsonDatabasePath)) {
             canUpdateDb = false;
             logger.warn(
-                    "Cannot access semantic tags database '{}', update may be incomplete, check path and access rights.",
+                    "Cannot update semantic tags database '{}', update may be incomplete, check path and access rights.",
                     semanticsJsonDatabasePath);
         }
 
@@ -177,7 +177,7 @@ public class SemanticTagUpgrader implements Upgrader {
         if (!Files.exists(itemJsonDatabasePath)) {
             logger.info("No item database '{}', no managed items to update.", itemJsonDatabasePath);
             return dbUpdated;
-        } else if (!Files.isReadable(itemJsonDatabasePath)) {
+        } else if (!Files.isWritable(itemJsonDatabasePath)) {
             logger.warn("Cannot access item database '{}', update may be incomplete, check path and access rights.",
                     itemJsonDatabasePath);
             return false;
