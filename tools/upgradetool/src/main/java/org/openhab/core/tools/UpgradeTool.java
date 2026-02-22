@@ -257,7 +257,7 @@ public class UpgradeTool {
             prop.load(fis);
             String build = prop.getProperty("build-no");
             String distro = prop.getProperty("openhab-distro");
-            String core = prop.getProperty("opehab-core");
+            String core = prop.getProperty("openhab-core");
             String addons = prop.getProperty("openhab-addons");
             String karaf = prop.getProperty("karaf");
             return new VersionRecord(build, distro, core, addons, karaf);
@@ -288,13 +288,13 @@ public class UpgradeTool {
 
     private static @Nullable String lastExecutedVersion(String upgrader) {
         JsonStorage<UpgradeRecord> upgrades = upgradeRecords;
-        if (upgrades != null) {
-            UpgradeRecord upgradeRecord = upgrades.get(upgrader);
-            if (upgradeRecord != null) {
-                return upgradeRecord.executionVersion();
+        if (upgrades != null && upgrades.get(upgrader) instanceof UpgradeRecord upgradeRecord) {
+            String executionVersion = upgradeRecord.executionVersion();
+            if (executionVersion != null && !executionVersion.isEmpty()) {
+                return executionVersion;
             }
             // Legacy records may lack an executionVersion; in that case, fall back to the
-            // global core version recorded by the upgrade tool (old format).
+            // global core version recorded by the upgrade tool.
             JsonStorage<VersionRecord> versions = ohVersionRecords;
             if (versions != null) {
                 VersionRecord versionRecord = versions.get(UPGRADE_TOOL_VERSION_KEY);
