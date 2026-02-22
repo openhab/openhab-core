@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.openhab.core.tools</groupId>
     <artifactId>org.openhab.core.reactor.tools</artifactId>
-    <version>4.3.10-SNAPSHOT</version>
+    <version>4.3.10</version>
   </parent>
 
   <artifactId>i18n-maven-plugin</artifactId>
