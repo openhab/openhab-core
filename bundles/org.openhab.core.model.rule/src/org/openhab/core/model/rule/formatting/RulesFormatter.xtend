@@ -15,10 +15,12 @@
  */
 package org.openhab.core.model.rule.formatting
 
+import com.google.inject.Inject
 import org.eclipse.xtext.formatting.impl.AbstractDeclarativeFormatter
+import org.eclipse.xtext.formatting.impl.AbstractFormattingConfig
 import org.eclipse.xtext.formatting.impl.FormattingConfig
-// import com.google.inject.Inject;
-// import org.openhab.core.model.rule.services.RulesGrammarAccess
+import org.eclipse.xtext.xtext.XtextFormatter
+import org.openhab.core.model.rule.services.RulesGrammarAccess
 
 /**
  * This class contains custom formatting description.
@@ -26,17 +28,71 @@ import org.eclipse.xtext.formatting.impl.FormattingConfig
  * see : http://www.eclipse.org/Xtext/documentation.html#formatting
  * on how and when to use it 
  * 
- * Also see {@link org.eclipse.xtext.xtext.XtextFormatter} as an example
+ * Also see {@link XtextFormatter} as an example
  */
 class RulesFormatter extends AbstractDeclarativeFormatter {
 
-//	@Inject extension RulesGrammarAccess
+	@Inject extension RulesGrammarAccess
 	
 	override protected void configureFormatting(FormattingConfig c) {
-// It's usually a good idea to activate the following three statements.
-// They will add and preserve newlines around comments
-//		c.setLinewrap(0, 1, 2).before(SL_COMMENTRule)
-//		c.setLinewrap(0, 1, 2).before(ML_COMMENTRule)
-//		c.setLinewrap(0, 1, 1).after(ML_COMMENTRule)
+	    
+        c.setLinewrap(1, 1, 2).before(ruleModelRule)
+        c.setLinewrap(1, 1, 2).after(ruleModelRule)
+        c.setLinewrap(1, 1, 2).after(XImportDeclarationRule)
+        c.setLinewrap(1, 1, 2).after(XFunctionTypeRefRule)
+        c.setLinewrap(1, 1, 2).after(XBlockExpressionRule)
+        c.setLinewrap(1, 2, 2).before(getRuleAccess.ruleKeyword_0)
+        c.setLinewrap(1, 1, 2).after(getRuleAccess.orKeyword_6_0)
+        c.setLinewrap(1, 1, 2).before(getRuleAccess.whenKeyword_4)
+        c.setLinewrap(1, 1, 2).after(getRuleAccess.whenKeyword_4)
+        c.setLinewrap(1, 1, 2).before(getRuleAccess.thenKeyword_8)
+        c.setLinewrap(1, 1, 2).after(getRuleAccess.thenKeyword_8)
+        c.setLinewrap(1, 1, 2).before(getRuleAccess.endKeyword_10)
+
+        c.setIndentationIncrement.after("{")
+        c.setIndentationDecrement.before("}")
+        c.setIndentationIncrement.after(getRuleAccess.whenKeyword_4)
+        c.setIndentationDecrement.before(getRuleAccess.thenKeyword_8)
+        c.setIndentationIncrement.after(getRuleAccess.thenKeyword_8)
+        c.setIndentationDecrement.before(getRuleAccess.endKeyword_10)
+
+        c.setLinewrap().before("}")
+
+        c.setNoSpace().withinKeywordPairs("(", ")")
+        c.setNoSpace().withinKeywordPairs("[", "]")
+        c.setNoSpace().around("=")
+        c.setNoSpace().around(".")
+        c.setNoSpace().before(",")
+
+        c.autoLinewrap = 120
+	    
+		c.setLinewrap(0, 1, 2).before(SL_COMMENTRule)
+		c.setLinewrap(0, 1, 2).before(ML_COMMENTRule)
+		c.setLinewrap(0, 1, 1).after(ML_COMMENTRule)
 	}
+	
+    def withinKeywordPairs(FormattingConfig.NoSpaceLocator locator, String leftKW, String rightKW) {
+        for (pair : findKeywordPairs(leftKW, rightKW)) {
+            locator.after(pair.first)
+            locator.before(pair.second)
+        }
+    }
+
+    def around(AbstractFormattingConfig.ElementLocator locator, String ... listKW) {
+        for (keyword : findKeywords(listKW)) {
+            locator.around(keyword)
+        }
+    }
+
+    def after(AbstractFormattingConfig.ElementLocator locator, String ... listKW) {
+        for (keyword : findKeywords(listKW)) {
+            locator.after(keyword)
+        }
+    }
+
+    def before(AbstractFormattingConfig.ElementLocator locator, String ... listKW) {
+        for (keyword : findKeywords(listKW)) {
+            locator.before(keyword)
+        }
+    }
 }
