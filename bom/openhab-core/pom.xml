@@ -264,6 +264,12 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.transport.serial.jserialcomm</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.io.transport.serial.rxtx</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>

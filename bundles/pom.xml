@@ -83,6 +83,7 @@
     <module>org.openhab.core.io.transport.mqtt</module>
     <module>org.openhab.core.io.transport.serial</module>
     <module>org.openhab.core.io.transport.serial.javacomm</module>
+    <module>org.openhab.core.io.transport.serial.jserialcomm</module>
     <module>org.openhab.core.io.transport.serial.rxtx</module>
     <module>org.openhab.core.io.transport.serial.rxtx.rfc2217</module>
     <module>org.openhab.core.io.transport.upnp</module>
