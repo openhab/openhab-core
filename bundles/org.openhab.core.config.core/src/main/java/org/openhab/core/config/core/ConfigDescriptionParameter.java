@@ -316,7 +316,7 @@ public class ConfigDescriptionParameter {
      * <ul>
      * <!-- @formatter:off -->
      * <li><b>channel</b>: A valid channel UID. A UI would probably show a channel selection widget.</li>
-     * <li><b>channeltype</b>: A valid channel type UID. A UI would probably show a channel type selection widget.</li>
+     * <li><b>channel-type</b>: A valid channel type UID. A UI would probably show a channel type selection widget.</li>
      * <li><b>color</b>: This value represents an RGB color value like #000000 - #ffffff or 12,12,12.</li>
      * <li><b>cronexpression</b>: A cron expression like "* * * * *". A user interface would probably show a cron expression generator.</li>
      * <li><b>date</b>: A date string in the format "YYYY-MM-DD"</li>
@@ -326,13 +326,14 @@ public class ConfigDescriptionParameter {
      * <li><b>group</b>: A valid group item "name". A UI would probably show an item selection widget.</li>
      * <li><b>item</b>: A valid item "name". A UI would probably show an item selection widget.</li>
      * <li><b>location</b>: A latitude,longitude[,altitude] GPS location. A UI would probably render a world map for selection.</li>
+     * <li><b>mac-address</b>: The configuration value represents a MAC address.</li>
      * <li><b>month</b>: A month of year [1-12]</li>
      * <li><b>network-address</b>: The configuration value represents an IPv4 or IPv6 address or domain name.</li>
      * <li><b>network-interface</b>: The configuration value represents a network interface name, e.g. eth0, wlan0.</li>
      * <li><b>page</b>: A valid page UID. A UI would probably show a page selection widget.</li>
      * <li><b>password</b>: An alphanumeric password value (a UI might obscure the visible value)</li>
      * <li><b>password-create</b>: An alphanumeric password generator widget might be shown</li>
-     * <li><b>persistenceService</b>: A valid persistence service ID. A UI would probably show a persistence service selection widget.</li>
+     * <li><b>persistence-service</b>: A valid persistence service ID. A UI would probably show a persistence service selection widget.</li>
      * <li><b>props</b>: A set of name = value properties.</li>
      * <li><b>qrcode</b>: A text that is presented as a QR-Code image</li>
      * <li><b>rule</b>: A valid rule uid. A UI would probably show a rule selection widget.</li>

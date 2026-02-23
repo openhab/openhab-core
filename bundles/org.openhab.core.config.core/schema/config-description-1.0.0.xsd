@@ -165,7 +165,7 @@
 	<xs:simpleType name="contextType">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="channel"/>
-			<xs:enumeration value="channeltype"/>
+			<xs:enumeration value="channel-type"/>
 			<xs:enumeration value="color"/>
 			<xs:enumeration value="cronexpression"/>
 			<xs:enumeration value="date"/>
@@ -175,13 +175,14 @@
 			<xs:enumeration value="group"/>
 			<xs:enumeration value="item"/>
 			<xs:enumeration value="location"/>
+			<xs:enumeration value="mac-address"/>
 			<xs:enumeration value="month"/>
 			<xs:enumeration value="network-address"/>
 			<xs:enumeration value="network-interface"/>
 			<xs:enumeration value="page"/>
 			<xs:enumeration value="password"/>
 			<xs:enumeration value="password-create"/>
-			<xs:enumeration value="persistenceService"/>
+			<xs:enumeration value="persistence-service"/>
 			<xs:enumeration value="props"/>
 			<xs:enumeration value="qrcode"/>
 			<xs:enumeration value="rule"/>
