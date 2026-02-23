@@ -337,7 +337,7 @@ public class ConfigDescriptionParameter {
      * <li><b>props</b>: A set of name = value properties.</li>
      * <li><b>qrcode</b>: A text that is presented as a QR-Code image</li>
      * <li><b>rule</b>: A valid rule uid. A UI would probably show a rule selection widget.</li>
-     * <li><b>script</b>: The configuration value represents a script (javascript, python etc). A UI would probably render a multi line editor.</li>
+     * <li><b>script</b>: The configuration value represents a script (JavaScript, Python etc). A UI would probably render a multi line editor.</li>
      * <li><b>serial-port</b>: The configuration value represents a serial port name, e.g. COM1, /dev/ttyS0.</li>
      * <li><b>service</b>: A valid service ID. A UI would probably show a service selection widget.</li>
      * <li><b>tag</b>: One tag or multiple tags separated by comma.</li>
