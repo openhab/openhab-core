@@ -429,6 +429,7 @@
 
 	<feature name="openhab-core-model-yaml" version="${project.version}">
 		<feature>openhab-core-base</feature>
+		<feature>openhab-core-model-script</feature>
 		<feature>openhab-core-ui</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.yaml/${project.version}</bundle>
 		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
