@@ -13,6 +13,7 @@
 package org.openhab.core.io.dto;
 
 import java.io.IOException;
+import java.io.Serial;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class SerializationException extends IOException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

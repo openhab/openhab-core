@@ -400,7 +400,7 @@ public class PersistenceResource implements RESTResource {
                             persistenceProblems.add(new PersistenceServiceProblem(
                                     PersistenceServiceProblem.PERSISTENCE_NO_STRATEGY, serviceId, items, editable));
                         } else if (strategies.size() == 1
-                                && PersistenceStrategy.Globals.RESTORE.equals(strategies.get(0))) {
+                                && PersistenceStrategy.Globals.RESTORE.equals(strategies.getFirst())) {
                             persistenceProblems.add(new PersistenceServiceProblem(
                                     PersistenceServiceProblem.PERSISTENCE_NO_STORE_STRATEGY, serviceId, items,
                                     editable));
