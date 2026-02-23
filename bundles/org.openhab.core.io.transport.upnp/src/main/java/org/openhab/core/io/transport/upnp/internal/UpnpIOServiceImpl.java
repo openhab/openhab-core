@@ -34,6 +34,9 @@ import org.jupnp.model.action.ActionInvocation;
 import org.jupnp.model.gena.CancelReason;
 import org.jupnp.model.gena.GENASubscription;
 import org.jupnp.model.message.UpnpResponse;
+import org.jupnp.model.message.discovery.OutgoingSearchRequest;
+import org.jupnp.model.message.header.UDNHeader;
+import org.jupnp.model.message.header.UpnpHeader;
 import org.jupnp.model.meta.Action;
 import org.jupnp.model.meta.Device;
 import org.jupnp.model.meta.DeviceIdentity;
@@ -46,6 +49,8 @@ import org.jupnp.model.types.UDAServiceId;
 import org.jupnp.model.types.UDN;
 import org.jupnp.registry.Registry;
 import org.jupnp.registry.RegistryListener;
+import org.jupnp.transport.Router;
+import org.jupnp.transport.RouterException;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
 import org.openhab.core.io.transport.upnp.UpnpIOService;
@@ -361,6 +366,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     public void registerParticipant(UpnpIOParticipant participant) {
         if (participant != null) {
             participants.add(participant);
+            sendDeviceSearchRequest(participant);
         }
     }
 
@@ -434,6 +440,10 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         public void run() {
             // It is assumed that during addStatusListener() a check is made whether the participant is correctly
             // registered
+
+            // before polling, send a search request to the device to keep it registered
+            sendDeviceSearchRequest(participant);
+
             try {
                 Device device = getDevice(participant);
                 if (device != null) {
@@ -468,6 +478,27 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
             } catch (Exception e) {
                 logger.error("An exception occurred while polling an UPNP device: '{}'", e.getMessage(), e);
             }
+        }
+    }
+
+    /**
+     * Send a device search request to the UPnP remote device.
+     * 
+     * Some devices, such as LinkPlay based systems (WiiM, Arylic, etc.) loose their registrations over time. Sending a
+     * periodic search request will help keep the device registered.
+     */
+    protected void sendDeviceSearchRequest(UpnpIOParticipant participant) {
+        try {
+            UpnpHeader<UDN> searchTarget = new UDNHeader(new UDN(participant.getUDN()));
+            OutgoingSearchRequest searchRequest = new OutgoingSearchRequest(searchTarget, 5);
+            Router router = upnpService.getRouter();
+            // this would only be null if running unit tests
+            if (router != null) {
+                router.send(searchRequest);
+                logger.debug("M-SEARCH query sent for device UDN: {}", searchTarget.getValue());
+            }
+        } catch (RouterException e) {
+            logger.debug("Failed to send M-SEARCH", e);
         }
     }
 
