@@ -619,8 +619,10 @@ public class PersistenceResource implements RESTResource {
         return dtoList;
     }
 
-    protected Set<PersistenceItemInfoDTO> getServiceItemList(QueryablePersistenceService service,
-            Map<String, String> aliases) {
+    protected Set<PersistenceItemInfoDTO> getServiceItemList(QueryablePersistenceService service) {
+        String serviceId = service.getId();
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(serviceId);
+        Map<String, String> aliases = config != null ? config.getAliases() : Map.of();
         return service.getItemInfo().stream().map(info -> {
             String alias = aliases.get(info.getName());
             if (alias != null) {
@@ -656,9 +658,7 @@ public class PersistenceResource implements RESTResource {
 
         QueryablePersistenceService qService = (QueryablePersistenceService) service;
 
-        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
-        Map<String, String> aliases = config != null ? config.getAliases() : Map.of();
-        Set<PersistenceItemInfoDTO> itemInfo = getServiceItemList(qService, aliases);
+        Set<PersistenceItemInfoDTO> itemInfo = getServiceItemList(qService);
         return JSONResponse.createResponse(Status.OK, itemInfo, "");
     }
 

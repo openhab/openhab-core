@@ -25,7 +25,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -213,7 +212,7 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceServiceItems() {
-        Set<PersistenceItemInfoDTO> info = pResource.getServiceItemList(pServiceMock, Map.of());
+        Set<PersistenceItemInfoDTO> info = pResource.getServiceItemList(pServiceMock);
 
         assertEquals(1, info.size());
         PersistenceItemInfoDTO dto = info.iterator().next();
@@ -221,16 +220,6 @@ public class PersistenceResourceTest {
         assertEquals(5, dto.count);
         assertNull(dto.earliest);
         assertNull(dto.latest);
-    }
-
-    @Test
-    public void testGetPersistenceServiceItemsWithAlias() {
-        final String alias = "TestAlias";
-        Set<PersistenceItemInfoDTO> info = pResource.getServiceItemList(pServiceMock, Map.of(ITEM_NAME, alias));
-
-        assertEquals(1, info.size());
-        PersistenceItemInfoDTO dto = info.iterator().next();
-        assertEquals(alias, dto.name);
     }
 
     @Test
