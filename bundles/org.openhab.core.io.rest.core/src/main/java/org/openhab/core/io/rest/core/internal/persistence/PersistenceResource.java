@@ -62,7 +62,6 @@ import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
-import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceProblem;
@@ -273,7 +272,7 @@ public class PersistenceResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getItemsForPersistenceService", summary = "Gets a list of items available via a specific persistence service.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfo.class), uniqueItems = true))) })
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceItemInfoDTO.class), uniqueItems = true))) })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId) {
         return getServiceItemList(serviceId);
