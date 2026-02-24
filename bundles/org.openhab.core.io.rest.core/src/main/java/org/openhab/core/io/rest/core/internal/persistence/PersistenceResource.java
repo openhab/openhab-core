@@ -17,7 +17,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -70,6 +69,7 @@ import org.openhab.core.persistence.PersistenceServiceProblem;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
+import org.openhab.core.persistence.dto.PersistenceItemInfoDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceDTO;
 import org.openhab.core.persistence.dto.PersistenceStrategyDTO;
@@ -620,6 +620,18 @@ public class PersistenceResource implements RESTResource {
         return dtoList;
     }
 
+    protected Set<PersistenceItemInfoDTO> getServiceItemList(QueryablePersistenceService service,
+            Map<String, String> aliases) {
+        return service.getItemInfo().stream().map(info -> {
+            String alias = aliases.get(info.getName());
+            if (alias != null) {
+                return new PersistenceItemInfoDTO(info, alias);
+            } else {
+                return new PersistenceItemInfoDTO(info);
+            }
+        }).collect(Collectors.toSet());
+    }
+
     private Response getServiceItemList(@Nullable String serviceId) {
         // If serviceId is null, then use the default service
         PersistenceService service;
@@ -647,35 +659,7 @@ public class PersistenceResource implements RESTResource {
 
         PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
         Map<String, String> aliases = config != null ? config.getAliases() : Map.of();
-        Set<PersistenceItemInfo> itemInfo = qService.getItemInfo().stream().map(info -> {
-            String alias = aliases.get(info.getName());
-            if (alias != null) {
-                return new PersistenceItemInfo() {
-
-                    @Override
-                    public String getName() {
-                        return alias;
-                    }
-
-                    @Override
-                    public @Nullable Integer getCount() {
-                        return info.getCount();
-                    }
-
-                    @Override
-                    public @Nullable Date getEarliest() {
-                        return info.getEarliest();
-                    }
-
-                    @Override
-                    public @Nullable Date getLatest() {
-                        return info.getLatest();
-                    }
-                };
-            } else {
-                return info;
-            }
-        }).collect(Collectors.toSet());
+        Set<PersistenceItemInfoDTO> itemInfo = getServiceItemList(qService, aliases);
         return JSONResponse.createResponse(Status.OK, itemInfo, "");
     }
 

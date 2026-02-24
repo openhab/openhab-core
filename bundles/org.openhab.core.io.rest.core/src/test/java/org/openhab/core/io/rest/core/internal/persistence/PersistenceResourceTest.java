@@ -23,11 +23,15 @@ import static org.mockito.Mockito.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.HttpHeaders;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,9 +50,11 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
+import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
+import org.openhab.core.persistence.dto.PersistenceItemInfoDTO;
 import org.openhab.core.persistence.internal.PersistenceManagerImpl;
 import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
@@ -67,6 +73,7 @@ import org.openhab.core.types.UnDefType;
 public class PersistenceResourceTest {
 
     private static final String PERSISTENCE_SERVICE_ID = "TestServiceID";
+    private static final String ITEM_NAME = "Test";
 
     private @NonNullByDefault({}) PersistenceResource pResource;
     private @NonNullByDefault({}) List<HistoricItem> items;
@@ -110,12 +117,33 @@ public class PersistenceResourceTest {
 
                 @Override
                 public String getName() {
-                    return "Test";
+                    return ITEM_NAME;
                 }
             });
         }
 
         when(pServiceMock.query(any(), any())).thenReturn(items);
+        when(pServiceMock.getItemInfo()).thenReturn(Set.of(new PersistenceItemInfo() {
+            @Override
+            public String getName() {
+                return ITEM_NAME;
+            }
+
+            @Override
+            public @Nullable Integer getCount() {
+                return 5;
+            }
+
+            @Override
+            public @Nullable Date getEarliest() {
+                return null;
+            }
+
+            @Override
+            public @Nullable Date getLatest() {
+                return null;
+            }
+        }));
 
         when(persistenceServiceRegistryMock.get(PERSISTENCE_SERVICE_ID)).thenReturn(pServiceMock);
         when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.systemDefault());
@@ -181,6 +209,28 @@ public class PersistenceResourceTest {
 
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
+    }
+
+    @Test
+    public void testGetPersistenceServiceItems() {
+        Set<PersistenceItemInfoDTO> info = pResource.getServiceItemList(pServiceMock, Map.of());
+
+        assertEquals(1, info.size());
+        PersistenceItemInfoDTO dto = info.iterator().next();
+        assertEquals(ITEM_NAME, dto.name);
+        assertEquals(5, dto.count);
+        assertNull(dto.earliest);
+        assertNull(dto.latest);
+    }
+
+    @Test
+    public void testGetPersistenceServiceItemsWithAlias() {
+        final String alias = "TestAlias";
+        Set<PersistenceItemInfoDTO> info = pResource.getServiceItemList(pServiceMock, Map.of(ITEM_NAME, alias));
+
+        assertEquals(1, info.size());
+        PersistenceItemInfoDTO dto = info.iterator().next();
+        assertEquals(alias, dto.name);
     }
 
     @Test
