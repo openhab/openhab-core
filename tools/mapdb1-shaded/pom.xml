@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- mapdb1-shaded/pom.xml -->
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.openhab.core.tools</groupId>
+    <artifactId>org.openhab.core.reactor.tools</artifactId>
+    <version>5.2.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.openhab.core</groupId>
+  <artifactId>mapdb1-shaded</artifactId>
+  <version>1.0.9</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.mapdb</groupId>
+      <artifactId>mapdb</artifactId>
+      <version>1.0.9</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <shadedArtifactAttached>false</shadedArtifactAttached>
+              <createDependencyReducedPom>true</createDependencyReducedPom>
+              <relocations>
+                <relocation>
+                  <pattern>org.mapdb</pattern>
+                  <shadedPattern>org.mapdb.v1</shadedPattern>
+                </relocation>
+                <!-- Relocate MapDB 1.x transitive deps to avoid conflicts -->
+                <relocation>
+                  <pattern>com.google.guava</pattern>
+                  <shadedPattern>org.mapdb.v1.guava</shadedPattern>
+                </relocation>
+              </relocations>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
