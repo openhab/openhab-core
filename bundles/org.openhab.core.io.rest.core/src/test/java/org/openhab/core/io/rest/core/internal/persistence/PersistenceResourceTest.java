@@ -52,7 +52,6 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemInfo;
-import org.openhab.core.persistence.PersistenceItemNotFoundException;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
@@ -137,6 +136,7 @@ public class PersistenceResourceTest {
     public void testGetPersistenceItemData() {
         ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, false, false);
 
+        assertNotNull(dto);
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
 
@@ -168,6 +168,7 @@ public class PersistenceResourceTest {
     public void testGetPersistenceItemDataWithBoundery() {
         ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, true, false);
 
+        assertNotNull(dto);
         assertThat(Integer.parseInt(dto.datapoints), is(7));
         assertThat(dto.data, hasSize(7));
     }
@@ -179,6 +180,7 @@ public class PersistenceResourceTest {
 
         ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, false, true);
 
+        assertNotNull(dto);
         assertThat(Integer.parseInt(dto.datapoints), is(6));
         assertThat(dto.data, hasSize(6));
         assertThat(dto.data.get(dto.data.size() - 1).state, is("0"));
@@ -191,6 +193,7 @@ public class PersistenceResourceTest {
 
         ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, false, true);
 
+        assertNotNull(dto);
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
     }
@@ -202,6 +205,7 @@ public class PersistenceResourceTest {
 
         ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, false, true);
 
+        assertNotNull(dto);
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
     }
@@ -214,6 +218,7 @@ public class PersistenceResourceTest {
 
         ItemHistoryDTO dto = pResource.createDTO(pServiceMock, "testItem", null, null, 1, 10, true, true);
 
+        assertNotNull(dto);
         assertThat(Integer.parseInt(dto.datapoints), is(7));
         assertThat(dto.data, hasSize(7));
         assertThat(dto.data.get(dto.data.size() - 1).state, not("0"));
@@ -232,14 +237,14 @@ public class PersistenceResourceTest {
     }
 
     @Test
-    public void testGetPersistenceItemInfoNotImplemented() throws ItemNotFoundException, UnsupportedOperationException {
+    public void testGetPersistenceItemInfoNotImplemented() throws UnsupportedOperationException {
         // Test method not supported
         when(pServiceMock.getItemInfo()).thenThrow(UnsupportedOperationException.class);
         assertThrows(UnsupportedOperationException.class, () -> pResource.createDTO(pServiceMock, null));
     }
 
     @Test
-    public void testGetPersistenceItemInfo() throws PersistenceItemNotFoundException, UnsupportedOperationException {
+    public void testGetPersistenceItemInfo() throws UnsupportedOperationException {
         when(pServiceMock.getItemInfo()).thenReturn(Set.of(new PersistenceItemInfo() {
 
             @Override
@@ -265,6 +270,7 @@ public class PersistenceResourceTest {
 
         // Testing with a specific implementation
         Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, null);
+        assertNotNull(dto);
         PersistenceItemInfoDTO itemInfo = dto.iterator().next();
         assertThat(itemInfo.name(), is(ITEM));
         assertThat(itemInfo.earliest(),
@@ -275,8 +281,7 @@ public class PersistenceResourceTest {
     }
 
     @Test
-    public void testGetPersistenceItemInfoWithItemDefault()
-            throws PersistenceItemNotFoundException, UnsupportedOperationException {
+    public void testGetPersistenceItemInfoWithItemDefault() throws UnsupportedOperationException {
         when(pServiceMock.getItemInfo(any(), any())).thenReturn(new PersistenceItemInfo() {
 
             @Override
@@ -302,6 +307,7 @@ public class PersistenceResourceTest {
 
         // This is testing the default behavior when no specific implementation exists in the service
         Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, ITEM);
+        assertNotNull(dto);
         assertThat(dto.size(), is(1));
         PersistenceItemInfoDTO itemInfo = dto.iterator().next();
         assertThat(itemInfo.name(), is(ITEM));
@@ -312,8 +318,7 @@ public class PersistenceResourceTest {
     }
 
     @Test
-    public void testGetPersistenceItemInfoWithItem()
-            throws PersistenceItemNotFoundException, UnsupportedOperationException {
+    public void testGetPersistenceItemInfoWithItem() throws UnsupportedOperationException {
         when(pServiceMock.getItemInfo(any(), any())).thenAnswer(invocation -> {
             String firstArg = invocation.getArgument(0);
             String secondArg = invocation.getArgument(1);
@@ -345,11 +350,13 @@ public class PersistenceResourceTest {
             };
         });
 
-        // Testing when ITEM does not exist and getItemInfo returns null
-        assertThrows(PersistenceItemNotFoundException.class, () -> pResource.createDTO(pServiceMock, "NotFoundTest"));
+        // Testing when ITEM does not exist
+        Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, "NotFoundTest");
+        assertNull(dto);
 
         // Test when specific implementation exists and no alias is used
-        Set<PersistenceItemInfoDTO> dto = pResource.createDTO(pServiceMock, ITEM);
+        dto = pResource.createDTO(pServiceMock, ITEM);
+        assertNotNull(dto);
         assertThat(dto.size(), is(1));
         PersistenceItemInfoDTO itemInfo = dto.iterator().next();
         assertThat(itemInfo.name(), is(ITEM));
@@ -363,6 +370,7 @@ public class PersistenceResourceTest {
         when(persistenceServiceConfigurationRegistryMock.get(any())).thenReturn(persistenceServiceConfigurationMock);
         when(persistenceServiceConfigurationMock.getAliases()).thenReturn(Map.of(ITEM, "TestAlias"));
         dto = pResource.createDTO(pServiceMock, ITEM);
+        assertNotNull(dto);
         assertThat(dto.size(), is(1));
         itemInfo = dto.iterator().next();
         assertThat(itemInfo.name(), is("TestAlias"));

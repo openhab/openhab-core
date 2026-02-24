@@ -64,7 +64,6 @@ import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceItemInfo;
-import org.openhab.core.persistence.PersistenceItemNotFoundException;
 import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceProblem;
@@ -646,31 +645,32 @@ public class PersistenceResource implements RESTResource {
         }
 
         QueryablePersistenceService qService = (QueryablePersistenceService) service;
-        Set<PersistenceItemInfoDTO> itemInfo = Set.of();
         try {
-            itemInfo = createDTO(qService, itemName);
-        } catch (PersistenceItemNotFoundException e) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, e.getMessage());
+            Set<PersistenceItemInfoDTO> itemInfo = createDTO(qService, itemName);
+            if (itemInfo == null) {
+                return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Item '" + itemName
+                        + "' could not be found in persistence service '" + effectiveServiceId + "'");
+            }
+
+            return JSONResponse.createResponse(Status.OK, itemInfo, "");
         } catch (UnsupportedOperationException e) {
             return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
                     "Not supported for persistence service: " + effectiveServiceId);
         }
-
-        return JSONResponse.createResponse(Status.OK, itemInfo, "");
     }
 
-    protected Set<PersistenceItemInfoDTO> createDTO(QueryablePersistenceService qService, @Nullable String itemName)
-            throws UnsupportedOperationException, PersistenceItemNotFoundException {
+    protected @Nullable Set<PersistenceItemInfoDTO> createDTO(QueryablePersistenceService qService,
+            @Nullable String itemName) throws UnsupportedOperationException {
         String serviceId = qService.getId();
         PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(serviceId);
         Map<String, String> itemToAlias = config != null ? config.getAliases() : Map.of();
 
-        Set<PersistenceItemInfo> itemInfo = Set.of();
+        Set<PersistenceItemInfo> itemInfo;
         if (itemName != null) {
             String alias = itemToAlias.get(itemName);
             PersistenceItemInfo singleItemInfo = qService.getItemInfo(itemName, alias);
             if (singleItemInfo == null) {
-                throw new PersistenceItemNotFoundException(serviceId, itemName, alias);
+                return null;
             }
             itemInfo = Set.of(singleItemInfo);
         } else {
