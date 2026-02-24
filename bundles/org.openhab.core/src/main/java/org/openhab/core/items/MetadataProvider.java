@@ -45,5 +45,4 @@ public interface MetadataProvider extends Provider<Metadata> {
     public default Collection<String> getReservedNamespaces() {
         return Set.of();
     }
-
 }
