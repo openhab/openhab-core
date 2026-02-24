@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayOutputStream;
@@ -347,7 +348,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         registerService(provider);
 
         Response response = itemResource.removeMetadata(ITEM_NAME1, "namespace");
-        assertEquals(409, response.getStatus());
+        assertEquals(405, response.getStatus());
     }
 
     @SuppressWarnings("unused")
