@@ -35,7 +35,8 @@ public interface MetadataProvider extends Provider<Metadata> {
      * provider, and is refused if the provider is not a {@link ManagedProvider}.
      *
      * This is useful if providers calculate metadata and this metadata is not meant to be persisted with a
-     * {@link ManagedProvider}. An example is semantics metadata provided by the {@link SemanticsMetadataProvider}.
+     * {@link ManagedProvider}. An example is semantics metadata provided by the
+     * {@link org.openhab.core.semantics.SemanticsMetadataProvider}.
      * Implementations are expected to return an immutable {@link Collection}.
      *
      * The default implementation returns an empty {@link Set}.
