@@ -96,7 +96,7 @@ public class MapDBUpgrader implements Upgrader {
                 newMap.putAll(oldMap);
                 newDb.commit();
 
-                logger.info("Migrated " + newMap.size() + " entries.");
+                logger.info("Migrated {} entries.", newMap.size());
             } finally {
                 oldDb.close();
                 newDb.close();
@@ -111,7 +111,7 @@ public class MapDBUpgrader implements Upgrader {
             logger.info("MapDB upgrade completed successfully, old file renamed to .bak.");
 
             return true;
-        } catch (Throwable e) {
+        } catch (Error | Exception e) {
             logger.error("Error during MapDB upgrade: ", e);
             return false;
         }
