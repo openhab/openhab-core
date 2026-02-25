@@ -43,10 +43,10 @@ public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionPara
             BigDecimal stepsize, String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context,
             String defaultValue, String label, String description, List<ParameterOptionDTO> options,
             List<FilterCriteriaDTO> filterCriteria, String groupName, Boolean advanced, Boolean limitToOptions,
-            Integer multipleLimit, String unit, String unitLabel, Boolean verify) {
+            Integer multipleLimit, String unit, String unitLabel, Boolean verify, Boolean dynamic) {
         super(name, type, minimum, maximum, stepsize, pattern, required, readOnly, multiple, context, defaultValue,
                 label, description, options, filterCriteria, groupName, advanced, limitToOptions, multipleLimit, unit,
-                unitLabel, verify);
+                unitLabel, verify, dynamic);
 
         if (multiple && defaultValue != null) {
             ConfigDescriptionParameter parameter = ConfigDescriptionParameterBuilder.create(name, type)
