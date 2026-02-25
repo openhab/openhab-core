@@ -324,6 +324,7 @@ public class ConfigDescriptionParameter {
      * <li><b>dayOfWeek</b>: A day of week [MON, TUE, WED, THU, FRI, SAT, SUN]</li>
      * <li><b>email</b>: The configuration value represents an email address, e.g. username@domain.com</li>
      * <li><b>group</b>: A valid group item "name". A UI would probably show an item selection widget.</li>
+     * <li><b>ip-address</b>: The configuration value represents a pure IPv4 or IPv6 address (without protocol, port, or path).</li>
      * <li><b>item</b>: A valid item "name". A UI would probably show an item selection widget.</li>
      * <li><b>location</b>: A latitude,longitude[,altitude] GPS location. A UI would probably render a world map for selection.</li>
      * <li><b>mac-address</b>: The configuration value represents a MAC address.</li>

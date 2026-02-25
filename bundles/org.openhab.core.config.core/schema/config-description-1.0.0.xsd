@@ -173,6 +173,7 @@
 			<xs:enumeration value="dayOfWeek"/>
 			<xs:enumeration value="email"/>
 			<xs:enumeration value="group"/>
+			<xs:enumeration value="ip-address"/>
 			<xs:enumeration value="item"/>
 			<xs:enumeration value="location"/>
 			<xs:enumeration value="mac-address"/>
