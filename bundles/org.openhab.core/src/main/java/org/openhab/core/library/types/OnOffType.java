@@ -60,6 +60,34 @@ public enum OnOffType implements PrimitiveType, State, Command {
         return super.toString();
     }
 
+    public boolean booleanValue() {
+        return this == ON;
+    }
+
+    public byte byteValue() {
+        return (byte) (this == ON ? 1 : 0);
+    }
+
+    public double doubleValue() {
+        return this == ON ? 1.0 : 0.0;
+    }
+
+    public float floatValue() {
+        return this == ON ? 1.0f : 0.0f;
+    }
+
+    public int intValue() {
+        return this == ON ? 1 : 0;
+    }
+
+    public long longValue() {
+        return this == ON ? 1L : 0L;
+    }
+
+    public short shortValue() {
+        return (short) (this == ON ? 1 : 0);
+    }
+
     @Override
     public <T extends State> @Nullable T as(@Nullable Class<T> target) {
         if (target == DecimalType.class) {
