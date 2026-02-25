@@ -275,14 +275,14 @@
 	</feature>
 
 	<feature name="openhab.tp-swagger-jaxrs" description="JAX-RS Whiteboard Swagger Support" version="${project.version}">
-		<capability>openhab.tp;feature=swagger-jaxrs;version=2.2.41</capability>
+		<capability>openhab.tp;feature=swagger-jaxrs;version=2.2.43</capability>
 		<feature dependency="true">openhab.tp-jax-rs-whiteboard</feature>
 		<feature dependency="true">openhab.tp-jackson</feature>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-annotations/2.2.41</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-core/2.2.41</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-integration/2.2.41</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-jaxrs2/2.2.41</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-models/2.2.41</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-annotations/2.2.43</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-core/2.2.43</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-integration/2.2.43</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-jaxrs2/2.2.43</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-models/2.2.43</bundle>
 		<bundle dependency="true">mvn:jakarta.validation/jakarta.validation-api/2.0.2</bundle>
 		<bundle dependency="true">mvn:org.javassist/javassist/3.30.2-GA</bundle>
 	</feature>

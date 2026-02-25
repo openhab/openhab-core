@@ -83,7 +83,7 @@
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>
     <spotless.eclipse.wtp.version>4.21.0</spotless.eclipse.wtp.version>
-    <swagger.version>2.2.35</swagger.version>
+    <swagger.version>2.2.43</swagger.version>
 
     <!-- TEST -->
     <!-- cxf can be updated independently, karaf only uses it in tests -->
