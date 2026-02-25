@@ -64,13 +64,13 @@ public class ItemUnitToMetadataUpgrader implements Upgrader {
             return false;
         }
 
-        userdataPath = userdataPath.resolve("jsondb");
+        Path dataPath = userdataPath.resolve("jsondb");
         boolean noLink;
 
-        Path itemJsonDatabasePath = userdataPath.resolve("org.openhab.core.items.Item.json");
-        Path metadataJsonDatabasePath = userdataPath.resolve("org.openhab.core.items.Metadata.json");
-        Path linkJsonDatabasePath = userdataPath.resolve("org.openhab.core.thing.link.ItemChannelLink.json");
-        Path thingJsonDatabasePath = userdataPath.resolve("org.openhab.core.thing.Thing.json");
+        Path itemJsonDatabasePath = dataPath.resolve("org.openhab.core.items.Item.json");
+        Path metadataJsonDatabasePath = dataPath.resolve("org.openhab.core.items.Metadata.json");
+        Path linkJsonDatabasePath = dataPath.resolve("org.openhab.core.thing.link.ItemChannelLink.json");
+        Path thingJsonDatabasePath = dataPath.resolve("org.openhab.core.thing.Thing.json");
         logger.info("Copying item unit from state description to metadata in database '{}'", itemJsonDatabasePath);
 
         if (!Files.isReadable(itemJsonDatabasePath)) {
