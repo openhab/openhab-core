@@ -40,8 +40,8 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
-import org.openhab.core.items.fileconverter.ItemFileGenerator;
-import org.openhab.core.items.fileconverter.ItemFileParser;
+import org.openhab.core.items.fileconverter.ItemParser;
+import org.openhab.core.items.fileconverter.ItemSerializer;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlModelRepository;
@@ -62,8 +62,8 @@ import org.osgi.service.component.annotations.Reference;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = { ItemFileGenerator.class, ItemFileParser.class })
-public class YamlItemFileConverter extends AbstractItemFileGenerator implements ItemFileParser {
+@Component(immediate = true, service = { ItemSerializer.class, ItemParser.class })
+public class YamlItemFileConverter extends AbstractItemFileGenerator implements ItemParser {
 
     private final YamlModelRepository modelRepository;
     private final YamlItemProvider itemProvider;
@@ -84,7 +84,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
     }
 
     @Override
-    public String getFileFormatGenerator() {
+    public String getGeneratedFormat() {
         return "YAML";
     }
 
@@ -100,7 +100,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
     }
 
     @Override
-    public void generateFileFormat(String id, OutputStream out) {
+    public void generateFormat(String id, OutputStream out) {
         modelRepository.generateFileFormat(id, out);
     }
 
@@ -283,18 +283,18 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
     }
 
     @Override
-    public String getFileFormatParser() {
+    public String getParserFormat() {
         return "YAML";
     }
 
     @Override
-    public @Nullable String startParsingFileFormat(String syntax, List<String> errors, List<String> warnings) {
+    public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
         return modelRepository.createIsolatedModel(inputStream, errors, warnings);
     }
 
     @Override
-    public Collection<Item> getParsedItems(String modelName) {
+    public Collection<Item> getParsedObjects(String modelName) {
         return itemProvider.getAllFromModel(modelName);
     }
 
@@ -318,7 +318,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
     }
 
     @Override
-    public void finishParsingFileFormat(String modelName) {
+    public void finishParsingFormat(String modelName) {
         modelRepository.removeIsolatedModel(modelName);
     }
 }
