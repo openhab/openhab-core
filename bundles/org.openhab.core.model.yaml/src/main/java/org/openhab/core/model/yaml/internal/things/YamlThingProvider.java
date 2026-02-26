@@ -102,16 +102,19 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     private final Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap<>();
 
     private final List<QueueContent> queue = new CopyOnWriteArrayList<>();
+    private final Object queueLock = new Object();
 
     private final Runnable lazyRetryRunnable = new Runnable() {
         @Override
         public void run() {
             logger.debug("Starting lazy retry thread");
             while (!queue.isEmpty()) {
-                for (QueueContent qc : queue) {
-                    if (retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration, qc.thingUID,
-                            qc.bridgeUID)) {
-                        queue.remove(qc);
+                synchronized (queueLock) {
+                    for (QueueContent qc : queue) {
+                        if (retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration, qc.thingUID,
+                                qc.bridgeUID)) {
+                            queue.remove(qc);
+                        }
                     }
                 }
                 if (!queue.isEmpty()) {
@@ -195,6 +198,11 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     @Override
     public void updatedModel(String modelName, Collection<YamlThingDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
+        if (!isolated) {
+            elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
+                removeFromRetryQueue(uid);
+            });
+        }
         List<Thing> updated = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = Objects
                 .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
@@ -221,6 +229,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         boolean isolated = isIsolatedModel(modelName);
         Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, List.of());
         elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
+            if (!isolated) {
+                removeFromRetryQueue(uid);
+            }
             modelThings.stream().filter(th -> th.getUID().equals(uid)).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
                 logger.debug("model {} removed thing {}", modelName, uid);
@@ -538,12 +549,24 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     private void queueRetryThingCreation(ThingHandlerFactory handlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
-        queue.add(new QueueContent(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID));
+        synchronized (queueLock) {
+            queue.add(new QueueContent(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID));
+        }
         Thread thread = lazyRetryThread;
         if (thread == null || !thread.isAlive()) {
             thread = new Thread(lazyRetryRunnable);
             lazyRetryThread = thread;
             thread.start();
+        }
+    }
+
+    private void removeFromRetryQueue(ThingUID thingUID) {
+        synchronized (queueLock) {
+            for (QueueContent qc : queue) {
+                if (thingUID.equals(qc.thingUID)) {
+                    queue.remove(qc);
+                }
+            }
         }
     }
 
