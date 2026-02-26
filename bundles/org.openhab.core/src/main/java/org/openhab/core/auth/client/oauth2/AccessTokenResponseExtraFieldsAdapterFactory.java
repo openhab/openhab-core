@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -27,14 +30,27 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+@NonNullByDefault
+/**
+ * A {@link TypeAdapterFactory} that decorates the default {@link AccessTokenResponse} adapter in order to capture
+ * additional fields returned by an OAuth 2.0 authorization server that are not part of the standard RFC 6749
+ * specification. All unknown JSON properties are collected into a map and exposed via {@code extraFields} on the
+ * {@link AccessTokenResponse}.
+ *
+ * @author Laurent Arnal
+ */
 public final class AccessTokenResponseExtraFieldsAdapterFactory implements TypeAdapterFactory {
 
     private static final Set<String> KNOWN_FIELDS = Set.of("access_token", "token_type", "expires_in", "refresh_token",
             "scope", "state");
 
     @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-        if (!AccessTokenResponse.class.isAssignableFrom(type.getRawType())) {
+    public <T> @Nullable TypeAdapter<T> create(@Nullable Gson gson, @Nullable TypeToken<T> type) {
+        if (type == null || !AccessTokenResponse.class.isAssignableFrom(type.getRawType())) {
+            return null;
+        }
+
+        if (gson == null) {
             return null;
         }
 
@@ -71,15 +87,18 @@ public final class AccessTokenResponseExtraFieldsAdapterFactory implements TypeA
                     }
                     return parsed;
                 }
+
+                // Delegate adapter returned null; propagate null without extra fields
                 return null;
             }
         };
     }
 
     private static String toStringValue(Gson gson, JsonElement el) {
-        if (el == null || el.isJsonNull()) {
-            return null;
+        if (el.isJsonNull()) {
+            return "";
         }
+
         if (el.isJsonPrimitive()) {
             JsonPrimitive p = el.getAsJsonPrimitive();
             return p.getAsString();
