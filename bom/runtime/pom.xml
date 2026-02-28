@@ -20,7 +20,7 @@
     <!-- cxf can be updated independently of karaf, only used in karaf tests -->
     <cxf.version>3.6.10</cxf.version>
     <jackson.annotations.version>2.21</jackson.annotations.version>
-    <jackson.version>2.21.0</jackson.version>
+    <jackson.version>2.21.1</jackson.version>
     <jetty.version>9.4.58.v20250814</jetty.version>
     <pax.logging.version>2.3.2</pax.logging.version>
     <pax.web.version>8.0.34</pax.web.version>
