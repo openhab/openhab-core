@@ -36,6 +36,7 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.service.StartLevelService;
+import org.openhab.core.thing.ThingRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,9 +61,11 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
     @BeforeEach
     public void before() {
         EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
+        ThingRegistry thingRegistry = Objects.requireNonNull(getService(ThingRegistry.class));
         ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
-                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+                eventPublisher, thingRegistry, itemRegistry, mock(TimeZoneProvider.class),
+                mock(StartLevelService.class));
         mock(CoreModuleHandlerFactory.class);
         registerService(coreModuleHandlerFactory);
     }
