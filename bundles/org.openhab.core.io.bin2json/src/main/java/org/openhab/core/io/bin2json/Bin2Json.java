@@ -137,6 +137,15 @@ public class Bin2Json {
         }
     }
 
+    /**
+     * Converts a parsed JBBP field structure to a JSON object.
+     * This internal method performs the actual conversion of parsed binary data to JSON format,
+     * tracking the conversion time when trace logging is enabled.
+     *
+     * @param data the parsed JBBP field structure containing binary data
+     * @return Gson {@link JsonObject} representation of the binary data
+     * @throws ConversionException if an error occurs during the JSON conversion process
+     */
     private JsonObject convert(JBBPFieldStruct data) throws ConversionException {
         try {
             LocalDateTime start = LocalDateTime.now();
@@ -151,10 +160,30 @@ public class Bin2Json {
         }
     }
 
+    /**
+     * Converts a JBBP field to a new JSON object.
+     * This is a convenience wrapper method that delegates to the main conversion method with a null
+     * initial JSON object, resulting in a new JSON object being created.
+     *
+     * @param field the JBBP field to convert to JSON
+     * @return a new Gson {@link JsonObject} containing the field data
+     * @throws ConversionException if the field type is not supported or conversion fails
+     */
     private JsonObject convertToJSon(final JBBPAbstractField field) throws ConversionException {
         return convertToJSon(null, field);
     }
 
+    /**
+     * Converts a JBBP field to JSON, optionally adding to an existing JSON object.
+     * This is the main conversion method that recursively handles all JBBP field types including
+     * primitives (bit, boolean, byte, int, long, short), unsigned types (ubyte, ushort),
+     * arrays, and nested structures. Each field is added to the JSON object with its field name as the key.
+     *
+     * @param json the existing JSON object to add the field to, or null to create a new JSON object
+     * @param field the JBBP field to convert (can be primitive, array, or struct)
+     * @return the JSON object containing the converted field data
+     * @throws ConversionException if the field type is not recognized or supported
+     */
     private JsonObject convertToJSon(@Nullable final JsonObject json, final JBBPAbstractField field)
             throws ConversionException {
         JsonObject jsn = json == null ? new JsonObject() : json;
