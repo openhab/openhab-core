@@ -765,14 +765,20 @@ public class ItemResource implements RESTResource {
             value = "";
         }
 
-        MetadataKey key = new MetadataKey(namespace, itemName);
-        Metadata md = new Metadata(key, value, metadata.config);
-        if (metadataRegistry.get(key) == null) {
-            metadataRegistry.add(md);
-            return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
-        } else {
-            metadataRegistry.update(md);
-            return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        try {
+            MetadataKey key = new MetadataKey(namespace, itemName);
+            Metadata md = new Metadata(key, value, metadata.config);
+            if (metadataRegistry.get(key) == null) {
+                metadataRegistry.add(md);
+                return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
+            } else {
+                if (metadataRegistry.update(md) == null) {
+                    return Response.status(Status.METHOD_NOT_ALLOWED).build();
+                }
+                return Response.ok(null, MediaType.TEXT_PLAIN).build();
+            }
+        } catch (IllegalStateException e) {
+            return Response.status(Status.METHOD_NOT_ALLOWED.getStatusCode(), e.getMessage()).build();
         }
     }
 
@@ -783,7 +789,7 @@ public class ItemResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Item not found."),
-                    @ApiResponse(responseCode = "405", description = "Meta data not editable.") })
+                    @ApiResponse(responseCode = "405", description = "Metadata not editable.") })
     public Response removeMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @Nullable @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
         Item item = getItem(itemName);
@@ -795,13 +801,17 @@ public class ItemResource implements RESTResource {
         if (namespace == null) {
             metadataRegistry.removeItemMetadata(itemName);
         } else {
-            MetadataKey key = new MetadataKey(namespace, itemName);
-            if (metadataRegistry.get(key) != null) {
-                if (metadataRegistry.remove(key) == null) {
-                    return Response.status(Status.CONFLICT).build();
+            try {
+                MetadataKey key = new MetadataKey(namespace, itemName);
+                if (metadataRegistry.get(key) != null) {
+                    if (metadataRegistry.remove(key) == null) {
+                        return Response.status(Status.METHOD_NOT_ALLOWED).build();
+                    }
+                } else {
+                    return Response.status(Status.NOT_FOUND).build();
                 }
-            } else {
-                return Response.status(Status.NOT_FOUND).build();
+            } catch (IllegalStateException e) {
+                return Response.status(Status.METHOD_NOT_ALLOWED.getStatusCode(), e.getMessage()).build();
             }
         }
 
