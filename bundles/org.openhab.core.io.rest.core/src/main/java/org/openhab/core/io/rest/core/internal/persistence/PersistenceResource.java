@@ -369,8 +369,15 @@ public class PersistenceResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceServiceProblem.class), uniqueItems = true))) })
     public Response httpGetPersistenceHealth(@Context HttpHeaders headers) {
         List<PersistenceServiceProblem> persistenceProblems = new ArrayList<>();
-        Set<PersistenceService> persistenceServices = persistenceServiceRegistry.getAll();
 
+        List<String> configurationConflicts = persistenceServiceConfigurationRegistry
+                .getServiceConfigurationConflicts();
+        for (String serviceId : configurationConflicts) {
+            persistenceProblems.add(new PersistenceServiceProblem(
+                    PersistenceServiceProblem.PERSISTENCE_DUPLICATE_CONFIG, serviceId, null, false));
+        }
+
+        Set<PersistenceService> persistenceServices = persistenceServiceRegistry.getAll();
         if (persistenceServices.size() > 1) {
             try {
                 Configuration configuration = configurationService.get("org.openhab.persistence");
