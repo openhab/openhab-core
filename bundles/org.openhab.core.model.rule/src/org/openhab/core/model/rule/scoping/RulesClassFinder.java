@@ -57,9 +57,4 @@ public class RulesClassFinder extends ClassFinder {
             throw e;
         }
     }
-
-    @Override
-    protected Class<?> forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
-        return Class.forName(name, false, classLoader);
-    }
 }
