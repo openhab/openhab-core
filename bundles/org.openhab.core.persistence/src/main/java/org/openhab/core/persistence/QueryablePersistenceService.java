@@ -15,6 +15,7 @@ package org.openhab.core.persistence;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -92,17 +93,65 @@ public interface QueryablePersistenceService extends PersistenceService {
 
     /**
      * Returns a set of {@link PersistenceItemInfo} about items that are stored in the persistence service. This allows
-     * the persistence service to return information about items that are no long available as an
-     * {@link org.openhab.core.items.Item} in openHAB. If it is not possible to retrieve the information an empty set
-     * should be returned.
+     * the persistence service to return information about items that are no longer available as an
+     * {@link org.openhab.core.items.Item} in openHAB. If it is not possible to retrieve the information or it would be
+     * too expensive to do so an {@link UnsupportedOperationException} should be thrown.
      *
-     * Note that implementations for method callers that this method may return an alias for an existing item if the
-     * database does not store the mapping between item name and alias or the reverse mapping is not implemented in the
-     * persistence service.
+     * Note that this method will return the names for items as stored in persistence. If aliases are used, the calling
+     * method is responsible for mapping back to the real item name.
      *
      * @return a set of information about the persisted items
+     * @throws UnsupportedOperationException if the operation is not supported or would be too expensive to perform
      */
-    Set<PersistenceItemInfo> getItemInfo();
+    default Set<PersistenceItemInfo> getItemInfo() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("getItemInfo not supported for persistence service");
+    }
+
+    /**
+     * Returns {@link PersistenceItemInfo} for an item stored in the persistence service. Null can be returned when the
+     * item is not found in the persistence service. If it is not possible to retrieve the information or it would be
+     * too expensive to do so an {@link UnsupportedOperationException} should be thrown.
+     * The default implementation will query the persistence service for the last value in the persistence store and
+     * set the latest timestamp, leaving the {@link PersistenceItemInfo} earliest timestamp and count equal to null.
+     *
+     * Note that the method should return the alias for the item in its response if an alias is being used.
+     *
+     * @param itemName the real openHAB name as it appears in the item registry
+     * @param alias for item name in database or null if no alias defined
+     * @return information about the persisted item
+     * @throws UnsupportedOperationException if the operation is not supported or would be too expensive to perform
+     */
+    default @Nullable PersistenceItemInfo getItemInfo(String itemName, @Nullable String alias)
+            throws UnsupportedOperationException {
+        PersistedItem item = persistedItem(itemName, alias);
+        if (item == null) {
+            return null;
+        }
+        Date latest = Date.from(item.getInstant());
+        Integer count = null; // If we found the item, we do not know how many are in the store
+        return new PersistenceItemInfo() {
+
+            @Override
+            public String getName() {
+                return alias != null ? alias : itemName;
+            }
+
+            @Override
+            public @Nullable Integer getCount() {
+                return count;
+            }
+
+            @Override
+            public @Nullable Date getEarliest() {
+                return null;
+            }
+
+            @Override
+            public @Nullable Date getLatest() {
+                return latest;
+            }
+        };
+    }
 
     /**
      * Returns a {@link PersistedItem} representing the persisted state, last update and change timestamps and previous
