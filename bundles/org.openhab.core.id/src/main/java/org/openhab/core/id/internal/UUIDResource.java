@@ -55,6 +55,13 @@ public class UUIDResource implements RESTResource {
 
     public static final String PATH_UUID = "uuid";
 
+    /**
+     * Retrieves the instance UUID via REST endpoint.
+     * This method exposes the unique instance identifier through a REST API endpoint.
+     * The UUID is generated once and persisted, remaining constant across restarts.
+     *
+     * @return a Response containing the instance UUID as plain text, or null if the UUID cannot be retrieved
+     */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "getUUID", summary = "A unified unique id.", responses = {
