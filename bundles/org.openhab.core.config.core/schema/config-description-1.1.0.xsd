@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
-	targetNamespace="https://openhab.org/schemas/config-description/v1.0.0">
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.1.0"
+	targetNamespace="https://openhab.org/schemas/config-description/v1.1.0">
 
 	<xs:element name="config-descriptions">
 		<xs:complexType>
@@ -36,8 +36,8 @@
 	</xs:complexType>
 
 	<xs:complexType name="parameter">
-		<xs:all>
-			<xs:element name="context" type="xs:string" minOccurs="0"/>
+		<xs:sequence>
+			<xs:element name="context" type="config-description:contextType" minOccurs="0"/>
 			<!-- deprecated element "required" -->
 			<xs:element name="required" type="xs:boolean" default="false" minOccurs="0"/>
 			<xs:element name="default" type="xs:string" minOccurs="0"/>
@@ -50,7 +50,7 @@
 			<xs:element name="verify" type="xs:boolean" minOccurs="0"/>
 			<xs:element name="multipleLimit" type="xs:integer" minOccurs="0"/>
 			<xs:element name="unitLabel" type="xs:string" minOccurs="0"/>
-		</xs:all>
+		</xs:sequence>
 		<xs:attribute name="name" type="xs:string" use="required"/>
 		<xs:attribute name="type" type="config-description:parameterType" use="required"/>
 		<xs:attribute name="groupName" type="xs:string"/>
@@ -68,7 +68,7 @@
 		<xs:all>
 			<xs:element name="label" type="xs:string" minOccurs="0"/>
 			<xs:element name="description" type="xs:string" minOccurs="0"/>
-			<xs:element name="context" type="xs:string" minOccurs="0"/>
+			<xs:element name="context" type="config-description:contextType" minOccurs="0"/>
 			<xs:element name="advanced" type="xs:boolean" minOccurs="0"/>
 		</xs:all>
 		<xs:attribute name="name" type="xs:string" use="required"/>
@@ -161,5 +161,42 @@
 	<xs:complexType name="configDescriptionRef">
 		<xs:attribute name="uri" type="config-description:uriRestrictionPattern" use="required"/>
 	</xs:complexType>
+
+	<xs:simpleType name="contextType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="channel"/>
+			<xs:enumeration value="channel-type"/>
+			<xs:enumeration value="color"/>
+			<xs:enumeration value="cronexpression"/>
+			<xs:enumeration value="date"/>
+			<xs:enumeration value="datetime"/>
+			<xs:enumeration value="dayOfWeek"/>
+			<xs:enumeration value="email"/>
+			<xs:enumeration value="group"/>
+			<xs:enumeration value="item"/>
+			<xs:enumeration value="location"/>
+			<xs:enumeration value="mac-address"/>
+			<xs:enumeration value="month"/>
+			<xs:enumeration value="network-address"/>
+			<xs:enumeration value="network-interface"/>
+			<xs:enumeration value="page"/>
+			<xs:enumeration value="password"/>
+			<xs:enumeration value="password-create"/>
+			<xs:enumeration value="persistence-service"/>
+			<xs:enumeration value="props"/>
+			<xs:enumeration value="qrcode"/>
+			<xs:enumeration value="rule"/>
+			<xs:enumeration value="script"/>
+			<xs:enumeration value="serial-port"/>
+			<xs:enumeration value="service"/>
+			<xs:enumeration value="tag"/>
+			<xs:enumeration value="telephone"/>
+			<xs:enumeration value="thing"/>
+			<xs:enumeration value="time"/>
+			<xs:enumeration value="url"/>
+			<xs:enumeration value="week"/>
+			<xs:enumeration value="widget"/>
+		</xs:restriction>
+	</xs:simpleType>
 
 </xs:schema>
