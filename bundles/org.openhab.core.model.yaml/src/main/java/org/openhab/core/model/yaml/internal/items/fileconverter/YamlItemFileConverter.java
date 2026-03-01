@@ -110,14 +110,9 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
         dto.name = item.getName();
 
         String label = item.getLabel();
-        boolean patternSet = false;
-        String defaultPattern = getDefaultStatePattern(item);
         if (label != null && !label.isEmpty()) {
             dto.label = item.getLabel();
         }
-        String patternToSet = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter : null;
-        dto.format = patternToSet;
-        patternSet = patternToSet != null;
 
         dto.type = item.getType();
         String mainType = ItemUtil.getMainItemType(item.getType());
@@ -191,40 +186,42 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
                 if (value != null && !value.isEmpty()) {
                     dto.autoupdate = Boolean.valueOf(value);
                 }
-            } else if ("unit".equals(namespace)) {
+                continue;
+            }
+
+            if ("unit".equals(namespace)) {
                 dto.unit = value; // When unit value is empty string, keep it as empty string
-            } else if ("expire".equals(namespace)) {
-                Map<String, Object> configuration = md.getConfiguration();
-                if (configuration.isEmpty()) {
-                    dto.expire = value; // When expire value is empty string, keep it as empty string
-                } else {
-                    YamlMetadataDTO mdDto = new YamlMetadataDTO();
-                    mdDto.value = value.isEmpty() ? null : value;
-                    mdDto.config = configuration;
-                    metadataDto.put(namespace, mdDto);
+                continue;
+            }
+
+            if ("expire".equals(namespace) && md.getConfiguration().isEmpty()) {
+                dto.expire = value; // When expire value is empty string, keep it as empty string
+                continue;
+            }
+
+            if ("stateDescription".equals(namespace) && (value == null || value.isBlank())) {
+                Map<String, Object> config = md.getConfiguration();
+
+                String defaultPattern = getDefaultStatePattern(item);
+                if (config.isEmpty() && stateFormatter != null && !stateFormatter.equals(defaultPattern)) {
+                    dto.format = stateFormatter;
+                    continue;
                 }
-            } else {
-                YamlMetadataDTO mdDto = new YamlMetadataDTO();
-                mdDto.value = value.isEmpty() ? null : value;
-                Map<String, Object> configuration = new LinkedHashMap<>();
-                String statePattern = null;
-                for (ConfigParameter param : getConfigurationParameters(md)) {
-                    configuration.put(param.name(), param.value());
-                    if ("stateDescription".equals(namespace) && "pattern".equals(param.name())) {
-                        statePattern = param.value().toString();
-                    }
-                }
-                // Ignore state description in case it contains only a state pattern and state pattern was injected
-                // in field format or is the default pattern
-                if (!(statePattern != null && configuration.size() == 1
-                        && (patternSet || statePattern.equals(defaultPattern)))) {
-                    mdDto.config = configuration.isEmpty() ? null : configuration;
-                    metadataDto.put(namespace, mdDto);
-                    if (patternSet && statePattern != null) {
-                        dto.format = null;
-                    }
+
+                if (config.get("pattern") instanceof String pattern && !pattern.isBlank() && config.size() == 1) {
+                    dto.format = pattern;
+                    continue;
                 }
             }
+
+            YamlMetadataDTO mdDto = new YamlMetadataDTO();
+            mdDto.value = value;
+            Map<String, Object> configuration = new LinkedHashMap<>();
+            for (ConfigParameter param : getConfigurationParameters(md)) {
+                configuration.put(param.name(), param.value());
+            }
+            mdDto.config = configuration.isEmpty() ? null : configuration;
+            metadataDto.put(namespace, mdDto);
         }
         dto.metadata = metadataDto.isEmpty() ? null : metadataDto;
 
