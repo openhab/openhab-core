@@ -278,7 +278,7 @@ public class PersistenceResource implements RESTResource {
                     @ApiResponse(responseCode = "405", description = "Persistence service not queryable or getting Item info not allowed") })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @Parameter(description = "An Item name, if provided response will only contain information for this Item") @QueryParam("itemname") @Nullable String itemName) {
+            @Parameter(description = "An Item name, if provided response will only contain information for this Item") @QueryParam("itemName") @Nullable String itemName) {
         return getServiceItemListDTO(serviceId, itemName);
     }
 
