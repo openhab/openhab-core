@@ -289,8 +289,13 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     public void testMetadata() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "some value";
+
         assertEquals(201, itemResource.addMetadata(ITEM_NAME1, "namespace", dto).getStatus());
         assertEquals(200, itemResource.removeMetadata(ITEM_NAME1, "namespace").getStatus());
+        assertEquals(404, itemResource.removeMetadata(ITEM_NAME1, "namespace").getStatus());
+
+        assertEquals(201, itemResource.addMetadata(ITEM_NAME1, "namespace", dto).getStatus());
+        assertEquals(200, itemResource.removeAllMetadata(ITEM_NAME1).getStatus());
         assertEquals(404, itemResource.removeMetadata(ITEM_NAME1, "namespace").getStatus());
     }
 
@@ -340,6 +345,12 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         registerService(provider);
 
         assertEquals(405, itemResource.addMetadata(ITEM_NAME1, "semantics", dto).getStatus());
+    }
+
+    @Test
+    public void testRemoveAllMetadataNonExistingItem() {
+        Response response = itemResource.removeAllMetadata("nonExisting");
+        assertEquals(404, response.getStatus());
     }
 
     @Test
