@@ -49,7 +49,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey, MetadataProvider>
         implements MetadataRegistry {
 
-    private Map<String, MetadataProvider> reservedNamespaces = new ConcurrentHashMap<>();
+    private final Map<String, MetadataProvider> reservedNamespaces = new ConcurrentHashMap<>();
 
     @Activate
     public MetadataRegistryImpl(final @Reference ReadyService readyService) {

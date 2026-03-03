@@ -335,6 +335,8 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
         MetadataProvider provider = mock(MetadataProvider.class);
         when(provider.getReservedNamespaces()).thenReturn(Set.of("semantics"));
+        when(provider.getAll())
+                .thenReturn(Set.of(new Metadata(new MetadataKey("semantics", ITEM_NAME1), "some value", null)));
         registerService(provider);
 
         assertEquals(405, itemResource.addMetadata(ITEM_NAME1, "semantics", dto).getStatus());

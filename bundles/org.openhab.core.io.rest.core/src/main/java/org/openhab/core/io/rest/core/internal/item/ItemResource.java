@@ -787,41 +787,55 @@ public class ItemResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemName: [a-zA-Z_0-9]+}/metadata/{namespace}")
-    @Operation(operationId = "removeMetadataFromItem", summary = "Removes metadata from an item.", security = {
+    @Path("/{itemName: [a-zA-Z_0-9]+}/metadata")
+    @Operation(operationId = "removeAllMetadataFromItem", summary = "Removes all managed metadata from an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Item or namespace not found."),
-                    @ApiResponse(responseCode = "405", description = "Metadata not editable."),
-                    @ApiResponse(responseCode = "503", description = "Managed provider not available.") })
-    public Response removeMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
-            @Nullable @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
+                    @ApiResponse(responseCode = "404", description = "Item not found.") })
+    public Response removeAllMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName) {
         Item item = getItem(itemName);
 
         if (item == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        if (namespace == null) {
-            metadataRegistry.removeItemMetadata(itemName);
-        } else {
-            try {
-                MetadataKey key = new MetadataKey(namespace, itemName);
-                if (metadataRegistry.get(key) != null) {
-                    if (metadataRegistry.remove(key) == null) {
-                        // Exists, but not managed
-                        return Response.status(Status.METHOD_NOT_ALLOWED).build();
-                    }
-                } else {
-                    return Response.status(Status.NOT_FOUND).build();
+        metadataRegistry.removeItemMetadata(itemName);
+        return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
+
+    @DELETE
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{itemName: [a-zA-Z_0-9]+}/metadata/{namespace}")
+    @Operation(operationId = "removeMetadataFromItem", summary = "Removes metadata in a specific namespace from an item.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Item or namespace not found."),
+                    @ApiResponse(responseCode = "405", description = "Metadata not editable."),
+                    @ApiResponse(responseCode = "503", description = "Managed provider not available.") })
+    public Response removeMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
+            @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
+        Item item = getItem(itemName);
+
+        if (item == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        try {
+            MetadataKey key = new MetadataKey(namespace, itemName);
+            if (metadataRegistry.get(key) != null) {
+                if (metadataRegistry.remove(key) == null) {
+                    // Exists, but not managed
+                    return Response.status(Status.METHOD_NOT_ALLOWED).build();
                 }
-            } catch (UnsupportedOperationException e) {
-                // Trying to remove from a reserved namespace that is in an unmanaged provider
-                return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, e.getMessage());
-            } catch (IllegalStateException e) {
-                // There is no managed provider available
-                return Response.status(Status.SERVICE_UNAVAILABLE).build();
+            } else {
+                return Response.status(Status.NOT_FOUND).build();
             }
+        } catch (UnsupportedOperationException e) {
+            // Trying to remove from a reserved namespace that is in an unmanaged provider
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, e.getMessage());
+        } catch (IllegalStateException e) {
+            // There is no managed provider available
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
 
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
