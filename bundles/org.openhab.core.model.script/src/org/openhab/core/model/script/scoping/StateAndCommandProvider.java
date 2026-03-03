@@ -29,8 +29,6 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
 import org.openhab.core.types.UnDefType;
 
-import com.google.inject.Singleton;
-
 /**
  * This is a class which provides all available states and commands (obviously only the enum-based ones with a fixed
  * name).
@@ -38,7 +36,6 @@ import com.google.inject.Singleton;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Singleton
 public class StateAndCommandProvider {
 
     protected static final Set<Command> COMMANDS = new HashSet<>();
@@ -79,15 +76,15 @@ public class StateAndCommandProvider {
         TYPES.addAll(STATES);
     }
 
-    public Iterable<Type> getAllTypes() {
+    static public Iterable<Type> getAllTypes() {
         return TYPES;
     }
 
-    public Iterable<Command> getAllCommands() {
+    static public Iterable<Command> getAllCommands() {
         return COMMANDS;
     }
 
-    public Iterable<State> getAllStates() {
+    static public Iterable<State> getAllStates() {
         return STATES;
     }
 }
