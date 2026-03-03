@@ -773,7 +773,10 @@ public class ItemResource implements RESTResource {
                 metadataRegistry.add(md);
                 return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
             } else {
-                metadataRegistry.update(md);
+                if (metadataRegistry.update(md) == null) {
+                    // Exists, but not managed
+                    return Response.status(Status.METHOD_NOT_ALLOWED).build();
+                }
                 return Response.ok(null, MediaType.TEXT_PLAIN).build();
             }
         } catch (UnsupportedOperationException e) {
