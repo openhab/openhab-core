@@ -12,6 +12,8 @@
  */
 package org.openhab.core.persistence.registry;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Registry;
 
@@ -29,4 +31,12 @@ public interface PersistenceServiceConfigurationRegistry extends Registry<Persis
     void addRegistryChangeListener(PersistenceServiceConfigurationRegistryChangeListener listener);
 
     void removeRegistryChangeListener(PersistenceServiceConfigurationRegistryChangeListener listener);
+
+    /**
+     * Returns a list of persistence services that have configurations defined by multiple providers, e.g. a DSL
+     * provider and a managed provider.
+     *
+     * @return a list of persistence identifiers of currently detected configuration conflicts, empty if no conflicts
+     */
+    List<String> getServiceConfigurationConflicts();
 }

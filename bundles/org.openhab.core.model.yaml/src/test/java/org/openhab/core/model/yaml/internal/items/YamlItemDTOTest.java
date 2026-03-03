@@ -609,6 +609,6 @@ public class YamlItemDTOTest {
         assertEquals(1, warnings.size());
         assertEquals(
                 "item \"item_name\": \"expire\" field is redundant with \"expire\" metadata; value \"5m\" will be considered",
-                warnings.get(0));
+                warnings.getFirst());
     }
 }
