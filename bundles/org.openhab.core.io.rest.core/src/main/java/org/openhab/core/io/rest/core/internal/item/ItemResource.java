@@ -807,7 +807,12 @@ public class ItemResource implements RESTResource {
         } else {
             try {
                 MetadataKey key = new MetadataKey(namespace, itemName);
-                if (metadataRegistry.remove(key) == null) {
+                if (metadataRegistry.get(key) != null) {
+                    if (metadataRegistry.remove(key) == null) {
+                        // Exists, but not managed
+                        return Response.status(Status.METHOD_NOT_ALLOWED).build();
+                    }
+                } else {
                     return Response.status(Status.NOT_FOUND).build();
                 }
             } catch (UnsupportedOperationException e) {
