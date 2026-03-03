@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * Tests for {@link YamlMetadataDTODeserializer}.
@@ -32,7 +32,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
  */
 class YamlMetadataDTODeserializerTest {
 
-    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    private final ObjectMapper mapper = new YAMLMapper();
 
     @ParameterizedTest
     @ValueSource(strings = { "string value", "123", "45.67", "true", "false" })

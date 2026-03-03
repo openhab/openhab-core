@@ -12,15 +12,14 @@
  */
 package org.openhab.core.model.yaml.internal.items;
 
-import java.io.IOException;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ValueDeserializer;
 
 /**
  * Custom deserializer for {@link YamlMetadataDTO} that converts any YAML scalar
@@ -28,10 +27,10 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-class YamlMetadataDTODeserializer extends JsonDeserializer<YamlMetadataDTO> {
+class YamlMetadataDTODeserializer extends ValueDeserializer<YamlMetadataDTO> {
 
     @Override
-    public YamlMetadataDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public YamlMetadataDTO deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
         JsonToken token = p.currentToken();
         if (token == JsonToken.VALUE_STRING || token == JsonToken.VALUE_NUMBER_INT
                 || token == JsonToken.VALUE_NUMBER_FLOAT || token == JsonToken.VALUE_TRUE
@@ -41,18 +40,17 @@ class YamlMetadataDTODeserializer extends JsonDeserializer<YamlMetadataDTO> {
             return dto;
         }
         if (token == JsonToken.START_OBJECT) {
-            ObjectCodec codec = p.getCodec();
-            JsonNode node = codec.readTree(p);
+            JsonNode node = p.readValueAsTree();
 
             YamlMetadataDTO dto = new YamlMetadataDTO();
             JsonNode valueNode = node.get("value");
             if (valueNode != null && !valueNode.isNull()) {
-                dto.value = valueNode.asText();
+                dto.value = valueNode.asString();
             }
 
             JsonNode configNode = node.get("config");
             if (configNode != null && !configNode.isNull()) {
-                dto.config = codec.treeToValue(configNode, Map.class);
+                dto.config = ctxt.readTreeAsValue(configNode, Map.class);
             }
             return dto;
         }
