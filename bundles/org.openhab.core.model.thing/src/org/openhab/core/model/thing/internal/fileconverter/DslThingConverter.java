@@ -41,7 +41,7 @@ import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
-import org.openhab.core.thing.fileconverter.AbstractThingFileGenerator;
+import org.openhab.core.thing.fileconverter.AbstractThingSerializer;
 import org.openhab.core.thing.fileconverter.ThingParser;
 import org.openhab.core.thing.fileconverter.ThingSerializer;
 import org.openhab.core.thing.link.ItemChannelLink;
@@ -57,16 +57,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link DslThingFileConverter} is the DSL file converter for {@link Thing} object
- * with the capabilities of parsing and generating file.
+ * {@link DslThingConverter} is the DSL file converter for {@link Thing} objects
+ * with the capabilities of parsing and serializing files.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ThingSerializer.class, ThingParser.class })
-public class DslThingFileConverter extends AbstractThingFileGenerator implements ThingParser {
+public class DslThingConverter extends AbstractThingSerializer implements ThingParser {
 
-    private final Logger logger = LoggerFactory.getLogger(DslThingFileConverter.class);
+    private final Logger logger = LoggerFactory.getLogger(DslThingConverter.class);
 
     private final ModelRepository modelRepository;
     private final GenericThingProvider thingProvider;
@@ -76,7 +76,7 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
     private final Map<String, ThingModel> elementsToGenerate = new ConcurrentHashMap<>();
 
     @Activate
-    public DslThingFileConverter(final @Reference ModelRepository modelRepository,
+    public DslThingConverter(final @Reference ModelRepository modelRepository,
             final @Reference GenericThingProvider thingProvider,
             final @Reference GenericItemChannelLinkProvider itemChannelLinkProvider,
             final @Reference ThingTypeRegistry thingTypeRegistry,
@@ -96,7 +96,7 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
     }
 
     @Override
-    public void setThingsToBeGenerated(String id, List<Thing> things, boolean hideDefaultChannels,
+    public void setThingsToBeSerialized(String id, List<Thing> things, boolean hideDefaultChannels,
             boolean hideDefaultParameters) {
         if (things.isEmpty()) {
             return;

@@ -26,14 +26,14 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.library.CoreItemFactory;
 
 /**
- * {@link AbstractItemFileGenerator} is the base class for any {@link Item} file generator.
+ * {@link AbstractItemSerializer} is the base class for any {@link Item} serializer.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractItemFileGenerator implements ItemSerializer {
+public abstract class AbstractItemSerializer implements ItemSerializer {
 
-    public AbstractItemFileGenerator() {
+    public AbstractItemSerializer() {
     }
 
     /**

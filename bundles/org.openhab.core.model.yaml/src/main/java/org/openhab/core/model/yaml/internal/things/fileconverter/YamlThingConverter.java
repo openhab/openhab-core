@@ -35,7 +35,7 @@ import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
-import org.openhab.core.thing.fileconverter.AbstractThingFileGenerator;
+import org.openhab.core.thing.fileconverter.AbstractThingSerializer;
 import org.openhab.core.thing.fileconverter.ThingParser;
 import org.openhab.core.thing.fileconverter.ThingSerializer;
 import org.openhab.core.thing.link.ItemChannelLink;
@@ -50,13 +50,13 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * {@link YamlThingFileConverter} is the YAML file converter for {@link Thing} object.
+ * {@link YamlThingConverter} is the YAML converter for {@link Thing} objects.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ThingSerializer.class, ThingParser.class })
-public class YamlThingFileConverter extends AbstractThingFileGenerator implements ThingParser {
+public class YamlThingConverter extends AbstractThingSerializer implements ThingParser {
 
     private final YamlModelRepository modelRepository;
     private final YamlThingProvider thingProvider;
@@ -64,7 +64,7 @@ public class YamlThingFileConverter extends AbstractThingFileGenerator implement
     private final LocaleProvider localeProvider;
 
     @Activate
-    public YamlThingFileConverter(final @Reference YamlModelRepository modelRepository,
+    public YamlThingConverter(final @Reference YamlModelRepository modelRepository,
             final @Reference YamlThingProvider thingProvider,
             final @Reference YamlChannelLinkProvider itemChannelLinkProvider,
             final @Reference ThingTypeRegistry thingTypeRegistry,
@@ -84,7 +84,7 @@ public class YamlThingFileConverter extends AbstractThingFileGenerator implement
     }
 
     @Override
-    public void setThingsToBeGenerated(String id, List<Thing> things, boolean hideDefaultChannels,
+    public void setThingsToBeSerialized(String id, List<Thing> things, boolean hideDefaultChannels,
             boolean hideDefaultParameters) {
         List<YamlElement> elements = new ArrayList<>();
         things.forEach(thing -> {

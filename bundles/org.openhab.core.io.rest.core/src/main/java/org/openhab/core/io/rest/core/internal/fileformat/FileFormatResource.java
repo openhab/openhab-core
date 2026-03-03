@@ -257,10 +257,10 @@ public class FileFormatResource implements RESTResource {
     private final ThingTypeRegistry thingTypeRegistry;
     private final ChannelTypeRegistry channelTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
-    private final Map<String, ItemSerializer> itemFileGenerators = new ConcurrentHashMap<>();
-    private final Map<String, ItemParser> itemFileParsers = new ConcurrentHashMap<>();
-    private final Map<String, ThingSerializer> thingFileGenerators = new ConcurrentHashMap<>();
-    private final Map<String, ThingParser> thingFileParsers = new ConcurrentHashMap<>();
+    private final Map<String, ItemSerializer> itemSerializers = new ConcurrentHashMap<>();
+    private final Map<String, ItemParser> itemParsers = new ConcurrentHashMap<>();
+    private final Map<String, ThingSerializer> thingSerializers = new ConcurrentHashMap<>();
+    private final Map<String, ThingParser> thingParsers = new ConcurrentHashMap<>();
 
     private int counter;
 
@@ -291,39 +291,39 @@ public class FileFormatResource implements RESTResource {
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addItemFileGenerator(ItemSerializer itemFileGenerator) {
-        itemFileGenerators.put(itemFileGenerator.getGeneratedFormat(), itemFileGenerator);
+    protected void addItemSerializer(ItemSerializer itemSerializer) {
+        itemSerializers.put(itemSerializer.getGeneratedFormat(), itemSerializer);
     }
 
-    protected void removeItemFileGenerator(ItemSerializer itemFileGenerator) {
-        itemFileGenerators.remove(itemFileGenerator.getGeneratedFormat());
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addItemFileParser(ItemParser itemFileParser) {
-        itemFileParsers.put(itemFileParser.getParserFormat(), itemFileParser);
-    }
-
-    protected void removeItemFileParser(ItemParser itemFileParser) {
-        itemFileParsers.remove(itemFileParser.getParserFormat());
+    protected void removeItemSerializer(ItemSerializer itemSerializer) {
+        itemSerializers.remove(itemSerializer.getGeneratedFormat());
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addThingFileGenerator(ThingSerializer thingFileGenerator) {
-        thingFileGenerators.put(thingFileGenerator.getGeneratedFormat(), thingFileGenerator);
+    protected void addItemParser(ItemParser itemParser) {
+        itemParsers.put(itemParser.getParserFormat(), itemParser);
     }
 
-    protected void removeThingFileGenerator(ThingSerializer thingFileGenerator) {
-        thingFileGenerators.remove(thingFileGenerator.getGeneratedFormat());
+    protected void removeItemParser(ItemParser itemParser) {
+        itemParsers.remove(itemParser.getParserFormat());
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addThingFileParser(ThingParser thingFileParser) {
-        thingFileParsers.put(thingFileParser.getParserFormat(), thingFileParser);
+    protected void addThingSerializer(ThingSerializer thingSerializer) {
+        thingSerializers.put(thingSerializer.getGeneratedFormat(), thingSerializer);
     }
 
-    protected void removeThingFileParser(ThingParser thingFileParser) {
-        thingFileParsers.remove(thingFileParser.getParserFormat());
+    protected void removeThingSerializer(ThingSerializer thingSerializer) {
+        thingSerializers.remove(thingSerializer.getGeneratedFormat());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addThingParser(ThingParser thingParser) {
+        thingParsers.put(thingParser.getParserFormat(), thingParser);
+    }
+
+    protected void removeThingParser(ThingParser thingParser) {
+        thingParsers.remove(thingParser.getParserFormat());
     }
 
     @POST
@@ -343,8 +343,8 @@ public class FileFormatResource implements RESTResource {
             @Parameter(description = "Array of item names. If empty or omitted, return all Items.") @Nullable List<String> itemNames) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForItems: mediaType = {}, itemNames = {}", acceptHeader, itemNames);
-        ItemSerializer generator = getItemFileGenerator(acceptHeader);
-        if (generator == null) {
+        ItemSerializer serializer = getItemSerializer(acceptHeader);
+        if (serializer == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
@@ -363,7 +363,7 @@ public class FileFormatResource implements RESTResource {
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        String genId = newIdForGeneration();
+        String genId = newIdForSerialization();
         Map<String, String> stateFormatters = new HashMap<>();
         items.forEach(item -> {
             StateDescription stateDescr = item.getStateDescription();
@@ -372,8 +372,8 @@ public class FileFormatResource implements RESTResource {
                 stateFormatters.put(item.getName(), format);
             }
         });
-        generator.setItemsToBeGenerated(genId, items, getMetadata(items), stateFormatters, hideDefaultParameters);
-        generator.generateFormat(genId, outputStream);
+        serializer.setItemsToBeSerialized(genId, items, getMetadata(items), stateFormatters, hideDefaultParameters);
+        serializer.generateFormat(genId, outputStream);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -394,8 +394,8 @@ public class FileFormatResource implements RESTResource {
             @Parameter(description = "Array of Thing UIDs. If empty or omitted, return all Things from the Registry.") @Nullable List<String> thingUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForThings: mediaType = {}, thingUIDs = {}", acceptHeader, thingUIDs);
-        ThingSerializer generator = getThingFileGenerator(acceptHeader);
-        if (generator == null) {
+        ThingSerializer serializer = getThingSerializer(acceptHeader);
+        if (serializer == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
@@ -410,9 +410,9 @@ public class FileFormatResource implements RESTResource {
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        String genId = newIdForGeneration();
-        generator.setThingsToBeGenerated(genId, things, true, hideDefaultParameters);
-        generator.generateFormat(genId, outputStream);
+        String genId = newIdForSerialization();
+        serializer.setThingsToBeSerialized(genId, things, true, hideDefaultParameters);
+        serializer.generateFormat(genId, outputStream);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -446,44 +446,44 @@ public class FileFormatResource implements RESTResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
         }
 
-        ThingSerializer thingGenerator = getThingFileGenerator(acceptHeader);
-        ItemSerializer itemGenerator = getItemFileGenerator(acceptHeader);
+        ThingSerializer thingSerializer = getThingSerializer(acceptHeader);
+        ItemSerializer itemSerializer = getItemSerializer(acceptHeader);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        String genId = newIdForGeneration();
+        String genId = newIdForSerialization();
         switch (acceptHeader) {
             case "text/vnd.openhab.dsl.thing":
-                if (thingGenerator == null) {
+                if (thingSerializer == null) {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                             .entity("Unsupported media type '" + acceptHeader + "'!").build();
                 } else if (things.isEmpty()) {
                     return Response.status(Response.Status.BAD_REQUEST).entity("No thing loaded from input").build();
                 }
-                thingGenerator.setThingsToBeGenerated(genId, things, hideDefaultChannels, hideDefaultParameters);
-                thingGenerator.generateFormat(genId, outputStream);
+                thingSerializer.setThingsToBeSerialized(genId, things, hideDefaultChannels, hideDefaultParameters);
+                thingSerializer.generateFormat(genId, outputStream);
                 break;
             case "text/vnd.openhab.dsl.item":
-                if (itemGenerator == null) {
+                if (itemSerializer == null) {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                             .entity("Unsupported media type '" + acceptHeader + "'!").build();
                 } else if (items.isEmpty()) {
                     return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
                 }
-                itemGenerator.setItemsToBeGenerated(genId, items, hideChannelLinksAndMetadata ? List.of() : metadata,
+                itemSerializer.setItemsToBeSerialized(genId, items, hideChannelLinksAndMetadata ? List.of() : metadata,
                         stateFormatters, hideDefaultParameters);
-                itemGenerator.generateFormat(genId, outputStream);
+                itemSerializer.generateFormat(genId, outputStream);
                 break;
             case "application/yaml":
-                if (thingGenerator != null) {
-                    thingGenerator.setThingsToBeGenerated(genId, things, hideDefaultChannels, hideDefaultParameters);
+                if (thingSerializer != null) {
+                    thingSerializer.setThingsToBeSerialized(genId, things, hideDefaultChannels, hideDefaultParameters);
                 }
-                if (itemGenerator != null) {
-                    itemGenerator.setItemsToBeGenerated(genId, items,
+                if (itemSerializer != null) {
+                    itemSerializer.setItemsToBeSerialized(genId, items,
                             hideChannelLinksAndMetadata ? List.of() : metadata, stateFormatters, hideDefaultParameters);
                 }
-                if (thingGenerator != null) {
-                    thingGenerator.generateFormat(genId, outputStream);
-                } else if (itemGenerator != null) {
-                    itemGenerator.generateFormat(genId, outputStream);
+                if (thingSerializer != null) {
+                    thingSerializer.generateFormat(genId, outputStream);
+                } else if (itemSerializer != null) {
+                    itemSerializer.generateFormat(genId, outputStream);
                 }
                 break;
             default:
@@ -519,8 +519,8 @@ public class FileFormatResource implements RESTResource {
         Map<String, String> stateFormatters = Map.of();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        ThingParser thingParser = getThingFileParser(contentTypeHeader);
-        ItemParser itemParser = getItemFileParser(contentTypeHeader);
+        ThingParser thingParser = getThingParser(contentTypeHeader);
+        ItemParser itemParser = getItemParser(contentTypeHeader);
         String modelName = null;
         String modelName2 = null;
         switch (contentTypeHeader) {
@@ -600,7 +600,7 @@ public class FileFormatResource implements RESTResource {
         return Response.ok(result).build();
     }
 
-    private String newIdForGeneration() {
+    private String newIdForSerialization() {
         return GEN_ID_PATTERN.formatted(++counter);
     }
 
@@ -748,35 +748,35 @@ public class FileFormatResource implements RESTResource {
                 configDescRegistry);
     }
 
-    private @Nullable ItemSerializer getItemFileGenerator(String mediaType) {
+    private @Nullable ItemSerializer getItemSerializer(String mediaType) {
         return switch (mediaType) {
-            case "text/vnd.openhab.dsl.item" -> itemFileGenerators.get("DSL");
-            case "application/yaml" -> itemFileGenerators.get("YAML");
+            case "text/vnd.openhab.dsl.item" -> itemSerializers.get("DSL");
+            case "application/yaml" -> itemSerializers.get("YAML");
             default -> null;
         };
     }
 
-    private @Nullable ThingSerializer getThingFileGenerator(String mediaType) {
+    private @Nullable ThingSerializer getThingSerializer(String mediaType) {
         return switch (mediaType) {
-            case "text/vnd.openhab.dsl.thing" -> thingFileGenerators.get("DSL");
-            case "application/yaml" -> thingFileGenerators.get("YAML");
+            case "text/vnd.openhab.dsl.thing" -> thingSerializers.get("DSL");
+            case "application/yaml" -> thingSerializers.get("YAML");
             default -> null;
         };
     }
 
-    private @Nullable ItemParser getItemFileParser(String contentType) {
+    private @Nullable ItemParser getItemParser(String contentType) {
         return switch (contentType) {
-            case "text/vnd.openhab.dsl.item" -> itemFileParsers.get("DSL");
-            case "application/yaml" -> itemFileParsers.get("YAML");
+            case "text/vnd.openhab.dsl.item" -> itemParsers.get("DSL");
+            case "application/yaml" -> itemParsers.get("YAML");
             default -> null;
         };
     }
 
-    private @Nullable ThingParser getThingFileParser(String contentType) {
+    private @Nullable ThingParser getThingParser(String contentType) {
         return switch (contentType) {
-            case "text/vnd.openhab.dsl.thing" -> thingFileParsers.get("DSL");
-            case "text/vnd.openhab.dsl.item" -> thingFileParsers.get("DSL");
-            case "application/yaml" -> thingFileParsers.get("YAML");
+            case "text/vnd.openhab.dsl.thing" -> thingParsers.get("DSL");
+            case "text/vnd.openhab.dsl.item" -> thingParsers.get("DSL");
+            case "application/yaml" -> thingParsers.get("YAML");
             default -> null;
         };
     }

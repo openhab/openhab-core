@@ -39,7 +39,7 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.Metadata;
-import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
+import org.openhab.core.items.fileconverter.AbstractItemSerializer;
 import org.openhab.core.items.fileconverter.ItemParser;
 import org.openhab.core.items.fileconverter.ItemSerializer;
 import org.openhab.core.library.CoreItemFactory;
@@ -57,13 +57,13 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * {@link YamlItemFileConverter} is the YAML file converter for {@link Item} object.
+ * {@link YamlItemConverter} is the YAML converter for {@link Item} objects.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ItemSerializer.class, ItemParser.class })
-public class YamlItemFileConverter extends AbstractItemFileGenerator implements ItemParser {
+public class YamlItemConverter extends AbstractItemSerializer implements ItemParser {
 
     private final YamlModelRepository modelRepository;
     private final YamlItemProvider itemProvider;
@@ -72,7 +72,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
-    public YamlItemFileConverter(final @Reference YamlModelRepository modelRepository,
+    public YamlItemConverter(final @Reference YamlModelRepository modelRepository,
             final @Reference YamlItemProvider itemProvider, final @Reference YamlMetadataProvider metadataProvider,
             final @Reference YamlChannelLinkProvider channelLinkProvider,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
@@ -89,7 +89,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator implements 
     }
 
     @Override
-    public void setItemsToBeGenerated(String id, List<Item> items, Collection<Metadata> metadata,
+    public void setItemsToBeSerialized(String id, List<Item> items, Collection<Metadata> metadata,
             Map<String, String> stateFormatters, boolean hideDefaultParameters) {
         List<YamlElement> elements = new ArrayList<>();
         items.forEach(item -> {

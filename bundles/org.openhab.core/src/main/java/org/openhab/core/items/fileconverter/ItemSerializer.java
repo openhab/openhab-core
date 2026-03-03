@@ -41,6 +41,6 @@ public interface ItemSerializer extends ObjectSerializer<Item> {
      *            should pass an empty map if no state formatters are provided.
      * @param hideDefaultParameters {@code true} to hide the configuration parameters having a default value.
      */
-    void setItemsToBeGenerated(String id, List<Item> items, Collection<Metadata> metadata,
+    void setItemsToBeSerialized(String id, List<Item> items, Collection<Metadata> metadata,
             Map<String, String> stateFormatters, boolean hideDefaultParameters);
 }

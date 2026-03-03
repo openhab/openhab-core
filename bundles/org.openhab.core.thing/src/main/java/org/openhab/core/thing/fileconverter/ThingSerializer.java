@@ -34,6 +34,6 @@ public interface ThingSerializer extends ObjectSerializer<Thing> {
      * @param hideDefaultChannels {@code true} to hide the non extensible channels having a default configuration.
      * @param hideDefaultParameters {@code true} to hide the configuration parameters having a default value.
      */
-    void setThingsToBeGenerated(String id, List<Thing> things, boolean hideDefaultChannels,
+    void setThingsToBeSerialized(String id, List<Thing> things, boolean hideDefaultChannels,
             boolean hideDefaultParameters);
 }
