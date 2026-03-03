@@ -750,7 +750,8 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"), //
                     @ApiResponse(responseCode = "201", description = "Created"), //
                     @ApiResponse(responseCode = "404", description = "Item not found."), //
-                    @ApiResponse(responseCode = "405", description = "Metadata not editable.") })
+                    @ApiResponse(responseCode = "405", description = "Metadata not editable."),
+                    @ApiResponse(responseCode = "503", description = "Managed provider not available.") })
     public Response addMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("namespace") @Parameter(description = "namespace") String namespace,
             @Parameter(description = "metadata", required = true) MetadataDTO metadata) {
@@ -772,13 +773,15 @@ public class ItemResource implements RESTResource {
                 metadataRegistry.add(md);
                 return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
             } else {
-                if (metadataRegistry.update(md) == null) {
-                    return Response.status(Status.METHOD_NOT_ALLOWED).build();
-                }
+                metadataRegistry.update(md);
                 return Response.ok(null, MediaType.TEXT_PLAIN).build();
             }
+        } catch (UnsupportedOperationException e) {
+            // Trying to add to a reserved namespace that is in an unmanaged provider
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, e.getMessage());
         } catch (IllegalStateException e) {
-            return Response.status(Status.METHOD_NOT_ALLOWED.getStatusCode(), e.getMessage()).build();
+            // There is no managed provider available
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
     }
 
@@ -788,8 +791,9 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "removeMetadataFromItem", summary = "Removes metadata from an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Item not found."),
-                    @ApiResponse(responseCode = "405", description = "Metadata not editable.") })
+                    @ApiResponse(responseCode = "404", description = "Item or namespace not found."),
+                    @ApiResponse(responseCode = "405", description = "Metadata not editable."),
+                    @ApiResponse(responseCode = "503", description = "Managed provider not available.") })
     public Response removeMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @Nullable @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
         Item item = getItem(itemName);
@@ -803,15 +807,15 @@ public class ItemResource implements RESTResource {
         } else {
             try {
                 MetadataKey key = new MetadataKey(namespace, itemName);
-                if (metadataRegistry.get(key) != null) {
-                    if (metadataRegistry.remove(key) == null) {
-                        return Response.status(Status.METHOD_NOT_ALLOWED).build();
-                    }
-                } else {
+                if (metadataRegistry.remove(key) == null) {
                     return Response.status(Status.NOT_FOUND).build();
                 }
+            } catch (UnsupportedOperationException e) {
+                // Trying to remove from a reserved namespace that is in an unmanaged provider
+                return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, e.getMessage());
             } catch (IllegalStateException e) {
-                return Response.status(Status.METHOD_NOT_ALLOWED.getStatusCode(), e.getMessage()).build();
+                // There is no managed provider available
+                return Response.status(Status.SERVICE_UNAVAILABLE).build();
             }
         }
 

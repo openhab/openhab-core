@@ -126,35 +126,38 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
     @Override
     public Metadata add(Metadata element) {
         String namespace = element.getUID().getNamespace();
-        if (reservedNamespaces.get(namespace) == null || reservedNamespaces.get(namespace) instanceof ManagedProvider) {
+        MetadataProvider provider = reservedNamespaces.get(namespace);
+        if (provider == null || provider instanceof ManagedProvider) {
             return super.add(element);
         }
-        throw new IllegalStateException("Cannot add metadata to '" + namespace + "' namespace");
+        throw new UnsupportedOperationException("Cannot add metadata to '" + namespace + "' namespace");
     }
 
     @Override
     public @Nullable Metadata update(Metadata element) {
         String namespace = element.getUID().getNamespace();
-        if (reservedNamespaces.get(namespace) == null || reservedNamespaces.get(namespace) instanceof ManagedProvider) {
+        MetadataProvider provider = reservedNamespaces.get(namespace);
+        if (provider == null || provider instanceof ManagedProvider) {
             return super.update(element);
         }
-        throw new IllegalStateException("Cannot update metadata in '" + namespace + "' namespace");
+        throw new UnsupportedOperationException("Cannot update metadata in '" + namespace + "' namespace");
     }
 
     @Override
     public @Nullable Metadata remove(MetadataKey key) {
         String namespace = key.getNamespace();
-        if (reservedNamespaces.get(namespace) == null || reservedNamespaces.get(namespace) instanceof ManagedProvider) {
+        MetadataProvider provider = reservedNamespaces.get(namespace);
+        if (provider == null || provider instanceof ManagedProvider) {
             return super.remove(key);
         }
-        throw new IllegalStateException("Cannot remove metadata from '" + namespace + "' namespace");
+        throw new UnsupportedOperationException("Cannot remove metadata from '" + namespace + "' namespace");
     }
 
     @Override
     protected void addProvider(Provider<Metadata> provider) {
         if (provider instanceof MetadataProvider metadataProvider) {
             metadataProvider.getReservedNamespaces().stream()
-                    .forEach(namespace -> reservedNamespaces.putIfAbsent(namespace, metadataProvider));
+                    .forEach(namespace -> reservedNamespaces.put(namespace, metadataProvider));
         }
         super.addProvider(provider);
     }

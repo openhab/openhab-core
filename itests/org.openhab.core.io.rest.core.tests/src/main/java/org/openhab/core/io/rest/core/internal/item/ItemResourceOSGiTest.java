@@ -329,6 +329,18 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
+    public void testAddMetadataUnmanagedReservedNamespace() {
+        MetadataDTO dto = new MetadataDTO();
+        dto.value = "some value";
+
+        MetadataProvider provider = mock(MetadataProvider.class);
+        when(provider.getReservedNamespaces()).thenReturn(Set.of("semantics"));
+        registerService(provider);
+
+        assertEquals(405, itemResource.addMetadata(ITEM_NAME1, "semantics", dto).getStatus());
+    }
+
+    @Test
     public void testRemoveMetadataNonExistingItem() {
         Response response = itemResource.removeMetadata("nonExisting", "anything");
         assertEquals(404, response.getStatus());
@@ -349,6 +361,15 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
         Response response = itemResource.removeMetadata(ITEM_NAME1, "namespace");
         assertEquals(405, response.getStatus());
+    }
+
+    @Test
+    public void testRemoveMetadataUnmanagedReservedNamespace() {
+        MetadataProvider provider = mock(MetadataProvider.class);
+        when(provider.getReservedNamespaces()).thenReturn(Set.of("semantics"));
+        registerService(provider);
+
+        assertEquals(405, itemResource.removeMetadata(ITEM_NAME1, "semantics").getStatus());
     }
 
     @SuppressWarnings("unused")
