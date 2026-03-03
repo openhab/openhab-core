@@ -73,6 +73,6 @@ feature.openhab-config: \
 	de.focus_shift.jollyday-core;version='[1.8.1,1.8.2)',\
 	de.focus_shift.jollyday-jackson;version='[1.8.1,1.8.2)',\
 	com.fasterxml.jackson.core.jackson-annotations;version='[2.21.0,2.21.1)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.21.0,2.21.1)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.21.0,2.21.1)',\
-	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.21.0,2.21.1)'
+	com.fasterxml.jackson.core.jackson-core;version='[2.21.1,2.21.2)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.21.1,2.21.2)',\
+	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.21.1,2.21.2)'
