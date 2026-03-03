@@ -173,6 +173,7 @@ public class PersistenceManagerTest {
     @BeforeEach
     public void setUp() throws ItemNotFoundException {
         TEST_GROUP_ITEM.addMember(TEST_ITEM);
+        TEST_GROUP_ITEM.addMember(TEST_GROUP_ITEM2);
 
         // set initial states
         TEST_ITEM.setState(UnDefType.NULL);
@@ -319,8 +320,6 @@ public class PersistenceManagerTest {
         addConfiguration(TEST_PERSISTENCE_SERVICE_ID,
                 List.of(new PersistenceAllConfig(), new PersistenceGroupExcludeConfig(TEST_GROUP_ITEM_NAME)),
                 PersistenceStrategy.Globals.UPDATE, null);
-
-        TEST_GROUP_ITEM.addMember(TEST_GROUP_ITEM2);
 
         manager.stateUpdated(TEST_GROUP_ITEM2, TEST_STATE);
         manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
