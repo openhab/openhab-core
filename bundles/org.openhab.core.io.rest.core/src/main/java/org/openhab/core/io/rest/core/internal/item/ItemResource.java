@@ -110,7 +110,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -182,8 +181,6 @@ public class ItemResource implements RESTResource {
     }
 
     private final Logger logger = LoggerFactory.getLogger(ItemResource.class);
-    private final Gson gson = new Gson();
-
     private final DTOMapper dtoMapper;
     private final EventPublisher eventPublisher;
     private final ItemBuilderFactory itemBuilderFactory;
@@ -500,7 +497,7 @@ public class ItemResource implements RESTResource {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
 
-        source = buildSource(source, securityContext);
+        String eventSource = buildSource(source, securityContext);
 
         // get Item
         Item item = getItem(itemName);
@@ -512,7 +509,7 @@ public class ItemResource implements RESTResource {
 
             if (state != null) {
                 // set State and report OK
-                eventPublisher.post(ItemEventFactory.createStateEvent(itemName, state, source));
+                eventPublisher.post(ItemEventFactory.createStateEvent(itemName, state, eventSource));
                 return getItemResponse(null, Status.ACCEPTED, null, locale, zoneId, null);
             } else {
                 // State could not be parsed
@@ -566,7 +563,7 @@ public class ItemResource implements RESTResource {
             SecurityContext securityContext) {
         Item item = getItem(itemName);
         Command command = null;
-        source = buildSource(source, securityContext);
+        String eventSource = buildSource(source, securityContext);
         if (item != null) {
             if ("toggle".equalsIgnoreCase(value) && (item instanceof SwitchItem || item instanceof RollershutterItem)) {
                 if (OnOffType.ON.equals(item.getStateAs(OnOffType.class))) {
@@ -585,7 +582,7 @@ public class ItemResource implements RESTResource {
                 command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), value);
             }
             if (command != null) {
-                eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command, source));
+                eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command, eventSource));
                 ResponseBuilder resbuilder = Response.ok();
                 resbuilder.type(MediaType.TEXT_PLAIN);
                 return resbuilder.build();
