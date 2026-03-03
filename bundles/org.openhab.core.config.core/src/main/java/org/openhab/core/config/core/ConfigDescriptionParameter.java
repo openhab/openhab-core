@@ -312,6 +312,9 @@ public class ConfigDescriptionParameter {
      * <p>
      * A context is a hint for user interfaces and input validators.
      * <p>
+     * <p>
+     * Any non empty string can be used, but the following have a special meaning, and will be suggested first by the IDE:
+     * </p>
      *
      * <ul>
      * <!-- @formatter:off -->
