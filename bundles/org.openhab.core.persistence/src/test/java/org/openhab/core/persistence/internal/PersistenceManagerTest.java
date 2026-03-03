@@ -15,6 +15,7 @@ package org.openhab.core.persistence.internal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -95,11 +96,13 @@ public class PersistenceManagerTest {
     private static final String TEST_ITEM2_NAME = "testItem2";
     private static final String TEST_ITEM3_NAME = "testItem3";
     private static final String TEST_GROUP_ITEM_NAME = "groupItem";
+    private static final String TEST_GROUP_ITEM2_NAME = "groupItem2";
 
     private static final StringItem TEST_ITEM = new StringItem(TEST_ITEM_NAME);
     private static final StringItem TEST_ITEM2 = new StringItem(TEST_ITEM2_NAME);
     private static final NumberItem TEST_ITEM3 = new NumberItem(TEST_ITEM3_NAME);
     private static final GroupItem TEST_GROUP_ITEM = new GroupItem(TEST_GROUP_ITEM_NAME);
+    private static final GroupItem TEST_GROUP_ITEM2 = new GroupItem(TEST_GROUP_ITEM2_NAME);
 
     private static final State TEST_STATE = new StringType("testState1");
 
@@ -176,8 +179,10 @@ public class PersistenceManagerTest {
         TEST_ITEM2.setState(UnDefType.NULL);
         TEST_ITEM3.setState(DecimalType.ZERO);
         TEST_GROUP_ITEM.setState(UnDefType.NULL);
+        TEST_GROUP_ITEM2.setState(UnDefType.NULL);
 
         when(itemRegistryMock.getItem(TEST_GROUP_ITEM_NAME)).thenReturn(TEST_GROUP_ITEM);
+        when(itemRegistryMock.getItem(TEST_GROUP_ITEM2_NAME)).thenReturn(TEST_GROUP_ITEM2);
         when(itemRegistryMock.getItem(TEST_ITEM_NAME)).thenReturn(TEST_ITEM);
         when(itemRegistryMock.getItem(TEST_ITEM2_NAME)).thenReturn(TEST_ITEM2);
         when(itemRegistryMock.getItem(TEST_ITEM3_NAME)).thenReturn(TEST_ITEM3);
@@ -304,6 +309,23 @@ public class PersistenceManagerTest {
         manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
 
         verify(persistenceServiceMock).store(TEST_ITEM2, null);
+        verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
+
+        verifyNoMoreInteractions(persistenceServiceMock);
+    }
+
+    @Test
+    public void doesNotApplyToNestedGroupItemWithAllConfigAndGroupExclusion() {
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID,
+                List.of(new PersistenceAllConfig(), new PersistenceGroupExcludeConfig(TEST_GROUP_ITEM_NAME)),
+                PersistenceStrategy.Globals.UPDATE, null);
+
+        TEST_GROUP_ITEM.addMember(TEST_GROUP_ITEM2);
+
+        manager.stateUpdated(TEST_GROUP_ITEM2, TEST_STATE);
+        manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
+
+        verify(persistenceServiceMock).store(TEST_GROUP_ITEM2, null);
         verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
 
         verifyNoMoreInteractions(persistenceServiceMock);
