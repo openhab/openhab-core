@@ -171,7 +171,7 @@
 				</xs:restriction>
 			</xs:simpleType>
 			<xs:simpleType>
-				<!-- enhanced behavior: allow any of the following (so IDE can suggest values) -->
+				<!-- enhanced behavior: allow "special meaning" options (so IDE can suggest them) -->
 				<xs:restriction base="xs:string">
 					<xs:enumeration value="channel"/>
 					<xs:enumeration value="channel-type"/>
