@@ -44,6 +44,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.SafeCallerBuilder;
+import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -102,7 +103,8 @@ public class PersistenceManagerTest {
     private static final StringItem TEST_ITEM2 = new StringItem(TEST_ITEM2_NAME);
     private static final NumberItem TEST_ITEM3 = new NumberItem(TEST_ITEM3_NAME);
     private static final GroupItem TEST_GROUP_ITEM = new GroupItem(TEST_GROUP_ITEM_NAME);
-    private static final GroupItem TEST_GROUP_ITEM2 = new GroupItem(TEST_GROUP_ITEM2_NAME);
+    private static final GroupItem TEST_GROUP_ITEM2 = new GroupItem(TEST_GROUP_ITEM2_NAME, TEST_ITEM3,
+            new GroupFunction.Equality());
 
     private static final State TEST_STATE = new StringType("testState1");
 
@@ -174,13 +176,14 @@ public class PersistenceManagerTest {
     public void setUp() throws ItemNotFoundException {
         TEST_GROUP_ITEM.addMember(TEST_ITEM);
         TEST_GROUP_ITEM.addMember(TEST_GROUP_ITEM2);
+        TEST_GROUP_ITEM2.addMember(TEST_ITEM3);
 
         // set initial states
         TEST_ITEM.setState(UnDefType.NULL);
         TEST_ITEM2.setState(UnDefType.NULL);
         TEST_ITEM3.setState(DecimalType.ZERO);
         TEST_GROUP_ITEM.setState(UnDefType.NULL);
-        TEST_GROUP_ITEM2.setState(UnDefType.NULL);
+        TEST_GROUP_ITEM2.setState(DecimalType.ZERO);
 
         when(itemRegistryMock.getItem(TEST_GROUP_ITEM_NAME)).thenReturn(TEST_GROUP_ITEM);
         when(itemRegistryMock.getItem(TEST_GROUP_ITEM2_NAME)).thenReturn(TEST_GROUP_ITEM2);
@@ -321,10 +324,13 @@ public class PersistenceManagerTest {
                 List.of(new PersistenceAllConfig(), new PersistenceGroupExcludeConfig(TEST_GROUP_ITEM_NAME)),
                 PersistenceStrategy.Globals.UPDATE, null);
 
-        manager.stateUpdated(TEST_GROUP_ITEM2, TEST_STATE);
+        manager.stateUpdated(TEST_ITEM, TEST_STATE);
+        manager.stateUpdated(TEST_ITEM2, TEST_STATE);
         manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
+        manager.stateUpdated(TEST_ITEM3, DecimalType.ZERO);
+        manager.stateUpdated(TEST_GROUP_ITEM2, DecimalType.ZERO);
 
-        verify(persistenceServiceMock).store(TEST_GROUP_ITEM2, null);
+        verify(persistenceServiceMock).store(TEST_ITEM2, null);
         verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
 
         verifyNoMoreInteractions(persistenceServiceMock);
