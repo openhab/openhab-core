@@ -353,7 +353,7 @@ public class ConfigDescriptionParameter {
      * <!-- @formatter:on -->
      * </ul>
      *
-     * @return the context of the configuration parameter (could be null or empty)
+     * @return the context of the configuration parameter (could be null)
      */
     public @Nullable String getContext() {
         return this.context;
