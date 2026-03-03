@@ -15,6 +15,7 @@ package org.openhab.core.persistence.internal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -96,13 +97,15 @@ public class PersistenceManagerTest {
     private static final String TEST_ITEM2_NAME = "testItem2";
     private static final String TEST_ITEM3_NAME = "testItem3";
     private static final String TEST_GROUP_ITEM_NAME = "groupItem";
+    private static final String TEST_GROUP_ITEM2_BASE_NAME = "groupItem2Base";
     private static final String TEST_GROUP_ITEM2_NAME = "groupItem2";
 
     private static final StringItem TEST_ITEM = new StringItem(TEST_ITEM_NAME);
     private static final StringItem TEST_ITEM2 = new StringItem(TEST_ITEM2_NAME);
     private static final NumberItem TEST_ITEM3 = new NumberItem(TEST_ITEM3_NAME);
     private static final GroupItem TEST_GROUP_ITEM = new GroupItem(TEST_GROUP_ITEM_NAME);
-    private static final GroupItem TEST_GROUP_ITEM2 = new GroupItem(TEST_GROUP_ITEM2_NAME, TEST_ITEM3,
+    private static final NumberItem TEST_GROUP_ITEM2_BASE = new NumberItem(TEST_GROUP_ITEM2_BASE_NAME);
+    private static final GroupItem TEST_GROUP_ITEM2 = new GroupItem(TEST_GROUP_ITEM2_NAME, TEST_GROUP_ITEM2_BASE,
             new GroupFunction.Equality());
 
     private static final State TEST_STATE = new StringType("testState1");
