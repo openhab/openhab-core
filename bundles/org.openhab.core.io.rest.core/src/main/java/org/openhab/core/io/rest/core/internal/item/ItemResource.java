@@ -823,13 +823,16 @@ public class ItemResource implements RESTResource {
         try {
             MetadataKey key = new MetadataKey(namespace, itemName);
             if (metadataRegistry.get(key) != null) {
-                if (metadataRegistry.remove(key) == null) {
-                    // Exists, but not managed
+                Metadata removedMetadata = metadataRegistry.remove(key);
+                if (removedMetadata != null) {
+                    return Response.ok(null, MediaType.TEXT_PLAIN).build();
+                }
+                if (metadataRegistry.get(key) != null) {
+                    // Exists, but not managed, and not removed in the mean time
                     return Response.status(Status.METHOD_NOT_ALLOWED).build();
                 }
-            } else {
-                return Response.status(Status.NOT_FOUND).build();
             }
+            return Response.status(Status.NOT_FOUND).build();
         } catch (UnsupportedOperationException e) {
             // Trying to remove from a reserved namespace that is in an unmanaged provider
             return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, e.getMessage());
@@ -837,8 +840,6 @@ public class ItemResource implements RESTResource {
             // There is no managed provider available
             return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
-
-        return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
     @POST
