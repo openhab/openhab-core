@@ -211,6 +211,8 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
                         console.println("Metadata element for " + key + " could not be found.");
                     }
                 }
+            } else {
+                console.println("Metadata element for " + key + " could not be found.");
             }
         } catch (UnsupportedOperationException e) {
             console.println("Unmanaged metadata element for " + key + " in reserved namespace, could not be removed.");
