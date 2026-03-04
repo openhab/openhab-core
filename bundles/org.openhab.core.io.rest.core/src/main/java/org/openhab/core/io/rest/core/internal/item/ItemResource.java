@@ -763,9 +763,9 @@ public class ItemResource implements RESTResource {
             value = "";
         }
 
+        MetadataKey key = new MetadataKey(namespace, itemName);
+        Metadata md = new Metadata(key, value, metadata.config);
         try {
-            MetadataKey key = new MetadataKey(namespace, itemName);
-            Metadata md = new Metadata(key, value, metadata.config);
             if (metadataRegistry.get(key) == null) {
                 metadataRegistry.add(md);
                 return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
@@ -820,8 +820,8 @@ public class ItemResource implements RESTResource {
             return Response.status(Status.NOT_FOUND).build();
         }
 
+        MetadataKey key = new MetadataKey(namespace, itemName);
         try {
-            MetadataKey key = new MetadataKey(namespace, itemName);
             if (metadataRegistry.get(key) != null) {
                 Metadata removedMetadata = metadataRegistry.remove(key);
                 if (removedMetadata != null) {
@@ -852,8 +852,13 @@ public class ItemResource implements RESTResource {
         Collection<String> itemNames = itemRegistry.stream().map(Item::getName)
                 .collect(Collectors.toCollection(HashSet::new));
 
-        metadataRegistry.getAll().stream().filter(md -> !itemNames.contains(md.getUID().getItemName()))
-                .forEach(md -> metadataRegistry.remove(md.getUID()));
+        metadataRegistry.getAll().stream().filter(md -> !itemNames.contains(md.getUID().getItemName())).forEach(md -> {
+            try {
+                metadataRegistry.remove(md.getUID());
+            } catch (UnsupportedOperationException | IllegalStateException e) {
+                // ignore metadata that cannot be removed
+            }
+        });
         return Response.ok().build();
     }
 

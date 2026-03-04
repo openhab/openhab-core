@@ -147,12 +147,21 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
             MetadataKey key = new MetadataKey(namespace, itemName);
             Map<String, Object> configMap = getConfigMap(config);
             Metadata metadata = new Metadata(key, value, configMap);
-            if (metadataRegistry.get(key) != null) {
-                metadataRegistry.update(metadata);
-                console.println("Updated: " + metadata);
-            } else {
-                metadataRegistry.add(metadata);
-                console.println("Added: " + metadata);
+            try {
+                if (metadataRegistry.get(key) == null) {
+                    metadataRegistry.add(metadata);
+                    console.println("Added: " + metadata);
+                } else {
+                    if (metadataRegistry.update(metadata) == null) {
+                        console.println("Cannot update metadata in unmanaged provider: " + metadata);
+                    } else {
+                        console.println("Updated: " + metadata);
+                    }
+                }
+            } catch (UnsupportedOperationException e) {
+                console.println("Namespace reserved in unmanaged provider: " + metadata);
+            } catch (IllegalStateException e) {
+                console.println("No managed provider available for: " + metadata);
             }
         }
     }
@@ -190,11 +199,23 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
     }
 
     private void removeMetadata(Console console, MetadataKey key) {
-        Metadata metadata = metadataRegistry.remove(key);
-        if (metadata != null) {
-            console.println("Removed: " + metadata);
-        } else {
-            console.println("Metadata element for " + key + " could not be found.");
+        try {
+            if (metadataRegistry.get(key) != null) {
+                Metadata removedMetadata = metadataRegistry.remove(key);
+                if (removedMetadata != null) {
+                    console.println("Removed: " + removedMetadata);
+                } else {
+                    if (metadataRegistry.get(key) != null) {
+                        console.println("Unmanaged metadata element for " + key + ", could not be removed.");
+                    } else {
+                        console.println("Metadata element for " + key + " could not be found.");
+                    }
+                }
+            }
+        } catch (UnsupportedOperationException e) {
+            console.println("Unmanaged metadata element for " + key + " in reserved namespace, could not be removed.");
+        } catch (IllegalStateException e) {
+            console.println("No managed provider available for metadata with key: " + key);
         }
     }
 
@@ -205,7 +226,11 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
             if (!itemNames.contains(md.getUID().getItemName())) {
                 console.println("Item missing: " + md.getUID());
                 if ("purge".equals(action)) {
-                    metadataRegistry.remove(md.getUID());
+                    try {
+                        metadataRegistry.remove(md.getUID());
+                    } catch (UnsupportedOperationException | IllegalStateException e) {
+                        // ignore metadata that cannot be removed
+                    }
                 }
             }
         });
