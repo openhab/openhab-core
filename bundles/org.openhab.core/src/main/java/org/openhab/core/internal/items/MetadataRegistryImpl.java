@@ -167,7 +167,7 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
             metadataProvider.getReservedNamespaces().stream().forEach(namespace -> {
                 Set<MetadataProvider> currentProviders = reservedNamespaces.getOrDefault(namespace, Set.of());
                 if (!currentProviders.isEmpty()) {
-                    logger.warn("Multiple metadata providers are reserving namespace '{}', there should only be one.",
+                    logger.debug("Multiple metadata providers are reserving namespace '{}', there should only be one.",
                             namespace);
                 }
                 Set<MetadataProvider> providers = Stream
