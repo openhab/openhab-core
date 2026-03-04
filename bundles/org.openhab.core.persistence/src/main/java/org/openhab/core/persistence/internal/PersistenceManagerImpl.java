@@ -382,8 +382,8 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                                 }
                             }
                             // update states
-                            timeSeries.getStates().forEach(
-                                    e -> service.store(item, e.timestamp().atZone(ZoneId.systemDefault()), e.state()));
+                            timeSeries.getStates().forEach(e -> service.store(item,
+                                    e.timestamp().atZone(ZoneId.systemDefault()), e.state(), container.getAlias(item)));
                             timeSeries.getStates().filter(s -> s.timestamp().isAfter(Instant.now())).findFirst()
                                     .ifPresent(s -> {
                                         ScheduledCompletableFuture<?> forecastJob = container.forecastJobs
