@@ -40,6 +40,7 @@ import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
+import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
@@ -73,11 +74,13 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - use item lastChange and lastUpdate methods if not in peristence
  * @author Mark Herwege - add Riemann sum methods
  * @author Jörg Sautter - use Instant instead of ZonedDateTime in Riemann sum methods
+ * @author Mark Herwege - handle timeseries update
  */
 @Component(immediate = true)
 @NonNullByDefault
 public class PersistenceExtensions {
 
+    private static @Nullable PersistenceManager manager;
     private static @Nullable PersistenceServiceRegistry registry;
     private static @Nullable PersistenceServiceConfigurationRegistry configRegistry;
     private static @Nullable TimeZoneProvider timeZoneProvider;
@@ -90,7 +93,7 @@ public class PersistenceExtensions {
     }
 
     @Activate
-    public PersistenceExtensions(@Reference PersistenceServiceRegistry registry,
+    public PersistenceExtensions(@Reference PersistenceManager manager, @Reference PersistenceServiceRegistry registry,
             @Reference PersistenceServiceConfigurationRegistry configRegistry,
             @Reference TimeZoneProvider timeZoneProvider) {
         PersistenceExtensions.registry = registry;
@@ -165,6 +168,9 @@ public class PersistenceExtensions {
         PersistenceService service = getService(effectiveServiceId);
         if (service instanceof ModifiablePersistenceService modifiableService) {
             modifiableService.store(item, timestamp, state, getAlias(item, effectiveServiceId));
+            if (manager != null) {
+                manager.handleExternalPersistenceDataChange(service, item);
+            }
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
@@ -230,6 +236,10 @@ public class PersistenceExtensions {
     }
 
     private static void internalPersist(Item item, TimeSeries timeSeries, @Nullable String serviceId) {
+        if (timeSeries.size() == 0) {
+            // discard empty time series
+            return;
+        }
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null || timeSeries.size() == 0) {
             return;
@@ -245,6 +255,9 @@ public class PersistenceExtensions {
             String alias = getAlias(item, effectiveServiceId);
             timeSeries.getStates()
                     .forEach(s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state(), alias));
+            if (manager != null) {
+                manager.handleExternalPersistenceDataChange(service, item);
+            }
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
@@ -3409,6 +3422,9 @@ public class PersistenceExtensions {
             filter.setOrdering(Ordering.ASCENDING);
 
             mService.remove(filter, alias);
+            if (manager != null) {
+                manager.handleExternalPersistenceDataChange(mService, item);
+            }
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
                     .warn("There is no modifiable persistence service registered with the id '{}'", effectiveServiceId);
