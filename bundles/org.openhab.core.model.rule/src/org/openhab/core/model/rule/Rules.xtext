@@ -22,7 +22,7 @@ VariableDeclaration:
 Rule:
 	'rule' name=(STRING|ID)
 	'when' eventtrigger+=EventTrigger ('or' eventtrigger+=EventTrigger)*
-	'then' script=Script
+	'then' script=XExpressionInClosure
 	'end'
 ;
 

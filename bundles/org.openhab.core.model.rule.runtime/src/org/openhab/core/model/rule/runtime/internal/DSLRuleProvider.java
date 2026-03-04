@@ -25,7 +25,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
-import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.openhab.core.automation.Action;
@@ -272,7 +271,7 @@ public class DSLRuleProvider
 
         // Create Action
         String context = DSLScriptContextProvider.CONTEXT_IDENTIFIER + modelName + "-" + index + "\n";
-        XBlockExpression expression = rule.getScript();
+        XExpression expression = rule.getScript();
         String script = NodeModelUtils.findActualNodeFor(expression).getText();
         Configuration cfg = new Configuration();
         cfg.put("script", context + removeIndentation(script));
