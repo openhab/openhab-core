@@ -33,8 +33,8 @@ public interface MetadataProvider extends Provider<Metadata> {
      * A {@link MetadataProvider} implementation can reserve a metadata namespace. Only a single provider for this
      * namespace should provide metadata for this namespace. Updating metadata in this namespace will have to be with
      * this provider, and is refused if the provider is not a {@link ManagedProvider}. If multiple providers for this
-     * namespace are added to the registry, all of them will be considered as reserved and updates could be to any of
-     * them ifany of them is managed. This should be avoided.
+     * namespace are added to the registry, all of them will be considered as reserved and updates may be sent to any of
+     * them if any of them is managed. This should be avoided.
      *
      * This is useful if providers calculate metadata and this metadata is not meant to be persisted with a
      * {@link ManagedProvider}. An example is semantics metadata provided by its own provider.

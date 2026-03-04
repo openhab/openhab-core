@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractRegistry;
-import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ManagedMetadataProvider;
@@ -132,8 +131,8 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
     public Metadata add(Metadata element) {
         String namespace = element.getUID().getNamespace();
         Set<MetadataProvider> providers = reservedNamespaces.get(namespace);
-        if (providers == null || providers.isEmpty()
-                || providers.stream().anyMatch(p -> p instanceof ManagedProvider)) {
+        MetadataProvider managedProvider = (MetadataProvider) getManagedProvider().orElse(null);
+        if (providers == null || providers.isEmpty() || providers.stream().anyMatch(p -> p.equals(managedProvider))) {
             return super.add(element);
         }
         throw new UnsupportedOperationException("Cannot add metadata to '" + namespace + "' namespace");
@@ -143,8 +142,8 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
     public @Nullable Metadata update(Metadata element) {
         String namespace = element.getUID().getNamespace();
         Set<MetadataProvider> providers = reservedNamespaces.get(namespace);
-        if (providers == null || providers.isEmpty()
-                || providers.stream().anyMatch(p -> p instanceof ManagedProvider)) {
+        MetadataProvider managedProvider = (MetadataProvider) getManagedProvider().orElse(null);
+        if (providers == null || providers.isEmpty() || providers.stream().anyMatch(p -> p.equals(managedProvider))) {
             return super.update(element);
         }
         throw new UnsupportedOperationException("Cannot update metadata in '" + namespace + "' namespace");
@@ -154,8 +153,8 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
     public @Nullable Metadata remove(MetadataKey key) {
         String namespace = key.getNamespace();
         Set<MetadataProvider> providers = reservedNamespaces.get(namespace);
-        if (providers == null || providers.isEmpty()
-                || providers.stream().anyMatch(p -> p instanceof ManagedProvider)) {
+        MetadataProvider managedProvider = (MetadataProvider) getManagedProvider().orElse(null);
+        if (providers == null || providers.isEmpty() || providers.stream().anyMatch(p -> p.equals(managedProvider))) {
             return super.remove(key);
         }
         throw new UnsupportedOperationException("Cannot remove metadata from '" + namespace + "' namespace");
@@ -185,7 +184,11 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
             metadataProvider.getReservedNamespaces().stream().forEach(namespace -> {
                 Set<MetadataProvider> providers = reservedNamespaces.getOrDefault(namespace, Set.of()).stream()
                         .filter(p -> !provider.equals(p)).collect(Collectors.toSet());
-                reservedNamespaces.put(namespace, providers);
+                if (providers.isEmpty()) {
+                    reservedNamespaces.remove(namespace);
+                } else {
+                    reservedNamespaces.put(namespace, providers);
+                }
             });
         }
         super.removeProvider(provider);
