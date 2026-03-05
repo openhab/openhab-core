@@ -16,8 +16,9 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.openhab.core.persistence.extensions.TestPersistenceService.*;
 
 import java.time.ZoneId;
@@ -51,11 +52,14 @@ import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.extensions.PersistenceExtensions.RiemannType;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
+import org.openhab.core.types.TimeSeries.Policy;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -83,6 +87,7 @@ public class PersistenceExtensionsTest {
 
     public static final double KELVIN_OFFSET = 273.15;
 
+    private @Mock @NonNullByDefault({}) PersistenceManager persistenceManagerMock;
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
@@ -120,7 +125,7 @@ public class PersistenceExtensionsTest {
         when(persistenceServiceConfigurationRegistryMock.get(anyString())).thenReturn(null);
         when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.systemDefault());
 
-        new PersistenceExtensions(new PersistenceServiceRegistry() {
+        new PersistenceExtensions(persistenceManagerMock, new PersistenceServiceRegistry() {
             private final PersistenceService testPersistenceService = new TestPersistenceService(itemRegistryMock);
 
             @Override
@@ -3439,6 +3444,94 @@ public class PersistenceExtensionsTest {
     }
 
     @Test
+    public void testPersistState() {
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 27;
+        int futureHours = 27;
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+        numberItem.setState(STATE);
+
+        assertNotNull(PersistenceExtensions.getAllStatesSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID), is(5L));
+        HistoricItem historicItem = PersistenceExtensions.previousState(numberItem,
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.persist(numberItem, TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock).handleExternalPersistenceDataChange(any(), eq(numberItem));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(STATE));
+    }
+
+    @Test
+    public void testPersistStateAtTime() {
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 27;
+        int futureHours = 27;
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+
+        assertNotNull(PersistenceExtensions.getAllStatesSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID), is(5L));
+        HistoricItem historicItem = PersistenceExtensions.previousState(numberItem,
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.persist(numberItem, now.minusMinutes(105), STATE, TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock).handleExternalPersistenceDataChange(any(), eq(numberItem));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+        historicItem = PersistenceExtensions.persistedState(numberItem, now.minusMinutes(90),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(STATE));
+    }
+
+    @Test
+    public void testPersistTimeSeries() {
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 27;
+        int futureHours = 27;
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+
+        assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID), is(10L));
+        HistoricItem historicItem = PersistenceExtensions.previousState(numberItem,
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+        historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        TimeSeries timeSeries = new TimeSeries(Policy.REPLACE);
+        timeSeries.add(now.minusHours(5).toInstant(), STATE);
+        timeSeries.add(now.plusHours(5).toInstant(), STATE);
+        PersistenceExtensions.persist(numberItem, timeSeries, TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(1)).handleExternalPersistenceDataChange(any(), eq(numberItem));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(STATE));
+        historicItem = PersistenceExtensions.persistedState(numberItem, now.minusHours(6),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+        historicItem = PersistenceExtensions.persistedState(numberItem, now.plusHours(6),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(STATE));
+    }
+
+    @Test
     public void testRemoveAllStatesSince() {
         ZonedDateTime now = ZonedDateTime.now();
         int historicHours = 27;
@@ -3456,6 +3549,7 @@ public class PersistenceExtensionsTest {
 
         PersistenceExtensions.removeAllStatesSince(numberItem, now.minusHours(1),
                 TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(1)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesSince(numberItem, now.minusHours(historicHours),
                 TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countSince(numberItem, now.minusHours(historicHours),
@@ -3466,6 +3560,7 @@ public class PersistenceExtensionsTest {
 
         PersistenceExtensions.removeAllStatesSince(numberItem, now.minusHours(3),
                 TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(2)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesSince(numberItem, now.minusHours(historicHours),
                 TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countSince(numberItem, now.minusHours(historicHours),
@@ -3476,6 +3571,7 @@ public class PersistenceExtensionsTest {
 
         PersistenceExtensions.removeAllStatesSince(numberItem, now.minusHours(historicHours + 1),
                 TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(3)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesSince(numberItem, now.minusHours(historicHours),
                 TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countSince(numberItem, now.minusHours(historicHours),
@@ -3500,6 +3596,7 @@ public class PersistenceExtensionsTest {
         assertThat(historicItem.getState(), is(new DecimalType(0)));
 
         PersistenceExtensions.removeAllStatesUntil(numberItem, now.plusHours(1), TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(1)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesUntil(numberItem, now.plusHours(futureHours),
                 TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countUntil(numberItem, now.plusHours(futureHours),
@@ -3509,6 +3606,7 @@ public class PersistenceExtensionsTest {
         assertThat(historicItem.getState(), is(new DecimalType(50)));
 
         PersistenceExtensions.removeAllStatesUntil(numberItem, now.plusHours(2), TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(2)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesUntil(numberItem, now.plusHours(futureHours),
                 TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countUntil(numberItem, now.plusHours(futureHours),
@@ -3519,6 +3617,7 @@ public class PersistenceExtensionsTest {
 
         PersistenceExtensions.removeAllStatesUntil(numberItem, now.plusHours(futureHours + 1),
                 TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(3)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesUntil(numberItem, now.plusHours(futureHours),
                 TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countUntil(numberItem, now.plusHours(futureHours),
@@ -3548,6 +3647,7 @@ public class PersistenceExtensionsTest {
 
         PersistenceExtensions.removeAllStatesBetween(numberItem, now.minusHours(2), now.minusHours(1),
                 TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(1)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
                 now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
@@ -3561,6 +3661,7 @@ public class PersistenceExtensionsTest {
 
         PersistenceExtensions.removeAllStatesBetween(numberItem, now.plusHours(1), now.plusHours(2),
                 TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(2)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
                 now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
@@ -3574,6 +3675,7 @@ public class PersistenceExtensionsTest {
 
         PersistenceExtensions.removeAllStatesBetween(numberItem, now.minusHours(historicHours - 2),
                 now.plusHours(futureHours - 2), TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(3)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
                 now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
@@ -3587,6 +3689,7 @@ public class PersistenceExtensionsTest {
 
         PersistenceExtensions.removeAllStatesBetween(numberItem, now.minusHours(historicHours + 1),
                 now.plusHours(futureHours + 1), TestCachedValuesPersistenceService.ID);
+        verify(persistenceManagerMock, times(4)).handleExternalPersistenceDataChange(any(), eq(numberItem));
         assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
                 now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
         assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
@@ -3603,7 +3706,7 @@ public class PersistenceExtensionsTest {
         assertTrue(futureHours == 0 || futureHours > 5);
 
         TestCachedValuesPersistenceService persistenceService = new TestCachedValuesPersistenceService();
-        new PersistenceExtensions(new PersistenceServiceRegistry() {
+        new PersistenceExtensions(persistenceManagerMock, new PersistenceServiceRegistry() {
 
             @Override
             public @Nullable String getDefaultId() {
