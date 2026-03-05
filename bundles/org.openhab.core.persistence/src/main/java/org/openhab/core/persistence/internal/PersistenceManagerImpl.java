@@ -397,9 +397,9 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                                     .sorted((e1, e2) -> e2.timestamp().compareTo(e1.timestamp())).findFirst()
                                     .ifPresent(s -> {
                                         ZonedDateTime lastStateUpdate = item.getLastStateUpdate();
-                                        if (lastStateUpdate == null || s.timestamp().atZone(ZoneId.systemDefault())
-                                                .isAfter(lastStateUpdate)) {
-                                            container.restoreItemState(item, ZonedDateTime.now(), s.state());
+                                        ZonedDateTime timestamp = s.timestamp().atZone(ZoneId.systemDefault());
+                                        if (lastStateUpdate == null || timestamp.isAfter(lastStateUpdate)) {
+                                            container.restoreItemState(item, timestamp, s.state());
                                         }
                                     });
                         }));
@@ -682,7 +682,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
 
                 @Override
                 public ZonedDateTime getTimestamp() {
-                    return ZonedDateTime.now();
+                    return timestamp;
                 }
 
                 @Override

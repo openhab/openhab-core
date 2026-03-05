@@ -78,6 +78,7 @@ import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
+import org.openhab.core.types.TimeSeries.Entry;
 import org.openhab.core.types.UnDefType;
 
 /**
@@ -414,6 +415,7 @@ public class PersistenceManagerTest {
         addConfiguration(TestModifiablePersistenceService.ID, List.of(new PersistenceAllConfig()),
                 PersistenceStrategy.Globals.FORECAST, null);
 
+        ZonedDateTime time0 = ZonedDateTime.now().minusSeconds(5000);
         Instant time1 = Instant.now().minusSeconds(1000);
         Instant time2 = Instant.now().plusSeconds(1000);
         Instant time3 = Instant.now().plusSeconds(2000);
@@ -425,6 +427,7 @@ public class PersistenceManagerTest {
         timeSeries.add(time2, new StringType("two"));
         timeSeries.add(time3, new StringType("three"));
         timeSeries.add(time4, new StringType("four"));
+        TEST_ITEM.setState(new StringType("zero"), null, time0, null, null);
 
         manager.timeSeriesUpdated(TEST_ITEM, timeSeries);
         InOrder inOrder = inOrder(service, schedulerMock);
@@ -436,6 +439,17 @@ public class PersistenceManagerTest {
         // first element not scheduled, because it is in the past, check if second is scheduled
         inOrder.verify(schedulerMock).at(any(SchedulerRunnable.class), eq(time2));
         inOrder.verifyNoMoreInteractions();
+
+        // check if timeseries element in the past updated item state
+        Entry firstEntry = timeSeries.getStates().findFirst().get();
+        assertThat(TEST_ITEM.getState(), is(firstEntry.state()));
+        assertThat(TEST_ITEM.getLastState(), is(new StringType("zero")));
+        ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
+        assertNotNull(lastStateUpdate);
+        assertThat(lastStateUpdate.toInstant(), is(firstEntry.timestamp()));
+        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
+        assertNotNull(lastStateChange);
+        assertThat(lastStateChange.toInstant(), is(firstEntry.timestamp()));
 
         // replace elements
         TimeSeries timeSeries2 = new TimeSeries(TimeSeries.Policy.REPLACE);
