@@ -751,7 +751,8 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
 
             // Check again if item has not been updated in the mean time before commit
             itemLastStateUpdate = item.getLastStateUpdate();
-            if (itemLastStateUpdate == null || lastStateUpdate.isAfter(itemLastStateUpdate)) {
+            if (itemLastStateUpdate == null
+                    || itemLastStateUpdate.toInstant().compareTo(lastStateUpdate.toInstant()) <= 0) {
                 genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
                 genericItem.setState(state, lastState, lastStateUpdate, lastStateChange, PERSISTENCE_SOURCE);
                 genericItem.addStateChangeListener(PersistenceManagerImpl.this);
