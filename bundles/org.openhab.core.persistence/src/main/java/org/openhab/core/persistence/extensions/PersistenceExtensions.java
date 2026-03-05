@@ -240,10 +240,6 @@ public class PersistenceExtensions {
     }
 
     private static void internalPersist(Item item, TimeSeries timeSeries, @Nullable String serviceId) {
-        if (timeSeries.size() == 0) {
-            // discard empty time series
-            return;
-        }
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null || timeSeries.size() == 0) {
             return;

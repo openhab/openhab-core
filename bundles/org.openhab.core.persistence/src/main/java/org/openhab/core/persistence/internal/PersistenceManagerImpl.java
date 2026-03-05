@@ -20,6 +20,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -394,8 +395,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                             });
                             // update current item state if last entry in timeseries is after last update of item
                             timeSeries.getStates().filter(s -> s.timestamp().isBefore(now))
-                                    .sorted((e1, e2) -> e2.timestamp().compareTo(e1.timestamp())).findFirst()
-                                    .ifPresent(s -> {
+                                    .max(Comparator.comparing(TimeSeries.Entry::timestamp)).ifPresent(s -> {
                                         ZonedDateTime lastStateUpdate = item.getLastStateUpdate();
                                         ZonedDateTime timestamp = s.timestamp().atZone(ZoneId.systemDefault());
                                         if (lastStateUpdate == null || timestamp.isAfter(lastStateUpdate)) {
@@ -615,8 +615,11 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 }
             }
             genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
-            genericItem.setState(state, lastState, lastStateUpdate, lastStateChange, PERSISTENCE_SOURCE);
-            genericItem.addStateChangeListener(PersistenceManagerImpl.this);
+            try {
+                genericItem.setState(state, lastState, lastStateUpdate, lastStateChange, PERSISTENCE_SOURCE);
+            } finally {
+                genericItem.addStateChangeListener(PersistenceManagerImpl.this);
+            }
             if (logger.isDebugEnabled()) {
                 logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
                         DateTimeFormatter.ISO_ZONED_DATE_TIME.format(persistedItem.getTimestamp()), item.getName(),
@@ -736,7 +739,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
             } else {
                 state = persistedItemState;
                 if (persistedItemLastStateChange != null && persistedItemLastState != null
-                        && persistedItemLastStateChange.isAfter(itemLastStateUpdate)) {
+                        && itemLastStateUpdate != null && persistedItemLastStateChange.isAfter(itemLastStateUpdate)) {
                     lastState = persistedItemLastState;
                     lastStateChange = persistedItemLastStateChange;
                 } else {
@@ -750,8 +753,11 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
             if (itemLastStateUpdate == null
                     || itemLastStateUpdate.toInstant().compareTo(lastStateUpdate.toInstant()) <= 0) {
                 genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
-                genericItem.setState(state, lastState, lastStateUpdate, lastStateChange, PERSISTENCE_SOURCE);
-                genericItem.addStateChangeListener(PersistenceManagerImpl.this);
+                try {
+                    genericItem.setState(state, lastState, lastStateUpdate, lastStateChange, PERSISTENCE_SOURCE);
+                } finally {
+                    genericItem.addStateChangeListener(PersistenceManagerImpl.this);
+                }
             }
         }
 

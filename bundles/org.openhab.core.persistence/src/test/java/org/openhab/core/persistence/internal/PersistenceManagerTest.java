@@ -415,11 +415,12 @@ public class PersistenceManagerTest {
         addConfiguration(TestModifiablePersistenceService.ID, List.of(new PersistenceAllConfig()),
                 PersistenceStrategy.Globals.FORECAST, null);
 
-        ZonedDateTime time0 = ZonedDateTime.now().minusSeconds(5000);
-        Instant time1 = Instant.now().minusSeconds(1000);
-        Instant time2 = Instant.now().plusSeconds(1000);
-        Instant time3 = Instant.now().plusSeconds(2000);
-        Instant time4 = Instant.now().plusSeconds(3000);
+        Instant now = Instant.now();
+        ZonedDateTime time0 = now.atZone(ZoneId.systemDefault()).minusSeconds(5000);
+        Instant time1 = now.minusSeconds(1000);
+        Instant time2 = now.plusSeconds(1000);
+        Instant time3 = now.plusSeconds(2000);
+        Instant time4 = now.plusSeconds(3000);
 
         // add elements
         TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.ADD);
