@@ -712,20 +712,50 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
 
         private void restoreItemState(Item item, PersistedItem persistedItem) {
             GenericItem genericItem = (GenericItem) item;
-            State persistedItemState = persistedItem.getState();
             ZonedDateTime itemLastStateUpdate = item.getLastStateUpdate();
-            ZonedDateTime lastStateUpdate = (itemLastStateUpdate == null
-                    || itemLastStateUpdate.isBefore(persistedItem.getTimestamp())) ? persistedItem.getTimestamp()
-                            : item.getLastStateUpdate();
-            ZonedDateTime lastStateChange = persistedItemState.equals(item.getState()) ? item.getLastStateChange()
-                    : lastStateUpdate;
-            State lastState = persistedItemState.equals(item.getState()) ? item.getLastState() : item.getState();
+            ZonedDateTime persistedItemTimestamp = persistedItem.getTimestamp();
+
+            if (itemLastStateUpdate != null && persistedItemTimestamp.isBefore(itemLastStateUpdate)) {
+                return;
+            }
+
+            State persistedItemState = persistedItem.getState();
+            State persistedItemLastState = persistedItem.getLastState();
+            ZonedDateTime persistedItemLastStateChange = persistedItem.getLastStateChange();
+            State itemState = item.getState();
+            State itemLastState = item.getLastState();
             ZonedDateTime itemLastStateChange = item.getLastStateChange();
-            State state = (lastStateChange != null && itemLastStateChange != null
-                    && lastStateChange.isBefore(itemLastStateChange)) ? item.getState() : persistedItemState;
-            genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
-            genericItem.setState(state, lastState, lastStateUpdate, lastStateChange, PERSISTENCE_SOURCE);
-            genericItem.addStateChangeListener(PersistenceManagerImpl.this);
+
+            State state;
+            ZonedDateTime lastStateUpdate = persistedItemTimestamp;
+            State lastState;
+            ZonedDateTime lastStateChange;
+
+            if (itemState.equals(persistedItemState)) {
+                state = itemState;
+                lastState = itemLastState;
+                lastStateChange = (persistedItemLastStateChange != null && itemLastStateChange != null
+                        && persistedItemLastStateChange.isAfter(itemLastStateChange)) ? persistedItemLastStateChange
+                                : itemLastStateChange;
+            } else {
+                state = persistedItemState;
+                if (persistedItemLastStateChange != null && persistedItemLastState != null
+                        && persistedItemLastStateChange.isAfter(itemLastStateUpdate)) {
+                    lastState = persistedItemLastState;
+                    lastStateChange = persistedItemLastStateChange;
+                } else {
+                    lastState = itemState;
+                    lastStateChange = persistedItemTimestamp;
+                }
+            }
+
+            // Check again if item has not been updated in the mean time before commit
+            itemLastStateUpdate = item.getLastStateUpdate();
+            if (itemLastStateUpdate == null || lastStateUpdate.isAfter(itemLastStateUpdate)) {
+                genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
+                genericItem.setState(state, lastState, lastStateUpdate, lastStateChange, PERSISTENCE_SOURCE);
+                genericItem.addStateChangeListener(PersistenceManagerImpl.this);
+            }
         }
 
         private void persistJob(List<PersistenceItemConfiguration> itemConfigs) {
