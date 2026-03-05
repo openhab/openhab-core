@@ -454,8 +454,10 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
     @Override
     public void handleExternalPersistenceDataChange(PersistenceService persistenceService, Item item) {
         persistenceServiceContainers.values().stream()
-                .filter(container -> container.persistenceService.equals(persistenceService) && container
-                        .getMatchingConfigurations(FORECAST).anyMatch(itemConf -> appliesToItem(itemConf, item)))
+                .filter(container -> container.persistenceService.equals(persistenceService) && Stream
+                        .concat(container.getMatchingConfigurations(UPDATE),
+                                container.getMatchingConfigurations(FORECAST))
+                        .distinct().anyMatch(itemConf -> appliesToItem(itemConf, item)))
                 .forEach(container -> {
                     container.scheduleNextPersistedForecastForItem(item.getName());
                     PersistedItem persistedItem = container.getPersistedItem(item);
