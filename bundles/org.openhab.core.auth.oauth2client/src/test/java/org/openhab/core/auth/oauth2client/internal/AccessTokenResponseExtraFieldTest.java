@@ -12,7 +12,7 @@
  */
 package org.openhab.core.auth.oauth2client.internal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 
@@ -24,7 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * JUnit tests for {@link AccessTokenResponseExtraField}
+ * JUnit tests for {@link AccessTokenResponse}
  *
  * @author Laurent Arnal - Initial contribution
  */
@@ -39,14 +39,14 @@ class AccessTokenResponseExtraFieldTest {
         String json = "{\"access_token\":\"AccessToken\",\"expires_in\":60,\"refresh_token\":\"RefreshToken\",\"app_client_id\":\"ApplicationClientId\"}";
         AccessTokenResponse atr = gson.fromJson(json, AccessTokenResponse.class);
 
-        assertEquals(atr.getAccessToken(), "AccessToken");
-        assertEquals(atr.getExpiresIn(), 60);
-        assertEquals(atr.getRefreshToken(), "RefreshToken");
+        assertEquals("AccessToken", atr.getAccessToken());
+        assertEquals(60, atr.getExpiresIn());
+        assertEquals("RefreshToken", atr.getRefreshToken());
 
         Map<String, String> extraFields = atr.getExtraFields();
 
-        assertEquals(extraFields.size(), 1);
-        assertEquals(extraFields.containsKey("app_client_id"), true);
-        assertEquals(extraFields.get("app_client_id"), "ApplicationClientId");
+        assertEquals(1, extraFields.size());
+        assertTrue(extraFields.containsKey("app_client_id"));
+        assertEquals("ApplicationClientId", extraFields.get("app_client_id"));
     }
 }

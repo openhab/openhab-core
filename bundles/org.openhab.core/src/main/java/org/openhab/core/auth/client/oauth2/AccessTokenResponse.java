@@ -133,7 +133,8 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
     }
 
     public void setExtraFields(Map<@NonNull String, @NonNull String> extraFields) {
-        this.extraFields = extraFields != null ? extraFields : Collections.emptyMap();
+        this.extraFields = (extraFields == null || extraFields.isEmpty()) ? Collections.emptyMap()
+                : Map.copyOf(extraFields);
     }
 
     /**
@@ -245,6 +246,6 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
     public String toString() {
         return "AccessTokenResponse [accessToken=" + accessToken + ", tokenType=" + tokenType + ", expiresIn="
                 + expiresIn + ", refreshToken=" + refreshToken + ", scope=" + scope + ", state=" + state
-                + ", createdOn=" + createdOn + "]";
+                + ", createdOn=" + createdOn + ", extraFields= " + extraFields + "]";
     }
 }

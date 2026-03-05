@@ -30,7 +30,6 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-@NonNullByDefault
 /**
  * A {@link TypeAdapterFactory} that decorates the default {@link AccessTokenResponse} adapter in order to capture
  * additional fields returned by an OAuth 2.0 authorization server that are not part of the standard RFC 6749
@@ -39,10 +38,11 @@ import com.google.gson.stream.JsonWriter;
  *
  * @author Laurent Arnal
  */
+@NonNullByDefault
 public final class AccessTokenResponseExtraFieldsAdapterFactory implements TypeAdapterFactory {
 
     private static final Set<String> KNOWN_FIELDS = Set.of("access_token", "token_type", "expires_in", "refresh_token",
-            "scope", "state");
+            "scope", "state", "created_on", "extra_fields");
 
     @Override
     public <T> @Nullable TypeAdapter<T> create(@Nullable Gson gson, @Nullable TypeToken<T> type) {
@@ -67,29 +67,32 @@ public final class AccessTokenResponseExtraFieldsAdapterFactory implements TypeA
             @Override
             public T read(JsonReader in) throws IOException {
                 JsonElement tree = elementAdapter.read(in);
-                if (tree != null) {
-                    JsonObject obj = tree.getAsJsonObject();
-
-                    T parsed = delegate.fromJsonTree(tree);
-                    AccessTokenResponse response = (AccessTokenResponse) parsed;
-
-                    Map<String, String> extras = new HashMap<>();
-                    for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                        String key = entry.getKey();
-                        if (KNOWN_FIELDS.contains(key)) {
-                            continue;
-                        }
-                        extras.put(key, toStringValue(gson, entry.getValue()));
-                    }
-
-                    if (response != null) {
-                        response.setExtraFields(extras);
-                    }
-                    return parsed;
+                if (tree == null) {
+                    return null;
                 }
 
-                // Delegate adapter returned null; propagate null without extra fields
-                return null;
+                if (!tree.isJsonObject()) {
+                    return delegate.fromJsonTree(tree);
+                }
+
+                JsonObject obj = tree.getAsJsonObject();
+
+                T parsed = delegate.fromJsonTree(tree);
+                AccessTokenResponse response = (AccessTokenResponse) parsed;
+
+                Map<String, String> extras = new HashMap<>();
+                for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+                    String key = entry.getKey();
+                    if (KNOWN_FIELDS.contains(key)) {
+                        continue;
+                    }
+                    extras.put(key, toStringValue(gson, entry.getValue()));
+                }
+
+                if (response != null) {
+                    response.setExtraFields(extras);
+                }
+                return parsed;
             }
         };
     }

@@ -93,7 +93,7 @@ public class OAuthConnector {
         this.gson = getGson(gsonBuilder);
     }
 
-    public static Gson getGson(GsonBuilder gsonBuilder) {
+    static Gson getGson(GsonBuilder gsonBuilder) {
         return gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(OAuthResponseException.class,
