@@ -389,7 +389,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                                 ScheduledCompletableFuture<?> forecastJob = container.forecastJobs.get(item.getName());
                                 if (forecastJob == null || forecastJob.getScheduledTime()
                                         .isAfter(s.timestamp().atZone(ZoneId.systemDefault()))) {
-                                    container.scheduleNextForecastForItem(item.getName(), s.timestamp(), s.state());
+                                    container.scheduleNextForecastForItem(item, s.timestamp(), s.state());
                                 }
                             });
                             // update current item state if last entry in timeseries is after last update of item
@@ -637,13 +637,15 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
             return persistedItem;
         }
 
-        public void scheduleNextForecastForItem(String itemName, Instant time, State state) {
+        public void scheduleNextForecastForItem(Item item, Instant time, State state) {
+            String itemName = item.getName();
             ScheduledFuture<?> oldJob = forecastJobs.remove(itemName);
             if (oldJob != null) {
                 oldJob.cancel(true);
             }
-            forecastJobs.put(itemName, scheduler.at(() -> restoreItemState(itemName, state), time));
-            logger.trace("Scheduled forecasted value for {} at {}", itemName, time);
+            forecastJobs.put(itemName,
+                    scheduler.at(() -> restoreItemState(item, time.atZone(ZoneId.systemDefault()), state), time));
+            logger.trace("Scheduled forecasted value for {} at {}", item.getName(), time);
         }
 
         public void scheduleNextPersistedForecastForItem(String itemName) {
@@ -663,17 +665,10 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                     HistoricItem next = result.next();
                     Instant timestamp = next.getInstant();
                     if (timestamp.isAfter(Instant.now())) {
-                        scheduleNextForecastForItem(itemName, timestamp, next.getState());
+                        scheduleNextForecastForItem(item, timestamp, next.getState());
                         break;
                     }
                 }
-            }
-        }
-
-        private void restoreItemState(String itemName, State state) {
-            Item item = itemRegistry.get(itemName);
-            if (item != null) {
-                restoreItemState(item, ZonedDateTime.now(), state);
             }
         }
 
