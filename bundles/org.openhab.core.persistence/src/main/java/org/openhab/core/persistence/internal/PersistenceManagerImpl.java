@@ -704,7 +704,6 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 public @Nullable State getLastState() {
                     return null;
                 }
-
             };
             restoreItemState(item, persistedItem);
             scheduleNextPersistedForecastForItem(item.getName());
