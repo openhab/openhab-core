@@ -467,11 +467,8 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                                         container.getMatchingConfigurations(FORECAST)))
                         .distinct().anyMatch(itemConf -> appliesToItem(itemConf, item)))
                 .forEach(container -> {
-                    container.scheduleNextPersistedForecastForItem(item.getName());
-                    PersistedItem persistedItem = container.getPersistedItem(item);
-                    if (persistedItem != null) {
-                        container.restoreItemStateFromPersistenceUpdate(item, persistedItem);
-                    }
+                    container.restoreItemStateFromPersistenceUpdate(item);
+                    container.scheduleNextPersistedForecastForItem(item);
                 });
     }
 
@@ -589,7 +586,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                     restoreItemStateOnStartup(item);
                 }
                 if (getMatchingConfigurations(FORECAST).anyMatch(configuration -> appliesToItem(configuration, item))) {
-                    scheduleNextPersistedForecastForItem(item.getName());
+                    scheduleNextPersistedForecastForItem(item);
                 }
             }
         }
@@ -627,13 +624,12 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
             logger.trace("Scheduled forecasted value for {} at {}", item.getName(), time);
         }
 
-        public void scheduleNextPersistedForecastForItem(String itemName) {
-            Item item = itemRegistry.get(itemName);
+        public void scheduleNextPersistedForecastForItem(Item item) {
             if (item instanceof GenericItem) {
                 String alias = getAlias(item);
                 QueryablePersistenceService queryService = (QueryablePersistenceService) persistenceService;
-                FilterCriteria filter = new FilterCriteria().setItemName(itemName).setBeginDate(ZonedDateTime.now())
-                        .setOrdering(ASCENDING);
+                FilterCriteria filter = new FilterCriteria().setItemName(item.getName())
+                        .setBeginDate(ZonedDateTime.now()).setOrdering(ASCENDING);
                 Iterator<HistoricItem> result = safeCaller.create(queryService, QueryablePersistenceService.class)
                         .onTimeout(() -> logger.warn("Querying persistence service '{}' takes more than {}ms.",
                                 queryService.getId(), SafeCaller.DEFAULT_TIMEOUT))
@@ -707,7 +703,13 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 }
             };
             restoreItemStateFromPersistenceUpdate(item, persistedItem);
-            scheduleNextPersistedForecastForItem(item.getName());
+        }
+
+        public void restoreItemStateFromPersistenceUpdate(Item item) {
+            PersistedItem persistedItem = getPersistedItem(item);
+            if (persistedItem != null) {
+                restoreItemStateFromPersistenceUpdate(item, persistedItem);
+            }
         }
 
         private void restoreItemStateFromPersistenceUpdate(Item item, PersistedItem persistedItem) {
