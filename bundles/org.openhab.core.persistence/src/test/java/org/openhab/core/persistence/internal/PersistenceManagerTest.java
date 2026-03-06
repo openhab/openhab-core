@@ -78,6 +78,7 @@ import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
+import org.openhab.core.types.TimeSeries.Entry;
 import org.openhab.core.types.UnDefType;
 
 /**
@@ -413,11 +414,15 @@ public class PersistenceManagerTest {
 
         addConfiguration(TestModifiablePersistenceService.ID, List.of(new PersistenceAllConfig()),
                 PersistenceStrategy.Globals.FORECAST, null);
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
 
-        Instant time1 = Instant.now().minusSeconds(1000);
-        Instant time2 = Instant.now().plusSeconds(1000);
-        Instant time3 = Instant.now().plusSeconds(2000);
-        Instant time4 = Instant.now().plusSeconds(3000);
+        Instant now = Instant.now();
+        ZonedDateTime time0 = now.atZone(ZoneId.systemDefault()).minusSeconds(5000);
+        Instant time1 = now.minusSeconds(1000);
+        Instant time2 = now.plusSeconds(1000);
+        Instant time3 = now.plusSeconds(2000);
+        Instant time4 = now.plusSeconds(3000);
 
         // add elements
         TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.ADD);
@@ -425,6 +430,7 @@ public class PersistenceManagerTest {
         timeSeries.add(time2, new StringType("two"));
         timeSeries.add(time3, new StringType("three"));
         timeSeries.add(time4, new StringType("four"));
+        TEST_ITEM.setState(new StringType("zero"), null, time0, null, null);
 
         manager.timeSeriesUpdated(TEST_ITEM, timeSeries);
         InOrder inOrder = inOrder(service, schedulerMock);
@@ -435,7 +441,25 @@ public class PersistenceManagerTest {
 
         // first element not scheduled, because it is in the past, check if second is scheduled
         inOrder.verify(schedulerMock).at(any(SchedulerRunnable.class), eq(time2));
+        // allow any number of getId() calls
+        inOrder.verify(service, atLeast(0)).getId();
         inOrder.verifyNoMoreInteractions();
+
+        // check if timeseries element in the past updated item state
+        Entry firstEntry = timeSeries.getStates().findFirst().get();
+        assertThat(TEST_ITEM.getState(), is(firstEntry.state()));
+        assertThat(TEST_ITEM.getLastState(), is(new StringType("zero")));
+        ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
+        assertNotNull(lastStateUpdate);
+        assertThat(lastStateUpdate.toInstant(), is(firstEntry.timestamp()));
+        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
+        assertNotNull(lastStateChange);
+        assertThat(lastStateChange.toInstant(), is(firstEntry.timestamp()));
+
+        // Check if other persistence services got updated
+        verify(persistenceServiceMock).store(TEST_ITEM, null);
+        verify(persistenceServiceMock, atLeast(0)).getId();
+        verifyNoMoreInteractions(persistenceServiceMock);
 
         // replace elements
         TimeSeries timeSeries2 = new TimeSeries(TimeSeries.Policy.REPLACE);
@@ -472,6 +496,22 @@ public class PersistenceManagerTest {
 
         // verify new restore future is properly created
         inOrder.verify(schedulerMock).at(any(SchedulerRunnable.class), eq(time5));
+    }
+
+    @Test
+    public void externalPersistenceDataChangeIsHandled() {
+        setupPersistence(new PersistenceAllConfig());
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
+        addConfiguration(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
+        manager.handleExternalPersistenceDataChange(persistenceServiceMock, TEST_ITEM);
+        assertNotEquals(TEST_STATE, TEST_ITEM.getState());
+
+        manager.handleExternalPersistenceDataChange(queryablePersistenceServiceMock, TEST_ITEM);
+        verify(queryablePersistenceServiceMock).persistedItem(eq(TEST_ITEM_NAME), any());
+        assertEquals(TEST_STATE, TEST_ITEM.getState());
+        verify(persistenceServiceMock).store(TEST_ITEM, null);
     }
 
     @Test
