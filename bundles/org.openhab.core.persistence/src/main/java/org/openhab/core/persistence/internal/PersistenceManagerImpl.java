@@ -717,12 +717,13 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
             }
 
             GenericItem genericItem = (GenericItem) item;
+            State oldState = item.getState();
             genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
             try {
                 genericItem.setState(newItemState.getState(), newItemState.getLastState(), newItemState.getTimestamp(),
                         newItemState.getLastStateChange(), PERSISTENCE_SOURCE);
                 // other services with update or change strategy should persist new state
-                storeInOtherServices(persistenceService, item, newItemState.getState());
+                storeInOtherServices(persistenceService, item, oldState);
             } finally {
                 genericItem.addStateChangeListener(PersistenceManagerImpl.this);
             }
