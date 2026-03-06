@@ -475,10 +475,9 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 });
     }
 
-    private void storeInOtherServices(PersistenceServiceContainer excludeContainer, Item item, State oldState) {
+    private void storeInOtherServices(String excludeContainerId, Item item, State oldState) {
         PersistenceStrategy changeStrategy = item.getState().equals(oldState) ? PersistenceStrategy.Globals.UPDATE
                 : PersistenceStrategy.Globals.CHANGE;
-        String excludeContainerId = excludeContainer.getPersistenceService().getId();
         persistenceServiceContainers.values().stream()
                 .filter(container -> !container.getPersistenceService().getId().equals(excludeContainerId))
                 .forEach(storeItem(item, changeStrategy));
@@ -773,7 +772,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 try {
                     genericItem.setState(state, lastState, lastStateUpdate, lastStateChange, PERSISTENCE_SOURCE);
                     // other services with update or change strategy should persist new state
-                    storeInOtherServices(this, item, itemState);
+                    storeInOtherServices(getPersistenceService().getId(), item, itemState);
                 } finally {
                     genericItem.addStateChangeListener(PersistenceManagerImpl.this);
                 }
