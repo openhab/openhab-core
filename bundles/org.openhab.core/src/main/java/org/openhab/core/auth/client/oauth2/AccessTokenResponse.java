@@ -15,7 +15,11 @@ package org.openhab.core.auth.client.oauth2;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * This is the Access Token Response, a simple value-object that holds the result of the
@@ -103,6 +107,37 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
     private Instant createdOn;
 
     /**
+     * Extra elements that may be passed in the token response by a specific OAuth implementation.
+     * <p>
+     * These fields are provider-specific and are not restricted to standard OAuth fields. As such,
+     * they may contain sensitive information (for example, identifiers, metadata or other values
+     * that should not be logged or exposed).
+     * <p>
+     * Consumers of this value MUST treat all entries as potentially sensitive and avoid logging or
+     * otherwise exposing them unless they have explicitly verified that the data is safe to do so.
+     */
+
+    private Map<@NonNull String, @NonNull String> extraFields = Collections.emptyMap();
+
+    /**
+     * Returns the additional provider-specific fields from the token response.
+     * <p>
+     * Note: the returned map may contain sensitive information in non-standard fields. Callers
+     * MUST take care not to log, persist, or expose these values without first ensuring that
+     * doing so is appropriate in their security context.
+     *
+     * @return a map of additional fields as provided by the authorization server
+     */
+    public Map<@NonNull String, @NonNull String> getExtraFields() {
+        return Collections.unmodifiableMap(extraFields);
+    }
+
+    public void setExtraFields(Map<@NonNull String, @NonNull String> extraFields) {
+        this.extraFields = (extraFields == null || extraFields.isEmpty()) ? Collections.emptyMap()
+                : Map.copyOf(extraFields);
+    }
+
+    /**
      * Calculate if the token is expired against the given time.
      * It also returns true even if the token is not initialized (i.e. object newly created).
      *
@@ -184,7 +219,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(accessToken, tokenType, expiresIn, refreshToken, scope, state, createdOn);
+        return Objects.hash(accessToken, tokenType, expiresIn, refreshToken, scope, state, createdOn, extraFields);
     }
 
     @Override
@@ -203,13 +238,18 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         return Objects.equals(this.accessToken, that.accessToken) && Objects.equals(this.tokenType, that.tokenType)
                 && Objects.equals(this.expiresIn, that.expiresIn)
                 && Objects.equals(this.refreshToken, that.refreshToken) && Objects.equals(this.scope, that.scope)
-                && Objects.equals(this.state, that.state) && Objects.equals(this.createdOn, that.createdOn);
+                && Objects.equals(this.state, that.state) && Objects.equals(this.createdOn, that.createdOn)
+                && Objects.equals(this.extraFields, that.extraFields);
     }
 
     @Override
+    /*
+     * warning : the toString() function may returns sensitive information that should not go into the log.
+     *
+     */
     public String toString() {
         return "AccessTokenResponse [accessToken=" + accessToken + ", tokenType=" + tokenType + ", expiresIn="
                 + expiresIn + ", refreshToken=" + refreshToken + ", scope=" + scope + ", state=" + state
-                + ", createdOn=" + createdOn + "]";
+                + ", createdOn=" + createdOn + ", extraFields= " + extraFields + "]";
     }
 }
