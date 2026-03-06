@@ -414,6 +414,8 @@ public class PersistenceManagerTest {
 
         addConfiguration(TestModifiablePersistenceService.ID, List.of(new PersistenceAllConfig()),
                 PersistenceStrategy.Globals.FORECAST, null);
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
 
         Instant now = Instant.now();
         ZonedDateTime time0 = now.atZone(ZoneId.systemDefault()).minusSeconds(5000);
@@ -439,6 +441,8 @@ public class PersistenceManagerTest {
 
         // first element not scheduled, because it is in the past, check if second is scheduled
         inOrder.verify(schedulerMock).at(any(SchedulerRunnable.class), eq(time2));
+        // allow any number of getId() calls
+        inOrder.verify(service, atLeast(0)).getId();
         inOrder.verifyNoMoreInteractions();
 
         // check if timeseries element in the past updated item state
@@ -451,6 +455,11 @@ public class PersistenceManagerTest {
         ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
         assertNotNull(lastStateChange);
         assertThat(lastStateChange.toInstant(), is(firstEntry.timestamp()));
+
+        // Check if other persistence services got updated
+        verify(persistenceServiceMock).store(TEST_ITEM, null);
+        verify(persistenceServiceMock, atLeast(0)).getId();
+        verifyNoMoreInteractions(persistenceServiceMock);
 
         // replace elements
         TimeSeries timeSeries2 = new TimeSeries(TimeSeries.Policy.REPLACE);

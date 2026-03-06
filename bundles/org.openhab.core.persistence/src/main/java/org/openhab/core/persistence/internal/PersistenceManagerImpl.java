@@ -32,7 +32,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -187,12 +186,11 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
         PersistenceStrategy changeStrategy = changed ? PersistenceStrategy.Globals.CHANGE
                 : PersistenceStrategy.Globals.UPDATE;
 
-        persistenceServiceContainers.values().forEach(storeItem(item, changeStrategy));
+        persistenceServiceContainers.values().forEach(container -> storeItem(container, item, changeStrategy));
     }
 
-    private Consumer<? super PersistenceServiceContainer> storeItem(Item item, PersistenceStrategy changeStrategy) {
-        return container -> container.getMatchingConfigurations(changeStrategy)
-                .filter(itemConfig -> appliesToItem(itemConfig, item))
+    private void storeItem(PersistenceServiceContainer container, Item item, PersistenceStrategy changeStrategy) {
+        container.getMatchingConfigurations(changeStrategy).filter(itemConfig -> appliesToItem(itemConfig, item))
                 .filter(itemConfig -> itemConfig.filters().stream().allMatch(filter -> filter.apply(item)))
                 .forEach(itemConfig -> {
                     itemConfig.filters().forEach(filter -> filter.persisted(item));
@@ -476,11 +474,15 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
     }
 
     private void storeInOtherServices(String excludeContainerId, Item item, State oldState) {
-        PersistenceStrategy changeStrategy = item.getState().equals(oldState) ? PersistenceStrategy.Globals.UPDATE
-                : PersistenceStrategy.Globals.CHANGE;
+        boolean changed = !item.getState().equals(oldState);
         persistenceServiceContainers.values().stream()
                 .filter(container -> !container.getPersistenceService().getId().equals(excludeContainerId))
-                .forEach(storeItem(item, changeStrategy));
+                .forEach(container -> {
+                    if (changed) {
+                        storeItem(container, item, PersistenceStrategy.Globals.CHANGE);
+                    }
+                    storeItem(container, item, PersistenceStrategy.Globals.UPDATE);
+                });
     }
 
     private class PersistenceServiceContainer {
