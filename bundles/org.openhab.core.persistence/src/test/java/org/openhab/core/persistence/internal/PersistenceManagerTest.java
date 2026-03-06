@@ -499,6 +499,22 @@ public class PersistenceManagerTest {
     }
 
     @Test
+    public void externalPersistenceDataChangeIsHandled() {
+        setupPersistence(new PersistenceAllConfig());
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
+        addConfiguration(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
+        manager.handleExternalPersistenceDataChange(persistenceServiceMock, TEST_ITEM);
+        assertNotEquals(TEST_STATE, TEST_ITEM.getState());
+
+        manager.handleExternalPersistenceDataChange(queryablePersistenceServiceMock, TEST_ITEM);
+        verify(queryablePersistenceServiceMock).persistedItem(eq(TEST_ITEM_NAME), any());
+        assertEquals(TEST_STATE, TEST_ITEM.getState());
+        verify(persistenceServiceMock).store(TEST_ITEM, null);
+    }
+
+    @Test
     public void cronStrategyIsScheduledAndCancelledAndPersistsValue() throws Exception {
         ArgumentCaptor<SchedulerRunnable> runnableCaptor = ArgumentCaptor.forClass(SchedulerRunnable.class);
         when(cronSchedulerMock.schedule(runnableCaptor.capture(), any())).thenReturn(scheduledFutureMock);
