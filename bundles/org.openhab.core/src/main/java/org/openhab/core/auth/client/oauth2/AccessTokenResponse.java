@@ -243,6 +243,10 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
     }
 
     @Override
+    /*
+     * warning : the toString() function may returns sensitive information that should not go into the log.
+     *
+     */
     public String toString() {
         return "AccessTokenResponse [accessToken=" + accessToken + ", tokenType=" + tokenType + ", expiresIn="
                 + expiresIn + ", refreshToken=" + refreshToken + ", scope=" + scope + ", state=" + state
