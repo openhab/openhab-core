@@ -43,6 +43,10 @@ jobs:
         run: |
           MAJOR=$(echo "$VERSION" | cut -d. -f1)
           SHA=$(curl -sL "https://downloads.apache.org/maven/maven-${MAJOR}/${VERSION}/binaries/apache-maven-${VERSION}-bin.zip.sha512")
+          if [[ ! "$SHA" =~ ^[0-9a-f]{128}$ ]]; then
+            echo "Error: invalid SHA-512 checksum downloaded for Maven ${VERSION}" >&2
+            exit 1
+          fi
           PROPS=".mvn/wrapper/maven-wrapper.properties"
           sed -i '/^distributionSha512Sum=/d' "$PROPS"
           echo "distributionSha512Sum=${SHA}" >> "$PROPS"
