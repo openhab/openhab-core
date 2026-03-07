@@ -252,7 +252,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
         List<String> newElementNames = new ArrayList<>();
         // get sub-elements
-        Iterator<Map.Entry<String, JsonNode>> it = fileContent.fields();
+        Iterator<Map.Entry<String, JsonNode>> it = fileContent.properties().iterator();
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> element = it.next();
             String elementName = element.getKey();

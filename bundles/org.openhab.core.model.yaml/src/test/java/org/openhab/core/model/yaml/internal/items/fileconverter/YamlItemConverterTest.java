@@ -37,7 +37,7 @@ import org.openhab.core.model.yaml.internal.items.YamlItemProvider;
 import org.openhab.core.model.yaml.internal.items.YamlMetadataProvider;
 
 @NonNullByDefault
-public class YamlItemFileConverterTest {
+public class YamlItemConverterTest {
 
     @Test
     public void testExpireMetadataConvertedToShortForm() {
@@ -100,7 +100,7 @@ public class YamlItemFileConverterTest {
 
     private YamlItemDTO convertWithMetadata(Metadata metadata, String itemType) {
         CapturingYamlModelRepository repository = new CapturingYamlModelRepository();
-        YamlItemFileConverter converter = new YamlItemFileConverter(repository, mock(YamlItemProvider.class),
+        YamlItemConverter converter = new YamlItemConverter(repository, mock(YamlItemProvider.class),
                 mock(YamlMetadataProvider.class), mock(YamlChannelLinkProvider.class),
                 mock(ConfigDescriptionRegistry.class));
 
@@ -112,7 +112,7 @@ public class YamlItemFileConverterTest {
         when(item.getGroupNames()).thenReturn(List.of());
         when(item.getTags()).thenReturn(Set.of());
 
-        converter.setItemsToBeGenerated("id", List.of(item), List.of(metadata), Map.of(), false);
+        converter.setItemsToBeSerialized("id", List.of(item), List.of(metadata), Map.of(), false);
 
         List<YamlElement> elements = repository.getElements();
         assertEquals(1, elements.size());

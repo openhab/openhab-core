@@ -37,19 +37,19 @@ import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
 
 /**
- * {@link AbstractThingFileGenerator} is the base class for any {@link Thing} file generator.
+ * {@link AbstractThingSerializer} is the base class for any {@link Thing} serializer.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractThingFileGenerator implements ThingFileGenerator {
+public abstract class AbstractThingSerializer implements ThingSerializer {
 
     protected final ThingTypeRegistry thingTypeRegistry;
     protected final ChannelTypeRegistry channelTypeRegistry;
     protected final ConfigDescriptionRegistry configDescRegistry;
 
     @Activate
-    public AbstractThingFileGenerator(ThingTypeRegistry thingTypeRegistry, ChannelTypeRegistry channelTypeRegistry,
+    public AbstractThingSerializer(ThingTypeRegistry thingTypeRegistry, ChannelTypeRegistry channelTypeRegistry,
             ConfigDescriptionRegistry configDescRegistry) {
         this.thingTypeRegistry = thingTypeRegistry;
         this.channelTypeRegistry = channelTypeRegistry;
