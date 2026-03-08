@@ -28,6 +28,10 @@ jobs:
             | grep -oP '<version>\K[^<]+' \
             | grep -viE 'rc|alpha|beta|snapshot|milestone' \
             | tail -1)
+          if [[ -z "$LATEST" || ! "$LATEST" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: failed to determine a valid Maven version (got: '${LATEST}')" >&2
+            exit 1
+          fi
           echo "version=$LATEST" >> $GITHUB_OUTPUT
 
       - name: Update wrapper
