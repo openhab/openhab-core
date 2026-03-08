@@ -675,7 +675,7 @@ public class PersistenceManagerTest {
             List<ZonedDateTime> keys = states.keySet().stream()
                     .filter(t -> (begin == null || t.isAfter(begin)) && (end == null || t.isBefore(end))).toList();
             return states.entrySet().stream().filter(e -> keys.contains(e.getKey()))
-                    .<HistoricItem>map(e -> new HistoricItem() {
+                    .<HistoricItem> map(e -> new HistoricItem() {
                         @Override
                         public ZonedDateTime getTimestamp() {
                             return e.getKey();
