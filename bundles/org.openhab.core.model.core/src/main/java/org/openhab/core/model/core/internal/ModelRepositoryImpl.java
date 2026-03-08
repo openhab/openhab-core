@@ -127,7 +127,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             }
             if (!valid) {
                 logger.warn("DSL model '{}' has errors, therefore ignoring it: {}", name, String.join("\n", newErrors));
-                removeModel(name);
+                removeResource(name);
                 return false;
             }
             if (!newWarnings.isEmpty()) {
@@ -184,6 +184,10 @@ public class ModelRepositoryImpl implements ModelRepository {
     @Override
     public boolean removeModel(String name) {
         logger.info("Unloading DSL model '{}'", name);
+        return removeResource(name);
+    }
+
+    private boolean removeResource(String name) {
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
