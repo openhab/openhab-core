@@ -24,8 +24,10 @@ jobs:
         # Note that the "gav" at the end of the URL is necessary to retrieve more than one version. jq will filter out rc versions.
         id: maven
         run: |
-          LATEST=$(curl -s "https://search.maven.org/solrsearch/select?q=g:org.apache.maven+a:apache-maven&rows=20&wt=json&core=gav" \
-            | jq -r '[.response.docs[].v | select(test("^3\\.\\d+\\.\\d+$"))] | first')
+          LATEST=$(curl -s "https://repo1.maven.org/maven2/org/apache/maven/apache-maven/maven-metadata.xml" \
+            | grep -oP '<version>\K[^<]+' \
+            | grep -viE 'rc|alpha|beta|snapshot|milestone' \
+            | tail -1)
           echo "version=$LATEST" >> $GITHUB_OUTPUT
 
       - name: Update wrapper
