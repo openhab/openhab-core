@@ -669,14 +669,13 @@ public class PersistenceManagerTest {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public Iterable<HistoricItem> query(FilterCriteria filter) {
-            ZonedDateTime begin = Objects.requireNonNull(filter.getBeginDate());
-            ZonedDateTime end = Objects.requireNonNull(filter.getEndDate());
-            List<ZonedDateTime> keys = states.keySet().stream().filter(t -> t.isAfter(begin) && t.isBefore(end))
-                    .toList();
-            return (Iterable<HistoricItem>) states.entrySet().stream().filter(e -> keys.contains(e.getKey()))
-                    .map(e -> new HistoricItem() {
+            ZonedDateTime begin = filter.getBeginDate();
+            ZonedDateTime end = filter.getEndDate();
+            List<ZonedDateTime> keys = states.keySet().stream()
+                    .filter(t -> (begin == null || t.isAfter(begin)) && (end == null || t.isBefore(end))).toList();
+            return states.entrySet().stream().filter(e -> keys.contains(e.getKey()))
+                    .<HistoricItem>map(e -> new HistoricItem() {
                         @Override
                         public ZonedDateTime getTimestamp() {
                             return e.getKey();
@@ -691,7 +690,7 @@ public class PersistenceManagerTest {
                         public String getName() {
                             return "item";
                         }
-                    }).iterator();
+                    }).toList();
         }
     }
 }

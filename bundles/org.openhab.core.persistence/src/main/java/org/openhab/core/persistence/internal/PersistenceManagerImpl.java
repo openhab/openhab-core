@@ -397,7 +397,8 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                                     container.scheduleNextForecastForItem(item, s.timestamp(), s.state());
                                 }
                             });
-                            // update current item state if last entry in time series is after last update of item
+                            // update current item state if last entry in the past in time series is after last update
+                            // of item
                             timeSeries.getStates().filter(s -> s.timestamp().isBefore(now))
                                     .max(Comparator.comparing(TimeSeries.Entry::timestamp)).ifPresent(s -> {
                                         ZonedDateTime lastStateUpdate = item.getLastStateUpdate();
@@ -619,8 +620,10 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
             if (oldJob != null) {
                 oldJob.cancel(true);
             }
-            forecastJobs.put(itemName, scheduler.at(
-                    () -> restoreItemStateFromTimeSeriesEntry(item, time.atZone(ZoneId.systemDefault()), state), time));
+            forecastJobs.put(itemName, scheduler.at(() -> {
+                restoreItemStateFromTimeSeriesEntry(item, time.atZone(ZoneId.systemDefault()), state);
+                scheduleNextPersistedForecastForItem(item);
+            }, time));
             logger.trace("Scheduled forecasted value for {} at {}", item.getName(), time);
         }
 
