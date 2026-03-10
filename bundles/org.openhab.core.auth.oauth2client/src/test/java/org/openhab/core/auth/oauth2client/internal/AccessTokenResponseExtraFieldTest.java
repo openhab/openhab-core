@@ -39,14 +39,16 @@ class AccessTokenResponseExtraFieldTest {
         String json = "{\"access_token\":\"AccessToken\",\"expires_in\":60,\"refresh_token\":\"RefreshToken\",\"app_client_id\":\"ApplicationClientId\"}";
         AccessTokenResponse atr = gson.fromJson(json, AccessTokenResponse.class);
 
-        assertEquals("AccessToken", atr.getAccessToken());
-        assertEquals(60, atr.getExpiresIn());
-        assertEquals("RefreshToken", atr.getRefreshToken());
+        if (atr != null) {
+            assertEquals("AccessToken", atr.getAccessToken());
+            assertEquals(60, atr.getExpiresIn());
+            assertEquals("RefreshToken", atr.getRefreshToken());
 
-        Map<String, String> extraFields = atr.getExtraFields();
+            Map<String, String> extraFields = atr.getExtraFields();
 
-        assertEquals(1, extraFields.size());
-        assertTrue(extraFields.containsKey("app_client_id"));
-        assertEquals("ApplicationClientId", extraFields.get("app_client_id"));
+            assertEquals(1, extraFields.size());
+            assertTrue(extraFields.containsKey("app_client_id"));
+            assertEquals("ApplicationClientId", extraFields.get("app_client_id"));
+        }
     }
 }

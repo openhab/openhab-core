@@ -157,7 +157,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         return accessToken;
     }
 
-    public void setAccessToken(String accessToken) {
+    public void setAccessToken(@Nullable String accessToken) {
         this.accessToken = accessToken;
     }
 
@@ -181,7 +181,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         return refreshToken;
     }
 
-    public void setRefreshToken(String refreshToken) {
+    public void setRefreshToken(@Nullable String refreshToken) {
         this.refreshToken = refreshToken;
     }
 
