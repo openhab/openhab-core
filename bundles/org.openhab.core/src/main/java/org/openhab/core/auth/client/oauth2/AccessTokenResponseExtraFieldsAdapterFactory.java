@@ -36,7 +36,7 @@ import com.google.gson.stream.JsonWriter;
  * specification. All unknown JSON properties are collected into a map and exposed via {@code extraFields} on the
  * {@link AccessTokenResponse}.
  *
- * @author Laurent Arnal
+ * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
 public final class AccessTokenResponseExtraFieldsAdapterFactory implements TypeAdapterFactory {

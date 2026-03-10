@@ -19,8 +19,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 /**
  * This is the Access Token Response, a simple value-object that holds the result of the
  * from an Access Token Request, as listed in RFC 6749:
@@ -117,7 +115,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * otherwise exposing them unless they have explicitly verified that the data is safe to do so.
      */
 
-    private Map<@NonNull String, @NonNull String> extraFields = Collections.emptyMap();
+    private Map<String, String> extraFields = Collections.emptyMap();
 
     /**
      * Returns the additional provider-specific fields from the token response.
@@ -128,11 +126,11 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      *
      * @return a map of additional fields as provided by the authorization server
      */
-    public Map<@NonNull String, @NonNull String> getExtraFields() {
+    public Map<String, String> getExtraFields() {
         return Collections.unmodifiableMap(extraFields);
     }
 
-    public void setExtraFields(Map<@NonNull String, @NonNull String> extraFields) {
+    public void setExtraFields(Map<String, String> extraFields) {
         this.extraFields = (extraFields == null || extraFields.isEmpty()) ? Collections.emptyMap()
                 : Map.copyOf(extraFields);
     }
@@ -244,7 +242,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
 
     @Override
     /*
-     * warning : the toString() function may returns sensitive information that should not go into the log.
+     * Warning: the toString() function may returns sensitive information that should not go into the log.
      *
      */
     public String toString() {
