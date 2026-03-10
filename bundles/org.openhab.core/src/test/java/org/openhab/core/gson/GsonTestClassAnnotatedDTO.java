@@ -25,7 +25,7 @@ import com.google.gson.annotations.SerializedName;
 public class GsonTestClassAnnotatedDTO {
     // adding annotations in different order is intended, please do not sort!
     public @SerializedName("name") @NonNullByDefault({}) String n = null;
-    public @SerializedName("email") @NonNullByDefault({}) String e = null;
+    public @NonNullByDefault({}) @SerializedName("email") String e = null;
     public int age;
     public boolean active;
 
