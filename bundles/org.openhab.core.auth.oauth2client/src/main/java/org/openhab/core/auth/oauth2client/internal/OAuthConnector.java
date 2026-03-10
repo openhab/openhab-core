@@ -37,6 +37,7 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.Fields;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.AccessTokenResponseExtraFieldsAdapterFactory;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
 import org.openhab.core.io.net.http.HttpClientFactory;
@@ -89,7 +90,11 @@ public class OAuthConnector {
     public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Fields extraFields, GsonBuilder gsonBuilder) {
         this.httpClientFactory = httpClientFactory;
         this.extraFields = extraFields;
-        gson = gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
+        this.gson = getGson(gsonBuilder);
+    }
+
+    static Gson getGson(GsonBuilder gsonBuilder) {
+        return gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(OAuthResponseException.class,
                         (JsonDeserializer<OAuthResponseException>) (json, typeOfT, context) -> {
@@ -120,7 +125,7 @@ public class OAuthConnector {
                     } catch (DateTimeParseException e) {
                         return LocalDateTime.parse(json.getAsString()).atZone(ZoneId.systemDefault()).toInstant();
                     }
-                }).create();
+                }).registerTypeAdapterFactory(new AccessTokenResponseExtraFieldsAdapterFactory()).create();
     }
 
     /**
@@ -214,8 +219,8 @@ public class OAuthConnector {
      * @throws OAuthResponseException Error codes given by authorization provider, as in RFC 6749 section 5.2 Error
      *             Response
      */
-    public AccessTokenResponse grantTypeRefreshToken(String tokenUrl, String refreshToken, @Nullable String clientId,
-            @Nullable String clientSecret, @Nullable String scope, boolean supportsBasicAuth)
+    public AccessTokenResponse grantTypeRefreshToken(String tokenUrl, @Nullable String refreshToken,
+            @Nullable String clientId, @Nullable String clientSecret, @Nullable String scope, boolean supportsBasicAuth)
             throws OAuthResponseException, OAuthException, IOException {
         HttpClient httpClient = null;
         try {
