@@ -111,4 +111,23 @@ class GsonTest {
         // This is an intentional test to document ECJ annotation ordering behavior.
         assertNull(test.e, "Email field is expected to be null due to annotation ordering issue");
     }
+
+    @Test
+    void testLoadAndDeserializeAnnotated3Json() {
+        // Load JSON from file
+        String json = load("testdata");
+        assertNotNull(json, "JSON content should not be null");
+        assertFalse(json.isEmpty(), "JSON content should not be empty");
+
+        // Deserialize into GsonTestClassAnnotated3_DTO
+        GsonTestClassAnnotated3_DTO test = GSON.fromJson(json, GsonTestClassAnnotated3_DTO.class);
+        assertNotNull(test, "Deserialized object should not be null");
+
+        // Verify all fields are correctly deserialized - this works because @SerializedName
+        // precedes the nullability annotation, which is the correct order for ECJ 3.45.0 and later.
+        assertEquals("John Doe", test.n, "Name field should match");
+        assertEquals(30, test.age, "Age field should match");
+        assertTrue(test.active, "Active field should match");
+        assertEquals("john.doe@example.com", test.e, "Email field should match");
+    }
 }
