@@ -81,10 +81,12 @@ public class ChannelStateDescriptionProviderTest {
 
         ChannelType channelType1 = Mockito.mock(ChannelType.class);
 
-        when(channelType1.getState()).thenReturn(stateDescription1);
-        when(thingTypeRegistry.getChannelType(channel1, Locale.ENGLISH)).thenReturn(channelType1);
-        when(dynamicStateDescriptionProvider.getStateDescription(channel1, stateDescription1, Locale.ENGLISH))
-                .thenReturn(StateDescriptionFragmentBuilder.create(stateDescription1).build().toStateDescription());
+        if (stateDescription1 != null) {
+            when(channelType1.getState()).thenReturn(stateDescription1);
+            when(thingTypeRegistry.getChannelType(channel1, Locale.ENGLISH)).thenReturn(channelType1);
+            when(dynamicStateDescriptionProvider.getStateDescription(channel1, stateDescription1, Locale.ENGLISH))
+                    .thenReturn(StateDescriptionFragmentBuilder.create(stateDescription1).build().toStateDescription());
+        }
 
         // Setup channel 2
         Channel channel2 = ChannelBuilder.create(CHANNEL_UID_2).build();
@@ -93,10 +95,12 @@ public class ChannelStateDescriptionProviderTest {
                 .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(channel2State).withPattern("%s")
                 .build().toStateDescription();
         ChannelType channelType2 = Mockito.mock(ChannelType.class);
-        when(channelType2.getState()).thenReturn(stateDescription2);
-        when(thingTypeRegistry.getChannelType(channel2, Locale.ENGLISH)).thenReturn(channelType2);
-        when(dynamicStateDescriptionProvider.getStateDescription(channel2, stateDescription2, Locale.ENGLISH))
-                .thenReturn(StateDescriptionFragmentBuilder.create(stateDescription2).build().toStateDescription());
+        if (stateDescription2 != null) {
+            when(channelType2.getState()).thenReturn(stateDescription2);
+            when(thingTypeRegistry.getChannelType(channel2, Locale.ENGLISH)).thenReturn(channelType2);
+            when(dynamicStateDescriptionProvider.getStateDescription(channel2, stateDescription2, Locale.ENGLISH))
+                    .thenReturn(StateDescriptionFragmentBuilder.create(stateDescription2).build().toStateDescription());
+        }
 
         channelStateDescriptionProvider.addDynamicStateDescriptionProvider(dynamicStateDescriptionProvider);
 
@@ -117,11 +121,13 @@ public class ChannelStateDescriptionProviderTest {
                 .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(Boolean.TRUE).withPattern("%s")
                 .build().toStateDescription();
         ChannelType channelType = Mockito.mock(ChannelType.class);
-        when(channelType.getState()).thenReturn(stateDescription1);
-        when(thingTypeRegistry.getChannelType(channel1, Locale.ENGLISH)).thenReturn(channelType);
+        if (stateDescription1 != null) {
+            when(channelType.getState()).thenReturn(stateDescription1);
+            when(thingTypeRegistry.getChannelType(channel1, Locale.ENGLISH)).thenReturn(channelType);
 
-        when(dynamicStateDescriptionProvider.getStateDescription(channel1, stateDescription1, Locale.ENGLISH))
-                .thenReturn(StateDescriptionFragmentBuilder.create(stateDescription1).build().toStateDescription());
+            when(dynamicStateDescriptionProvider.getStateDescription(channel1, stateDescription1, Locale.ENGLISH))
+                    .thenReturn(StateDescriptionFragmentBuilder.create(stateDescription1).build().toStateDescription());
+        }
 
         channelStateDescriptionProvider.addDynamicStateDescriptionProvider(dynamicStateDescriptionProvider);
 
@@ -142,11 +148,13 @@ public class ChannelStateDescriptionProviderTest {
                 .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(Boolean.FALSE).withPattern("%s")
                 .build().toStateDescription();
         ChannelType channelType = Mockito.mock(ChannelType.class);
-        when(channelType.getState()).thenReturn(stateDescription1);
-        when(thingTypeRegistry.getChannelType(channel1, Locale.ENGLISH)).thenReturn(channelType);
+        if (stateDescription1 != null) {
+            when(channelType.getState()).thenReturn(stateDescription1);
+            when(thingTypeRegistry.getChannelType(channel1, Locale.ENGLISH)).thenReturn(channelType);
 
-        when(dynamicStateDescriptionProvider.getStateDescription(channel1, stateDescription1, Locale.ENGLISH))
-                .thenReturn(StateDescriptionFragmentBuilder.create(stateDescription1).build().toStateDescription());
+            when(dynamicStateDescriptionProvider.getStateDescription(channel1, stateDescription1, Locale.ENGLISH))
+                    .thenReturn(StateDescriptionFragmentBuilder.create(stateDescription1).build().toStateDescription());
+        }
 
         channelStateDescriptionProvider.addDynamicStateDescriptionProvider(dynamicStateDescriptionProvider);
 
