@@ -209,8 +209,8 @@ public class ThingImpl implements Thing {
     }
 
     @Override
-    public @Nullable String setProperty(String name, @Nullable String value) {
-        if (name.isEmpty()) {
+    public @Nullable String setProperty(@Nullable String name, @Nullable String value) {
+        if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Property name must not be null or empty");
         }
         synchronized (this) {
