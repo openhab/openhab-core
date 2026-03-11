@@ -165,7 +165,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         return tokenType;
     }
 
-    public void setTokenType(String tokenType) {
+    public void setTokenType(@Nullable String tokenType) {
         this.tokenType = tokenType;
     }
 
@@ -189,7 +189,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         return scope;
     }
 
-    public void setScope(String scope) {
+    public void setScope(@Nullable String scope) {
         this.scope = scope;
     }
 
@@ -197,7 +197,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(@Nullable String state) {
         this.state = state;
     }
 
@@ -205,7 +205,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         return createdOn;
     }
 
-    public void setCreatedOn(Instant createdOn) {
+    public void setCreatedOn(@Nullable Instant createdOn) {
         this.createdOn = createdOn;
     }
 
