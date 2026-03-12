@@ -70,6 +70,7 @@ import org.openhab.core.persistence.PersistenceServiceProblem;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
+import org.openhab.core.persistence.dto.PersistenceCronStrategyDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceDTO;
 import org.openhab.core.persistence.dto.PersistenceStrategyDTO;
@@ -278,7 +279,7 @@ public class PersistenceResource implements RESTResource {
                     @ApiResponse(responseCode = "405", description = "Persistence service not queryable or getting Item info not allowed") })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @Parameter(description = "An Item name, if provided response will only contain information for this Item") @QueryParam("itemname") @Nullable String itemName) {
+            @Parameter(description = "An Item name, if provided response will only contain information for this Item") @QueryParam("itemName") @Nullable String itemName) {
         return getServiceItemListDTO(serviceId, itemName);
     }
 
@@ -349,7 +350,8 @@ public class PersistenceResource implements RESTResource {
     @Path("strategysuggestions")
     @Operation(operationId = "getPersistenceServiceStrategySuggestions", summary = "Gets a persistence service suggested strategies.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceStrategyDTO.class), uniqueItems = true))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(oneOf = {
+                            PersistenceStrategyDTO.class, PersistenceCronStrategyDTO.class }), uniqueItems = true))),
                     @ApiResponse(responseCode = "404", description = "Suggested strategies not found.") })
     public Response httpGetPersistenceServiceStrategySuggestions(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.") @QueryParam("serviceId") String serviceId) {
