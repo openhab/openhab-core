@@ -17,23 +17,21 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * The {@link PersistenceCronStrategyDTO} is used for transferring persistence cron
- * strategies
+ * The {@link PersistenceStrategyDTO} is used for transferring persistence strategies.
  *
  * @author Jan N. Klug - Initial contribution
  */
-@Schema(name = "PersistenceCronStrategy")
+@Schema(name = "PersistenceStrategy")
 @NonNullByDefault
-public class PersistenceCronStrategyDTO extends PersistenceStrategyDTO {
-    public String cronExpression = "";
+public class PersistenceStrategyDTO {
+    public String name;
 
     // do not remove - needed by GSON
-    public PersistenceCronStrategyDTO() {
-        this("", "");
+    PersistenceStrategyDTO() {
+        this("");
     }
 
-    public PersistenceCronStrategyDTO(String name, String cronExpression) {
-        super(name);
-        this.cronExpression = cronExpression;
+    public PersistenceStrategyDTO(String name) {
+        this.name = name;
     }
 }
