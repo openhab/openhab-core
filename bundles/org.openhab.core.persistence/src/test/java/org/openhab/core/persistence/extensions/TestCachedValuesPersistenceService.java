@@ -51,19 +51,22 @@ public class TestCachedValuesPersistenceService implements ModifiablePersistence
 
     @Override
     public void store(Item item) {
+        store(item, null);
     }
 
     @Override
     public void store(Item item, @Nullable String alias) {
+        store(item, ZonedDateTime.now(), item.getState(), alias);
     }
 
     @Override
     public void store(Item item, ZonedDateTime date, State state) {
-        historicItems.add(new CachedHistoricItem(date, state, item.getName()));
+        store(item, date, state, null);
     }
 
     @Override
     public void store(Item item, ZonedDateTime date, State state, @Nullable String alias) {
+        historicItems.add(new CachedHistoricItem(date, state, alias != null ? alias : item.getName()));
     }
 
     @Override
