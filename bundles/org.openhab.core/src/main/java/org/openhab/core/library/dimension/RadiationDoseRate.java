@@ -17,10 +17,10 @@ import javax.measure.Quantity;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Define Specific activity type (basic unit is Sv/h)
+ * Radiation dose per time (basic unit is Sv/h)
  *
  * @author Bernd Weymann - Initial contribution
  */
 @NonNullByDefault
-public interface RadiationAmbientDose extends Quantity<RadiationAmbientDose> {
+public interface RadiationDoseRate extends Quantity<RadiationDoseRate> {
 }
