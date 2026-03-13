@@ -60,6 +60,7 @@ import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.EmissionIntensity;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiantExposure;
+import org.openhab.core.library.dimension.RadiationAmbientDose;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 
@@ -193,6 +194,8 @@ public final class Units extends CustomUnits {
 
     public static final Unit<RadiationDoseAbsorbed> GRAY = addUnit(tech.units.indriya.unit.Units.GRAY);
     public static final Unit<RadiationDoseEffective> SIEVERT = addUnit(tech.units.indriya.unit.Units.SIEVERT);
+    public static final Unit<RadiationAmbientDose> SIEVERT_PER_HOUR = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.SIEVERT.divide(tech.units.indriya.unit.Units.HOUR)));
     public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(
             new TransformedUnit<>("mm/h", tech.units.indriya.unit.Units.KILOMETRE_PER_HOUR,
                     MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000))));

@@ -79,6 +79,7 @@ import org.openhab.core.library.dimension.EmissionIntensity;
 import org.openhab.core.library.dimension.EnergyPrice;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiantExposure;
+import org.openhab.core.library.dimension.RadiationAmbientDose;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumePrice;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
@@ -431,6 +432,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Mass.class, SIUnits.KILOGRAM, ImperialUnits.POUND);
         addDefaultUnit(dimensionMap, Power.class, Units.WATT);
         addDefaultUnit(dimensionMap, Pressure.class, HECTO(SIUnits.PASCAL), ImperialUnits.INCH_OF_MERCURY);
+        addDefaultUnit(dimensionMap, RadiationAmbientDose.class, Units.SIEVERT_PER_HOUR);
         addDefaultUnit(dimensionMap, RadiationDoseAbsorbed.class, Units.GRAY);
         addDefaultUnit(dimensionMap, RadiationDoseEffective.class, Units.SIEVERT);
         addDefaultUnit(dimensionMap, RadiationSpecificActivity.class, Units.BECQUEREL_PER_CUBIC_METRE);
