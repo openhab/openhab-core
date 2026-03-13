@@ -98,9 +98,6 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     @Inject
     ItemRegistry itemRegistry
 
-    @Inject
-    StateAndCommandProvider stateAndCommandProvider
-
     /**
      * Is called for each instance of the first argument's type contained in a resource.
      * 
@@ -116,8 +113,7 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
             val Set<String> fieldNames = newHashSet()
 
-            val types = stateAndCommandProvider.allTypes
-            types.forEach [ type |
+            StateAndCommandProvider::allTypes.forEach [ type |
                 val name = type.toString
                 if (fieldNames.add(name)) {
                     members += script.toField(name, typeRef(type.class)) [

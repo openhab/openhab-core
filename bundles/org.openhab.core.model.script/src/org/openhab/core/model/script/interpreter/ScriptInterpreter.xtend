@@ -52,9 +52,6 @@ class ScriptInterpreter extends XbaseInterpreter {
     ItemRegistry itemRegistry
 
     @Inject
-    StateAndCommandProvider stateAndCommandProvider
-    
-    @Inject
     IBatchTypeResolver typeResolver;
 
     @Inject
@@ -100,7 +97,7 @@ class ScriptInterpreter extends XbaseInterpreter {
     }
 
     def protected Type getStateOrCommand(String name) {
-        for (Type type : stateAndCommandProvider.getAllTypes()) {
+        for (Type type : StateAndCommandProvider::allTypes) {
             if (type.toString == name) {
                 return type
             }
