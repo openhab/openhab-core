@@ -15,7 +15,7 @@ package org.openhab.core.thing.fileconverter;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.common.ObjectSerializer;
+import org.openhab.core.converter.ObjectSerializer;
 import org.openhab.core.thing.Thing;
 
 /**

@@ -17,7 +17,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.ObjectParser;
+import org.openhab.core.converter.ObjectParser;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.link.ItemChannelLink;
 

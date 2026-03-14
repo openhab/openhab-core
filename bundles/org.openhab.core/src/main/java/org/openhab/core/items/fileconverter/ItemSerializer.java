@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.common.ObjectSerializer;
+import org.openhab.core.converter.ObjectSerializer;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
 

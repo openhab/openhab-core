@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.common;
+package org.openhab.core.converter;
 
 import java.util.Collection;
 import java.util.List;

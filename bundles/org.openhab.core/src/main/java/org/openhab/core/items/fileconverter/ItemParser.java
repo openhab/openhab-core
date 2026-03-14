@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.ObjectParser;
+import org.openhab.core.converter.ObjectParser;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
 
