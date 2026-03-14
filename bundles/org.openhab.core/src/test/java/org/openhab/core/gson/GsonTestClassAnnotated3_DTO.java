@@ -18,22 +18,24 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Example Test for testing Gson deserialization.
+ * Example Test for testing Gson deserialization with correct annotation ordering.
+ * Unlike {@link GsonTestClassAnnotated_DTO} and {@link GsonTestClassAnnotated2_DTO},
+ * this class uses the correct annotation order where {@link SerializedName} precedes
+ * any nullability annotations, which works correctly with ECJ 3.45.0 and later.
  *
  * @author Holger Friedrich - Initial contribution
  */
 @NonNullByDefault
-public class GsonTestClassAnnotated2_DTO {
-    // adding annotations in different order is intended, please do not sort!
+public class GsonTestClassAnnotated3_DTO {
     public @SerializedName("name") @Nullable String n;
-    public @Nullable @SerializedName("email") String e;
+    public @SerializedName("email") @Nullable String e;
     public int age;
     public boolean active;
 
-    public GsonTestClassAnnotated2_DTO() {
+    public GsonTestClassAnnotated3_DTO() {
     }
 
-    public GsonTestClassAnnotated2_DTO(String name, int age, String email, boolean active) {
+    public GsonTestClassAnnotated3_DTO(String name, int age, String email, boolean active) {
         this.n = name;
         this.e = email;
         this.age = age;
@@ -42,7 +44,7 @@ public class GsonTestClassAnnotated2_DTO {
 
     @Override
     public String toString() {
-        return "GsonTestClassAnnotated2_DTO{" + "name='" + n + '\'' + ", age=" + age + ", email='" + e + '\''
+        return "GsonTestClassAnnotated3_DTO{" + "name='" + n + '\'' + ", age=" + age + ", email='" + e + '\''
                 + ", active=" + active + '}';
     }
 }
