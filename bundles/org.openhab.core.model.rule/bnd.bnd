@@ -12,6 +12,7 @@ Export-Package: org.openhab.core.model.rule,\
  org.openhab.core.model.rule.services,\
  org.openhab.core.model.rule.validation
 Import-Package: \
+ org.openhab.core.automation.module.script.rulesupport.shared,\
  org.openhab.core.common,\
  org.openhab.core.common.registry,\
  org.openhab.core.events,\
@@ -20,6 +21,10 @@ Import-Package: \
  org.openhab.core.library.items,\
  org.openhab.core.library.types,\
  org.openhab.core.library.unit,\
+ org.openhab.core.model.core,\
+ org.openhab.core.model.items,\
+ org.openhab.core.model.script,\
+ org.openhab.core.model.script.engine.action,\
  org.openhab.core.persistence,\
  org.openhab.core.persistence.extensions,\
  org.openhab.core.service,\
@@ -27,11 +32,6 @@ Import-Package: \
  org.openhab.core.thing.binding,\
  org.openhab.core.thing.events,\
  org.openhab.core.types,\
- org.openhab.core.model.core,\
- org.openhab.core.model.items,\
- org.openhab.core.model.script,\
- org.openhab.core.model.script.engine.action,\
- org.openhab.core.automation.module.script.rulesupport.shared,\
  com.google.common.base;version="14",\
  javax.measure,\
  javax.measure.quantity,\
@@ -45,10 +45,10 @@ Require-Bundle: org.antlr.runtime,\
  org.eclipse.emf.mwe2.launch;resolution:=optional,\
  org.openhab.core.model.item,\
  org.openhab.core.model.script,\
+ org.eclipse.xtext;visibility:=reexport,\
  org.eclipse.xtext.common.types,\
- org.eclipse.xtext.xtext.generator;resolution:=optional,\
  org.eclipse.xtext.util,\
  org.eclipse.xtext.xbase,\
  org.eclipse.xtext.xbase.lib;bundle-version="2.34.0",\
- org.eclipse.xtext;visibility:=reexport,\
+ org.eclipse.xtext.xtext.generator;resolution:=optional,\
  org.objectweb.asm;bundle-version="[9.0.0,10.0.0)";resolution:=optional
