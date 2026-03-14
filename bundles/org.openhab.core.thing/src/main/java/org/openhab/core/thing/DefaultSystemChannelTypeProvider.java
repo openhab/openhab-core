@@ -36,6 +36,7 @@ import org.openhab.core.types.EventOption;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.util.BundleResolver;
+import org.ops4j.lang.NullArgumentException;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -437,9 +438,14 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
         final List<ChannelType> allChannelTypes = new ArrayList<>();
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
+        if (bundle == null) {
+            throw new NullArgumentException("bundle==null in DefaultSystemChannelTypeProvider::getChannelTypes");
+        }
+
         for (final ChannelType channelType : CHANNEL_TYPES) {
             allChannelTypes.add(createLocalizedChannelType(bundle, channelType, locale));
         }
+
         return allChannelTypes;
     }
 
@@ -447,11 +453,16 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public @Nullable ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
+        if (bundle == null) {
+            throw new NullArgumentException("bundle==null in DefaultSystemChannelTypeProvider::getChannelType");
+        }
+
         for (final ChannelType channelType : CHANNEL_TYPES) {
             if (channelTypeUID.equals(channelType.getUID())) {
                 return createLocalizedChannelType(bundle, channelType, locale);
             }
         }
+
         return null;
     }
 
