@@ -36,7 +36,6 @@ import org.openhab.core.types.EventOption;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.util.BundleResolver;
-import org.ops4j.lang.NullArgumentException;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -439,7 +438,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
         if (bundle == null) {
-            throw new NullArgumentException("bundle==null in DefaultSystemChannelTypeProvider::getChannelTypes");
+            throw new NullPointerException("bundle==null in DefaultSystemChannelTypeProvider::getChannelTypes");
         }
 
         for (final ChannelType channelType : CHANNEL_TYPES) {
@@ -454,7 +453,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
         if (bundle == null) {
-            throw new NullArgumentException("bundle==null in DefaultSystemChannelTypeProvider::getChannelType");
+            throw new NullPointerException("bundle==null in DefaultSystemChannelTypeProvider::getChannelType");
         }
 
         for (final ChannelType channelType : CHANNEL_TYPES) {
