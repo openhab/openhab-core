@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -215,11 +214,8 @@ public class ThingImpl implements Thing {
             throw new IllegalArgumentException("Property name must not be null or empty");
         }
         synchronized (this) {
-            if (value == null) {
-                return properties.remove(name);
-            } else {
-                return properties.put(name, Objects.requireNonNull(value));
-            }
+            String val = value;
+            return val == null ? properties.remove(name) : properties.put(name, val);
         }
     }
 
