@@ -59,12 +59,16 @@ public class JSonType implements ComplexType, State, Command {
     @Override
     public SortedMap<String, PrimitiveType> getConstituents() {
         TreeMap<String, PrimitiveType> map = new TreeMap<>();
-        map.put(KEY_JSON, getJSon());
+        map.put(KEY_JSON, getJSonString());
         return map;
     }
 
-    public StringType getJSon() {
+    public StringType getJSonString() {
         return new StringType(json);
+    }
+
+    public @Nullable JsonElement getJSonElement() {
+        return jsonRoot;
     }
 
     @Override
