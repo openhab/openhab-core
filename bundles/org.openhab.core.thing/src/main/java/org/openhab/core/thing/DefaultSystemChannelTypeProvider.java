@@ -438,7 +438,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
         if (bundle == null) {
-            throw new NullPointerException("bundle==null in DefaultSystemChannelTypeProvider::getChannelTypes");
+            throw new IllegalArgumentException("bundle==null in DefaultSystemChannelTypeProvider::getChannelTypes");
         }
 
         for (final ChannelType channelType : CHANNEL_TYPES) {
@@ -453,7 +453,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
         if (bundle == null) {
-            throw new NullPointerException("bundle==null in DefaultSystemChannelTypeProvider::getChannelType");
+            throw new IllegalArgumentException("bundle==null in DefaultSystemChannelTypeProvider::getChannelType");
         }
 
         for (final ChannelType channelType : CHANNEL_TYPES) {
