@@ -193,6 +193,7 @@
 			<xs:enumeration value="Number:Pressure"/>
 			<xs:enumeration value="Number:RadiationDoseAbsorbed"/>
 			<xs:enumeration value="Number:RadiationDoseEffective"/>
+			<xs:enumeration value="Number:RadiationDoseRate"/>
 			<xs:enumeration value="Number:RadiationSpecificActivity"/>
 			<xs:enumeration value="Number:RadioactiveActivity"/>
 			<xs:enumeration value="Number:SolidAngle"/>
