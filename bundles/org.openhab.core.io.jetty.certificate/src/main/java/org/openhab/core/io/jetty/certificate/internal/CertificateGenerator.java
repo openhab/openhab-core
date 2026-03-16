@@ -110,6 +110,9 @@ public class CertificateGenerator implements BundleActivator {
      */
     private KeyStore ensureKeystore() throws KeyStoreException {
         String keystorePath = System.getProperty(JETTY_KEYSTORE_PATH_PROPERTY);
+        if (keystorePath == null || keystorePath.isEmpty()) {
+            throw new KeyStoreException("Keystore path is not set.");
+        }
         keystoreFile = new File(keystorePath);
         KeyStore keyStore = KeyStore.getInstance(KEYSTORE_JKS_TYPE);
         if (!keystoreFile.exists()) {
@@ -184,7 +187,7 @@ public class CertificateGenerator implements BundleActivator {
             X500Name subjectDN = new X500Name(X500_NAME);
             byte[] publickeyb = publicKey.getEncoded();
             ASN1Sequence sequence = (ASN1Sequence) ASN1Primitive.fromByteArray(publickeyb);
-            SubjectPublicKeyInfo subPubKeyInfo = new SubjectPublicKeyInfo(sequence);
+            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(sequence);
             X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(issuerDN, serialNumber, notBefore,
                     notAfter, subjectDN, subPubKeyInfo);
 

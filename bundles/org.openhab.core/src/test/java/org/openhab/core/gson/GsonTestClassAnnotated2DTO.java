@@ -12,30 +12,36 @@
  */
 package org.openhab.core.gson;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Example Test for testing Gson deserialization.
  *
  * @author Holger Friedrich - Initial contribution
  */
-public class GsonTestClass_DTO {
-    public String name;
+@NonNullByDefault
+public class GsonTestClassAnnotated2DTO {
+    public @SerializedName("name") @Nullable String n;
+    public @Nullable @SerializedName("email") String e;
     public int age;
-    public String email;
     public boolean active;
 
-    public GsonTestClass_DTO() {
+    public GsonTestClassAnnotated2DTO() {
     }
 
-    public GsonTestClass_DTO(String name, int age, String email, boolean active) {
-        this.name = name;
+    public GsonTestClassAnnotated2DTO(String name, int age, String email, boolean active) {
+        this.n = name;
+        this.e = email;
         this.age = age;
-        this.email = email;
         this.active = active;
     }
 
     @Override
     public String toString() {
-        return "GsonTestClass{" + "name='" + name + '\'' + ", age=" + age + ", email='" + email + '\'' + ", active="
-                + active + '}';
+        return "GsonTestClassAnnotated2DTO{" + "name='" + n + '\'' + ", age=" + age + ", email='" + e + '\''
+                + ", active=" + active + '}';
     }
 }
