@@ -6,9 +6,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  update:
+  resolve:
     name: Resolve itest dependencies
     runs-on: 'ubuntu-24.04'
+    permissions:
+      contents: write
+      pull-requests: write
     # typical duration is ~15min, set twice the amount as limit (default is 6h)
     timeout-minutes: 30
     steps:
@@ -44,6 +47,6 @@ jobs:
         with:
           commit-message: "Resolve itest dependencies"
           title: "Resolve itest dependencies"
-          branch: "gha/update-maven-wrapper/${{ github.ref_name }}"
+          branch: "gha/resolver/${{ github.ref_name }}"
           delete-branch: true
           # labels: infrastructure
