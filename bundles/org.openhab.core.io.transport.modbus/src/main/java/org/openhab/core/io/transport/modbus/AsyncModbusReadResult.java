@@ -13,9 +13,9 @@
 package org.openhab.core.io.transport.modbus;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Encapsulates result of modbus read operations
@@ -27,24 +27,24 @@ public class AsyncModbusReadResult {
 
     private final ModbusReadRequestBlueprint request;
 
-    private final Optional<BitArray> bits;
+    private final @Nullable BitArray bits;
 
-    private final Optional<ModbusRegisterArray> registers;
+    private final @Nullable ModbusRegisterArray registers;
 
     public AsyncModbusReadResult(ModbusReadRequestBlueprint request, ModbusRegisterArray registers) {
         Objects.requireNonNull(request, "Request must not be null!");
         Objects.requireNonNull(registers, "Registers must not be null!");
         this.request = request;
-        this.registers = Optional.of(registers);
-        this.bits = Optional.empty();
+        this.registers = registers;
+        this.bits = null;
     }
 
     public AsyncModbusReadResult(ModbusReadRequestBlueprint request, BitArray bits) {
         Objects.requireNonNull(request, "Request must not be null!");
         Objects.requireNonNull(bits, "Bits must not be null!");
         this.request = request;
-        this.registers = Optional.empty();
-        this.bits = Optional.of(bits);
+        this.registers = null;
+        this.bits = bits;
     }
 
     /**
@@ -61,7 +61,7 @@ public class AsyncModbusReadResult {
      *
      * @return bit data
      */
-    public Optional<BitArray> getBits() {
+    public @Nullable BitArray getBits() {
         return bits;
     }
 
@@ -70,7 +70,7 @@ public class AsyncModbusReadResult {
      *
      * @return register data
      */
-    public Optional<ModbusRegisterArray> getRegisters() {
+    public @Nullable ModbusRegisterArray getRegisters() {
         return registers;
     }
 
@@ -79,14 +79,14 @@ public class AsyncModbusReadResult {
         StringBuilder builder = new StringBuilder("AsyncModbusReadResult(");
         builder.append("request = ");
         builder.append(request);
-        bits.ifPresent(bits -> {
+        if (bits != null) {
             builder.append(", bits = ");
             builder.append(bits);
-        });
-        registers.ifPresent(registers -> {
+        }
+        if (registers != null) {
             builder.append(", registers = ");
             builder.append(registers);
-        });
+        }
         builder.append(")");
         return builder.toString();
     }

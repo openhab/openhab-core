@@ -13,7 +13,6 @@
 package org.openhab.core.automation.module.script.internal.handler;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -64,10 +63,9 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
             return true;
         }
 
-        Optional<ScriptEngine> engine = getScriptEngine();
+        ScriptEngine scriptEngine = getScriptEngine();
 
-        if (engine.isPresent()) {
-            ScriptEngine scriptEngine = engine.get();
+        if (scriptEngine != null) {
             try {
                 if (scriptEngine instanceof Lock lock && !lock.tryLock(1, TimeUnit.MINUTES)) {
                     logger.error(
