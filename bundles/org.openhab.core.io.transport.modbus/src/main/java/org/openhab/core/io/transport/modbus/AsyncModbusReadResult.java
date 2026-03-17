@@ -13,6 +13,7 @@
 package org.openhab.core.io.transport.modbus;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -61,8 +62,8 @@ public class AsyncModbusReadResult {
      *
      * @return bit data
      */
-    public @Nullable BitArray getBits() {
-        return bits;
+    public Optional<BitArray> getBits() {
+        return Optional.ofNullable(bits);
     }
 
     /**
@@ -70,8 +71,8 @@ public class AsyncModbusReadResult {
      *
      * @return register data
      */
-    public @Nullable ModbusRegisterArray getRegisters() {
-        return registers;
+    public Optional<ModbusRegisterArray> getRegisters() {
+        return Optional.ofNullable(registers);
     }
 
     @Override
