@@ -129,7 +129,7 @@ class SitemapValidator extends AbstractSitemapValidator {
 
     @Check
     def void checkFramesInFrame(ModelFrame frame) {
-        for (ModelWidget w : frame.children) {
+        for (w : frame.children) {
             val node = NodeModelUtils.getNode(w)
             val line = node.getStartLine()
             if (w instanceof ModelFrame) {
@@ -150,7 +150,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         var containsFrames = false
         var containsOtherWidgets = false
 
-        for (ModelWidget w : sitemap.children) {
+        for (w : sitemap.children) {
             val node = NodeModelUtils.getNode(w)
             val line = node.getStartLine()
             if (w instanceof ModelButton) {
@@ -184,7 +184,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         var containsFrames = false
         var containsOtherWidgets = false
         val className = getWidgetType(widget)
-        for (ModelWidget w : widget.children) {
+        for (w : widget.children) {
             val node = NodeModelUtils.getNode(w)
             val line = node.getStartLine()
             if (w instanceof ModelButton) {
@@ -216,7 +216,7 @@ class SitemapValidator extends AbstractSitemapValidator {
             return
         }
         val positions = new HashSet<Pos>
-        for (ModelWidget w : grid.children) {
+        for (w : grid.children) {
             val node = NodeModelUtils.getNode(w)
             val line = node.getStartLine()
             if (w instanceof ModelButton) {
