@@ -86,7 +86,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         val seen = new HashSet<String>
         val duplicates = new HashSet<String>
         val node = NodeModelUtils.getNode(w)
-        val line = node.getStartLine()
+        val line = node.startLine
 
         for (leaf : node.leafNodes) {
             val text = leaf.text.trim
@@ -105,7 +105,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkWidgetHasItem(ModelWidget w) {
         if (!(w instanceof ModelFrame || w instanceof ModelText || w instanceof ModelImage || w instanceof ModelVideo || w instanceof ModelWebview || w instanceof ModelButtongrid) && w.item === null) {
             val node = NodeModelUtils.getNode(w)
-            val line = node.getStartLine()
+            val line = node.startLine
             error(errorString(getWidgetType(w) + " widget doesn't have item defined", line),
                 SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_WIDGET__ITEM))
         }
@@ -116,12 +116,12 @@ class SitemapValidator extends AbstractSitemapValidator {
         val className = getWidgetType(w)
         if (w.icon !== null && w.staticIcon !== null) {
             val node = NodeModelUtils.getNode(w)
-            val line = node.getStartLine()
+            val line = node.startLine
             warning(errorString(className + "widget has icon '" + w.icon + "' and staticIcon '" + w.staticIcon + "' defined at the same time", line), null)
         }
         if (w.iconRules !== null && w.staticIcon !== null) {
             val node = NodeModelUtils.getNode(w)
-            val line = node.getStartLine()
+            val line = node.startLine
             val iconRules = NodeModelUtils.getTokenText(NodeModelUtils.getNode(w.iconRules))
             warning(errorString(className + "widget has icon rules '" + iconRules + "' and staticIcon '" + w.staticIcon + "' defined at the same time", line), null)
         }
@@ -131,7 +131,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkFramesInFrame(ModelFrame frame) {
         for (w : frame.children) {
             val node = NodeModelUtils.getNode(w)
-            val line = node.getStartLine()
+            val line = node.startLine
             if (w instanceof ModelFrame) {
                 warning(errorString("Frame widget must not contain other Frames", line),
                     SitemapPackage.Literals.MODEL_FRAME.getEStructuralFeature(SitemapPackage.MODEL_FRAME__CHILDREN))
@@ -152,7 +152,7 @@ class SitemapValidator extends AbstractSitemapValidator {
 
         for (w : sitemap.children) {
             val node = NodeModelUtils.getNode(w)
-            val line = node.getStartLine()
+            val line = node.startLine
             if (w instanceof ModelButton) {
                 warning(errorString("Sitemap should not contain Button, Buttons are only allowed in Buttongrid", line),
                     SitemapPackage.Literals.MODEL_SITEMAP.getEStructuralFeature(SitemapPackage.MODEL_SITEMAP__NAME))
@@ -186,7 +186,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         val className = getWidgetType(widget)
         for (w : widget.children) {
             val node = NodeModelUtils.getNode(w)
-            val line = node.getStartLine()
+            val line = node.startLine
             if (w instanceof ModelButton) {
                 warning(errorString(className + " widget should not contain Button, Buttons are only allowed in Buttongrid", line),
                     SitemapPackage.Literals.MODEL_LINKABLE_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_LINKABLE_WIDGET__CHILDREN))
@@ -210,7 +210,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         val nb = grid.getButtons !== null ? grid.getButtons.getElements.size : 0
         if (nb > 0 && grid.item === null) {
             val node = NodeModelUtils.getNode(grid)
-            val line = node.getStartLine()
+            val line = node.startLine
             error(errorString("To use the \"buttons\" parameter in a Buttongrid, the \"item\" parameter is required", line),
                 SitemapPackage.Literals.MODEL_BUTTONGRID.getEStructuralFeature(SitemapPackage.MODEL_BUTTONGRID__ITEM))
             return
@@ -218,7 +218,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         val positions = new HashSet<Pos>
         for (w : grid.children) {
             val node = NodeModelUtils.getNode(w)
-            val line = node.getStartLine()
+            val line = node.startLine
             if (w instanceof ModelButton) {
                 val pos = new Pos(w.row, w.column)
                 if (positions.contains(pos)) {
@@ -240,7 +240,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkSetpointParameters(ModelSetpoint sp) {
         val node = NodeModelUtils.getNode(sp)
-        val line = node.getStartLine()
+        val line = node.startLine
         if (BigDecimal.ZERO == sp.step) {
             warning(errorString("Setpoint widget has step size of '0'", line),
                 SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__STEP))
@@ -258,7 +258,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkSliderParameters(ModelSlider s) {
         val node = NodeModelUtils.getNode(s)
-        val line = node.getStartLine()
+        val line = node.startLine
         if (BigDecimal.ZERO == s.step) {
             warning(errorString("Slider widget has step size of '0'", line),
                 SitemapPackage.Literals.MODEL_SLIDER.getEStructuralFeature(SitemapPackage.MODEL_SLIDER__STEP))
@@ -277,7 +277,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkColortemperaturepickerParameters(ModelColortemperaturepicker ctp) {
         if (ctp.minValue !== null && ctp.maxValue !== null && ctp.minValue > ctp.maxValue) {
             val node = NodeModelUtils.getNode(ctp)
-            val line = node.getStartLine()
+            val line = node.startLine
             warning(errorString("Colortemperaturepicker widget has larger minValue '" + ctp.minValue + "' than maxValue '" + ctp.maxValue + "'", line),
                 SitemapPackage.Literals.MODEL_COLORTEMPERATUREPICKER.getEStructuralFeature(SitemapPackage.MODEL_COLORTEMPERATUREPICKER__MIN_VALUE))
         }
@@ -287,7 +287,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkInputParameters(ModelInput i) {
         if (i.inputHint !== null && !ALLOWED_HINTS.contains(i.inputHint)) {
             val node = NodeModelUtils.getNode(i)
-            val line = node.getStartLine()
+            val line = node.startLine
             warning(errorString("Input widget has invalid inputHint '" + i.inputHint + "'", line),
                 SitemapPackage.Literals.MODEL_INPUT.getEStructuralFeature(SitemapPackage.MODEL_INPUT__INPUT_HINT))
         }
@@ -296,7 +296,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkChartParameters(ModelChart c) {
         val node = NodeModelUtils.getNode(c)
-        val line = node.getStartLine()
+        val line = node.startLine
         if (c.interpolation !== null && !ALLOWED_INTERPOLATION.contains(c.interpolation)) {
             warning(errorString("Chart widget has invalid interpolation '" + c.interpolation + "'", line),
                 SitemapPackage.Literals.MODEL_CHART.getEStructuralFeature(SitemapPackage.MODEL_CHART__INTERPOLATION))
@@ -311,7 +311,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkVideoParameters(ModelVideo v) {
         if (v.url === null) {
             val node = NodeModelUtils.getNode(v)
-            val line = node.getStartLine()
+            val line = node.startLine
             warning(errorString("Video widget doesn't have url defined", line),
                 SitemapPackage.Literals.MODEL_VIDEO.getEStructuralFeature(SitemapPackage.MODEL_VIDEO__URL))
         }
@@ -321,7 +321,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkWebviewParameters(ModelWebview w) {
         if (w.url === null) {
             val node = NodeModelUtils.getNode(w)
-            val line = node.getStartLine()
+            val line = node.startLine
             warning(errorString("Webview widget doesn't have url defined", line),
                 SitemapPackage.Literals.MODEL_WEBVIEW.getEStructuralFeature(SitemapPackage.MODEL_WEBVIEW__URL))
         }
