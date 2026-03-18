@@ -17,7 +17,7 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
-import org.openhab.core.model.sitemap.sitemap.Sitemap;
+import org.openhab.core.sitemap.Sitemap;
 
 @NonNullByDefault
 public interface SitemapProvider {
