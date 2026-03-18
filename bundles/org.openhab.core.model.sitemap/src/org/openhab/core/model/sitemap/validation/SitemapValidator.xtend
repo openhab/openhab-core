@@ -90,10 +90,8 @@ class SitemapValidator extends AbstractSitemapValidator {
 
         for (leaf : node.leafNodes) {
             val text = leaf.text.trim
-            if (KEYWORDS.contains(text)) {
-                if (!seen.add(text)) {
-                    duplicates.add(text)
-                }
+            if (KEYWORDS.contains(text) && !seen.add(text)) {
+                duplicates.add(text)
             }
         }
 
