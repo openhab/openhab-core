@@ -207,21 +207,48 @@ class SitemapValidator extends AbstractSitemapValidator {
 
     @Check
     def void checkWidgetsInButtongrid(ModelButtongrid grid) {
-        val nb = grid.getButtons !== null ? grid.getButtons.getElements.size : 0
-        if (nb > 0 && grid.item === null) {
-            val node = NodeModelUtils.getNode(grid)
-            val line = node.startLine
-            error(errorString("To use the \"buttons\" parameter in a Buttongrid, the \"item\" parameter is required", line),
-                SitemapPackage.Literals.MODEL_BUTTONGRID.getEStructuralFeature(SitemapPackage.MODEL_BUTTONGRID__ITEM))
-            return
-        }
         val positions = new HashSet<Pos>
+        val nb = grid.getButtons !== null ? grid.getButtons.getElements.size : 0
+        if (nb > 0) {
+            if (grid.item === null) {
+                val node = NodeModelUtils.getNode(grid)
+                val line = node.startLine
+                error(errorString("To use the \"buttons\" parameter in a Buttongrid, the \"item\" parameter is required", line),
+                    SitemapPackage.Literals.MODEL_BUTTONGRID.getEStructuralFeature(SitemapPackage.MODEL_BUTTONGRID__ITEM))
+                return
+            }
+            for (b : grid.getButtons.getElements) {
+                val node = NodeModelUtils.getNode(b)
+                val line = node.startLine
+                if (b.row === 0) {
+                    warning(errorString("Buttongrid button must have positive row index", line), b,
+                        SitemapPackage.Literals.MODEL_BUTTON_DEFINITION.getEStructuralFeature(SitemapPackage.MODEL_BUTTON_DEFINITION__ROW))
+                }
+                if (b.column === 0) {
+                    warning(errorString("Buttongrid button must have positive column index", line), b,
+                        SitemapPackage.Literals.MODEL_BUTTON_DEFINITION.getEStructuralFeature(SitemapPackage.MODEL_BUTTON_DEFINITION__COLUMN))
+                }
+                val pos = new Pos(b.row, b.column)
+                if (positions.contains(pos) && b.row > 0 && b.column > 0) {
+                    warning(errorString("Buttongrid button already exists for position (" + b.row + "," + b.column + ")", line), b, null)
+                }
+                positions.add(pos)
+            }
+        }
         for (w : grid.children) {
             val node = NodeModelUtils.getNode(w)
             val line = node.startLine
             if (w instanceof ModelButton) {
+                if (w.row === 0) {
+                    warning(errorString("Button widget must have positive row index", line), w,
+                        SitemapPackage.Literals.MODEL_BUTTON.getEStructuralFeature(SitemapPackage.MODEL_BUTTON__ROW))
+                }
+                if (w.column === 0) {
+                    warning(errorString("Button widget must have positive column index", line), w,
+                        SitemapPackage.Literals.MODEL_BUTTON.getEStructuralFeature(SitemapPackage.MODEL_BUTTON__COLUMN))
+                }
                 val pos = new Pos(w.row, w.column)
-                if (positions.contains(pos)) {
+                if (positions.contains(pos) && w.row > 0 && w.column > 0) {
                     warning(errorString("Button widget already exists for position (" + w.row + "," + w.column + ")", line), w, null)
                 }
                 positions.add(pos)
