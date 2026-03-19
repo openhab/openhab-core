@@ -201,7 +201,7 @@ public class LRUMediaCacheEntryTest {
             }
         }).toList();
 
-        IOException possibleException = exceptionCatched.get();
+        IOException possibleException = exceptionCatched.getValue();
         if (possibleException != null) {
             throw possibleException;
         }
