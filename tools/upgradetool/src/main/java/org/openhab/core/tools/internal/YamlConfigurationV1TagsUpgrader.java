@@ -31,11 +31,11 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.StreamWriteFeature;
-import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 /**
  * The {@link YamlConfigurationV1TagsUpgrader} upgrades YAML Tags Configuration from List to Map.
@@ -72,19 +72,17 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
     public YamlConfigurationV1TagsUpgrader() {
         // match the options used in {@link YamlModelRepositoryImpl}
 
-        objectMapper = YAMLMapper.builder()
-            .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
-            .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
-            .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
-            .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary
-            .findAndAddModules()
-            .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
-            .changeDefaultVisibility(visibilityChecker -> visibilityChecker
-                .withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-                .withVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY))
-            .changeDefaultPropertyInclusion(inclusion -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL,
-                JsonInclude.Include.NON_NULL))
-            .build();
+        objectMapper = YAMLMapper.builder().disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
+                .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
+                .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary
+                .findAndAddModules().enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
+                .changeDefaultVisibility(visibilityChecker -> visibilityChecker
+                        .withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+                        .withVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY))
+                .changeDefaultPropertyInclusion(inclusion -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL,
+                        JsonInclude.Include.NON_NULL))
+                .build();
         // TODO re-enable this feature
         // objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
     }

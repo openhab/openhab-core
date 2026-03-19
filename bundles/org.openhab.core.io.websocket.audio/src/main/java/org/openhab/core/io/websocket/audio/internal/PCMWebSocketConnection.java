@@ -33,6 +33,7 @@ import org.openhab.core.audio.AudioSource;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -176,7 +177,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
                         }
                         case ON_SPOT -> onRemoteSpot();
                     }
-                } catch ( JacksonException |IOException | IllegalStateException e) {
+                } catch (JacksonException | IOException | IllegalStateException e) {
                     logger.warn("Error handing command '{}' with message: {}. Disconnecting client", cmd,
                             e.getMessage());
                     disconnect();
