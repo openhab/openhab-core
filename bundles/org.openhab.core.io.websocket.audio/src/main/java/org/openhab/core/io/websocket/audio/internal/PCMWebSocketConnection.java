@@ -130,7 +130,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
             try {
                 remote.sendStringByFuture(new ObjectMapper().writeValueAsString(msg));
             } catch (JacksonException e) {
-                logger.warn("JsonProcessingException writing JSON message", e);
+                logger.warn("Exception writing JSON message", e);
             }
         }
     }
