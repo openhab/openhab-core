@@ -142,8 +142,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 .changeDefaultPropertyInclusion(inclusion -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL,
                         JsonInclude.Include.NON_NULL))
                 .build();
-        // TODO re-enable this feature
-        // objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
 
         this.watchService = watchService;
         this.mainWatchPath = watchService.getWatchPath();
