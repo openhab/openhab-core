@@ -124,24 +124,24 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @Activate
     public YamlModelRepositoryImpl(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
         YAMLFactory yamlFactory = YAMLFactory.builder() //
-            .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
-            .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
-            .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
-            .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary
-            .enable(YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as
-                                                                        // strings
-            // TODO re-enable this feature
-            // .enable(YAMLReadFeature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS) // do not parse ON/OFF/... as
-            // booleans
-            .build();
+                .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
+                .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
+                .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary
+                .enable(YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as
+                                                                          // strings
+                // TODO re-enable this feature
+                // .enable(YAMLReadFeature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS) // do not parse ON/OFF/... as
+                // booleans
+                .build();
         this.objectMapper = YAMLMapper.builder(yamlFactory).findAndAddModules()
-            .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
-            .changeDefaultVisibility(visibilityChecker -> visibilityChecker
-                    .withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-                    .withVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY))
-            .changeDefaultPropertyInclusion(inclusion -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL,
-                    JsonInclude.Include.NON_NULL))
-            .build();
+                .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
+                .changeDefaultVisibility(visibilityChecker -> visibilityChecker
+                        .withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+                        .withVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY))
+                .changeDefaultPropertyInclusion(inclusion -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL,
+                        JsonInclude.Include.NON_NULL))
+                .build();
         // TODO re-enable this feature
         // objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
 
