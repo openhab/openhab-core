@@ -111,7 +111,8 @@ public class CertificateGenerator implements BundleActivator {
     private KeyStore ensureKeystore() throws KeyStoreException {
         String keystorePath = System.getProperty(JETTY_KEYSTORE_PATH_PROPERTY);
         if (keystorePath == null || keystorePath.isEmpty()) {
-            throw new KeyStoreException("Keystore path is not set.");
+            throw new KeyStoreException(
+                    "Keystore path system property '" + JETTY_KEYSTORE_PATH_PROPERTY + "' is not set.");
         }
         keystoreFile = new File(keystorePath);
         KeyStore keyStore = KeyStore.getInstance(KEYSTORE_JKS_TYPE);
