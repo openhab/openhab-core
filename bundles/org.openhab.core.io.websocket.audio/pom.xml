@@ -26,8 +26,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>tools.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-yaml</artifactId>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
       <scope>compile</scope>
     </dependency>
