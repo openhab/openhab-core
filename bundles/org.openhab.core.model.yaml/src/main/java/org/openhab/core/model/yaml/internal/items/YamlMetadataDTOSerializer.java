@@ -38,7 +38,7 @@ public class YamlMetadataDTOSerializer extends ValueSerializer<YamlMetadataDTO> 
             gen.writeName("value");
             gen.writeString(value.getValue());
             gen.writeName("config");
-            serializers.findValueSerializer(Map.class).serialize(value.config, gen, serializers);
+            serializers.writeValue(gen, value.config);
             gen.writeEndObject();
         }
     }
