@@ -277,10 +277,10 @@
 		<feature dependency="true">openhab.tp-jax-rs-whiteboard</feature>
 		<feature dependency="true">openhab.tp-jackson</feature>
 		<!-- this is due to transitive dependencies, TODO remove once swagger-jaxrs2 no longer enforces jackson 2.x -->
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.21.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.21.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.21.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.21.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.21.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.21.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.21.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.21.1</bundle>
 		<!-- -->
 		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.5</bundle>
 		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-annotations/2.2.43</bundle>
