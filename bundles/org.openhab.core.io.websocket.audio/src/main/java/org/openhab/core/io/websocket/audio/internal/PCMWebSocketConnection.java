@@ -178,7 +178,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
                         case ON_SPOT -> onRemoteSpot();
                     }
                 } catch (JacksonException | IOException | IllegalStateException e) {
-                    logger.warn("Error handing command '{}' with message: {}. Disconnecting client", cmd,
+                    logger.warn("Error handling command '{}' with message: {}. Disconnecting client", cmd,
                             e.getMessage());
                     disconnect();
                 }
