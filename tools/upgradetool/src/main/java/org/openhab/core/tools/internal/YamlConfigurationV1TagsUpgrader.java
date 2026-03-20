@@ -72,7 +72,8 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
     public YamlConfigurationV1TagsUpgrader() {
         // match the options used in {@link YamlModelRepositoryImpl}
 
-        objectMapper = YAMLMapper.builder().disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
+        objectMapper = YAMLMapper.builder() //
+                .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
                 .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
                 .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
                 .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary

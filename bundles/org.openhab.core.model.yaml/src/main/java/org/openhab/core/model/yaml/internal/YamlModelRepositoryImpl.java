@@ -130,9 +130,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary
                 .enable(YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as
                                                                           // strings
-                // TODO re-enable this feature
-                // .enable(YAMLReadFeature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS) // do not parse ON/OFF/... as
-                // booleans
                 .build();
         this.objectMapper = YAMLMapper.builder(yamlFactory).findAndAddModules()
                 .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
