@@ -121,7 +121,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         return things
     }
 
-    def public Collection<Thing> getAllFromModel(String modelName) {
+    def Collection<Thing> getAllFromModel(String modelName) {
         thingsMap.getOrDefault(modelName, List.of())
     }
 
