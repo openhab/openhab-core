@@ -15,6 +15,8 @@ package org.openhab.core.items;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.Registry;
 
 /**
@@ -51,4 +53,46 @@ public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
      * @param itemname the name of the item for which the metadata is to be removed.
      */
     void removeItemMetadata(String itemname);
+
+    /**
+     * Add element to metadata
+     *
+     * @param element the element to add (must not be null)
+     * @return the added element or newly created object of the same type
+     *
+     * @throws UnsupportedOperationException if the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}
+     * @throws IllegalStateException if no ManagedProvider is available
+     */
+    @Override
+    Metadata add(Metadata element);
+
+    /**
+     * Update element in metadata
+     *
+     * @param element the element to update (must not be null)
+     * @return returns the old element or null if no element with the same key
+     *         exists
+     *
+     * @throws UnsupportedOperationException if the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}
+     * @throws IllegalStateException if no ManagedProvider is available
+     */
+    @Override
+    @Nullable
+    Metadata update(Metadata element);
+
+    /**
+     * Remove element from metadata
+     *
+     * @param key the key of the element to remove (must not be null)
+     * @return the removed element, or null if no element with the given key exists
+     *
+     * @throws UnsupportedOperationException if the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}
+     * @throws IllegalStateException if no ManagedProvider is available
+     */
+    @Override
+    @Nullable
+    Metadata remove(MetadataKey key);
 }

@@ -110,7 +110,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -182,8 +181,6 @@ public class ItemResource implements RESTResource {
     }
 
     private final Logger logger = LoggerFactory.getLogger(ItemResource.class);
-    private final Gson gson = new Gson();
-
     private final DTOMapper dtoMapper;
     private final EventPublisher eventPublisher;
     private final ItemBuilderFactory itemBuilderFactory;
@@ -500,7 +497,7 @@ public class ItemResource implements RESTResource {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
 
-        source = buildSource(source, securityContext);
+        String eventSource = buildSource(source, securityContext);
 
         // get Item
         Item item = getItem(itemName);
@@ -512,7 +509,7 @@ public class ItemResource implements RESTResource {
 
             if (state != null) {
                 // set State and report OK
-                eventPublisher.post(ItemEventFactory.createStateEvent(itemName, state, source));
+                eventPublisher.post(ItemEventFactory.createStateEvent(itemName, state, eventSource));
                 return getItemResponse(null, Status.ACCEPTED, null, locale, zoneId, null);
             } else {
                 // State could not be parsed
@@ -566,7 +563,7 @@ public class ItemResource implements RESTResource {
             SecurityContext securityContext) {
         Item item = getItem(itemName);
         Command command = null;
-        source = buildSource(source, securityContext);
+        String eventSource = buildSource(source, securityContext);
         if (item != null) {
             if ("toggle".equalsIgnoreCase(value) && (item instanceof SwitchItem || item instanceof RollershutterItem)) {
                 if (OnOffType.ON.equals(item.getStateAs(OnOffType.class))) {
@@ -585,7 +582,7 @@ public class ItemResource implements RESTResource {
                 command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), value);
             }
             if (command != null) {
-                eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command, source));
+                eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command, eventSource));
                 ResponseBuilder resbuilder = Response.ok();
                 resbuilder.type(MediaType.TEXT_PLAIN);
                 return resbuilder.build();
@@ -750,7 +747,8 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"), //
                     @ApiResponse(responseCode = "201", description = "Created"), //
                     @ApiResponse(responseCode = "404", description = "Item not found."), //
-                    @ApiResponse(responseCode = "405", description = "Metadata not editable.") })
+                    @ApiResponse(responseCode = "405", description = "Metadata not editable."),
+                    @ApiResponse(responseCode = "503", description = "Managed provider not available.") })
     public Response addMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("namespace") @Parameter(description = "namespace") String namespace,
             @Parameter(description = "metadata", required = true) MetadataDTO metadata) {
@@ -767,45 +765,81 @@ public class ItemResource implements RESTResource {
 
         MetadataKey key = new MetadataKey(namespace, itemName);
         Metadata md = new Metadata(key, value, metadata.config);
-        if (metadataRegistry.get(key) == null) {
-            metadataRegistry.add(md);
-            return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
-        } else {
-            metadataRegistry.update(md);
-            return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        try {
+            if (metadataRegistry.get(key) == null) {
+                metadataRegistry.add(md);
+                return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
+            } else {
+                if (metadataRegistry.update(md) == null) {
+                    // Exists, but not managed
+                    return Response.status(Status.METHOD_NOT_ALLOWED).build();
+                }
+                return Response.ok(null, MediaType.TEXT_PLAIN).build();
+            }
+        } catch (UnsupportedOperationException e) {
+            // Trying to add to a reserved namespace that is in an unmanaged provider
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, e.getMessage());
+        } catch (IllegalStateException e) {
+            // There is no managed provider available
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
         }
     }
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemName: [a-zA-Z_0-9]+}/metadata/{namespace}")
-    @Operation(operationId = "removeMetadataFromItem", summary = "Removes metadata from an item.", security = {
+    @Path("/{itemName: [a-zA-Z_0-9]+}/metadata")
+    @Operation(operationId = "removeAllMetadataFromItem", summary = "Removes all managed metadata from an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Item not found."),
-                    @ApiResponse(responseCode = "405", description = "Meta data not editable.") })
-    public Response removeMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
-            @Nullable @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
+                    @ApiResponse(responseCode = "404", description = "Item not found.") })
+    public Response removeAllMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName) {
         Item item = getItem(itemName);
 
         if (item == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        if (namespace == null) {
-            metadataRegistry.removeItemMetadata(itemName);
-        } else {
-            MetadataKey key = new MetadataKey(namespace, itemName);
-            if (metadataRegistry.get(key) != null) {
-                if (metadataRegistry.remove(key) == null) {
-                    return Response.status(Status.CONFLICT).build();
-                }
-            } else {
-                return Response.status(Status.NOT_FOUND).build();
-            }
+        metadataRegistry.removeItemMetadata(itemName);
+        return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
+
+    @DELETE
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{itemName: [a-zA-Z_0-9]+}/metadata/{namespace}")
+    @Operation(operationId = "removeMetadataFromItem", summary = "Removes metadata in a specific namespace from an item.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Item or namespace not found."),
+                    @ApiResponse(responseCode = "405", description = "Metadata not editable."),
+                    @ApiResponse(responseCode = "503", description = "Managed provider not available.") })
+    public Response removeMetadata(@PathParam("itemName") @Parameter(description = "item name") String itemName,
+            @PathParam("namespace") @Parameter(description = "namespace") String namespace) {
+        Item item = getItem(itemName);
+
+        if (item == null) {
+            return Response.status(Status.NOT_FOUND).build();
         }
 
-        return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        MetadataKey key = new MetadataKey(namespace, itemName);
+        try {
+            if (metadataRegistry.get(key) != null) {
+                Metadata removedMetadata = metadataRegistry.remove(key);
+                if (removedMetadata != null) {
+                    return Response.ok(null, MediaType.TEXT_PLAIN).build();
+                }
+                if (metadataRegistry.get(key) != null) {
+                    // Exists, but not managed, and not removed in the mean time
+                    return Response.status(Status.METHOD_NOT_ALLOWED).build();
+                }
+            }
+            return Response.status(Status.NOT_FOUND).build();
+        } catch (UnsupportedOperationException e) {
+            // Trying to remove from a reserved namespace that is in an unmanaged provider
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, e.getMessage());
+        } catch (IllegalStateException e) {
+            // There is no managed provider available
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
+        }
     }
 
     @POST
@@ -818,8 +852,13 @@ public class ItemResource implements RESTResource {
         Collection<String> itemNames = itemRegistry.stream().map(Item::getName)
                 .collect(Collectors.toCollection(HashSet::new));
 
-        metadataRegistry.getAll().stream().filter(md -> !itemNames.contains(md.getUID().getItemName()))
-                .forEach(md -> metadataRegistry.remove(md.getUID()));
+        metadataRegistry.getAll().stream().filter(md -> !itemNames.contains(md.getUID().getItemName())).forEach(md -> {
+            try {
+                metadataRegistry.remove(md.getUID());
+            } catch (UnsupportedOperationException | IllegalStateException e) {
+                // ignore metadata that cannot be removed
+            }
+        });
         return Response.ok().build();
     }
 
