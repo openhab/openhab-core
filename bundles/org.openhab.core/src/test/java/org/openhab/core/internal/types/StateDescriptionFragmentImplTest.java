@@ -42,6 +42,7 @@ public class StateDescriptionFragmentImplTest {
         source.setMinimum(BigDecimal.ZERO);
         source.setMaximum(BigDecimal.TEN);
         source.setStep(BigDecimal.ONE);
+        source.setRangeUnit("x");
         source.setPattern("pattern");
         source.setReadOnly(Boolean.TRUE);
         source.setOptions(List.of());
@@ -54,6 +55,7 @@ public class StateDescriptionFragmentImplTest {
         assertThat(fragment.getMinimum(), is(source.getMinimum()));
         assertThat(fragment.getMaximum(), is(source.getMaximum()));
         assertThat(fragment.getStep(), is(source.getStep()));
+        assertThat(fragment.getRangeUnit(), is(source.getRangeUnit()));
         assertThat(fragment.getPattern(), is(source.getPattern()));
         assertThat(fragment.isReadOnly(), is(source.isReadOnly()));
         assertThat(fragment.getOptions(), is(source.getOptions()));
@@ -82,6 +84,7 @@ public class StateDescriptionFragmentImplTest {
         assertThat(stateDescription.getMinimum(), is(source.getMinimum()));
         assertThat(stateDescription.getMaximum(), is(source.getMaximum()));
         assertThat(stateDescription.getStep(), is(source.getStep()));
+        assertThat(stateDescription.getRangeUnit(), is(source.getRangeUnit()));
         assertThat(stateDescription.getPattern(), is(source.getPattern()));
         assertThat(stateDescription.isReadOnly(), is(source.isReadOnly()));
         assertThat(stateDescription.getOptions(), is(source.getOptions()));
