@@ -26,6 +26,7 @@ import org.openhab.core.library.items.ContactItem;
 import org.openhab.core.library.items.DateTimeItem;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.ImageItem;
+import org.openhab.core.library.items.JSonItem;
 import org.openhab.core.library.items.LocationItem;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.PlayerItem;
@@ -53,6 +54,7 @@ public class CoreItemFactory implements ItemFactory {
     public static final String DATETIME = "DateTime";
     public static final String DIMMER = "Dimmer";
     public static final String IMAGE = "Image";
+    public static final String JSON = "JSon";
     public static final String LOCATION = "Location";
     public static final String NUMBER = "Number";
     public static final String PLAYER = "Player";
@@ -61,7 +63,7 @@ public class CoreItemFactory implements ItemFactory {
     public static final String SWITCH = "Switch";
 
     public static final Set<String> VALID_ITEM_TYPES = Set.of( //
-            CALL, COLOR, CONTACT, DATETIME, DIMMER, IMAGE, LOCATION, NUMBER, PLAYER, ROLLERSHUTTER, STRING, SWITCH //
+            CALL, COLOR, CONTACT, DATETIME, DIMMER, IMAGE, JSON, LOCATION, NUMBER, PLAYER, ROLLERSHUTTER, STRING, SWITCH //
     );
 
     private final UnitProvider unitProvider;
@@ -85,6 +87,7 @@ public class CoreItemFactory implements ItemFactory {
             case DATETIME -> new DateTimeItem(itemName);
             case DIMMER -> new DimmerItem(itemName);
             case IMAGE -> new ImageItem(itemName);
+            case JSON -> new JSonItem(itemName);
             case LOCATION -> new LocationItem(itemName);
             case NUMBER -> new NumberItem(itemTypeName, itemName, unitProvider);
             case PLAYER -> new PlayerItem(itemName);
