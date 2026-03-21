@@ -44,11 +44,14 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.introspect.AnnotationIntrospectorPair;
+import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles community provided transformations
@@ -71,11 +74,11 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
         this.storage = storageService.getStorage("org.openhab.marketplace.transformation",
                 this.getClass().getClassLoader());
 
-        this.yamlMapper = new ObjectMapper(new YAMLFactory());
-        yamlMapper.findAndRegisterModules();
-        this.yamlMapper.setDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa", Locale.ENGLISH));
-        yamlMapper.setAnnotationIntrospector(new AnnotationIntrospectorPair(new SerializedNameAnnotationIntrospector(),
-                yamlMapper.getSerializationConfig().getAnnotationIntrospector()));
+        this.yamlMapper = YAMLMapper.builder().findAndAddModules()
+                .defaultDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa", Locale.ENGLISH))
+                .annotationIntrospector(new AnnotationIntrospectorPair(new SerializedNameAnnotationIntrospector(),
+                        new JacksonAnnotationIntrospector()))
+                .build();
     }
 
     @Override
@@ -151,7 +154,7 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
             PersistedTransformation transformation = yamlMapper.readValue(yaml, PersistedTransformation.class);
             storage.put(id, transformation);
             return transformation;
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             logger.error("Unable to parse YAML: {}", e.getMessage());
             throw new IllegalArgumentException("Unable to parse YAML");
         }

@@ -37,9 +37,11 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.introspect.AnnotationIntrospectorPair;
+import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles UI widgets as YAML files and installs
@@ -59,11 +61,11 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
     @Activate
     public CommunityUIWidgetAddonHandler(final @Reference UIComponentRegistryFactory uiComponentRegistryFactory) {
         this.widgetRegistry = uiComponentRegistryFactory.getRegistry("ui:widget");
-        this.yamlMapper = new ObjectMapper(new YAMLFactory());
-        yamlMapper.findAndRegisterModules();
-        this.yamlMapper.setDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa", Locale.ENGLISH));
-        yamlMapper.setAnnotationIntrospector(new AnnotationIntrospectorPair(new SerializedNameAnnotationIntrospector(),
-                yamlMapper.getSerializationConfig().getAnnotationIntrospector()));
+        this.yamlMapper = YAMLMapper.builder().findAndAddModules()
+                .defaultDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa", Locale.ENGLISH))
+                .annotationIntrospector(new AnnotationIntrospectorPair(new SerializedNameAnnotationIntrospector(),
+                        new JacksonAnnotationIntrospector()))
+                .build();
     }
 
     @Override
@@ -124,7 +126,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
             // add a tag with the add-on ID to be able to identify the widget in the registry
             widget.addTag(id);
             widgetRegistry.add(widget);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             logger.error("Unable to parse YAML: {}", e.getMessage());
             throw new IllegalArgumentException("Unable to parse YAML");
         }

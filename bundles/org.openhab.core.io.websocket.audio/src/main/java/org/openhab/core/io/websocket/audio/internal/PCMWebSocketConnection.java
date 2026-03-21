@@ -34,9 +34,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The {@link PCMWebSocketConnection} represents a WebSocket connection used to transmit PCM audio.
@@ -129,8 +129,8 @@ public class PCMWebSocketConnection implements WebSocketListener {
         if (remote != null) {
             try {
                 remote.sendStringByFuture(new ObjectMapper().writeValueAsString(msg));
-            } catch (JsonProcessingException e) {
-                logger.warn("JsonProcessingException writing JSON message", e);
+            } catch (JacksonException e) {
+                logger.warn("Exception writing JSON message", e);
             }
         }
     }
@@ -157,7 +157,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
         try {
             JsonNode rootMessageNode = jsonMapper.readTree(message);
             if (rootMessageNode.has("cmd")) {
-                String cmd = rootMessageNode.get("cmd").asText().trim().toUpperCase();
+                String cmd = rootMessageNode.get("cmd").asString().trim().toUpperCase();
                 try {
                     logger.debug("Handling msg '{}'", cmd);
                     var messageType = WebSocketCommand.InputCommands.valueOf(cmd);
@@ -177,13 +177,13 @@ public class PCMWebSocketConnection implements WebSocketListener {
                         }
                         case ON_SPOT -> onRemoteSpot();
                     }
-                } catch (IOException | IllegalStateException e) {
-                    logger.warn("Error handing command '{}' with message: {}. Disconnecting client", cmd,
+                } catch (JacksonException | IOException | IllegalStateException e) {
+                    logger.warn("Error handling command '{}' with message: {}. Disconnecting client", cmd,
                             e.getMessage());
                     disconnect();
                 }
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.warn("Exception parsing JSON message.", e);
             logger.warn("Disconnecting client.");
             disconnect();
