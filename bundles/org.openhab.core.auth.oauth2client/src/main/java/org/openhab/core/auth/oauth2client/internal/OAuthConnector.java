@@ -12,7 +12,17 @@
  */
 package org.openhab.core.auth.oauth2client.internal;
 
-import static org.openhab.core.auth.oauth2client.internal.Keyword.*;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.AUTHORIZATION_CODE;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.CLIENT_CREDENTIALS;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.CLIENT_ID;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.CLIENT_SECRET;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.CODE;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.GRANT_TYPE;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.PASSWORD;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.REDIRECT_URI;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.REFRESH_TOKEN;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.SCOPE;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.USERNAME;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -361,27 +371,43 @@ public class OAuthConnector {
             statusCode = response.getStatus();
             content = response.getContentAsString();
 
-            if (statusCode == HttpStatus.OK_200) {
-                AccessTokenResponse jsonResponse = gson.fromJson(content, AccessTokenResponse.class);
-                if (jsonResponse == null) {
-                    throw new OAuthException("Empty response content when deserializing AccessTokenResponse");
+            switch (statusCode) {
+                case HttpStatus.OK_200 -> {
+                    AccessTokenResponse jsonResponse = gson.fromJson(content, AccessTokenResponse.class);
+                    if (jsonResponse == null) {
+                        throw new OAuthException("Empty response content when deserializing AccessTokenResponse");
+                    }
+                    jsonResponse.setCreatedOn(Instant.now()); // this is not supplied by the response
+                    logger.debug("grant type {} to URL {} success", grantType, request.getURI());
+                    return jsonResponse;
                 }
-                jsonResponse.setCreatedOn(Instant.now()); // this is not supplied by the response
-                logger.debug("grant type {} to URL {} success", grantType, request.getURI());
-                return jsonResponse;
-            } else if (statusCode == HttpStatus.BAD_REQUEST_400) {
-                OAuthResponseException errorResponse = gson.fromJson(content, OAuthResponseException.class);
-                if (errorResponse == null) {
-                    throw new OAuthException("Empty response content when deserializing OAuthResponseException");
-                }
-                logger.error("grant type {} to URL {} failed with error code {}, description {}", grantType,
-                        request.getURI(), errorResponse.getError(), errorResponse.getErrorDescription());
+                case HttpStatus.BAD_REQUEST_400 -> {
+                    OAuthResponseException errorResponse = gson.fromJson(content, OAuthResponseException.class);
+                    if (errorResponse == null) {
+                        throw new OAuthException("Empty response content when deserializing OAuthResponseException");
+                    }
+                    logger.error("grant type {} to URL {} failed with error code {}, description {}", grantType,
+                            request.getURI(), errorResponse.getError(), errorResponse.getErrorDescription());
 
-                throw errorResponse;
-            } else {
-                logger.error("grant type {} to URL {} failed with HTTP response code {}", grantType, request.getURI(),
-                        statusCode);
-                throw new OAuthException("Bad http response, http code " + statusCode);
+                    throw errorResponse;
+                }
+                case HttpStatus.UNAUTHORIZED_401 -> {
+                    // Per RFC 6749 section 5.2, HTTP 401 indicates client authentication failure (invalid_client).
+                    // The response body may contain JSON error details; fall back to invalid_client if not present.
+                    OAuthResponseException errorResponse = gson.fromJson(content, OAuthResponseException.class);
+                    if (errorResponse == null || errorResponse.getError().isEmpty()) {
+                        errorResponse = new OAuthResponseException();
+                        errorResponse.setError("invalid_client");
+                    }
+                    logger.debug("grant type {} to URL {} failed with HTTP 401, error: {}, description: {}", grantType,
+                            request.getURI(), errorResponse.getError(), errorResponse.getErrorDescription());
+                    throw errorResponse;
+                }
+                default -> {
+                    logger.error("grant type {} to URL {} failed with HTTP response code {}", grantType,
+                            request.getURI(), statusCode);
+                    throw new OAuthException("Bad http response, http code " + statusCode);
+                }
             }
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             throw new IOException("Exception in oauth communication, grant type " + grantType, e);
