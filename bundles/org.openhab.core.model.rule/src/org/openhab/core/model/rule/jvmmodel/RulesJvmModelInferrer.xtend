@@ -65,9 +65,6 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
     @Inject
     ThingRegistry thingRegistry
 
-    @Inject
-    StateAndCommandProvider stateAndCommandProvider
-
     /**
      * Is called for each instance of the first argument's type contained in a resource.
      * 
@@ -90,8 +87,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
 
             val Set<String> fieldNames = newHashSet()
 
-            val types = stateAndCommandProvider.allTypes
-            types.forEach [ type |
+            StateAndCommandProvider::allTypes.forEach [ type |
                 val name = type.toString
                 if (fieldNames.add(name)) {
                     members += ruleModel.toField(name, typeRef(type.class)) [
