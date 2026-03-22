@@ -23,7 +23,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractProvider;
-import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -143,14 +142,15 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
         for (String filename : sitemapFilenames) {
             ModelSitemap modelSitemap = (ModelSitemap) modelRepo.getModel(filename);
             if (modelSitemap != null) {
-                String sitemapName = filename.substring(0, filename.length() - SITEMAP_FILEEXT.length());
-                if (!modelSitemap.getName().equals(sitemapName)) {
-                    logger.warn(
-                            "Filename `{}` does not match the name `{}` of the sitemap - please fix this as you might see unexpected behavior otherwise.",
-                            filename, modelSitemap.getName());
+                String sitemapFileName = filename.substring(0, filename.length() - SITEMAP_FILEEXT.length());
+                String sitemapName = modelSitemap.getName();
+                if (!sitemapFileName.equals(sitemapName)) {
+                    logger.warn("Filename '{}' does not match the name '{}' of the sitemap - ignoring sitemap.",
+                            filename, sitemapName);
+                } else {
+                    Sitemap sitemap = parseModelSitemap(modelSitemap);
+                    sitemapCache.put(sitemapName, sitemap);
                 }
-                Sitemap sitemap = parseModelSitemap(modelSitemap);
-                sitemapCache.put(sitemapName, sitemap);
             }
         }
     }
@@ -373,17 +373,24 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
         }
 
         Sitemap sitemap = null;
-        String sitemapName = modelName.substring(0, modelName.length() - SITEMAP_FILEEXT.length());
-        Sitemap oldSitemap = sitemapRegistry.get(sitemapName);
+        String sitemapFileName = modelName.substring(0, modelName.length() - SITEMAP_FILEEXT.length());
+        Sitemap oldSitemap = sitemapRegistry.get(sitemapFileName);
 
         if (type == EventType.REMOVED) {
-            sitemapCache.remove(sitemapName);
+            sitemapCache.remove(sitemapFileName);
         } else {
             EObject modelSitemapObject = modelRepo.getModel(modelName);
             // if the sitemap file is empty it will not be in the repo and thus there is no need to cache it here
             if (modelSitemapObject instanceof ModelSitemap modelSitemap) {
-                sitemap = parseModelSitemap(modelSitemap);
-                sitemapCache.put(sitemapName, sitemap);
+                String sitemapName = modelSitemap.getName();
+                if (!sitemapFileName.equals(sitemapName)) {
+                    logger.warn("Filename '{}' does not match the name '{}' of the sitemap - ignoring sitemap.",
+                            sitemapFileName, sitemapName);
+                    sitemapCache.remove(sitemapFileName);
+                } else {
+                    sitemap = parseModelSitemap(modelSitemap);
+                    sitemapCache.put(sitemapName, sitemap);
+                }
             }
         }
 
@@ -409,21 +416,5 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
     @Override
     public Collection<Sitemap> getAll() {
         return sitemapCache.values();
-    }
-
-    @Override
-    public void addProviderChangeListener(ProviderChangeListener<Sitemap> listener) {
-        super.addProviderChangeListener(listener);
-        getAll().forEach(sitemap -> {
-            notifyListenersAboutAddedElement(sitemap);
-        });
-    }
-
-    @Override
-    public void removeProviderChangeListener(ProviderChangeListener<Sitemap> listener) {
-        super.removeProviderChangeListener(listener);
-        getAll().forEach(sitemap -> {
-            notifyListenersAboutRemovedElement(sitemap);
-        });
     }
 }

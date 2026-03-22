@@ -82,6 +82,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         return "Line " + line + ": " + error
     }
 
+    @Check
     def void checkDuplicates(ModelWidget w) {
         val seen = new HashSet<String>
         val duplicates = new HashSet<String>
@@ -117,13 +118,13 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (w.icon !== null && w.staticIcon !== null) {
             val node = NodeModelUtils.getNode(w)
             val line = node.startLine
-            warning(errorString(className + "widget has icon '" + w.icon + "' and staticIcon '" + w.staticIcon + "' defined at the same time", line), null)
+            warning(errorString(className + " widget has icon '" + w.icon + "' and staticIcon '" + w.staticIcon + "' defined at the same time", line), null)
         }
         if (w.iconRules !== null && w.staticIcon !== null) {
             val node = NodeModelUtils.getNode(w)
             val line = node.startLine
             val iconRules = NodeModelUtils.getTokenText(NodeModelUtils.getNode(w.iconRules))
-            warning(errorString(className + "widget has icon rules '" + iconRules + "' and staticIcon '" + w.staticIcon + "' defined at the same time", line), null)
+            warning(errorString(className + " widget has icon rules '" + iconRules + "' and staticIcon '" + w.staticIcon + "' defined at the same time", line), null)
         }
     }
 
