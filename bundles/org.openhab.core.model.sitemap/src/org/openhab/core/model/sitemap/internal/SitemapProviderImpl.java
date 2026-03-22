@@ -374,10 +374,12 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
 
         Sitemap sitemap = null;
         String sitemapFileName = modelName.substring(0, modelName.length() - SITEMAP_FILEEXT.length());
-        Sitemap oldSitemap = sitemapRegistry.get(sitemapFileName);
 
         if (type == EventType.REMOVED) {
-            sitemapCache.remove(sitemapFileName);
+            Sitemap oldSitemap = sitemapCache.remove(sitemapFileName);
+            if (oldSitemap != null) {
+                notifyListenersAboutRemovedElement(oldSitemap);
+            }
         } else {
             EObject modelSitemapObject = modelRepo.getModel(modelName);
             // if the sitemap file is empty it will not be in the repo and thus there is no need to cache it here
@@ -386,30 +388,20 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
                 if (!sitemapFileName.equals(sitemapName)) {
                     logger.warn("Filename '{}' does not match the name '{}' of the sitemap - ignoring sitemap.",
                             sitemapFileName, sitemapName);
-                    sitemapCache.remove(sitemapFileName);
+                    Sitemap oldSitemap = sitemapCache.remove(sitemapFileName);
+                    if (oldSitemap != null) {
+                        notifyListenersAboutRemovedElement(oldSitemap);
+                    }
                 } else {
                     sitemap = parseModelSitemap(modelSitemap);
-                    sitemapCache.put(sitemapName, sitemap);
+                    Sitemap oldSitemap = sitemapCache.put(sitemapName, sitemap);
+                    if (oldSitemap != null) {
+                        notifyListenersAboutUpdatedElement(oldSitemap, sitemap);
+                    } else {
+                        notifyListenersAboutAddedElement(sitemap);
+                    }
                 }
             }
-        }
-
-        switch (type) {
-            case EventType.ADDED:
-                if (sitemap != null) {
-                    notifyListenersAboutAddedElement(sitemap);
-                }
-                break;
-            case EventType.REMOVED:
-                if (oldSitemap != null) {
-                    notifyListenersAboutRemovedElement(oldSitemap);
-                }
-                break;
-            case EventType.MODIFIED:
-                if (sitemap != null && oldSitemap != null) {
-                    notifyListenersAboutUpdatedElement(oldSitemap, sitemap);
-                }
-                break;
         }
     }
 
