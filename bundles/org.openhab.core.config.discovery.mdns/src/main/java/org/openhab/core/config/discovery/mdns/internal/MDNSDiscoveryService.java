@@ -190,11 +190,14 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Override
     public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        /**
-         * Do nothing when a service is added, as we will get a <code>serviceResolved</code> event afterwards,
-         * which contains the fully resolved ServiceInfo. If we would already create a DiscoveryResult here,
-         * we would not have the necessary full information.
-         */
+        String serviceType = serviceEvent.getType();
+        String serviceName = serviceEvent.getName();
+        for (ServiceInfo serviceInfo : mdnsClient.list(serviceType, FOREGROUND_SCAN_TIMEOUT)) {
+            if (serviceInfo.getName().equals(serviceName)) {
+                considerService(serviceType, serviceInfo);
+                break;
+            }
+        }
     }
 
     @Override
@@ -210,14 +213,14 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     @Override
     public void serviceResolved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         // note: {@link ServiceEvent} JavaDoc says getInfo() result can be null; but seems never to be so here.
-        considerService(serviceEvent);
+        considerService(serviceEvent.getType(), serviceEvent.getInfo());
     }
 
-    private void considerService(ServiceEvent serviceEvent) {
+    private void considerService(String serviceType, ServiceInfo serviceInfo) {
         if (isBackgroundDiscoveryEnabled()) {
             for (MDNSDiscoveryParticipant participant : participants) {
-                if (participant.getServiceType().equals(serviceEvent.getType())) {
-                    createDiscoveryResult(participant, serviceEvent.getInfo());
+                if (participant.getServiceType().equals(serviceType)) {
+                    createDiscoveryResult(participant, serviceInfo);
                 }
             }
         }
