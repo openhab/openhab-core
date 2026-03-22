@@ -38,6 +38,7 @@ import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHan
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
 import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;
 import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
 import org.openhab.core.events.EventPublisher;
@@ -143,7 +144,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
                 "when\n" + //
                 "   System started or\n" + //
                 "   Time is noon or\n" + //
-                "   Time is midnight or\n" + //
+                "   Time is 20:57 or\n" + //
                 "   Time cron \"0 0/1 * * * ?\" or\n" + //
                 "   Item X received command ON or\n" + //
                 "   Item Y received update \"A\" or\n" + //
@@ -175,13 +176,11 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(rule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
         assertThat(rule.getTriggers().getFirst().getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL),
                 is(new BigDecimal(40)));
-        assertThat(rule.getTriggers().get(1).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(1).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
-                is("0 0 12 * * ?"));
+        assertThat(rule.getTriggers().get(1).getTypeUID(), is(TimeOfDayTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(1).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("12:00"));
 
-        assertThat(rule.getTriggers().get(2).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(2).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
-                is("0 0 0 * * ?"));
+        assertThat(rule.getTriggers().get(2).getTypeUID(), is(TimeOfDayTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(2).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("20:57"));
 
         assertThat(rule.getTriggers().get(3).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
         assertThat(rule.getTriggers().get(3).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),

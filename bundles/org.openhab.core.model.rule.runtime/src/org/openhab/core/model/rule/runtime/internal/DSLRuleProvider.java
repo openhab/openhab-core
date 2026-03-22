@@ -375,19 +375,20 @@ public class DSLRuleProvider
             if (tt.getCron() != null) {
                 id = tt.getCron();
                 cfg.put("cronExpression", tt.getCron());
+                return TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID("timer.GenericCronTrigger").withConfiguration(cfg).build();
             } else {
                 id = tt.getTime();
                 if ("noon".equals(id)) {
-                    cfg.put("cronExpression", "0 0 12 * * ?");
+                    cfg.put("time", "12:00");
                 } else if ("midnight".equals(id)) {
-                    cfg.put("cronExpression", "0 0 0 * * ?");
+                    cfg.put("time", "00:00");
                 } else {
-                    logger.warn("Unrecognized time expression '{}' in rule trigger", tt.getTime());
-                    return null;
+                    cfg.put("time", id);
                 }
+                return TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID("timer.TimeOfDayTrigger").withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("timer.GenericCronTrigger")
-                    .withConfiguration(cfg).build();
         } else if (t instanceof DateTimeTrigger tt) {
             Configuration cfg = new Configuration();
             cfg.put("itemName", tt.getItem());
