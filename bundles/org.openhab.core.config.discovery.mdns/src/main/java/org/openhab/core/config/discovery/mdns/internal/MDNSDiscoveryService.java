@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Bräutigam - Initial contribution
  * @author Kai Kreuzer - Improved startup behavior and background discovery
  * @author Andre Fuechsel - make {@link #startScan()} asynchronous
+ * @author Andrew Fiddian-Green - Improved service resolution and de-bouncing of multiple events
  */
 @NonNullByDefault
 @Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.mdns")
@@ -66,8 +67,9 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private final Logger logger = LoggerFactory.getLogger(MDNSDiscoveryService.class);
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
-    /**
-     * Map of scheduled tasks to remove devices from the Inbox and to consider new services
+    /*
+     * Map of scheduled tasks: to remove devices from the Inbox, and to de-bounce the consideration
+     * of multiple service events.
      */
     private final Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
     private final Map<String, ScheduledFuture<?>> considerServiceTasks = new ConcurrentHashMap<>();
