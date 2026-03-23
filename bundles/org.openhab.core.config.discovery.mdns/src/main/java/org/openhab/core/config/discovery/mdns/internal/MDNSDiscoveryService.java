@@ -190,19 +190,19 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Override
     public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        String serviceType = serviceEvent.getType();
-        String serviceName = serviceEvent.getName();
-        for (ServiceInfo serviceInfo : mdnsClient.list(serviceType, FOREGROUND_SCAN_TIMEOUT)) {
-            if (serviceInfo.getName().equals(serviceName)) {
-                considerService(serviceType, serviceInfo);
-                break;
-            }
+        /**
+         * When a service is added its ServiceInfo may be either resolved or unresolved. The test for being
+         * resolved is that ServiceEvent getInfo() must be non- null and its respective hasData() true. In
+         * the resolved case we directly consider the DiscoveryResult here. But in the unresolved case we
+         * defer to the future <code>serviceResolved</code> event containing the then resolved ServiceInfo.
+         */
+        if (serviceEvent.getInfo() instanceof ServiceInfo serviceInfo && serviceInfo.hasData()) {
+            considerService(serviceEvent);
         }
     }
 
     @Override
     public void serviceRemoved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        // note: {@link ServiceEvent} JavaDoc says getInfo() result can be null; but seems never to be so here.
         for (MDNSDiscoveryParticipant participant : participants) {
             if (participant.getServiceType().equals(serviceEvent.getType())) {
                 removeDiscoveryResult(participant, serviceEvent.getInfo());
@@ -212,15 +212,14 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Override
     public void serviceResolved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        // note: {@link ServiceEvent} JavaDoc says getInfo() result can be null; but seems never to be so here.
-        considerService(serviceEvent.getType(), serviceEvent.getInfo());
+        considerService(serviceEvent);
     }
 
-    private void considerService(String serviceType, ServiceInfo serviceInfo) {
+    private void considerService(ServiceEvent serviceEvent) {
         if (isBackgroundDiscoveryEnabled()) {
             for (MDNSDiscoveryParticipant participant : participants) {
-                if (participant.getServiceType().equals(serviceType)) {
-                    createDiscoveryResult(participant, serviceInfo);
+                if (participant.getServiceType().equals(serviceEvent.getType())) {
+                    createDiscoveryResult(participant, serviceEvent.getInfo());
                 }
             }
         }
