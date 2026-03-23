@@ -238,8 +238,9 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     /**
      * Checks if the given ServiceEvent is sufficiently resolved to be considered for creating a DiscoveryResult.
-     * The test for being resolved is that ServiceEvent getInfo() must be non- null and its respective hasData()
-     * returns true. HOWEVER a service info may never be 100% final but this ensures that it contains at least:
+     * The test for being resolved is that ServiceEvent getInfo() must be non- null and it contains the minimal
+     * sufficient information for consideration as a discovery candidate. A service info may never be 100% final
+     * but this ensures that it contains at least the following information:
      * <ul>
      * <li>Server name</li>
      * <li>One IP address (whereby IPv6 addresses may be added later)</li>
