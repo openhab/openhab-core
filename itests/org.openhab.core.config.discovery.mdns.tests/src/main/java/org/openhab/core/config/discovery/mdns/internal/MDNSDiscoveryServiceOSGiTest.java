@@ -22,6 +22,7 @@ import java.util.Hashtable;
 import java.util.Random;
 import java.util.Set;
 
+import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
 
@@ -76,6 +77,7 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         ServiceEvent mockServiceEvent = mock(ServiceEvent.class);
         when(mockServiceEvent.getType()).thenReturn(serviceType);
         when(mockServiceEvent.getInfo()).thenReturn(ServiceInfo.create(serviceType, "name", 80, "text"));
+        when(mockServiceEvent.getDNS()).thenReturn(mock(JmDNS.class));
 
         DiscoveryListener mockDiscoveryListener = mock(DiscoveryListener.class);
         mdnsDiscoveryService.addDiscoveryListener(mockDiscoveryListener);
