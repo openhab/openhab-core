@@ -99,6 +99,12 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     protected void deactivate() {
         super.deactivate();
 
+        deviceRemovalTasks.values().forEach(task -> task.cancel(false));
+        deviceRemovalTasks.clear();
+
+        considerServiceTasks.values().forEach(task -> task.cancel(false));
+        considerServiceTasks.clear();
+
         for (MDNSDiscoveryParticipant participant : participants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
@@ -261,15 +267,14 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
             return;
         }
         String serviceName = serviceEvent.getName();
-        ScheduledFuture<?> considerTask = considerServiceTasks.remove(serviceName);
-        if (considerTask != null) {
-            considerTask.cancel(false);
+        ScheduledFuture<?> considerServiceTask = considerServiceTasks.remove(serviceName);
+        if (considerServiceTask != null) {
+            considerServiceTask.cancel(false);
         }
-        considerTask = scheduler.schedule(() -> {
+        considerServiceTasks.put(serviceName, scheduler.schedule(() -> {
             considerServiceTasks.remove(serviceName);
             considerServiceTask(serviceEvent);
-        }, CONSIDER_SERVICE_WINDOW_MSEC, TimeUnit.MILLISECONDS);
-        considerServiceTasks.put(serviceName, considerTask);
+        }, CONSIDER_SERVICE_WINDOW_MSEC, TimeUnit.MILLISECONDS));
     }
 
     /**
