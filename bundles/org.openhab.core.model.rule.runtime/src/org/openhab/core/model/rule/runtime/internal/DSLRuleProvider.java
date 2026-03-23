@@ -371,14 +371,12 @@ public class DSLRuleProvider
                     .withTypeUID("core.GroupStateChangeTrigger").withConfiguration(cfg).build();
         } else if (t instanceof TimerTrigger tt) {
             Configuration cfg = new Configuration();
-            String id;
             if (tt.getCron() != null) {
-                id = tt.getCron();
                 cfg.put("cronExpression", tt.getCron());
                 return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                         .withTypeUID("timer.GenericCronTrigger").withConfiguration(cfg).build();
             } else {
-                id = tt.getTime();
+                String id = tt.getTime();
                 if ("noon".equals(id)) {
                     cfg.put("time", "12:00");
                 } else if ("midnight".equals(id)) {
