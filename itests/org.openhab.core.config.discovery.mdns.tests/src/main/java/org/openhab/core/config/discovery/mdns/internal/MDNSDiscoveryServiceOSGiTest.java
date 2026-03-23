@@ -107,6 +107,9 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         assertNotNull(addr);
         when(serviceInfo.getInetAddresses()).thenReturn(new InetAddress[] { addr });
         when(serviceInfo.getTextBytes()).thenReturn("ok".getBytes(StandardCharsets.UTF_8));
+        when(serviceInfo.getQualifiedName()).thenReturn("my-host._http._tcp.local.");
+        when(serviceInfo.getType()).thenReturn(serviceType);
+        when(serviceInfo.getName()).thenReturn("my-host");
 
         ServiceEvent mockServiceEvent = mock(ServiceEvent.class);
         when(mockServiceEvent.getType()).thenReturn(serviceType);
@@ -118,15 +121,12 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         mdnsDiscoveryService.addDiscoveryListener(mockDiscoveryListener);
 
         mdnsDiscoveryService.serviceAdded(mockServiceEvent);
-        verify(mockDiscoveryListener, timeout(2000).times(1)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
-        verifyNoMoreInteractions(mockDiscoveryListener);
-
         mdnsDiscoveryService.serviceResolved(mockServiceEvent);
         verify(mockDiscoveryListener, timeout(2000).times(1)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
-        verifyNoMoreInteractions(mockDiscoveryListener);
 
         mdnsDiscoveryService.serviceRemoved(mockServiceEvent);
         verify(mockDiscoveryListener, timeout(2000).times(1)).thingRemoved(mdnsDiscoveryService, thingUID);
+
         verifyNoMoreInteractions(mockDiscoveryListener);
     }
 

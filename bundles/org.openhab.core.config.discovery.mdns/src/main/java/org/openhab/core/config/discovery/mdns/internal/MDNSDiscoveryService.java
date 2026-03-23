@@ -61,16 +61,18 @@ import org.slf4j.LoggerFactory;
 public class MDNSDiscoveryService extends AbstractDiscoveryService implements ServiceListener {
 
     private static final Duration FOREGROUND_SCAN_TIMEOUT = Duration.ofMillis(200);
-    private final Logger logger = LoggerFactory.getLogger(MDNSDiscoveryService.class);
+    private static final int CONSIDER_SERVICE_WINDOW_MSEC = 200;
 
+    private final Logger logger = LoggerFactory.getLogger(MDNSDiscoveryService.class);
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
-    private final MDNSClient mdnsClient;
-
     /**
-     * Map of scheduled tasks to remove devices from the Inbox.
+     * Map of scheduled tasks to remove devices from the Inbox and to consider new services
      */
-    private Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
+    private final Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
+    private final Map<String, ScheduledFuture<?>> considerServiceTasks = new ConcurrentHashMap<>();
+
+    private final MDNSClient mdnsClient;
 
     @Activate
     public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties, //
@@ -247,12 +249,39 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                 && attributeText.length > 1);
     }
 
-    private void considerService(ServiceEvent serviceEvent) {
-        if (isBackgroundDiscoveryEnabled()) {
-            for (MDNSDiscoveryParticipant participant : participants) {
-                if (participant.getServiceType().equals(serviceEvent.getType())) {
-                    createDiscoveryResult(participant, serviceEvent.getInfo());
-                }
+    /**
+     * Schedules a task to consider the given ServiceEvent for creating a DiscoveryResult after a short delay. This is
+     * needed to avoid creating multiple DiscoveryResults for the same service in case that multiple serviceAdded and
+     * serviceResolved events are fired in quick succession during the resolution process of a new service.
+     *
+     * @param serviceEvent the ServiceEvent to consider.
+     */
+    private synchronized void considerService(ServiceEvent serviceEvent) {
+        if (!isBackgroundDiscoveryEnabled()) {
+            return;
+        }
+        String serviceName = serviceEvent.getName();
+        ScheduledFuture<?> considerTask = considerServiceTasks.remove(serviceName);
+        if (considerTask != null) {
+            considerTask.cancel(false);
+        }
+        considerTask = scheduler.schedule(() -> {
+            considerServiceTasks.remove(serviceName);
+            considerServiceTask(serviceEvent);
+        }, CONSIDER_SERVICE_WINDOW_MSEC, TimeUnit.MILLISECONDS);
+        considerServiceTasks.put(serviceName, considerTask);
+    }
+
+    /**
+     * Considers the given ServiceEvent for creating a DiscoveryResult. This method is called by the scheduled task
+     * created in considerService() after the short delay has expired.
+     *
+     * @param serviceEvent the ServiceEvent to consider.
+     */
+    private void considerServiceTask(ServiceEvent serviceEvent) {
+        for (MDNSDiscoveryParticipant participant : participants) {
+            if (participant.getServiceType().equals(serviceEvent.getType())) {
+                createDiscoveryResult(participant, serviceEvent.getInfo());
             }
         }
     }
