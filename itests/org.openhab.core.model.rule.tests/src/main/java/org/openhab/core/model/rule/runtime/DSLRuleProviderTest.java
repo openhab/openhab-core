@@ -14,6 +14,7 @@ package org.openhab.core.model.rule.runtime;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayInputStream;
@@ -93,7 +94,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         Collection<Rule> rules = dslRuleProvider.getAll();
         assertThat(rules.size(), is(0));
 
-        String model = "rule RuleNumberOne\n" + //
+        String model = "rule RuleNumberOne [ Test, \"my test\" ]\n" + //
                 "when\n" + //
                 "   System started\n" + //
                 "then\n" + //
@@ -117,6 +118,9 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(firstRule.getUID(), is("dslruletest-1"));
         assertThat(firstRule.getName(), is("RuleNumberOne"));
+        assertThat(firstRule.getTags(), hasSize(2));
+        assertThat(firstRule.getTags(), hasItem("Test"));
+        assertThat(firstRule.getTags(), hasItem("my test"));
         assertThat(firstRule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
         assertThat(firstRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
         assertThat(firstRule.getActions().getFirst().getConfiguration()
@@ -126,6 +130,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(secondRule.getUID(), is("dslruletest-2"));
         assertThat(secondRule.getName(), is("Rule Number Two"));
+        assertThat(secondRule.getTags(), hasSize(0));
         assertThat(secondRule.getTriggers().getFirst().getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
         assertThat(secondRule.getTriggers().getFirst().getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME),
                 is("X"));

@@ -14,10 +14,12 @@ package org.openhab.core.model.rule.runtime.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -279,7 +281,11 @@ public class DSLRuleProvider
         List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID("script.ScriptAction")
                 .withConfiguration(cfg).build());
 
-        return RuleBuilder.create(uid).withName(name).withTriggers(triggers).withActions(actions).build();
+        List<String> ruleTags = rule.getTags();
+        Set<String> tags = ruleTags == null ? null : new HashSet<>(ruleTags);
+
+        return RuleBuilder.create(uid).withTags(tags).withName(name).withTriggers(triggers).withActions(actions)
+                .build();
     }
 
     private String removeIndentation(String script) {
