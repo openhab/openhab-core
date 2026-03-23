@@ -341,7 +341,6 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
             EList<ModelIconRule> modelIconRules = modelIconRuleList.getElements();
             modelIconRules.forEach(modelIconRule -> {
                 Rule iconRule = sitemapFactory.createRule();
-                iconRule.setArgument(modelIconRule.getArg());
                 addRuleConditions(iconRule.getConditions(), modelIconRule.getConditions());
                 iconRule.setArgument(modelIconRule.getArg());
                 iconRules.add(iconRule);
@@ -400,6 +399,12 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
                     } else {
                         notifyListenersAboutAddedElement(sitemap);
                     }
+                }
+            } else {
+                Sitemap oldSitemap = sitemapCache.remove(sitemapFileName);
+                if (oldSitemap != null) {
+                    // Previously valid sitemap is now invalid, so no ModelSitemap was created
+                    notifyListenersAboutRemovedElement(oldSitemap);
                 }
             }
         }
