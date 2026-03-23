@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery.mdns.internal;
 
+import java.net.InetAddress;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
@@ -190,14 +191,17 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Override
     public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        /**
-         * When a service is added its ServiceInfo may be either resolved or unresolved. The test for being
-         * resolved is that ServiceEvent getInfo() must be non- null and its respective hasData() true. In
-         * the resolved case we directly consider the DiscoveryResult here. But in the unresolved case we
-         * defer to the future <code>serviceResolved</code> event containing the then resolved ServiceInfo.
+        /*
+         * When a service is added its ServiceInfo may be either resolved or unresolved. In the resolved case
+         * we directly consider the DiscoveryResult here. But in the unresolved case we explicitly request the
+         * service to be resolved first so that the future serviceResolved event will be called with the then
+         * resolved ServiceInfo.
          */
-        if (serviceEvent.getInfo() instanceof ServiceInfo serviceInfo && serviceInfo.hasData()) {
+        if (isSufficientlyResolved(serviceEvent)) {
             considerService(serviceEvent);
+        } else {
+            // IMPORTANT: explicitly request service resolution to trigger serviceResolved() event
+            serviceEvent.getDNS().requestServiceInfo(serviceEvent.getType(), serviceEvent.getName(), true);
         }
     }
 
@@ -212,7 +216,35 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Override
     public void serviceResolved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        considerService(serviceEvent);
+        /*
+         * This method may be called several times as additional information such as the IP v4 and v6 addresses
+         * and TXT attribute records are added. Therefore we need to check if it is sufficiently resolved to be
+         * considered for creating a DiscoveryResult.
+         */
+        if (isSufficientlyResolved(serviceEvent)) {
+            considerService(serviceEvent);
+        }
+    }
+
+    /**
+     * Checks if the given ServiceEvent is sufficiently resolved to be considered for creating a DiscoveryResult.
+     * The test for being resolved is that ServiceEvent getInfo() must be non- null and its respective hasData()
+     * returns true. HOWEVER a service info may never be 100% final but this ensures that it contains at least:
+     * <ul>
+     * <li>Server name</li>
+     * <li>One IP address (whereby IPv6 addresses may be added later)</li>
+     * <li>The port number</li>
+     * <li>Non empty TXT attributes (whereby more attributes may be added later)</li>
+     * </ul>
+     * 
+     * @param serviceEvent the ServiceEvent to check.
+     * @return true if the ServiceEvent is sufficiently resolved, false otherwise.
+     */
+    private boolean isSufficientlyResolved(ServiceEvent serviceEvent) {
+        return (serviceEvent.getInfo() instanceof ServiceInfo serviceInfo && serviceInfo.getServer() != null
+                && serviceInfo.getPort() > 0 && serviceInfo.getInetAddresses() instanceof InetAddress[] ipAddresses
+                && ipAddresses.length > 0 && serviceInfo.getTextBytes() instanceof byte[] attributeText
+                && attributeText.length > 1);
     }
 
     private void considerService(ServiceEvent serviceEvent) {
