@@ -14,10 +14,13 @@ package org.openhab.core.config.discovery.mdns.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.InetAddress;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.Set;
@@ -74,9 +77,10 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 
         assertThat(mdnsDiscoveryService.getSupportedThingTypes(), is(thingTypeUIDs));
 
+        ServiceInfo resolvedInfo = createSufficientlyResolvedServiceInfo(serviceType);
         ServiceEvent mockServiceEvent = mock(ServiceEvent.class);
         when(mockServiceEvent.getType()).thenReturn(serviceType);
-        when(mockServiceEvent.getInfo()).thenReturn(ServiceInfo.create(serviceType, "name", 80, "text"));
+        when(mockServiceEvent.getInfo()).thenReturn(resolvedInfo);
         when(mockServiceEvent.getDNS()).thenReturn(mock(JmDNS.class));
 
         DiscoveryListener mockDiscoveryListener = mock(DiscoveryListener.class);
@@ -93,6 +97,21 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         mdnsDiscoveryService.serviceRemoved(mockServiceEvent);
         verify(mockDiscoveryListener, timeout(2000).times(1)).thingRemoved(mdnsDiscoveryService, thingUID);
         verifyNoMoreInteractions(mockDiscoveryListener);
+    }
+
+    private ServiceInfo createSufficientlyResolvedServiceInfo(String serviceType) {
+        ServiceInfo result = ServiceInfo.create(serviceType, "name", 80, "key=value");
+        try {
+            Field serverField = ServiceInfo.class.getDeclaredField("server");
+            Field addressesField = ServiceInfo.class.getDeclaredField("inetAddresses");
+            serverField.setAccessible(true);
+            addressesField.setAccessible(true);
+            serverField.set(result, "myserver.local.");
+            addressesField.set(result, new InetAddress[] { InetAddress.getLoopbackAddress() });
+        } catch (Exception e) {
+            fail(e);
+        }
+        return result;
     }
 
     /**
