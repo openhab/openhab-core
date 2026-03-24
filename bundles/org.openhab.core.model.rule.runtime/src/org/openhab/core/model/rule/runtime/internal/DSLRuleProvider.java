@@ -370,12 +370,13 @@ public class DSLRuleProvider
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.GroupStateChangeTrigger").withConfiguration(cfg).build();
         } else if (t instanceof TimerTrigger tt) {
+            String triggerType;
             Configuration cfg = new Configuration();
             if (tt.getCron() != null) {
+                triggerType = "timer.GenericCronTrigger";
                 cfg.put("cronExpression", tt.getCron());
-                return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                        .withTypeUID("timer.GenericCronTrigger").withConfiguration(cfg).build();
             } else {
+                triggerType = "timer.TimeOfDayTrigger";
                 String id = tt.getTime();
                 if ("noon".equals(id)) {
                     cfg.put("time", "12:00");
@@ -384,9 +385,9 @@ public class DSLRuleProvider
                 } else {
                     cfg.put("time", id);
                 }
-                return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                        .withTypeUID("timer.TimeOfDayTrigger").withConfiguration(cfg).build();
             }
+            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID(triggerType)
+                    .withConfiguration(cfg).build();
         } else if (t instanceof DateTimeTrigger tt) {
             Configuration cfg = new Configuration();
             cfg.put("itemName", tt.getItem());
