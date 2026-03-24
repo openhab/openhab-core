@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.discovery.mdns.internal;
 
-import java.net.InetAddress;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
@@ -203,16 +202,13 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         /*
          * When a service is added its ServiceInfo may be either resolved or unresolved. In the resolved case
-         * we directly consider the DiscoveryResult here. But in the unresolved case we explicitly request the
-         * service to be resolved first so that the future serviceResolved event will be called with the then
-         * resolved ServiceInfo.
+         * we may directly consider the ServiceInfo for discovery here. But we also explicitly request the service
+         * to be resolved so that future serviceResolved events may be called with the then resolved ServiceInfo
+         * records. The considerService method applies a short delay to de-bounce multiple such events.
          */
-        if (isSufficientlyResolved(serviceEvent)) {
-            considerService(serviceEvent);
-        } else {
-            // IMPORTANT: explicitly request service resolution to trigger serviceResolved() event
-            serviceEvent.getDNS().requestServiceInfo(serviceEvent.getType(), serviceEvent.getName(), true);
-        }
+        considerService(serviceEvent);
+        // IMPORTANT: explicitly request service resolution to trigger possible further serviceResolved() events
+        serviceEvent.getDNS().requestServiceInfo(serviceEvent.getType(), serviceEvent.getName(), true);
     }
 
     @Override
@@ -228,34 +224,10 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     public void serviceResolved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         /*
          * This method may be called several times as additional information such as the IP v4 and v6 addresses
-         * and TXT attribute records are added. Therefore we need to check if it is sufficiently resolved to be
-         * considered for creating a DiscoveryResult.
+         * and TXT attribute records are added. The considerService method applies a short delay to de-bounce
+         * multiple such events.
          */
-        if (isSufficientlyResolved(serviceEvent)) {
-            considerService(serviceEvent);
-        }
-    }
-
-    /**
-     * Checks if the given ServiceEvent is sufficiently resolved to be considered for creating a DiscoveryResult.
-     * The test for being resolved is that ServiceEvent getInfo() must be non- null and it contains the minimal
-     * sufficient information for consideration as a discovery candidate. A service info may never be 100% final
-     * but this ensures that it contains at least the following information:
-     * <ul>
-     * <li>Server name</li>
-     * <li>One IP address (whereby IPv6 addresses may be added later)</li>
-     * <li>The port number</li>
-     * <li>Non empty TXT attributes (whereby more attributes may be added later)</li>
-     * </ul>
-     * 
-     * @param serviceEvent the ServiceEvent to check.
-     * @return true if the ServiceEvent is sufficiently resolved, false otherwise.
-     */
-    private boolean isSufficientlyResolved(ServiceEvent serviceEvent) {
-        return (serviceEvent.getInfo() instanceof ServiceInfo serviceInfo && serviceInfo.getServer() != null
-                && serviceInfo.getPort() > 0 && serviceInfo.getInetAddresses() instanceof InetAddress[] ipAddresses
-                && ipAddresses.length > 0 && serviceInfo.getTextBytes() instanceof byte[] attributeText
-                && attributeText.length > 1);
+        considerService(serviceEvent);
     }
 
     /**
@@ -266,18 +238,17 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
      * @param serviceEvent the ServiceEvent to consider.
      */
     private synchronized void considerService(ServiceEvent serviceEvent) {
-        if (!isBackgroundDiscoveryEnabled()) {
-            return;
+        if (isBackgroundDiscoveryEnabled() && serviceEvent.getInfo() instanceof ServiceInfo serviceInfo
+                && serviceInfo.getQualifiedName() instanceof String qualifiedName) {
+            ScheduledFuture<?> considerServiceTask = considerServiceTasks.remove(qualifiedName);
+            if (considerServiceTask != null) {
+                considerServiceTask.cancel(false);
+            }
+            considerServiceTasks.put(qualifiedName, scheduler.schedule(() -> {
+                considerServiceTasks.remove(qualifiedName);
+                considerServiceTask(serviceEvent);
+            }, CONSIDER_SERVICE_WINDOW_MSEC, TimeUnit.MILLISECONDS));
         }
-        String serviceName = serviceEvent.getName();
-        ScheduledFuture<?> considerServiceTask = considerServiceTasks.remove(serviceName);
-        if (considerServiceTask != null) {
-            considerServiceTask.cancel(false);
-        }
-        considerServiceTasks.put(serviceName, scheduler.schedule(() -> {
-            considerServiceTasks.remove(serviceName);
-            considerServiceTask(serviceEvent);
-        }, CONSIDER_SERVICE_WINDOW_MSEC, TimeUnit.MILLISECONDS));
     }
 
     /**
