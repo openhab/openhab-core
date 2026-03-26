@@ -13,7 +13,6 @@
 package org.openhab.core.gson;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -23,16 +22,17 @@ import com.google.gson.annotations.SerializedName;
  * @author Holger Friedrich - Initial contribution
  */
 @NonNullByDefault
-public class GsonTestClassAnnotated2_DTO {
-    public @SerializedName("name") @Nullable String n;
-    public @Nullable @SerializedName("email") String e;
+public class GsonTestClassAnnotatedDTO {
+    // adding annotations in different order is intended, please do not sort!
+    public @SerializedName("name") @NonNullByDefault({}) String n = null;
+    public @NonNullByDefault({}) @SerializedName("email") String e = null;
     public int age;
     public boolean active;
 
-    public GsonTestClassAnnotated2_DTO() {
+    public GsonTestClassAnnotatedDTO() {
     }
 
-    public GsonTestClassAnnotated2_DTO(String name, int age, String email, boolean active) {
+    public GsonTestClassAnnotatedDTO(String name, int age, String email, boolean active) {
         this.n = name;
         this.e = email;
         this.age = age;
@@ -41,7 +41,7 @@ public class GsonTestClassAnnotated2_DTO {
 
     @Override
     public String toString() {
-        return "GsonTestClassAnnotated2_DTO{" + "name='" + n + '\'' + ", age=" + age + ", email='" + e + '\''
+        return "GsonTestClassAnnotatedDTO{" + "name='" + n + '\'' + ", age=" + age + ", email='" + e + '\''
                 + ", active=" + active + '}';
     }
 }

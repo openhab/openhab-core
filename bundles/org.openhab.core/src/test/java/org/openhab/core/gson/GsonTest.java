@@ -59,8 +59,8 @@ class GsonTest {
         assertNotNull(json, "JSON content should not be null");
         assertFalse(json.isEmpty(), "JSON content should not be empty");
 
-        // Deserialize into GsonTestClass_DTO
-        GsonTestClass_DTO test = GSON.fromJson(json, GsonTestClass_DTO.class);
+        // Deserialize into GsonTestClassDTO
+        GsonTestClassDTO test = GSON.fromJson(json, GsonTestClassDTO.class);
         assertNotNull(test, "Deserialized object should not be null");
 
         // Verify all fields are correctly deserialized
@@ -77,8 +77,8 @@ class GsonTest {
         assertNotNull(json, "JSON content should not be null");
         assertFalse(json.isEmpty(), "JSON content should not be empty");
 
-        // Deserialize into GsonTestClassAnnotated_DTO
-        GsonTestClassAnnotated_DTO test = GSON.fromJson(json, GsonTestClassAnnotated_DTO.class);
+        // Deserialize into GsonTestClassAnnotatedDTO
+        GsonTestClassAnnotatedDTO test = GSON.fromJson(json, GsonTestClassAnnotatedDTO.class);
         assertNotNull(test, "Deserialized object should not be null");
 
         // Verify all fields are correctly deserialized
@@ -95,8 +95,8 @@ class GsonTest {
         assertNotNull(json, "JSON content should not be null");
         assertFalse(json.isEmpty(), "JSON content should not be empty");
 
-        // Deserialize into GsonTestClassAnnotated2_DTO
-        GsonTestClassAnnotated2_DTO test = GSON.fromJson(json, GsonTestClassAnnotated2_DTO.class);
+        // Deserialize into GsonTestClassAnnotated2DTO
+        GsonTestClassAnnotated2DTO test = GSON.fromJson(json, GsonTestClassAnnotated2DTO.class);
         assertNotNull(test, "Deserialized object should not be null");
 
         // Verify all fields are correctly deserialized
