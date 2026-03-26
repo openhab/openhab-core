@@ -24,6 +24,16 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Set up Cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/org/openhab
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Build and resolve dependencies
         id: build
         # call mvnw directly to avoid filtering of the log by the wrapper,
