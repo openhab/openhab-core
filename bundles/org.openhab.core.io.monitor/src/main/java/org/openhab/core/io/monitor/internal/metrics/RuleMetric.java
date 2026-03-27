@@ -119,7 +119,7 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
             logger.debug("Rule {} RUNNING - updating metric.", ruleId);
             Counter.builder(METRIC_NAME).description("Execution count of the rules").tags(tagsWithRule)
                     .register(this.meterRegistry).increment();
-            cache.put(topic, () -> Timer.start(meterRegistry));
+            cache.putValue(topic, Timer.start(meterRegistry));
         } else if (ruleStatus.contains(RuleStatus.IDLE.name())) {
             Timer.Sample sample = cache.get(topic);
             if (sample != null) {
@@ -130,6 +130,7 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
             } else {
                 logger.trace("Rule {} Finished - but running state missed.", ruleId);
             }
+            cache.remove(topic);
         } else {
             logger.trace("Skipping rule status info with status {}", ruleStatus);
         }
