@@ -19,7 +19,6 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
 import java.util.Random;
