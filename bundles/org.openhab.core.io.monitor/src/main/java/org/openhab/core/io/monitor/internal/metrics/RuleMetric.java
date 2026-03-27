@@ -119,7 +119,8 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
             logger.debug("Rule {} RUNNING - updating metric.", ruleId);
             Counter.builder(METRIC_NAME).description("Execution count of the rules").tags(tagsWithRule)
                     .register(this.meterRegistry).increment();
-            cache.putValue(topic, Timer.start(meterRegistry));
+            Timer.Sample start = Timer.start(meterRegistry);
+            cache.put(topic, () -> start);
         } else if (ruleStatus.contains(RuleStatus.IDLE.name())) {
             Timer.Sample sample = cache.get(topic);
             if (sample != null) {
