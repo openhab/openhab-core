@@ -61,7 +61,7 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testThingDiscoveredAndRemoved() {
+    public void testThingDiscoveredAndRemoved() throws Exception {
         String serviceType = "_http._tcp.local.";
         ThingTypeUID thingTypeUID = new ThingTypeUID("myBinding", "myThingType");
         ThingUID thingUID = new ThingUID(thingTypeUID, "test" + new Random().nextInt(999999999));
@@ -98,12 +98,7 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         ServiceInfo serviceInfo = mock(ServiceInfo.class);
         when(serviceInfo.getServer()).thenReturn("my-host.local");
         when(serviceInfo.getPort()).thenReturn(1234);
-        InetAddress addr = null;
-        try {
-            addr = InetAddress.getByName("192.168.1.10");
-        } catch (UnknownHostException e) {
-            addr = null;
-        }
+        InetAddress addr = InetAddress.getByName("192.168.1.10");
         assertNotNull(addr);
         when(serviceInfo.getInetAddresses()).thenReturn(new InetAddress[] { addr });
         when(serviceInfo.getTextBytes()).thenReturn("ok".getBytes(StandardCharsets.UTF_8));
