@@ -88,8 +88,8 @@ public class ThingStatusConditionHandlerTest extends JavaTest {
 
     private @NonNullByDefault({}) Thing thing;
 
-    private @NonNullByDefault({}) @Mock ThingRegistry mockThingRegistry;
-    private @NonNullByDefault({}) @Mock BundleContext mockBundleContext;
+    private @Mock @NonNullByDefault({}) ThingRegistry mockThingRegistry;
+    private @Mock @NonNullByDefault({}) BundleContext mockBundleContext;
 
     @BeforeEach
     public void setup() {
