@@ -101,7 +101,7 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         assertNotNull(addr);
         when(serviceInfo.getInetAddresses()).thenReturn(new InetAddress[] { addr });
         when(serviceInfo.getTextBytes()).thenReturn("ok".getBytes(StandardCharsets.UTF_8));
-        when(serviceInfo.getQualifiedName()).thenReturn("my-host._http._tcp.local.");
+        when(serviceInfo.getKey()).thenReturn("my-host._http._tcp.local.");
         when(serviceInfo.getType()).thenReturn(serviceType);
         when(serviceInfo.getName()).thenReturn("my-host");
 
