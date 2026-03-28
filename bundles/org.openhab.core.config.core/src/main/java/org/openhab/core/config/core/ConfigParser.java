@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.RecordComponent;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -151,7 +152,36 @@ public final class ConfigParser {
             });
         } else {
             try {
-                configuration = constructor.newInstance(initArgs.values().toArray());
+                RecordComponent[] components = configurationClass.getRecordComponents();
+                Object[] args = new Object[components.length];
+
+                for (int i = 0; i < components.length; i++) {
+                    RecordComponent component = components[i];
+                    String name = component.getName();
+                    Class<?> type = component.getType();
+
+                    Object value = properties.get(name);
+
+                    if (value instanceof Collection<?> valueCollection) {
+                        Collection<Object> collection = List.class.isAssignableFrom(type) ? new ArrayList<>()
+                                : Set.class.isAssignableFrom(type) ? new HashSet<>() : null;
+
+                        if (collection != null) {
+                            Class<?> innerClass = (Class<?>) ((ParameterizedType) component.getGenericType())
+                                    .getActualTypeArguments()[0];
+
+                            valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Objects::nonNull)
+                                    .forEach(collection::add);
+
+                            args[i] = collection;
+                            continue;
+                        }
+                    }
+
+                    args[i] = valueAs(value, type);
+                }
+
+                configuration = constructor.newInstance(args);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 LOGGER.warn("Could invoke default record constructor '{}'", e.getMessage(), e);
             }

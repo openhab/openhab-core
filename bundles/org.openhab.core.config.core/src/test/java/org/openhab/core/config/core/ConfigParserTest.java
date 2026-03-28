@@ -14,6 +14,7 @@ package org.openhab.core.config.core;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -104,6 +105,49 @@ public class ConfigParserTest {
     public void valueAsDefaultTest() {
         Object result = ConfigParser.valueAsOrElse(null, String.class, "foo");
         Assertions.assertEquals("foo", result);
+    }
+
+    @Test
+    public void configurationAsRecordWithMissingFieldsTest() {
+        Map<String, @Nullable Object> properties = Map.of("first", "one");
+
+        TestRecord result = ConfigParser.configurationAs(properties, TestRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("one", result.first());
+        Assertions.assertNull(result.second());
+        Assertions.assertNull(result.third());
+    }
+
+    @Test
+    public void configurationAsRecordWithAllFieldsOutOfOrderTest() {
+        Map<String, @Nullable Object> properties = Map.of("third", "three", "second", "two", "first", "one");
+
+        TestRecord result = ConfigParser.configurationAs(properties, TestRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("one", result.first());
+        Assertions.assertEquals("two", result.second());
+        Assertions.assertEquals("three", result.third());
+    }
+
+    @Test
+    public void configurationAsRecordWithCollectionConversionTest() {
+        Map<String, @Nullable Object> properties = Map.of("listField", List.of("1", "2", "3"), "setField",
+                List.of("4", "5", "6"));
+
+        TestCollectionRecord result = ConfigParser.configurationAs(properties, TestCollectionRecord.class);
+
+        Assertions.assertNotNull(result);
+
+        Assertions.assertEquals(List.of(1, 2, 3), result.listField());
+        Assertions.assertEquals(Set.of(4, 5, 6), result.setField());
+    }
+
+    public record TestRecord(String first, String second, String third) {
+    }
+
+    public record TestCollectionRecord(List<Integer> listField, Set<Integer> setField) {
     }
 
     private enum TestEnum {
