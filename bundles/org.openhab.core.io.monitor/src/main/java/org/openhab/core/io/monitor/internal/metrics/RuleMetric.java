@@ -70,7 +70,7 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
     }
 
     @Override
-    public void bindTo(@NonNullByDefault MeterRegistry meterRegistry) {
+    public void bindTo(@NonNullByDefault({}) MeterRegistry meterRegistry) {
         unbind();
         logger.debug("RuleMetric is being bound...");
         this.meterRegistry = meterRegistry;
