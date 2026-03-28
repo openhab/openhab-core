@@ -18,12 +18,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.RecordComponent;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -77,116 +77,108 @@ public final class ConfigParser {
      * @return The configuration holder object. All fields that matched a configuration option are set. If a required
      *         field is not set, null is returned.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> @Nullable T configurationAs(Map<String, @Nullable Object> properties,
             Class<T> configurationClass) {
-        Constructor<T> constructor;
-        T configuration = null;
         try {
-            if (!configurationClass.isRecord()) {
-                constructor = configurationClass.getConstructor();
-                configuration = constructor.newInstance();
+            if (configurationClass.isRecord()) {
+                return constructRecord(properties, configurationClass);
             } else {
-                Constructor<?>[] constructors = configurationClass.getConstructors();
-                constructor = (Constructor<T>) constructors[0];
+                return constructClass(properties, configurationClass);
             }
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException
                 | InvocationTargetException e) {
+            LOGGER.warn("Could not create configuration instance of '{}' with properties {}: {}",
+                    configurationClass.getName(), properties, e.getMessage(), e);
             return null;
         }
+    }
 
-        Map<Field, Object> initArgs = new LinkedHashMap<>();
+    private static <T> @Nullable T constructClass(Map<String, @Nullable Object> properties, Class<T> configurationClass)
+            throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        T configuration = configurationClass.getConstructor().newInstance();
+
         for (Field field : getAllFields(configurationClass)) {
-            // Don't try to write to final fields and ignore transient fields when it's a class
-            if (!configurationClass.isRecord()
-                    && (Modifier.isFinal(field.getModifiers()) || Modifier.isTransient(field.getModifiers()))) {
+            // Don't try to write to final fields and ignore transient fields
+            if (Modifier.isFinal(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) {
                 continue;
             }
 
             String fieldName = field.getName();
-            Object value = properties.get(fieldName);
+            Object rawValue = properties.get(fieldName);
             // Consider RequiredField annotations
-            if (value == null) {
+            if (rawValue == null) {
                 LOGGER.trace("Skipping field '{}', because config has no entry for it", fieldName);
                 continue;
             }
 
-            Class<?> type = field.getType();
-            // Allows to have List<int>, List<Double>, List<String> etc (and the corresponding Set<?>)
-            if (value instanceof Collection valueCollection) {
-                Collection collection = List.class.isAssignableFrom(type) ? new ArrayList<>()
-                        : Set.class.isAssignableFrom(type) ? new HashSet<>() : //
-                                null;
+            Object value = convertValue(rawValue, field.getType(), field.getGenericType(), fieldName);
 
-                if (collection != null) {
-                    Class<?> innerClass = (Class<?>) ((ParameterizedType) field.getGenericType())
-                            .getActualTypeArguments()[0];
-                    valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Object.class::isInstance)
-                            .forEach(collection::add);
-                    initArgs.put(field, collection);
-                } else {
-                    LOGGER.warn("Skipping field '{}', only List and Set is supported as target Collection", fieldName);
-                }
-            } else {
-                value = valueAs(value, type);
-                if (value != null) {
-                    initArgs.put(field, value);
-                } else {
-                    LOGGER.warn(
-                            "Could not set value for field '{}' because conversion failed. Check your configuration value.",
-                            fieldName);
-                }
-            }
-        }
-
-        if (configuration instanceof T localConfiguration) {
-            initArgs.forEach((field, value) -> {
+            if (value != null) {
                 try {
                     LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}",
-                            field.getType().getSimpleName(), value, field.getName(), configurationClass.getName());
+                            field.getType().getSimpleName(), value, fieldName, configurationClass.getName());
                     field.setAccessible(true);
-                    field.set(localConfiguration, value);
+                    field.set(configuration, value);
                 } catch (IllegalAccessException e) {
-                    LOGGER.warn("Could not set field value for field '{}': {}", field.getName(), e.getMessage(), e);
+                    LOGGER.warn("Could not set field value for field '{}': {}", fieldName, e.getMessage(), e);
                 }
-            });
-        } else {
-            try {
-                RecordComponent[] components = configurationClass.getRecordComponents();
-                Object[] args = new Object[components.length];
-
-                for (int i = 0; i < components.length; i++) {
-                    RecordComponent component = components[i];
-                    String name = component.getName();
-                    Class<?> type = component.getType();
-
-                    Object value = properties.get(name);
-
-                    if (value instanceof Collection<?> valueCollection) {
-                        Collection<Object> collection = List.class.isAssignableFrom(type) ? new ArrayList<>()
-                                : Set.class.isAssignableFrom(type) ? new HashSet<>() : null;
-
-                        if (collection != null) {
-                            Class<?> innerClass = (Class<?>) ((ParameterizedType) component.getGenericType())
-                                    .getActualTypeArguments()[0];
-
-                            valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Objects::nonNull)
-                                    .forEach(collection::add);
-
-                            args[i] = collection;
-                            continue;
-                        }
-                    }
-
-                    args[i] = valueAs(value, type);
-                }
-
-                configuration = constructor.newInstance(args);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                LOGGER.warn("Could invoke default record constructor '{}'", e.getMessage(), e);
             }
         }
+
         return configuration;
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    private static <T> @Nullable T constructRecord(Map<String, @Nullable Object> properties,
+            Class<T> configurationClass)
+            throws InstantiationException, IllegalAccessException, InvocationTargetException {
+
+        Constructor<?>[] constructors = configurationClass.getConstructors();
+        Constructor<T> constructor = (Constructor<T>) constructors[0];
+
+        RecordComponent[] components = configurationClass.getRecordComponents();
+        Object[] args = new Object[components.length];
+
+        for (int i = 0; i < components.length; i++) {
+            RecordComponent component = components[i];
+
+            String name = component.getName();
+            Object rawValue = properties.get(name);
+
+            args[i] = convertValue(rawValue, component.getType(), component.getGenericType(), name);
+        }
+
+        return constructor.newInstance(args);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static @Nullable Object convertValue(Object value, Class<?> type, @Nullable Type genericType,
+            String fieldName) {
+        // Allows to have List<int>, List<Double>, List<String> etc (and the corresponding Set<?>)
+        if (value instanceof Collection<?> valueCollection) {
+            Collection collection = List.class.isAssignableFrom(type) ? new ArrayList<>()
+                    : Set.class.isAssignableFrom(type) ? new HashSet<>() : null;
+
+            if (collection != null && genericType instanceof ParameterizedType parameterizedType) {
+                Class<?> innerClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+
+                valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Objects::nonNull)
+                        .forEach(collection::add);
+
+                return collection;
+            } else {
+                LOGGER.warn("Skipping field '{}', only List and Set is supported as target Collection", fieldName);
+                return null;
+            }
+        }
+
+        Object converted = valueAs(value, type);
+        if (converted == null) {
+            LOGGER.warn("Could not set value for field '{}' because conversion failed. Check your configuration value.",
+                    fieldName);
+        }
+
+        return converted;
     }
 
     /**
