@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public final class ConfigParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigParser.class);
+
     private static final Map<String, Class<?>> WRAPPER_CLASSES_MAP = Map.of(//
             "float", Float.class, //
             "double", Double.class, //
@@ -53,6 +54,16 @@ public final class ConfigParser {
             "short", Short.class, //
             "byte", Byte.class, //
             "boolean", Boolean.class);
+
+    private static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS = Map.of( //
+            boolean.class, false, //
+            byte.class, (byte) 0, //
+            short.class, (short) 0, //
+            int.class, 0, //
+            long.class, 0L, //
+            float.class, 0f, //
+            double.class, 0d, //
+            char.class, '\0');
 
     private ConfigParser() {
         // prevent instantiation
@@ -144,7 +155,13 @@ public final class ConfigParser {
             String name = component.getName();
             Object rawValue = properties.get(name);
 
-            args[i] = convertValue(rawValue, component.getType(), component.getGenericType(), name);
+            Object value = convertValue(rawValue, component.getType(), component.getGenericType(), name);
+
+            if (value == null && component.getType().isPrimitive()) {
+                value = defaultValue(component.getType());
+            }
+
+            args[i] = value;
         }
 
         return configurationClass.cast(constructor.newInstance(args));
@@ -192,6 +209,14 @@ public final class ConfigParser {
             fields.addAll(Arrays.asList(superclazz.getDeclaredFields()));
         }
         return fields;
+    }
+
+    private static Object defaultValue(Class<?> type) {
+        Object value = PRIMITIVE_DEFAULTS.get(type);
+        if (value != null) {
+            return value;
+        }
+        throw new IllegalArgumentException("Unsupported primitive type: " + type);
     }
 
     /**

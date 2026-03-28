@@ -144,10 +144,31 @@ public class ConfigParserTest {
         Assertions.assertEquals(Set.of(4, 5, 6), result.setField());
     }
 
+    @Test
+    public void configurationAsRecordWithPrimitiveDefaultsTest() {
+        Map<String, @Nullable Object> properties = Map.of();
+
+        TestPrimitiveRecord result = ConfigParser.configurationAs(properties, TestPrimitiveRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.booleanField());
+        Assertions.assertEquals(0, result.byteField());
+        Assertions.assertEquals(0, result.shortField());
+        Assertions.assertEquals(0, result.intField());
+        Assertions.assertEquals(0L, result.longField());
+        Assertions.assertEquals(0f, result.floatField());
+        Assertions.assertEquals(0d, result.doubleField());
+        Assertions.assertEquals('\u0000', result.charField());
+    }
+
     private record TestRecord(String first, String second, String third) {
     }
 
     private record TestCollectionRecord(List<Integer> listField, Set<Integer> setField) {
+    }
+
+    private record TestPrimitiveRecord(boolean booleanField, byte byteField, short shortField, int intField,
+            long longField, float floatField, double doubleField, char charField) {
     }
 
     private enum TestEnum {
