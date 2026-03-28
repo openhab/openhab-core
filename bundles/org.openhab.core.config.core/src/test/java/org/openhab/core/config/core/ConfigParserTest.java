@@ -144,10 +144,10 @@ public class ConfigParserTest {
         Assertions.assertEquals(Set.of(4, 5, 6), result.setField());
     }
 
-    public record TestRecord(String first, String second, String third) {
+    private record TestRecord(String first, String second, String third) {
     }
 
-    public record TestCollectionRecord(List<Integer> listField, Set<Integer> setField) {
+    private record TestCollectionRecord(List<Integer> listField, Set<Integer> setField) {
     }
 
     private enum TestEnum {

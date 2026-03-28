@@ -128,13 +128,12 @@ public final class ConfigParser {
         return configuration;
     }
 
-    @SuppressWarnings({ "unchecked" })
     private static <T> @Nullable T constructRecord(Map<String, @Nullable Object> properties,
             Class<T> configurationClass)
             throws InstantiationException, IllegalAccessException, InvocationTargetException {
 
-        Constructor<?>[] constructors = configurationClass.getConstructors();
-        Constructor<T> constructor = (Constructor<T>) constructors[0];
+        Constructor<?> constructor = configurationClass.getDeclaredConstructors()[0];
+        constructor.setAccessible(true);
 
         RecordComponent[] components = configurationClass.getRecordComponents();
         Object[] args = new Object[components.length];
@@ -148,7 +147,7 @@ public final class ConfigParser {
             args[i] = convertValue(rawValue, component.getType(), component.getGenericType(), name);
         }
 
-        return constructor.newInstance(args);
+        return configurationClass.cast(constructor.newInstance(args));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
