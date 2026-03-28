@@ -167,20 +167,20 @@ public final class ConfigParser {
         return configurationClass.cast(constructor.newInstance(args));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static @Nullable Object convertValue(Object value, Class<?> type, @Nullable Type genericType,
             String fieldName) {
         // Allows to have List<int>, List<Double>, List<String> etc (and the corresponding Set<?>)
         if (value instanceof Collection<?> valueCollection) {
-            Collection collection = List.class.isAssignableFrom(type) ? new ArrayList<>()
+            Collection<Object> collection = List.class.isAssignableFrom(type) ? new ArrayList<>()
                     : Set.class.isAssignableFrom(type) ? new HashSet<>() : null;
 
             if (collection != null && genericType instanceof ParameterizedType parameterizedType) {
-                Class<?> innerClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+                Type innerType = parameterizedType.getActualTypeArguments()[0];
 
-                valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Objects::nonNull)
-                        .forEach(collection::add);
-
+                if (innerType instanceof Class<?> innerClass) {
+                    valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Objects::nonNull)
+                            .forEach(collection::add);
+                }
                 return collection;
             } else {
                 LOGGER.warn("Skipping field '{}', only List and Set is supported as target Collection", fieldName);

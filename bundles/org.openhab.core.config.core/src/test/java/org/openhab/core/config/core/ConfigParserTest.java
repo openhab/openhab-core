@@ -161,6 +161,18 @@ public class ConfigParserTest {
         Assertions.assertEquals('\u0000', result.charField());
     }
 
+    @Test
+    public void configurationAsRecordWithNestedListTest() {
+        Map<String, @Nullable Object> properties = Map.of("nested", List.of(List.of("a", "b"), List.of("c", "d")));
+
+        TestNestedListRecord result = ConfigParser.configurationAs(properties, TestNestedListRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertNotNull(result.nested());
+        Assertions.assertTrue(result.nested().isEmpty(),
+                "Nested lists should be skipped when inner type is not supported");
+    }
+
     private record TestRecord(String first, String second, String third) {
     }
 
@@ -169,6 +181,9 @@ public class ConfigParserTest {
 
     private record TestPrimitiveRecord(boolean booleanField, byte byteField, short shortField, int intField,
             long longField, float floatField, double doubleField, char charField) {
+    }
+
+    private record TestNestedListRecord(List<List<String>> nested) {
     }
 
     private enum TestEnum {
