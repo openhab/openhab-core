@@ -341,7 +341,8 @@ public class ItemResource implements RESTResource {
     @Path("/{itemName: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getItemByName", summary = "Gets a single item.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(oneOf = {
+                    EnrichedItemDTO.class, EnrichedGroupItemDTO.class }))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
     public Response getItemByName(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,

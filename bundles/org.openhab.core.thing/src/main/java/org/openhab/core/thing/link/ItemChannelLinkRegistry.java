@@ -193,8 +193,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return the number of removed links
      */
     public int removeLinksForThing(final ThingUID thingUID) {
-        ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
+        @Nullable
+        ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider();
+        if (managedProvider == null) {
+            throw new IllegalStateException("ManagedProvider is not available");
+        }
         return managedProvider.removeLinksForThing(thingUID);
     }
 
@@ -205,8 +208,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return the number of removed links
      */
     public int removeLinksForItem(final String itemName) {
-        ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
+        @Nullable
+        ManagedItemChannelLinkProvider managedProvider = (ManagedItemChannelLinkProvider) getManagedProvider();
+        if (managedProvider == null) {
+            throw new IllegalStateException("ManagedProvider is not available");
+        }
         return managedProvider.removeLinksForItem(itemName);
     }
 
@@ -217,8 +223,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return the number of removed links
      */
     public int purge() {
-        ManagedProvider<ItemChannelLink, String> managedProvider = getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
+        @Nullable
+        ManagedProvider<ItemChannelLink, String> managedProvider = getManagedProvider();
+        if (managedProvider == null) {
+            throw new IllegalStateException("ManagedProvider is not available");
+        }
 
         List<String> toRemove = getOrphanLinks().keySet().stream().map(ItemChannelLink::getUID)
                 .filter(i -> managedProvider.get(i) != null).toList();

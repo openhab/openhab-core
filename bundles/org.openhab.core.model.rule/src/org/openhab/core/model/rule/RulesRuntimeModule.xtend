@@ -24,7 +24,6 @@ import org.openhab.core.model.script.jvmmodel.ScriptTypeComputer
 import org.openhab.core.model.script.scoping.ActionClassLoader
 import org.openhab.core.model.script.scoping.ScriptImplicitlyImportedTypes
 import org.openhab.core.model.script.scoping.ScriptImportSectionNamespaceScopeProvider
-import org.openhab.core.model.script.scoping.StateAndCommandProvider
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeProviderFactory
 import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeScopeProvider
@@ -55,10 +54,6 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
 
     def Class<? extends ImplicitlyImportedFeatures> bindImplicitlyImportedTypes() {
         return ScriptImplicitlyImportedTypes
-    }
-
-    def Class<StateAndCommandProvider> bindStateAndCommandProvider() {
-        return StateAndCommandProvider
     }
 
     override Class<? extends IGenerator> bindIGenerator() {

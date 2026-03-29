@@ -171,8 +171,9 @@ public class ChannelTransformation {
                 } catch (TransformationException e) {
                     if (e.getCause() instanceof ScriptException ex) {
                         logger.error("Applying {} failed: {}", this, ex.getMessage());
-                    } else
+                    } else {
                         logger.debug("Applying {} failed: {}", this, e.getMessage());
+                    }
                 }
             } else {
                 logger.warn("Failed to use {}, service not found", this);

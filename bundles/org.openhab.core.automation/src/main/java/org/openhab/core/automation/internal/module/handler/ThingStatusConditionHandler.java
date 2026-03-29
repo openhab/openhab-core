@@ -125,7 +125,7 @@ public class ThingStatusConditionHandler extends BaseConditionModuleHandler impl
 
         if (thing == null) {
             logger.error("Thing with UID {} not found in ThingRegistry for condition of rule {}.", thingUID, ruleUID);
-        } else
+        } else {
             switch (operator) {
                 case "=":
                     return thing.getStatus().equals(status);
@@ -134,6 +134,7 @@ public class ThingStatusConditionHandler extends BaseConditionModuleHandler impl
                 default:
                     logger.error("Thing status condition operator {} is not known of rule {}", operator, ruleUID);
             }
+        }
         return false;
     }
 
