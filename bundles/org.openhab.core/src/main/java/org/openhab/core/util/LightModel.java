@@ -806,21 +806,19 @@ public class LightModel {
          * In combined mode the RGB and white values are all determined by the HSB values.
          */
         if (LedOperatingMode.COMBINED == ledOperatingMode) {
-            /*
-             * RGBCW - convert HSB to RGB, normalize it, then convert to RGBCW, then scale to [0..255]
-             */
             if (RgbDataType.RGB_C_W == rgbDataType) {
+                /*
+                 * RGBCW - convert HSB to RGB, normalize it, then convert to RGBCW, then scale to [0..255]
+                 */
                 PercentType[] rgbP = ColorUtil.hsbToRgbPercent(hsb);
                 double[] rgb = Arrays.stream(rgbP).mapToDouble(p -> p.doubleValue() / 100.0).toArray();
                 double[] rgbcw = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
                 rgbcw = Arrays.stream(rgbcw).map(d -> Math.round(d * 255 * 10) / 10).toArray(); // // round to 1
                 return rgbcw;
-            } else
-
-            /*
-             * RGBW - convert HSB to RGBW, then scale to [0..255]
-             */
-            if (RgbDataType.RGB_W == rgbDataType) {
+            } else if (RgbDataType.RGB_W == rgbDataType) {
+                /*
+                 * RGBW - convert HSB to RGBW, then scale to [0..255]
+                 */
                 PercentType[] rgbwP = ColorUtil.hsbToRgbwPercent(hsb);
                 double[] rgbw = Arrays.stream(rgbwP).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0).toArray();
                 return rgbw;
@@ -1070,7 +1068,7 @@ public class LightModel {
                     double cw = rgbxParameter[3];
                     double ww = rgbxParameter[4];
                     double sum = cw + ww;
-                    white = sum / 2.0;
+                    white = Math.min(sum, 255.0);
                     if (sum > 0.0) {
                         mirek = ((coolWhiteLed.getMirek() * cw) + (warmWhiteLed.getMirek() * ww)) / sum;
                     } else if (Double.isNaN(cachedMirek)) {
@@ -1421,8 +1419,13 @@ public class LightModel {
          */
         public static double[] rgb2rgbcw(double[] rgb, double[] coolProfile, double[] warmProfile)
                 throws IllegalArgumentException {
-            if (rgb.length != 3 || Arrays.stream(rgb).anyMatch(d -> d < 0.0 || d > 1.0)) {
+            if (rgb.length != 3 || Arrays.stream(rgb).anyMatch(d -> !Double.isFinite(d) || d < 0.0 || d > 1.0)) {
                 throw new IllegalArgumentException("RGB invalid length, or value out of range");
+            }
+            if (coolProfile.length != 3 || warmProfile.length != 3
+                    || Arrays.stream(coolProfile).anyMatch(d -> !Double.isFinite(d) || d < 0.0 || d > 1.0)
+                    || Arrays.stream(warmProfile).anyMatch(d -> !Double.isFinite(d) || d < 0.0 || d > 1.0)) {
+                throw new IllegalArgumentException("Cool or warm profile invalid length, or value out of range");
             }
 
             double[] rgbcw = new double[] { rgb[0], rgb[1], rgb[2], 0.0, 0.0 };
@@ -1500,7 +1503,7 @@ public class LightModel {
          */
         public static double[] rgbcw2rgb(double[] rgbcw, double[] coolProfile, double[] warmProfile)
                 throws IllegalArgumentException {
-            if (rgbcw.length != 5 || Arrays.stream(rgbcw).anyMatch(d -> d < 0.0 || d > 1.0)) {
+            if (rgbcw.length != 5 || Arrays.stream(rgbcw).anyMatch(d -> !Double.isFinite(d) || d < 0.0 || d > 1.0)) {
                 throw new IllegalArgumentException("RGB invalid length, or value out of range");
             }
 

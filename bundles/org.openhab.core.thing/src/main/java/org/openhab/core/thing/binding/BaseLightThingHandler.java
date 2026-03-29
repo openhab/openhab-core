@@ -131,7 +131,7 @@ public abstract class BaseLightThingHandler extends BaseThingHandler {
      *      transmit command to set RGB value to model.getRGBx()
      *  }
      *
-     *  if (model.getXY() != null) {
+     *  if the light supports XY color coordinates:
      *      transmit command to set XY value to model.getXY()
      *  }
      * }
@@ -183,7 +183,7 @@ public abstract class BaseLightThingHandler extends BaseThingHandler {
      *      model.setXY(xy);
      *  }
      *  
-     *       Handle color temperature reports from the device
+     *  Handle color temperature reports from the device
      *  Option A: device reports color temperature directly in Mirek (micro reciprocal Kelvin)
      *  if (colorTemperatureMirek != null) {
      *      model.setMirek(colorTemperatureMirek);

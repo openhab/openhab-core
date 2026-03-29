@@ -905,7 +905,6 @@ public class LightModelTest {
         assertEquals(5, rgbx.length);
         assertEquals(0.0, rgbx[3], 0.01);
         assertEquals(0.0, rgbx[4], 0.01);
-        // TODO RGB value mix tests
 
         lsm.setLedOperatingMode(LedOperatingMode.WHITE_ONLY);
         rgbx = lsm.getRGBx();
@@ -914,6 +913,5 @@ public class LightModelTest {
         assertEquals(0.0, rgbx[1], 0.01);
         assertEquals(0.0, rgbx[2], 0.01);
         assertEquals(255.0, rgbx[3] + rgbx[4], 0.01);
-        // TODO WHITE value mix tests
     }
 }
