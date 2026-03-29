@@ -211,8 +211,13 @@ public final class ConfigParser {
             if (innerType instanceof Class<?> innerClass) {
                 valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Objects::nonNull)
                         .forEach(collection::add);
+                return collection;
+            } else {
+                LOGGER.warn(
+                        "Skipping field '{}', collection element type '{}' is not supported (only simple class element types are supported)",
+                        fieldName, innerType.getTypeName());
+                return null;
             }
-            return collection;
         }
 
         Object converted = valueAs(value, type);

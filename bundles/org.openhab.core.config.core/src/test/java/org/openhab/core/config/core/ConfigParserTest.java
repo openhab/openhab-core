@@ -196,9 +196,7 @@ public class ConfigParserTest {
         TestNestedListRecord result = ConfigParser.configurationAs(properties, TestNestedListRecord.class);
 
         Assertions.assertNotNull(result);
-        Assertions.assertNotNull(result.nested());
-        Assertions.assertTrue(result.nested().isEmpty(),
-                "Nested lists should be skipped when inner type is not supported");
+        Assertions.assertNull(result.nested(), "Nested lists should result in null when inner type is not supported");
     }
 
     private record TestRecord(String first, String second, String third) {
