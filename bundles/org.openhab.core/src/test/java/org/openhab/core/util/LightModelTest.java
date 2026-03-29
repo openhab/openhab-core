@@ -813,7 +813,7 @@ public class LightModelTest {
         assertEquals(0.0, rgbx[0], 1); // red channel minimal
         assertTrue(rgbx[1] > Math.max(rgbx[0], rgbx[2])); // green channel dominant
         assertEquals(0.0, rgbx[2], 1); // blue channel minimal
-        assertEquals(0.0, Math.min(rgbx[0], Math.min(rgbx[2], rgbx[2])), 1); // red or blue should be zero
+        assertEquals(0.0, Math.min(rgbx[0], rgbx[2]), 1); // red or blue should be zero
         assertEquals(192.0, Arrays.stream(rgbx).sum(), 5); // ~75% brightness
     }
 

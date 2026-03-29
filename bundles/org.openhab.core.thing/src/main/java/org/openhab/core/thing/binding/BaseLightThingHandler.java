@@ -75,13 +75,13 @@ public abstract class BaseLightThingHandler extends BaseThingHandler {
      *  model.configSetRgbDataType(RgbDataType.RGB_NO_BRIGHTNESS); // RGB data type
      *  model.configSetMinimumOnBrightness(2); // minimum brightness level in % when on
      *  model.configSetIncreaseDecreaseStep(10); // step size for increase/decrease commands
-     *  model.configSetMiredControlCoolest(153); // color temperature control range coolest
-     *  model.configSetMiredControlWarmest(500); // color temperature control range warmest
+     *  model.configSetMirekControlCoolest(153); // color temperature control range coolest
+     *  model.configSetMirekControlWarmest(500); // color temperature control range warmest
      *
      *  // STEP 3: optionally if the light has warm and cool white LEDS then set up their LED color temperatures.
      *  // These would typically be read from the thing configuration or read from the remote device.
-     *  model.configSetMiredCoolWhiteLED(153);
-     *  model.configSetMiredWarmWhiteLED(500);
+     *  model.configSetMirekCoolWhiteLED(153);
+     *  model.configSetMirekWarmWhiteLED(500);
      *
      *  // STEP 4: now set the status to UNKNOWN to indicate that we are initialized
      *  updateStatus(ThingStatus.UNKNOWN);
@@ -164,7 +164,7 @@ public abstract class BaseLightThingHandler extends BaseThingHandler {
      *  STEP 2: Update the model state based on the received data
      *
      *  if (onOff != null) {
-     *      model.setOnOff(onOff);
+     *      model.setOnOff(onOff.booleanValue());
      *  }
      *
      *  if (brightness != null) {
@@ -175,14 +175,6 @@ public abstract class BaseLightThingHandler extends BaseThingHandler {
      *      model.setColor(color);
      *  }
      *
-     *  if (colorTemperature != null) {
-     *      model.setColorTemperature(colorTemperature);
-     *  }
-     *
-     *  if (colorTemperaturePercent != null) {
-     *      model.setColorTemperaturePercent(colorTemperaturePercent);
-     *  }
-     *
      *  if (rgb != null) {
      *      model.setRGBx(rgb);
      *  }
@@ -190,6 +182,26 @@ public abstract class BaseLightThingHandler extends BaseThingHandler {
      *  if (xy != null) {
      *      model.setXY(xy);
      *  }
+     *  
+     *       Handle color temperature reports from the device
+     *  Option A: device reports color temperature directly in Mirek (micro reciprocal Kelvin)
+     *  if (colorTemperatureMirek != null) {
+     *      model.setMirek(colorTemperatureMirek);
+     *  }
+     *
+     *  Option B: device reports color temperature in Kelvin
+     *  if (colorTemperatureKelvin != null) {
+     *      // Convert Kelvin to Mirek: mirek = 1_000_000 / kelvin
+     *      double mirek = 1_000_000d / colorTemperatureKelvin;
+     *      model.setMirek(mirek);
+     *  }
+     *
+     *  Option C: device reports color temperature as a 0–100% value
+     *  if (colorTemperaturePercent != null) {
+     *      // Map the percent value to your device's supported Mirek range (mirekMin..mirekMax)
+     *      // before updating the model. Example:
+     *       double mirek = mirekMin + (mirekMax - mirekMin) * colorTemperaturePercent / 100.0;
+     *      model.setMirek(mirek);
      *
      *  STEP 3: After updating the model, update the channel states in OpenHAB
      *  Note: Ensure that the channel IDs used in updateState() match those defined in the thing type.

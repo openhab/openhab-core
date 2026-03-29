@@ -56,7 +56,7 @@ import org.openhab.core.types.UnDefType;
  * <li>ON_OFF: if the light is on-off only.</li>
  * <li>BRIGHTNESS: if the light is on-off with brightness.</li>
  * <li>BRIGHTNESS_WITH_COLOR_TEMPERATURE: if the light is on-off with color temperature control.</li>
- * <li>COLOR: if the light is on-off with brightness and full and color control.</li>
+ * <li>COLOR: if the light is on-off with brightness and full color control.</li>
  * <li>COLOR_WITH_COLOR_TEMPERATURE: if the light is on-off with brightness, full color, and color temperature
  * control.</li>
  * </ul>
@@ -91,7 +91,7 @@ import org.openhab.core.types.UnDefType;
  * {@link #rgbDataType} setting. If {@link #rgbDataType} is DEFAULT the RGB values read/write all three parts of the
  * HSBType state. Whereas if it is {@link #rgbDataType} is RGB_NO_BRIGHTNESS the RGB values read/write only
  * the 'HS' parts. NOTE: in the latter case, a 'setRGBx()' call followed by a 'getRGBx()' call do not necessarily return
- * the same values, since the values are normalized to 100%. Neverthless the ratios between the RGB values do remain
+ * the same values, since the values are normalized to 100%. Nevertheless the ratios between the RGB values do remain
  * unchanged.</li>
  * <li>If {@link #rgbDataType} is RGB_W it handles values in RGBW format. The behavior is similar to the RGB case above
  * except that the white channel is derived from the lowest of the RGB values.</li>
@@ -769,7 +769,12 @@ public class LightModel {
              */
             if (RgbDataType.RGB_C_W == rgbDataType) {
                 double denominator = warmWhiteLed.getMirek() - coolWhiteLed.getMirek();
-                double ratio = denominator > 0 ? (cachedMirek - coolWhiteLed.getMirek()) / denominator : 0.5;
+                double ratio;
+                if (denominator > 0 && !Double.isNaN(cachedMirek)) {
+                    ratio = Math.max(0.0, Math.min(1.0, (cachedMirek - coolWhiteLed.getMirek()) / denominator));
+                } else {
+                    ratio = 0.5;
+                }
                 double bri = cachedHSB.getBrightness().doubleValue() * 255.0 / 100.0;
                 double cool = bri * ratio;
                 double warm = bri - cool;
@@ -913,6 +918,15 @@ public class LightModel {
     }
 
     /**
+     * Runtime State: update the color from the remote light
+     *
+     * @param color the HSBType color to set
+     */
+    public synchronized void setColor(HSBType color) {
+        zHandleHSBType(color);
+    }
+
+    /**
      * Runtime State: Set the current LED operating mode. Some brands of light are not able to use the RGB leds
      * and the white led(s) at the same time. So they must be switched between WHITE_ONLY and RGB_ONLY mode.
      * Whereas others lights can use any combination of RGB and White leds at the same time they must be switched
@@ -1038,7 +1052,7 @@ public class LightModel {
         if (rgbxParameter.length > 3 && ledOperatingMode == LedOperatingMode.RGB_ONLY) {
             throw new IllegalArgumentException("White channel(s) not allowed in LED mode " + ledOperatingMode);
         }
-        if (Arrays.stream(rgbxParameter).anyMatch(d -> d < 0.0 || d > 255.0)) {
+        if (Arrays.stream(rgbxParameter).anyMatch(d -> !Double.isFinite(d) || d < 0.0 || d > 255.0)) {
             throw new IllegalArgumentException("RGBx value out of range [0.0..255.0]");
         }
 
@@ -1053,11 +1067,17 @@ public class LightModel {
                      * is determined by both white channels averaged. And the color temperature is
                      * determined by the ratio of the two white channels.
                      */
-                    white = (rgbxParameter[3] + rgbxParameter[4]) / 2.0;
-                    mirek = white > 0.0 // avoid division by zero
-                            ? (coolWhiteLed.getMirek() * rgbxParameter[3] / white)
-                                    + (warmWhiteLed.getMirek() * rgbxParameter[4] / white)
-                            : cachedMirek;
+                    double cw = rgbxParameter[3];
+                    double ww = rgbxParameter[4];
+                    double sum = cw + ww;
+                    white = sum / 2.0;
+                    if (sum > 0.0) {
+                        mirek = ((coolWhiteLed.getMirek() * cw) + (warmWhiteLed.getMirek() * ww)) / sum;
+                    } else if (Double.isNaN(cachedMirek)) {
+                        mirek = (coolWhiteLed.getMirek() + warmWhiteLed.getMirek()) / 2.0;
+                    } else {
+                        mirek = cachedMirek;
+                    }
                 } else {
                     /*
                      * At this point the rgbxParameter.length can only be 4 so we create a white
@@ -1069,8 +1089,9 @@ public class LightModel {
                     white = rgbxParameter[3];
                     mirek = (coolWhiteLed.getMirek() + warmWhiteLed.getMirek()) / 2.0; // average of the two LEDs
                 }
+                PercentType bri = new PercentType(Math.max(0, Math.min(100, (int) Math.round(white * 100.0 / 255.0))));
                 hsb = ColorUtil.xyToHsb(ColorUtil.kelvinToXY(1000000 / mirek));
-                hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), PercentType.HUNDRED);
+                hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), bri);
                 break;
 
             case RGB_ONLY:
@@ -1271,7 +1292,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the value is outside the range [0.0..100.0]
      */
     private static PercentType zPercentTypeFrom(double value) throws IllegalArgumentException {
-        if (value < 0.0 || value > 100.0) {
+        if (!Double.isFinite(value) || value < 0.0 || value > 100.0) {
             throw new IllegalArgumentException("PercentType value must be in range [0.0..100.0]: " + value);
         }
         return new PercentType(new BigDecimal(value));
