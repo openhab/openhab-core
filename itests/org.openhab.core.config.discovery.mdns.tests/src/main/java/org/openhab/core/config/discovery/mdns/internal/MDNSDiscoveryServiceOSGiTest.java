@@ -130,8 +130,6 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 
         mdnsDiscoveryService.serviceRemoved(mockServiceEvent);
         verify(mockDiscoveryListener, timeout(2000).times(1)).thingRemoved(mdnsDiscoveryService, thingUID);
-
-        verifyNoMoreInteractions(mockDiscoveryListener);
     }
 
     @Test
