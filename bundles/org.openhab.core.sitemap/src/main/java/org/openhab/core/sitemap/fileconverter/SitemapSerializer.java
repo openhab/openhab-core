@@ -32,7 +32,7 @@ public interface SitemapSerializer extends ObjectSerializer<Sitemap> {
      * id the identifier of the {@link Sitemap} format generation.
      *
      * @param id the identifier of the {@link Sitemap} format generation.
-     * @param things the {@link List} of {@link Sitemap}s to serialize.
+     * @param sitemaps the {@link List} of {@link Sitemap}s to serialize.
      */
     void setSitemapsToBeSerialized(String id, List<Sitemap> sitemaps);
 }

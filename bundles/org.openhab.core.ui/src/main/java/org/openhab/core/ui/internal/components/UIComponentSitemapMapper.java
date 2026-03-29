@@ -51,7 +51,8 @@ import org.openhab.core.ui.components.UIComponent;
 public class UIComponentSitemapMapper {
 
     public static RootUIComponent map(Sitemap element) {
-        RootUIComponent sitemapComponent = new RootUIComponent(element.getName(), "Sitemap");
+        RootUIComponent sitemapComponent = new RootUIComponent(
+                element.getName().substring(UIComponentSitemapProvider.SITEMAP_PREFIX.length()), "Sitemap");
         addConfig(sitemapComponent, "label", element.getLabel());
         addConfig(sitemapComponent, "icon", element.getIcon());
 

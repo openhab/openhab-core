@@ -79,7 +79,6 @@ import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
@@ -88,7 +87,6 @@ import org.openhab.core.sitemap.Frame;
 import org.openhab.core.sitemap.Image;
 import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
-import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
@@ -100,6 +98,7 @@ import org.openhab.core.sitemap.Switch;
 import org.openhab.core.sitemap.Video;
 import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.dto.MappingDTO;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
@@ -692,15 +691,15 @@ public class SitemapResource
             bean.maxValue = colortemperaturepickerWidget.getMaxValue();
         }
         if (widget instanceof Buttongrid buttonGridWidget) {
-            for (ButtonDefinition button : buttonGridWidget.getButtons()) {
+            bean.mappings = buttonGridWidget.getButtons().stream().map(button -> {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.row = button.getRow();
                 mappingBean.column = button.getColumn();
                 mappingBean.command = button.getCmd();
                 mappingBean.label = button.getLabel();
                 mappingBean.icon = button.getIcon();
-                bean.mappings.add(mappingBean);
-            }
+                return mappingBean;
+            }).toList();
         }
         if (widget instanceof Button buttonWidget) {
             // Get the icon from the widget only

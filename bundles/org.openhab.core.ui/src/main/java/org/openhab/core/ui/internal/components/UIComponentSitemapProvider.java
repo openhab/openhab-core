@@ -92,7 +92,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
 
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
-    private static final String SITEMAP_PREFIX = "uicomponents_";
+    static final String SITEMAP_PREFIX = "uicomponents_";
 
     private static final Pattern CONDITION_PATTERN = Pattern
             .compile("((?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>))?\\s*(?<value>(\\+|-)?.+)");
@@ -502,7 +502,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
 
     @Override
     public @Nullable Sitemap update(Sitemap element) {
-        Sitemap sitemap = remove(SITEMAP_PREFIX + element.getName());
+        Sitemap sitemap = remove(element.getName());
         add(element);
         return sitemap;
     }
