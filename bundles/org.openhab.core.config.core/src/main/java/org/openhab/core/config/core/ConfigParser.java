@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author David Graeff - Initial contribution
  * @author Jan N. Klug - Extended and refactored to an exposed utility class
+ * @author Jacob Laursen - Added full support for Java records
  *
  */
 @NonNullByDefault
@@ -86,7 +87,8 @@ public final class ConfigParser {
      * @param configurationClass The configuration holder class. An instance of this will be created so make sure that
      *            a default constructor is available.
      * @return The configuration holder object. All fields that matched a configuration option are set. If a required
-     *         field is not set, null is returned.
+     *         field is not set, null is returned. For record classes, missing primitives are automatically set to
+     *         their default value.
      */
     public static <T> @Nullable T configurationAs(Map<String, @Nullable Object> properties,
             Class<T> configurationClass) {
