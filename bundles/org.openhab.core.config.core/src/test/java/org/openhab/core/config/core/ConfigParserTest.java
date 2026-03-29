@@ -131,6 +131,23 @@ public class ConfigParserTest {
         Assertions.assertEquals("three", result.third());
     }
 
+    /**
+     * Note: This test does not guarantee failure without proper constructor resolution,
+     * as JVM constructor ordering is unspecified but often stable in practice.
+     * The implementation must explicitly resolve the canonical constructor.
+     */
+    @Test
+    public void configurationAsRecordUsesCanonicalConstructorTest() {
+        Map<String, @Nullable Object> properties = Map.of("a", "a", "b", "b");
+
+        TestCustomConstructorRecord result = ConfigParser.configurationAs(properties,
+                TestCustomConstructorRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("a", result.a());
+        Assertions.assertEquals("b", result.b());
+    }
+
     @Test
     public void configurationAsRecordWithCollectionConversionTest() {
         Map<String, @Nullable Object> properties = Map.of("listField", List.of("1", "2", "3"), "setField",
@@ -174,6 +191,13 @@ public class ConfigParserTest {
     }
 
     private record TestRecord(String first, String second, String third) {
+    }
+
+    private record TestCustomConstructorRecord(String a, String b) {
+        @SuppressWarnings("unused")
+        public TestCustomConstructorRecord(String a) {
+            this(a, "not b");
+        }
     }
 
     private record TestCollectionRecord(List<Integer> listField, Set<Integer> setField) {
