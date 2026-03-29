@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.sitemap.Button;
@@ -79,11 +80,14 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Add support for Button element
  * @author Laurent Garnier - Added support for new sitemap element Colortemperaturepicker
  * @author Mark Herwege - Implement sitemap registry
+ * @author Mark Herwege - Make provider managed and add support for adding/updating/removing sitemaps via the provider
+ *         interface
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class, immediate = true)
 public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
-        implements SitemapProvider, RegistryChangeListener<RootUIComponent> {
+        implements ManagedProvider<Sitemap, String>, SitemapProvider, RegistryChangeListener<RootUIComponent> {
+
     private final Logger logger = LoggerFactory.getLogger(UIComponentSitemapProvider.class);
 
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
@@ -475,5 +479,36 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 notifyListenersAboutAddedElement(sitemap);
             }
         }
+    }
+
+    @Override
+    public void add(Sitemap element) {
+        UIComponentRegistry sitemapComponentRegistry = this.sitemapComponentRegistry;
+        if (sitemapComponentRegistry != null) {
+            sitemapComponentRegistry.add(UIComponentSitemapMapper.map(element));
+        }
+    }
+
+    @Override
+    public @Nullable Sitemap remove(String key) {
+        Sitemap sitemap = sitemaps.get(key);
+        UIComponentRegistry sitemapComponentRegistry = this.sitemapComponentRegistry;
+        if (sitemapComponentRegistry != null) {
+            sitemapComponentRegistry.remove(key.substring(SITEMAP_PREFIX.length()));
+            return sitemap;
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable Sitemap update(Sitemap element) {
+        Sitemap sitemap = remove(SITEMAP_PREFIX + element.getName());
+        add(element);
+        return sitemap;
+    }
+
+    @Override
+    public @Nullable Sitemap get(String key) {
+        return getSitemap(key);
     }
 }
