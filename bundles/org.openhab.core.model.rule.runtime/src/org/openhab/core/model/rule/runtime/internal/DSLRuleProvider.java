@@ -349,10 +349,6 @@ public class DSLRuleProvider
                 yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
                         .withTypeUID(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            case SystemOnShutdownTrigger t -> {
-                logger.warn("System shutdown rule triggers are no longer supported!");
-                yield null;
-            }
             case CommandEventTrigger ceTrigger -> {
                 cfg.put(ItemCommandTriggerHandler.CFG_ITEMNAME, ceTrigger.getItem());
                 if (ceTrigger.getCommand() != null) {
@@ -451,6 +447,10 @@ public class DSLRuleProvider
                 cfg.put(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS, tscTrigger.getOldState());
                 yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
                         .withTypeUID(ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case SystemOnShutdownTrigger t -> {
+                logger.warn("System shutdown rule triggers are no longer supported!");
+                yield null;
             }
             default -> {
                 logger.warn("Unknown trigger type '{}' - ignoring it.", eventTrigger.getClass().getSimpleName());
