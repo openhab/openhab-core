@@ -98,8 +98,8 @@ public final class ConfigParser {
             }
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException
                 | InvocationTargetException e) {
-            LOGGER.warn("Could not create configuration instance of '{}' with properties {}: {}",
-                    configurationClass.getName(), properties, e.getMessage(), e);
+            LOGGER.warn("Could not create configuration instance of '{}' with properties keys {}: {}",
+                    configurationClass.getName(), properties.keySet(), e.getMessage(), e);
             return null;
         }
     }
@@ -154,11 +154,22 @@ public final class ConfigParser {
 
             String name = component.getName();
             Object rawValue = properties.get(name);
+            if (rawValue == null) {
+                LOGGER.trace("Skipping component '{}', because config has no entry for it", name);
+            }
+            Object value = rawValue != null
+                    ? convertValue(rawValue, component.getType(), component.getGenericType(), name)
+                    : null;
 
-            Object value = convertValue(rawValue, component.getType(), component.getGenericType(), name);
-
-            if (value == null && component.getType().isPrimitive()) {
-                value = defaultValue(component.getType());
+            if (value == null) {
+                if (component.getType().isPrimitive()) {
+                    value = defaultValue(component.getType());
+                    LOGGER.trace("Setting default value ({}) {} to component '{}' in configuration class {}",
+                            component.getType().getSimpleName(), value, name, configurationClass.getName());
+                }
+            } else {
+                LOGGER.trace("Setting value ({}) {} to component '{}' in configuration class {}",
+                        component.getType().getSimpleName(), value, name, configurationClass.getName());
             }
 
             args[i] = value;
@@ -174,18 +185,25 @@ public final class ConfigParser {
             Collection<Object> collection = List.class.isAssignableFrom(type) ? new ArrayList<>()
                     : Set.class.isAssignableFrom(type) ? new HashSet<>() : null;
 
-            if (collection != null && genericType instanceof ParameterizedType parameterizedType) {
-                Type innerType = parameterizedType.getActualTypeArguments()[0];
-
-                if (innerType instanceof Class<?> innerClass) {
-                    valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Objects::nonNull)
-                            .forEach(collection::add);
-                }
-                return collection;
-            } else {
-                LOGGER.warn("Skipping field '{}', only List and Set is supported as target Collection", fieldName);
+            if (collection == null) {
+                LOGGER.warn("Skipping field '{}', only List and Set are supported as target collection types",
+                        fieldName);
                 return null;
             }
+
+            if (!(genericType instanceof ParameterizedType parameterizedType)) {
+                LOGGER.warn("Skipping field '{}', target collection type must declare a generic element type",
+                        fieldName);
+                return null;
+            }
+
+            Type innerType = parameterizedType.getActualTypeArguments()[0];
+
+            if (innerType instanceof Class<?> innerClass) {
+                valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Objects::nonNull)
+                        .forEach(collection::add);
+            }
+            return collection;
         }
 
         Object converted = valueAs(value, type);
