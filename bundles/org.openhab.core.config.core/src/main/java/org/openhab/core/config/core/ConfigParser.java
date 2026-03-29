@@ -265,7 +265,7 @@ public final class ConfigParser {
      * @param type desired target class
      * @return the converted value or null if conversion fails or input value is null
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings("unchecked")
     public static <T> @Nullable T valueAs(@Nullable Object value, Class<T> type) {
         if (value == null || type.isAssignableFrom(value.getClass())) {
             // exit early if value is null or type is already compatible
@@ -275,63 +275,63 @@ public final class ConfigParser {
         // make sure primitives are converted to their respective wrapper class
         Class<?> typeClass = WRAPPER_CLASSES_MAP.getOrDefault(type.getSimpleName(), type);
 
-        Object result = value;
-        // Handle the conversion case of Number to Float,Double,Long,Integer,Short,Byte,BigDecimal
-        if (value instanceof Number number) {
-            if (Float.class.equals(typeClass)) {
-                result = number.floatValue();
-            } else if (Double.class.equals(typeClass)) {
-                result = number.doubleValue();
-            } else if (Long.class.equals(typeClass)) {
-                result = number.longValue();
-            } else if (Integer.class.equals(typeClass)) {
-                result = number.intValue();
-            } else if (Short.class.equals(typeClass)) {
-                result = number.shortValue();
-            } else if (Byte.class.equals(typeClass)) {
-                result = number.byteValue();
-            } else if (BigDecimal.class.equals(typeClass)) {
-                result = new BigDecimal(number.toString());
-            }
-        } else if (value instanceof String strValue && !String.class.equals(typeClass)) {
-            // Handle the conversion case of String to Float,Double,Long,Integer,BigDecimal,Boolean
-            if (Float.class.equals(typeClass)) {
-                result = Float.valueOf(strValue);
-            } else if (Double.class.equals(typeClass)) {
-                result = Double.valueOf(strValue);
-            } else if (Long.class.equals(typeClass)) {
-                result = Long.valueOf(strValue);
-            } else if (Integer.class.equals(typeClass)) {
-                result = Integer.valueOf(strValue);
-            } else if (Short.class.equals(typeClass)) {
-                result = Short.valueOf(strValue);
-            } else if (Byte.class.equals(typeClass)) {
-                result = Byte.valueOf(strValue);
-            } else if (BigDecimal.class.equals(typeClass)) {
-                result = new BigDecimal(strValue);
-            } else if (Boolean.class.equals(typeClass)) {
-                result = Boolean.valueOf(strValue);
-            } else if (type.isEnum()) {
-                final Class<? extends Enum> enumType = (Class<? extends Enum>) typeClass;
-                try {
-                    result = Enum.valueOf(enumType, value.toString());
-                } catch (IllegalArgumentException e) {
-                    result = null;
+        try {
+            Object result = value;
+            // Handle the conversion case of Number to Float,Double,Long,Integer,Short,Byte,BigDecimal
+            if (value instanceof Number number) {
+                if (Float.class.equals(typeClass)) {
+                    result = number.floatValue();
+                } else if (Double.class.equals(typeClass)) {
+                    result = number.doubleValue();
+                } else if (Long.class.equals(typeClass)) {
+                    result = number.longValue();
+                } else if (Integer.class.equals(typeClass)) {
+                    result = number.intValue();
+                } else if (Short.class.equals(typeClass)) {
+                    result = number.shortValue();
+                } else if (Byte.class.equals(typeClass)) {
+                    result = number.byteValue();
+                } else if (BigDecimal.class.equals(typeClass)) {
+                    result = new BigDecimal(number.toString());
                 }
-            } else if (Set.class.isAssignableFrom(typeClass)) {
-                result = Set.of(value);
-            } else if (Collection.class.isAssignableFrom(typeClass)) {
-                result = List.of(value);
+            } else if (value instanceof String strValue && !String.class.equals(typeClass)) {
+                // Handle the conversion case of String to Float,Double,Long,Integer,BigDecimal,Boolean
+                if (Float.class.equals(typeClass)) {
+                    result = Float.valueOf(strValue);
+                } else if (Double.class.equals(typeClass)) {
+                    result = Double.valueOf(strValue);
+                } else if (Long.class.equals(typeClass)) {
+                    result = Long.valueOf(strValue);
+                } else if (Integer.class.equals(typeClass)) {
+                    result = Integer.valueOf(strValue);
+                } else if (Short.class.equals(typeClass)) {
+                    result = Short.valueOf(strValue);
+                } else if (Byte.class.equals(typeClass)) {
+                    result = Byte.valueOf(strValue);
+                } else if (BigDecimal.class.equals(typeClass)) {
+                    result = new BigDecimal(strValue);
+                } else if (Boolean.class.equals(typeClass)) {
+                    result = Boolean.valueOf(strValue);
+                } else if (type.isEnum()) {
+                    @SuppressWarnings("rawtypes")
+                    final Class<? extends Enum> enumType = (Class<? extends Enum>) typeClass;
+                    result = Enum.valueOf(enumType, value.toString());
+                } else if (Set.class.isAssignableFrom(typeClass)) {
+                    result = Set.of(value);
+                } else if (Collection.class.isAssignableFrom(typeClass)) {
+                    result = List.of(value);
+                }
             }
+            if (result != null && typeClass.isAssignableFrom(result.getClass())) {
+                return (T) result;
+            }
+            LOGGER.warn("Conversion of value '{}' with type '{}' to '{}' failed. Returning null", value,
+                    value.getClass(), type);
+            return null;
+        } catch (RuntimeException e) {
+            LOGGER.warn("Conversion of value '{}' with type '{}' to '{}' failed: {}. Returning null", value,
+                    value.getClass(), type, e.getMessage());
+            return null;
         }
-
-        if (result != null && typeClass.isAssignableFrom(result.getClass())) {
-            return (T) result;
-        }
-
-        LOGGER.warn("Conversion of value '{}' with type '{}' to '{}' failed. Returning null", value, value.getClass(),
-                type);
-
-        return null;
     }
 }

@@ -179,6 +179,17 @@ public class ConfigParserTest {
     }
 
     @Test
+    public void configurationAsRecordWithInvalidPrimitiveValueFallsBackToDefaultTest() {
+        Map<String, @Nullable Object> properties = Map.of("intField", "not-a-number");
+
+        TestPrimitiveRecord result = ConfigParser.configurationAs(properties, TestPrimitiveRecord.class);
+
+        // Expected: fallback to default
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(0, result.intField());
+    }
+
+    @Test
     public void configurationAsRecordWithNestedListTest() {
         Map<String, @Nullable Object> properties = Map.of("nested", List.of(List.of("a", "b"), List.of("c", "d")));
 
