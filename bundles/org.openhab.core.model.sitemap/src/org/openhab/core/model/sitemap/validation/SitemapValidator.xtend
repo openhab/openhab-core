@@ -252,7 +252,9 @@ class SitemapValidator extends AbstractSitemapValidator {
                 if (positions.contains(pos) && w.row > 0 && w.column > 0) {
                     warning(errorString("Button widget already exists for position (" + w.row + "," + w.column + ")", line), w, null)
                 }
-                positions.add(pos)
+                if (w.visibility === null || w.visibility.elements === null || w.visibility.elements.isEmpty) {
+                    positions.add(pos)
+                }
                 if (w.cmd === null) {
                     warning(errorString("Button widget must have command defined", line), w,
                         SitemapPackage.Literals.MODEL_BUTTON.getEStructuralFeature(SitemapPackage.MODEL_BUTTON__CMD))
