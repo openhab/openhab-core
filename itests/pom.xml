@@ -54,7 +54,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.5.25</version>
+      <version>1.5.27</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -95,7 +95,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.9.0</version>
+        <version>3.10.0</version>
         <executions>
           <execution>
             <id>unpack-eea</id>

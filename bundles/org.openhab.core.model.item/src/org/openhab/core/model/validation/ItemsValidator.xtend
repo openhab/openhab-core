@@ -12,12 +12,17 @@
  */
 package org.openhab.core.model.validation
 
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
+import org.openhab.core.common.AbstractUID
 import org.openhab.core.items.GroupFunction
 import org.openhab.core.items.ItemUtil
 import org.openhab.core.library.CoreItemFactory
 import org.openhab.core.model.items.ItemsPackage
+import org.openhab.core.model.items.ModelBinding
 import org.openhab.core.model.items.ModelItem
+import org.openhab.core.model.items.ModelProperty
 import org.openhab.core.types.util.UnitUtils
 
 /**
@@ -33,9 +38,10 @@ class ItemsValidator extends AbstractItemsValidator {
 			return
 		}
         if (!ItemUtil.isValidItemName(item.name)) {
-			error('Item name "' + item.name + '" is invalid. It must begin with a letter or underscore followed by alphanumeric characters and underscores, and must not contain any other symbols.', ItemsPackage.Literals.MODEL_ITEM__NAME)
+			error(buildMsgWithLineNb(item, "Item name '" + item.name + "' is invalid. It must begin with a letter or underscore followed by alphanumeric characters and underscores, and must not contain any other symbols."),
+			    item, ItemsPackage.Literals.MODEL_ITEM__NAME)
         }
-	}
+    }
 
     @Check
     def checkValidItemType(ModelItem item) {
@@ -56,13 +62,15 @@ class ItemsValidator extends AbstractItemsValidator {
         switch (segments.size) {
             case 1: return // Just "Number", valid
             case 2: checkDimension(item, segments.get(1)) // "Number:<dimension>"
-            default: error("Item: '" + item.name + "' has an invalid Number type, too many segments: " + item.type, ItemsPackage.Literals.MODEL_ITEM__TYPE)
+            default: error(buildMsgWithLineNb(item, "Item: '" + item.name + "' has an invalid Number type, too many segments: '" + item.type + "'"),
+                item, ItemsPackage.Literals.MODEL_ITEM__TYPE)
         }
     }
 
     def checkBasicItemType(ModelItem item) {
         if (!CoreItemFactory.VALID_ITEM_TYPES.contains(item.type)) {
-            error("Item '" + item.name + "' has an invalid type: '" + item.type + "'", ItemsPackage.Literals.MODEL_ITEM__TYPE)
+            error(buildMsgWithLineNb(item, "Item '" + item.name + "' has an invalid type: '" + item.type + "'"),
+                item, ItemsPackage.Literals.MODEL_ITEM__TYPE)
         }
     }
 
@@ -78,7 +86,8 @@ class ItemsValidator extends AbstractItemsValidator {
 
     def checkGroupBaseType(ModelItem item, String baseType) {
         if (!CoreItemFactory.VALID_ITEM_TYPES.contains(baseType)) {
-            error("Item '" + item.name + "' has an invalid base item type: '" + baseType + "'", ItemsPackage.Literals.MODEL_ITEM__TYPE)
+            error(buildMsgWithLineNb(item, "Item '" + item.name + "' has an invalid base item type: '" + baseType + "'"),
+                item, ItemsPackage.Literals.MODEL_ITEM__TYPE)
         }
     }
 
@@ -101,7 +110,8 @@ class ItemsValidator extends AbstractItemsValidator {
         if (baseType == "Number") {
             checkDimension(item, dimension)
         } else {
-            error("Item '" + item.name + "' with type '" + item.type + "' cannot have a dimension. Dimensions are only valid for Number base type. The dimension '" + dimension + "' is ignored.", ItemsPackage.Literals.MODEL_ITEM__TYPE)
+            error(buildMsgWithLineNb(item, "Item '" + item.name + "' with type '" + item.type + "' cannot have a dimension. Dimensions are only valid for Number base type. The dimension '" + dimension + "' is ignored."),
+                item, ItemsPackage.Literals.MODEL_ITEM__TYPE)
         }
 
         checkGroupFunction(item, function)
@@ -111,17 +121,90 @@ class ItemsValidator extends AbstractItemsValidator {
         try {
             UnitUtils.parseDimension(dimension)
         } catch (IllegalArgumentException e) {
-            error("Item '" + item.name + "' has an unknown dimension: '" + dimension + "'. The Item will not be created.", ItemsPackage.Literals.MODEL_ITEM__TYPE)
+            error(buildMsgWithLineNb(item, "Item '" + item.name + "' has an unknown dimension: '" + dimension + "'."),
+                item, ItemsPackage.Literals.MODEL_ITEM__TYPE)
         }
     }
 
     def checkGroupFunction(ModelItem item, String function) {
         if (!isValidGroupFunction(function)) {
-            warning("Item '" + item.name + "' has an unknown group function: '" + function + "'. Using EQUALITY instead.", ItemsPackage.Literals.MODEL_ITEM__TYPE)
+            warning(buildMsgWithLineNb(item, "Item '" + item.name + "' has an unknown group function: '" + function + "'. Using EQUALITY instead."),
+                item, ItemsPackage.Literals.MODEL_ITEM__TYPE)
         }
     }
 
     def isValidGroupFunction(String value) {
         return GroupFunction.VALID_FUNCTIONS.contains(value)
+    }
+
+    @Check
+    def checkValidChannelProfileType(ModelItem item) {
+        if (item === null || item.bindings === null) {
+            return
+        }
+        for (ModelBinding binding : item.bindings) {
+            if (binding.type == "channel" && binding.properties !== null) {
+                for (ModelProperty property : binding.properties) {
+                    checkProperty(item, binding, property)
+                }
+            }
+        }
+    }
+
+    def checkProperty(ModelItem item, ModelBinding binding, ModelProperty property) {
+        if (property.key != "profile") {
+            return
+        }
+        // The profile property must be configured as exactly one STRING/ID value.
+        if (property.value === null || property.value.size != 1) {
+            error(buildMsgWithLineNb(property, "Item '" + item.name
+                + "' has an invalid profile configuration for channel '" + binding.configuration
+                + "': profile must have exactly one value."),
+                property, ItemsPackage.Literals.MODEL_PROPERTY__VALUE)
+            return
+        }
+        val Object singleValue = property.value.get(0)
+        if (!(singleValue instanceof String)) {
+            error(buildMsgWithLineNb(property, "Item '" + item.name
+                + "' has an invalid profile configuration for channel '" + binding.configuration
+                + "': profile value must be a string."),
+                property, ItemsPackage.Literals.MODEL_PROPERTY__VALUE)
+            return
+        }
+        val String profileValue = singleValue as String
+        try {
+            new ProfileTypeUID(profileValue.split(AbstractUID.SEPARATOR).length == 1
+                ? "system" + AbstractUID.SEPARATOR + profileValue
+                : profileValue)
+        } catch (IllegalArgumentException e) {
+            error(buildMsgWithLineNb(property, "Item '" + item.name
+                + "' has an invalid profile configuration '" + profileValue
+                + "' for channel '" + binding.configuration + "': " + e.message),
+                property, ItemsPackage.Literals.MODEL_PROPERTY__VALUE)
+        }
+    }
+
+    static class ProfileTypeUID extends AbstractUID {
+        new(String profileType) {
+            super(profileType)
+        }
+
+        override int getMinimalNumberOfSegments() {
+            return 2
+        }
+    }
+
+    def private buildMsgWithLineNb(EObject object, String msg) {
+        val node = NodeModelUtils.getNode(object)
+        if (node === null) {
+            return msg
+        }
+        val startLine = node.startLine
+        val endLine = node.endLine
+        if (startLine == endLine) {
+            return "Line " + startLine + ": " + msg
+        } else {
+            return "Line " + startLine + "-" + endLine + ": " + msg
+        }
     }
 }

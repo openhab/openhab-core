@@ -72,10 +72,10 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
         final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Principal userPrincipal = new GenericUser(name);
-            Subject subject = new Subject(true, Set.of(userPrincipal), Set.of(), Set.of(userCredentials));
+            Subject subject = new Subject(DEFAULT_REALM.equals(realmName), Set.of(userPrincipal), Set.of(),
+                    Set.of(userCredentials));
 
-            Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
-            LoginContext loginContext = new LoginContext(realmName, subject, new CallbackHandler() {
+            CallbackHandler callbackHandler = new CallbackHandler() {
                 @Override
                 public void handle(@NonNullByDefault({}) Callback[] callbacks)
                         throws IOException, UnsupportedCallbackException {
@@ -89,7 +89,16 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
                         }
                     }
                 }
-            }, new ManagedUserLoginConfiguration());
+            };
+
+            LoginContext loginContext;
+            if (DEFAULT_REALM.equals(realmName)) {
+                Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
+                loginContext = new LoginContext(realmName, subject, callbackHandler,
+                        new ManagedUserLoginConfiguration());
+            } else {
+                loginContext = new LoginContext(realmName, subject, callbackHandler);
+            }
             loginContext.login();
 
             return getAuthentication(name, loginContext.getSubject());
@@ -106,12 +115,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
     }
 
     private String[] getRoles(Set<Principal> principals) {
-        String[] roles = new String[principals.size()];
-        int i = 0;
-        for (Principal principal : principals) {
-            roles[i++] = principal.getName();
-        }
-        return roles;
+        return principals.stream().map(Principal::getName).distinct().toArray(String[]::new);
     }
 
     @Activate

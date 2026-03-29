@@ -15,6 +15,7 @@ package org.openhab.core.persistence.internal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -43,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.SafeCallerBuilder;
+import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -56,7 +57,6 @@ import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistedItem;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
-import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
@@ -79,6 +79,7 @@ import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
+import org.openhab.core.types.TimeSeries.Entry;
 import org.openhab.core.types.UnDefType;
 
 /**
@@ -95,11 +96,16 @@ public class PersistenceManagerTest {
     private static final String TEST_ITEM2_NAME = "testItem2";
     private static final String TEST_ITEM3_NAME = "testItem3";
     private static final String TEST_GROUP_ITEM_NAME = "groupItem";
+    private static final String TEST_GROUP_ITEM2_BASE_NAME = "groupItem2Base";
+    private static final String TEST_GROUP_ITEM2_NAME = "groupItem2";
 
     private static final StringItem TEST_ITEM = new StringItem(TEST_ITEM_NAME);
     private static final StringItem TEST_ITEM2 = new StringItem(TEST_ITEM2_NAME);
     private static final NumberItem TEST_ITEM3 = new NumberItem(TEST_ITEM3_NAME);
     private static final GroupItem TEST_GROUP_ITEM = new GroupItem(TEST_GROUP_ITEM_NAME);
+    private static final NumberItem TEST_GROUP_ITEM2_BASE = new NumberItem(TEST_GROUP_ITEM2_BASE_NAME);
+    private static final GroupItem TEST_GROUP_ITEM2 = new GroupItem(TEST_GROUP_ITEM2_NAME, TEST_GROUP_ITEM2_BASE,
+            new GroupFunction.Equality());
 
     private static final State TEST_STATE = new StringType("testState1");
 
@@ -152,32 +158,36 @@ public class PersistenceManagerTest {
 
     private static final String TEST_MODIFIABLE_PERSISTENCE_SERVICE_ID = "testModifiablePersistenceService";
 
-    private @NonNullByDefault({}) @Mock CronScheduler cronSchedulerMock;
-    private @NonNullByDefault({}) @Mock Scheduler schedulerMock;
-    private @NonNullByDefault({}) @Mock ScheduledCompletableFuture<Void> scheduledFutureMock;
-    private @NonNullByDefault({}) @Mock ItemRegistry itemRegistryMock;
-    private @NonNullByDefault({}) @Mock SafeCaller safeCallerMock;
-    private @NonNullByDefault({}) @Mock SafeCallerBuilder<@NonNull QueryablePersistenceService> safeCallerBuilderMock;
-    private @NonNullByDefault({}) @Mock ReadyService readyServiceMock;
-    private @NonNullByDefault({}) @Mock PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
+    private @Mock @NonNullByDefault({}) CronScheduler cronSchedulerMock;
+    private @Mock @NonNullByDefault({}) Scheduler schedulerMock;
+    private @Mock @NonNullByDefault({}) ScheduledCompletableFuture<Void> scheduledFutureMock;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
+    private @Mock @NonNullByDefault({}) SafeCaller safeCallerMock;
+    private @Mock @NonNullByDefault({}) SafeCallerBuilder<@NonNull QueryablePersistenceService> safeCallerBuilderMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
+    private @Mock @NonNullByDefault({}) PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
 
-    private @NonNullByDefault({}) @Mock PersistenceService persistenceServiceMock;
-    private @NonNullByDefault({}) @Mock QueryablePersistenceService queryablePersistenceServiceMock;
-    private @NonNullByDefault({}) @Mock ModifiablePersistenceService modifiablePersistenceServiceMock;
+    private @Mock @NonNullByDefault({}) PersistenceService persistenceServiceMock;
+    private @Mock @NonNullByDefault({}) QueryablePersistenceService queryablePersistenceServiceMock;
+    private @Mock @NonNullByDefault({}) ModifiablePersistenceService modifiablePersistenceServiceMock;
 
     private @NonNullByDefault({}) PersistenceManagerImpl manager;
 
     @BeforeEach
     public void setUp() throws ItemNotFoundException {
         TEST_GROUP_ITEM.addMember(TEST_ITEM);
+        TEST_GROUP_ITEM.addMember(TEST_GROUP_ITEM2);
+        TEST_GROUP_ITEM2.addMember(TEST_ITEM3);
 
         // set initial states
         TEST_ITEM.setState(UnDefType.NULL);
         TEST_ITEM2.setState(UnDefType.NULL);
         TEST_ITEM3.setState(DecimalType.ZERO);
         TEST_GROUP_ITEM.setState(UnDefType.NULL);
+        TEST_GROUP_ITEM2.setState(DecimalType.ZERO);
 
         when(itemRegistryMock.getItem(TEST_GROUP_ITEM_NAME)).thenReturn(TEST_GROUP_ITEM);
+        when(itemRegistryMock.getItem(TEST_GROUP_ITEM2_NAME)).thenReturn(TEST_GROUP_ITEM2);
         when(itemRegistryMock.getItem(TEST_ITEM_NAME)).thenReturn(TEST_ITEM);
         when(itemRegistryMock.getItem(TEST_ITEM2_NAME)).thenReturn(TEST_ITEM2);
         when(itemRegistryMock.getItem(TEST_ITEM3_NAME)).thenReturn(TEST_ITEM3);
@@ -310,6 +320,24 @@ public class PersistenceManagerTest {
     }
 
     @Test
+    public void doesNotApplyToNestedGroupItemWithAllConfigAndGroupExclusion() {
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID,
+                List.of(new PersistenceAllConfig(), new PersistenceGroupExcludeConfig(TEST_GROUP_ITEM_NAME)),
+                PersistenceStrategy.Globals.UPDATE, null);
+
+        manager.stateUpdated(TEST_ITEM, TEST_STATE);
+        manager.stateUpdated(TEST_ITEM2, TEST_STATE);
+        manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
+        manager.stateUpdated(TEST_ITEM3, DecimalType.ZERO);
+        manager.stateUpdated(TEST_GROUP_ITEM2, DecimalType.ZERO);
+
+        verify(persistenceServiceMock).store(TEST_ITEM2, null);
+        verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
+
+        verifyNoMoreInteractions(persistenceServiceMock);
+    }
+
+    @Test
     public void updatedStatePersistsEveryUpdate() {
         addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
                 PersistenceStrategy.Globals.UPDATE, null);
@@ -414,11 +442,15 @@ public class PersistenceManagerTest {
 
         addConfiguration(TestModifiablePersistenceService.ID, List.of(new PersistenceAllConfig()),
                 PersistenceStrategy.Globals.FORECAST, null);
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
 
-        Instant time1 = Instant.now().minusSeconds(1000);
-        Instant time2 = Instant.now().plusSeconds(1000);
-        Instant time3 = Instant.now().plusSeconds(2000);
-        Instant time4 = Instant.now().plusSeconds(3000);
+        Instant now = Instant.now();
+        ZonedDateTime time0 = now.atZone(ZoneId.systemDefault()).minusSeconds(5000);
+        Instant time1 = now.minusSeconds(1000);
+        Instant time2 = now.plusSeconds(1000);
+        Instant time3 = now.plusSeconds(2000);
+        Instant time4 = now.plusSeconds(3000);
 
         // add elements
         TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.ADD);
@@ -426,6 +458,7 @@ public class PersistenceManagerTest {
         timeSeries.add(time2, new StringType("two"));
         timeSeries.add(time3, new StringType("three"));
         timeSeries.add(time4, new StringType("four"));
+        TEST_ITEM.setState(new StringType("zero"), null, time0, null, null);
 
         manager.timeSeriesUpdated(TEST_ITEM, timeSeries);
         InOrder inOrder = inOrder(service, schedulerMock);
@@ -436,7 +469,25 @@ public class PersistenceManagerTest {
 
         // first element not scheduled, because it is in the past, check if second is scheduled
         inOrder.verify(schedulerMock).at(any(SchedulerRunnable.class), eq(time2));
+        // allow any number of getId() calls
+        inOrder.verify(service, atLeast(0)).getId();
         inOrder.verifyNoMoreInteractions();
+
+        // check if timeseries element in the past updated item state
+        Entry firstEntry = timeSeries.getStates().findFirst().get();
+        assertThat(TEST_ITEM.getState(), is(firstEntry.state()));
+        assertThat(TEST_ITEM.getLastState(), is(new StringType("zero")));
+        ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
+        assertNotNull(lastStateUpdate);
+        assertThat(lastStateUpdate.toInstant(), is(firstEntry.timestamp()));
+        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
+        assertNotNull(lastStateChange);
+        assertThat(lastStateChange.toInstant(), is(firstEntry.timestamp()));
+
+        // Check if other persistence services got updated
+        verify(persistenceServiceMock).store(TEST_ITEM, null);
+        verify(persistenceServiceMock, atLeast(0)).getId();
+        verifyNoMoreInteractions(persistenceServiceMock);
 
         // replace elements
         TimeSeries timeSeries2 = new TimeSeries(TimeSeries.Policy.REPLACE);
@@ -473,6 +524,22 @@ public class PersistenceManagerTest {
 
         // verify new restore future is properly created
         inOrder.verify(schedulerMock).at(any(SchedulerRunnable.class), eq(time5));
+    }
+
+    @Test
+    public void externalPersistenceDataChangeIsHandled() {
+        setupPersistence(new PersistenceAllConfig());
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
+        addConfiguration(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
+        manager.handleExternalPersistenceDataChange(persistenceServiceMock, TEST_ITEM);
+        assertNotEquals(TEST_STATE, TEST_ITEM.getState());
+
+        manager.handleExternalPersistenceDataChange(queryablePersistenceServiceMock, TEST_ITEM);
+        verify(queryablePersistenceServiceMock).persistedItem(eq(TEST_ITEM_NAME), any());
+        assertEquals(TEST_STATE, TEST_ITEM.getState());
+        verify(persistenceServiceMock).store(TEST_ITEM, null);
     }
 
     @Test
@@ -630,14 +697,13 @@ public class PersistenceManagerTest {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public Iterable<HistoricItem> query(FilterCriteria filter) {
-            ZonedDateTime begin = Objects.requireNonNull(filter.getBeginDate());
-            ZonedDateTime end = Objects.requireNonNull(filter.getEndDate());
-            List<ZonedDateTime> keys = states.keySet().stream().filter(t -> t.isAfter(begin) && t.isBefore(end))
-                    .toList();
-            return (Iterable<HistoricItem>) states.entrySet().stream().filter(e -> keys.contains(e.getKey()))
-                    .map(e -> new HistoricItem() {
+            ZonedDateTime begin = filter.getBeginDate();
+            ZonedDateTime end = filter.getEndDate();
+            List<ZonedDateTime> keys = states.keySet().stream()
+                    .filter(t -> (begin == null || t.isAfter(begin)) && (end == null || t.isBefore(end))).toList();
+            return states.entrySet().stream().filter(e -> keys.contains(e.getKey()))
+                    .<HistoricItem> map(e -> new HistoricItem() {
                         @Override
                         public ZonedDateTime getTimestamp() {
                             return e.getKey();
@@ -652,12 +718,7 @@ public class PersistenceManagerTest {
                         public String getName() {
                             return "item";
                         }
-                    }).iterator();
-        }
-
-        @Override
-        public Set<PersistenceItemInfo> getItemInfo() {
-            return Set.of();
+                    }).toList();
         }
     }
 }

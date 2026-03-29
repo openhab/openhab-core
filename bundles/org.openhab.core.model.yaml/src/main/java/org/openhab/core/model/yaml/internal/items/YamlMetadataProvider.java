@@ -27,7 +27,6 @@ import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataProvider;
-import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +84,7 @@ public class YamlMetadataProvider extends AbstractProvider<Metadata> implements 
                     notifyListenersAboutAddedElement(md);
                 }
             } else if (!md.getValue().equals(oldMd.getValue())
-                    || !YamlElementUtils.equalsConfig(md.getConfiguration(), oldMd.getConfiguration())) {
+                    || !Objects.equals(md.getConfiguration(), oldMd.getConfiguration())) {
                 namespacesMetadataMap.put(namespace, md);
                 logger.debug("model {} updated metadata {}", modelName, namespace);
                 if (!isIsolatedModel(modelName)) {

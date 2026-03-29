@@ -25,7 +25,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ItemProvider;
-import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkProvider;
@@ -107,8 +106,7 @@ public class YamlChannelLinkProvider extends AbstractProvider<ItemChannelLink> i
                 if (!isIsolatedModel(modelName)) {
                     notifyListenersAboutAddedElement(itemChannelLink);
                 }
-            } else if (!YamlElementUtils.equalsConfig(configuration.getProperties(),
-                    oldLink.getConfiguration().getProperties())) {
+            } else if (!Objects.equals(configuration.getProperties(), oldLink.getConfiguration().getProperties())) {
                 links.put(channelUIDObject, itemChannelLink);
                 logger.debug("model {} updated channel link {}", modelName, itemChannelLink.getUID());
                 if (!isIsolatedModel(modelName)) {

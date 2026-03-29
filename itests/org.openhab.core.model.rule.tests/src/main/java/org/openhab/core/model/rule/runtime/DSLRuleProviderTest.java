@@ -14,6 +14,7 @@ package org.openhab.core.model.rule.runtime;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayInputStream;
@@ -38,6 +39,7 @@ import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHan
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
 import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;
 import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
 import org.openhab.core.events.EventPublisher;
@@ -93,7 +95,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         Collection<Rule> rules = dslRuleProvider.getAll();
         assertThat(rules.size(), is(0));
 
-        String model = "rule RuleNumberOne\n" + //
+        String model = "rule RuleNumberOne [ Test, \"my test\" ]\n" + //
                 "when\n" + //
                 "   System started\n" + //
                 "then\n" + //
@@ -117,6 +119,9 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(firstRule.getUID(), is("dslruletest-1"));
         assertThat(firstRule.getName(), is("RuleNumberOne"));
+        assertThat(firstRule.getTags(), hasSize(2));
+        assertThat(firstRule.getTags(), hasItem("Test"));
+        assertThat(firstRule.getTags(), hasItem("my test"));
         assertThat(firstRule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
         assertThat(firstRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
         assertThat(firstRule.getActions().getFirst().getConfiguration()
@@ -126,6 +131,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(secondRule.getUID(), is("dslruletest-2"));
         assertThat(secondRule.getName(), is("Rule Number Two"));
+        assertThat(secondRule.getTags(), hasSize(0));
         assertThat(secondRule.getTriggers().getFirst().getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
         assertThat(secondRule.getTriggers().getFirst().getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME),
                 is("X"));
@@ -144,6 +150,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
                 "   System started or\n" + //
                 "   Time is noon or\n" + //
                 "   Time is midnight or\n" + //
+                "   Time is 20:57 or\n" + //
                 "   Time cron \"0 0/1 * * * ?\" or\n" + //
                 "   Item X received command ON or\n" + //
                 "   Item Y received update \"A\" or\n" + //
@@ -170,70 +177,71 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(rule.getUID(), is("dslruletest-1"));
         assertThat(rule.getName(), is("RuleWithAllTriggers"));
-        assertThat(rule.getTriggers().size(), is(13));
+        assertThat(rule.getTriggers().size(), is(14));
 
         assertThat(rule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
         assertThat(rule.getTriggers().getFirst().getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL),
                 is(new BigDecimal(40)));
-        assertThat(rule.getTriggers().get(1).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(1).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
-                is("0 0 12 * * ?"));
+        assertThat(rule.getTriggers().get(1).getTypeUID(), is(TimeOfDayTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(1).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("12:00"));
 
-        assertThat(rule.getTriggers().get(2).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(2).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
-                is("0 0 0 * * ?"));
+        assertThat(rule.getTriggers().get(2).getTypeUID(), is(TimeOfDayTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(2).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("00:00"));
 
-        assertThat(rule.getTriggers().get(3).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(3).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
+        assertThat(rule.getTriggers().get(3).getTypeUID(), is(TimeOfDayTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(3).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("20:57"));
+
+        assertThat(rule.getTriggers().get(4).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(4).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
                 is("0 0/1 * * * ?"));
 
-        assertThat(rule.getTriggers().get(4).getTypeUID(), is(ItemCommandTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(4).getConfiguration().get(ItemCommandTriggerHandler.CFG_ITEMNAME), is("X"));
-        assertThat(rule.getTriggers().get(4).getConfiguration().get(ItemCommandTriggerHandler.CFG_COMMAND), is("ON"));
+        assertThat(rule.getTriggers().get(5).getTypeUID(), is(ItemCommandTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(5).getConfiguration().get(ItemCommandTriggerHandler.CFG_ITEMNAME), is("X"));
+        assertThat(rule.getTriggers().get(5).getConfiguration().get(ItemCommandTriggerHandler.CFG_COMMAND), is("ON"));
 
-        assertThat(rule.getTriggers().get(5).getTypeUID(), is(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(5).getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME), is("Y"));
-        assertThat(rule.getTriggers().get(5).getConfiguration().get(ItemStateTriggerHandler.CFG_STATE), is("A"));
+        assertThat(rule.getTriggers().get(6).getTypeUID(), is(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME), is("Y"));
+        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_STATE), is("A"));
 
-        assertThat(rule.getTriggers().get(6).getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME), is("Z"));
-        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_PREVIOUS_STATE),
+        assertThat(rule.getTriggers().get(7).getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(7).getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME), is("Z"));
+        assertThat(rule.getTriggers().get(7).getConfiguration().get(ItemStateTriggerHandler.CFG_PREVIOUS_STATE),
                 is("1"));
-        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_STATE), is("2"));
+        assertThat(rule.getTriggers().get(7).getConfiguration().get(ItemStateTriggerHandler.CFG_STATE), is("2"));
 
-        assertThat(rule.getTriggers().get(7).getTypeUID(), is(GroupCommandTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(7).getConfiguration().get(GroupCommandTriggerHandler.CFG_GROUPNAME),
+        assertThat(rule.getTriggers().get(8).getTypeUID(), is(GroupCommandTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(8).getConfiguration().get(GroupCommandTriggerHandler.CFG_GROUPNAME),
                 is("G1"));
-        assertThat(rule.getTriggers().get(7).getConfiguration().get(GroupCommandTriggerHandler.CFG_COMMAND), is("UP"));
+        assertThat(rule.getTriggers().get(8).getConfiguration().get(GroupCommandTriggerHandler.CFG_COMMAND), is("UP"));
 
-        assertThat(rule.getTriggers().get(8).getTypeUID(), is(GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(8).getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME), is("G2"));
-        assertThat(rule.getTriggers().get(8).getConfiguration().get(GroupStateTriggerHandler.CFG_STATE), is("10|°C"));
+        assertThat(rule.getTriggers().get(9).getTypeUID(), is(GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME), is("G2"));
+        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_STATE), is("10|°C"));
 
-        assertThat(rule.getTriggers().get(9).getTypeUID(), is(GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME), is("G3"));
-        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_PREVIOUS_STATE),
+        assertThat(rule.getTriggers().get(10).getTypeUID(), is(GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(10).getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME), is("G3"));
+        assertThat(rule.getTriggers().get(10).getConfiguration().get(GroupStateTriggerHandler.CFG_PREVIOUS_STATE),
                 is("PLAY"));
-        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_STATE), is("PAUSE"));
+        assertThat(rule.getTriggers().get(10).getConfiguration().get(GroupStateTriggerHandler.CFG_STATE), is("PAUSE"));
 
-        assertThat(rule.getTriggers().get(10).getTypeUID(), is(ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(10).getConfiguration().get(ThingStatusTriggerHandler.CFG_THING_UID),
-                is("T1"));
-        assertThat(rule.getTriggers().get(10).getConfiguration().get(ThingStatusTriggerHandler.CFG_STATUS),
-                is("OFFLINE"));
-
-        assertThat(rule.getTriggers().get(11).getTypeUID(), is(ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(11).getTypeUID(), is(ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID));
         assertThat(rule.getTriggers().get(11).getConfiguration().get(ThingStatusTriggerHandler.CFG_THING_UID),
-                is("T2"));
-        assertThat(rule.getTriggers().get(11).getConfiguration().get(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS),
-                is("OFFLINE"));
+                is("T1"));
         assertThat(rule.getTriggers().get(11).getConfiguration().get(ThingStatusTriggerHandler.CFG_STATUS),
+                is("OFFLINE"));
+
+        assertThat(rule.getTriggers().get(12).getTypeUID(), is(ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(12).getConfiguration().get(ThingStatusTriggerHandler.CFG_THING_UID),
+                is("T2"));
+        assertThat(rule.getTriggers().get(12).getConfiguration().get(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS),
+                is("OFFLINE"));
+        assertThat(rule.getTriggers().get(12).getConfiguration().get(ThingStatusTriggerHandler.CFG_STATUS),
                 is("ONLINE"));
 
-        assertThat(rule.getTriggers().get(12).getTypeUID(), is(ChannelEventTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(12).getConfiguration().get(ChannelEventTriggerHandler.CFG_CHANNEL),
+        assertThat(rule.getTriggers().get(13).getTypeUID(), is(ChannelEventTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(13).getConfiguration().get(ChannelEventTriggerHandler.CFG_CHANNEL),
                 is("a:b:c:1"));
-        assertThat(rule.getTriggers().get(12).getConfiguration().get(ChannelEventTriggerHandler.CFG_CHANNEL_EVENT),
+        assertThat(rule.getTriggers().get(13).getConfiguration().get(ChannelEventTriggerHandler.CFG_CHANNEL_EVENT),
                 is("START"));
     }
 
@@ -267,5 +275,27 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(context, is(notNullValue()));
         Object x = context.getValue(QualifiedName.create("x"));
         assertThat(x, is(15));
+    }
+
+    @Test
+    public void testRuleWithUntypedLambdaArgsDoesNotFailToLoad() {
+        Collection<Rule> rules = dslRuleProvider.getAll();
+        assertThat(rules.size(), is(0));
+
+        String model = """
+                var lambdaWithUntypedArgs = [ foo | foo ]
+                rule "RuleWithUntypedLambdaArgs"
+                when
+                   System started
+                then
+                   logInfo('Test', 'Test')
+                end
+                """;
+
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME,
+                new ByteArrayInputStream(model.getBytes(StandardCharsets.UTF_8)));
+        Collection<Rule> actualRules = dslRuleProvider.getAll();
+
+        assertThat(actualRules.size(), is(1));
     }
 }

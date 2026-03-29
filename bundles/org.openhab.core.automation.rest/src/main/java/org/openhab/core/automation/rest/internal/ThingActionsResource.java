@@ -131,7 +131,8 @@ public class ThingActionsResource implements RESTResource {
             if (actionUIDs.isEmpty()) {
                 return;
             }
-            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()).put(scope, actionUIDs);
+            Objects.requireNonNull(thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()))
+                    .put(scope, actionUIDs);
         }
     }
 
@@ -165,7 +166,7 @@ public class ThingActionsResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAvailableActionsForThing", summary = "Get all available actions for provided thing UID", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ThingActionDTO.class), uniqueItems = true))),
-            @ApiResponse(responseCode = "404", description = "No actions found.") })
+            @ApiResponse(responseCode = "204", description = "No actions found") })
     public Response getActions(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
@@ -174,7 +175,7 @@ public class ThingActionsResource implements RESTResource {
         List<ThingActionDTO> actions = new ArrayList<>();
         Map<String, List<String>> thingActionsMap = this.thingActionsMap.get(aThingUID);
         if (thingActionsMap == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.noContent().build();
         }
 
         // inspect ThingActions

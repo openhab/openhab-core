@@ -40,6 +40,7 @@ import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
+import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
@@ -73,11 +74,13 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - use item lastChange and lastUpdate methods if not in peristence
  * @author Mark Herwege - add Riemann sum methods
  * @author Jörg Sautter - use Instant instead of ZonedDateTime in Riemann sum methods
+ * @author Mark Herwege - handle timeseries update
  */
 @Component(immediate = true)
 @NonNullByDefault
 public class PersistenceExtensions {
 
+    private static @Nullable PersistenceManager manager;
     private static @Nullable PersistenceServiceRegistry registry;
     private static @Nullable PersistenceServiceConfigurationRegistry configRegistry;
     private static @Nullable TimeZoneProvider timeZoneProvider;
@@ -90,9 +93,10 @@ public class PersistenceExtensions {
     }
 
     @Activate
-    public PersistenceExtensions(@Reference PersistenceServiceRegistry registry,
+    public PersistenceExtensions(@Reference PersistenceManager manager, @Reference PersistenceServiceRegistry registry,
             @Reference PersistenceServiceConfigurationRegistry configRegistry,
             @Reference TimeZoneProvider timeZoneProvider) {
+        PersistenceExtensions.manager = manager;
         PersistenceExtensions.registry = registry;
         PersistenceExtensions.configRegistry = configRegistry;
         PersistenceExtensions.timeZoneProvider = timeZoneProvider;
@@ -126,6 +130,9 @@ public class PersistenceExtensions {
         PersistenceService service = getService(effectiveServiceId);
         if (service != null) {
             service.store(item, getAlias(item, effectiveServiceId));
+            if (manager != null) {
+                manager.handleExternalPersistenceDataChange(service, item);
+            }
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
@@ -165,6 +172,9 @@ public class PersistenceExtensions {
         PersistenceService service = getService(effectiveServiceId);
         if (service instanceof ModifiablePersistenceService modifiableService) {
             modifiableService.store(item, timestamp, state, getAlias(item, effectiveServiceId));
+            if (manager != null) {
+                manager.handleExternalPersistenceDataChange(service, item);
+            }
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
@@ -240,11 +250,14 @@ public class PersistenceExtensions {
         if (service instanceof ModifiablePersistenceService modifiableService) {
             if (timeSeries.getPolicy() == TimeSeries.Policy.REPLACE) {
                 internalRemoveAllStatesBetween(item, timeSeries.getBegin().atZone(timeZone),
-                        timeSeries.getEnd().atZone(timeZone), serviceId);
+                        timeSeries.getEnd().atZone(timeZone), modifiableService, getAlias(item, effectiveServiceId));
             }
             String alias = getAlias(item, effectiveServiceId);
             timeSeries.getStates()
                     .forEach(s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state(), alias));
+            if (manager != null) {
+                manager.handleExternalPersistenceDataChange(service, item);
+            }
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
@@ -3385,35 +3398,42 @@ public class PersistenceExtensions {
         }
         PersistenceService service = getService(effectiveServiceId);
         if (service instanceof ModifiablePersistenceService mService) {
-            FilterCriteria filter = new FilterCriteria();
-            ZonedDateTime now = ZonedDateTime.now();
-            if ((begin == null && end == null) || (begin != null && end == null && begin.isAfter(now))
-                    || (begin == null && end != null && end.isBefore(now))) {
-                LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                        "Querying persistence service with open begin and/or end not allowed: begin {}, end {}, now {}",
-                        begin, end, now);
-                return;
+            internalRemoveAllStatesBetween(item, begin, end, mService, getAlias(item, effectiveServiceId));
+            if (manager != null) {
+                manager.handleExternalPersistenceDataChange(mService, item);
             }
-            if (begin != null) {
-                filter.setBeginDate(begin);
-            } else {
-                filter.setBeginDate(now);
-            }
-            if (end != null) {
-                filter.setEndDate(end);
-            } else {
-                filter.setEndDate(now);
-            }
-            String alias = getAlias(item, effectiveServiceId);
-            filter.setItemName(item.getName());
-            filter.setOrdering(Ordering.ASCENDING);
-
-            mService.remove(filter, alias);
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
                     .warn("There is no modifiable persistence service registered with the id '{}'", effectiveServiceId);
         }
         return;
+    }
+
+    private static void internalRemoveAllStatesBetween(Item item, @Nullable ZonedDateTime begin,
+            @Nullable ZonedDateTime end, ModifiablePersistenceService mService, @Nullable String alias) {
+        FilterCriteria filter = new FilterCriteria();
+        ZonedDateTime now = ZonedDateTime.now();
+        if ((begin == null && end == null) || (begin != null && end == null && begin.isAfter(now))
+                || (begin == null && end != null && end.isBefore(now))) {
+            LoggerFactory.getLogger(PersistenceExtensions.class).warn(
+                    "Querying persistence service with open begin and/or end not allowed: begin {}, end {}, now {}",
+                    begin, end, now);
+            return;
+        }
+        if (begin != null) {
+            filter.setBeginDate(begin);
+        } else {
+            filter.setBeginDate(now);
+        }
+        if (end != null) {
+            filter.setEndDate(end);
+        } else {
+            filter.setEndDate(now);
+        }
+        filter.setItemName(item.getName());
+        filter.setOrdering(Ordering.ASCENDING);
+
+        mService.remove(filter, alias);
     }
 
     private static @Nullable Iterable<HistoricItem> getAllStatesBetweenWithBoundaries(Item item,

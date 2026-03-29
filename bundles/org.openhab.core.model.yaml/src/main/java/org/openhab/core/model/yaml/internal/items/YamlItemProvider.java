@@ -161,11 +161,8 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
 
     @Override
     public void removedModel(String modelName, Collection<YamlItemDTO> elements) {
-        List<Item> removed = elements.stream().map(elt -> mapItem(elt)).filter(Objects::nonNull).toList();
-
         Collection<Item> modelItems = itemsMap.getOrDefault(modelName, List.of());
-        removed.forEach(item -> {
-            String name = item.getName();
+        elements.stream().map(elt -> elt.name).forEach(name -> {
             modelItems.stream().filter(i -> i.getName().equals(name)).findFirst().ifPresentOrElse(oldItem -> {
                 modelItems.remove(oldItem);
                 logger.debug("model {} removed item {}", modelName, name);

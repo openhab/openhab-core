@@ -49,4 +49,10 @@ public class ChannelGroupUIDTest {
         assertEquals(GROUP_ID, channelGroupUID.getId());
         assertEquals(THING_UID, channelGroupUID.getThingUID());
     }
+
+    @Test
+    public void testThingUIDPart() {
+        assertThrows(IllegalArgumentException.class, () -> new ChannelGroupUID("binding:thing-type::group"));
+        assertThrows(IllegalArgumentException.class, () -> new ChannelGroupUID("binding:thing-type:bridge::group"));
+    }
 }

@@ -127,7 +127,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             }
             if (!valid) {
                 logger.warn("DSL model '{}' has errors, therefore ignoring it: {}", name, String.join("\n", newErrors));
-                removeModel(name);
+                removeResource(name);
                 return false;
             }
             if (!newWarnings.isEmpty()) {
@@ -184,6 +184,10 @@ public class ModelRepositoryImpl implements ModelRepository {
     @Override
     public boolean removeModel(String name) {
         logger.info("Unloading DSL model '{}'", name);
+        return removeResource(name);
+    }
+
+    private boolean removeResource(String name) {
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
@@ -331,10 +335,12 @@ public class ModelRepositoryImpl implements ModelRepository {
 
                 // Check for validation errors, but log them only
                 try {
+                    String modelType = resource.getURI().fileExtension();
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
-                        if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR) {
+                        if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
+                                && !"rules".equalsIgnoreCase(modelType) && !"script".equalsIgnoreCase(modelType)) {
                             errors.add(d.getMessage());
                         } else {
                             warnings.add(d.getMessage());

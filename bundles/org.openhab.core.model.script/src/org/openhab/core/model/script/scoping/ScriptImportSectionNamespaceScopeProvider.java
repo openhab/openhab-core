@@ -32,6 +32,8 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
     public static final QualifiedName CORE_ITEMS_PACKAGE = QualifiedName.create("org", "openhab", "core", "items");
     public static final QualifiedName CORE_PERSISTENCE_PACKAGE = QualifiedName.create("org", "openhab", "core",
             "persistence");
+    public static final QualifiedName CORE_PERSISTENCE_RIEMANNTYPE_CLASS = QualifiedName.create("org", "openhab",
+            "core", "persistence", "extensions", "PersistenceExtensions", "RiemannType");
     public static final QualifiedName MODEL_SCRIPT_ACTIONS_PACKAGE = QualifiedName.create("org", "openhab", "core",
             "model", "script", "actions");
     public static final QualifiedName TIME_PACKAGE = QualifiedName.create("java", "time");
@@ -46,6 +48,7 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
         implicitImports.add(doCreateImportNormalizer(CORE_LIBRARY_ITEMS_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CORE_ITEMS_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CORE_PERSISTENCE_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(CORE_PERSISTENCE_RIEMANNTYPE_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(MODEL_SCRIPT_ACTIONS_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(TIME_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CHRONOUNIT_CLASS, false, false));

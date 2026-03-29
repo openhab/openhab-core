@@ -26,6 +26,7 @@ public class AddonEntryDTO {
     public String id = "";
     public String type = "";
     public String description = "";
+    public String keywords = "";
     public String title = "";
     public String link = "";
     public String version = "";

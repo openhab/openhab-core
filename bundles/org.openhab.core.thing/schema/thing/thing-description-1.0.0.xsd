@@ -161,6 +161,7 @@
 			<xs:enumeration value="Number:Angle"/>
 			<xs:enumeration value="Number:Area"/>
 			<xs:enumeration value="Number:ArealDensity"/>
+			<xs:enumeration value="Number:CalorificValue"/>
 			<xs:enumeration value="Number:CatalyticActivity"/>
 			<xs:enumeration value="Number:Currency"/>
 			<xs:enumeration value="Number:DataAmount"/>
@@ -192,6 +193,7 @@
 			<xs:enumeration value="Number:Pressure"/>
 			<xs:enumeration value="Number:RadiationDoseAbsorbed"/>
 			<xs:enumeration value="Number:RadiationDoseEffective"/>
+			<xs:enumeration value="Number:RadiationDoseRate"/>
 			<xs:enumeration value="Number:RadiationSpecificActivity"/>
 			<xs:enumeration value="Number:RadioactiveActivity"/>
 			<xs:enumeration value="Number:SolidAngle"/>
@@ -330,6 +332,7 @@
 			<xs:enumeration value="Smoke"/>
 			<xs:enumeration value="SoundVolume"/>
 			<xs:enumeration value="Speed"/>
+			<xs:enumeration value="StateOfCharge"/>
 			<xs:enumeration value="Tampered"/>
 			<xs:enumeration value="Temperature"/>
 			<xs:enumeration value="Tilt"/>

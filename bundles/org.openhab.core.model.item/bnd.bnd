@@ -17,6 +17,7 @@ Import-Package: javax.measure,\
  org.apache.log4j,\
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.openhab.core.config.core,\
+ org.openhab.core.common,\
  org.openhab.core.common.registry,\
  org.openhab.core.i18n,\
  org.openhab.core.items,\

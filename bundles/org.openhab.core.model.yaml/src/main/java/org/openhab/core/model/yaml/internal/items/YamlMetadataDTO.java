@@ -17,7 +17,6 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -45,7 +44,7 @@ public class YamlMetadataDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getValue());
+        return Objects.hash(getValue(), config);
     }
 
     @Override
@@ -56,6 +55,6 @@ public class YamlMetadataDTO {
             return false;
         }
         YamlMetadataDTO other = (YamlMetadataDTO) obj;
-        return Objects.equals(getValue(), other.getValue()) && YamlElementUtils.equalsConfig(config, other.config);
+        return Objects.equals(getValue(), other.getValue()) && Objects.equals(config, other.config);
     }
 }

@@ -12,24 +12,14 @@
  */
 package org.openhab.core.automation.module.script.profile;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_COMMAND_FROM_ITEM_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_STATE_FROM_ITEM_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_HANDLER_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_ITEM_SCRIPT;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.openhab.core.automation.module.script.profile.ScriptProfile.*;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -419,32 +409,12 @@ public class ScriptProfileTest extends JavaTest {
         }
 
         public ProfileContext build() {
-            return new ProfileContext() {
-                @Override
-                public Configuration getConfiguration() {
-                    return new Configuration(configuration);
-                }
-
-                @Override
-                public ScheduledExecutorService getExecutorService() {
-                    throw new IllegalStateException();
-                }
-
-                @Override
-                public List<Class<? extends State>> getAcceptedDataTypes() {
-                    return acceptedDataTypes;
-                }
-
-                @Override
-                public List<Class<? extends Command>> getAcceptedCommandTypes() {
-                    return acceptedCommandTypes;
-                }
-
-                @Override
-                public List<Class<? extends Command>> getHandlerAcceptedCommandTypes() {
-                    return handlerAcceptedCommandTypes;
-                }
-            };
+            ProfileContext mockedProfileContext = mock(ProfileContext.class);
+            when(mockedProfileContext.getConfiguration()).thenReturn(new Configuration(configuration));
+            when(mockedProfileContext.getAcceptedDataTypes()).thenReturn(acceptedDataTypes);
+            when(mockedProfileContext.getAcceptedCommandTypes()).thenReturn(acceptedCommandTypes);
+            when(mockedProfileContext.getHandlerAcceptedCommandTypes()).thenReturn(handlerAcceptedCommandTypes);
+            return mockedProfileContext;
         }
     }
 }

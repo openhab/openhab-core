@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.auth.internal;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -41,7 +42,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jose4j.base64url.Base64Url;
-import org.openhab.core.auth.ManagedUser;
+import org.openhab.core.auth.AuthenticatedUser;
 import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserApiToken;
@@ -145,6 +146,7 @@ public class TokenResource implements RESTResource {
     @Path("/sessions")
     @Operation(operationId = "getSessionsForCurrentUser", summary = "List the sessions associated to the authenticated user.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserSessionDTO.class)))),
+            @ApiResponse(responseCode = "400", description = "User authentication is not managed by openHAB"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -153,12 +155,16 @@ public class TokenResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
 
-        ManagedUser user = (ManagedUser) userRegistry.get(securityContext.getUserPrincipal().getName());
+        User user = userRegistry.get(securityContext.getUserPrincipal().getName());
         if (user == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "User not found");
         }
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "User authentication is not managed by openHAB");
+        }
 
-        Stream<UserSessionDTO> sessions = user.getSessions().stream().map(this::toUserSessionDTO);
+        Stream<UserSessionDTO> sessions = authenticatedUser.getSessions().stream().map(this::toUserSessionDTO);
         return Response.ok(new Stream2JSONInputStream(sessions)).build();
     }
 
@@ -166,6 +172,7 @@ public class TokenResource implements RESTResource {
     @Path("/apitokens")
     @Operation(operationId = "getApiTokens", summary = "List the API tokens associated to the authenticated user.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserApiTokenDTO.class)))),
+            @ApiResponse(responseCode = "400", description = "User authentication is not managed by openHAB"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -174,12 +181,16 @@ public class TokenResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
 
-        ManagedUser user = (ManagedUser) userRegistry.get(securityContext.getUserPrincipal().getName());
+        User user = userRegistry.get(securityContext.getUserPrincipal().getName());
         if (user == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "User not found");
         }
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "User authentication is not managed by openHAB");
+        }
 
-        Stream<UserApiTokenDTO> sessions = user.getApiTokens().stream().map(this::toUserApiTokenDTO);
+        Stream<UserApiTokenDTO> sessions = authenticatedUser.getApiTokens().stream().map(this::toUserApiTokenDTO);
         return Response.ok(new Stream2JSONInputStream(sessions)).build();
     }
 
@@ -187,6 +198,7 @@ public class TokenResource implements RESTResource {
     @Path("/apitokens/{name}")
     @Operation(operationId = "removeApiToken", summary = "Revoke a specified API token associated to the authenticated user.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "User authentication is not managed by openHAB"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or API token not found") })
     public Response removeApiToken(@Context SecurityContext securityContext, @PathParam("name") String name) {
@@ -194,12 +206,16 @@ public class TokenResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
 
-        ManagedUser user = (ManagedUser) userRegistry.get(securityContext.getUserPrincipal().getName());
+        User user = userRegistry.get(securityContext.getUserPrincipal().getName());
         if (user == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "User not found");
         }
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "User authentication is not managed by openHAB");
+        }
 
-        Optional<UserApiToken> userApiToken = user.getApiTokens().stream()
+        Optional<UserApiToken> userApiToken = authenticatedUser.getApiTokens().stream()
                 .filter(apiToken -> apiToken.getName().equals(name)).findAny();
         if (userApiToken.isEmpty()) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No API token found with that name");
@@ -214,6 +230,7 @@ public class TokenResource implements RESTResource {
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Operation(operationId = "deleteSession", summary = "Delete the session associated with a refresh token.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "User authentication is not managed by openHAB"),
             @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User or refresh token not found") })
     public Response deleteSession(@Nullable @FormParam("refresh_token") String refreshToken,
@@ -223,16 +240,22 @@ public class TokenResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
 
-        ManagedUser user = (ManagedUser) userRegistry.get(securityContext.getUserPrincipal().getName());
+        User user = userRegistry.get(securityContext.getUserPrincipal().getName());
         if (user == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "User not found");
+        }
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "User authentication is not managed by openHAB");
         }
 
         Optional<UserSession> session;
         if (refreshToken != null) {
-            session = user.getSessions().stream().filter(s -> s.getRefreshToken().equals(refreshToken)).findAny();
+            session = authenticatedUser.getSessions().stream().filter(s -> s.getRefreshToken().equals(refreshToken))
+                    .findAny();
         } else if (id != null) {
-            session = user.getSessions().stream().filter(s -> s.getSessionId().startsWith(id + "-")).findAny();
+            session = authenticatedUser.getSessions().stream().filter(s -> s.getSessionId().startsWith(id + "-"))
+                    .findAny();
         } else {
             throw new IllegalArgumentException("no refresh_token or id specified");
         }
@@ -249,7 +272,8 @@ public class TokenResource implements RESTResource {
                 // jakarta.ws.rs/jakarta.ws.rs-api/3.1.0 or newer
                 response.header("Set-Cookie",
                         SESSIONID_COOKIE_FORMAT.formatted(UUID.randomUUID(), domainUri.getHost()));
-            } catch (Exception e) {
+            } catch (URISyntaxException e) {
+                logger.error("Unexpected error deleting session", e);
             }
         }
 
@@ -272,20 +296,26 @@ public class TokenResource implements RESTResource {
     private Response processAuthorizationCodeGrant(String code, String redirectUri, String clientId,
             @Nullable String codeVerifier, boolean useCookie) throws TokenEndpointException, NoSuchAlgorithmException {
         // find a user with the authorization code pending
-        Optional<User> user = userRegistry.getAll().stream().filter(u -> {
-            ManagedUser managedUser = (ManagedUser) u;
+        Optional<User> optionalUser = userRegistry.getAll().stream().filter(u -> {
+            if (!(u instanceof AuthenticatedUser authenticatedUser)) {
+                return false;
+            }
             @Nullable
-            PendingToken pendingToken = managedUser.getPendingToken();
+            PendingToken pendingToken = authenticatedUser.getPendingToken();
             return (pendingToken != null && pendingToken.getAuthorizationCode().equals(code));
         }).findAny();
 
-        if (user.isEmpty()) {
+        if (optionalUser.isEmpty()) {
             logger.warn("Couldn't find a user with the provided authentication code pending");
             throw new TokenEndpointException(ErrorType.INVALID_GRANT);
         }
 
-        ManagedUser managedUser = (ManagedUser) user.get();
-        PendingToken pendingToken = managedUser.getPendingToken();
+        User user = optionalUser.get();
+        if (!(user instanceof AuthenticatedUser authenticatedUser)) {
+            logger.warn("User '{}' authentication is not managed by openHAB", user.getName());
+            throw new TokenEndpointException(ErrorType.INVALID_CLIENT);
+        }
+        PendingToken pendingToken = authenticatedUser.getPendingToken();
         if (pendingToken == null) {
             throw new TokenEndpointException(ErrorType.INVALID_GRANT);
         }
@@ -335,12 +365,12 @@ public class TokenResource implements RESTResource {
         }
 
         // create an access token
-        String accessToken = jwtHelper.getJwtAccessToken(managedUser, clientId, scope, TOKEN_LIFETIME);
+        String accessToken = jwtHelper.getJwtAccessToken(authenticatedUser, clientId, scope, TOKEN_LIFETIME);
 
         UserSession newSession = new UserSession(sessionId, newRefreshToken, clientId, redirectUri, scope);
 
-        ResponseBuilder response = Response.ok(
-                new TokenResponseDTO(accessToken, "bearer", TOKEN_LIFETIME * 60, newRefreshToken, scope, managedUser));
+        ResponseBuilder response = Response.ok(new TokenResponseDTO(accessToken, "bearer", TOKEN_LIFETIME * 60,
+                newRefreshToken, scope, authenticatedUser));
 
         // if the client has requested an http-only cookie for the session, set it
         if (useCookie) {
@@ -366,9 +396,9 @@ public class TokenResource implements RESTResource {
         }
 
         // add the new session to the user profile and clear the pending token information
-        managedUser.getSessions().add(newSession);
-        managedUser.setPendingToken(null);
-        userRegistry.update(managedUser);
+        authenticatedUser.getSessions().add(newSession);
+        authenticatedUser.setPendingToken(null);
+        userRegistry.update(authenticatedUser);
 
         return response.build();
     }
@@ -380,42 +410,52 @@ public class TokenResource implements RESTResource {
         }
 
         // find a user associated with the provided refresh token
-        Optional<User> refreshTokenUser = userRegistry.getAll().stream().filter(
-                u -> ((ManagedUser) u).getSessions().stream().anyMatch(s -> refreshToken.equals(s.getRefreshToken())))
+        Optional<User> optionalRefreshTokenUser = userRegistry.getAll().stream()
+                .filter(u -> u instanceof AuthenticatedUser).filter(u -> ((AuthenticatedUser) u).getSessions().stream()
+                        .anyMatch(s -> refreshToken.equals(s.getRefreshToken())))
                 .findAny();
 
-        if (refreshTokenUser.isEmpty()) {
+        if (optionalRefreshTokenUser.isEmpty()) {
             logger.warn("Couldn't find a user with a session matching the provided refresh_token");
             throw new TokenEndpointException(ErrorType.INVALID_GRANT);
         }
 
         // get the session from the refresh token
-        ManagedUser refreshTokenManagedUser = (ManagedUser) refreshTokenUser.get();
-        UserSession session = refreshTokenManagedUser.getSessions().stream()
-                .filter(s -> s.getRefreshToken().equals(refreshToken)).findAny().get();
+        User refreshTokenUser = optionalRefreshTokenUser.get();
+        if (!(refreshTokenUser instanceof AuthenticatedUser refreshTokenAuthenticatedUser)) {
+            logger.warn("User '{}' authentication is not managed by openHAB", refreshTokenUser.getName());
+            throw new TokenEndpointException(ErrorType.INVALID_CLIENT);
+        }
+        Optional<UserSession> optSession = refreshTokenAuthenticatedUser.getSessions().stream()
+                .filter(s -> s.getRefreshToken().equals(refreshToken)).findAny();
+        if (optSession.isEmpty()) {
+            logger.warn("Not refreshing token for user {}, missing session", refreshTokenAuthenticatedUser.getName());
+            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+        }
+        UserSession session = optSession.get();
 
         // if the cookie flag is present on the session, verify that the cookie is present and corresponds
         // to this session
-        if (session.hasSessionCookie()) {
-            if (sessionCookie == null || !sessionCookie.getValue().equals(session.getSessionId())) {
-                logger.warn("Not refreshing token for session {} of user {}, missing or invalid session cookie",
-                        session.getSessionId(), refreshTokenManagedUser.getName());
-                throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-            }
+        if (session.hasSessionCookie()
+                && (sessionCookie == null || !sessionCookie.getValue().equals(session.getSessionId()))) {
+            logger.warn("Not refreshing token for session {} of user {}, missing or invalid session cookie",
+                    session.getSessionId(), refreshTokenAuthenticatedUser.getName());
+            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
         }
 
         // issue a new access token
-        String refreshedAccessToken = jwtHelper.getJwtAccessToken(refreshTokenManagedUser, clientId, session.getScope(),
-                TOKEN_LIFETIME);
+        String refreshedAccessToken = jwtHelper.getJwtAccessToken(refreshTokenAuthenticatedUser, clientId,
+                session.getScope(), TOKEN_LIFETIME);
 
-        logger.debug("Refreshing session {} of user {}", session.getSessionId(), refreshTokenManagedUser.getName());
+        logger.debug("Refreshing session {} of user {}", session.getSessionId(),
+                refreshTokenAuthenticatedUser.getName());
 
         ResponseBuilder refreshResponse = Response.ok(new TokenResponseDTO(refreshedAccessToken, "bearer",
-                TOKEN_LIFETIME * 60, refreshToken, session.getScope(), refreshTokenManagedUser));
+                TOKEN_LIFETIME * 60, refreshToken, session.getScope(), refreshTokenAuthenticatedUser));
 
         // update the last refresh time of the session in the user's profile
         session.setLastRefreshTime(new Date());
-        userRegistry.update(refreshTokenManagedUser);
+        userRegistry.update(refreshTokenAuthenticatedUser);
 
         return refreshResponse.build();
     }

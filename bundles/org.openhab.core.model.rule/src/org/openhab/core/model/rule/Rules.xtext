@@ -1,9 +1,5 @@
 grammar org.openhab.core.model.rule.Rules with org.openhab.core.model.script.Script
 
-import "http://www.eclipse.org/xtext/xbase/Xbase" as xbase
-import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
-import "http://www.eclipse.org/emf/2002/Ecore" as ecore
-
 generate rules "https://openhab.org/model/Rules"
 
 RuleModel:
@@ -11,18 +7,14 @@ RuleModel:
 	(variables+=VariableDeclaration)*
 	(rules += Rule)*;
 
-//Import:
-//	'import' importedNamespace=QualifiedNameWithWildcard
-//;
-
 VariableDeclaration:
 	(writeable?='var'|'val') (=>(type=JvmTypeReference name=ValidID) | name=ValidID) ('=' right=XExpression)?
 ;
 
 Rule:
-	'rule' name=(STRING|ID)
+	'rule' name=(STRING|ID) ('[' tags+=(ID|STRING) (',' tags+=(ID|STRING))* ']')?
 	'when' eventtrigger+=EventTrigger ('or' eventtrigger+=EventTrigger)*
-	'then' script=Script
+	'then' script=XExpressionInClosure
 	'end'
 ;
 
@@ -72,7 +64,7 @@ EventEmittedTrigger:
 
 TimerTrigger:
 	'Time' 'cron' cron=STRING |
-	'Time' 'is' time=('midnight' | 'noon')
+	'Time' 'is' time=('midnight' | 'noon' | TIME)
 ;
 
 DateTimeTrigger:
@@ -168,6 +160,10 @@ ThingValidState:
     'OFFLINE' |
     'REMOVING' |
     'REMOVED'
+;
+
+terminal TIME:
+    (('0'..'1') ('0'..'9') ':' ('0'..'5') ('0'..'9')) | ('2' ('0'..'3') ':' ('0'..'5') ('0'..'9'))
 ;
 
 SIGNED_INT:

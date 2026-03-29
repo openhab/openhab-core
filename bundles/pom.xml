@@ -53,6 +53,7 @@
     <module>org.openhab.core.id</module>
     <module>org.openhab.core.persistence</module>
     <module>org.openhab.core.semantics</module>
+    <module>org.openhab.core.sitemap</module>
     <module>org.openhab.core.thing</module>
     <module>org.openhab.core.transform</module>
     <module>org.openhab.core.voice</module>
@@ -170,7 +171,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.9.0</version>
+        <version>3.10.0</version>
         <executions>
           <execution>
             <id>unpack-eea</id>

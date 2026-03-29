@@ -1,0 +1,324 @@
+/*
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.model.yaml.internal.items.fileconverter;
+
+import java.io.ByteArrayInputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigUtil;
+import org.openhab.core.items.GroupFunction;
+import org.openhab.core.items.GroupFunction.Equality;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemUtil;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.fileconverter.AbstractItemSerializer;
+import org.openhab.core.items.fileconverter.ItemParser;
+import org.openhab.core.items.fileconverter.ItemSerializer;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.model.yaml.YamlElement;
+import org.openhab.core.model.yaml.YamlModelRepository;
+import org.openhab.core.model.yaml.internal.items.YamlChannelLinkProvider;
+import org.openhab.core.model.yaml.internal.items.YamlGroupDTO;
+import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
+import org.openhab.core.model.yaml.internal.items.YamlItemProvider;
+import org.openhab.core.model.yaml.internal.items.YamlMetadataDTO;
+import org.openhab.core.model.yaml.internal.items.YamlMetadataProvider;
+import org.openhab.core.types.State;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+/**
+ * {@link YamlItemConverter} is the YAML converter for {@link Item} objects.
+ *
+ * @author Laurent Garnier - Initial contribution
+ */
+@NonNullByDefault
+@Component(immediate = true, service = { ItemSerializer.class, ItemParser.class })
+public class YamlItemConverter extends AbstractItemSerializer implements ItemParser {
+
+    private final YamlModelRepository modelRepository;
+    private final YamlItemProvider itemProvider;
+    private final YamlMetadataProvider metadataProvider;
+    private final YamlChannelLinkProvider channelLinkProvider;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
+
+    @Activate
+    public YamlItemConverter(final @Reference YamlModelRepository modelRepository,
+            final @Reference YamlItemProvider itemProvider, final @Reference YamlMetadataProvider metadataProvider,
+            final @Reference YamlChannelLinkProvider channelLinkProvider,
+            final @Reference ConfigDescriptionRegistry configDescRegistry) {
+        this.modelRepository = modelRepository;
+        this.itemProvider = itemProvider;
+        this.metadataProvider = metadataProvider;
+        this.channelLinkProvider = channelLinkProvider;
+        this.configDescriptionRegistry = configDescRegistry;
+    }
+
+    @Override
+    public String getGeneratedFormat() {
+        return "YAML";
+    }
+
+    @Override
+    public void setItemsToBeSerialized(String id, List<Item> items, Collection<Metadata> metadata,
+            Map<String, String> stateFormatters, boolean hideDefaultParameters) {
+        List<YamlElement> elements = new ArrayList<>();
+        items.forEach(item -> {
+            elements.add(buildItemDTO(item, getChannelLinks(metadata, item.getName()),
+                    getMetadata(metadata, item.getName()), stateFormatters.get(item.getName()), hideDefaultParameters));
+        });
+        modelRepository.addElementsToBeGenerated(id, elements);
+    }
+
+    @Override
+    public void generateFormat(String id, OutputStream out) {
+        modelRepository.generateFileFormat(id, out);
+    }
+
+    private YamlItemDTO buildItemDTO(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
+            @Nullable String stateFormatter, boolean hideDefaultParameters) {
+        YamlItemDTO dto = new YamlItemDTO();
+        dto.name = item.getName();
+
+        String label = item.getLabel();
+        boolean patternSet = false;
+        String defaultPattern = getDefaultStatePattern(item);
+        if (label != null && !label.isEmpty()) {
+            dto.label = item.getLabel();
+        }
+        String patternToSet = stateFormatter != null && !stateFormatter.equals(defaultPattern) ? stateFormatter : null;
+        dto.format = patternToSet;
+        patternSet = patternToSet != null;
+
+        dto.type = item.getType();
+        String mainType = ItemUtil.getMainItemType(item.getType());
+        String dimension = ItemUtil.getItemTypeExtension(item.getType());
+        if (CoreItemFactory.NUMBER.equals(mainType) && dimension != null) {
+            dto.type = mainType;
+            dto.dimension = dimension;
+        }
+        if (item instanceof GroupItem groupItem) {
+            Item baseItem = groupItem.getBaseItem();
+            if (baseItem != null) {
+                dto.group = new YamlGroupDTO();
+                dto.group.type = baseItem.getType();
+                mainType = ItemUtil.getMainItemType(baseItem.getType());
+                dimension = ItemUtil.getItemTypeExtension(baseItem.getType());
+                if (CoreItemFactory.NUMBER.equals(mainType) && dimension != null) {
+                    dto.group.type = mainType;
+                    dto.group.dimension = dimension;
+                }
+                GroupFunction function = groupItem.getFunction();
+                if (function != null && !(function instanceof Equality)) {
+                    dto.group.function = function.getClass().getSimpleName();
+                    List<String> params = new ArrayList<>();
+                    State[] parameters = function.getParameters();
+                    for (int i = 0; i < parameters.length; i++) {
+                        params.add(parameters[i].toString());
+                    }
+                    dto.group.parameters = params.isEmpty() ? null : params;
+                }
+            }
+        }
+
+        String category = item.getCategory();
+        if (category != null && !category.isEmpty()) {
+            dto.icon = category;
+        }
+
+        if (!item.getGroupNames().isEmpty()) {
+            dto.groups = new ArrayList<>();
+            item.getGroupNames().forEach(group -> {
+                dto.groups.add(group);
+            });
+        }
+        if (!item.getTags().isEmpty()) {
+            dto.tags = new LinkedHashSet<>();
+            item.getTags().stream().sorted().collect(Collectors.toList()).forEach(tag -> {
+                dto.tags.add(tag);
+            });
+        }
+
+        if (channelLinks.size() == 1 && channelLinks.getFirst().getConfiguration().isEmpty()) {
+            dto.channel = channelLinks.getFirst().getValue();
+        } else if (!channelLinks.isEmpty()) {
+            dto.channels = new LinkedHashMap<>();
+            channelLinks.forEach(md -> {
+                Map<String, Object> configuration = new LinkedHashMap<>();
+                getConfigurationParameters(md, hideDefaultParameters).forEach(param -> {
+                    configuration.put(param.name(), param.value());
+                });
+                dto.channels.put(md.getValue(), configuration);
+            });
+        }
+
+        Map<String, YamlMetadataDTO> metadataDto = new LinkedHashMap<>();
+        for (Metadata md : metadata) {
+            String namespace = md.getUID().getNamespace();
+            String value = md.getValue();
+            if ("autoupdate".equals(namespace)) {
+                // When autoupdate value is an empty string, treat it as not set since dto.autoupdate only accepts
+                // true/false
+                if (value != null && !value.isEmpty()) {
+                    dto.autoupdate = Boolean.valueOf(value);
+                }
+            } else if ("unit".equals(namespace)) {
+                dto.unit = value; // When unit value is empty string, keep it as empty string
+            } else if ("expire".equals(namespace)) {
+                Map<String, Object> configuration = md.getConfiguration();
+                if (configuration.isEmpty()) {
+                    dto.expire = value; // When expire value is empty string, keep it as empty string
+                } else {
+                    YamlMetadataDTO mdDto = new YamlMetadataDTO();
+                    mdDto.value = value.isEmpty() ? null : value;
+                    mdDto.config = configuration;
+                    metadataDto.put(namespace, mdDto);
+                }
+            } else {
+                YamlMetadataDTO mdDto = new YamlMetadataDTO();
+                mdDto.value = value.isEmpty() ? null : value;
+                Map<String, Object> configuration = new LinkedHashMap<>();
+                String statePattern = null;
+                for (ConfigParameter param : getConfigurationParameters(md)) {
+                    configuration.put(param.name(), param.value());
+                    if ("stateDescription".equals(namespace) && "pattern".equals(param.name())) {
+                        statePattern = param.value().toString();
+                    }
+                }
+                // Ignore state description in case it contains only a state pattern and state pattern was injected
+                // in field format or is the default pattern
+                if (!(statePattern != null && configuration.size() == 1
+                        && (patternSet || statePattern.equals(defaultPattern)))) {
+                    mdDto.config = configuration.isEmpty() ? null : configuration;
+                    metadataDto.put(namespace, mdDto);
+                    if (patternSet && statePattern != null) {
+                        dto.format = null;
+                    }
+                }
+            }
+        }
+        dto.metadata = metadataDto.isEmpty() ? null : metadataDto;
+
+        return dto;
+    }
+
+    /*
+     * Get the list of configuration parameters for a channel link.
+     *
+     * If a profile is set and a configuration description is found for this profile, the parameters are provided
+     * in the same order as in this configuration description, and any parameter having the default value is ignored.
+     * If no profile is set, the parameters are provided sorted by natural order of their names.
+     */
+    private List<ConfigParameter> getConfigurationParameters(Metadata metadata, boolean hideDefaultParameters) {
+        List<ConfigParameter> parameters = new ArrayList<>();
+        Set<String> handledNames = new HashSet<>();
+        Map<String, Object> configParameters = metadata.getConfiguration();
+        Object profile = configParameters.get("profile");
+        List<ConfigDescriptionParameter> configDescriptionParameter = List.of();
+        if (profile instanceof String profileStr) {
+            parameters.add(new ConfigParameter("profile", profileStr));
+            handledNames.add("profile");
+            try {
+                ConfigDescription configDesc = configDescriptionRegistry
+                        .getConfigDescription(new URI("profile:" + profileStr));
+                if (configDesc != null) {
+                    configDescriptionParameter = configDesc.getParameters();
+                }
+            } catch (URISyntaxException e) {
+                // Ignored; in practice this will never be thrown
+            }
+        }
+        for (ConfigDescriptionParameter param : configDescriptionParameter) {
+            String paramName = param.getName();
+            if (handledNames.contains(paramName)) {
+                continue;
+            }
+            Object value = configParameters.get(paramName);
+            Object defaultValue = ConfigUtil.getDefaultValueAsCorrectType(param);
+            if (value != null && (!hideDefaultParameters || !value.equals(defaultValue))) {
+                parameters.add(new ConfigParameter(paramName, value));
+            }
+            handledNames.add(paramName);
+        }
+        for (String paramName : configParameters.keySet().stream().sorted().collect(Collectors.toList())) {
+            if (handledNames.contains(paramName)) {
+                continue;
+            }
+            Object value = configParameters.get(paramName);
+            if (value != null) {
+                parameters.add(new ConfigParameter(paramName, value));
+            }
+            handledNames.add(paramName);
+        }
+        return parameters;
+    }
+
+    @Override
+    public String getParserFormat() {
+        return "YAML";
+    }
+
+    @Override
+    public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        return modelRepository.createIsolatedModel(inputStream, errors, warnings);
+    }
+
+    @Override
+    public Collection<Item> getParsedObjects(String modelName) {
+        return itemProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Collection<Metadata> getParsedMetadata(String modelName) {
+        return metadataProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Map<String, String> getParsedStateFormatters(String modelName) {
+        Map<String, String> stateFormatters = new HashMap<>();
+        getParsedMetadata(modelName).forEach(md -> {
+            if ("stateDescription".equals(md.getUID().getNamespace())) {
+                Object pattern = md.getConfiguration().get("pattern");
+                if (pattern instanceof String patternStr && !patternStr.isBlank()) {
+                    stateFormatters.put(md.getUID().getItemName(), patternStr);
+                }
+            }
+        });
+        return stateFormatters;
+    }
+
+    @Override
+    public void finishParsingFormat(String modelName) {
+        modelRepository.removeIsolatedModel(modelName);
+    }
+}

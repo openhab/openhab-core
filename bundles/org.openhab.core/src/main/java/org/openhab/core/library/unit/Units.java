@@ -52,6 +52,7 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.CalorificValue;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
@@ -59,6 +60,7 @@ import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.EmissionIntensity;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiantExposure;
+import org.openhab.core.library.dimension.RadiationDoseRate;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 
@@ -145,6 +147,8 @@ public final class Units extends CustomUnits {
             new ProductUnit<>(tech.units.indriya.unit.Units.WATT.multiply(tech.units.indriya.unit.Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
     public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
+    public static final Unit<CalorificValue> KILOWATT_HOUR_PER_CUBICMETRE = addUnit(
+            new ProductUnit<>(KILOWATT_HOUR.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
     public static final Unit<EmissionIntensity> GRAM_PER_KILOWATT_HOUR = addUnit(
             new ProductUnit<>(tech.units.indriya.unit.Units.GRAM.divide(KILOWATT_HOUR)));
     public static final Unit<Power> VAR = addUnit(new AlternateUnit<>(tech.units.indriya.unit.Units.WATT, "var"));
@@ -190,6 +194,8 @@ public final class Units extends CustomUnits {
 
     public static final Unit<RadiationDoseAbsorbed> GRAY = addUnit(tech.units.indriya.unit.Units.GRAY);
     public static final Unit<RadiationDoseEffective> SIEVERT = addUnit(tech.units.indriya.unit.Units.SIEVERT);
+    public static final Unit<RadiationDoseRate> SIEVERT_PER_HOUR = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.SIEVERT.divide(tech.units.indriya.unit.Units.HOUR)));
     public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(
             new TransformedUnit<>("mm/h", tech.units.indriya.unit.Units.KILOMETRE_PER_HOUR,
                     MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000))));
@@ -302,6 +308,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(KILOVAR_HOUR, "kvarh");
         SimpleUnitFormat.getInstance().label(KILOVOLT_AMPERE, "kVA");
         SimpleUnitFormat.getInstance().label(KILOWATT_HOUR, "kWh");
+        SimpleUnitFormat.getInstance().label(KILOWATT_HOUR_PER_CUBICMETRE, "kWh/m³");
         SimpleUnitFormat.getInstance().label(KNOT, KNOT.getSymbol());
         SimpleUnitFormat.getInstance().alias(LITRE, "dm³");
         SimpleUnitFormat.getInstance().label(LITRE_PER_MINUTE, "l/min");
