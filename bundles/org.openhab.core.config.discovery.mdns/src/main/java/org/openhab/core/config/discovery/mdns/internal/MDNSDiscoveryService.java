@@ -18,9 +18,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
@@ -68,7 +70,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     /*
      * Map of scheduled tasks: to remove devices from the Inbox, and to de-bounce the consideration
-     * of multiple service events.
+     * of multiple service events. Note: they must be protected by synchronization on 'this'.
      */
     private final Map<String, ScheduledFuture<?>> deviceRemovalTasks = new HashMap<>();
     private final Map<String, ScheduledFuture<?>> considerServiceTasks = new HashMap<>();
@@ -101,20 +103,16 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     @Override
     protected void deactivate() {
         deactivating = true;
-
-        for (MDNSDiscoveryParticipant participant : participants) {
-            mdnsClient.removeServiceListener(participant.getServiceType(), this);
-        }
-
         super.deactivate();
-
+        Map<String, ScheduledFuture<?>> removalTasks, considerTasks;
         synchronized (this) {
-            deviceRemovalTasks.values().forEach(task -> task.cancel(false));
+            removalTasks = Map.copyOf(deviceRemovalTasks);
+            considerTasks = Map.copyOf(considerServiceTasks);
             deviceRemovalTasks.clear();
-
-            considerServiceTasks.values().forEach(task -> task.cancel(false));
             considerServiceTasks.clear();
         }
+        removalTasks.values().forEach(task -> task.cancel(false));
+        considerTasks.values().forEach(task -> task.cancel(false));
     }
 
     @Modified
@@ -205,7 +203,10 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     @Override
-    public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
+    public void serviceAdded(@Nullable ServiceEvent serviceEvent) {
+        if (deactivating || serviceEvent == null || !isBackgroundDiscoveryEnabled()) {
+            return;
+        }
         /*
          * When a service is added its ServiceInfo may be either resolved or unresolved. In the resolved case
          * we may directly consider the ServiceInfo for discovery here. But we also explicitly request the service
@@ -213,25 +214,35 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
          * records. The considerService method applies a short delay to de-bounce multiple such events.
          */
         considerService(serviceEvent);
-        // IMPORTANT: explicitly request service resolution to trigger possible further serviceResolved() events
-        serviceEvent.getDNS().requestServiceInfo(serviceEvent.getType(), serviceEvent.getName(), true);
+        /*
+         * IMPORTANT: explicitly make asynchronous request service resolution to trigger possible further
+         * serviceResolved() events with additional information
+         */
+        JmDNS jmDNS = serviceEvent.getDNS();
+        if (jmDNS != null) {
+            jmDNS.requestServiceInfo(serviceEvent.getType(), serviceEvent.getName(), true);
+        }
     }
 
     @Override
-    public void serviceRemoved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        ServiceInfo serviceInfo = serviceEvent.getInfo();
-        if (serviceInfo != null) {
-            String serviceType = serviceEvent.getType();
-            for (MDNSDiscoveryParticipant participant : participants) {
-                if (participant.getServiceType().equals(serviceType)) {
-                    removeDiscoveryResult(participant, serviceInfo);
-                }
+    public void serviceRemoved(@Nullable ServiceEvent serviceEvent) {
+        ServiceInfo serviceInfo;
+        if (deactivating || serviceEvent == null || (serviceInfo = serviceEvent.getInfo()) == null) {
+            return;
+        }
+        String serviceType = serviceEvent.getType();
+        for (MDNSDiscoveryParticipant participant : participants) {
+            if (participant.getServiceType().equals(serviceType)) {
+                removeDiscoveryResult(participant, serviceInfo);
             }
         }
     }
 
     @Override
-    public void serviceResolved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
+    public void serviceResolved(@Nullable ServiceEvent serviceEvent) {
+        if (deactivating || serviceEvent == null || !isBackgroundDiscoveryEnabled()) {
+            return;
+        }
         /*
          * This method may be called several times as additional information such as the IP v4 and v6 addresses
          * and TXT attribute records are added. The considerService method applies a short delay to de-bounce
@@ -248,17 +259,19 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
      * @param serviceEvent the ServiceEvent to consider.
      */
     private void considerService(ServiceEvent serviceEvent) {
-        if (!deactivating && isBackgroundDiscoveryEnabled() && serviceEvent.getInfo() instanceof ServiceInfo serviceInfo
-                && serviceInfo.getKey() instanceof String lookupKey) {
-            synchronized (this) {
-                ScheduledFuture<?> considerServiceTask = considerServiceTasks.remove(lookupKey);
-                if (considerServiceTask != null) {
-                    considerServiceTask.cancel(false);
-                }
-                considerServiceTasks.put(lookupKey,
-                        scheduler.schedule(() -> considerServiceTask(serviceInfo, serviceEvent.getType(), lookupKey),
-                                CONSIDER_SERVICE_WINDOW_MSEC, TimeUnit.MILLISECONDS));
-            }
+        ServiceInfo serviceInfo;
+        if ((serviceInfo = serviceEvent.getInfo()) == null) {
+            return;
+        }
+        String lookupKey = serviceInfo.getKey();
+        ScheduledFuture<?> oldTask;
+        synchronized (this) {
+            oldTask = considerServiceTasks.put(lookupKey,
+                    scheduler.schedule(() -> considerServiceTask(serviceInfo, serviceEvent.getType(), lookupKey),
+                            CONSIDER_SERVICE_WINDOW_MSEC, TimeUnit.MILLISECONDS));
+        }
+        if (oldTask != null) {
+            oldTask.cancel(false);
         }
     }
 
@@ -271,14 +284,19 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
      * @param lookupKey the hash map lookup key.
      */
     private void considerServiceTask(ServiceInfo serviceInfo, String serviceType, String lookupKey) {
-        if (!deactivating) {
-            synchronized (this) {
-                considerServiceTasks.remove(lookupKey);
-            }
-            for (MDNSDiscoveryParticipant participant : participants) {
-                if (participant.getServiceType().equals(serviceType)) {
-                    createDiscoveryResult(participant, serviceInfo);
-                }
+        if (deactivating) {
+            return;
+        }
+        Future<?> task;
+        synchronized (this) {
+            task = considerServiceTasks.remove(lookupKey);
+        }
+        if (task != null) {
+            task.cancel(false);
+        }
+        for (MDNSDiscoveryParticipant participant : participants) {
+            if (participant.getServiceType().equals(serviceType)) {
+                createDiscoveryResult(participant, serviceInfo);
             }
         }
     }
