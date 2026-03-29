@@ -200,8 +200,9 @@ public abstract class BaseLightThingHandler extends BaseThingHandler {
      *  if (colorTemperaturePercent != null) {
      *      // Map the percent value to your device's supported Mirek range (mirekMin..mirekMax)
      *      // before updating the model. Example:
-     *       double mirek = mirekMin + (mirekMax - mirekMin) * colorTemperaturePercent / 100.0;
+     *      double mirek = mirekMin + (mirekMax - mirekMin) * colorTemperaturePercent / 100.0;
      *      model.setMirek(mirek);
+     *  }
      *
      *  STEP 3: After updating the model, update the channel states in OpenHAB
      *  Note: Ensure that the channel IDs used in updateState() match those defined in the thing type.
