@@ -56,11 +56,11 @@ public class YamlModuleDTOTest {
         Trigger t = TriggerBuilder.create().withId("trigger1").withTypeUID("type1").build();
         YamlModuleDTO trigger1 = new YamlModuleDTO(t);
         YamlModuleDTO trigger2 = new YamlModuleDTO();
-        assertEquals("YamlModuleDTO [id=trigger1, type=type1, config={}]", trigger1.toString());
+        assertEquals("YamlModuleDTO [id=trigger1, type=type1]", trigger1.toString());
         assertEquals("YamlModuleDTO []", trigger2.toString());
         trigger1.label = "Label1";
         trigger1.description = "Description1";
-        assertEquals("YamlModuleDTO [id=trigger1, type=type1, label=Label1, description=Description1, config={}]",
+        assertEquals("YamlModuleDTO [id=trigger1, type=type1, label=Label1, description=Description1]",
                 trigger1.toString());
     }
 }

@@ -56,12 +56,11 @@ public class YamlConditionDTOTest {
         Condition c = ConditionBuilder.create().withId("condition1").withTypeUID("type1").build();
         YamlConditionDTO condition1 = new YamlConditionDTO(c);
         YamlConditionDTO condition2 = new YamlConditionDTO();
-        assertEquals("YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]", condition1.toString());
+        assertEquals("YamlConditionDTO [id=condition1, type=type1]", condition1.toString());
         assertEquals("YamlConditionDTO []", condition2.toString());
         condition1.label = "Label1";
         condition1.description = "Description1";
-        assertEquals(
-                "YamlConditionDTO [inputs={}, id=condition1, type=type1, label=Label1, description=Description1, config={}]",
+        assertEquals("YamlConditionDTO [id=condition1, type=type1, label=Label1, description=Description1]",
                 condition1.toString());
     }
 }
