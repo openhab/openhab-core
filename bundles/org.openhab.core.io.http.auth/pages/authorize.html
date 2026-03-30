@@ -19,13 +19,17 @@ body {
 		Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, Arial,
 		sans-serif;
 }
-	
+
+input, button, textarea, select {
+	font-family: inherit;
+	line-height: inherit;
+}
+
 @media (prefers-color-scheme: dark) {
 	body, input.field {
 		background-color: rgb(18, 18, 18);
 		color: white;
 	}
-	
 	input.field {
 		border-bottom: 1px solid #333 !important;
 	}
