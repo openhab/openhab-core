@@ -122,7 +122,9 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(firstRule.getTags(), hasSize(2));
         assertThat(firstRule.getTags(), hasItem("Test"));
         assertThat(firstRule.getTags(), hasItem("my test"));
+        assertThat(firstRule.getTriggers(), hasSize(1));
         assertThat(firstRule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
+        assertThat(firstRule.getActions(), hasSize(1));
         assertThat(firstRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
         assertThat(firstRule.getActions().getFirst().getConfiguration()
                 .get(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE), is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
@@ -132,12 +134,42 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(secondRule.getUID(), is("dslruletest-2"));
         assertThat(secondRule.getName(), is("Rule Number Two"));
         assertThat(secondRule.getTags(), hasSize(0));
+        assertThat(secondRule.getTriggers(), hasSize(1));
         assertThat(secondRule.getTriggers().getFirst().getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
         assertThat(secondRule.getTriggers().getFirst().getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME),
                 is("X"));
+        assertThat(secondRule.getActions(), hasSize(1));
         assertThat(secondRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
         assertThat(secondRule.getActions().getFirst().getConfiguration()
                 .get(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE), is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
+    }
+
+    @Test
+    public void testNoTrigger() {
+        Collection<Rule> rules = dslRuleProvider.getAll();
+        assertThat(rules.size(), is(0));
+
+        String model = "rule RuleNoTrigger\n" + //
+                "when\n" + //
+                "then\n" + //
+                "   logInfo('Test', 'Test')\n" + //
+                "end\n\n";
+
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        Collection<Rule> actualRules = dslRuleProvider.getAll();
+
+        assertThat(actualRules.size(), is(1));
+
+        Rule rule = actualRules.iterator().next();
+
+        assertThat(rule.getUID(), is("dslruletest-1"));
+        assertThat(rule.getName(), is("RuleNoTrigger"));
+        assertThat(rule.getTags(), hasSize(0));
+        assertThat(rule.getTriggers(), hasSize(0));
+        assertThat(rule.getActions(), hasSize(1));
+        assertThat(rule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
+        assertThat(rule.getActions().getFirst().getConfiguration().get(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE),
+                is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
     }
 
     @Test
