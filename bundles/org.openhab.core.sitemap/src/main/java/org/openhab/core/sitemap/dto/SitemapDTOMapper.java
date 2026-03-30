@@ -80,8 +80,8 @@ public class SitemapDTOMapper {
      * @param sitemap the sitemap
      * @return the sitemap DTO object
      */
-    public static SitemapDTO map(Sitemap sitemap) {
-        SitemapDTO sitemapDTO = new SitemapDTO();
+    public static SitemapDefinitionDTO map(Sitemap sitemap) {
+        SitemapDefinitionDTO sitemapDTO = new SitemapDefinitionDTO();
         sitemapDTO.name = sitemap.getName();
         sitemapDTO.label = sitemap.getLabel();
         sitemapDTO.icon = sitemap.getIcon();
@@ -93,8 +93,8 @@ public class SitemapDTOMapper {
         return sitemapDTO;
     }
 
-    private static WidgetDTO map(Widget widget) {
-        WidgetDTO widgetDTO = new WidgetDTO();
+    private static WidgetDefinitionDTO map(Widget widget) {
+        WidgetDefinitionDTO widgetDTO = new WidgetDefinitionDTO();
         widgetDTO.type = widget.getWidgetType();
         widgetDTO.item = widget.getItem();
         widgetDTO.label = widget.getLabel();
@@ -258,7 +258,7 @@ public class SitemapDTOMapper {
         return buttonDTO;
     }
 
-    public static Sitemap map(SitemapDTO sitemapDTO) {
+    public static Sitemap map(SitemapDefinitionDTO sitemapDTO) {
         Sitemap sitemap = new SitemapImpl(sitemapDTO.name);
         sitemap.setLabel(sitemapDTO.label);
         sitemap.setIcon(sitemapDTO.icon);
@@ -266,7 +266,7 @@ public class SitemapDTOMapper {
         return sitemap;
     }
 
-    private @Nullable static Widget map(WidgetDTO widgetDTO) {
+    private @Nullable static Widget map(WidgetDefinitionDTO widgetDTO) {
         Widget widget = null;
         switch (widgetDTO.type) {
             case "Frame" -> {

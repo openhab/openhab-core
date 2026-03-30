@@ -26,7 +26,7 @@ import java.util.List;
  * @author Danny Baumann - New field labelSource
  * @author Laurent Garnier - Remove field columns
  * @author Laurent Garnier - New fields row, column, command, releaseCommand and stateless for Button element
- * @author Mark Herwege - Created as abstract base class for WidgetDTO classes
+ * @author Mark Herwege - Created as abstract base class for WidgetDefinitionDTO classes
  */
 public abstract class AbstractWidgetDTO {
 

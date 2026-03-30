@@ -56,6 +56,7 @@ import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.ui.internal.components.UIComponentSitemapProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 import org.osgi.framework.BundleContext;
@@ -117,6 +118,7 @@ public class SitemapResourceTest extends JavaTest {
     private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
     private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
     private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistryMock;
+    private @Mock @NonNullByDefault({}) UIComponentSitemapProvider managedSitemapProviderMock;
     private @Mock @NonNullByDefault({}) UriInfo uriInfoMock;
     private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
 
@@ -127,8 +129,8 @@ public class SitemapResourceTest extends JavaTest {
         subscriptions = new SitemapSubscriptionService(Collections.emptyMap(), itemUIRegistryMock, sitemapRegistryMock,
                 timeZoneProviderMock, bundleContextMock);
 
-        sitemapResource = new SitemapResource(itemUIRegistryMock, sitemapRegistryMock, localeServiceMock,
-                timeZoneProviderMock, subscriptions);
+        sitemapResource = new SitemapResource(itemUIRegistryMock, sitemapRegistryMock, managedSitemapProviderMock,
+                localeServiceMock, timeZoneProviderMock, subscriptions);
 
         when(uriInfoMock.getAbsolutePathBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));
         when(uriInfoMock.getBaseUriBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));

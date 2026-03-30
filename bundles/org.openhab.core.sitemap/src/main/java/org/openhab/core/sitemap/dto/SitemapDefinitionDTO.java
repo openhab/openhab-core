@@ -17,22 +17,12 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * This is a data transfer object that is used to serialize widgets.
+ * This is a data transfer object that is used to serialize sitemaps.
  *
  * @author Mark Herwege - Initial contribution
  */
-@Schema(name = "WidgetDefinition")
-public class WidgetDTO extends AbstractWidgetDTO {
+@Schema(name = "SitemapDefinition")
+public class SitemapDefinitionDTO extends AbstractSitemapDTO {
 
-    public String item;
-
-    public List<RuleDTO> visibilityRules = List.of();
-    public List<RuleDTO> iconRules = List.of();
-    public List<RuleDTO> labelColorRules = List.of();
-    public List<RuleDTO> valueColorRules = List.of();
-    public List<RuleDTO> iconColorRules = List.of();
-
-    public List<ButtonDefinitionDTO> buttons = List.of();
-
-    public List<WidgetDTO> widgets = List.of();
+    public List<WidgetDefinitionDTO> widgets = List.of();
 }

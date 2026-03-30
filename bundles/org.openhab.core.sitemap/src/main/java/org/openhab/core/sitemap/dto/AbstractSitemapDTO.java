@@ -17,7 +17,7 @@ package org.openhab.core.sitemap.dto;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
- * @author Mark Herwege - Created as abstract base class for SitemapDTO classes
+ * @author Mark Herwege - Created as abstract base class for SitemapDefinitionDTO classes
  */
 public abstract class AbstractSitemapDTO {
 

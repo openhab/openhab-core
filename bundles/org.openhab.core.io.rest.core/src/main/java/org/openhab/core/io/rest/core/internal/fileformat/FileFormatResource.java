@@ -68,7 +68,7 @@ import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemParser;
 import org.openhab.core.items.fileconverter.ItemSerializer;
 import org.openhab.core.sitemap.Sitemap;
-import org.openhab.core.sitemap.dto.SitemapDTO;
+import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
 import org.openhab.core.sitemap.dto.SitemapDTOMapper;
 import org.openhab.core.sitemap.fileconverter.SitemapParser;
 import org.openhab.core.sitemap.fileconverter.SitemapSerializer;
@@ -1019,7 +1019,7 @@ public class FileFormatResource implements RESTResource {
             }
         }
         if (data.sitemaps != null) {
-            for (SitemapDTO sitemapData : data.sitemaps) {
+            for (SitemapDefinitionDTO sitemapData : data.sitemaps) {
                 String name = sitemapData.name;
                 if (name == null || name.isEmpty()) {
                     errors.add("Missing sitemap name in sitemaps data!");
