@@ -62,20 +62,28 @@ input.field {
 	margin-bottom: 1rem;
 }
 
-.submit {
+.button {
+	box-sizing: border-box;
 	cursor: pointer;
 	margin-top: 2rem;
-	background-color: rgb(33, 150, 243);
 	text-decoration: none;
-	color: white;
 	border-radius: 4px;
 	font-size: 14px;
 	font-weight: 600;
 	min-width: 80px;
-	padding-top: 10px;
-	padding-bottom: 10px;
-	padding-left: 1rem;
-	padding-right: 1rem;
+	padding: 10px 1rem;
+	border: 2px solid transparent;
+}
+
+.cancel {
+	background-color: transparent;
+	color: rgb(33, 150, 243);
+	border-color: rgb(33, 150, 243);
+}
+
+.submit {
+	background-color: rgb(33, 150, 243);
+	color: white;
 }
 
 input.submit:hover {
@@ -120,11 +128,12 @@ input.submit:hover {
 			<input class="field" type="{tokenScopeFieldType}" placeholder="{tokenScopePlaceholder}" name="token_scope" />
 		</div>
 		<div>
-			<input class="submit" type="Submit" value="{buttonLabel}" />
+			<a class="button cancel" style="margin-right: 30px;" type="button" onclick="window.history.back(); return false;" href="#">{cancelButtonLabel}</a>
+			<input class="button submit" type="Submit" value="{buttonLabel}" />
 		</div>
 	</form>
 	<div class="result{resultClass}">
-		<a class="submit" type="button" href="/">{returnButtonLabel}</a>
+		<a class="button submit" type="button" href="/">{returnButtonLabel}</a>
 	</div>
 </body>
 </html>
