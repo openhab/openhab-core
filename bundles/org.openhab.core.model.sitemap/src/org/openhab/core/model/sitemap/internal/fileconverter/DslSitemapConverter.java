@@ -13,10 +13,7 @@
 package org.openhab.core.model.sitemap.internal.fileconverter;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +65,7 @@ import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colorpicker;
 import org.openhab.core.sitemap.Colortemperaturepicker;
 import org.openhab.core.sitemap.Condition;
+import org.openhab.core.sitemap.Default;
 import org.openhab.core.sitemap.Frame;
 import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.Image;
@@ -140,14 +138,7 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
     public void generateFormat(String id, OutputStream out) {
         SitemapModel model = elementsToGenerate.remove(id);
         if (model != null) {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            modelRepository.generateFileFormat(outputStream, "sitemap", model);
-            String syntax = new String(outputStream.toByteArray());
-            try {
-                out.write(syntax.getBytes());
-            } catch (IOException e) {
-                logger.warn("Exception when writing the generated syntax {}", e.getMessage());
-            }
+            modelRepository.generateFileFormat(out, "sitemap", model);
         }
     }
 
@@ -167,15 +158,15 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
     private ModelWidget buildModelWidget(Widget widget) {
         ModelWidget modelWidget;
         switch (widget) {
-            case Frame frame -> {
+            case Frame frameWidget -> {
                 ModelFrame modelFrame = SitemapFactory.eINSTANCE.createModelFrame();
                 modelWidget = modelFrame;
             }
-            case Text text -> {
+            case Text textWidget -> {
                 ModelText modelText = SitemapFactory.eINSTANCE.createModelText();
                 modelWidget = modelText;
             }
-            case Group group -> {
+            case Group groupWidget -> {
                 ModelGroup modelGroup = SitemapFactory.eINSTANCE.createModelGroup();
                 modelWidget = modelGroup;
             }
@@ -187,186 +178,113 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
                 }
                 modelWidget = modelSwitch;
             }
-            case Buttongrid buttongrid -> {
+            case Buttongrid buttongridWidget -> {
                 ModelButtongrid modelButtongrid = SitemapFactory.eINSTANCE.createModelButtongrid();
-                List<ButtonDefinition> buttons = buttongrid.getButtons();
+                List<ButtonDefinition> buttons = buttongridWidget.getButtons();
                 if (!buttons.isEmpty()) {
                     modelButtongrid.setButtons(modelButtons(buttons));
                 }
                 modelWidget = modelButtongrid;
             }
-            case Button button -> {
+            case Button buttonWidget -> {
                 ModelButton modelButton = SitemapFactory.eINSTANCE.createModelButton();
-                modelButton.setRow(button.getRow());
-                modelButton.setColumn(button.getColumn());
-                modelButton.setCmd(button.getCmd());
-                String releaseCmd = button.getReleaseCmd();
-                if (releaseCmd != null) {
-                    modelButton.setReleaseCmd(releaseCmd);
-                }
-                if (button.isStateless()) {
-                    modelButton.setStateless(true);
-                }
+                modelButton.setRow(buttonWidget.getRow());
+                modelButton.setColumn(buttonWidget.getColumn());
+                modelButton.setCmd(buttonWidget.getCmd());
+                modelButton.setReleaseCmd(buttonWidget.getReleaseCmd());
+                modelButton.setStateless(buttonWidget.isStateless());
                 modelWidget = modelButton;
             }
-            case Selection selection -> {
+            case Selection selectionWidget -> {
                 ModelSelection modelSelection = SitemapFactory.eINSTANCE.createModelSelection();
-                List<Mapping> mappings = selection.getMappings();
+                List<Mapping> mappings = selectionWidget.getMappings();
                 if (!mappings.isEmpty()) {
                     modelSelection.setMappings(modelMappings(mappings));
                 }
                 modelWidget = modelSelection;
             }
-            case Setpoint setpoint -> {
+            case Setpoint setpointWidget -> {
                 ModelSetpoint modelSetpoint = SitemapFactory.eINSTANCE.createModelSetpoint();
-                BigDecimal minValue = setpoint.getMinValue();
-                if (minValue != null) {
-                    modelSetpoint.setMinValue(minValue);
-                }
-                BigDecimal maxValue = setpoint.getMaxValue();
-                if (maxValue != null) {
-                    modelSetpoint.setMaxValue(maxValue);
-                }
-                BigDecimal step = setpoint.getStep();
-                if (step != null) {
-                    modelSetpoint.setStep(step);
-                }
+                modelSetpoint.setMinValue(setpointWidget.getMinValue());
+                modelSetpoint.setMaxValue(setpointWidget.getMaxValue());
+                modelSetpoint.setStep(setpointWidget.getStep());
                 modelWidget = modelSetpoint;
             }
-            case Slider slider -> {
+            case Slider sliderWidget -> {
                 ModelSlider modelSlider = SitemapFactory.eINSTANCE.createModelSlider();
-                BigDecimal minValue = slider.getMinValue();
-                if (minValue != null) {
-                    modelSlider.setMinValue(minValue);
-                }
-                BigDecimal maxValue = slider.getMaxValue();
-                if (maxValue != null) {
-                    modelSlider.setMaxValue(maxValue);
-                }
-                BigDecimal step = slider.getStep();
-                if (step != null) {
-                    modelSlider.setStep(step);
-                }
-                if (slider.isSwitchEnabled()) {
-                    modelSlider.setSwitchEnabled(true);
-                }
-                if (slider.isReleaseOnly()) {
-                    modelSlider.setReleaseOnly(true);
-                }
+                modelSlider.setMinValue(sliderWidget.getMinValue());
+                modelSlider.setMaxValue(sliderWidget.getMaxValue());
+                modelSlider.setStep(sliderWidget.getStep());
+                modelSlider.setSwitchEnabled(sliderWidget.isSwitchEnabled());
+                modelSlider.setReleaseOnly(sliderWidget.isReleaseOnly());
                 modelWidget = modelSlider;
             }
-            case Colorpicker colorpicker -> {
+            case Colorpicker colorpickerWidget -> {
                 ModelColorpicker modelColorpicker = SitemapFactory.eINSTANCE.createModelColorpicker();
                 modelWidget = modelColorpicker;
             }
-            case Colortemperaturepicker colortemperaturepicker -> {
+            case Colortemperaturepicker colortemperaturepickerWidget -> {
                 ModelColortemperaturepicker modelColortemperaturepicker = SitemapFactory.eINSTANCE
                         .createModelColortemperaturepicker();
-                BigDecimal minValue = colortemperaturepicker.getMinValue();
-                if (minValue != null) {
-                    modelColortemperaturepicker.setMinValue(minValue);
-                }
-                BigDecimal maxValue = colortemperaturepicker.getMaxValue();
-                if (maxValue != null) {
-                    modelColortemperaturepicker.setMaxValue(maxValue);
-                }
+                modelColortemperaturepicker.setMinValue(colortemperaturepickerWidget.getMinValue());
+                modelColortemperaturepicker.setMaxValue(colortemperaturepickerWidget.getMaxValue());
                 modelWidget = modelColortemperaturepicker;
             }
-            case Input input -> {
+            case Input inputWidget -> {
                 ModelInput modelInput = SitemapFactory.eINSTANCE.createModelInput();
-                String inputHint = input.getInputHint();
-                if (inputHint != null) {
-                    modelInput.setInputHint(inputHint);
-                }
+                modelInput.setInputHint(inputWidget.getInputHint());
                 modelWidget = modelInput;
             }
-            case Webview webview -> {
+            case Webview webviewWidgete -> {
                 ModelWebview modelWebview = SitemapFactory.eINSTANCE.createModelWebview();
-                modelWebview.setUrl(webview.getUrl());
-                int height = webview.getHeight();
-                if (height != 0) {
-                    modelWebview.setHeight(height);
-                }
+                modelWebview.setUrl(webviewWidgete.getUrl());
+                modelWebview.setHeight(webviewWidgete.getHeight());
                 modelWidget = modelWebview;
             }
-            case Mapview mapview -> {
+            case Mapview mapviewWidget -> {
                 ModelMapview modelMapview = SitemapFactory.eINSTANCE.createModelMapview();
-                int height = mapview.getHeight();
-                if (height != 0) {
-                    modelMapview.setHeight(height);
-                }
+                modelMapview.setHeight(mapviewWidget.getHeight());
                 modelWidget = modelMapview;
             }
-            case Image image -> {
+            case Image imageWidget -> {
                 ModelImage modelImage = SitemapFactory.eINSTANCE.createModelImage();
-                String url = image.getUrl();
-                if (url != null) {
-                    modelImage.setUrl(url);
-                }
-                int refresh = image.getRefresh();
-                if (refresh != 0) {
-                    modelImage.setRefresh(refresh);
-                }
+                modelImage.setUrl(imageWidget.getUrl());
+                modelImage.setRefresh(imageWidget.getRefresh());
                 modelWidget = modelImage;
             }
-            case Video video -> {
+            case Video videoWidget -> {
                 ModelVideo modelVideo = SitemapFactory.eINSTANCE.createModelVideo();
-                modelVideo.setUrl(video.getUrl());
-                String encoding = video.getEncoding();
-                if (encoding != null) {
-                    modelVideo.setEncoding(encoding);
-                }
+                modelVideo.setUrl(videoWidget.getUrl());
+                modelVideo.setEncoding(videoWidget.getEncoding());
                 modelWidget = modelVideo;
             }
-            case Chart chart -> {
+            case Chart chartWidget -> {
                 ModelChart modelChart = SitemapFactory.eINSTANCE.createModelChart();
-                int refresh = chart.getRefresh();
-                if (refresh != 0) {
-                    modelChart.setRefresh(refresh);
-                }
-                modelChart.setPeriod(chart.getPeriod());
-                String service = chart.getService();
-                if (service != null) {
-                    modelChart.setService(service);
-                }
-                Boolean legend = chart.hasLegend();
-                if (legend != null) {
-                    modelChart.setLegend(legend);
-                }
-                if (chart.forceAsItem()) {
-                    modelChart.setForceAsItem(true);
-                }
-                String yAxisDecimalPattern = chart.getYAxisDecimalPattern();
-                if (yAxisDecimalPattern != null) {
-                    modelChart.setYAxisDecimalPattern(yAxisDecimalPattern);
-                }
-                String interpolation = chart.getInterpolation();
-                if (interpolation != null) {
-                    modelChart.setInterpolation(interpolation);
-                }
+                modelChart.setRefresh(chartWidget.getRefresh());
+                modelChart.setPeriod(chartWidget.getPeriod());
+                modelChart.setService(chartWidget.getService());
+                modelChart.setLegend(chartWidget.hasLegend());
+                modelChart.setForceAsItem(chartWidget.forceAsItem());
+                modelChart.setYAxisDecimalPattern(chartWidget.getYAxisDecimalPattern());
+                modelChart.setInterpolation(chartWidget.getInterpolation());
                 modelWidget = modelChart;
             }
             default -> {
                 ModelDefault modelDefault = SitemapFactory.eINSTANCE.createModelDefault();
+                if (widget instanceof Default defaultWidget) {
+                    modelDefault.setHeight(defaultWidget.getHeight());
+                }
                 modelWidget = modelDefault;
             }
         }
 
-        String item = widget.getItem();
-        if (item != null) {
-            modelWidget.setItem(item);
-        }
-        String label = widget.getLabel();
-        if (label != null) {
-            modelWidget.setLabel(label);
-        }
+        modelWidget.setItem(widget.getItem());
+        modelWidget.setLabel(widget.getLabel());
         String icon = widget.getIcon();
-        if (icon != null) {
-            if (widget.isStaticIcon()) {
-                modelWidget.setStaticIcon(icon);
-            } else {
-                modelWidget.setIcon(icon);
-            }
+        if (widget.isStaticIcon()) {
+            modelWidget.setStaticIcon(icon);
+        } else {
+            modelWidget.setIcon(icon);
         }
 
         List<Rule> iconRules = widget.getIconRules();
@@ -407,15 +325,9 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
         mappings.forEach(mapping -> {
             ModelMapping modelMapping = SitemapFactory.eINSTANCE.createModelMapping();
             modelMapping.setCmd(mapping.getCmd());
-            String releaseCmd = mapping.getReleaseCmd();
-            if (releaseCmd != null) {
-                modelMapping.setReleaseCmd(releaseCmd);
-            }
+            modelMapping.setReleaseCmd(mapping.getReleaseCmd());
             modelMapping.setLabel(mapping.getLabel());
-            String icon = mapping.getIcon();
-            if (icon != null) {
-                modelMapping.setIcon(icon);
-            }
+            modelMapping.setIcon(mapping.getIcon());
             modelMappings.add(modelMapping);
         });
         return modelMappingList;
@@ -430,10 +342,7 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
             modelButton.setColumn(button.getColumn());
             modelButton.setCmd(button.getCmd());
             modelButton.setLabel(button.getLabel());
-            String icon = button.getIcon();
-            if (icon != null) {
-                modelButton.setIcon(icon);
-            }
+            modelButton.setIcon(button.getIcon());
             modelButtons.add(modelButton);
         });
         return modelButtonList;
@@ -447,10 +356,7 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
             EList<ModelCondition> modelConditions = modelRule.getConditions();
             List<Condition> conditions = rule.getConditions();
             setModelConditions(modelConditions, conditions);
-            String argument = rule.getArgument();
-            if (argument != null) {
-                modelRule.setArg(argument);
-            }
+            modelRule.setArg(rule.getArgument());
             modelRules.add(modelRule);
         });
         return modelRuleList;
@@ -477,10 +383,7 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
             EList<ModelCondition> modelConditions = modelRule.getConditions();
             List<Condition> conditions = rule.getConditions();
             setModelConditions(modelConditions, conditions);
-            String argument = rule.getArgument();
-            if (argument != null) {
-                modelRule.setArg(argument);
-            }
+            modelRule.setArg(rule.getArgument());
             modelRules.add(modelRule);
         });
         return modelRuleList;
@@ -489,14 +392,8 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
     private void setModelConditions(EList<ModelCondition> modelConditions, List<Condition> conditions) {
         conditions.forEach(condition -> {
             ModelCondition modelCondition = SitemapFactory.eINSTANCE.createModelCondition();
-            String item = condition.getItem();
-            if (item != null) {
-                modelCondition.setItem(item);
-            }
-            String operator = condition.getCondition();
-            if (operator != null) {
-                modelCondition.setCondition(operator);
-            }
+            modelCondition.setItem(condition.getItem());
+            modelCondition.setCondition(condition.getCondition());
             String value = condition.getValue();
             if (value.length() > 1 && (value.startsWith("-") || value.startsWith("+"))) {
                 modelCondition.setSign(value.substring(0, 1));

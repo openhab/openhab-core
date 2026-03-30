@@ -21,50 +21,24 @@ import org.openhab.core.sitemap.Button;
 import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
-import org.openhab.core.sitemap.Colorpicker;
 import org.openhab.core.sitemap.Colortemperaturepicker;
 import org.openhab.core.sitemap.Condition;
-import org.openhab.core.sitemap.Default;
-import org.openhab.core.sitemap.Frame;
-import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.Image;
 import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
 import org.openhab.core.sitemap.Setpoint;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Slider;
 import org.openhab.core.sitemap.Switch;
-import org.openhab.core.sitemap.Text;
 import org.openhab.core.sitemap.Video;
 import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
-import org.openhab.core.sitemap.internal.ButtonDefinitionImpl;
-import org.openhab.core.sitemap.internal.ButtonImpl;
-import org.openhab.core.sitemap.internal.ButtongridImpl;
-import org.openhab.core.sitemap.internal.ChartImpl;
-import org.openhab.core.sitemap.internal.ColorpickerImpl;
-import org.openhab.core.sitemap.internal.ColortemperaturepickerImpl;
-import org.openhab.core.sitemap.internal.ConditionImpl;
-import org.openhab.core.sitemap.internal.DefaultImpl;
-import org.openhab.core.sitemap.internal.FrameImpl;
-import org.openhab.core.sitemap.internal.GroupImpl;
-import org.openhab.core.sitemap.internal.ImageImpl;
-import org.openhab.core.sitemap.internal.InputImpl;
-import org.openhab.core.sitemap.internal.MappingImpl;
-import org.openhab.core.sitemap.internal.MapviewImpl;
-import org.openhab.core.sitemap.internal.RuleImpl;
-import org.openhab.core.sitemap.internal.SelectionImpl;
-import org.openhab.core.sitemap.internal.SetpointImpl;
-import org.openhab.core.sitemap.internal.SitemapImpl;
-import org.openhab.core.sitemap.internal.SliderImpl;
-import org.openhab.core.sitemap.internal.SwitchImpl;
-import org.openhab.core.sitemap.internal.TextImpl;
-import org.openhab.core.sitemap.internal.VideoImpl;
-import org.openhab.core.sitemap.internal.WebviewImpl;
+import org.openhab.core.sitemap.registry.SitemapFactory;
 
 /**
  * The {@link SitemapDTOMapper} is a utility class to map sitemaps into data transfer objects (DTO).
@@ -258,113 +232,78 @@ public class SitemapDTOMapper {
         return buttonDTO;
     }
 
-    public static Sitemap map(SitemapDefinitionDTO sitemapDTO) {
-        Sitemap sitemap = new SitemapImpl(sitemapDTO.name);
+    public static Sitemap map(SitemapDefinitionDTO sitemapDTO, SitemapFactory sitemapFactory) {
+        if (sitemapDTO.name == null) {
+            throw new IllegalArgumentException("Sitemap name must not be null");
+        }
+        Sitemap sitemap = sitemapFactory.createSitemap(sitemapDTO.name);
         sitemap.setLabel(sitemapDTO.label);
         sitemap.setIcon(sitemapDTO.icon);
-        sitemap.setWidgets(sitemapDTO.widgets.stream().map(SitemapDTOMapper::map).filter(Objects::nonNull).toList());
+        sitemap.setWidgets(sitemapDTO.widgets.stream().map(widget -> map(widget, sitemap, sitemapFactory))
+                .filter(Objects::nonNull).toList());
         return sitemap;
     }
 
-    private @Nullable static Widget map(WidgetDefinitionDTO widgetDTO) {
-        Widget widget = null;
-        switch (widgetDTO.type) {
-            case "Frame" -> {
-                Frame frameWidget = new FrameImpl();
-                widget = frameWidget;
+    private @Nullable static Widget map(WidgetDefinitionDTO widgetDTO, Parent parent, SitemapFactory sitemapFactory) {
+        Widget widget = sitemapFactory.createWidget(widgetDTO.type, parent);
+        if (widget == null) {
+            return null;
+        }
+        switch (widget) {
+            case Switch switchWidget -> {
+                switchWidget
+                        .setMappings(widgetDTO.mappings.stream().map(mapping -> map(mapping, sitemapFactory)).toList());
             }
-            case "Default" -> {
-                Default defaultWidget = new DefaultImpl();
-                widget = defaultWidget;
+            case Buttongrid buttongridWidget -> {
+                buttongridWidget
+                        .setButtons(widgetDTO.buttons.stream().map(button -> map(button, sitemapFactory)).toList());
             }
-            case "Text" -> {
-                Text textWidget = new TextImpl();
-                widget = textWidget;
-            }
-            case "Group" -> {
-                Group groupWidget = new GroupImpl();
-                widget = groupWidget;
-            }
-            case "Switch" -> {
-                Switch switchWidget = new SwitchImpl();
-                switchWidget.setMappings(widgetDTO.mappings.stream().map(SitemapDTOMapper::map).toList());
-                widget = switchWidget;
-            }
-            case "Buttongrid" -> {
-                Buttongrid buttongridWidget = new ButtongridImpl();
-                buttongridWidget.setButtons(widgetDTO.buttons.stream().map(SitemapDTOMapper::map).toList());
-                widget = buttongridWidget;
-            }
-            case "Button" -> {
-                Button buttonWidget = new ButtonImpl();
+            case Button buttonWidget -> {
                 buttonWidget.setRow(widgetDTO.row);
                 buttonWidget.setColumn(widgetDTO.column);
                 buttonWidget.setStateless(widgetDTO.stateless);
                 buttonWidget.setCmd(widgetDTO.command);
                 buttonWidget.setReleaseCmd(widgetDTO.releaseCommand);
-                widget = buttonWidget;
             }
-            case "Selection" -> {
-                Selection selectionWidget = new SelectionImpl();
-                selectionWidget.setMappings(widgetDTO.mappings.stream().map(SitemapDTOMapper::map).toList());
-                widget = selectionWidget;
+            case Selection selectionWidget -> {
+                selectionWidget
+                        .setMappings(widgetDTO.mappings.stream().map(mapping -> map(mapping, sitemapFactory)).toList());
             }
-            case "Setpoint" -> {
-                Setpoint setpointWidget = new SetpointImpl();
+            case Setpoint setpointWidget -> {
                 setpointWidget.setMinValue(widgetDTO.minValue);
                 setpointWidget.setMaxValue(widgetDTO.maxValue);
                 setpointWidget.setStep(widgetDTO.step);
-                widget = setpointWidget;
             }
-            case "Slider" -> {
-                Slider sliderWidget = new SliderImpl();
+            case Slider sliderWidget -> {
                 sliderWidget.setMinValue(widgetDTO.minValue);
                 sliderWidget.setMaxValue(widgetDTO.maxValue);
                 sliderWidget.setStep(widgetDTO.step);
                 sliderWidget.setSwitchEnabled(widgetDTO.switchSupport);
                 sliderWidget.setReleaseOnly(widgetDTO.releaseOnly);
-                widget = sliderWidget;
             }
-            case "Colorpicker" -> {
-                Colorpicker colorpickerWidget = new ColorpickerImpl();
-                widget = colorpickerWidget;
-            }
-            case "Colortemperaturepicker" -> {
-                Colortemperaturepicker colortemperaturepickerWidget = new ColortemperaturepickerImpl();
+            case Colortemperaturepicker colortemperaturepickerWidget -> {
                 colortemperaturepickerWidget.setMinValue(widgetDTO.minValue);
                 colortemperaturepickerWidget.setMaxValue(widgetDTO.maxValue);
-                widget = colortemperaturepickerWidget;
             }
-            case "Input" -> {
-                Input inputWidget = new InputImpl();
+            case Input inputWidget -> {
                 inputWidget.setInputHint(widgetDTO.inputHint);
-                widget = inputWidget;
             }
-            case "Webview" -> {
-                Webview webviewWidget = new WebviewImpl();
+            case Webview webviewWidget -> {
                 webviewWidget.setUrl(widgetDTO.url);
                 webviewWidget.setHeight(widgetDTO.height);
-                widget = webviewWidget;
             }
-            case "Mapview" -> {
-                Mapview mapviewWidget = new MapviewImpl();
+            case Mapview mapviewWidget -> {
                 mapviewWidget.setHeight(widgetDTO.height);
-                widget = mapviewWidget;
             }
-            case "Image" -> {
-                Image imageWidget = new ImageImpl();
+            case Image imageWidget -> {
                 imageWidget.setUrl(widgetDTO.url);
                 imageWidget.setRefresh(widgetDTO.refresh);
-                widget = imageWidget;
             }
-            case "Video" -> {
-                Video videoWidget = new VideoImpl();
+            case Video videoWidget -> {
                 videoWidget.setUrl(widgetDTO.url);
                 videoWidget.setEncoding(widgetDTO.encoding);
-                widget = videoWidget;
             }
-            case "Chart" -> {
-                Chart chartWidget = new ChartImpl();
+            case Chart chartWidget -> {
                 chartWidget.setRefresh(widgetDTO.refresh);
                 chartWidget.setPeriod(widgetDTO.period);
                 chartWidget.setService(widgetDTO.service);
@@ -372,33 +311,34 @@ public class SitemapDTOMapper {
                 chartWidget.setForceAsItem(widgetDTO.forceAsItem);
                 chartWidget.setYAxisDecimalPattern(widgetDTO.yAxisDecimalPattern);
                 chartWidget.setInterpolation(widgetDTO.interpolation);
-                widget = chartWidget;
             }
             default -> {
-                return null;
+                // nothing to do
             }
         }
+        ;
 
         widget.setItem(widgetDTO.item);
         widget.setLabel(widgetDTO.label);
         widget.setIcon(widgetDTO.icon);
         widget.setStaticIcon(widgetDTO.staticIcon);
 
-        widget.setIconRules(widgetDTO.iconRules.stream().map(SitemapDTOMapper::map).toList());
-        widget.setVisibility(widgetDTO.visibilityRules.stream().map(SitemapDTOMapper::map).toList());
-        widget.setLabelColor(widgetDTO.labelColorRules.stream().map(SitemapDTOMapper::map).toList());
-        widget.setValueColor(widgetDTO.valueColorRules.stream().map(SitemapDTOMapper::map).toList());
-        widget.setIconColor(widgetDTO.iconColorRules.stream().map(SitemapDTOMapper::map).toList());
+        widget.setIconRules(widgetDTO.iconRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        widget.setVisibility(widgetDTO.visibilityRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        widget.setLabelColor(widgetDTO.labelColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        widget.setValueColor(widgetDTO.valueColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        widget.setIconColor(widgetDTO.iconColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
 
         if (widget instanceof LinkableWidget linkableWidget) {
             linkableWidget.setWidgets(
-                    widgetDTO.widgets.stream().map(SitemapDTOMapper::map).filter(Objects::nonNull).toList());
+                    widgetDTO.widgets.stream().map(childWidget -> map(childWidget, linkableWidget, sitemapFactory))
+                            .filter(Objects::nonNull).toList());
         }
         return widget;
     }
 
-    private static Mapping map(MappingDTO mappingDTO) {
-        Mapping mapping = new MappingImpl();
+    private static Mapping map(MappingDTO mappingDTO, SitemapFactory sitemapFactory) {
+        Mapping mapping = sitemapFactory.createMapping();
         mapping.setLabel(mappingDTO.label);
         mapping.setIcon(mappingDTO.icon);
         mapping.setCmd(mappingDTO.command);
@@ -406,8 +346,8 @@ public class SitemapDTOMapper {
         return mapping;
     }
 
-    private static ButtonDefinition map(ButtonDefinitionDTO buttonDefinitionDTO) {
-        ButtonDefinition buttonDefinition = new ButtonDefinitionImpl();
+    private static ButtonDefinition map(ButtonDefinitionDTO buttonDefinitionDTO, SitemapFactory sitemapFactory) {
+        ButtonDefinition buttonDefinition = sitemapFactory.createButtonDefinition();
         buttonDefinition.setRow(buttonDefinitionDTO.row);
         buttonDefinition.setColumn(buttonDefinitionDTO.column);
         buttonDefinition.setCmd(buttonDefinitionDTO.command);
@@ -415,15 +355,15 @@ public class SitemapDTOMapper {
         return buttonDefinition;
     }
 
-    private static Rule map(RuleDTO ruleDTO) {
-        Rule rule = new RuleImpl();
+    private static Rule map(RuleDTO ruleDTO, SitemapFactory sitemapFactory) {
+        Rule rule = sitemapFactory.createRule();
         rule.setArgument(ruleDTO.argument);
-        rule.setConditions(ruleDTO.conditions.stream().map(SitemapDTOMapper::map).toList());
+        rule.setConditions(ruleDTO.conditions.stream().map(condition -> map(condition, sitemapFactory)).toList());
         return rule;
     }
 
-    private static Condition map(ConditionDTO conditionDTO) {
-        Condition condition = new ConditionImpl();
+    private static Condition map(ConditionDTO conditionDTO, SitemapFactory sitemapFactory) {
+        Condition condition = sitemapFactory.createCondition();
         condition.setItem(conditionDTO.item);
         condition.setCondition(conditionDTO.condition);
         condition.setValue(conditionDTO.value);

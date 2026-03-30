@@ -72,6 +72,7 @@ import org.openhab.core.sitemap.dto.SitemapDTOMapper;
 import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
 import org.openhab.core.sitemap.fileconverter.SitemapParser;
 import org.openhab.core.sitemap.fileconverter.SitemapSerializer;
+import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
@@ -273,6 +274,7 @@ public class FileFormatResource implements RESTResource {
     private final ThingTypeRegistry thingTypeRegistry;
     private final ChannelTypeRegistry channelTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
+    private final SitemapFactory sitemapFactory;
     private final SitemapRegistry sitemapRegistry;
     private final Map<String, ItemSerializer> itemSerializers = new ConcurrentHashMap<>();
     private final Map<String, ItemParser> itemParsers = new ConcurrentHashMap<>();
@@ -293,7 +295,8 @@ public class FileFormatResource implements RESTResource {
             final @Reference Inbox inbox, //
             final @Reference ThingTypeRegistry thingTypeRegistry, //
             final @Reference ChannelTypeRegistry channelTypeRegistry, //
-            final @Reference ConfigDescriptionRegistry configDescRegistry,
+            final @Reference ConfigDescriptionRegistry configDescRegistry, //
+            final @Reference SitemapFactory sitemapFactory, //
             final @Reference SitemapRegistry sitemapRegistry) {
         this.itemBuilderFactory = itemBuilderFactory;
         this.itemRegistry = itemRegistry;
@@ -304,6 +307,7 @@ public class FileFormatResource implements RESTResource {
         this.thingTypeRegistry = thingTypeRegistry;
         this.channelTypeRegistry = channelTypeRegistry;
         this.configDescRegistry = configDescRegistry;
+        this.sitemapFactory = sitemapFactory;
         this.sitemapRegistry = sitemapRegistry;
     }
 
@@ -477,7 +481,7 @@ public class FileFormatResource implements RESTResource {
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
 
-        if (acceptHeader.equals("txt/vnd.openhab.dsl.sitemap") && (sitemapNames == null || sitemapNames.size() != 1)) {
+        if (acceptHeader.equals("text/vnd.openhab.dsl.sitemap") && (sitemapNames == null || sitemapNames.size() != 1)) {
             // DSL format only supports one sitemap at a time
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("For media type 'text/vnd.openhab.dsl.sitemap', exactly one sitemap name must be provided!")
@@ -573,6 +577,11 @@ public class FileFormatResource implements RESTResource {
                             .entity("Unsupported media type '" + acceptHeader + "'!").build();
                 } else if (sitemaps.isEmpty()) {
                     return Response.status(Response.Status.BAD_REQUEST).entity("No sitemaps loaded from input").build();
+                } else if (sitemaps.size() != 1) {
+                    // DSL format only supports one sitemap at a time
+                    return Response.status(Response.Status.BAD_REQUEST).entity(
+                            "For media type 'text/vnd.openhab.dsl.sitemap', exactly one sitemap name must be provided!")
+                            .build();
                 }
                 sitemapSerializer.setSitemapsToBeSerialized(genId, sitemaps);
                 sitemapSerializer.generateFormat(genId, outputStream);
@@ -1030,14 +1039,14 @@ public class FileFormatResource implements RESTResource {
         if (data.sitemaps != null) {
             for (SitemapDefinitionDTO sitemapData : data.sitemaps) {
                 String name = sitemapData.name;
-                if (name == null || name.isEmpty()) {
-                    errors.add("Missing sitemap name in sitemaps data!");
+                try {
+                    Sitemap sitemap = SitemapDTOMapper.map(sitemapData, sitemapFactory);
+                    sitemaps.add(sitemap);
+                } catch (IllegalArgumentException e) {
+                    errors.add("Invalid sitemap data for sitemap '" + name + "': " + e.getMessage());
                     ok = false;
                     continue;
                 }
-
-                Sitemap sitemap = SitemapDTOMapper.map(sitemapData);
-                sitemaps.add(sitemap);
             }
         }
         return ok;

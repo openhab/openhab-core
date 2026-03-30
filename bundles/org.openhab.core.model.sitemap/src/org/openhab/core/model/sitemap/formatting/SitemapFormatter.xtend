@@ -19,7 +19,6 @@ import org.eclipse.xtext.formatting.impl.AbstractDeclarativeFormatter
 import org.eclipse.xtext.formatting.impl.FormattingConfig
 import org.openhab.core.model.sitemap.services.SitemapGrammarAccess
 import com.google.inject.Inject
-import org.openhab.core.model.sitemap.sitemap.ModelWidget
 
 // import com.google.inject.Inject;
 // import org.openhab.core.model.services.SitemapGrammarAccess
@@ -37,7 +36,6 @@ class SitemapFormatter extends AbstractDeclarativeFormatter {
     @Inject extension SitemapGrammarAccess
 
     override protected void configureFormatting(FormattingConfig c) {
-        c.wrappedLineIndentation = 4
         c.autoLinewrap = 200
 
         c.setLinewrap(1, 1, 2).before(modelWidgetRule)
@@ -47,8 +45,6 @@ class SitemapFormatter extends AbstractDeclarativeFormatter {
         c.setIndentationDecrement.before("}")
         c.setLinewrap().after("}")
 
-        c.setNoSpace().withinKeywordPairs("<", ">")
-        c.setNoSpace().withinKeywordPairs("(", ")")
         c.setNoSpace().withinKeywordPairs("[", "]")
 
         c.setNoSpace().after("item=", "label=", "icon=", "staticIcon=")

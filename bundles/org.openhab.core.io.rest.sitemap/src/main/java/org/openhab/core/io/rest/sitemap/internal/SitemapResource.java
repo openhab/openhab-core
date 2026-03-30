@@ -103,6 +103,7 @@ import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.dto.MappingDTO;
 import org.openhab.core.sitemap.dto.SitemapDTOMapper;
 import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
+import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.internal.components.UIComponentSitemapProvider;
@@ -194,6 +195,7 @@ public class SitemapResource
     Sse sse;
 
     private final ItemUIRegistry itemUIRegistry;
+    private final SitemapFactory sitemapFactory;
     private final SitemapRegistry sitemapRegistry;
     private final UIComponentSitemapProvider managedSitemapProvider;
     private final SitemapSubscriptionService subscriptions;
@@ -208,12 +210,14 @@ public class SitemapResource
     @Activate
     public SitemapResource( //
             final @Reference ItemUIRegistry itemUIRegistry, //
+            final @Reference SitemapFactory sitemapFactory, //
             final @Reference SitemapRegistry sitemapRegistry, //
             final @Reference UIComponentSitemapProvider managedSitemapProvider, //
             final @Reference LocaleService localeService, //
             final @Reference TimeZoneProvider timeZoneProvider, //
             final @Reference SitemapSubscriptionService subscriptions) {
         this.itemUIRegistry = itemUIRegistry;
+        this.sitemapFactory = sitemapFactory;
         this.sitemapRegistry = sitemapRegistry;
         this.managedSitemapProvider = managedSitemapProvider;
         this.localeService = localeService;
@@ -250,12 +254,12 @@ public class SitemapResource
     @GET
     @Path("/*/definition")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "getSitemaps", summary = "Get all available sitemap definitions.", responses = {
+    @Operation(operationId = "getSitemapDefinitions", summary = "Get all available sitemap definitions.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SitemapDefinitionDTO.class)))) })
     public Response getSitemapsDefinition() {
         logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
         Collection<SitemapDefinitionDTO> responseObject = sitemapRegistry.getAll().stream().map(SitemapDTOMapper::map)
-                .toList();
+                .map(this::setIsEditable).toList();
         return Response.ok(responseObject).build();
     }
 
@@ -272,8 +276,13 @@ public class SitemapResource
         if (sitemap == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        SitemapDefinitionDTO responseObject = SitemapDTOMapper.map(sitemap);
+        SitemapDefinitionDTO responseObject = setIsEditable(SitemapDTOMapper.map(sitemap));
         return Response.ok(responseObject).build();
+    }
+
+    private SitemapDefinitionDTO setIsEditable(SitemapDefinitionDTO dto) {
+        dto.editable = managedSitemapProvider.get(dto.name) != null;
+        return dto;
     }
 
     /**
@@ -307,7 +316,7 @@ public class SitemapResource
         }
 
         try {
-            Sitemap sitemap = SitemapDTOMapper.map(sitemapDTO);
+            Sitemap sitemap = SitemapDTOMapper.map(sitemapDTO, sitemapFactory);
 
             // Save the sitemap
             if (getSitemap(sitemapName) == null) {
@@ -338,7 +347,8 @@ public class SitemapResource
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Sitemap not found or sitemap is not editable.") })
-    public Response removeItem(@PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapName) {
+    public Response removeSitemap(
+            @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapName) {
         if (managedSitemapProvider.remove(sitemapName) == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
@@ -880,27 +890,10 @@ public class SitemapResource
     }
 
     /**
-     * Prepare a response representing the sitemap depending on the status.
-     *
-     * @param uriBuilder the URI builder
-     * @param status http status
-     * @param sitemap can be null
-     * @param locale the locale
-     * @param errormessage optional message in case of error
-     * @return Response configured to represent the sitemap depending on the status
-     */
-    private Response getSitemapResponse(final @Nullable UriBuilder uriBuilder, Status status, @Nullable Sitemap sitemap,
-            @Nullable String errormessage) {
-        Object entity = null != sitemap ? SitemapDTOMapper.map(sitemap) : null;
-        return JSONResponse.createResponse(status, entity, errormessage);
-    }
-
-    /**
      * This method only returns when a change has occurred to any item on the
      * page to display or if the timeout is reached
      *
-     * @param widgets
-     *            the widgets of the page to observe
+     * @param widgets the widgets of the page to observe
      * @return true if the timeout is reached
      */
     private boolean waitForChanges(List<Widget> widgets) {
@@ -929,8 +922,7 @@ public class SitemapResource
     /**
      * Collects all items that are represented by a given list of widgets
      *
-     * @param widgets
-     *            the widget list to get the items for added to all bundles containing REST resources
+     * @param widgets the widget list to get the items for added to all bundles containing REST resources
      * @return all items that are represented by the list of widgets
      */
     private Set<GenericItem> getAllItems(List<Widget> widgets) {

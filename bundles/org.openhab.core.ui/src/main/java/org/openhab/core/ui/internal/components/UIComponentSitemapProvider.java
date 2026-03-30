@@ -84,7 +84,8 @@ import org.slf4j.LoggerFactory;
  *         interface
  */
 @NonNullByDefault
-@Component(service = SitemapProvider.class, immediate = true)
+@Component(service = { SitemapProvider.class, ManagedProvider.class,
+        UIComponentSitemapProvider.class }, immediate = true)
 public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         implements ManagedProvider<Sitemap, String>, SitemapProvider, RegistryChangeListener<RootUIComponent> {
 
@@ -494,7 +495,8 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         Sitemap sitemap = sitemaps.get(key);
         UIComponentRegistry sitemapComponentRegistry = this.sitemapComponentRegistry;
         if (sitemapComponentRegistry != null) {
-            sitemapComponentRegistry.remove(key.substring(SITEMAP_PREFIX.length()));
+            String sitemapName = key.startsWith(SITEMAP_PREFIX) ? key.substring(SITEMAP_PREFIX.length()) : key;
+            sitemapComponentRegistry.remove(sitemapName);
             return sitemap;
         }
         return null;
