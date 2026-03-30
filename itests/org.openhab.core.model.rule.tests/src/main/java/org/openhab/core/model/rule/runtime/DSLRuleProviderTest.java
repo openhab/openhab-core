@@ -260,7 +260,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         Collection<Rule> rules = dslRuleProvider.getAll();
         assertThat(rules.size(), is(0));
 
-        String model = "rule RuleWithAllConditionss\n" + //
+        String model = "rule RuleWithAllConditions\n" + //
                 "when\n" + //
                 "   Item X received command ON\n" + //
                 "but only if\n" + //
@@ -293,7 +293,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         Rule rule = it.next();
 
         assertThat(rule.getUID(), is("dslruletest-1"));
-        assertThat(rule.getName(), is("RuleWithAllConditionss"));
+        assertThat(rule.getName(), is("RuleWithAllConditions"));
         assertThat(rule.getConditions().size(), is(14));
 
         assertThat(rule.getConditions().getFirst().getTypeUID(), is(TimeOfDayConditionHandler.MODULE_TYPE_ID));

@@ -14,7 +14,6 @@ package org.openhab.core.model.rule.runtime.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +102,6 @@ import org.slf4j.LoggerFactory;
 /**
  * This RuleProvider provides rules that are defined in DSL rule files.
  * All rules consist out of a list of triggers and a single script action.
- * No rule conditions are used as this concept does not exist for DSL rules.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Add support for conditions
@@ -469,7 +467,7 @@ public class DSLRuleProvider
                         .withTypeUID(TimeOfDayConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
             case DayOfWeekCondition dowCond -> {
-                Set<String> days = new HashSet<>();
+                List<String> days = new ArrayList<>();
                 dowCond.getWeekDays().forEach(day -> {
                     String d = switch (day) {
                         case "Monday" -> "MON";

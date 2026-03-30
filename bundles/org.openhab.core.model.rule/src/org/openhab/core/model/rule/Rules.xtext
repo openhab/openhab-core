@@ -136,7 +136,7 @@ IntervalCondition:
 ;
 
 ThingStatusCondition:
-	'Thing' thing=STRING 'is' (negation?='not')? (status=ThingValidState)?
+	'Thing' thing=STRING 'is' (negation?='not')? status=ThingValidState
 ;
 
 ItemStateCondition:
