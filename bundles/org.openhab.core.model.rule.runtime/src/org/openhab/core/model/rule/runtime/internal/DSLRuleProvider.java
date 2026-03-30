@@ -14,6 +14,7 @@ package org.openhab.core.model.rule.runtime.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -292,9 +293,7 @@ public class DSLRuleProvider
         List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID(ScriptActionHandler.TYPE_ID)
                 .withConfiguration(cfg).build());
 
-        List<String> ruleTags = rule.getTags();
-        Set<String> tags = ruleTags == null ? Set.of() : Set.copyOf(ruleTags);
-
+        Set<String> tags = new HashSet<>(rule.getTags());
         return RuleBuilder.create(uid).withTags(tags).withName(name).withTriggers(triggers).withActions(actions)
                 .build();
     }
