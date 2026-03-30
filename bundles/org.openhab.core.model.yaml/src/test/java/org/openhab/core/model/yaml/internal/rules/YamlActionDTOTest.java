@@ -56,12 +56,11 @@ public class YamlActionDTOTest {
         Action a = ActionBuilder.create().withId("action1").withTypeUID("type1").build();
         YamlActionDTO action1 = new YamlActionDTO(a);
         YamlActionDTO action2 = new YamlActionDTO();
-        assertEquals("YamlActionDTO [inputs={}, id=action1, type=type1, config={}]", action1.toString());
+        assertEquals("YamlActionDTO [id=action1, type=type1]", action1.toString());
         assertEquals("YamlActionDTO []", action2.toString());
         action1.label = "Label1";
         action1.description = "Description1";
-        assertEquals(
-                "YamlActionDTO [inputs={}, id=action1, type=type1, label=Label1, description=Description1, config={}]",
+        assertEquals("YamlActionDTO [id=action1, type=type1, label=Label1, description=Description1]",
                 action1.toString());
     }
 }

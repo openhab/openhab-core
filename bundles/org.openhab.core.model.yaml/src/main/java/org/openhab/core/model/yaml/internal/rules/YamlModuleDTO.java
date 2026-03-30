@@ -15,9 +15,11 @@ package org.openhab.core.model.yaml.internal.rules;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.automation.Module;
+import org.openhab.core.automation.converter.RuleSerializer.RuleSerializationOption;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
@@ -27,6 +29,8 @@ import com.fasterxml.jackson.annotation.JsonAlias;
  * @author Ravi Nadahar - Initial contribution
  */
 public class YamlModuleDTO {
+
+    private static final Pattern CONTEXT_COMMENT_PATTERN = Pattern.compile("^// context:.*$\\R", Pattern.MULTILINE);
 
     public String id;
     public String label;
@@ -39,6 +43,10 @@ public class YamlModuleDTO {
     }
 
     public YamlModuleDTO(@NonNull Module module) {
+        this(module, RuleSerializationOption.NORMAL);
+    }
+
+    public YamlModuleDTO(@NonNull Module module, RuleSerializationOption option) {
         this.id = module.getId();
         this.label = module.getLabel();
         this.description = module.getDescription();
@@ -49,6 +57,16 @@ public class YamlModuleDTO {
             if (!type.equals(typeAlias)) {
                 this.config.put("type", typeAlias);
             }
+            if (option != RuleSerializationOption.INCLUDE_ALL && "application/vnd.openhab.dsl.rule".equals(type)) {
+                if (this.config.get("script") instanceof String scriptContent) {
+                    // Remove the "context comment" inserted into file-based DSL rules
+                    this.config.put("script", CONTEXT_COMMENT_PATTERN.matcher(scriptContent).replaceFirst(""));
+                }
+                this.config.remove(Module.SHARED_CONTEXT);
+            }
+        }
+        if (option != RuleSerializationOption.INCLUDE_ALL && this.config.isEmpty()) {
+            this.config = null;
         }
     }
 
@@ -76,19 +94,19 @@ public class YamlModuleDTO {
         StringBuilder builder = new StringBuilder(getClass().getSimpleName());
         builder.append(" [");
         if (id != null) {
-            builder.append("id=").append(id).append(", ");
+            builder.append("id=").append(id);
         }
         if (type != null) {
-            builder.append("type=").append(type).append(", ");
+            builder.append(", type=").append(type);
         }
         if (label != null) {
-            builder.append("label=").append(label).append(", ");
+            builder.append(", label=").append(label);
         }
         if (description != null) {
-            builder.append("description=").append(description).append(", ");
+            builder.append(", description=").append(description);
         }
         if (config != null) {
-            builder.append("config=").append(config);
+            builder.append(", config=").append(config);
         }
         builder.append("]");
         return builder.toString();

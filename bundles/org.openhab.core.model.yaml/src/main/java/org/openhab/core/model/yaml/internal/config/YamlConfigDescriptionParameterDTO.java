@@ -38,13 +38,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class YamlConfigDescriptionParameterDTO {
 
+    private static final Boolean REQUIRED_DEFAULT = Boolean.FALSE;
+    private static final Boolean READ_ONLY_DEFAULT = Boolean.FALSE;
+    private static final Boolean MULTIPLE_DEFAULT = Boolean.FALSE;
+    private static final Boolean LIMIT_TO_OPTIONS_DEFAULT = Boolean.TRUE;
+    private static final Boolean ADVANCED_DEFAULT = Boolean.FALSE;
+    private static final Boolean VERIFY_DEFAULT = Boolean.FALSE;
+
     public String context;
     @JsonProperty("default")
     @JsonAlias("defaultValue")
     public String defaultValue;
     public String description;
     public String label;
-    public boolean required;
+    public Boolean required;
     public Type type;
     public BigDecimal min;
     public BigDecimal max;
@@ -74,17 +81,27 @@ public class YamlConfigDescriptionParameterDTO {
      * Creates a new instance based on the specified {@link ConfigDescriptionParameter}.
      *
      * @param parameter the {@link ConfigDescriptionParameter}.
+     * @param includeDefault whether boolean values with the default value should be included.
      */
-    public YamlConfigDescriptionParameterDTO(@NonNull ConfigDescriptionParameter parameter) {
+    public YamlConfigDescriptionParameterDTO(@NonNull ConfigDescriptionParameter parameter, boolean includeDefault) {
         this.type = parameter.getType();
         this.min = parameter.getMinimum();
         this.max = parameter.getMaximum();
         this.step = parameter.getStepSize();
         this.pattern = parameter.getPattern();
         this.readOnly = parameter.isReadOnly();
+        if (!includeDefault && READ_ONLY_DEFAULT.equals(this.readOnly)) {
+            this.readOnly = null;
+        }
         this.multiple = parameter.isMultiple();
+        if (!includeDefault && MULTIPLE_DEFAULT.equals(this.multiple)) {
+            this.multiple = null;
+        }
         this.context = parameter.getContext();
         this.required = parameter.isRequired();
+        if (!includeDefault && REQUIRED_DEFAULT.equals(this.required)) {
+            this.required = null;
+        }
         this.defaultValue = parameter.getDefault();
         this.label = parameter.getLabel();
         this.description = parameter.getDescription();
@@ -106,11 +123,20 @@ public class YamlConfigDescriptionParameterDTO {
         }
         this.groupName = parameter.getGroupName();
         this.advanced = parameter.isAdvanced();
+        if (!includeDefault && ADVANCED_DEFAULT.equals(this.advanced)) {
+            this.advanced = null;
+        }
         this.limitToOptions = parameter.getLimitToOptions();
+        if (!includeDefault && LIMIT_TO_OPTIONS_DEFAULT.equals(this.limitToOptions)) {
+            this.limitToOptions = null;
+        }
         this.multipleLimit = parameter.getMultipleLimit();
         this.unit = parameter.getUnit();
         this.unitLabel = parameter.getUnitLabel();
         this.verify = parameter.isVerifyable();
+        if (!includeDefault && VERIFY_DEFAULT.equals(this.verify)) {
+            this.verify = null;
+        }
     }
 
     @Override
@@ -136,7 +162,7 @@ public class YamlConfigDescriptionParameterDTO {
                 && Objects.equals(max, other.max) && Objects.equals(min, other.min)
                 && Objects.equals(multiple, other.multiple) && Objects.equals(multipleLimit, other.multipleLimit)
                 && Objects.equals(options, other.options) && Objects.equals(pattern, other.pattern)
-                && Objects.equals(readOnly, other.readOnly) && required == other.required
+                && Objects.equals(readOnly, other.readOnly) && Objects.equals(required, other.required)
                 && Objects.equals(step, other.step) && type == other.type && Objects.equals(unit, other.unit)
                 && Objects.equals(unitLabel, other.unitLabel) && Objects.equals(verify, other.verify);
     }
@@ -157,7 +183,9 @@ public class YamlConfigDescriptionParameterDTO {
         if (label != null) {
             builder.append("label=").append(label).append(", ");
         }
-        builder.append("required=").append(required).append(", ");
+        if (required != null) {
+            builder.append("required=").append(required).append(", ");
+        }
         if (type != null) {
             builder.append("type=").append(type).append(", ");
         }

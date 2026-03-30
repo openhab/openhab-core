@@ -28,6 +28,7 @@ import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
+import org.openhab.core.automation.converter.RuleTemplateSerializer.RuleTemplateSerializationOption;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.util.ActionBuilder;
 import org.openhab.core.automation.util.ConditionBuilder;
@@ -49,25 +50,31 @@ public class YamlRuleTemplateDTOTest {
         Action action = ActionBuilder.create().withId("action1").withTypeUID("type1").build();
         RuleTemplate template = new RuleTemplate("template1", "Foo Template", "Foo rule template", Set.of("test"),
                 List.of(), List.of(), List.of(action), List.of(), Visibility.VISIBLE);
-        assertNotNull(new YamlRuleTemplateDTO(template));
+        assertNotNull(new YamlRuleTemplateDTO(template, RuleTemplateSerializationOption.NORMAL));
 
         Condition condition = ConditionBuilder.create().withId("condition1").withTypeUID("type1").build();
         template = new RuleTemplate("template1", "Foo Template", "Foo rule template", Set.of("test"), List.of(),
                 List.of(condition), List.of(action), List.of(), Visibility.VISIBLE);
-        assertNotNull(new YamlRuleTemplateDTO(template));
+        assertNotNull(new YamlRuleTemplateDTO(template, RuleTemplateSerializationOption.NORMAL));
 
         Trigger trigger = TriggerBuilder.create().withId("trigger1").withTypeUID("type1").build();
         template = new RuleTemplate("template1", "Foo Template", "Foo rule template", Set.of("test"), List.of(trigger),
                 List.of(condition), List.of(action), List.of(), Visibility.VISIBLE);
-        assertNotNull(new YamlRuleTemplateDTO(template));
+        assertNotNull(new YamlRuleTemplateDTO(template, RuleTemplateSerializationOption.NORMAL));
 
         template = new RuleTemplate("template1", "Foo Template", "Foo rule template", Set.of("test"), List.of(trigger),
                 List.of(condition), List.of(action),
                 List.of(ConfigDescriptionParameterBuilder.create("number", Type.DECIMAL).build()), Visibility.VISIBLE);
-        YamlRuleTemplateDTO templateDTO = new YamlRuleTemplateDTO(template);
+        YamlRuleTemplateDTO templateDTO = new YamlRuleTemplateDTO(template,
+                RuleTemplateSerializationOption.INCLUDE_ALL);
         assertNotNull(templateDTO);
         assertEquals(
-                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, visibility=VISIBLE, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], actions=[YamlActionDTO [inputs={}, id=action1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, visibility=VISIBLE, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [id=condition1, inputs={}, type=type1, config={}]], actions=[YamlActionDTO [id=action1, inputs={}, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                templateDTO.toString());
+        templateDTO = new YamlRuleTemplateDTO(template, RuleTemplateSerializationOption.NORMAL);
+        assertNotNull(templateDTO);
+        assertEquals(
+                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, configDescriptions={number=YamlConfigDescriptionParameterDTO [type=DECIMAL, ]}, conditions=[YamlConditionDTO [id=condition1, type=type1]], actions=[YamlActionDTO [id=action1, type=type1]], triggers=[YamlModuleDTO [id=trigger1, type=type1]]]",
                 templateDTO.toString());
     }
 
