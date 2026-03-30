@@ -111,14 +111,11 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
 
     private final Map<String, SitemapModel> elementsToGenerate = new ConcurrentHashMap<>();
 
-    // private final ISerializer serializer;
-
     @Activate
     public DslSitemapConverter(final @Reference ModelRepository modelRepository,
             final @Reference DslSitemapProvider sitemapProvider) {
         this.modelRepository = modelRepository;
         this.sitemapProvider = sitemapProvider;
-        // this.serializer = SitemapStandaloneSetup.doSetup().getInstance(ISerializer.class);
     }
 
     @Override
@@ -133,6 +130,7 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
         }
         if (sitemaps.size() > 1) {
             logger.warn("Only one sitemap at a time can be serialized to DSL");
+            return;
         }
         SitemapModel model = buildModelSitemap(sitemaps.getFirst());
         elementsToGenerate.put(id, model);

@@ -29,8 +29,6 @@ public interface SitemapSerializer extends ObjectSerializer<Sitemap> {
     /**
      * Specify the {@link List} of {@link Sitemap}s to serialize and associate them with an identifier.
      *
-     * id the identifier of the {@link Sitemap} format generation.
-     *
      * @param id the identifier of the {@link Sitemap} format generation.
      * @param sitemaps the {@link List} of {@link Sitemap}s to serialize.
      */

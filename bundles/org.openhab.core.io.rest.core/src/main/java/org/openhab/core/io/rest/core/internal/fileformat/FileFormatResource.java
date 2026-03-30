@@ -68,8 +68,8 @@ import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemParser;
 import org.openhab.core.items.fileconverter.ItemSerializer;
 import org.openhab.core.sitemap.Sitemap;
-import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
 import org.openhab.core.sitemap.dto.SitemapDTOMapper;
+import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
 import org.openhab.core.sitemap.fileconverter.SitemapParser;
 import org.openhab.core.sitemap.fileconverter.SitemapSerializer;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
@@ -464,6 +464,7 @@ public class FileFormatResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
                             @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)) }),
+                    @ApiResponse(responseCode = "400", description = "Payload invalid."),
                     @ApiResponse(responseCode = "404", description = "One or more sitemaps not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForSitemaps(final @Context HttpHeaders httpHeaders,
@@ -475,6 +476,14 @@ public class FileFormatResource implements RESTResource {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
+
+        if (acceptHeader.equals("txt/vnd.openhab.dsl.sitemap") && (sitemapNames == null || sitemapNames.size() != 1)) {
+            // DSL format only supports one sitemap at a time
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("For media type 'text/vnd.openhab.dsl.sitemap', exactly one sitemap name must be provided!")
+                    .build();
+        }
+
         List<Sitemap> sitemaps;
         if (sitemapNames == null || sitemapNames.isEmpty()) {
             sitemaps = sitemapRegistry.getAll().stream().sorted(Comparator.comparing(Sitemap::getName)).toList();

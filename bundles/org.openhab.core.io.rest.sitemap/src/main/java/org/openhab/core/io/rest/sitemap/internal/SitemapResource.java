@@ -150,7 +150,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Added support for Buttongrid as container for Button elements
  * @author Laurent Garnier - Added support for new sitemap element Colortemperaturepicker
  * @author Mark Herwege - Implement sitemap registry, remove Guava dependency
- *         author Mark Herwege - Implement sitemap definition endpoints
+ * @author Mark Herwege - Implement sitemap definition endpoints
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
