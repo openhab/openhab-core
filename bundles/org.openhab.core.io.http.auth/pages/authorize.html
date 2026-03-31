@@ -29,12 +29,12 @@ input, button, textarea, select {
 	margin-top: 3rem;
 	margin-bottom: 2rem;
 	width: 240px;
-	& > .gray {
-		fill: #989898;
-	}
-	& > .orange {
-		fill: #e64a19;
-	}
+}
+.logo > gray {
+	fill: #989898;
+}
+.logo > .orange {
+	fill: #e64a19;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -92,6 +92,7 @@ input.field {
 	background-color: transparent;
 	color: rgb(33, 150, 243);
 	border-color: rgb(33, 150, 243);
+	margin-right: 30px;
 }
 
 .cancel:hover {
@@ -150,7 +151,7 @@ input.submit:hover {
 			<input class="field" type="{tokenScopeFieldType}" placeholder="{tokenScopePlaceholder}" name="token_scope" />
 		</div>
 		<div>
-			<a class="button cancel" style="margin-right: 30px;" href="/">{cancelButtonLabel}</a>
+			<a class="button cancel" href="/">{cancelButtonLabel}</a>
 			<input class="button submit" type="Submit" value="{buttonLabel}" />
 		</div>
 	</form>
