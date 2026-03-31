@@ -124,15 +124,19 @@ public class DSLRuleProvider
     }
 
     @Override
+    public void removeProviderChangeListener(ProviderChangeListener<Rule> listener) {
+        listeners.remove(listener);
+    }
+
+    @Override
     public Collection<Rule> getAll() {
         // Ignore isolated models
         return rulesMap.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
                 .flatMap(e -> e.getValue().stream()).toList();
     }
 
-    @Override
-    public void removeProviderChangeListener(ProviderChangeListener<Rule> listener) {
-        listeners.remove(listener);
+    public Collection<Rule> getAllFromModel(String modelName) {
+        return rulesMap.getOrDefault(modelName, List.of());
     }
 
     @Override
