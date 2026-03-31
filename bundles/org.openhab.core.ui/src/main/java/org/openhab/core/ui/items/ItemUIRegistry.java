@@ -115,9 +115,12 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      *
      * This constructs a string out of the position of the sitemap, so if this
      * widget is the third child of a page linked from the fifth widget on the
-     * home screen, its id would be "0503". If the widget is dynamically created
-     * and not available in the sitemap, the name of its associated item is used
-     * instead.
+     * home screen, its id would be "2:0402". The initial "2" before the ":"
+     * defines how many digits are used to code each index. Each index is 0 based.
+     * So the id of the 105th child of a page linked from the fifth widget on the
+     * home screen would be "3:004104".
+     * If the widget is dynamically created and not available in the sitemap,
+     * the name of its associated item is used instead.
      *
      * @param w the widget to get the id for
      * @return an id for this widget

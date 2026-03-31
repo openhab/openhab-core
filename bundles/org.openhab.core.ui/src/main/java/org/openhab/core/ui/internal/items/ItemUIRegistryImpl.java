@@ -110,6 +110,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Consider Colortemperaturepicker element as possible default widget
  * @author Mark Herwege - Implement sitemap registry
  * @author Florian Hotze - Refactor getLabel(Widget w) to use {@link ItemDisplayStateUtil}
+ * @author Laurent Garnier - Change widget id coding to support any number of widgets in frame/page
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -681,15 +682,43 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 w.setItem(id);
             } else {
                 try {
-                    int widgetID = Integer.parseInt(id.substring(0, 2));
-                    if (widgetID < sitemap.getWidgets().size()) {
-                        w = sitemap.getWidgets().get(widgetID);
-                        for (int i = 2; i < id.length(); i += 2) {
-                            int childWidgetID = Integer.parseInt(id.substring(i, i + 2));
-                            if (childWidgetID < ((LinkableWidget) w).getWidgets().size()) {
-                                w = ((LinkableWidget) w).getWidgets().get(childWidgetID);
+                    // Widget id is defined by concatenating the child index at each level from top
+                    // (main page) to bottom (sub-page) using same number of digits at each level.
+                    // Old id coding used 2 digits per level; this coding is still supported.
+                    // New id coding follows this format <n>:<value> where <n> defines how digits are used
+                    // per level in <value>.
+                    // Example: "0002" and "2:0002" are both valid and reference the same widget
+                    // in the sitemap, the third sub-widget in the first sitemap widget.
+                    int codingSize = 2;
+                    String idValue = id;
+                    String splittedId[] = id.split(":", 2);
+                    if (splittedId.length == 2) {
+                        codingSize = Integer.parseInt(splittedId[0]);
+                        idValue = splittedId[1];
+                    }
+                    if (idValue.length() >= codingSize && (idValue.length() % codingSize) == 0) {
+                        int widgetID = Integer.parseInt(idValue.substring(0, codingSize));
+                        if (widgetID < sitemap.getWidgets().size()) {
+                            w = sitemap.getWidgets().get(widgetID);
+                            for (int i = codingSize; i < idValue.length(); i += codingSize) {
+                                int childWidgetID = Integer.parseInt(idValue.substring(i, i + codingSize));
+                                if (childWidgetID < ((LinkableWidget) w).getWidgets().size()) {
+                                    w = ((LinkableWidget) w).getWidgets().get(childWidgetID);
+                                } else {
+                                    logger.warn(
+                                            "Widget id '{}' is invalid, index {} outside the number ({}) of widgets in the page",
+                                            id, childWidgetID, ((LinkableWidget) w).getWidgets().size());
+                                    w = null;
+                                    break;
+                                }
                             }
+                        } else {
+                            logger.warn(
+                                    "Widget id '{}' is invalid, index {} outside the number ({}) of widgets in the sitemap",
+                                    id, widgetID, sitemap.getWidgets().size());
                         }
+                    } else {
+                        throw new NumberFormatException("Unexpected id length");
                     }
                 } catch (NumberFormatException e) {
                     // no valid number, so the requested page id does not exist
@@ -954,22 +983,44 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return getWidgetId(w2);
         }
 
+        // Build the id by concatenating the child index at each level from top (main page) to bottom (sub-page),
+        // using same number of digits at each level.
+        // We first try to use 2 digits and if this is not enough, we increment it. That way, we can support
+        // any number of widgets in a page.
+        int codingSize = 2;
         String id = "";
         Widget w = widget;
-        while (w.getParent() instanceof LinkableWidget parent) {
-            String index = String.valueOf(parent.getWidgets().indexOf(w));
-            if (index.length() == 1) {
-                index = "0" + index; // make it two digits
+        boolean built = false;
+        while (!built) {
+            id = "";
+            String codingFormat = "%0" + codingSize + "d";
+            int maxChildren = (int) Math.round(Math.pow(10, codingSize));
+            boolean error = false;
+            while (w.getParent() instanceof LinkableWidget parent) {
+                int num = parent.getWidgets().indexOf(w);
+                if (num >= maxChildren) {
+                    error = true;
+                    break;
+                }
+                String index = String.format(codingFormat, num);
+                id = index + id;
+                w = parent;
             }
-            id = index + id;
-            w = parent;
-        }
-        if (w.getParent() instanceof Sitemap sitemap) {
-            String index = String.valueOf(sitemap.getWidgets().indexOf(w));
-            if (index.length() == 1) {
-                index = "0" + index; // make it two digits
+            if (error) {
+                codingSize++;
+                continue;
             }
-            id = index + id;
+            if (w.getParent() instanceof Sitemap sitemap) {
+                int num = sitemap.getWidgets().indexOf(w);
+                if (num >= maxChildren) {
+                    codingSize++;
+                    continue;
+                }
+                String index = String.format(codingFormat, num);
+                id = index + id;
+            }
+            id = codingSize + ":" + id;
+            built = true;
         }
 
         // if the widget is dynamically created and not available in the sitemap,

@@ -1441,4 +1441,42 @@ public class ItemUIRegistryImplTest {
         String icon = uiRegistry.getCategory(widgetMock);
         assertEquals("text", icon);
     }
+
+    @Test
+    public void getWidgetId() throws ItemNotFoundException {
+        when(sitemapMock.getWidgets()).thenReturn(List.of(textMock));
+        when(textMock.getWidgets()).thenReturn(List.of(switchMock, sliderMock));
+        when(textMock.getParent()).thenReturn(sitemapMock);
+        when(switchMock.getParent()).thenReturn(textMock);
+        when(sliderMock.getParent()).thenReturn(textMock);
+
+        assertEquals("2:00", uiRegistry.getWidgetId(textMock));
+        assertEquals("2:0000", uiRegistry.getWidgetId(switchMock));
+        assertEquals("2:0001", uiRegistry.getWidgetId(sliderMock));
+    }
+
+    @Test
+    public void getWidget() throws ItemNotFoundException {
+        when(sitemapMock.getWidgets()).thenReturn(List.of(textMock));
+        when(textMock.getWidgets()).thenReturn(List.of(switchMock, sliderMock));
+
+        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
+
+        assertEquals(textMock, uiRegistry.getWidget(sitemapMock, "2:00"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "2:0000"));
+        assertEquals(sliderMock, uiRegistry.getWidget(sitemapMock, "2:0001"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "3:000000"));
+        assertEquals(sliderMock, uiRegistry.getWidget(sitemapMock, "3:000001"));
+        assertEquals(textMock, uiRegistry.getWidget(sitemapMock, "00"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "0000"));
+        assertEquals(sliderMock, uiRegistry.getWidget(sitemapMock, "0001"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2:0"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2:000"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2:0100"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2:0002"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "0"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "000"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "0100"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "0002"));
+    }
 }
