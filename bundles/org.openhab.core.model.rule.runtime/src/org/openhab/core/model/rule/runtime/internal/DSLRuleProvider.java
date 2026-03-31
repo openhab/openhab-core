@@ -147,22 +147,25 @@ public class DSLRuleProvider
                 case MODIFIED:
                     removeRuleModel(modelFileName, false);
                 case ADDED:
+                    boolean isolated = isIsolatedModel(modelFileName);
                     String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-                    List<Rule> rules = new ArrayList<>();
-                    List<ModelRulePair> modelRules = new ArrayList<>();
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof RuleModel ruleModel) {
                         int index = 1;
+                        List<Rule> rules = new ArrayList<>();
+                        List<ModelRulePair> modelRules = new ArrayList<>();
                         for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
                             Rule newRule = toRule(ruleModelName, rule, index);
                             rules.add(newRule);
-                            xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                            if (!isolated) {
+                                xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                            }
                             modelRules.add(new ModelRulePair(newRule, null));
                             index++;
                         }
                         rulesMap.put(modelFileName, rules);
-                        handleVarDeclarations(ruleModelName, ruleModel);
-                        if (!isIsolatedModel(modelFileName)) {
+                        if (!isolated) {
+                            handleVarDeclarations(ruleModelName, ruleModel);
                             notifyProviderChangeListeners(modelRules);
                         }
                     }
@@ -177,9 +180,9 @@ public class DSLRuleProvider
             switch (type) {
                 case MODIFIED:
                 case ADDED:
-                    List<ModelRulePair> modelRules = new ArrayList<>();
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof Script script) {
+                        List<ModelRulePair> modelRules = new ArrayList<>();
                         List<Rule> oldRules = new ArrayList<>(rulesMap.getOrDefault(modelFileName, List.of()));
                         Rule oldRule = oldRules.size() == 1 ? oldRules.getFirst() : null;
                         Rule newRule = toRule(modelFileName, script);
@@ -436,6 +439,7 @@ public class DSLRuleProvider
         for (String ruleFileName : modelRepository.getAllModelNamesOfType("rules")) {
             EObject model = modelRepository.getModel(ruleFileName);
             if (model instanceof RuleModel ruleModel) {
+                boolean isolated = isIsolatedModel(ruleFileName);
                 String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
                 int index = 1;
                 List<Rule> rules = new ArrayList<>();
@@ -443,14 +447,15 @@ public class DSLRuleProvider
                 for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
                     Rule newRule = toRule(ruleModelName, rule, index);
                     rules.add(newRule);
-                    xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                    if (!isolated) {
+                        xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                    }
                     modelRules.add(new ModelRulePair(newRule, null));
                     index++;
                 }
                 rulesMap.put(ruleFileName, rules);
-                handleVarDeclarations(ruleModelName, ruleModel);
-
-                if (!isIsolatedModel(ruleFileName)) {
+                if (!isolated) {
+                    handleVarDeclarations(ruleModelName, ruleModel);
                     notifyProviderChangeListeners(modelRules);
                 }
             }
