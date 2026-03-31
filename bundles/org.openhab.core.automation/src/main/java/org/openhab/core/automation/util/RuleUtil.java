@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.util;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Rule;
 
@@ -25,7 +27,10 @@ import org.openhab.core.automation.Rule;
 @NonNullByDefault
 public class RuleUtil {
 
-    private static final String RULE_UID_PATTERN = "[\\w-]+(:[\\w-]+)*";
+    private static final Pattern RULE_UID_PATTERN_STRICT = Pattern.compile("[\\w-]+(:[\\w-]+)*");
+    private static final Pattern RULE_UID_PATTERN_STRICT_UNICODE = Pattern.compile("[\\w-]+(:[\\w-]+)*", Pattern.UNICODE_CHARACTER_CLASS);
+    private static final Pattern RULE_UID_PATTERN_LENIENT = Pattern.compile("[^\\s/\\\\]+", Pattern.UNICODE_CHARACTER_CLASS);
+    private static final Pattern RULE_UID_PATTERN_VERY_LENIENT = Pattern.compile("\\S(?:[^/\\\\]*\\S)?", Pattern.UNICODE_CHARACTER_CLASS);
 
     /**
      * Returns {@code true} if the specified uid is a valid rule UID, otherwise {@code false}.
@@ -43,8 +48,8 @@ public class RuleUtil {
      * @param uid the UID of the rule to be checked
      * @return true if the specified uid is a valid rule UID, otherwise false
      */
-    public static boolean isValidRuleUID(final String uid) {
-        return uid.matches(RULE_UID_PATTERN);
+    public static boolean isValidRuleUID(final String uid) { // TODO: Update Javadocs to reflect final decision
+        return RULE_UID_PATTERN_STRICT_UNICODE.matcher(uid).matches();
     }
 
     /**
@@ -66,7 +71,7 @@ public class RuleUtil {
      * @param uid the UID of the rule to be checked
      * @throws IllegalArgumentException if the UID of the rule is invalid
      */
-    public static void assertValidRuleUID(String uid) throws IllegalArgumentException {
+    public static void assertValidRuleUID(String uid) throws IllegalArgumentException { // TODO: Update Javadocs to reflect final decision
         if (!isValidRuleUID(uid)) {
             throw new IllegalArgumentException("The specified UID of the rule '" + uid + "' is not valid!");
         }
