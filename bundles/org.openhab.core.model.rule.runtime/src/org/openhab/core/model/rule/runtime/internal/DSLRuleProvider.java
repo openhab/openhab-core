@@ -126,8 +126,8 @@ public class DSLRuleProvider
     @Override
     public Collection<Rule> getAll() {
         // Ignore isolated models
-        return rulesMap.keySet().stream().filter(name -> !isIsolatedModel(name))
-                .map(name -> rulesMap.getOrDefault(name, List.of())).flatMap(list -> list.stream()).toList();
+        return rulesMap.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
+                .flatMap(e -> e.getValue().stream()).toList();
     }
 
     @Override
@@ -176,11 +176,8 @@ public class DSLRuleProvider
                     List<ModelRulePair> modelRules = new ArrayList<>();
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof Script script) {
-                        Collection<Rule> oldRules = rulesMap.getOrDefault(modelFileName, List.of());
-                        Rule oldRule = null;
-                        if (oldRules.size() == 1) {
-                            oldRule = oldRules.iterator().next();
-                        }
+                        List<Rule> oldRules = new ArrayList<>(rulesMap.getOrDefault(modelFileName, List.of()));
+                        Rule oldRule = oldRules.size() == 1 ? oldRules.getFirst() : null;
                         Rule newRule = toRule(modelFileName, script);
                         rulesMap.put(modelFileName, List.of(newRule));
                         modelRules.add(new ModelRulePair(newRule, oldRule));
@@ -226,8 +223,7 @@ public class DSLRuleProvider
         }
 
         String modelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-        Iterator<Entry<String, XExpression>> it = xExpressions.entrySet().iterator();
-        while (it.hasNext()) {
+        for (Iterator<Entry<String, XExpression>> it = xExpressions.entrySet().iterator(); it.hasNext();) {
             Entry<String, XExpression> entry = it.next();
             if (belongsToModel(entry.getKey(), modelName)) {
                 it.remove();
