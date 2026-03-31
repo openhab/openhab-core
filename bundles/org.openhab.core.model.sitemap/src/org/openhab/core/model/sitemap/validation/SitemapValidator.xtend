@@ -209,6 +209,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkWidgetsInButtongrid(ModelButtongrid grid) {
         val positions = new HashSet<Pos>
+        val positionsWithVisibilityRule = new HashSet<Pos>
         val nb = grid.getButtons !== null ? grid.getButtons.getElements.size : 0
         if (nb > 0) {
             if (grid.item === null) {
@@ -254,6 +255,11 @@ class SitemapValidator extends AbstractSitemapValidator {
                 }
                 if (w.visibility === null || w.visibility.elements === null || w.visibility.elements.isEmpty) {
                     positions.add(pos)
+                } else {
+                    if (positionsWithVisibilityRule.contains(pos) && w.row > 0 && w.column > 0) {
+                        warning(errorString("Button widget with visibility rule already exists for position (" + w.row + "," + w.column + ")", line), w, null)
+                    }
+                    positionsWithVisibilityRule.add(pos)
                 }
                 if (w.cmd === null) {
                     warning(errorString("Button widget must have command defined", line), w,
