@@ -129,6 +129,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private static final String DEFAULT_SORTING = "NONE";
 
+    private static final int WIDGET_ID_CODING_SIZE = 3;
+    private static final String WIDGET_ID_CODING_FORMAT = "%0" + WIDGET_ID_CODING_SIZE + "d";
+    private static final int MAX_SUPPORTED_CHILDREN = (int) Math.round(Math.pow(10, WIDGET_ID_CODING_SIZE));
+
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
@@ -773,11 +777,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 w.setItem(id);
             } else {
                 try {
-                    int widgetID = Integer.parseInt(id.substring(0, 2));
+                    int widgetID = Integer.parseInt(id.substring(0, WIDGET_ID_CODING_SIZE));
                     if (widgetID < sitemap.getWidgets().size()) {
                         w = sitemap.getWidgets().get(widgetID);
-                        for (int i = 2; i < id.length(); i += 2) {
-                            int childWidgetID = Integer.parseInt(id.substring(i, i + 2));
+                        for (int i = WIDGET_ID_CODING_SIZE; i < id.length(); i += WIDGET_ID_CODING_SIZE) {
+                            int childWidgetID = Integer.parseInt(id.substring(i, i + WIDGET_ID_CODING_SIZE));
                             if (childWidgetID < ((LinkableWidget) w).getWidgets().size()) {
                                 w = ((LinkableWidget) w).getWidgets().get(childWidgetID);
                             }
@@ -1046,22 +1050,29 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return getWidgetId(w2);
         }
 
+        // Build the id by concatenating the child index at each level from top (main page) to bottom (sub-page),
+        // using WIDGET_ID_CODING_SIZE (3) digits at each level.
+        // This coding allows until MAX_SUPPORTED_CHILDREN (1000) items at each level.
         String id = "";
         Widget w = widget;
+        boolean error = false;
         while (w.getParent() instanceof LinkableWidget parent) {
-            String index = String.valueOf(parent.getWidgets().indexOf(w));
-            if (index.length() == 1) {
-                index = "0" + index; // make it two digits
-            }
+            int num = parent.getWidgets().indexOf(w);
+            error |= (num >= MAX_SUPPORTED_CHILDREN);
+            String index = String.format(WIDGET_ID_CODING_FORMAT, num);
             id = index + id;
             w = parent;
         }
         if (w.getParent() instanceof Sitemap sitemap) {
-            String index = String.valueOf(sitemap.getWidgets().indexOf(w));
-            if (index.length() == 1) {
-                index = "0" + index; // make it two digits
-            }
+            int num = sitemap.getWidgets().indexOf(w);
+            error |= (num >= MAX_SUPPORTED_CHILDREN);
+            String index = String.format(WIDGET_ID_CODING_FORMAT, num);
             id = index + id;
+        }
+        if (error) {
+            logger.error(
+                    "You have too many sub-widgets at a certain level of your sitemap; openHAB only supports a maximum of {}",
+                    MAX_SUPPORTED_CHILDREN);
         }
 
         // if the widget is dynamically created and not available in the sitemap,

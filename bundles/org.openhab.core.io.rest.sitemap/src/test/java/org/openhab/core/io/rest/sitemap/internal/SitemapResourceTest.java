@@ -89,11 +89,11 @@ public class SitemapResourceTest extends JavaTest {
     private static final String WIDGET3_LABEL = "widget 3";
     private static final String GROUP_LABEL = "frame";
     private static final String WIDGET4_LABEL = "widget 4";
-    private static final String WIDGET1_ID = "00";
-    private static final String WIDGET2_ID = "01";
-    private static final String WIDGET3_ID = "02";
-    private static final String FRAME_ID = "03";
-    private static final String WIDGET4_ID = "04";
+    private static final String WIDGET1_ID = "000";
+    private static final String WIDGET2_ID = "001";
+    private static final String WIDGET3_ID = "002";
+    private static final String FRAME_ID = "003";
+    private static final String WIDGET4_ID = "004";
     private static final String WIDGET1_ICON = "icon1";
     private static final String WIDGET2_ICON = "icon2";
     private static final String WIDGET3_ICON = "icon3";
