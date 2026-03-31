@@ -279,7 +279,7 @@ public class DSLRuleProvider
     private Rule toRule(String modelName, org.openhab.core.model.rule.rules.Rule rule, int index) {
         String name = rule.getName();
         String uid = rule.getUid();
-        if (uid == null) {
+        if (uid == null || uid.isBlank()) {
             uid = modelName + "-" + index;
         }
 
