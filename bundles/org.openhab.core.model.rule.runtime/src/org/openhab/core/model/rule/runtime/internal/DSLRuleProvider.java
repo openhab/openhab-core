@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.rule.runtime.internal;
 
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -98,7 +100,7 @@ public class DSLRuleProvider
 
     private final Logger logger = LoggerFactory.getLogger(DSLRuleProvider.class);
     private final Collection<ProviderChangeListener<Rule>> listeners = new ArrayList<>();
-    private final Map<String, Rule> rules = new ConcurrentHashMap<>();
+    private final Map<String, List<Rule>> rulesMap = new ConcurrentHashMap<>();
     private final Map<String, IEvaluationContext> contexts = new ConcurrentHashMap<>();
     private final Map<String, XExpression> xExpressions = new ConcurrentHashMap<>();
     private final ReadyMarker marker = new ReadyMarker("rules", "dslprovider");
@@ -122,7 +124,7 @@ public class DSLRuleProvider
     @Deactivate
     protected void deactivate() {
         modelRepository.removeModelRepositoryChangeListener(this);
-        rules.clear();
+        rulesMap.clear();
         contexts.clear();
         xExpressions.clear();
     }
@@ -134,7 +136,9 @@ public class DSLRuleProvider
 
     @Override
     public Collection<Rule> getAll() {
-        return rules.values();
+        // Ignore isolated models
+        return rulesMap.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
+                .flatMap(e -> e.getValue().stream()).toList();
     }
 
     @Override
@@ -147,68 +151,67 @@ public class DSLRuleProvider
         String ruleModelType = modelFileName.substring(modelFileName.lastIndexOf(".") + 1);
         if ("rules".equalsIgnoreCase(ruleModelType)) {
             String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-            List<ModelRulePair> modelRules = new ArrayList<>();
+            boolean isolated = isIsolatedModel(ruleModelName);
             switch (type) {
                 case ADDED:
+                case MODIFIED:
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof RuleModel ruleModel) {
                         int index = 1;
+                        List<Rule> newRules = new ArrayList<>();
                         for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                            Rule newRule = toRule(ruleModelName, rule, index);
-                            rules.put(newRule.getUID(), newRule);
-                            xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                            modelRules.add(new ModelRulePair(newRule, null));
+                            newRules.add(toRule(ruleModelName, rule, index));
+                            if (!isolated) {
+                                xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                            }
                             index++;
                         }
+                        List<Rule> oldRules = rulesMap.put(ruleModelName, newRules);
                         handleVarDeclarations(ruleModelName, ruleModel);
-                    }
-                    break;
-                case MODIFIED:
-                    removeRuleModel(ruleModelName);
-                    EObject modifiedModel = modelRepository.getModel(modelFileName);
-                    if (modifiedModel instanceof RuleModel ruleModel) {
-                        int index = 1;
-                        for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                            Rule newRule = toRule(ruleModelName, rule, index);
-                            Rule oldRule = rules.remove(ruleModelName);
-                            rules.put(newRule.getUID(), newRule);
-                            xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                            modelRules.add(new ModelRulePair(newRule, oldRule));
-                            index++;
+                        if (!isolated) {
+                            notifyProviderChangeListeners(calcChanges(oldRules, newRules));
                         }
-                        handleVarDeclarations(ruleModelName, ruleModel);
                     }
                     break;
                 case REMOVED:
-                    removeRuleModel(ruleModelName);
+                    List<Rule> oldRules = rulesMap.remove(ruleModelName);
+                    if (!isolated) {
+                        for (Iterator<Entry<String, XExpression>> it = xExpressions.entrySet().iterator(); it
+                                .hasNext();) {
+                            Entry<String, XExpression> entry = it.next();
+                            if (belongsToModel(entry.getKey(), ruleModelName)) {
+                                it.remove();
+                            }
+                        }
+                        notifyProviderChangeListeners(calcChanges(oldRules, null));
+                    }
+                    contexts.remove(ruleModelName);
                     break;
                 default:
                     logger.debug("Unknown event type.");
             }
-            notifyProviderChangeListeners(modelRules);
         } else if ("script".equals(ruleModelType)) {
-            List<ModelRulePair> modelRules = new ArrayList<>();
             switch (type) {
                 case MODIFIED:
                 case ADDED:
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof Script script) {
-                        Rule oldRule = rules.remove(modelFileName);
-                        Rule newRule = toRule(modelFileName, script);
-                        rules.put(newRule.getUID(), newRule);
-                        modelRules.add(new ModelRulePair(newRule, oldRule));
+                        List<Rule> newRules = List.of(toRule(modelFileName, script));
+                        List<Rule> oldRules = rulesMap.put(modelFileName, newRules);
+                        if (!isIsolatedModel(modelFileName)) {
+                            notifyProviderChangeListeners(calcChanges(oldRules, newRules));
+                        }
                     }
                     break;
                 case REMOVED:
-                    Rule oldRule = rules.remove(modelFileName);
-                    if (oldRule != null) {
-                        listeners.forEach(listener -> listener.removed(this, oldRule));
+                    List<Rule> oldRules = rulesMap.remove(ruleModelType);
+                    if (!isIsolatedModel(modelFileName)) {
+                        notifyProviderChangeListeners(calcChanges(oldRules, null));
                     }
                     break;
                 default:
                     logger.debug("Unknown event type.");
             }
-            notifyProviderChangeListeners(modelRules);
         }
     }
 
@@ -222,29 +225,41 @@ public class DSLRuleProvider
         return xExpressions.get(modelName + "-" + index);
     }
 
+    private Changes calcChanges(@Nullable List<Rule> oldRules, @Nullable List<Rule> newRules) {
+        if (newRules == null || newRules.isEmpty()) {
+            return new Changes(List.of(), List.of(), oldRules == null ? List.of() : List.copyOf(oldRules));
+        }
+        if (oldRules == null || oldRules.isEmpty()) {
+            return new Changes(List.copyOf(newRules), List.of(), List.of());
+        }
+        List<Rule> oldMutable = new ArrayList<>(oldRules);
+        List<Rule> newMutable = new ArrayList<>(newRules);
+        List<RulePair> modified = new ArrayList<>();
+        Rule oldRule, newRule;
+        String uid;
+        boolean found;
+        for (Iterator<Rule> iterator = oldMutable.iterator(); iterator.hasNext();) {
+            oldRule = iterator.next();
+            found = false;
+            uid = oldRule.getUID();
+            for (Iterator<Rule> newIterator = newMutable.iterator(); newIterator.hasNext() && !found;) {
+                newRule = newIterator.next();
+                if (uid.equals(newRule.getUID())) {
+                    modified.add(new RulePair(oldRule, newRule));
+                    newIterator.remove();
+                    found = true;
+                }
+            }
+            if (found) {
+                iterator.remove();
+            }
+        }
+        return new Changes(newMutable, modified, oldMutable);
+    }
+
     private void handleVarDeclarations(String modelName, RuleModel ruleModel) {
         IEvaluationContext context = RuleContextHelper.getContext(ruleModel);
         contexts.put(modelName, context);
-    }
-
-    private void removeRuleModel(String modelName) {
-        Iterator<Entry<String, Rule>> it = rules.entrySet().iterator();
-        while (it.hasNext()) {
-            Entry<String, Rule> entry = it.next();
-            if (belongsToModel(entry.getKey(), modelName)) {
-                listeners.forEach(listener -> listener.removed(this, entry.getValue()));
-
-                it.remove();
-            }
-        }
-        Iterator<Entry<String, XExpression>> it2 = xExpressions.entrySet().iterator();
-        while (it2.hasNext()) {
-            Entry<String, XExpression> entry = it2.next();
-            if (belongsToModel(entry.getKey(), modelName)) {
-                it2.remove();
-            }
-        }
-        contexts.remove(modelName);
     }
 
     private boolean belongsToModel(String id, String modelName) {
@@ -270,7 +285,7 @@ public class DSLRuleProvider
 
     private Rule toRule(String modelName, org.openhab.core.model.rule.rules.Rule rule, int index) {
         String name = rule.getName();
-        String uid = modelName + "-" + index;
+        String uid = modelName + '-' + index;
 
         // Create Triggers
         triggerId = 0;
@@ -446,34 +461,42 @@ public class DSLRuleProvider
             String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
             if (model instanceof RuleModel ruleModel) {
                 int index = 1;
-                List<ModelRulePair> modelRules = new ArrayList<>();
+                List<Rule> newRules = new ArrayList<>();
                 for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                    Rule newRule = toRule(ruleModelName, rule, index);
+                    newRules.add(toRule(ruleModelName, rule, index));
                     xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                    modelRules.add(new ModelRulePair(newRule, null));
                     index++;
                 }
+                List<Rule> oldRules = rulesMap.put(ruleModelName, newRules);
                 handleVarDeclarations(ruleModelName, ruleModel);
-
-                notifyProviderChangeListeners(modelRules);
+                if (!isIsolatedModel(ruleModelName)) {
+                    notifyProviderChangeListeners(calcChanges(oldRules, newRules));
+                }
             }
         }
         modelRepository.addModelRepositoryChangeListener(this);
         readyService.markReady(marker);
     }
 
-    private void notifyProviderChangeListeners(List<ModelRulePair> modelRules) {
-        modelRules.forEach(rulePair -> {
-            Rule oldRule = rulePair.oldRule();
-            if (oldRule != null) {
-                rules.remove(oldRule.getUID());
-                rules.put(rulePair.newRule().getUID(), rulePair.newRule());
-                listeners.forEach(listener -> listener.updated(this, oldRule, rulePair.newRule()));
-            } else {
-                rules.put(rulePair.newRule().getUID(), rulePair.newRule());
-                listeners.forEach(listener -> listener.added(this, rulePair.newRule()));
+    private void notifyProviderChangeListeners(Changes changes) {
+        if (listeners.isEmpty()) {
+            return;
+        }
+        for (Rule rule : changes.removed) {
+            for (ProviderChangeListener<Rule> listener : listeners) {
+                listener.removed(this, rule);
             }
-        });
+        }
+        for (RulePair pair : changes.modified) {
+            for (ProviderChangeListener<Rule> listener : listeners) {
+                listener.updated(this, pair.oldRule, pair.newRule);
+            }
+        }
+        for (Rule rule : changes.added) {
+            for (ProviderChangeListener<Rule> listener : listeners) {
+                listener.added(this, rule);
+            }
+        }
     }
 
     @Override
@@ -481,6 +504,9 @@ public class DSLRuleProvider
         readyService.unmarkReady(marker);
     }
 
-    private record ModelRulePair(Rule newRule, @Nullable Rule oldRule) {
+    private record RulePair(Rule oldRule, Rule newRule) {
+    }
+
+    private record Changes(List<Rule> added, List<RulePair> modified, List<Rule> removed) {
     }
 }
