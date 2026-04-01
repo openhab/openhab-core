@@ -209,7 +209,8 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkWidgetsInButtongrid(ModelButtongrid grid) {
         val positions = new HashSet<Pos>
-        val positionsWithVisibilityRule = new HashSet<Pos>
+        val noVisibilityRulePositions = new HashSet<Pos>
+        val visibilityRulePositions = new HashSet<Pos>
         val nb = grid.getButtons !== null ? grid.getButtons.getElements.size : 0
         if (nb > 0) {
             if (grid.item === null) {
@@ -250,16 +251,21 @@ class SitemapValidator extends AbstractSitemapValidator {
                         SitemapPackage.Literals.MODEL_BUTTON.getEStructuralFeature(SitemapPackage.MODEL_BUTTON__COLUMN))
                 }
                 val pos = new Pos(w.row, w.column)
-                if (positions.contains(pos) && w.row > 0 && w.column > 0) {
-                    warning(errorString("Button widget already exists for position (" + w.row + "," + w.column + ")", line), w, null)
-                }
-                if (w.visibility === null || w.visibility.elements === null || w.visibility.elements.isEmpty) {
-                    positions.add(pos)
-                } else {
-                    if (positionsWithVisibilityRule.contains(pos) && w.row > 0 && w.column > 0) {
-                        warning(errorString("Button widget with visibility rule already exists for position (" + w.row + "," + w.column + ")", line), w, null)
+                if (w.row > 0 && w.column > 0) {
+                    if (w.visibility === null || w.visibility.elements === null || w.visibility.elements.isEmpty) {
+                        if (noVisibilityRulePositions.contains(pos)) {
+                            warning(errorString("Button widget already exists for position (" + w.row + "," + w.column + ")", line), w, null)
+                        }
+                        if (visibilityRulePositions.contains(pos)) {
+                            warning(errorString("Button widget with and without visibility rule for same position (" + w.row + "," + w.column + ")", line), w, null)
+                        }
+                        noVisibilityRulePositions.add(pos)
+                    } else {
+                        if (noVisibilityRulePositions.contains(pos)) {
+                            warning(errorString("Button widget without and with visibility rule for same position (" + w.row + "," + w.column + ")", line), w, null)
+                        }
+                        visibilityRulePositions.add(pos)
                     }
-                    positionsWithVisibilityRule.add(pos)
                 }
                 if (w.cmd === null) {
                     warning(errorString("Button widget must have command defined", line), w,
