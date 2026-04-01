@@ -138,7 +138,7 @@ public class DSLRuleProvider
     /**
      * Returns all rules originating from the given model name.
      *
-     * @param modelFileName the full model file name, including ".rules" or ".script" extension)
+     * @param modelFileName the full model file name, including ".rules" or ".script" extension
      * @return the rules associated with the given model name, or an empty collection if none exist
      */
     public Collection<Rule> getAllFromModel(String modelFileName) {
@@ -148,6 +148,8 @@ public class DSLRuleProvider
     @Override
     public void modelChanged(String modelFileName, EventType type) {
         String ruleModelType = modelFileName.substring(modelFileName.lastIndexOf(".") + 1);
+        List<Rule> oldRules;
+        List<Rule> newRules = new ArrayList<>();
         if ("rules".equalsIgnoreCase(ruleModelType)) {
             boolean isolated = isIsolatedModel(modelFileName);
             String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
@@ -155,9 +157,8 @@ public class DSLRuleProvider
                 case ADDED:
                 case MODIFIED:
                     EObject model = modelRepository.getModel(modelFileName);
+                    int index = 1;
                     if (model instanceof RuleModel ruleModel) {
-                        int index = 1;
-                        List<Rule> newRules = new ArrayList<>();
                         for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
                             newRules.add(toRule(ruleModelName, rule, index));
                             if (!isolated) {
@@ -165,21 +166,23 @@ public class DSLRuleProvider
                             }
                             index++;
                         }
-                        List<Rule> oldRules = rulesMap.put(modelFileName, newRules);
                         if (!isolated) {
-                            // Cleanup xExpressions for old rules
-                            int nbOldRules = oldRules == null ? 0 : oldRules.size();
-                            while (index <= nbOldRules) {
-                                xExpressions.remove(ruleModelName + "-" + index);
-                                index++;
-                            }
                             handleVarDeclarations(ruleModelName, ruleModel);
-                            notifyProviderChangeListeners(calcChanges(oldRules, newRules));
                         }
+                    }
+                    oldRules = rulesMap.put(modelFileName, newRules);
+                    if (!isolated) {
+                        // Cleanup xExpressions for old rules
+                        int nbOldRules = oldRules == null ? 0 : oldRules.size();
+                        while (index <= nbOldRules) {
+                            xExpressions.remove(ruleModelName + "-" + index);
+                            index++;
+                        }
+                        notifyProviderChangeListeners(calcChanges(oldRules, newRules));
                     }
                     break;
                 case REMOVED:
-                    List<Rule> oldRules = rulesMap.remove(modelFileName);
+                    oldRules = rulesMap.remove(modelFileName);
                     if (!isolated) {
                         for (Iterator<Entry<String, XExpression>> it = xExpressions.entrySet().iterator(); it
                                 .hasNext();) {
@@ -201,15 +204,15 @@ public class DSLRuleProvider
                 case MODIFIED:
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof Script script) {
-                        List<Rule> newRules = List.of(toRule(modelFileName, script));
-                        List<Rule> oldRules = rulesMap.put(modelFileName, newRules);
-                        if (!isIsolatedModel(modelFileName)) {
-                            notifyProviderChangeListeners(calcChanges(oldRules, newRules));
-                        }
+                        newRules.add(toRule(modelFileName, script));
+                    }
+                    oldRules = rulesMap.put(modelFileName, newRules);
+                    if (!isIsolatedModel(modelFileName)) {
+                        notifyProviderChangeListeners(calcChanges(oldRules, newRules));
                     }
                     break;
                 case REMOVED:
-                    List<Rule> oldRules = rulesMap.remove(modelFileName);
+                    oldRules = rulesMap.remove(modelFileName);
                     if (!isIsolatedModel(modelFileName)) {
                         notifyProviderChangeListeners(calcChanges(oldRules, null));
                     }
