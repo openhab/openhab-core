@@ -208,7 +208,6 @@ class SitemapValidator extends AbstractSitemapValidator {
 
     @Check
     def void checkWidgetsInButtongrid(ModelButtongrid grid) {
-        val buttonDefinitionPositions = new HashSet<Pos>
         val noVisibilityRulePositions = new HashSet<Pos>
         val visibilityRulePositions = new HashSet<Pos>
         val nb = grid.getButtons !== null ? grid.getButtons.getElements.size : 0
@@ -232,10 +231,10 @@ class SitemapValidator extends AbstractSitemapValidator {
                         SitemapPackage.Literals.MODEL_BUTTON_DEFINITION.getEStructuralFeature(SitemapPackage.MODEL_BUTTON_DEFINITION__COLUMN))
                 }
                 val pos = new Pos(b.row, b.column)
-                if (buttonDefinitionPositions.contains(pos) && b.row > 0 && b.column > 0) {
+                if (noVisibilityRulePositions.contains(pos) && b.row > 0 && b.column > 0) {
                     warning(errorString("Buttongrid button already exists for position (" + b.row + "," + b.column + ")", line), b, null)
                 }
-                buttonDefinitionPositions.add(pos)
+                noVisibilityRulePositions.add(pos)
             }
         }
         for (w : grid.children) {
