@@ -34,6 +34,18 @@ import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.internal.module.handler.ChannelEventTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.DateTimeTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GenericCronTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GroupCommandTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GroupStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
+import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;
+import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
 import org.openhab.core.automation.util.ActionBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.automation.util.TriggerBuilder;
@@ -283,9 +295,9 @@ public class DSLRuleProvider
         String scriptText = NodeModelUtils.findActualNodeFor(script).getText();
 
         Configuration cfg = new Configuration();
-        cfg.put("script", removeIndentation(scriptText));
-        cfg.put("type", MIMETYPE_OPENHAB_DSL_RULE);
-        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID("script.ScriptAction")
+        cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT, removeIndentation(scriptText));
+        cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE, MIMETYPE_OPENHAB_DSL_RULE);
+        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID(ScriptActionHandler.TYPE_ID)
                 .withConfiguration(cfg).build());
 
         return RuleBuilder.create(modelName).withTags("Script").withName(modelName).withActions(actions).build();
@@ -313,9 +325,9 @@ public class DSLRuleProvider
         XExpression expression = rule.getScript();
         String script = NodeModelUtils.findActualNodeFor(expression).getText();
         Configuration cfg = new Configuration();
-        cfg.put("script", context + removeIndentation(script));
-        cfg.put("type", MIMETYPE_OPENHAB_DSL_RULE);
-        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID("script.ScriptAction")
+        cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT, context + removeIndentation(script));
+        cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE, MIMETYPE_OPENHAB_DSL_RULE);
+        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID(ScriptActionHandler.TYPE_ID)
                 .withConfiguration(cfg).build());
 
         List<String> ruleTags = rule.getTags();
@@ -347,118 +359,118 @@ public class DSLRuleProvider
     private @Nullable Trigger mapTrigger(EventTrigger t) {
         if (t instanceof SystemOnStartupTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("startlevel", 40);
+            cfg.put(SystemTriggerHandler.CFG_STARTLEVEL, 40);
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
+                    .withTypeUID(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof SystemStartlevelTrigger slTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("startlevel", slTrigger.getLevel());
+            cfg.put(SystemTriggerHandler.CFG_STARTLEVEL, slTrigger.getLevel());
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
+                    .withTypeUID(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof SystemOnShutdownTrigger) {
             logger.warn("System shutdown rule triggers are no longer supported!");
             return null;
         } else if (t instanceof CommandEventTrigger ceTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("itemName", ceTrigger.getItem());
+            cfg.put(ItemCommandTriggerHandler.CFG_ITEMNAME, ceTrigger.getItem());
             if (ceTrigger.getCommand() != null) {
-                cfg.put("command", ceTrigger.getCommand().getValue());
+                cfg.put(ItemCommandTriggerHandler.CFG_COMMAND, ceTrigger.getCommand().getValue());
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.ItemCommandTrigger")
-                    .withConfiguration(cfg).build();
+            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                    .withTypeUID(ItemCommandTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof GroupMemberCommandEventTrigger ceTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("groupName", ceTrigger.getGroup());
+            cfg.put(GroupCommandTriggerHandler.CFG_GROUPNAME, ceTrigger.getGroup());
             if (ceTrigger.getCommand() != null) {
-                cfg.put("command", ceTrigger.getCommand().getValue());
+                cfg.put(GroupCommandTriggerHandler.CFG_COMMAND, ceTrigger.getCommand().getValue());
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.GroupCommandTrigger")
-                    .withConfiguration(cfg).build();
+            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                    .withTypeUID(GroupCommandTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof UpdateEventTrigger ueTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("itemName", ueTrigger.getItem());
+            cfg.put(ItemStateTriggerHandler.CFG_ITEMNAME, ueTrigger.getItem());
             if (ueTrigger.getState() != null) {
-                cfg.put("state", ueTrigger.getState().getValue());
+                cfg.put(ItemStateTriggerHandler.CFG_STATE, ueTrigger.getState().getValue());
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.ItemStateUpdateTrigger").withConfiguration(cfg).build();
+                    .withTypeUID(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof GroupMemberUpdateEventTrigger ueTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("groupName", ueTrigger.getGroup());
+            cfg.put(GroupStateTriggerHandler.CFG_GROUPNAME, ueTrigger.getGroup());
             if (ueTrigger.getState() != null) {
-                cfg.put("state", ueTrigger.getState().getValue());
+                cfg.put(GroupStateTriggerHandler.CFG_STATE, ueTrigger.getState().getValue());
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.GroupStateUpdateTrigger").withConfiguration(cfg).build();
+                    .withTypeUID(GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof ChangedEventTrigger ceTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("itemName", ceTrigger.getItem());
+            cfg.put(ItemStateTriggerHandler.CFG_ITEMNAME, ceTrigger.getItem());
             if (ceTrigger.getNewState() != null) {
-                cfg.put("state", ceTrigger.getNewState().getValue());
+                cfg.put(ItemStateTriggerHandler.CFG_STATE, ceTrigger.getNewState().getValue());
             }
             if (ceTrigger.getOldState() != null) {
-                cfg.put("previousState", ceTrigger.getOldState().getValue());
+                cfg.put(ItemStateTriggerHandler.CFG_PREVIOUS_STATE, ceTrigger.getOldState().getValue());
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.ItemStateChangeTrigger").withConfiguration(cfg).build();
+                    .withTypeUID(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof GroupMemberChangedEventTrigger ceTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("groupName", ceTrigger.getGroup());
+            cfg.put(GroupStateTriggerHandler.CFG_GROUPNAME, ceTrigger.getGroup());
             if (ceTrigger.getNewState() != null) {
-                cfg.put("state", ceTrigger.getNewState().getValue());
+                cfg.put(GroupStateTriggerHandler.CFG_STATE, ceTrigger.getNewState().getValue());
             }
             if (ceTrigger.getOldState() != null) {
-                cfg.put("previousState", ceTrigger.getOldState().getValue());
+                cfg.put(GroupStateTriggerHandler.CFG_PREVIOUS_STATE, ceTrigger.getOldState().getValue());
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.GroupStateChangeTrigger").withConfiguration(cfg).build();
+                    .withTypeUID(GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof TimerTrigger tt) {
             String triggerType;
             Configuration cfg = new Configuration();
             if (tt.getCron() != null) {
-                triggerType = "timer.GenericCronTrigger";
-                cfg.put("cronExpression", tt.getCron());
+                triggerType = GenericCronTriggerHandler.MODULE_TYPE_ID;
+                cfg.put(GenericCronTriggerHandler.CFG_CRON_EXPRESSION, tt.getCron());
             } else {
-                triggerType = "timer.TimeOfDayTrigger";
+                triggerType = TimeOfDayTriggerHandler.MODULE_TYPE_ID;
                 String id = tt.getTime();
                 if ("noon".equals(id)) {
-                    cfg.put("time", "12:00");
+                    cfg.put(TimeOfDayTriggerHandler.CFG_TIME, "12:00");
                 } else if ("midnight".equals(id)) {
-                    cfg.put("time", "00:00");
+                    cfg.put(TimeOfDayTriggerHandler.CFG_TIME, "00:00");
                 } else {
-                    cfg.put("time", id);
+                    cfg.put(TimeOfDayTriggerHandler.CFG_TIME, id);
                 }
             }
             return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID(triggerType)
                     .withConfiguration(cfg).build();
         } else if (t instanceof DateTimeTrigger tt) {
             Configuration cfg = new Configuration();
-            cfg.put("itemName", tt.getItem());
-            cfg.put("timeOnly", tt.isTimeOnly());
-            cfg.put("offset", tt.getOffset());
-            return TriggerBuilder.create().withId(Integer.toString((triggerId++))).withTypeUID("timer.DateTimeTrigger")
-                    .withConfiguration(cfg).build();
+            cfg.put(DateTimeTriggerHandler.CONFIG_ITEM_NAME, tt.getItem());
+            cfg.put(DateTimeTriggerHandler.CONFIG_TIME_ONLY, tt.isTimeOnly());
+            cfg.put(DateTimeTriggerHandler.CONFIG_OFFSET, tt.getOffset());
+            return TriggerBuilder.create().withId(Integer.toString((triggerId++)))
+                    .withTypeUID(DateTimeTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof EventEmittedTrigger eeTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("channelUID", eeTrigger.getChannel());
+            cfg.put(ChannelEventTriggerHandler.CFG_CHANNEL, eeTrigger.getChannel());
             if (eeTrigger.getTrigger() != null) {
-                cfg.put("event", eeTrigger.getTrigger().getValue());
+                cfg.put(ChannelEventTriggerHandler.CFG_CHANNEL_EVENT, eeTrigger.getTrigger().getValue());
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.ChannelEventTrigger")
-                    .withConfiguration(cfg).build();
+            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                    .withTypeUID(ChannelEventTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof ThingStateUpdateEventTrigger tsuTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("thingUID", tsuTrigger.getThing());
-            cfg.put("status", tsuTrigger.getState());
+            cfg.put(ThingStatusTriggerHandler.CFG_THING_UID, tsuTrigger.getThing());
+            cfg.put(ThingStatusTriggerHandler.CFG_STATUS, tsuTrigger.getState());
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.ThingStatusUpdateTrigger").withConfiguration(cfg).build();
+                    .withTypeUID(ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else if (t instanceof ThingStateChangedEventTrigger tscTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("thingUID", tscTrigger.getThing());
-            cfg.put("status", tscTrigger.getNewState());
-            cfg.put("previousStatus", tscTrigger.getOldState());
+            cfg.put(ThingStatusTriggerHandler.CFG_THING_UID, tscTrigger.getThing());
+            cfg.put(ThingStatusTriggerHandler.CFG_STATUS, tscTrigger.getNewState());
+            cfg.put(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS, tscTrigger.getOldState());
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.ThingStatusChangeTrigger").withConfiguration(cfg).build();
+                    .withTypeUID(ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
         } else {
             logger.warn("Unknown trigger type '{}' - ignoring it.", t.getClass().getSimpleName());
             return null;

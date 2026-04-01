@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
+import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -83,13 +84,14 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
             return resultMap;
         }
 
-        getScriptEngine().ifPresent(scriptEngine -> {
+        ScriptEngine scriptEngine = getScriptEngine();
+        if (scriptEngine != null) {
             try {
                 if (scriptEngine instanceof Lock lock && !lock.tryLock(1, TimeUnit.MINUTES)) {
                     logger.error(
                             "Failed to acquire lock within one minute for script module '{}' of rule with UID '{}'",
                             module.getId(), ruleUID);
-                    return;
+                    return resultMap;
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -105,7 +107,7 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
                     lock.unlock();
                 }
             }
-        });
+        }
 
         return resultMap;
     }

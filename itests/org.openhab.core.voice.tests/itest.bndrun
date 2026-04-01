@@ -81,5 +81,4 @@ Fragment-Host: org.openhab.core.voice
 	org.openhab.core.voice.tests;version='[5.2.0,5.2.1)',\
 	biz.aQute.tester.junit-platform;version='[7.2.1,7.2.2)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.2,2.3.3)',\
-	org.openhab.core.semantics;version='[5.2.0,5.2.1)', \
-	org.openhab.core.sitemap;version='[5.2.0,5.2.1)'
+	org.openhab.core.semantics;version='[5.2.0,5.2.1)'
