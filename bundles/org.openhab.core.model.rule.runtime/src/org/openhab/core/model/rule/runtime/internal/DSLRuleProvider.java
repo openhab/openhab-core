@@ -135,8 +135,14 @@ public class DSLRuleProvider
                 .flatMap(e -> e.getValue().stream()).toList();
     }
 
-    public Collection<Rule> getAllFromModel(String modelName) {
-        return rulesMap.getOrDefault(modelName, List.of());
+    /**
+     * Returns all rules originating from the given model name.
+     *
+     * @param modelFileName the full model file name, including ".rules" or ".script" extension)
+     * @return the rules associated with the given model name, or an empty collection if none exist
+     */
+    public Collection<Rule> getAllFromModel(String modelFileName) {
+        return List.copyOf(rulesMap.getOrDefault(modelFileName, List.of()));
     }
 
     @Override
@@ -161,6 +167,12 @@ public class DSLRuleProvider
                         }
                         List<Rule> oldRules = rulesMap.put(modelFileName, newRules);
                         if (!isolated) {
+                            // Cleanup xExpressions for old rules
+                            int nbOldRules = oldRules == null ? 0 : oldRules.size();
+                            while (index <= nbOldRules) {
+                                xExpressions.remove(ruleModelName + "-" + index);
+                                index++;
+                            }
                             handleVarDeclarations(ruleModelName, ruleModel);
                             notifyProviderChangeListeners(calcChanges(oldRules, newRules));
                         }
@@ -456,7 +468,7 @@ public class DSLRuleProvider
             EObject model = modelRepository.getModel(modelFileName);
             if (model instanceof RuleModel ruleModel) {
                 boolean isolated = isIsolatedModel(modelFileName);
-                String ruleModelName = modelFileName.substring(0, modelFileName.indexOf("."));
+                String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
                 int index = 1;
                 List<Rule> newRules = new ArrayList<>();
                 for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
