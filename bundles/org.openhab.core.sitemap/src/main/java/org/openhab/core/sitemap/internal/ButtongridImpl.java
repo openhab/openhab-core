@@ -29,7 +29,6 @@ public class ButtongridImpl extends LinkableWidgetImpl implements Buttongrid {
     private List<ButtonDefinition> buttons = new CopyOnWriteArrayList<>();
 
     public ButtongridImpl() {
-        super();
     }
 
     public ButtongridImpl(Parent parent) {
