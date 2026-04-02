@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.sitemap.internal;
 
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +142,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     public Collection<Sitemap> getAllFromModel(String modelName) {
-        return sitemapCache.getOrDefault(modelName, List.of());
+        return sitemapCache.getOrDefault(modelName, List.of()).stream().toList();
     }
 
     private void refreshSitemapModels() {
@@ -373,7 +375,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
 
         if (type == EventType.REMOVED) {
             Collection<Sitemap> oldSitemaps = sitemapCache.remove(modelName);
-            if (oldSitemaps != null) {
+            if (!isIsolatedModel(modelName) && oldSitemaps != null) {
                 oldSitemaps.forEach(oldSitemap -> {
                     notifyRemovedSitemap(modelName, oldSitemap);
                 });
@@ -384,26 +386,28 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
             if (modelSitemapObject instanceof ModelSitemap modelSitemap) {
                 Map<String, Sitemap> newSitemaps = parseModelSitemap(modelSitemap).stream()
                         .collect(Collectors.toMap(Sitemap::getName, Function.identity()));
-                Map<String, Sitemap> oldSitemaps = sitemapCache.getOrDefault(modelName, Set.of()).stream()
-                        .collect(Collectors.toMap(Sitemap::getName, Function.identity()));
-                newSitemaps.entrySet().stream().forEach(entry -> {
-                    if (!oldSitemaps.containsKey(entry.getKey())) {
-                        notifyListenersAboutAddedElement(entry.getValue());
-                    }
-                });
-                oldSitemaps.entrySet().stream().forEach(entry -> {
-                    Sitemap oldSitemap = entry.getValue();
-                    Sitemap newSitemap = newSitemaps.get(entry.getKey());
-                    if (newSitemap != null) {
-                        notifyListenersAboutUpdatedElement(oldSitemap, newSitemap);
-                    } else {
-                        notifyRemovedSitemap(modelName, oldSitemap);
-                    }
-                });
+                if (!isIsolatedModel(modelName)) {
+                    Map<String, Sitemap> oldSitemaps = sitemapCache.getOrDefault(modelName, Set.of()).stream()
+                            .collect(Collectors.toMap(Sitemap::getName, Function.identity()));
+                    newSitemaps.entrySet().stream().forEach(entry -> {
+                        if (!oldSitemaps.containsKey(entry.getKey())) {
+                            notifyListenersAboutAddedElement(entry.getValue());
+                        }
+                    });
+                    oldSitemaps.entrySet().stream().forEach(entry -> {
+                        Sitemap oldSitemap = entry.getValue();
+                        Sitemap newSitemap = newSitemaps.get(entry.getKey());
+                        if (newSitemap != null) {
+                            notifyListenersAboutUpdatedElement(oldSitemap, newSitemap);
+                        } else {
+                            notifyRemovedSitemap(modelName, oldSitemap);
+                        }
+                    });
+                }
                 sitemapCache.put(modelName, newSitemaps.values());
             } else {
                 Collection<Sitemap> oldSitemaps = sitemapCache.remove(modelName);
-                if (oldSitemaps != null) {
+                if (!isIsolatedModel(modelName) && oldSitemaps != null) {
                     oldSitemaps.forEach(oldSitemap -> {
                         notifyRemovedSitemap(modelName, oldSitemap);
                     });

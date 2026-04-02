@@ -26,7 +26,6 @@ import org.openhab.core.sitemap.Widget;
 @NonNullByDefault
 public class SitemapImpl implements Sitemap {
 
-    private boolean managed = false;
     private String name = "";
     private @Nullable String label;
     private @Nullable String icon;
@@ -47,11 +46,6 @@ public class SitemapImpl implements Sitemap {
     @Override
     public String getUID() {
         return name;
-    }
-
-    @Override
-    public boolean isManaged() {
-        return managed;
     }
 
     @Override

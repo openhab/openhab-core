@@ -21,8 +21,6 @@ import org.eclipse.xtext.conversion.IValueConverterService
 import org.eclipse.xtext.linking.lazy.LazyURIEncoder
 import com.google.inject.Binder
 import com.google.inject.name.Names
-import org.eclipse.xtext.formatting.IIndentationInformation
-import org.openhab.core.model.sitemap.formatting.SitemapIndentationInformation
 import org.eclipse.xtext.formatting.IFormatter
 import org.openhab.core.model.sitemap.formatting.SitemapFormatter
 
@@ -36,11 +34,6 @@ class SitemapRuntimeModule extends org.openhab.core.model.sitemap.AbstractSitema
 
     override Class<? extends IFormatter> bindIFormatter() {
         return SitemapFormatter
-    }
-
-    override void configure(Binder binder) {
-        super.configure(binder)
-        binder.bind(IIndentationInformation).to(SitemapIndentationInformation)
     }
 
     override void configureUseIndexFragmentsForLazyLinking(Binder binder) {
