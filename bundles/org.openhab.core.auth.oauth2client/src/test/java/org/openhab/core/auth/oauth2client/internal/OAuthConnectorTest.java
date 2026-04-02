@@ -106,4 +106,31 @@ class OAuthConnectorTest {
         assertEquals("unauthorized_client", exception.getError());
         assertEquals("The client is not authorized to use this grant type", exception.getErrorDescription());
     }
+
+    /**
+     * RFC 6749 section 5.2: HTTP 401 with a non-JSON body (e.g. "Unauthorized")
+     * must be treated like an empty body and produce an {@link OAuthResponseException}
+     * with {@code error = "invalid_client"} instead of failing JSON parsing.
+     */
+    @Test
+    void testHttp401WithNonJsonBodyThrowsInvalidClientException() {
+        HttpClientFactory httpClientFactory = mock(HttpClientFactory.class);
+        HttpClient httpClient = mock(HttpClient.class);
+        Request request = mock(Request.class, Mockito.RETURNS_SELF);
+        ContentResponse contentResponse = mock(ContentResponse.class);
+
+        try {
+            setupHttpMocks(httpClientFactory, httpClient, request, contentResponse, HttpStatus.UNAUTHORIZED_401,
+                    "Unauthorized");
+        } catch (InterruptedException | TimeoutException | ExecutionException e) {
+            fail(e);
+        }
+
+        OAuthConnector connector = new OAuthConnector(httpClientFactory);
+
+        OAuthResponseException exception = assertThrows(OAuthResponseException.class, () -> connector
+                .grantTypeClientCredentials("http://token.example.com", "clientId", "clientSecret", null, false));
+
+        assertEquals("invalid_client", exception.getError());
+    }
 }

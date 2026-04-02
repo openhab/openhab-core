@@ -393,8 +393,18 @@ public class OAuthConnector {
                 }
                 case HttpStatus.UNAUTHORIZED_401 -> {
                     // Per RFC 6749 section 5.2, HTTP 401 indicates client authentication failure (invalid_client).
-                    // The response body may contain JSON error details; fall back to invalid_client if not present.
-                    OAuthResponseException errorResponse = gson.fromJson(content, OAuthResponseException.class);
+                    // The response body may contain JSON error details; fall back to invalid_client if not present
+                    // or if the body is non-JSON (plain-text, HTML, etc.).
+                    OAuthResponseException errorResponse = null;
+                    if (!content.isBlank()) {
+                        try {
+                            errorResponse = gson.fromJson(content, OAuthResponseException.class);
+                        } catch (JsonSyntaxException e) {
+                            logger.debug(
+                                    "grant type {} to URL {} returned HTTP 401 with non-JSON body, treating as invalid_client",
+                                    grantType, request.getURI());
+                        }
+                    }
                     if (errorResponse == null || errorResponse.getError().isEmpty()) {
                         errorResponse = new OAuthResponseException();
                         errorResponse.setError("invalid_client");
