@@ -214,7 +214,7 @@ class SitemapValidator extends AbstractSitemapValidator {
             if (grid.item === null) {
                 val node = NodeModelUtils.getNode(grid)
                 val line = node.startLine
-                error(errorString("To use the \"buttons\" parameter in a Buttongrid, the \"item\" parameter is required", line),
+                error(errorString("To use the buttons parameter in a Buttongrid, the item parameter is required", line),
                     SitemapPackage.Literals.MODEL_BUTTONGRID.getEStructuralFeature(SitemapPackage.MODEL_BUTTONGRID__ITEM))
                 return
             }
@@ -241,11 +241,11 @@ class SitemapValidator extends AbstractSitemapValidator {
             val line = node.startLine
             if (w instanceof ModelButton) {
                 if (w.row === 0) {
-                    warning(errorString("Button widget must have positive row index", line), w,
+                    error(errorString("Button widget doesn't have positive row index defined", line), w,
                         SitemapPackage.Literals.MODEL_BUTTON.getEStructuralFeature(SitemapPackage.MODEL_BUTTON__ROW))
                 }
                 if (w.column === 0) {
-                    warning(errorString("Button widget must have positive column index", line), w,
+                    error(errorString("Button widget doesn't have positive column index defined", line), w,
                         SitemapPackage.Literals.MODEL_BUTTON.getEStructuralFeature(SitemapPackage.MODEL_BUTTON__COLUMN))
                 }
                 val pos = new Pos(w.row, w.column)
@@ -254,7 +254,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                 }
                 positions.add(pos)
                 if (w.cmd === null) {
-                    warning(errorString("Button widget must have command defined", line), w,
+                    error(errorString("Button widget doens't have click command defined", line), w,
                         SitemapPackage.Literals.MODEL_BUTTON.getEStructuralFeature(SitemapPackage.MODEL_BUTTON__CMD))
                 }
             } else {
@@ -269,6 +269,18 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkSetpointParameters(ModelSetpoint sp) {
         val node = NodeModelUtils.getNode(sp)
         val line = node.startLine
+        if (sp.minValue === null) {
+            error(errorString("Setpoint widget doesn't have minValue defined", line),
+                SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__MIN_VALUE))
+        }
+        if (sp.maxValue === null) {
+            error(errorString("Setpoint widget doesn't have maxValue defined", line),
+                SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__MAX_VALUE))
+        }
+        if (sp.step === null) {
+            error(errorString("Setpoint widget doesn't have step defined", line),
+                SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__STEP))
+        }
         if (BigDecimal.ZERO == sp.step) {
             warning(errorString("Setpoint widget has step size of '0'", line),
                 SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__STEP))
@@ -325,13 +337,13 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkChartParameters(ModelChart c) {
         val node = NodeModelUtils.getNode(c)
         val line = node.startLine
+        if (c.period === null) {
+            error(errorString("Chart widget doesn't have period defined", line),
+                SitemapPackage.Literals.MODEL_CHART.getEStructuralFeature(SitemapPackage.MODEL_CHART__PERIOD))
+        }
         if (c.interpolation !== null && !ALLOWED_INTERPOLATION.contains(c.interpolation)) {
             warning(errorString("Chart widget has invalid interpolation '" + c.interpolation + "'", line),
                 SitemapPackage.Literals.MODEL_CHART.getEStructuralFeature(SitemapPackage.MODEL_CHART__INTERPOLATION))
-        }
-        if (c.period === null) {
-            warning(errorString("Chart widget doesn't have period defined", line),
-                SitemapPackage.Literals.MODEL_CHART.getEStructuralFeature(SitemapPackage.MODEL_CHART__PERIOD))
         }
     }
 
@@ -340,8 +352,18 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (v.url === null) {
             val node = NodeModelUtils.getNode(v)
             val line = node.startLine
-            warning(errorString("Video widget doesn't have url defined", line),
+            error(errorString("Video widget doesn't have url defined", line),
                 SitemapPackage.Literals.MODEL_VIDEO.getEStructuralFeature(SitemapPackage.MODEL_VIDEO__URL))
+        }
+    }
+
+    @Check
+    def void checkImageParameters(ModelImage i) {
+        if (i.url === null) {
+            val node = NodeModelUtils.getNode(i)
+            val line = node.startLine
+            error(errorString("Image widget doesn't have url defined", line),
+                SitemapPackage.Literals.MODEL_IMAGE.getEStructuralFeature(SitemapPackage.MODEL_IMAGE__URL))
         }
     }
 
@@ -350,7 +372,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (w.url === null) {
             val node = NodeModelUtils.getNode(w)
             val line = node.startLine
-            warning(errorString("Webview widget doesn't have url defined", line),
+            error(errorString("Webview widget doesn't have url defined", line),
                 SitemapPackage.Literals.MODEL_WEBVIEW.getEStructuralFeature(SitemapPackage.MODEL_WEBVIEW__URL))
         }
     }
