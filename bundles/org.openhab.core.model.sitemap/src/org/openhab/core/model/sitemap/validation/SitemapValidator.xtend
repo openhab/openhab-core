@@ -269,18 +269,6 @@ class SitemapValidator extends AbstractSitemapValidator {
     def void checkSetpointParameters(ModelSetpoint sp) {
         val node = NodeModelUtils.getNode(sp)
         val line = node.startLine
-        if (sp.minValue === null) {
-            error(errorString("Setpoint widget doesn't have minValue defined", line),
-                SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__MIN_VALUE))
-        }
-        if (sp.maxValue === null) {
-            error(errorString("Setpoint widget doesn't have maxValue defined", line),
-                SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__MAX_VALUE))
-        }
-        if (sp.step === null) {
-            error(errorString("Setpoint widget doesn't have step defined", line),
-                SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__STEP))
-        }
         if (BigDecimal.ZERO == sp.step) {
             warning(errorString("Setpoint widget has step size of '0'", line),
                 SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__STEP))
@@ -354,16 +342,6 @@ class SitemapValidator extends AbstractSitemapValidator {
             val line = node.startLine
             error(errorString("Video widget doesn't have url defined", line),
                 SitemapPackage.Literals.MODEL_VIDEO.getEStructuralFeature(SitemapPackage.MODEL_VIDEO__URL))
-        }
-    }
-
-    @Check
-    def void checkImageParameters(ModelImage i) {
-        if (i.url === null) {
-            val node = NodeModelUtils.getNode(i)
-            val line = node.startLine
-            error(errorString("Image widget doesn't have url defined", line),
-                SitemapPackage.Literals.MODEL_IMAGE.getEStructuralFeature(SitemapPackage.MODEL_IMAGE__URL))
         }
     }
 
