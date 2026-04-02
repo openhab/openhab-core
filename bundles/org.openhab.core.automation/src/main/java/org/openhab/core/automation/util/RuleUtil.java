@@ -29,8 +29,8 @@ public class RuleUtil {
 
     private static final Pattern RULE_UID_PATTERN_STRICT = Pattern.compile("[\\w-]+(:[\\w-]+)*");
     private static final Pattern RULE_UID_PATTERN_STRICT_UNICODE = Pattern.compile("[\\w-]+(:[\\w-]+)*", Pattern.UNICODE_CHARACTER_CLASS);
-    private static final Pattern RULE_UID_PATTERN_LENIENT = Pattern.compile("\\S+", Pattern.UNICODE_CHARACTER_CLASS);
-    private static final Pattern RULE_UID_PATTERN_VERY_LENIENT = Pattern.compile("\\w(?:.*\\w)?", Pattern.UNICODE_CHARACTER_CLASS);
+    private static final Pattern RULE_UID_PATTERN_LENIENT = Pattern.compile("[^\\s/\\\\]+", Pattern.UNICODE_CHARACTER_CLASS);
+    private static final Pattern RULE_UID_PATTERN_VERY_LENIENT = Pattern.compile("\\S(?:[^/\\\\]*\\S)?", Pattern.UNICODE_CHARACTER_CLASS);
 
     /**
      * Returns {@code true} if the specified uid is a valid rule UID, otherwise {@code false}.
