@@ -265,12 +265,12 @@ public class SitemapDTOMapper {
         }
         switch (widget) {
             case Switch switchWidget -> {
-                switchWidget
-                        .setMappings(widgetDTO.mappings.stream().map(mapping -> map(mapping, sitemapFactory)).toList());
+                List<MappingDTO> mappings = widgetDTO.mappings != null ? widgetDTO.mappings : List.of();
+                switchWidget.setMappings(mappings.stream().map(mapping -> map(mapping, sitemapFactory)).toList());
             }
             case Buttongrid buttongridWidget -> {
-                buttongridWidget
-                        .setButtons(widgetDTO.buttons.stream().map(button -> map(button, sitemapFactory)).toList());
+                List<ButtonDefinitionDTO> buttons = widgetDTO.buttons != null ? widgetDTO.buttons : List.of();
+                buttongridWidget.setButtons(buttons.stream().map(button -> map(button, sitemapFactory)).toList());
             }
             case Button buttonWidget -> {
                 if (widgetDTO.row != null) {
@@ -286,8 +286,8 @@ public class SitemapDTOMapper {
                 buttonWidget.setReleaseCmd(widgetDTO.releaseCommand);
             }
             case Selection selectionWidget -> {
-                selectionWidget
-                        .setMappings(widgetDTO.mappings.stream().map(mapping -> map(mapping, sitemapFactory)).toList());
+                List<MappingDTO> mappings = widgetDTO.mappings != null ? widgetDTO.mappings : List.of();
+                selectionWidget.setMappings(mappings.stream().map(mapping -> map(mapping, sitemapFactory)).toList());
             }
             case Setpoint setpointWidget -> {
                 setpointWidget.setMinValue(widgetDTO.minValue);
@@ -354,15 +354,21 @@ public class SitemapDTOMapper {
         widget.setIcon(widgetDTO.icon);
         widget.setStaticIcon(widgetDTO.staticIcon);
 
-        widget.setIconRules(widgetDTO.iconRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
-        widget.setVisibility(widgetDTO.visibilityRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
-        widget.setLabelColor(widgetDTO.labelColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
-        widget.setValueColor(widgetDTO.valueColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
-        widget.setIconColor(widgetDTO.iconColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        List<RuleDTO> iconRules = widgetDTO.iconRules != null ? widgetDTO.iconRules : List.of();
+        widget.setIconRules(iconRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        List<RuleDTO> visibilityRules = widgetDTO.visibilityRules != null ? widgetDTO.visibilityRules : List.of();
+        widget.setVisibility(visibilityRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        List<RuleDTO> labelColorRules = widgetDTO.labelColorRules != null ? widgetDTO.labelColorRules : List.of();
+        widget.setLabelColor(labelColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        List<RuleDTO> valueColorRules = widgetDTO.valueColorRules != null ? widgetDTO.valueColorRules : List.of();
+        widget.setValueColor(valueColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        List<RuleDTO> iconColorRules = widgetDTO.iconColorRules != null ? widgetDTO.iconColorRules : List.of();
+        widget.setIconColor(iconColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
 
         if (widget instanceof LinkableWidget linkableWidget) {
-            linkableWidget.setWidgets(
-                    widgetDTO.widgets.stream().map(childWidget -> map(childWidget, linkableWidget, sitemapFactory))
+            List<WidgetDefinitionDTO> widgets = widgetDTO.widgets != null ? widgetDTO.widgets : List.of();
+            linkableWidget
+                    .setWidgets(widgets.stream().map(childWidget -> map(childWidget, linkableWidget, sitemapFactory))
                             .filter(Objects::nonNull).toList());
         }
         return widget;
@@ -402,7 +408,8 @@ public class SitemapDTOMapper {
     private static Rule map(RuleDTO ruleDTO, SitemapFactory sitemapFactory) {
         Rule rule = sitemapFactory.createRule();
         rule.setArgument(ruleDTO.argument);
-        rule.setConditions(ruleDTO.conditions.stream().map(condition -> map(condition, sitemapFactory)).toList());
+        List<ConditionDTO> conditions = ruleDTO.conditions != null ? ruleDTO.conditions : List.of();
+        rule.setConditions(conditions.stream().map(condition -> map(condition, sitemapFactory)).toList());
         return rule;
     }
 
