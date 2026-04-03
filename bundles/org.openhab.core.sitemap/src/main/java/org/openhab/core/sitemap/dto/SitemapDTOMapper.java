@@ -255,6 +255,9 @@ public class SitemapDTOMapper {
     }
 
     private @Nullable static Widget map(WidgetDefinitionDTO widgetDTO, Parent parent, SitemapFactory sitemapFactory) {
+        if (widgetDTO.type == null) {
+            return null;
+        }
         Widget widget = sitemapFactory.createWidget(widgetDTO.type, parent);
         if (widget == null) {
             return null;
@@ -269,10 +272,16 @@ public class SitemapDTOMapper {
                         .setButtons(widgetDTO.buttons.stream().map(button -> map(button, sitemapFactory)).toList());
             }
             case Button buttonWidget -> {
-                buttonWidget.setRow(widgetDTO.row);
-                buttonWidget.setColumn(widgetDTO.column);
+                if (widgetDTO.row != null) {
+                    buttonWidget.setRow(widgetDTO.row);
+                }
+                if (widgetDTO.column != null) {
+                    buttonWidget.setColumn(widgetDTO.column);
+                }
                 buttonWidget.setStateless(widgetDTO.stateless);
-                buttonWidget.setCmd(widgetDTO.command);
+                if (widgetDTO.command != null) {
+                    buttonWidget.setCmd(widgetDTO.command);
+                }
                 buttonWidget.setReleaseCmd(widgetDTO.releaseCommand);
             }
             case Selection selectionWidget -> {
@@ -299,7 +308,9 @@ public class SitemapDTOMapper {
                 inputWidget.setInputHint(widgetDTO.inputHint);
             }
             case Webview webviewWidget -> {
-                webviewWidget.setUrl(widgetDTO.url);
+                if (widgetDTO.url != null) {
+                    webviewWidget.setUrl(widgetDTO.url);
+                }
                 webviewWidget.setHeight(widgetDTO.height);
             }
             case Mapview mapviewWidget -> {
@@ -310,13 +321,19 @@ public class SitemapDTOMapper {
                 imageWidget.setRefresh(widgetDTO.refresh);
             }
             case Video videoWidget -> {
-                videoWidget.setUrl(widgetDTO.url);
+                if (widgetDTO.url != null) {
+                    videoWidget.setUrl(widgetDTO.url);
+                }
                 videoWidget.setEncoding(widgetDTO.encoding);
             }
             case Chart chartWidget -> {
                 chartWidget.setRefresh(widgetDTO.refresh);
-                chartWidget.setPeriod(widgetDTO.period);
-                chartWidget.setService(widgetDTO.service);
+                if (widgetDTO.period != null) {
+                    chartWidget.setPeriod(widgetDTO.period);
+                }
+                if (widgetDTO.service != null) {
+                    chartWidget.setService(widgetDTO.service);
+                }
                 chartWidget.setLegend(widgetDTO.legend);
                 chartWidget.setForceAsItem(widgetDTO.forceAsItem);
                 chartWidget.setYAxisDecimalPattern(widgetDTO.yAxisDecimalPattern);
@@ -352,19 +369,31 @@ public class SitemapDTOMapper {
 
     private static Mapping map(MappingDTO mappingDTO, SitemapFactory sitemapFactory) {
         Mapping mapping = sitemapFactory.createMapping();
-        mapping.setLabel(mappingDTO.label);
+        if (mappingDTO.label != null) {
+            mapping.setLabel(mappingDTO.label);
+        }
         mapping.setIcon(mappingDTO.icon);
-        mapping.setCmd(mappingDTO.command);
+        if (mappingDTO.command != null) {
+            mapping.setCmd(mappingDTO.command);
+        }
         mapping.setReleaseCmd(mappingDTO.releaseCommand);
         return mapping;
     }
 
     private static ButtonDefinition map(ButtonDefinitionDTO buttonDefinitionDTO, SitemapFactory sitemapFactory) {
         ButtonDefinition buttonDefinition = sitemapFactory.createButtonDefinition();
-        buttonDefinition.setRow(buttonDefinitionDTO.row);
-        buttonDefinition.setColumn(buttonDefinitionDTO.column);
-        buttonDefinition.setCmd(buttonDefinitionDTO.command);
-        buttonDefinition.setLabel(buttonDefinitionDTO.label);
+        if (buttonDefinitionDTO.row != null) {
+            buttonDefinition.setRow(buttonDefinitionDTO.row);
+        }
+        if (buttonDefinitionDTO.column != null) {
+            buttonDefinition.setColumn(buttonDefinitionDTO.column);
+        }
+        if (buttonDefinitionDTO.command != null) {
+            buttonDefinition.setCmd(buttonDefinitionDTO.command);
+        }
+        if (buttonDefinitionDTO.label != null) {
+            buttonDefinition.setLabel(buttonDefinitionDTO.label);
+        }
         buttonDefinition.setIcon(buttonDefinitionDTO.icon);
         return buttonDefinition;
     }
@@ -380,7 +409,9 @@ public class SitemapDTOMapper {
         Condition condition = sitemapFactory.createCondition();
         condition.setItem(conditionDTO.item);
         condition.setCondition(conditionDTO.condition);
-        condition.setValue(conditionDTO.value);
+        if (conditionDTO.value != null) {
+            condition.setValue(conditionDTO.value);
+        }
         return condition;
     }
 }
