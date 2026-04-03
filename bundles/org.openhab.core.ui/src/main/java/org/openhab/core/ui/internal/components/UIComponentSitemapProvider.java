@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractProvider;
-import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.sitemap.Button;
@@ -55,6 +54,7 @@ import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapProvider;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
+import org.openhab.core.ui.components.ManagedSitemapProvider;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
@@ -84,10 +84,9 @@ import org.slf4j.LoggerFactory;
  *         interface
  */
 @NonNullByDefault
-@Component(service = { SitemapProvider.class, ManagedProvider.class,
-        UIComponentSitemapProvider.class }, immediate = true)
+@Component(service = { SitemapProvider.class, ManagedSitemapProvider.class }, immediate = true)
 public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
-        implements ManagedProvider<Sitemap, String>, SitemapProvider, RegistryChangeListener<RootUIComponent> {
+        implements ManagedSitemapProvider, SitemapProvider, RegistryChangeListener<RootUIComponent> {
 
     private final Logger logger = LoggerFactory.getLogger(UIComponentSitemapProvider.class);
 

@@ -106,7 +106,7 @@ import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.State;
-import org.openhab.core.ui.internal.components.UIComponentSitemapProvider;
+import org.openhab.core.ui.components.ManagedSitemapProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 import org.openhab.core.util.ColorUtil;
@@ -197,7 +197,7 @@ public class SitemapResource
     private final ItemUIRegistry itemUIRegistry;
     private final SitemapFactory sitemapFactory;
     private final SitemapRegistry sitemapRegistry;
-    private final UIComponentSitemapProvider managedSitemapProvider;
+    private final ManagedSitemapProvider managedSitemapProvider;
     private final SitemapSubscriptionService subscriptions;
     private final LocaleService localeService;
     private final TimeZoneProvider timeZoneProvider;
@@ -212,7 +212,7 @@ public class SitemapResource
             final @Reference ItemUIRegistry itemUIRegistry, //
             final @Reference SitemapFactory sitemapFactory, //
             final @Reference SitemapRegistry sitemapRegistry, //
-            final @Reference UIComponentSitemapProvider managedSitemapProvider, //
+            final @Reference ManagedSitemapProvider managedSitemapProvider, //
             final @Reference LocaleService localeService, //
             final @Reference TimeZoneProvider timeZoneProvider, //
             final @Reference SitemapSubscriptionService subscriptions) {

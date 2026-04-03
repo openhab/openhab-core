@@ -57,7 +57,7 @@ import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
-import org.openhab.core.ui.internal.components.UIComponentSitemapProvider;
+import org.openhab.core.ui.components.ManagedSitemapProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 import org.osgi.framework.BundleContext;
@@ -120,7 +120,7 @@ public class SitemapResourceTest extends JavaTest {
     private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
     private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactory;
     private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistryMock;
-    private @Mock @NonNullByDefault({}) UIComponentSitemapProvider managedSitemapProviderMock;
+    private @Mock @NonNullByDefault({}) ManagedSitemapProvider managedSitemapProviderMock;
     private @Mock @NonNullByDefault({}) UriInfo uriInfoMock;
     private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
 
