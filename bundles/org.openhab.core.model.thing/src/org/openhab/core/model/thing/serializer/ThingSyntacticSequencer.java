@@ -24,7 +24,7 @@ import org.eclipse.xtext.serializer.analysis.ISyntacticSequencerPDAProvider.ISyn
  *
  * @author Alex Tugarev - Initial contribution
  */
-public class ThingSyntacticSequencerExtension extends AbstractThingSyntacticSequencer {
+public class ThingSyntacticSequencer extends AbstractThingSyntacticSequencer {
 
     @Override
     protected void emit_ModelThing_ThingKeyword_0_q(EObject semanticObject, ISynNavigable transition,
