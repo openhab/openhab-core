@@ -20,9 +20,6 @@ import org.eclipse.xtext.formatting.impl.FormattingConfig
 import org.openhab.core.model.sitemap.services.SitemapGrammarAccess
 import com.google.inject.Inject
 
-// import com.google.inject.Inject;
-// import org.openhab.core.model.services.SitemapGrammarAccess
-
 /**
  * This class contains custom formatting description.
  * 

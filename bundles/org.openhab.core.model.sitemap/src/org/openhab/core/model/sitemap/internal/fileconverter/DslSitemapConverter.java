@@ -83,7 +83,6 @@ import org.openhab.core.sitemap.Text;
 import org.openhab.core.sitemap.Video;
 import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
-import org.openhab.core.sitemap.fileconverter.AbstractSitemapSerializer;
 import org.openhab.core.sitemap.fileconverter.SitemapParser;
 import org.openhab.core.sitemap.fileconverter.SitemapSerializer;
 import org.osgi.service.component.annotations.Activate;
@@ -100,7 +99,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapSerializer.class, SitemapParser.class })
-public class DslSitemapConverter extends AbstractSitemapSerializer implements SitemapParser {
+public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslSitemapConverter.class);
 
@@ -235,10 +234,10 @@ public class DslSitemapConverter extends AbstractSitemapSerializer implements Si
                 modelInput.setInputHint(inputWidget.getInputHint());
                 modelWidget = modelInput;
             }
-            case Webview webviewWidgete -> {
+            case Webview webviewWidget -> {
                 ModelWebview modelWebview = SitemapFactory.eINSTANCE.createModelWebview();
-                modelWebview.setUrl(webviewWidgete.getUrl());
-                modelWebview.setHeight(webviewWidgete.getHeight());
+                modelWebview.setUrl(webviewWidget.getUrl());
+                modelWebview.setHeight(webviewWidget.getHeight());
                 modelWidget = modelWebview;
             }
             case Mapview mapviewWidget -> {

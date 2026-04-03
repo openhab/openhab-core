@@ -181,7 +181,9 @@ public class SitemapDTOMapper {
                 widgetDTO.period = chartWidget.getPeriod();
                 widgetDTO.service = chartWidget.getService();
                 widgetDTO.legend = chartWidget.hasLegend();
-                widgetDTO.forceAsItem = chartWidget.forceAsItem();
+                if (chartWidget.forceAsItem()) {
+                    widgetDTO.forceAsItem = true;
+                }
                 widgetDTO.yAxisDecimalPattern = chartWidget.getYAxisDecimalPattern();
                 widgetDTO.interpolation = chartWidget.getInterpolation();
             }
@@ -229,6 +231,7 @@ public class SitemapDTOMapper {
         buttonDTO.column = button.getColumn();
         buttonDTO.command = button.getCmd();
         buttonDTO.label = button.getLabel();
+        buttonDTO.icon = button.getIcon();
         return buttonDTO;
     }
 

@@ -26,6 +26,7 @@ public class ButtonDefinitionDTO {
     public Integer column;
     public String command;
     public String label;
+    public String icon;
 
     public ButtonDefinitionDTO() {
     }
