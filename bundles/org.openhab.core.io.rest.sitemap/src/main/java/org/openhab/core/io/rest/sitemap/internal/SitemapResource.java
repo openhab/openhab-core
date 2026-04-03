@@ -307,12 +307,17 @@ public class SitemapResource
             @Parameter(description = "sitemap data", required = true) @Nullable SitemapDefinitionDTO sitemapDTO) {
         // If we didn't get a sitemap, then return!
         if (sitemapDTO == null) {
-            return Response.status(Status.BAD_REQUEST).build();
-        } else if (!sitemapName.equals((sitemapDTO.name))) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Sitemap payload is required.");
+        } else if (sitemapDTO.name == null) {
+            logger.warn("Received HTTP PUT request at '{}' with a missing sitemap name in the payload.",
+                    uriInfo.getPath());
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Sitemap name in payload must not be null.");
+        } else if (!sitemapName.equals(sitemapDTO.name)) {
             logger.warn(
                     "Received HTTP PUT request at '{}' with a sitemap name '{}' that does not match the one in the url.",
                     uriInfo.getPath(), sitemapDTO.name);
-            return Response.status(Status.BAD_REQUEST).build();
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Sitemap name in payload must match sitemap name in URL.");
         }
 
         try {
