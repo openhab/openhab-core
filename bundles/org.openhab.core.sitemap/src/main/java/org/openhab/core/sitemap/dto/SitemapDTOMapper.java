@@ -249,8 +249,9 @@ public class SitemapDTOMapper {
         Sitemap sitemap = sitemapFactory.createSitemap(sitemapDTO.name);
         sitemap.setLabel(sitemapDTO.label);
         sitemap.setIcon(sitemapDTO.icon);
-        sitemap.setWidgets(sitemapDTO.widgets.stream().map(widget -> map(widget, sitemap, sitemapFactory))
-                .filter(Objects::nonNull).toList());
+        List<WidgetDefinitionDTO> widgets = sitemapDTO.widgets != null ? sitemapDTO.widgets : List.of();
+        sitemap.setWidgets(
+                widgets.stream().map(widget -> map(widget, sitemap, sitemapFactory)).filter(Objects::nonNull).toList());
         return sitemap;
     }
 

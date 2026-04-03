@@ -363,8 +363,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
 
     @Override
     public Set<String> getSitemapNames() {
-        return sitemapCache.values().stream().flatMap(c -> c.stream()).map(s -> s.getName())
-                .collect(Collectors.toSet());
+        return getAll().stream().map(s -> s.getName()).collect(Collectors.toSet());
     }
 
     @Override
@@ -432,6 +431,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
 
     @Override
     public Collection<Sitemap> getAll() {
-        return sitemapCache.values().stream().flatMap(c -> c.stream()).collect(Collectors.toSet());
+        return sitemapCache.values().stream().flatMap(c -> c.stream()).filter(s -> !isIsolatedModel(s.getName()))
+                .collect(Collectors.toSet());
     }
 }

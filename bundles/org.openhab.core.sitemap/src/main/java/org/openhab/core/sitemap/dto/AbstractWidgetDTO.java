@@ -21,7 +21,7 @@ import java.util.List;
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
  * @author Laurent Garnier - New field iconcolor
- * @author Mark herwege - New fields pattern, unit
+ * @author Mark Herwege - New fields pattern, unit
  * @author Laurent Garnier - New field columns
  * @author Danny Baumann - New field labelSource
  * @author Laurent Garnier - Remove field columns

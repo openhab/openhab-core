@@ -580,7 +580,7 @@ public class FileFormatResource implements RESTResource {
                 } else if (sitemaps.size() != 1) {
                     // DSL format only supports one sitemap at a time
                     return Response.status(Response.Status.BAD_REQUEST).entity(
-                            "For media type 'text/vnd.openhab.dsl.sitemap', exactly one sitemap name must be provided!")
+                            "For media type 'text/vnd.openhab.dsl.sitemap', the JSON payload must contain exactly one sitemap definition!")
                             .build();
                 }
                 sitemapSerializer.setSitemapsToBeSerialized(genId, sitemaps);
