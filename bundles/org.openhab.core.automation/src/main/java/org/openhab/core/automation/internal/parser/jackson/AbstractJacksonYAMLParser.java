@@ -18,8 +18,8 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.parser.Parser;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * Abstract class that can be used by YAML parsers for the different entity types.
@@ -35,8 +35,7 @@ public abstract class AbstractJacksonYAMLParser<T> implements Parser<T> {
     protected static final ObjectMapper YAML_MAPPER;
 
     static {
-        YAML_MAPPER = new ObjectMapper(new YAMLFactory());
-        YAML_MAPPER.findAndRegisterModules();
+        YAML_MAPPER = YAMLMapper.builder().findAndAddModules().build();
     }
 
     @Override

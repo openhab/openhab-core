@@ -41,10 +41,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.jaxrs2.Reader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -54,6 +50,9 @@ import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * An endpoint to generate and provide an OpenAPI description.
@@ -81,6 +80,7 @@ public class OpenApiResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(OpenApiResource.class);
     private final BundleContext bundleContext;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Creates a new instance.
@@ -106,11 +106,11 @@ public class OpenApiResource implements RESTResource {
             openAPI.setServers(List.of(createServer()));
             openAPI.schemaRequirement("oauth2", createOAuth2SecurityScheme());
 
-            String json = Json.mapper().writeValueAsString(openAPI);
+            String json = objectMapper.writeValueAsString(openAPI);
             return Response.status(Response.Status.OK)
-                    .entity(Json.mapper().readValue(json, new TypeReference<Map<String, Object>>() {
+                    .entity(objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
                     })).build();
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("Error while serializing the OpenAPI object to JSON");
             return Response.serverError().build();
         } catch (InvalidSyntaxException e) {

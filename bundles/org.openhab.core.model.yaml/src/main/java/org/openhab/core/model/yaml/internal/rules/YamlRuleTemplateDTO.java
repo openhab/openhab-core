@@ -38,10 +38,10 @@ import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.internal.config.YamlConfigDescriptionParameterDTO;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The {@link YamlRuleTemplateDTO} is a data transfer object used to serialize a rule template in a YAML configuration
@@ -142,18 +142,19 @@ public class YamlRuleTemplateDTO
             if (result.visibility == null) {
                 result.visibility = Visibility.VISIBLE;
             }
-            if (partial.configDescriptions != null && partial.configDescriptions.isContainerNode()) {
+            if (partial.configDescriptions != null && partial.configDescriptions.isContainer()) {
                 Map<String, YamlConfigDescriptionParameterDTO> configDescriptions = new LinkedHashMap<>(
                         partial.configDescriptions.size());
                 YamlConfigDescriptionParameterDTO parameterDTO;
                 if (partial.configDescriptions.isArray()) {
                     JsonNode parameterNode, nameNode;
-                    for (Iterator<JsonNode> iterator = partial.configDescriptions.elements(); iterator.hasNext();) {
+                    for (Iterator<JsonNode> iterator = partial.configDescriptions.values().iterator(); iterator
+                            .hasNext();) {
                         parameterNode = iterator.next();
                         if (parameterNode instanceof ObjectNode objectNode
-                                && (nameNode = objectNode.remove("name")) != null && nameNode.isTextual()) {
+                                && (nameNode = objectNode.remove("name")) != null && nameNode.isString()) {
                             parameterDTO = mapper.treeToValue(parameterNode, YamlConfigDescriptionParameterDTO.class);
-                            configDescriptions.put(nameNode.asText(), parameterDTO);
+                            configDescriptions.put(nameNode.asString(), parameterDTO);
                         } else {
                             if (!(parameterNode instanceof ObjectNode objectNode)) {
                                 throw new SerializationException(
@@ -182,7 +183,7 @@ public class YamlRuleTemplateDTO
                 List<YamlActionDTO> actions = new ArrayList<>(partial.actions.size());
                 JsonNode actionNode;
                 YamlActionDTO action;
-                for (Iterator<JsonNode> iterator = partial.actions.elements(); iterator.hasNext();) {
+                for (Iterator<JsonNode> iterator = partial.actions.values().iterator(); iterator.hasNext();) {
                     actionNode = iterator.next();
                     action = mapper.treeToValue(actionNode, YamlActionDTO.class);
                     action.type = ModuleTypeAliases.aliasToType(Action.class, action.type);
@@ -198,7 +199,7 @@ public class YamlRuleTemplateDTO
                 List<YamlConditionDTO> conditions = new ArrayList<>(partial.conditions.size());
                 JsonNode conditionNode;
                 YamlConditionDTO condition;
-                for (Iterator<JsonNode> iterator = partial.conditions.elements(); iterator.hasNext();) {
+                for (Iterator<JsonNode> iterator = partial.conditions.values().iterator(); iterator.hasNext();) {
                     conditionNode = iterator.next();
                     condition = mapper.treeToValue(conditionNode, YamlConditionDTO.class);
                     condition.type = ModuleTypeAliases.aliasToType(Condition.class, condition.type);
@@ -214,7 +215,7 @@ public class YamlRuleTemplateDTO
                 List<YamlModuleDTO> triggers = new ArrayList<>(partial.triggers.size());
                 JsonNode triggerNode;
                 YamlModuleDTO trigger;
-                for (Iterator<JsonNode> iterator = partial.triggers.elements(); iterator.hasNext();) {
+                for (Iterator<JsonNode> iterator = partial.triggers.values().iterator(); iterator.hasNext();) {
                     triggerNode = iterator.next();
                     trigger = mapper.treeToValue(triggerNode, YamlModuleDTO.class);
                     trigger.type = ModuleTypeAliases.aliasToType(Trigger.class, trigger.type);
@@ -223,7 +224,7 @@ public class YamlRuleTemplateDTO
                 }
                 result.triggers = triggers;
             }
-        } catch (JsonProcessingException | IllegalArgumentException e) {
+        } catch (JacksonException | IllegalArgumentException e) {
             throw new SerializationException(e.getMessage(), e);
         }
         return result;

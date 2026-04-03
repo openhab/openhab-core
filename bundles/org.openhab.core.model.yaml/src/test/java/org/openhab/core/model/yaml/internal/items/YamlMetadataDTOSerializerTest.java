@@ -19,8 +19,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * Tests for {@link YamlMetadataDTOSerializer}.
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
  * @author Jimmy Tanagra - Initial contribution
  */
 class YamlMetadataDTOSerializerTest {
-    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    private final ObjectMapper mapper = new YAMLMapper();
 
     @Test
     void testSerializeScalarWhenConfigEmpty() throws Exception {

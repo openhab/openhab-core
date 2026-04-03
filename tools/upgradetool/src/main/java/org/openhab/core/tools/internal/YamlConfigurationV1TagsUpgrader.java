@@ -26,15 +26,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 /**
  * The {@link YamlConfigurationV1TagsUpgrader} upgrades YAML Tags Configuration from List to Map.
@@ -66,24 +67,23 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
 
     private final Logger logger = LoggerFactory.getLogger(YamlConfigurationV1TagsUpgrader.class);
 
-    private final YAMLFactory yamlFactory;
     private final ObjectMapper objectMapper;
 
     public YamlConfigurationV1TagsUpgrader() {
         // match the options used in {@link YamlModelRepositoryImpl}
-        yamlFactory = YAMLFactory.builder() //
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER) // omit "---" at file start
-                .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
-                .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
-                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build(); // do not parse ON/OFF/... as
-                                                                                         // booleans
-        objectMapper = new ObjectMapper(yamlFactory);
-        objectMapper.findAndRegisterModules();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
-        objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
+
+        objectMapper = YAMLMapper.builder() //
+                .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER) // omit "---" at file start
+                .disable(YAMLWriteFeature.SPLIT_LINES) // do not split long lines
+                .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES) // use quotes only where necessary
+                .findAndAddModules().enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
+                .changeDefaultVisibility(visibilityChecker -> visibilityChecker
+                        .withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+                        .withVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY))
+                .changeDefaultPropertyInclusion(inclusion -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL,
+                        JsonInclude.Include.NON_NULL))
+                .build();
     }
 
     @Override
@@ -166,7 +166,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
                     ObjectNode tagsMap = objectMapper.createObjectNode();
                     for (JsonNode tag : node) {
                         if (tag.hasNonNull("uid")) {
-                            String uid = tag.get("uid").asText();
+                            String uid = tag.get("uid").asString();
                             ((ObjectNode) tag).remove("uid");
                             tagsMap.set(uid, tag);
                         } else {
@@ -179,7 +179,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
 
             String output = objectMapper.writeValueAsString(fileContent);
             saveFile(filePath, output);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             logger.error("Failed to read YAML file {}: {}", filePath, e.getMessage());
             return;
         }

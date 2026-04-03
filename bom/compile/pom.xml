@@ -392,7 +392,7 @@
     <dependency>
       <groupId>de.focus-shift</groupId>
       <artifactId>jollyday-jackson</artifactId>
-      <version>1.8.1</version>
+      <version>2.3.0</version>
       <scope>compile</scope>
     </dependency>
 
