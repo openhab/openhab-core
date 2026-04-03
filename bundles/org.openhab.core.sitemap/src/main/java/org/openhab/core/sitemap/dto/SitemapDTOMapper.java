@@ -23,6 +23,7 @@ import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
 import org.openhab.core.sitemap.Condition;
+import org.openhab.core.sitemap.Default;
 import org.openhab.core.sitemap.Image;
 import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
@@ -187,6 +188,12 @@ public class SitemapDTOMapper {
                 widgetDTO.yAxisDecimalPattern = chartWidget.getYAxisDecimalPattern();
                 widgetDTO.interpolation = chartWidget.getInterpolation();
             }
+            case Default defaultWidget -> {
+                int height = defaultWidget.getHeight();
+                if (height > 0) {
+                    widgetDTO.height = height;
+                }
+            }
             default -> {
                 // nothing to do
             }
@@ -314,6 +321,9 @@ public class SitemapDTOMapper {
                 chartWidget.setForceAsItem(widgetDTO.forceAsItem);
                 chartWidget.setYAxisDecimalPattern(widgetDTO.yAxisDecimalPattern);
                 chartWidget.setInterpolation(widgetDTO.interpolation);
+            }
+            case Default defaultWidget -> {
+                defaultWidget.setHeight(widgetDTO.height);
             }
             default -> {
                 // nothing to do
