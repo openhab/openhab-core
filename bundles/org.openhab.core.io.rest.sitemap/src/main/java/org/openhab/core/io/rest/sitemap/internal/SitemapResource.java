@@ -341,7 +341,7 @@ public class SitemapResource
         } catch (IllegalArgumentException e) {
             logger.warn("Received HTTP PUT request at '{}' with an invalid sitemap name '{}'.", uriInfo.getPath(),
                     sitemapDTO.name);
-            return Response.status(Status.BAD_REQUEST).build();
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Sitemap name is invalid: " + sitemapDTO.name);
         }
     }
 
