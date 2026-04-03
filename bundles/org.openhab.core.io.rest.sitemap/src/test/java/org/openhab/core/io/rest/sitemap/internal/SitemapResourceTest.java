@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.sitemap.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -30,14 +31,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -55,7 +53,6 @@ import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Widget;
-import org.openhab.core.sitemap.dto.SitemapDTOMapper;
 import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
 import org.openhab.core.sitemap.internal.SitemapImpl;
 import org.openhab.core.sitemap.registry.SitemapFactory;
@@ -170,23 +167,16 @@ public class SitemapResourceTest extends JavaTest {
     public void whenGetSitemapsDefinition_shouldSetEditableFlag() {
         // sitemapRegistryMock.getAll() already returns Set.of(defaultSitemapMock) via configureSitemapRegistryMock
         // This test will have that sitemap be a managed sitemap
-        SitemapDefinitionDTO dto = new SitemapDefinitionDTO();
-        dto.name = SITEMAP_NAME;
+        when(managedSitemapProviderMock.get(SITEMAP_NAME)).thenReturn(new SitemapImpl(SITEMAP_NAME));
 
-        try (MockedStatic<@NonNull SitemapDTOMapper> mockStatic = Mockito.mockStatic(SitemapDTOMapper.class)) {
-            mockStatic.when(() -> SitemapDTOMapper.map(defaultSitemapMock)).thenReturn(dto);
-            // managed provider returns non-null to indicate editable
-            when(managedSitemapProviderMock.get(SITEMAP_NAME)).thenReturn(new SitemapImpl(SITEMAP_NAME));
+        Response resp = sitemapResource.getSitemapsDefinition();
+        assertThat(resp.getStatus(), is(200));
 
-            Response resp = sitemapResource.getSitemapsDefinition();
-            assertThat(resp.getStatus(), is(200));
-
-            @SuppressWarnings("unchecked")
-            List<SitemapDefinitionDTO> body = (List<SitemapDefinitionDTO>) resp.getEntity();
-            assertThat(body, hasSize(1));
-            assertThat(body.get(0).name, is(SITEMAP_NAME));
-            assertThat(body.get(0).editable, is(true));
-        }
+        @SuppressWarnings("unchecked")
+        List<SitemapDefinitionDTO> body = (List<SitemapDefinitionDTO>) resp.getEntity();
+        assertThat(body, hasSize(1));
+        assertThat(body.get(0).name, is(SITEMAP_NAME));
+        assertThat(body.get(0).editable, is(true));
     }
 
     @Test
@@ -216,18 +206,13 @@ public class SitemapResourceTest extends JavaTest {
         dto.name = "s1";
 
         when(sitemapRegistryMock.get("s1")).thenReturn(null);
+        when(sitemapFactory.createSitemap("s1")).thenReturn(new SitemapImpl("s1"));
 
-        Sitemap sitemapMock = mock(Sitemap.class);
+        Object respObj = sitemapResource.createOrUpdateSitemap(headersMock, "s1", dto);
+        Response resp = (Response) respObj;
+        assertThat(resp.getStatus(), is(Response.Status.CREATED.getStatusCode()));
 
-        try (MockedStatic<@NonNull SitemapDTOMapper> mockStatic = Mockito.mockStatic(SitemapDTOMapper.class)) {
-            mockStatic.when(() -> SitemapDTOMapper.map(dto, sitemapFactory)).thenReturn(sitemapMock);
-
-            Object respObj = sitemapResource.createOrUpdateSitemap(headersMock, "s1", dto);
-            Response resp = (Response) respObj;
-            assertThat(resp.getStatus(), is(Response.Status.CREATED.getStatusCode()));
-
-            verify(managedSitemapProviderMock, times(1)).add(sitemapMock);
-        }
+        verify(managedSitemapProviderMock, times(1)).add(any());
     }
 
     @Test
@@ -237,17 +222,13 @@ public class SitemapResourceTest extends JavaTest {
 
         when(sitemapRegistryMock.get("s2")).thenReturn(mock(Sitemap.class));
         when(managedSitemapProviderMock.get("s2")).thenReturn(mock(Sitemap.class));
+        when(sitemapFactory.createSitemap("s2")).thenReturn(new SitemapImpl("s2"));
 
-        Sitemap sitemapMock = mock(Sitemap.class);
+        Object respObj = sitemapResource.createOrUpdateSitemap(headersMock, "s2", dto);
+        Response resp = (Response) respObj;
+        assertThat(resp.getStatus(), is(Response.Status.OK.getStatusCode()));
 
-        try (MockedStatic<@NonNull SitemapDTOMapper> mockStatic = Mockito.mockStatic(SitemapDTOMapper.class)) {
-            mockStatic.when(() -> SitemapDTOMapper.map(dto, sitemapFactory)).thenReturn(sitemapMock);
-            Object respObj = sitemapResource.createOrUpdateSitemap(headersMock, "s2", dto);
-            Response resp = (Response) respObj;
-            assertThat(resp.getStatus(), is(Response.Status.OK.getStatusCode()));
-
-            verify(managedSitemapProviderMock, times(1)).update(sitemapMock);
-        }
+        verify(managedSitemapProviderMock, times(1)).update(any());
     }
 
     @Test
