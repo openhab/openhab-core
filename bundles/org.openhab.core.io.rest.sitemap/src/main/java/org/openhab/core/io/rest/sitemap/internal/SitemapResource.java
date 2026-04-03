@@ -331,7 +331,7 @@ public class SitemapResource
                 // Sitemap exists but cannot be updated
                 logger.warn("Cannot update existing sitemap '{}', because is not managed.", sitemapName);
                 return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
-                        "Cannot update non-managed sitemap " + sitemapName);
+                        "Cannot update unmanaged sitemap " + sitemapName);
             }
         } catch (IllegalArgumentException e) {
             logger.warn("Received HTTP PUT request at '{}' with an invalid sitemap name '{}'.", uriInfo.getPath(),
@@ -346,11 +346,16 @@ public class SitemapResource
     @Operation(operationId = "removeSitemapFromRegistry", summary = "Removes a sitemap from the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Sitemap not found or sitemap is not editable.") })
+                    @ApiResponse(responseCode = "404", description = "Sitemap not found."),
+                    @ApiResponse(responseCode = "405", description = "Sitemap not editable.") })
     public Response removeSitemap(
             @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapName) {
-        if (managedSitemapProvider.remove(sitemapName) == null) {
+        if (getSitemap(sitemapName) == null) {
             return Response.status(Status.NOT_FOUND).build();
+        }
+        if (managedSitemapProvider.remove(sitemapName) == null) {
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
+                    "Cannot delete unmanaged sitemap " + sitemapName);
         }
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
