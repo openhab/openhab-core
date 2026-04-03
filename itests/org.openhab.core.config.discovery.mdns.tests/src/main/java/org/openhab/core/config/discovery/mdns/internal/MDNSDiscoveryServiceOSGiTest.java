@@ -14,18 +14,23 @@ package org.openhab.core.config.discovery.mdns.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.Set;
 
+import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.discovery.DiscoveryListener;
@@ -48,49 +53,116 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 
     private @NonNullByDefault({}) MDNSDiscoveryService mdnsDiscoveryService;
+    private @NonNullByDefault({}) String serviceType;
+    private @NonNullByDefault({}) ThingTypeUID thingTypeUID;
+    private @NonNullByDefault({}) ThingUID thingUID;
+    private @NonNullByDefault({}) DiscoveryResult discoveryResult;
+    private @NonNullByDefault({}) ServiceEvent mockServiceEvent;
 
     @BeforeEach
-    public void setup() {
+    private void initializeCommonFields() throws Exception {
         mdnsDiscoveryService = getService(DiscoveryService.class, MDNSDiscoveryService.class);
-        assertThat(mdnsDiscoveryService, is(notNullValue()));
-    }
-
-    @Test
-    public void testThingDiscoveredAndRemoved() {
-        String serviceType = "_http._tcp.local.";
-        ThingTypeUID thingTypeUID = new ThingTypeUID("myBinding", "myThingType");
-        ThingUID thingUID = new ThingUID(thingTypeUID, "test" + new Random().nextInt(999999999));
+        serviceType = "_http._tcp.local.";
+        thingTypeUID = new ThingTypeUID("myBinding", "myThingType");
+        thingUID = new ThingUID(thingTypeUID, "test" + new Random().nextInt(999999999));
         Set<ThingTypeUID> thingTypeUIDs = Set.of(thingTypeUID);
-        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).build();
+        discoveryResult = DiscoveryResultBuilder.create(thingUID).build();
 
-        MDNSDiscoveryParticipant mockMDNSDiscoveryParticipant = mock(MDNSDiscoveryParticipant.class);
-        when(mockMDNSDiscoveryParticipant.getSupportedThingTypeUIDs()).thenReturn(thingTypeUIDs);
-        when(mockMDNSDiscoveryParticipant.getServiceType()).thenReturn(serviceType);
-        when(mockMDNSDiscoveryParticipant.createResult(any())).thenReturn(discoveryResult);
-        when(mockMDNSDiscoveryParticipant.getThingUID(any())).thenReturn(thingUID);
+        class TestParticipant implements MDNSDiscoveryParticipant {
+            @Override
+            public Set<ThingTypeUID> getSupportedThingTypeUIDs() {
+                return Set.of(thingTypeUID);
+            }
 
-        mdnsDiscoveryService.addMDNSDiscoveryParticipant(mockMDNSDiscoveryParticipant);
+            @Override
+            public String getServiceType() {
+                return serviceType;
+            }
+
+            @Override
+            public @Nullable DiscoveryResult createResult(ServiceInfo info) {
+                return discoveryResult;
+            }
+
+            @Override
+            public @Nullable ThingUID getThingUID(ServiceInfo info) {
+                return thingUID;
+            }
+        }
+
+        MDNSDiscoveryParticipant participant = new TestParticipant();
+        mdnsDiscoveryService.addMDNSDiscoveryParticipant(participant);
 
         assertThat(mdnsDiscoveryService.getSupportedThingTypes(), is(thingTypeUIDs));
 
-        ServiceEvent mockServiceEvent = mock(ServiceEvent.class);
-        when(mockServiceEvent.getType()).thenReturn(serviceType);
-        when(mockServiceEvent.getInfo()).thenReturn(ServiceInfo.create(serviceType, "name", 80, "text"));
+        ServiceInfo serviceInfo = mock(ServiceInfo.class);
+        when(serviceInfo.getServer()).thenReturn("my-host.local");
+        when(serviceInfo.getPort()).thenReturn(1234);
+        InetAddress addr = InetAddress.getByName("192.168.1.10");
+        when(serviceInfo.getInetAddresses()).thenReturn(new InetAddress[] { addr });
+        when(serviceInfo.getTextBytes()).thenReturn("ok".getBytes(StandardCharsets.UTF_8));
+        when(serviceInfo.getKey()).thenReturn("my-host._http._tcp.local.");
+        when(serviceInfo.getType()).thenReturn(serviceType);
+        when(serviceInfo.getName()).thenReturn("my-host");
 
+        mockServiceEvent = mock(ServiceEvent.class);
+        when(mockServiceEvent.getType()).thenReturn(serviceType);
+        when(mockServiceEvent.getInfo()).thenReturn(serviceInfo);
+        when(mockServiceEvent.getDNS()).thenReturn(mock(JmDNS.class));
+        when(mockServiceEvent.getName()).thenReturn("my-host");
+
+        assertNotNull(mdnsDiscoveryService);
+        assertNotNull(serviceType);
+        assertNotNull(thingTypeUID);
+        assertNotNull(thingUID);
+        assertNotNull(discoveryResult);
+        assertNotNull(mockServiceEvent);
+    }
+
+    @Test
+    public void testThingDiscoveredAndRemoved() throws Exception {
         DiscoveryListener mockDiscoveryListener = mock(DiscoveryListener.class);
         mdnsDiscoveryService.addDiscoveryListener(mockDiscoveryListener);
 
         mdnsDiscoveryService.serviceAdded(mockServiceEvent);
-        verify(mockDiscoveryListener, timeout(2000).times(0)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
-        verifyNoMoreInteractions(mockDiscoveryListener);
-
         mdnsDiscoveryService.serviceResolved(mockServiceEvent);
         verify(mockDiscoveryListener, timeout(2000).times(1)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
-        verifyNoMoreInteractions(mockDiscoveryListener);
 
         mdnsDiscoveryService.serviceRemoved(mockServiceEvent);
         verify(mockDiscoveryListener, timeout(2000).times(1)).thingRemoved(mdnsDiscoveryService, thingUID);
-        verifyNoMoreInteractions(mockDiscoveryListener);
+    }
+
+    @Test
+    public void testServiceAddedAloneTriggersDiscovery() throws Exception {
+        DiscoveryListener mockListener = mock(DiscoveryListener.class);
+        mdnsDiscoveryService.addDiscoveryListener(mockListener);
+
+        mdnsDiscoveryService.serviceAdded(mockServiceEvent);
+
+        verify(mockListener, timeout(2000).times(1)).thingDiscovered(eq(mdnsDiscoveryService), eq(discoveryResult));
+    }
+
+    @Test
+    public void testServiceAddedTriggersRequestServiceInfo() throws Exception {
+        JmDNS mockDns = mock(JmDNS.class);
+        when(mockServiceEvent.getDNS()).thenReturn(mockDns);
+
+        mdnsDiscoveryService.serviceAdded(mockServiceEvent);
+
+        verify(mockDns, timeout(2000)).requestServiceInfo(serviceType, "my-host", true);
+    }
+
+    @Test
+    public void testDebounceCollapsesMultipleEvents() throws Exception {
+        DiscoveryListener mockListener = mock(DiscoveryListener.class);
+        mdnsDiscoveryService.addDiscoveryListener(mockListener);
+
+        mdnsDiscoveryService.serviceAdded(mockServiceEvent);
+        for (int i = 0; i < 10; i++) {
+            mdnsDiscoveryService.serviceResolved(mockServiceEvent);
+        }
+
+        verify(mockListener, timeout(2000).times(1)).thingDiscovered(eq(mdnsDiscoveryService), eq(discoveryResult));
     }
 
     /**

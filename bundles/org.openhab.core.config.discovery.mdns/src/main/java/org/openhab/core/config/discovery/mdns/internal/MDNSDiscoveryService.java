@@ -13,14 +13,16 @@
 package org.openhab.core.config.discovery.mdns.internal;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
@@ -54,22 +56,28 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Bräutigam - Initial contribution
  * @author Kai Kreuzer - Improved startup behavior and background discovery
  * @author Andre Fuechsel - make {@link #startScan()} asynchronous
+ * @author Andrew Fiddian-Green - Improved service resolution and de-bouncing of multiple events
  */
 @NonNullByDefault
 @Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.mdns")
 public class MDNSDiscoveryService extends AbstractDiscoveryService implements ServiceListener {
 
     private static final Duration FOREGROUND_SCAN_TIMEOUT = Duration.ofMillis(200);
-    private final Logger logger = LoggerFactory.getLogger(MDNSDiscoveryService.class);
+    private static final int CONSIDER_SERVICE_WINDOW_MSEC = 200;
 
+    private final Logger logger = LoggerFactory.getLogger(MDNSDiscoveryService.class);
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
+
+    /*
+     * Map of scheduled tasks: to remove devices from the Inbox, and to de-bounce the consideration
+     * of multiple service events. Note: they must be protected by synchronization on 'this'.
+     */
+    private final Map<String, ScheduledFuture<?>> deviceRemovalTasks = new HashMap<>();
+    private final Map<String, ScheduledFuture<?>> considerServiceTasks = new HashMap<>();
 
     private final MDNSClient mdnsClient;
 
-    /**
-     * Map of scheduled tasks to remove devices from the Inbox.
-     */
-    private Map<String, ScheduledFuture<?>> deviceRemovalTasks = new ConcurrentHashMap<>();
+    private volatile boolean deactivating = false;
 
     @Activate
     public MDNSDiscoveryService(final @Nullable Map<String, Object> configProperties, //
@@ -94,11 +102,17 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     @Deactivate
     @Override
     protected void deactivate() {
+        deactivating = true;
         super.deactivate();
-
-        for (MDNSDiscoveryParticipant participant : participants) {
-            mdnsClient.removeServiceListener(participant.getServiceType(), this);
+        Map<String, ScheduledFuture<?>> removalTasks, considerTasks;
+        synchronized (this) {
+            removalTasks = Map.copyOf(deviceRemovalTasks);
+            considerTasks = Map.copyOf(considerServiceTasks);
+            deviceRemovalTasks.clear();
+            considerServiceTasks.clear();
         }
+        removalTasks.values().forEach(task -> task.cancel(false));
+        considerTasks.values().forEach(task -> task.cancel(false));
     }
 
     @Modified
@@ -189,36 +203,100 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     @Override
-    public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        /**
-         * Do nothing when a service is added, as we will get a <code>serviceResolved</code> event afterwards,
-         * which contains the fully resolved ServiceInfo. If we would already create a DiscoveryResult here,
-         * we would not have the necessary full information.
+    public void serviceAdded(@Nullable ServiceEvent serviceEvent) {
+        if (deactivating || serviceEvent == null || !isBackgroundDiscoveryEnabled()) {
+            return;
+        }
+        /*
+         * When a service is added its ServiceInfo may be either resolved or unresolved. In the resolved case
+         * we may directly consider the ServiceInfo for discovery here. But we also explicitly request the service
+         * to be resolved so that future serviceResolved events may be called with the then resolved ServiceInfo
+         * records. The considerService method applies a short delay to de-bounce multiple such events.
          */
+        considerService(serviceEvent);
+        /*
+         * IMPORTANT: explicitly make asynchronous request service resolution to trigger possible further
+         * serviceResolved() events with additional information
+         */
+        JmDNS jmDNS = serviceEvent.getDNS();
+        if (jmDNS != null) {
+            jmDNS.requestServiceInfo(serviceEvent.getType(), serviceEvent.getName(), true);
+        }
     }
 
     @Override
-    public void serviceRemoved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        // note: {@link ServiceEvent} JavaDoc says getInfo() result can be null; but seems never to be so here.
+    public void serviceRemoved(@Nullable ServiceEvent serviceEvent) {
+        ServiceInfo serviceInfo;
+        if (deactivating || serviceEvent == null || (serviceInfo = serviceEvent.getInfo()) == null) {
+            return;
+        }
+        String serviceType = serviceEvent.getType();
         for (MDNSDiscoveryParticipant participant : participants) {
-            if (participant.getServiceType().equals(serviceEvent.getType())) {
-                removeDiscoveryResult(participant, serviceEvent.getInfo());
+            if (participant.getServiceType().equals(serviceType)) {
+                removeDiscoveryResult(participant, serviceInfo);
             }
         }
     }
 
     @Override
-    public void serviceResolved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
-        // note: {@link ServiceEvent} JavaDoc says getInfo() result can be null; but seems never to be so here.
+    public void serviceResolved(@Nullable ServiceEvent serviceEvent) {
+        if (deactivating || serviceEvent == null || !isBackgroundDiscoveryEnabled()) {
+            return;
+        }
+        /*
+         * This method may be called several times as additional information such as the IP v4 and v6 addresses
+         * and TXT attribute records are added. The considerService method applies a short delay to de-bounce
+         * multiple such events.
+         */
         considerService(serviceEvent);
     }
 
+    /**
+     * Schedules a task to consider the given ServiceEvent for creating a DiscoveryResult after a short delay. This is
+     * needed to avoid creating multiple DiscoveryResults for the same service in case that multiple serviceAdded and
+     * serviceResolved events are fired in quick succession during the resolution process of a new service.
+     *
+     * @param serviceEvent the ServiceEvent to consider.
+     */
     private void considerService(ServiceEvent serviceEvent) {
-        if (isBackgroundDiscoveryEnabled()) {
-            for (MDNSDiscoveryParticipant participant : participants) {
-                if (participant.getServiceType().equals(serviceEvent.getType())) {
-                    createDiscoveryResult(participant, serviceEvent.getInfo());
-                }
+        ServiceInfo serviceInfo;
+        if ((serviceInfo = serviceEvent.getInfo()) == null) {
+            return;
+        }
+        String lookupKey = serviceInfo.getKey();
+        ScheduledFuture<?> oldTask;
+        synchronized (this) {
+            oldTask = considerServiceTasks.put(lookupKey,
+                    scheduler.schedule(() -> considerServiceTask(serviceInfo, serviceEvent.getType(), lookupKey),
+                            CONSIDER_SERVICE_WINDOW_MSEC, TimeUnit.MILLISECONDS));
+        }
+        if (oldTask != null) {
+            oldTask.cancel(false);
+        }
+    }
+
+    /**
+     * Considers the given ServiceEvent for creating a DiscoveryResult. This method is called by the scheduled task
+     * created in considerService() after the short delay has expired.
+     * 
+     * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
+     * @param serviceType the mDNS service type.
+     * @param lookupKey the hash map lookup key.
+     */
+    private void considerServiceTask(ServiceInfo serviceInfo, String serviceType, String lookupKey) {
+        if (deactivating) {
+            return;
+        }
+        Future<?> task;
+        synchronized (this) {
+            task = considerServiceTasks.remove(lookupKey);
+        }
+        if (task != null) {
+            task.cancel(false);
+        }
+        for (MDNSDiscoveryParticipant participant : participants) {
+            if (participant.getServiceType().equals(serviceType)) {
+                createDiscoveryResult(participant, serviceInfo);
             }
         }
     }
@@ -258,7 +336,10 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
      * @param serviceInfo the mDNS ServiceInfo describing the device on the network.
      */
     private void cancelRemovalTask(ServiceInfo serviceInfo) {
-        ScheduledFuture<?> deviceRemovalTask = deviceRemovalTasks.remove(serviceInfo.getQualifiedName());
+        ScheduledFuture<?> deviceRemovalTask;
+        synchronized (this) {
+            deviceRemovalTask = deviceRemovalTasks.remove(serviceInfo.getKey());
+        }
         if (deviceRemovalTask != null) {
             deviceRemovalTask.cancel(false);
         }
@@ -272,9 +353,13 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
      * @param gracePeriod the scheduled delay in seconds.
      */
     private void scheduleRemovalTask(ThingUID thingUID, ServiceInfo serviceInfo, long gracePeriod) {
-        deviceRemovalTasks.put(serviceInfo.getQualifiedName(), scheduler.schedule(() -> {
-            thingRemoved(thingUID);
-            cancelRemovalTask(serviceInfo);
-        }, gracePeriod, TimeUnit.SECONDS));
+        if (!deactivating) {
+            synchronized (this) {
+                deviceRemovalTasks.put(serviceInfo.getKey(), scheduler.schedule(() -> {
+                    thingRemoved(thingUID);
+                    cancelRemovalTask(serviceInfo);
+                }, gracePeriod, TimeUnit.SECONDS));
+            }
+        }
     }
 }
