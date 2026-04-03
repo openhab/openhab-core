@@ -339,9 +339,9 @@ public class SitemapResource
                         "Cannot update unmanaged sitemap " + sitemapName);
             }
         } catch (IllegalArgumentException e) {
-            logger.warn("Received HTTP PUT request at '{}' with an invalid sitemap name '{}'.", uriInfo.getPath(),
-                    sitemapDTO.name);
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Sitemap name is invalid: " + sitemapDTO.name);
+            logger.warn("Received HTTP PUT request at '{}' with an invalid sitemap: {}", uriInfo.getPath(),
+                    e.getMessage());
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Sitemap invalid: " + e.getMessage());
         }
     }
 

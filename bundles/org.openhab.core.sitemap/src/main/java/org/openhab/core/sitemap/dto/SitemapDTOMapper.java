@@ -257,7 +257,7 @@ public class SitemapDTOMapper {
 
     private @Nullable static Widget map(WidgetDefinitionDTO widgetDTO, Parent parent, SitemapFactory sitemapFactory) {
         if (widgetDTO.type == null) {
-            return null;
+            throw new IllegalArgumentException("All widgets must have a type");
         }
         Widget widget = sitemapFactory.createWidget(widgetDTO.type, parent);
         if (widget == null) {

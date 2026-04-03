@@ -1043,7 +1043,8 @@ public class FileFormatResource implements RESTResource {
                     Sitemap sitemap = SitemapDTOMapper.map(sitemapData, sitemapFactory);
                     sitemaps.add(sitemap);
                 } catch (IllegalArgumentException e) {
-                    errors.add("Invalid sitemap data for sitemap '" + name + "': " + e.getMessage());
+                    errors.add("Invalid sitemap data" + (name != null ? " for sitemap '" + name + "'" : "") + ": "
+                            + e.getMessage());
                     ok = false;
                     continue;
                 }
