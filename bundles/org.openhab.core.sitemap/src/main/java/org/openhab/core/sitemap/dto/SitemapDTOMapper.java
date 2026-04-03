@@ -365,6 +365,7 @@ public class SitemapDTOMapper {
         buttonDefinition.setColumn(buttonDefinitionDTO.column);
         buttonDefinition.setCmd(buttonDefinitionDTO.command);
         buttonDefinition.setLabel(buttonDefinitionDTO.label);
+        buttonDefinition.setIcon(buttonDefinitionDTO.icon);
         return buttonDefinition;
     }
 
