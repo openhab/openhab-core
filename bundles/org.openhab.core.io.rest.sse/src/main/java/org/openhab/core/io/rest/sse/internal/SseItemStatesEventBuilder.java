@@ -17,9 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.sse.OutboundSseEvent;
-import javax.ws.rs.sse.OutboundSseEvent.Builder;
+import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,6 +37,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.sse.OutboundSseEvent;
+import jakarta.ws.rs.sse.OutboundSseEvent.Builder;
 
 /**
  * The {@link SseItemStatesEventBuilder} builds {@link OutboundSseEvent}s for connections that listen to item state

@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;

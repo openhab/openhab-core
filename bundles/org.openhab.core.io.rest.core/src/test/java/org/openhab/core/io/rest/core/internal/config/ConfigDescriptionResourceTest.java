@@ -25,9 +25,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +41,9 @@ import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.io.rest.LocaleService;
 
 import com.google.gson.JsonParser;
+
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 /**
  * @author Christoph Weitkamp - Initial contribution

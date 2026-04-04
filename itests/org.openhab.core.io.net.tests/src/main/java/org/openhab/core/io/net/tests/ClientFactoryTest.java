@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
@@ -123,7 +123,7 @@ public class ClientFactoryTest extends JavaOSGiTest {
         TestStreamAdapter streamAdapter = new TestStreamAdapter();
 
         MetaData.Request request = new MetaData.Request(HttpMethod.GET.toString(),
-                new HttpURI(getServer().getHttpUri()), HttpVersion.HTTP_2, new HttpFields());
+                HttpURI.from(getServer().getHttpUri().toString()), HttpVersion.HTTP_2, HttpFields.EMPTY);
 
         HeadersFrame headers = new HeadersFrame(request, null, true);
 
@@ -133,8 +133,8 @@ public class ClientFactoryTest extends JavaOSGiTest {
             client.start();
 
             // establish session
-            client.connect(new InetSocketAddress(getServer().getHost(), getServer().getPort()),
-                    new Session.Listener.Adapter(), sessionCompletable);
+            client.connect(new InetSocketAddress(getServer().getHost(), getServer().getPort()), new Session.Listener() {
+            }, sessionCompletable);
             Session session = sessionCompletable.get(WAIT_SECONDS, TimeUnit.SECONDS);
             assertNotNull(session);
             assertFalse(session.isClosed());
