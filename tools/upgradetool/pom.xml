@@ -17,6 +17,11 @@
   <name>openHAB Core :: Tools :: Upgrade tool</name>
   <description>A tool for upgrading openHAB</description>
 
+  <properties>
+    <jackson.annotations.version>2.22</jackson.annotations.version>
+    <jackson.version>2.22.1</jackson.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>

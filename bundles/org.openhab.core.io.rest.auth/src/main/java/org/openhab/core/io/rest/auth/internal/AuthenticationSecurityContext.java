@@ -12,9 +12,9 @@
  */
 package org.openhab.core.io.rest.auth.internal;
 
-import javax.ws.rs.core.SecurityContext;
-
 import org.openhab.core.auth.Authentication;
+
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * A {@link SecurityContext} holding an instance of {@link Authentication}

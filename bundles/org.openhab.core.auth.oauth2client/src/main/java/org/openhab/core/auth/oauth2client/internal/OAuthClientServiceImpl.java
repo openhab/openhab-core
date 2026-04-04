@@ -28,7 +28,6 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.util.Fields;
-import org.eclipse.jetty.util.UrlEncoded;
 import org.openhab.core.auth.client.oauth2.AccessTokenRefreshListener;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.DeviceCodeResponseDTO;
@@ -175,19 +174,20 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         // parse the redirectURL
         try {
             URL redirectURLObject = (new URI(redirectURLwithParams)).toURL();
-            UrlEncoded urlEncoded = new UrlEncoded(redirectURLObject.getQuery());
+            String query = redirectURLObject.getQuery();
+            String stateFromRedirectURL = parseQueryParam(query, STATE);
+            String extractedCode = parseQueryParam(query, CODE);
 
-            String stateFromRedirectURL = urlEncoded.getValue(STATE, 0); // may contain multiple...
             if (stateFromRedirectURL == null) {
                 if (persistedParams.state == null) {
                     // This should not happen as the state is usually set
-                    return urlEncoded.getValue(CODE, 0);
+                    return extractedCode;
                 } // else
                 throw new OAuthException(String.format("state from redirectURL is incorrect.  Expected: %s Found: %s",
                         persistedParams.state, stateFromRedirectURL));
             } else {
                 if (stateFromRedirectURL.equals(persistedParams.state)) {
-                    return urlEncoded.getValue(CODE, 0);
+                    return extractedCode;
                 } // else
                 throw new OAuthException(String.format("state from redirectURL is incorrect.  Expected: %s Found: %s",
                         persistedParams.state, stateFromRedirectURL));
@@ -195,6 +195,20 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             throw new OAuthException("Redirect URL is malformed", e);
         }
+    }
+
+    private static @Nullable String parseQueryParam(@Nullable String query, String name) {
+        if (query == null) {
+            return null;
+        }
+        for (String pair : query.split("&")) {
+            String[] kv = pair.split("=", 2);
+            if (kv.length == 2
+                    && java.net.URLDecoder.decode(kv[0], java.nio.charset.StandardCharsets.UTF_8).equals(name)) {
+                return java.net.URLDecoder.decode(kv[1], java.nio.charset.StandardCharsets.UTF_8);
+            }
+        }
+        return null;
     }
 
     @Override
