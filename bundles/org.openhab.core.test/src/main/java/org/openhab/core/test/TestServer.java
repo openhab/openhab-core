@@ -14,15 +14,15 @@ package org.openhab.core.test;
 
 import java.util.concurrent.CompletableFuture;
 
-import javax.servlet.Servlet;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.Servlet;
 
 /**
  * Embedded jetty server used in the tests.
@@ -68,9 +68,10 @@ public class TestServer {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                ServletHandler handler = new ServletHandler();
-                handler.addServletWithMapping(servletHolder, "/*");
-                server.setHandler(handler);
+                ServletContextHandler context = new ServletContextHandler();
+                context.setContextPath("/");
+                context.addServlet(servletHolder, "/*");
+                server.setHandler(context);
 
                 // HTTP connector
                 ServerConnector http = new ServerConnector(server);
