@@ -29,7 +29,6 @@ public class LinkableWidgetImpl extends WidgetImpl implements LinkableWidget {
     private List<Widget> widgets = new CopyOnWriteArrayList<>();
 
     public LinkableWidgetImpl() {
-        super();
     }
 
     public LinkableWidgetImpl(Parent parent) {

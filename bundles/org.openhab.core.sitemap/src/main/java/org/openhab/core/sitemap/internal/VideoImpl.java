@@ -27,7 +27,6 @@ public class VideoImpl extends NonLinkableWidgetImpl implements Video {
     private @Nullable String encoding;
 
     public VideoImpl() {
-        super();
     }
 
     public VideoImpl(Parent parent) {

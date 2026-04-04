@@ -26,7 +26,6 @@ public class MapviewImpl extends NonLinkableWidgetImpl implements Mapview {
     private @Nullable Integer height;
 
     public MapviewImpl() {
-        super();
     }
 
     public MapviewImpl(Parent parent) {

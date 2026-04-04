@@ -32,7 +32,6 @@ public class ChartImpl extends NonLinkableWidgetImpl implements Chart {
     private @Nullable String interpolation;
 
     public ChartImpl() {
-        super();
     }
 
     public ChartImpl(Parent parent) {

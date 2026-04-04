@@ -29,7 +29,6 @@ public class ColortemperaturepickerImpl extends NonLinkableWidgetImpl implements
     private @Nullable BigDecimal maxValue;
 
     public ColortemperaturepickerImpl() {
-        super();
     }
 
     public ColortemperaturepickerImpl(Parent parent) {
