@@ -12,13 +12,13 @@
  */
 package org.openhab.core.io.rest.internal;
 
-import javax.ws.rs.core.Application;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationBase;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+
+import jakarta.ws.rs.core.Application;
 
 /**
  * The JAX-RS application for the openHAB JAX-RS resources.
@@ -29,8 +29,8 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
         // https://lists.apache.org/thread.html/
         // r1379789bd90c6b7e3971d5ffeedb2e0d1e1c9103fd2392cb95458596%40%3Cuser.aries.apache.org%3E
         "servlet.init.hide-service-list-page=true" })
-@JaxrsName(RESTConstants.JAX_RS_NAME)
-@JaxrsApplicationBase("rest")
+@JakartarsName(RESTConstants.JAX_RS_NAME)
+@JakartarsApplicationBase("rest")
 @NonNullByDefault
 public class RESTApplicationImpl extends Application {
 }

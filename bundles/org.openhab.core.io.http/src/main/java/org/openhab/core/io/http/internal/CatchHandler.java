@@ -12,13 +12,13 @@
  */
 package org.openhab.core.io.http.internal;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.openhab.core.io.http.Handler;
 import org.openhab.core.io.http.HandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Dedicated kind of delegate handler which provides error handling.

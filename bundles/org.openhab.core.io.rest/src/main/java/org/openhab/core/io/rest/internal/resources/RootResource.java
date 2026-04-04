@@ -16,14 +16,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TimeZoneProvider;
@@ -35,15 +27,15 @@ import org.openhab.core.io.rest.internal.resources.beans.RootBean.Links;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jaxrs.runtime.JaxrsServiceRuntime;
-import org.osgi.service.jaxrs.runtime.dto.ApplicationDTO;
-import org.osgi.service.jaxrs.runtime.dto.ResourceDTO;
-import org.osgi.service.jaxrs.runtime.dto.RuntimeDTO;
-import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
+import org.osgi.service.jakartars.runtime.dto.ApplicationDTO;
+import org.osgi.service.jakartars.runtime.dto.ResourceDTO;
+import org.osgi.service.jakartars.runtime.dto.RuntimeDTO;
+import org.osgi.service.jakartars.whiteboard.JakartarsWhiteboardConstants;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationSelect;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +44,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 /**
  * <p>
@@ -68,9 +67,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(configurationPid = "org.openhab.restroot")
-@JaxrsResource
-@JaxrsName(RootResource.RESOURCE_NAME)
-@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JakartarsResource
+@JakartarsName(RootResource.RESOURCE_NAME)
+@JakartarsApplicationSelect("(" + JakartarsWhiteboardConstants.JAKARTA_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
@@ -81,14 +80,15 @@ public class RootResource implements RESTResource {
     public static final String RESOURCE_NAME = "root";
 
     private final Logger logger = LoggerFactory.getLogger(RootResource.class);
-    private final JaxrsServiceRuntime runtime;
+    private final JakartarsServiceRuntime runtime;
     private final LocaleProvider localeProvider;
     private final UnitProvider unitProvider;
     private final TimeZoneProvider timeZoneProvider;
 
     @Activate
-    public RootResource(final @Reference JaxrsServiceRuntime runtime, final @Reference LocaleProvider localeProvider,
-            final @Reference UnitProvider unitProvider, final @Reference TimeZoneProvider timeZoneProvider) {
+    public RootResource(final @Reference JakartarsServiceRuntime runtime,
+            final @Reference LocaleProvider localeProvider, final @Reference UnitProvider unitProvider,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.runtime = runtime;
         this.localeProvider = localeProvider;
         this.unitProvider = unitProvider;
