@@ -17,12 +17,9 @@ import java.util.Enumeration;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import javax.ws.rs.core.SecurityContext;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.websocket.WebSocketAdapter;
 import org.osgi.service.component.annotations.Activate;
@@ -35,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * The {@link LogWebSocketAdapter} allows subscription to log events over WebSocket
@@ -77,15 +76,15 @@ public class LogWebSocketAdapter implements WebSocketAdapter {
     }
 
     @Override
-    public @Nullable Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
-            ServletUpgradeResponse servletUpgradeResponse, SecurityContext securityContext) {
+    public Object createWebSocket(JettyServerUpgradeRequest servletUpgradeRequest,
+            JettyServerUpgradeResponse servletUpgradeResponse, SecurityContext securityContext) {
         if (securityContext.isUserInRole(Role.ADMIN)) {
             return new LogWebSocket(gson, LogWebSocketAdapter.this);
         }
         try {
             servletUpgradeResponse.sendForbidden("Admin role required.");
         } catch (IOException e) {
-            logger.warn("Failed to send forbidden response to {}", servletUpgradeRequest.getRemoteAddress(), e);
+            logger.warn("Failed to send forbidden response to {}", servletUpgradeRequest.getRemoteSocketAddress(), e);
         }
         return null;
     }
