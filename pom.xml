@@ -74,8 +74,8 @@
     <bnd.version>7.2.1</bnd.version>
     <commons.net.version>3.12.0</commons.net.version>
     <eea.version>2.4.0</eea.version>
-    <karaf.compile.version>4.4.10</karaf.compile.version>
-    <karaf.tooling.version>4.4.10</karaf.tooling.version>
+    <karaf.compile.version>4.5.0-SNAPSHOT</karaf.compile.version>
+    <karaf.tooling.version>4.5.0-SNAPSHOT</karaf.tooling.version>
     <sat.version>0.18.0</sat.version>
     <slf4j.version>2.0.17</slf4j.version>
     <xtext.version>2.41.0</xtext.version>
@@ -83,11 +83,9 @@
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>
     <spotless.eclipse.wtp.version>4.21.0</spotless.eclipse.wtp.version>
-    <swagger.version>2.2.43</swagger.version>
+    <swagger.version>2.2.31</swagger.version>
 
     <!-- TEST -->
-    <!-- cxf can be updated independently, karaf only uses it in tests -->
-    <cxf.version>3.6.10</cxf.version>
     <junit.version>5.14.2</junit.version>
     <mockito.version>5.21.0</mockito.version>
   </properties>
@@ -374,7 +372,7 @@ Import-Package: \
             <additionalDependencies>
               <dependency>
                 <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-annotations</artifactId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
                 <version>${swagger.version}</version>
                 <scope>compile</scope>
               </dependency>

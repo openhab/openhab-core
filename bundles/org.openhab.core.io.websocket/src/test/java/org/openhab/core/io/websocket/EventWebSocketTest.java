@@ -28,7 +28,6 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,7 +73,6 @@ public class EventWebSocketTest {
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisher;
     private @Mock @NonNullByDefault({}) Session session;
-    private @Mock @NonNullByDefault({}) RemoteEndpoint remoteEndpoint;
 
     private @NonNullByDefault({}) ItemEventUtility itemEventUtility;
     private @NonNullByDefault({}) EventWebSocket eventWebSocket;
@@ -84,12 +82,11 @@ public class EventWebSocketTest {
         itemEventUtility = new ItemEventUtility(gson, itemRegistry);
         eventWebSocket = new EventWebSocket(gson, servlet, itemEventUtility, eventPublisher);
 
-        when(session.getRemote()).thenReturn(remoteEndpoint);
-        when(remoteEndpoint.getInetSocketAddress()).thenReturn(new InetSocketAddress(47115));
+        when(session.getRemoteSocketAddress()).thenReturn(new InetSocketAddress(47115));
 
         when(itemRegistry.getItem(eq(TEST_ITEM_NAME))).thenReturn(TEST_ITEM);
 
-        eventWebSocket.onConnect(session);
+        eventWebSocket.onOpen(session);
         verify(servlet).registerListener(eventWebSocket);
     }
 
@@ -199,7 +196,7 @@ public class EventWebSocketTest {
         eventWebSocket.processEvent(event);
         EventDTO eventDTO = new EventDTO(event);
 
-        verify(remoteEndpoint).sendString(eq(gson.toJson(eventDTO)), any());
+        verify(session).sendText(eq(gson.toJson(eventDTO)), any());
     }
 
     @Test
@@ -209,18 +206,18 @@ public class EventWebSocketTest {
         EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/type",
                 eventDTO.payload, null, null);
         eventWebSocket.onText(gson.toJson(eventDTO));
-        verify(remoteEndpoint).sendString(eq(gson.toJson(responseEventDTO)), any());
+        verify(session).sendText(eq(gson.toJson(responseEventDTO)), any());
 
         // subscribed type is sent
         Event event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO,
                 REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
         // not subscribed event not sent
         event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint, times(2)).sendString(any(), any());
+        verify(session, times(2)).sendText(any(), any());
     }
 
     @Test
@@ -230,17 +227,17 @@ public class EventWebSocketTest {
         EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/source",
                 eventDTO.payload, null, null);
         eventWebSocket.onText(gson.toJson(eventDTO));
-        verify(remoteEndpoint).sendString(eq(gson.toJson(responseEventDTO)), any());
+        verify(session).sendText(eq(gson.toJson(responseEventDTO)), any());
 
         // non-matching is sent
         Event event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
         // matching is not sent
         event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint, times(2)).sendString(any(), any());
+        verify(session, times(2)).sendText(any(), any());
     }
 
     @Test
@@ -258,36 +255,36 @@ public class EventWebSocketTest {
         EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
                 eventDTO.payload, null, null);
         eventWebSocket.onText(gson.toJson(eventDTO));
-        verify(remoteEndpoint).sendString(eq(gson.toJson(responseEventDTO)), any());
-        clearInvocations(remoteEndpoint);
+        verify(session).sendText(eq(gson.toJson(responseEventDTO)), any());
+        clearInvocations(session);
 
         // subscribed topics are sent
         Event event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO,
                 REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
         event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO, null,
                 null);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
         event = ItemEventFactory.createStateEvent(REX_TEST_ITEM_NAME, DecimalType.ZERO,
                 REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
-        clearInvocations(remoteEndpoint);
+        clearInvocations(session);
 
         // not subscribed topics are not sent
         event = ItemEventFactory.createCommandEvent(REX_TEST_ITEM_NAME, DecimalType.ZERO,
                 REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint, never()).sendString(any(), any());
+        verify(session, never()).sendText(any(), any());
 
         event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint, never()).sendString(any(), any());
+        verify(session, never()).sendText(any(), any());
     }
 
     @Test
@@ -300,38 +297,38 @@ public class EventWebSocketTest {
         EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
                 eventDTO.payload, null, null);
         eventWebSocket.onText(gson.toJson(eventDTO));
-        verify(remoteEndpoint).sendString(eq(gson.toJson(responseEventDTO)), any());
-        clearInvocations(remoteEndpoint);
+        verify(session).sendText(eq(gson.toJson(responseEventDTO)), any());
+        clearInvocations(session);
 
         // excluded topics are not sent
         Event event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO,
                 REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint, never()).sendString(any(), any());
+        verify(session, never()).sendText(any(), any());
 
         event = ItemEventFactory.createStateEvent(REX_TEST_ITEM_NAME, DecimalType.ZERO,
                 REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint, never()).sendString(any(), any());
+        verify(session, never()).sendText(any(), any());
 
         // not excluded topics are sent
         event = ItemEventFactory.createCommandEvent(REX_TEST_ITEM_NAME, DecimalType.ZERO,
                 REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
         event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO, null,
                 null);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
         event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
         event = ItemEventFactory.createStateEvent("anotherItem", DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
     }
 
     @Test
@@ -341,23 +338,23 @@ public class EventWebSocketTest {
         EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
                 eventDTO.payload, null, null);
         eventWebSocket.onText(gson.toJson(eventDTO));
-        verify(remoteEndpoint).sendString(eq(gson.toJson(responseEventDTO)), any());
-        clearInvocations(remoteEndpoint);
+        verify(session).sendText(eq(gson.toJson(responseEventDTO)), any());
+        clearInvocations(session);
 
         // included topics are sent
         Event event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO, null,
                 null);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
         event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint).sendString(eq(gson.toJson(new EventDTO(event))), any());
+        verify(session).sendText(eq(gson.toJson(new EventDTO(event))), any());
 
         // excluded sub-topics are not sent
         event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
-        verify(remoteEndpoint, times(2)).sendString(any(), any());
+        verify(session, times(2)).sendText(any(), any());
     }
 
     private void assertEventProcessing(EventDTO incoming, @Nullable Event expectedEvent,
@@ -372,9 +369,9 @@ public class EventWebSocketTest {
 
         if (expectedResponse != null) {
             String expectedResponseString = gson.toJson(expectedResponse);
-            verify(remoteEndpoint).sendString(eq(expectedResponseString), any());
+            verify(session).sendText(eq(expectedResponseString), any());
         } else {
-            verify(remoteEndpoint, never()).sendString(any());
+            verify(session, never()).sendText(any(), any());
         }
     }
 }

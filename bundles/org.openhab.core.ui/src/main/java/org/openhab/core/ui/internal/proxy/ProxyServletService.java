@@ -22,16 +22,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.sitemap.Image;
@@ -41,14 +34,21 @@ import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.ops4j.pax.web.service.http.HttpService;
+import org.ops4j.pax.web.service.http.NamespaceException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * The proxy servlet is used by image and video widgets. As its name suggests, it proxies the content, so
@@ -307,7 +307,7 @@ public class ProxyServletService extends HttpServlet {
                 String authString = password != null ? user + ":" + password : user + ":";
 
                 String basicAuthentication = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes());
-                request.header(HttpHeader.AUTHORIZATION, basicAuthentication);
+                request.headers(f -> f.add(HttpHeader.AUTHORIZATION, basicAuthentication));
             }
         }
     }
