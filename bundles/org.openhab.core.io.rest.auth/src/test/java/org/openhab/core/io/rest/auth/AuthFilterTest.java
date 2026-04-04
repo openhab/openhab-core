@@ -25,10 +25,6 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.SecurityContext;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +44,10 @@ import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.io.rest.auth.internal.JwtHelper;
 import org.openhab.core.io.rest.auth.internal.JwtSecurityContext;
 import org.openhab.core.io.rest.auth.internal.UserSecurityContext;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * The {@link AuthFilterTest} is a
