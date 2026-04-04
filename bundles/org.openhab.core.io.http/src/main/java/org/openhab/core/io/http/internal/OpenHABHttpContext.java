@@ -20,18 +20,20 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.openhab.core.io.http.Handler;
 import org.openhab.core.io.http.WrappingHttpContext;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardContext;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardContext;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Default HTTP context implementation which groups all openHAB related HTTP elements into one logical application.
@@ -42,14 +44,19 @@ import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardContext;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
-@Component(service = { HttpContext.class, WrappingHttpContext.class })
+@Component(service = { ServletContextHelper.class, WrappingHttpContext.class })
 @HttpWhiteboardContext(path = "/", name = "oh-dfl-http-ctx")
-public class OpenHABHttpContext implements WrappingHttpContext {
+public class OpenHABHttpContext extends WrappingHttpContext {
 
     /**
      * Sorted list of handlers, where handler with priority 0 is first.
      */
     private final List<Handler> handlers = new CopyOnWriteArrayList<>();
+
+    @Activate
+    public OpenHABHttpContext(BundleContext bundleContext) {
+        super(bundleContext.getBundle());
+    }
 
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -71,7 +78,7 @@ public class OpenHABHttpContext implements WrappingHttpContext {
     }
 
     @Override
-    public HttpContext wrap(Bundle bundle) {
+    public ServletContextHelper wrap(Bundle bundle) {
         return new BundleHttpContext(this, bundle);
     }
 

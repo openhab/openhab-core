@@ -24,20 +24,11 @@ import javax.net.ssl.TrustManager;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.HttpDestination;
-import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.client.HttpProxy;
-import org.eclipse.jetty.client.api.Connection;
-import org.eclipse.jetty.client.http.HttpChannelOverHTTP;
-import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
-import org.eclipse.jetty.client.http.HttpConnectionOverHTTP;
-import org.eclipse.jetty.client.http.HttpReceiverOverHTTP;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.http.PreEncodedHttpField;
 import org.eclipse.jetty.http2.client.HTTP2Client;
-import org.eclipse.jetty.io.EndPoint;
-import org.eclipse.jetty.util.Promise;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -152,7 +143,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     @Override
-    public HttpClient createHttpClient(String consumerName, @Nullable SslContextFactory sslContextFactory) {
+    public HttpClient createHttpClient(String consumerName, SslContextFactory.@Nullable Client sslContextFactory) {
         logger.debug("http client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
         return createHttpClientInternal(consumerName, sslContextFactory, false, null);
@@ -164,7 +155,8 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     @Override
-    public WebSocketClient createWebSocketClient(String consumerName, @Nullable SslContextFactory sslContextFactory) {
+    public WebSocketClient createWebSocketClient(String consumerName,
+            SslContextFactory.@Nullable Client sslContextFactory) {
         logger.debug("web socket client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
         return createWebSocketClientInternal(consumerName, sslContextFactory, false, null);
@@ -269,13 +261,14 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
     }
 
-    private HttpClient createHttpClientInternal(String consumerName, @Nullable SslContextFactory sslContextFactory,
-            boolean startClient, @Nullable QueuedThreadPool threadPool) {
+    private HttpClient createHttpClientInternal(String consumerName,
+            SslContextFactory.@Nullable Client sslContextFactory, boolean startClient,
+            @Nullable QueuedThreadPool threadPool) {
         try {
             logger.debug("creating http client for consumer {}", consumerName);
 
-            HttpClient httpClient = new HttpClient(new CustomHttpClientTransportOverHTTP(),
-                    sslContextFactory != null ? sslContextFactory : createSslContextFactory());
+            HttpClient httpClient = new HttpClient();
+            httpClient.setSslContextFactory(sslContextFactory != null ? sslContextFactory : createSslContextFactory());
 
             // If proxy is set as property (standard Java property), provide the proxy information to Jetty HTTP
             // Client
@@ -287,7 +280,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                 if (sProxyPort != null) {
                     try {
                         int port = Integer.parseInt(sProxyPort);
-                        httpClient.getProxyConfiguration().getProxies().add(new HttpProxy(httpProxyHost, port));
+                        httpClient.getProxyConfiguration().addProxy(new HttpProxy(httpProxyHost, port));
                     } catch (NumberFormatException ex) {
                         // this was not a correct port. Ignoring.
                         logger.debug("HTTP Proxy detected (http.proxyHost), but invalid proxyport. Ignoring proxy.");
@@ -298,7 +291,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                 if (sProxyPort != null) {
                     try {
                         int port = Integer.parseInt(sProxyPort);
-                        httpClient.getProxyConfiguration().getProxies().add(new HttpProxy(httpsProxyHost, port));
+                        httpClient.getProxyConfiguration().addProxy(new HttpProxy(httpsProxyHost, port));
                     } catch (NumberFormatException ex) {
                         // this was not a correct port. Ignoring.
                         logger.debug("HTTP Proxy detected (https.proxyHost), but invalid proxyport. Ignoring proxy.");
@@ -335,12 +328,13 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     private WebSocketClient createWebSocketClientInternal(String consumerName,
-            @Nullable SslContextFactory sslContextFactory, boolean startClient, @Nullable QueuedThreadPool threadPool) {
+            SslContextFactory.@Nullable Client sslContextFactory, boolean startClient,
+            @Nullable QueuedThreadPool threadPool) {
         try {
             logger.debug("creating web socket client for consumer {}", consumerName);
 
-            HttpClient httpClient = new HttpClient(
-                    sslContextFactory != null ? sslContextFactory : createSslContextFactory());
+            HttpClient httpClient = new HttpClient();
+            httpClient.setSslContextFactory(sslContextFactory != null ? sslContextFactory : createSslContextFactory());
             if (threadPool != null) {
                 httpClient.setExecutor(threadPool);
             } else {
@@ -392,8 +386,8 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
     }
 
-    private SslContextFactory createSslContextFactory() {
-        SslContextFactory sslContextFactory = new SslContextFactory.Client();
+    private SslContextFactory.Client createSslContextFactory() {
+        SslContextFactory.Client sslContextFactory = new SslContextFactory.Client();
         sslContextFactory.setEndpointIdentificationAlgorithm("HTTPS");
 
         try {
@@ -414,13 +408,14 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     @Override
-    public HTTP2Client createHttp2Client(String consumerName, @Nullable SslContextFactory sslContextFactory) {
+    public HTTP2Client createHttp2Client(String consumerName, SslContextFactory.@Nullable Client sslContextFactory) {
         logger.debug("http client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
         return createHttp2ClientInternal(consumerName, sslContextFactory);
     }
 
-    private HTTP2Client createHttp2ClientInternal(String consumerName, @Nullable SslContextFactory sslContextFactory) {
+    private HTTP2Client createHttp2ClientInternal(String consumerName,
+            SslContextFactory.@Nullable Client sslContextFactory) {
         try {
             logger.debug("creating HTTP/2 client for consumer {}", consumerName);
 
@@ -450,50 +445,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         } catch (Exception e) {
             throw new HttpClientInitializationException(
                     "unexpected checked exception during initialization of the Jetty HTTP/2 client", e);
-        }
-    }
-
-    /**
-     * Extends the default {@link HttpClientTransportOverHTTP} but exposes the underling {@link EndPoint} of each
-     * request/response.
-     * It mimics the way it's done in higher Jetty Http client versions.
-     */
-    private static class CustomHttpClientTransportOverHTTP extends HttpClientTransportOverHTTP {
-        @Override
-        @NonNullByDefault({})
-        protected HttpConnectionOverHTTP newHttpConnection(EndPoint endPoint, HttpDestination destination,
-                Promise<Connection> promise) {
-            return new HttpConnectionOverHTTP(endPoint, destination, promise) {
-                @Override
-                protected HttpChannelOverHTTP newHttpChannel() {
-                    return new HttpChannelOverHTTP(this) {
-                        @Override
-                        protected HttpReceiverOverHTTP newHttpReceiver() {
-                            return new CustomHttpReceiverOverHTTP(this);
-                        }
-                    };
-                }
-            };
-        }
-
-        private static class CustomHttpReceiverOverHTTP extends HttpReceiverOverHTTP {
-            private final HttpChannelOverHTTP channel;
-
-            public CustomHttpReceiverOverHTTP(HttpChannelOverHTTP channel) {
-                super(channel);
-                this.channel = channel;
-            }
-
-            @Override
-            public boolean headerComplete() {
-                HttpExchange exchange = getHttpExchange();
-                if (exchange != null) {
-                    // Store the EndPoint is case of upgrades
-                    exchange.getRequest().getConversation().setAttribute(EndPoint.class.getName(),
-                            channel.getHttpConnection().getEndPoint());
-                }
-                return super.headerComplete();
-            }
         }
     }
 }

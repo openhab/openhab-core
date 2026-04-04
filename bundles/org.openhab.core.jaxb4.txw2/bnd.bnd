@@ -1,0 +1,9 @@
+# txw2 4.0.x is published without OSGi metadata (no Bundle-SymbolicName, no Export-Package), but jaxb-core and
+# jaxb-runtime import com.sun.xml.txw2 as mandatory. This bundle embeds and exports it for the bnd resolvers
+# (itests, demo app), which cannot wrap plain jars. In Karaf, the framework feature already installs txw2 via
+# wrap:, so openhab-tp lists this bundle with dependency="true" and it is normally not installed.
+# Keep Bundle-Version and the txw2 version in pom.xml in line with jaxb-core and jaxb-runtime.
+# Remove this bundle once txw2 is published with OSGi metadata.
+Bundle-SymbolicName: org.glassfish.jaxb.txw2
+Bundle-Version: 4.0.9
+Export-Package: com.sun.xml.txw2.*

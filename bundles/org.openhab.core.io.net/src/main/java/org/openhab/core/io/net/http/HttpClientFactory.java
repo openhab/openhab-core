@@ -51,11 +51,11 @@ public interface HttpClientFactory {
      *
      * @param consumerName the for identifying the consumer in the Jetty thread pool.
      *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
-     * @param sslContextFactory the SSL factory managing TLS encryption
+     * @param sslContextFactory the client-side SSL factory managing TLS encryption, or {@code null} for the default
      * @return the Jetty client
      * @throws IllegalArgumentException if {@code consumerName} is invalid
      */
-    HttpClient createHttpClient(String consumerName, @Nullable SslContextFactory sslContextFactory);
+    HttpClient createHttpClient(String consumerName, SslContextFactory.@Nullable Client sslContextFactory);
 
     /**
      * Returns the shared Jetty http client. You must not call any setter methods or {@code stop()} on it.
@@ -88,9 +88,9 @@ public interface HttpClientFactory {
      *
      * @param consumerName for identifying the consumer in the Jetty thread pool.
      *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
-     * @param sslContextFactory the SSL factory managing TLS encryption
+     * @param sslContextFactory the client-side SSL factory managing TLS encryption, or {@code null} for the default
      * @return the Jetty HTTP/2 client
      * @throws IllegalArgumentException if {@code consumerName} is invalid
      */
-    HTTP2Client createHttp2Client(String consumerName, @Nullable SslContextFactory sslContextFactory);
+    HTTP2Client createHttp2Client(String consumerName, SslContextFactory.@Nullable Client sslContextFactory);
 }
