@@ -25,6 +25,7 @@ import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
 import org.openhab.core.sitemap.Condition;
+import org.openhab.core.sitemap.Default;
 import org.openhab.core.sitemap.Image;
 import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
@@ -160,6 +161,12 @@ public class UIComponentSitemapMapper {
                 addConfig(widgetComponent, "forceAsItem", chartWidget.forceAsItem());
                 addConfig(widgetComponent, "yAxisDecimalPattern", chartWidget.getYAxisDecimalPattern());
                 addConfig(widgetComponent, "interpolation", chartWidget.getInterpolation());
+            }
+            case Default defaultWidget -> {
+                int height = defaultWidget.getHeight();
+                if (height > 0) {
+                    addConfig(widgetComponent, "height", height);
+                }
             }
             default -> {
                 // Nothing to do

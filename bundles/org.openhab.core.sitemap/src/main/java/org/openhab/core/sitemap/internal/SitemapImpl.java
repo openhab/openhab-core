@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Widget;
-import org.openhab.core.sitemap.registry.SitemapFactory;
 
 /**
  * @author Mark Herwege - Initial contribution
@@ -38,16 +37,15 @@ public class SitemapImpl implements Sitemap {
     }
 
     /**
-     * Method to create a sitemap with the given name. This method is only meant to be called from a
-     * {@link SitemapFactory} implementation and will check the provided name is not null and is valid.
+     * Method to create a sitemap with the given name.
      *
-     * @param name the name of the sitemap, must be non-null and match the pattern defined in NAME_PATTERN.
+     * @param name the name of the sitemap, must match the pattern defined in NAME_PATTERN.
      *
      * @throws IllegalArgumentException if the provided name is null or does not match the required pattern.
      */
-    public SitemapImpl(@Nullable String name) {
-        if (name == null || !name.matches(NAME_PATTERN)) {
-            throw new IllegalArgumentException("Sitemap name must be non-null and match the pattern: " + NAME_PATTERN);
+    public SitemapImpl(String name) {
+        if (!name.matches(NAME_PATTERN)) {
+            throw new IllegalArgumentException("Sitemap name must match the pattern: " + NAME_PATTERN);
         }
         this.name = name;
     }

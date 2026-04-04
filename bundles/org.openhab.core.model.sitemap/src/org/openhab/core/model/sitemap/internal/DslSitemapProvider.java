@@ -133,8 +133,9 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
 
     @Override
     public @Nullable Sitemap getSitemap(String sitemapName) {
-        Sitemap sitemap = sitemapCache.values().stream().flatMap(c -> c.stream())
-                .filter(s -> sitemapName.equals(s.getName())).findAny().orElse(null);
+        Sitemap sitemap = sitemapCache.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
+                .flatMap(e -> e.getValue().stream()).filter(s -> sitemapName.equals(s.getName())).findAny()
+                .orElse(null);
         if (sitemap == null) {
             logger.trace("Sitemap {} cannot be found", sitemapName);
         }
@@ -431,7 +432,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
 
     @Override
     public Collection<Sitemap> getAll() {
-        return sitemapCache.values().stream().flatMap(c -> c.stream()).filter(s -> !isIsolatedModel(s.getName()))
-                .collect(Collectors.toSet());
+        return sitemapCache.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
+                .flatMap(e -> e.getValue().stream()).collect(Collectors.toSet());
     }
 }
