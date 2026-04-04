@@ -32,10 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,6 +80,7 @@ import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 
 import com.google.gson.Gson;
+import jakarta.ws.rs.core.HttpHeaders;
 
 /**
  * Tests for PersistenceItem REST resource

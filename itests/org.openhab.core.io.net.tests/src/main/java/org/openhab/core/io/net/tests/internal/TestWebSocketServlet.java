@@ -16,8 +16,8 @@ import java.io.Serial;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
 
 /**
  * Servlet for org.openhab.core.io.net tests.
@@ -25,14 +25,12 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class TestWebSocketServlet extends WebSocketServlet {
+public class TestWebSocketServlet extends JettyWebSocketServlet {
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Override
-    public void configure(@Nullable WebSocketServletFactory factory) {
-        if (factory != null) {
-            factory.register(TestWebSocketAdapter.class);
-        }
+    public void configure(@Nullable JettyWebSocketServletFactory factory) {
+        factory.setCreator((req, resp) -> new TestWebSocketAdapter());
     }
 }
