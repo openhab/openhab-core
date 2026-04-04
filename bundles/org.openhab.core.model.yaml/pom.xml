@@ -55,5 +55,10 @@
       <artifactId>org.openhab.core.sitemap</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>3.0.0</version>
+    </dependency>
   </dependencies>
 </project>

@@ -18,13 +18,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 /**
- * Create {@link HttpContext} instances when registering servlets, resources or filters using the
- * {@link HttpService#registerServlet} and corresponding methods.
- * The resulting {@link HttpContext} complies with the OSGi specification when it comes to resource resolving.
+ * Create {@link ServletContextHelper} instances for bundle-specific resource serving via the whiteboard.
  *
  * @author Henning Treu - Initial contribution
  */
@@ -34,7 +31,7 @@ public class HttpContextFactoryServiceImpl implements HttpContextFactoryService 
     private WrappingHttpContext httpContext;
 
     @Override
-    public HttpContext createDefaultHttpContext(Bundle bundle) {
+    public ServletContextHelper createDefaultHttpContext(Bundle bundle) {
         return httpContext.wrap(bundle);
     }
 

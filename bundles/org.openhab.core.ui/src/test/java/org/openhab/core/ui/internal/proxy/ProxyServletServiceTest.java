@@ -18,15 +18,16 @@ import static org.mockito.Mockito.*;
 import java.net.URI;
 import java.util.Base64;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.function.Consumer;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpHeader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -40,7 +41,9 @@ import org.openhab.core.sitemap.Video;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.ui.items.ItemUIRegistry;
-import org.osgi.service.http.HttpService;
+import org.ops4j.pax.web.service.http.HttpService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Unit tests for the {@link ProxyServletService} class.
@@ -111,8 +114,13 @@ public class ProxyServletServiceTest {
         Request request = mock(Request.class);
         URI uri = URI.create("http://testuser:testpassword@127.0.0.1:8080/content");
         service.maybeAppendAuthHeader(uri, request);
-        verify(request).header(HttpHeader.AUTHORIZATION,
-                "Basic " + Base64.getEncoder().encodeToString("testuser:testpassword".getBytes()));
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Consumer<HttpFields.Mutable>> captor = ArgumentCaptor.forClass(Consumer.class);
+        verify(request).headers(captor.capture());
+        HttpFields.Mutable fields = HttpFields.build();
+        captor.getValue().accept(fields);
+        assertEquals("Basic " + Base64.getEncoder().encodeToString("testuser:testpassword".getBytes()),
+                fields.get(HttpHeader.AUTHORIZATION));
     }
 
     @Test
@@ -120,8 +128,13 @@ public class ProxyServletServiceTest {
         Request request = mock(Request.class);
         URI uri = URI.create("http://testuser@127.0.0.1:8080/content");
         service.maybeAppendAuthHeader(uri, request);
-        verify(request).header(HttpHeader.AUTHORIZATION,
-                "Basic " + Base64.getEncoder().encodeToString("testuser:".getBytes()));
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Consumer<HttpFields.Mutable>> captor = ArgumentCaptor.forClass(Consumer.class);
+        verify(request).headers(captor.capture());
+        HttpFields.Mutable fields = HttpFields.build();
+        captor.getValue().accept(fields);
+        assertEquals("Basic " + Base64.getEncoder().encodeToString("testuser:".getBytes()),
+                fields.get(HttpHeader.AUTHORIZATION));
     }
 
     @Test
@@ -129,7 +142,7 @@ public class ProxyServletServiceTest {
         Request request = mock(Request.class);
         URI uri = URI.create("http://127.0.0.1:8080/content");
         service.maybeAppendAuthHeader(uri, request);
-        verify(request, never()).header(any(HttpHeader.class), anyString());
+        verify(request, never()).headers(any());
     }
 
     @Test
