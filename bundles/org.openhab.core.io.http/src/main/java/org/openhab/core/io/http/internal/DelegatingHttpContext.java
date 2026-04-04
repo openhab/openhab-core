@@ -15,21 +15,21 @@ package org.openhab.core.io.http.internal;
 import java.io.IOException;
 import java.net.URL;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
-import org.osgi.service.http.HttpContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Http context which does nothing but lets the delegate do its job.
  *
  * @author Łukasz Dywicki - Initial contribution.
  */
-class DelegatingHttpContext implements HttpContext {
+class DelegatingHttpContext extends ServletContextHelper {
 
-    private final HttpContext delegate;
+    private final ServletContextHelper delegate;
 
-    public DelegatingHttpContext(HttpContext delegate) {
+    public DelegatingHttpContext(ServletContextHelper delegate) {
         this.delegate = delegate;
     }
 

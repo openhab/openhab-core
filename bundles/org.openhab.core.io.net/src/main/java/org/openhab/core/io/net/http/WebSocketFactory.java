@@ -49,12 +49,12 @@ public interface WebSocketFactory {
      *
      * @param consumerName the for identifying the consumer in the Jetty thread pool.
      *            Must be between 4 and 20 characters long and must contain only the following characters [a-zA-Z0-9-_]
-     * @param sslContextFactory the SSL factory managing TLS encryption
+     * @param sslContextFactory the client-side SSL factory managing TLS encryption, or {@code null} for the default
      * @return the Jetty client
      * @throws NullPointerException if {@code consumerName} is {@code null}
      * @throws IllegalArgumentException if {@code consumerName} is invalid
      */
-    WebSocketClient createWebSocketClient(String consumerName, @Nullable SslContextFactory sslContextFactory);
+    WebSocketClient createWebSocketClient(String consumerName, SslContextFactory.@Nullable Client sslContextFactory);
 
     /**
      * Returns a shared Jetty web socket client. You must not call any setter methods or {@code stop()} on it.
