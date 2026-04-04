@@ -22,8 +22,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +37,8 @@ import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * The {@link ItemChannelLinkResourceTest} tests the {@link ItemChannelLinkResource}
