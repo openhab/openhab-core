@@ -24,9 +24,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
@@ -44,6 +41,9 @@ import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Tests the validation of the OAuth2 authorization request performed by the {@link AuthorizePageServlet}, which

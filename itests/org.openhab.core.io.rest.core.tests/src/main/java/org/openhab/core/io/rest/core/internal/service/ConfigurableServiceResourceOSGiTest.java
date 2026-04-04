@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +34,8 @@ import org.openhab.core.test.AsyncResultWrapper;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * {@link ConfigurableServiceResourceOSGiTest} tests the ConfigurableService REST resource on the OSGi level.
