@@ -13,7 +13,7 @@ VariableDeclaration:
 
 Rule:
 	'rule' name=(STRING|ID) ('[' tags+=(ID|STRING) (',' tags+=(ID|STRING))* ']')?
-	'when' eventtrigger+=EventTrigger ('or' eventtrigger+=EventTrigger)*
+	'when' (eventtrigger+=EventTrigger ('or' eventtrigger+=EventTrigger)*)?
 	'then' script=XExpressionInClosure
 	'end'
 ;
