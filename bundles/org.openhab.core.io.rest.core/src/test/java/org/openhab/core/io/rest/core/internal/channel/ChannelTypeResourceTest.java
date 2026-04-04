@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.ws.rs.core.Response;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +37,8 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * @author Henning Treu - Initial contribution
