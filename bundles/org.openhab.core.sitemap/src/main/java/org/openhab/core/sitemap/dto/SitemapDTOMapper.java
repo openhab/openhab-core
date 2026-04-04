@@ -200,7 +200,10 @@ public class SitemapDTOMapper {
         }
 
         if (widget instanceof LinkableWidget linkableWidget) {
-            widgetDTO.widgets = linkableWidget.getWidgets().stream().map(SitemapDTOMapper::map).toList();
+            List<Widget> widgets = linkableWidget.getWidgets();
+            if (!widgets.isEmpty()) {
+                widgetDTO.widgets = widgets.stream().map(SitemapDTOMapper::map).toList();
+            }
         }
         return widgetDTO;
     }
