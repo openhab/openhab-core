@@ -557,7 +557,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      *
      * @param properties properties map, that was updated and should be persisted (all properties cleared if null)
      */
-    protected void updateProperties(@Nullable Map<String, @Nullable String> properties) {
+    protected void updateProperties(@Nullable Map<String, String> properties) {
         if (properties == null) {
             updatePropertiesInternal(null);
         } else {
