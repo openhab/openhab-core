@@ -54,6 +54,7 @@ import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapProvider;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
+import org.openhab.core.ui.components.ManagedSitemapProvider;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
@@ -79,16 +80,19 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Add support for Button element
  * @author Laurent Garnier - Added support for new sitemap element Colortemperaturepicker
  * @author Mark Herwege - Implement sitemap registry
+ * @author Mark Herwege - Make provider managed and add support for adding/updating/removing sitemaps via the provider
+ *         interface
  */
 @NonNullByDefault
-@Component(service = SitemapProvider.class, immediate = true)
+@Component(service = { SitemapProvider.class, ManagedSitemapProvider.class }, immediate = true)
 public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
-        implements SitemapProvider, RegistryChangeListener<RootUIComponent> {
+        implements ManagedSitemapProvider, SitemapProvider, RegistryChangeListener<RootUIComponent> {
+
     private final Logger logger = LoggerFactory.getLogger(UIComponentSitemapProvider.class);
 
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
-    private static final String SITEMAP_PREFIX = "uicomponents_";
+    static final String SITEMAP_PREFIX = "uicomponents_";
 
     private static final Pattern CONDITION_PATTERN = Pattern
             .compile("((?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>))?\\s*(?<value>(\\+|-)?.+)");
@@ -475,5 +479,37 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 notifyListenersAboutAddedElement(sitemap);
             }
         }
+    }
+
+    @Override
+    public void add(Sitemap element) {
+        UIComponentRegistry sitemapComponentRegistry = this.sitemapComponentRegistry;
+        if (sitemapComponentRegistry != null) {
+            sitemapComponentRegistry.add(UIComponentSitemapMapper.map(element));
+        }
+    }
+
+    @Override
+    public @Nullable Sitemap remove(String key) {
+        Sitemap sitemap = sitemaps.get(key);
+        UIComponentRegistry sitemapComponentRegistry = this.sitemapComponentRegistry;
+        if (sitemapComponentRegistry != null) {
+            String sitemapName = key.startsWith(SITEMAP_PREFIX) ? key.substring(SITEMAP_PREFIX.length()) : key;
+            sitemapComponentRegistry.remove(sitemapName);
+            return sitemap;
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable Sitemap update(Sitemap element) {
+        Sitemap sitemap = remove(element.getName());
+        add(element);
+        return sitemap;
+    }
+
+    @Override
+    public @Nullable Sitemap get(String key) {
+        return getSitemap(key);
     }
 }

@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.sitemap.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -52,10 +53,14 @@ import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
+import org.openhab.core.sitemap.internal.SitemapImpl;
+import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.ui.components.ManagedSitemapProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 import org.osgi.framework.BundleContext;
@@ -116,7 +121,9 @@ public class SitemapResourceTest extends JavaTest {
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
     private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
+    private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactory;
     private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistryMock;
+    private @Mock @NonNullByDefault({}) ManagedSitemapProvider managedSitemapProviderMock;
     private @Mock @NonNullByDefault({}) UriInfo uriInfoMock;
     private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
 
@@ -127,8 +134,8 @@ public class SitemapResourceTest extends JavaTest {
         subscriptions = new SitemapSubscriptionService(Collections.emptyMap(), itemUIRegistryMock, sitemapRegistryMock,
                 timeZoneProviderMock, bundleContextMock);
 
-        sitemapResource = new SitemapResource(itemUIRegistryMock, sitemapRegistryMock, localeServiceMock,
-                timeZoneProviderMock, subscriptions);
+        sitemapResource = new SitemapResource(itemUIRegistryMock, sitemapFactory, sitemapRegistryMock,
+                managedSitemapProviderMock, localeServiceMock, timeZoneProviderMock, subscriptions);
 
         when(uriInfoMock.getAbsolutePathBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));
         when(uriInfoMock.getBaseUriBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));
@@ -154,6 +161,103 @@ public class SitemapResourceTest extends JavaTest {
 
         // Disable long polling
         when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(null);
+    }
+
+    @Test
+    public void whenGetSitemapsDefinition_shouldSetEditableFlag() {
+        // sitemapRegistryMock.getAll() already returns Set.of(defaultSitemapMock) via configureSitemapRegistryMock
+        // This test will have that sitemap be a managed sitemap
+        when(managedSitemapProviderMock.get(SITEMAP_NAME)).thenReturn(new SitemapImpl(SITEMAP_NAME));
+
+        Response resp = sitemapResource.getSitemapsDefinition();
+        assertThat(resp.getStatus(), is(200));
+
+        @SuppressWarnings("unchecked")
+        List<SitemapDefinitionDTO> body = (List<SitemapDefinitionDTO>) resp.getEntity();
+        assertThat(body, hasSize(1));
+        assertThat(body.get(0).name, is(SITEMAP_NAME));
+        assertThat(body.get(0).editable, is(true));
+    }
+
+    @Test
+    public void whenGetSitemapDefinition_notFound_shouldReturn404() {
+        when(sitemapRegistryMock.get("noexist")).thenReturn(null);
+        Response resp = sitemapResource.getSitemapDefinition(headersMock, "noexist");
+        assertThat(resp.getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
+    }
+
+    @Test
+    public void whenCreateOrUpdateSitemap_nullBody_shouldReturnBadRequest() {
+        Object resp = sitemapResource.createOrUpdateSitemap(headersMock, "any", null);
+        assertThat(((Response) resp).getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+    }
+
+    @Test
+    public void whenCreateOrUpdateSitemap_nameMismatch_shouldReturnBadRequest() {
+        SitemapDefinitionDTO dto = new SitemapDefinitionDTO();
+        dto.name = "other";
+        Object resp = sitemapResource.createOrUpdateSitemap(headersMock, "pathName", dto);
+        assertThat(((Response) resp).getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+    }
+
+    @Test
+    public void whenCreateOrUpdateSitemap_createNew_shouldAddManagedSitemap() {
+        SitemapDefinitionDTO dto = new SitemapDefinitionDTO();
+        dto.name = "s1";
+
+        when(sitemapRegistryMock.get("s1")).thenReturn(null);
+        when(sitemapFactory.createSitemap("s1")).thenReturn(new SitemapImpl("s1"));
+
+        Object respObj = sitemapResource.createOrUpdateSitemap(headersMock, "s1", dto);
+        Response resp = (Response) respObj;
+        assertThat(resp.getStatus(), is(Response.Status.CREATED.getStatusCode()));
+
+        verify(managedSitemapProviderMock, times(1)).add(any());
+    }
+
+    @Test
+    public void whenCreateOrUpdateSitemap_updateManaged_shouldUpdateManagedSitemap() {
+        SitemapDefinitionDTO dto = new SitemapDefinitionDTO();
+        dto.name = "s2";
+
+        when(sitemapRegistryMock.get("s2")).thenReturn(mock(Sitemap.class));
+        when(managedSitemapProviderMock.get("s2")).thenReturn(mock(Sitemap.class));
+        when(sitemapFactory.createSitemap("s2")).thenReturn(new SitemapImpl("s2"));
+
+        Object respObj = sitemapResource.createOrUpdateSitemap(headersMock, "s2", dto);
+        Response resp = (Response) respObj;
+        assertThat(resp.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+        verify(managedSitemapProviderMock, times(1)).update(any());
+    }
+
+    @Test
+    public void whenRemoveSitemap_notFound_shouldReturn404() {
+        when(sitemapRegistryMock.get("xyz")).thenReturn(null);
+        Response resp = sitemapResource.removeSitemap("xyz");
+        assertThat(resp.getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
+    }
+
+    @Test
+    public void whenRemoveSitemap_notManaged_shouldReturnMethodNotAllowed() {
+        Sitemap sitemap = mock(Sitemap.class);
+        when(sitemapRegistryMock.get("sdel")).thenReturn(sitemap);
+        when(managedSitemapProviderMock.remove("sdel")).thenReturn(null);
+
+        Response resp = sitemapResource.removeSitemap("sdel");
+        assertThat(resp.getStatus(), is(Response.Status.METHOD_NOT_ALLOWED.getStatusCode()));
+        verify(managedSitemapProviderMock, times(1)).remove("sdel");
+    }
+
+    @Test
+    public void whenRemoveSitemap_managed_shouldReturnOk() {
+        Sitemap sitemap = mock(Sitemap.class);
+        when(sitemapRegistryMock.get("sdel2")).thenReturn(sitemap);
+        when(managedSitemapProviderMock.remove("sdel2")).thenReturn(sitemap);
+
+        Response resp = sitemapResource.removeSitemap("sdel2");
+        assertThat(resp.getStatus(), is(Response.Status.OK.getStatusCode()));
+        verify(managedSitemapProviderMock, times(1)).remove("sdel2");
     }
 
     @Test

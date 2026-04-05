@@ -35,10 +35,12 @@ import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -79,7 +81,6 @@ import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
@@ -88,7 +89,6 @@ import org.openhab.core.sitemap.Frame;
 import org.openhab.core.sitemap.Image;
 import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
-import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
@@ -100,8 +100,13 @@ import org.openhab.core.sitemap.Switch;
 import org.openhab.core.sitemap.Video;
 import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.dto.MappingDTO;
+import org.openhab.core.sitemap.dto.SitemapDTOMapper;
+import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
+import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.State;
+import org.openhab.core.ui.components.ManagedSitemapProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 import org.openhab.core.util.ColorUtil;
@@ -123,6 +128,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -145,6 +151,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Added support for Buttongrid as container for Button elements
  * @author Laurent Garnier - Added support for new sitemap element Colortemperaturepicker
  * @author Mark Herwege - Implement sitemap registry, remove Guava dependency
+ * @author Mark Herwege - Implement sitemap definition endpoints
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
@@ -166,6 +173,9 @@ public class SitemapResource
 
     private static final long TIMEOUT_IN_MS = 30000;
 
+    private final ScheduledExecutorService scheduler = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+
     private SseBroadcaster<SseSinkInfo> broadcaster;
 
     @Context
@@ -185,15 +195,14 @@ public class SitemapResource
     Sse sse;
 
     private final ItemUIRegistry itemUIRegistry;
+    private final SitemapFactory sitemapFactory;
     private final SitemapRegistry sitemapRegistry;
+    private final ManagedSitemapProvider managedSitemapProvider;
     private final SitemapSubscriptionService subscriptions;
     private final LocaleService localeService;
     private final TimeZoneProvider timeZoneProvider;
 
     private final WeakValueConcurrentHashMap<String, SseSinkInfo> knownSubscriptions = new WeakValueConcurrentHashMap<>();
-
-    private final ScheduledExecutorService scheduler = ThreadPoolManager
-            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private @Nullable ScheduledFuture<?> cleanSubscriptionsJob;
     private Set<BlockingStateChangeListener> stateChangeListeners = new CopyOnWriteArraySet<>();
@@ -201,12 +210,16 @@ public class SitemapResource
     @Activate
     public SitemapResource( //
             final @Reference ItemUIRegistry itemUIRegistry, //
+            final @Reference SitemapFactory sitemapFactory, //
             final @Reference SitemapRegistry sitemapRegistry, //
+            final @Reference ManagedSitemapProvider managedSitemapProvider, //
             final @Reference LocaleService localeService, //
             final @Reference TimeZoneProvider timeZoneProvider, //
             final @Reference SitemapSubscriptionService subscriptions) {
         this.itemUIRegistry = itemUIRegistry;
+        this.sitemapFactory = sitemapFactory;
         this.sitemapRegistry = sitemapRegistry;
+        this.managedSitemapProvider = managedSitemapProvider;
         this.localeService = localeService;
         this.timeZoneProvider = timeZoneProvider;
         this.subscriptions = subscriptions;
@@ -239,6 +252,120 @@ public class SitemapResource
     }
 
     @GET
+    @Path("/*/definition")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getSitemapDefinitions", summary = "Get all available sitemap definitions.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SitemapDefinitionDTO.class)))) })
+    public Response getSitemapsDefinition() {
+        logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
+        Collection<SitemapDefinitionDTO> responseObject = sitemapRegistry.getAll().stream().map(SitemapDTOMapper::map)
+                .map(this::setIsEditable).toList();
+        return Response.ok(responseObject).build();
+    }
+
+    @GET
+    @Path("/{sitemapname: [a-zA-Z_0-9]+}/definition")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getSitemapDefinitionByName", summary = "Get sitemap definition by name.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDefinitionDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Sitemap not found") })
+    public Response getSitemapDefinition(@Context HttpHeaders headers,
+            @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname) {
+        logger.debug("Received HTTP GET request from IP {} at '{}'.", request.getRemoteAddr(), uriInfo.getPath());
+        Sitemap sitemap = getSitemap(sitemapname);
+        if (sitemap == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        SitemapDefinitionDTO responseObject = setIsEditable(SitemapDTOMapper.map(sitemap));
+        return Response.ok(responseObject).build();
+    }
+
+    private SitemapDefinitionDTO setIsEditable(SitemapDefinitionDTO dto) {
+        dto.editable = managedSitemapProvider.get(dto.name) != null;
+        return dto;
+    }
+
+    /**
+     * Create or Update a sitemap.
+     *
+     * @param sitemapname the sitemap name
+     * @param sitemap data.
+     * @return Response configured to represent the sitemap depending on the status
+     */
+    @PUT
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{sitemapname: [a-zA-Z_0-9]+}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "addOrUpdateSitemapInRegistry", summary = "Adds a new sitemap to the registry or updates the existing sitemap.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "Sitemap updated.", content = @Content(schema = @Schema(implementation = SitemapDefinitionDTO.class))),
+                    @ApiResponse(responseCode = "201", description = "Sitemap created.", content = @Content(schema = @Schema(implementation = SitemapDefinitionDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Payload invalid."),
+                    @ApiResponse(responseCode = "405", description = "Sitemap not editable.") })
+    public Response createOrUpdateSitemap(final @Context HttpHeaders httpHeaders,
+            @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapName,
+            @Parameter(description = "sitemap data", required = true) @Nullable SitemapDefinitionDTO sitemapDTO) {
+        // If we didn't get a sitemap, then return!
+        if (sitemapDTO == null) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Sitemap payload is required.");
+        } else if (sitemapDTO.name == null) {
+            logger.warn("Received HTTP PUT request at '{}' with a missing sitemap name in the payload.",
+                    uriInfo.getPath());
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Sitemap name in payload must not be null.");
+        } else if (!sitemapName.equals(sitemapDTO.name)) {
+            logger.warn(
+                    "Received HTTP PUT request at '{}' with a sitemap name '{}' that does not match the one in the url.",
+                    uriInfo.getPath(), sitemapDTO.name);
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Sitemap name in payload must match sitemap name in URL.");
+        }
+
+        try {
+            Sitemap sitemap = SitemapDTOMapper.map(sitemapDTO, sitemapFactory);
+
+            // Save the sitemap
+            if (getSitemap(sitemapName) == null) {
+                // sitemap does not yet exist, create it
+                managedSitemapProvider.add(sitemap);
+                return JSONResponse.createResponse(Status.CREATED, sitemapDTO, null);
+            } else if (managedSitemapProvider.get(sitemapName) != null) {
+                // sitemap already exists as a managed sitemap, update it
+                managedSitemapProvider.update(sitemap);
+                return JSONResponse.createResponse(Status.OK, SitemapDTOMapper.map(sitemap), null);
+            } else {
+                // Sitemap exists but cannot be updated
+                logger.warn("Cannot update existing sitemap '{}', because is not managed.", sitemapName);
+                return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
+                        "Cannot update unmanaged sitemap " + sitemapName);
+            }
+        } catch (IllegalArgumentException e) {
+            logger.warn("Received HTTP PUT request at '{}' with an invalid sitemap: {}", uriInfo.getPath(),
+                    e.getMessage());
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Sitemap invalid: " + e.getMessage());
+        }
+    }
+
+    @DELETE
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{sitemapname: [a-zA-Z_0-9]+}")
+    @Operation(operationId = "removeSitemapFromRegistry", summary = "Removes a sitemap from the registry.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Sitemap not found."),
+                    @ApiResponse(responseCode = "405", description = "Sitemap not editable.") })
+    public Response removeSitemap(
+            @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapName) {
+        if (getSitemap(sitemapName) == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        if (managedSitemapProvider.remove(sitemapName) == null) {
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
+                    "Cannot delete unmanaged sitemap " + sitemapName);
+        }
+        return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
+
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSitemaps", summary = "Get all available sitemaps.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SitemapDTO.class)))) })
@@ -256,11 +383,9 @@ public class SitemapResource
     public Response getSitemapData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
-            @QueryParam("type") String type, @QueryParam("jsoncallback") @DefaultValue("callback") String callback,
             @QueryParam("includeHidden") @Parameter(description = "include hidden widgets") boolean includeHiddenWidgets) {
         final Locale locale = localeService.getLocale(language);
-        logger.debug("Received HTTP GET request from IP {} at '{}' for media type '{}'.", request.getRemoteAddr(),
-                uriInfo.getPath(), type);
+        logger.debug("Received HTTP GET request from IP {} at '{}'.", request.getRemoteAddr(), uriInfo.getPath());
         URI uri = uriInfo.getBaseUriBuilder().build();
         SitemapDTO responseObject = getSitemapBean(sitemapname, uri, locale, includeHiddenWidgets, false);
         return Response.ok(responseObject).build();
@@ -620,22 +745,22 @@ public class SitemapResource
             }
         }
         if (widget instanceof Switch switchWidget) {
-            for (Mapping mapping : switchWidget.getMappings()) {
+            bean.mappings = switchWidget.getMappings().stream().map(mapping -> {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.releaseCommand = mapping.getReleaseCmd();
                 mappingBean.label = mapping.getLabel();
                 mappingBean.icon = mapping.getIcon();
-                bean.mappings.add(mappingBean);
-            }
+                return mappingBean;
+            }).toList();
         }
         if (widget instanceof Selection selectionWidget) {
-            for (Mapping mapping : selectionWidget.getMappings()) {
+            bean.mappings = selectionWidget.getMappings().stream().map(mapping -> {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.label = mapping.getLabel();
-                bean.mappings.add(mappingBean);
-            }
+                return mappingBean;
+            }).toList();
         }
         if (widget instanceof Input inputWidget) {
             bean.inputHint = inputWidget.getInputHint();
@@ -692,15 +817,15 @@ public class SitemapResource
             bean.maxValue = colortemperaturepickerWidget.getMaxValue();
         }
         if (widget instanceof Buttongrid buttonGridWidget) {
-            for (ButtonDefinition button : buttonGridWidget.getButtons()) {
+            bean.mappings = buttonGridWidget.getButtons().stream().map(button -> {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.row = button.getRow();
                 mappingBean.column = button.getColumn();
                 mappingBean.command = button.getCmd();
                 mappingBean.label = button.getLabel();
                 mappingBean.icon = button.getIcon();
-                bean.mappings.add(mappingBean);
-            }
+                return mappingBean;
+            }).toList();
         }
         if (widget instanceof Button buttonWidget) {
             // Get the icon from the widget only
@@ -778,8 +903,7 @@ public class SitemapResource
      * This method only returns when a change has occurred to any item on the
      * page to display or if the timeout is reached
      *
-     * @param widgets
-     *            the widgets of the page to observe
+     * @param widgets the widgets of the page to observe
      * @return true if the timeout is reached
      */
     private boolean waitForChanges(List<Widget> widgets) {
@@ -808,8 +932,7 @@ public class SitemapResource
     /**
      * Collects all items that are represented by a given list of widgets
      *
-     * @param widgets
-     *            the widget list to get the items for added to all bundles containing REST resources
+     * @param widgets the widget list to get the items for added to all bundles containing REST resources
      * @return all items that are represented by the list of widgets
      */
     private Set<GenericItem> getAllItems(List<Widget> widgets) {

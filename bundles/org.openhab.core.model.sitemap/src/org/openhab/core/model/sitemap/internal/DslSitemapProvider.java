@@ -12,11 +12,15 @@
  */
 package org.openhab.core.model.sitemap.internal;
 
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
@@ -93,24 +97,24 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Separate registry from model
  */
 @NonNullByDefault
-@Component(service = SitemapProvider.class, immediate = true)
-public class SitemapProviderImpl extends AbstractProvider<Sitemap>
+@Component(service = { SitemapProvider.class, DslSitemapProvider.class }, immediate = true)
+public class DslSitemapProvider extends AbstractProvider<Sitemap>
         implements SitemapProvider, ModelRepositoryChangeListener {
 
     private static final String SITEMAP_MODEL_NAME = "sitemap";
     protected static final String SITEMAP_FILEEXT = "." + SITEMAP_MODEL_NAME;
     protected static final String MODEL_TYPE_PREFIX = "Model";
 
-    private final Logger logger = LoggerFactory.getLogger(SitemapProviderImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(DslSitemapProvider.class);
 
     private final ModelRepository modelRepo;
     private final SitemapRegistry sitemapRegistry;
     private final SitemapFactory sitemapFactory;
 
-    private final Map<String, Sitemap> sitemapCache = new ConcurrentHashMap<>();
+    private final Map<String, Collection<Sitemap>> sitemapCache = new ConcurrentHashMap<>();
 
     @Activate
-    public SitemapProviderImpl(final @Reference ModelRepository modelRepo,
+    public DslSitemapProvider(final @Reference ModelRepository modelRepo,
             final @Reference SitemapRegistry sitemapRegistry, final @Reference SitemapFactory sitemapFactory) {
         this.modelRepo = modelRepo;
         this.sitemapRegistry = sitemapRegistry;
@@ -129,11 +133,17 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
 
     @Override
     public @Nullable Sitemap getSitemap(String sitemapName) {
-        Sitemap sitemap = sitemapCache.get(sitemapName);
+        Sitemap sitemap = sitemapCache.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
+                .flatMap(e -> e.getValue().stream()).filter(s -> sitemapName.equals(s.getName())).findAny()
+                .orElse(null);
         if (sitemap == null) {
             logger.trace("Sitemap {} cannot be found", sitemapName);
         }
         return sitemap;
+    }
+
+    public Collection<Sitemap> getAllFromModel(String modelName) {
+        return sitemapCache.getOrDefault(modelName, List.of()).stream().toList();
     }
 
     private void refreshSitemapModels() {
@@ -142,26 +152,18 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
         for (String filename : sitemapFilenames) {
             ModelSitemap modelSitemap = (ModelSitemap) modelRepo.getModel(filename);
             if (modelSitemap != null) {
-                String sitemapFileName = filename.substring(0, filename.length() - SITEMAP_FILEEXT.length());
-                String sitemapName = modelSitemap.getName();
-                if (!sitemapFileName.equals(sitemapName)) {
-                    logger.warn("Filename '{}' does not match the name '{}' of the sitemap - ignoring sitemap.",
-                            filename, sitemapName);
-                } else {
-                    Sitemap sitemap = parseModelSitemap(modelSitemap);
-                    sitemapCache.put(sitemapName, sitemap);
-                }
+                sitemapCache.put(filename, parseModelSitemap(modelSitemap));
             }
         }
     }
 
-    private Sitemap parseModelSitemap(ModelSitemap modelSitemap) {
+    private Collection<Sitemap> parseModelSitemap(ModelSitemap modelSitemap) {
         Sitemap sitemap = sitemapFactory.createSitemap(modelSitemap.getName());
         sitemap.setLabel(modelSitemap.getLabel());
         sitemap.setIcon(modelSitemap.getIcon());
         List<Widget> widgets = sitemap.getWidgets();
         modelSitemap.getChildren().forEach(child -> addWidget(widgets, child, sitemap));
-        return sitemap;
+        return List.of(sitemap);
     }
 
     private void addWidget(List<Widget> widgets, ModelWidget modelWidget, Parent parent) {
@@ -362,7 +364,7 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
 
     @Override
     public Set<String> getSitemapNames() {
-        return sitemapCache.keySet();
+        return getAll().stream().map(s -> s.getName()).collect(Collectors.toSet());
     }
 
     @Override
@@ -371,47 +373,66 @@ public class SitemapProviderImpl extends AbstractProvider<Sitemap>
             return;
         }
 
-        Sitemap sitemap = null;
-        String sitemapFileName = modelName.substring(0, modelName.length() - SITEMAP_FILEEXT.length());
-
         if (type == EventType.REMOVED) {
-            Sitemap oldSitemap = sitemapCache.remove(sitemapFileName);
-            if (oldSitemap != null) {
-                notifyListenersAboutRemovedElement(oldSitemap);
+            Collection<Sitemap> oldSitemaps = sitemapCache.remove(modelName);
+            if (!isIsolatedModel(modelName) && oldSitemaps != null) {
+                oldSitemaps.forEach(oldSitemap -> {
+                    notifyRemovedSitemap(modelName, oldSitemap);
+                });
             }
         } else {
             EObject modelSitemapObject = modelRepo.getModel(modelName);
             // if the sitemap file is empty it will not be in the repo and thus there is no need to cache it here
             if (modelSitemapObject instanceof ModelSitemap modelSitemap) {
-                String sitemapName = modelSitemap.getName();
-                if (!sitemapFileName.equals(sitemapName)) {
-                    logger.warn("Filename '{}' does not match the name '{}' of the sitemap - ignoring sitemap.",
-                            sitemapFileName, sitemapName);
-                    Sitemap oldSitemap = sitemapCache.remove(sitemapFileName);
-                    if (oldSitemap != null) {
-                        notifyListenersAboutRemovedElement(oldSitemap);
-                    }
-                } else {
-                    sitemap = parseModelSitemap(modelSitemap);
-                    Sitemap oldSitemap = sitemapCache.put(sitemapName, sitemap);
-                    if (oldSitemap != null) {
-                        notifyListenersAboutUpdatedElement(oldSitemap, sitemap);
-                    } else {
-                        notifyListenersAboutAddedElement(sitemap);
-                    }
+                Map<String, Sitemap> newSitemaps = parseModelSitemap(modelSitemap).stream()
+                        .collect(Collectors.toMap(Sitemap::getName, Function.identity()));
+                if (!isIsolatedModel(modelName)) {
+                    Map<String, Sitemap> oldSitemaps = sitemapCache.getOrDefault(modelName, Set.of()).stream()
+                            .collect(Collectors.toMap(Sitemap::getName, Function.identity()));
+                    newSitemaps.entrySet().stream().forEach(entry -> {
+                        if (!oldSitemaps.containsKey(entry.getKey())) {
+                            notifyListenersAboutAddedElement(entry.getValue());
+                        }
+                    });
+                    oldSitemaps.entrySet().stream().forEach(entry -> {
+                        Sitemap oldSitemap = entry.getValue();
+                        Sitemap newSitemap = newSitemaps.get(entry.getKey());
+                        if (newSitemap != null) {
+                            notifyListenersAboutUpdatedElement(oldSitemap, newSitemap);
+                        } else {
+                            notifyRemovedSitemap(modelName, oldSitemap);
+                        }
+                    });
                 }
+                sitemapCache.put(modelName, newSitemaps.values());
             } else {
-                Sitemap oldSitemap = sitemapCache.remove(sitemapFileName);
-                if (oldSitemap != null) {
-                    // Previously valid sitemap is now invalid, so no ModelSitemap was created
-                    notifyListenersAboutRemovedElement(oldSitemap);
+                Collection<Sitemap> oldSitemaps = sitemapCache.remove(modelName);
+                if (!isIsolatedModel(modelName) && oldSitemaps != null) {
+                    oldSitemaps.forEach(oldSitemap -> {
+                        notifyRemovedSitemap(modelName, oldSitemap);
+                    });
                 }
             }
         }
     }
 
+    private void notifyRemovedSitemap(String modelName, Sitemap sitemap) {
+        String sitemapName = sitemap.getName();
+        Sitemap existingSitemap = sitemapCache.entrySet().stream().filter(e -> !e.getKey().equals(modelName))
+                .flatMap(e -> e.getValue().stream()).filter(s -> sitemapName.equals(s.getName())).findAny()
+                .orElse(null);
+        if (existingSitemap != null) {
+            // Another sitemap with the same name exists, so we need to update it to use the other one instead
+            // of the removed one
+            notifyListenersAboutUpdatedElement(sitemap, existingSitemap);
+        } else {
+            notifyListenersAboutRemovedElement(sitemap);
+        }
+    }
+
     @Override
     public Collection<Sitemap> getAll() {
-        return sitemapCache.values();
+        return sitemapCache.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
+                .flatMap(e -> e.getValue().stream()).collect(Collectors.toSet());
     }
 }
