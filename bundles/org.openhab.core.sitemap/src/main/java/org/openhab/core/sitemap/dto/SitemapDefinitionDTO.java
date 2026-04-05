@@ -25,5 +25,5 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class SitemapDefinitionDTO extends AbstractSitemapDTO {
 
     public boolean editable;
-    public List<WidgetDefinitionDTO> widgets = List.of();
+    public List<WidgetDefinitionDTO> widgets;
 }

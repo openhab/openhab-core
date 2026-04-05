@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "Rule")
 public class RuleDTO {
 
-    public List<ConditionDTO> conditions = List.of();
+    public List<ConditionDTO> conditions;
     public String argument;
 
     public RuleDTO() {
