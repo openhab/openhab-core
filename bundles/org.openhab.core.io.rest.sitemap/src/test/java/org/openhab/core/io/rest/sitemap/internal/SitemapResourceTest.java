@@ -173,7 +173,7 @@ public class SitemapResourceTest extends JavaTest {
         assertThat(resp.getStatus(), is(200));
 
         @SuppressWarnings("unchecked")
-        List<SitemapDefinitionDTO> body = (List<SitemapDefinitionDTO>) resp.getEntity();
+        List<EnrichedSitemapDefinitionDTO> body = (List<EnrichedSitemapDefinitionDTO>) resp.getEntity();
         assertThat(body, hasSize(1));
         assertThat(body.get(0).name, is(SITEMAP_NAME));
         assertThat(body.get(0).editable, is(true));
