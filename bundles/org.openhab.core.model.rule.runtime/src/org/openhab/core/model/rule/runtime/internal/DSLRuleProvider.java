@@ -194,7 +194,7 @@ public class DSLRuleProvider
                         if (newRules.isEmpty()) {
                             contexts.remove(ruleModelName);
                         }
-                        notifyProviderChangeListeners(calcChanges(oldRules, newRules));
+                        notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, newRules));
                     }
                     break;
                 case REMOVED:
@@ -208,7 +208,7 @@ public class DSLRuleProvider
                             }
                         }
                         contexts.remove(ruleModelName);
-                        notifyProviderChangeListeners(calcChanges(oldRules, null));
+                        notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, null));
                     }
                     break;
                 default:
@@ -224,13 +224,13 @@ public class DSLRuleProvider
                     }
                     oldRules = rulesMap.put(modelFileName, newRules);
                     if (!isIsolatedModel(modelFileName)) {
-                        notifyProviderChangeListeners(calcChanges(oldRules, newRules));
+                        notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, newRules));
                     }
                     break;
                 case REMOVED:
                     oldRules = rulesMap.remove(modelFileName);
                     if (!isIsolatedModel(modelFileName)) {
-                        notifyProviderChangeListeners(calcChanges(oldRules, null));
+                        notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, null));
                     }
                     break;
                 default:
@@ -254,28 +254,32 @@ public class DSLRuleProvider
         contexts.put(modelName, context);
     }
 
-    private Changes calcChanges(@Nullable List<Rule> oldRules, @Nullable List<Rule> newRules) {
-        if (newRules == null || newRules.isEmpty()) {
-            return new Changes(List.of(), List.of(), oldRules == null ? List.of() : List.copyOf(oldRules));
-        }
+    private Changes calcChanges(String modelFileName, @Nullable List<Rule> oldRules, @Nullable List<Rule> newRules) {
         if (oldRules == null || oldRules.isEmpty()) {
-            return new Changes(List.copyOf(newRules), List.of(), List.of());
+            return new Changes(newRules == null ? List.of() : List.copyOf(newRules), List.of(), List.of());
         }
         List<Rule> oldMutable = new ArrayList<>(oldRules);
-        List<Rule> newMutable = new ArrayList<>(newRules);
+        List<Rule> newMutable = newRules == null ? new ArrayList<>() : new ArrayList<>(newRules);
         List<RulePair> modified = new ArrayList<>();
         Rule oldRule, newRule;
-        String uid;
-        boolean found;
         for (Iterator<Rule> iterator = oldMutable.iterator(); iterator.hasNext();) {
             oldRule = iterator.next();
-            found = false;
-            uid = oldRule.getUID();
+            boolean found = false;
+            String uid = oldRule.getUID();
             for (Iterator<Rule> newIterator = newMutable.iterator(); newIterator.hasNext() && !found;) {
                 newRule = newIterator.next();
                 if (uid.equals(newRule.getUID())) {
                     modified.add(new RulePair(oldRule, newRule));
                     newIterator.remove();
+                    found = true;
+                }
+            }
+            if (!found) {
+                // Check if the old rule exists in another model file with the same UID
+                Rule existingRule = rulesMap.entrySet().stream().filter(e -> !e.getKey().equals(modelFileName))
+                        .flatMap(e -> e.getValue().stream()).filter(r -> uid.equals(r.getUID())).findAny().orElse(null);
+                if (existingRule != null) {
+                    modified.add(new RulePair(oldRule, existingRule));
                     found = true;
                 }
             }
@@ -500,7 +504,7 @@ public class DSLRuleProvider
                 List<Rule> oldRules = rulesMap.put(modelFileName, newRules);
                 if (!isolated) {
                     handleVarDeclarations(ruleModelName, ruleModel);
-                    notifyProviderChangeListeners(calcChanges(oldRules, newRules));
+                    notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, newRules));
                 }
             }
         }
