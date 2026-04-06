@@ -190,6 +190,10 @@ public class DSLRuleProvider
                             xExpressions.remove(ruleModelName + "-" + index);
                             index++;
                         }
+                        // Cleanup contexts if no new rules
+                        if (newRules.isEmpty()) {
+                            contexts.remove(ruleModelName);
+                        }
                         notifyProviderChangeListeners(calcChanges(oldRules, newRules));
                     }
                     break;
