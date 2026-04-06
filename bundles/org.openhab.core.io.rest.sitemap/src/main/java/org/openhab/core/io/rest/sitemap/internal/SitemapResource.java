@@ -255,11 +255,11 @@ public class SitemapResource
     @Path("/*/definition")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSitemapDefinitions", summary = "Get all available sitemap definitions.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SitemapDefinitionDTO.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedSitemapDefinitionDTO.class)))) })
     public Response getSitemapsDefinition() {
         logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
-        Collection<SitemapDefinitionDTO> responseObject = sitemapRegistry.getAll().stream().map(SitemapDTOMapper::map)
-                .map(this::setIsEditable).toList();
+        Collection<EnrichedSitemapDefinitionDTO> responseObject = sitemapRegistry.getAll().stream()
+                .map(SitemapDTOMapper::map).map(this::setIsEditable).toList();
         return Response.ok(responseObject).build();
     }
 
@@ -267,7 +267,7 @@ public class SitemapResource
     @Path("/{sitemapname: [a-zA-Z_0-9]+}/definition")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSitemapDefinitionByName", summary = "Get sitemap definition by name.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDefinitionDTO.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedSitemapDefinitionDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sitemap not found") })
     public Response getSitemapDefinition(@Context HttpHeaders headers,
             @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname) {
@@ -276,13 +276,14 @@ public class SitemapResource
         if (sitemap == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        SitemapDefinitionDTO responseObject = setIsEditable(SitemapDTOMapper.map(sitemap));
+        EnrichedSitemapDefinitionDTO responseObject = setIsEditable(SitemapDTOMapper.map(sitemap));
         return Response.ok(responseObject).build();
     }
 
-    private SitemapDefinitionDTO setIsEditable(SitemapDefinitionDTO dto) {
-        dto.editable = managedSitemapProvider.get(dto.name) != null;
-        return dto;
+    private EnrichedSitemapDefinitionDTO setIsEditable(SitemapDefinitionDTO dto) {
+        EnrichedSitemapDefinitionDTO enrichedDto = new EnrichedSitemapDefinitionDTO(dto);
+        enrichedDto.editable = managedSitemapProvider.get(dto.name) != null;
+        return enrichedDto;
     }
 
     /**

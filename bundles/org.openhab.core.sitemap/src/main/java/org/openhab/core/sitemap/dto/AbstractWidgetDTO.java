@@ -41,7 +41,7 @@ public abstract class AbstractWidgetDTO {
     public Boolean staticIcon;
 
     // widget-specific attributes
-    public List<MappingDTO> mappings = List.of();
+    public List<MappingDTO> mappings;
     public Boolean switchSupport;
     public Boolean releaseOnly;
     public Integer refresh;
