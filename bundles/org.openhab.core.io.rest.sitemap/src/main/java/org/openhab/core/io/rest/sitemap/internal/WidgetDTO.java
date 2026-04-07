@@ -47,6 +47,8 @@ public class WidgetDTO extends AbstractWidgetDTO {
     public String pattern;
     public String unit;
 
+    public String state;
+
     public EnrichedItemDTO item;
     public PageDTO linkedPage;
 

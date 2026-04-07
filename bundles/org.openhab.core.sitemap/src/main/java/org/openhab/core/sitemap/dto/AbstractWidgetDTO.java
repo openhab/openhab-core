@@ -63,7 +63,6 @@ public abstract class AbstractWidgetDTO {
     public String command;
     public String releaseCommand;
     public Boolean stateless;
-    public String state;
 
     public AbstractWidgetDTO() {
     }
