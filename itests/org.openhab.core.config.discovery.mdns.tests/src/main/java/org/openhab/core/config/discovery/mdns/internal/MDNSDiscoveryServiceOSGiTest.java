@@ -60,8 +60,8 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) DiscoveryResult discoveryResult;
     private @NonNullByDefault({}) ServiceEvent mockServiceEvent;
 
-    private MDNSDiscoveryParticipant testParticipant;
-    private DiscoveryListener testListener;
+    private @NonNullByDefault({}) MDNSDiscoveryParticipant testParticipant;
+    private @NonNullByDefault({}) DiscoveryListener testListener;
 
     @BeforeEach
     void setup() throws Exception {
