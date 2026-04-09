@@ -16,8 +16,11 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.openhab.core.automation.RuleManager;
+import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.script.engine.ScriptEngine;
 import org.openhab.core.model.script.engine.action.ActionService;
@@ -50,6 +53,9 @@ public class ScriptServiceUtil {
     private final ThingRegistry thingRegistry;
     private final EventPublisher eventPublisher;
     private final ModelRepository modelRepository;
+    private final MetadataRegistry metadataRegistry;
+    private final RuleRegistry ruleRegistry;
+    private final RuleManager ruleManager;
     private final Scheduler scheduler;
 
     private final AtomicReference<ScriptEngine> scriptEngine = new AtomicReference<>();
@@ -59,11 +65,15 @@ public class ScriptServiceUtil {
     @Activate
     public ScriptServiceUtil(final @Reference ItemRegistry itemRegistry, final @Reference ThingRegistry thingRegistry,
             final @Reference EventPublisher eventPublisher, final @Reference ModelRepository modelRepository,
-            final @Reference Scheduler scheduler) {
+            final @Reference MetadataRegistry metadataRegistry, final @Reference RuleRegistry ruleRegistry,
+            final @Reference RuleManager ruleManager, final @Reference Scheduler scheduler) {
         this.itemRegistry = itemRegistry;
         this.thingRegistry = thingRegistry;
         this.eventPublisher = eventPublisher;
         this.modelRepository = modelRepository;
+        this.metadataRegistry = metadataRegistry;
+        this.ruleRegistry = ruleRegistry;
+        this.ruleManager = ruleManager;
         this.scheduler = scheduler;
 
         if (instance != null) {
@@ -91,6 +101,10 @@ public class ScriptServiceUtil {
         return itemRegistry;
     }
 
+    public static ThingRegistry getThingRegistry() {
+        return getInstance().thingRegistry;
+    }
+
     public ThingRegistry getThingRegistryInstance() {
         return thingRegistry;
     }
@@ -105,6 +119,30 @@ public class ScriptServiceUtil {
 
     public ModelRepository getModelRepositoryInstance() {
         return modelRepository;
+    }
+
+    public static MetadataRegistry getMetadataRegistry() {
+        return getInstance().metadataRegistry;
+    }
+
+    public MetadataRegistry getMetadataRegistryInstance() {
+        return metadataRegistry;
+    }
+
+    public static RuleRegistry getRuleRegistry() {
+        return getInstance().ruleRegistry;
+    }
+
+    public RuleRegistry getRuleRegistryInstance() {
+        return ruleRegistry;
+    }
+
+    public static RuleManager getRuleManager() {
+        return getInstance().ruleManager;
+    }
+
+    public RuleManager getRuleManagerInstance() {
+        return ruleManager;
     }
 
     public static Scheduler getScheduler() {
