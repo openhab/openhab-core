@@ -356,8 +356,15 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         if (!deactivating) {
             synchronized (this) {
                 deviceRemovalTasks.put(serviceInfo.getKey(), scheduler.schedule(() -> {
+                    try {
+                        if (deactivating) {
+                            return;
+                        }
+                        thingRemoved(thingUID);
+                    } finally {
+                        cancelRemovalTask(serviceInfo);
+                    }
                     thingRemoved(thingUID);
-                    cancelRemovalTask(serviceInfo);
                 }, gracePeriod, TimeUnit.SECONDS));
             }
         }
