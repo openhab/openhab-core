@@ -35,6 +35,7 @@ import org.openhab.core.model.script.actions.HTTP;
 import org.openhab.core.model.script.actions.Log;
 import org.openhab.core.model.script.actions.Ping;
 import org.openhab.core.model.script.actions.ScriptExecution;
+import org.openhab.core.model.script.actions.System;
 import org.openhab.core.model.script.actions.Transformation;
 import org.openhab.core.model.script.engine.IActionServiceProvider;
 import org.openhab.core.model.script.engine.IThingActionsProvider;
@@ -76,6 +77,7 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(Ping.class);
         result.add(Transformation.class);
         result.add(ScriptExecution.class);
+        result.add(System.class);
         result.add(URLEncoder.class);
 
         result.addAll(getActionClasses());
@@ -92,6 +94,7 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(Ping.class);
         result.add(Transformation.class);
         result.add(ScriptExecution.class);
+        result.add(System.class);
         result.add(URLEncoder.class);
         result.add(CoreUtil.class);
 
