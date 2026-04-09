@@ -47,6 +47,7 @@ import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.types.State;
 
@@ -68,6 +69,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @NonNullByDefault({}) ScriptEngine scriptEngine;
     private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
+    private @Mock @NonNullByDefault({}) StartLevelService startLevelService;
 
     @BeforeEach
     public void setup() {
@@ -80,6 +82,9 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         };
 
         registerService(eventPublisher);
+
+        when(startLevelService.getStartLevel()).thenReturn(40);
+        registerService(startLevelService, StartLevelService.class.getName());
 
         itemRegistry = getService(ItemRegistry.class);
         assertNotNull(itemRegistry);
