@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.events.EventPublisher;
@@ -55,7 +56,7 @@ public class ScriptServiceUtil {
     private final ModelRepository modelRepository;
     private final MetadataRegistry metadataRegistry;
     private final RuleRegistry ruleRegistry;
-    private final RuleManager ruleManager;
+    private volatile @Nullable RuleManager ruleManager;
     private final Scheduler scheduler;
 
     private final AtomicReference<ScriptEngine> scriptEngine = new AtomicReference<>();
@@ -66,14 +67,13 @@ public class ScriptServiceUtil {
     public ScriptServiceUtil(final @Reference ItemRegistry itemRegistry, final @Reference ThingRegistry thingRegistry,
             final @Reference EventPublisher eventPublisher, final @Reference ModelRepository modelRepository,
             final @Reference MetadataRegistry metadataRegistry, final @Reference RuleRegistry ruleRegistry,
-            final @Reference RuleManager ruleManager, final @Reference Scheduler scheduler) {
+            final @Reference Scheduler scheduler) {
         this.itemRegistry = itemRegistry;
         this.thingRegistry = thingRegistry;
         this.eventPublisher = eventPublisher;
         this.modelRepository = modelRepository;
         this.metadataRegistry = metadataRegistry;
         this.ruleRegistry = ruleRegistry;
-        this.ruleManager = ruleManager;
         this.scheduler = scheduler;
 
         if (instance != null) {
@@ -81,6 +81,15 @@ public class ScriptServiceUtil {
         }
         instance = this;
         logger.debug("ScriptServiceUtil started");
+    }
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    void setRuleManager(RuleManager ruleManager) {
+        this.ruleManager = ruleManager;
+    }
+
+    void unsetRuleManager(RuleManager ruleManager) {
+        this.ruleManager = null;
     }
 
     @Deactivate
@@ -137,11 +146,11 @@ public class ScriptServiceUtil {
         return ruleRegistry;
     }
 
-    public static RuleManager getRuleManager() {
+    public @Nullable static RuleManager getRuleManager() {
         return getInstance().ruleManager;
     }
 
-    public RuleManager getRuleManagerInstance() {
+    public @Nullable RuleManager getRuleManagerInstance() {
         return ruleManager;
     }
 
