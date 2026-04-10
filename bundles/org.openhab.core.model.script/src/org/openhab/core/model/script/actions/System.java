@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.common.registry.ManagedProvider;
+import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -83,6 +84,18 @@ public class System {
             throw new IllegalArgumentException("Rule with UID '" + ruleUID + "' doesn't exist");
         }
         return ruleManager.runNow(ruleUID);
+    }
+
+    @ActionDoc(text = "run the rule with the specified UID and condition evaluation setting")
+    public static Map<String, Object> runRule(String ruleUID, boolean considerConditions) {
+        RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
+        if (ruleManager == null) {
+            throw new IllegalStateException("RuleManager doesn't exist");
+        }
+        if (ruleManager.getStatus(ruleUID) == null) {
+            throw new IllegalArgumentException("Rule with UID '" + ruleUID + "' doesn't exist");
+        }
+        return ruleManager.runNow(ruleUID, considerConditions, null);
     }
 
     /**
@@ -191,10 +204,18 @@ public class System {
         ruleManager.setEnabled(ruleUID, enabled);
     }
 
+    @NonNullByDefault({})
+    public static void addMetadata(Item item, String namespace, String value) {
+        if (item == null) {
+            throw new IllegalArgumentException("item cannot be null");
+        }
+        addMetadata(item.getName(), namespace, value, (String) null);
+    }
+
     /**
      *
-     * @param namespace
      * @param itemName
+     * @param namespace
      * @param value
      * @throws IllegalArgumentException If either value is {@code null} or {@code namespace} or
      *             {@code itemName} is invalid.
@@ -203,19 +224,36 @@ public class System {
      * @throws IllegalStateException If no ManagedProvider is available.
      */
     @NonNullByDefault({})
-    public static void addMetadata(String namespace, String itemName, String value) {
-        addMetadata(namespace, itemName, value, (String) null);
+    public static void addMetadata(String itemName, String namespace, String value) {
+        addMetadata(itemName, namespace, value, (String) null);
     }
 
     @NonNullByDefault({})
-    public static void addMetadata(String namespace, String itemName, String value, Object... configuration) {
-        addMetadata(namespace, itemName, value, parseObjectArray(configuration));
+    public static void addMetadata(Item item, String namespace, String value, Object... configuration) {
+        if (item == null) {
+            throw new IllegalArgumentException("item cannot be null");
+        }
+        addMetadata(item.getName(), namespace, value, parseObjectArray(configuration));
+    }
+
+    @NonNullByDefault({})
+    public static void addMetadata(String itemName, String namespace, String value, Object... configuration) {
+        addMetadata(itemName, namespace, value, parseObjectArray(configuration));
+    }
+
+    @NonNullByDefault({})
+    public static void addMetadata(Item item, String namespace, String value,
+            @Nullable Map<@NonNull String, @NonNull Object> configuration) {
+        if (item == null) {
+            throw new IllegalArgumentException("item cannot be null");
+        }
+        addMetadata(item.getName(), namespace, value, configuration);
     }
 
     /**
      *
-     * @param namespace
      * @param itemName
+     * @param namespace
      * @param value
      * @param configuration
      * @throws IllegalArgumentException If {@code namespace}, {@code itemName} or {@code value} is {@code null} or if
@@ -225,13 +263,13 @@ public class System {
      * @throws IllegalStateException If no ManagedProvider is available.
      */
     @NonNullByDefault({})
-    public static void addMetadata(String namespace, String itemName, String value,
+    public static void addMetadata(String itemName, String namespace, String value,
             @Nullable Map<@NonNull String, @NonNull Object> configuration) {
-        if (namespace == null) {
-            throw new IllegalArgumentException("namespace cannot be null");
-        }
         if (itemName == null) {
             throw new IllegalArgumentException("itemName cannot be null");
+        }
+        if (namespace == null) {
+            throw new IllegalArgumentException("namespace cannot be null");
         }
         if (value == null) {
             throw new IllegalArgumentException("value cannot be null");
@@ -240,25 +278,49 @@ public class System {
     }
 
     @NonNullByDefault({})
-    public static @Nullable Metadata getMetadata(String namespace, String itemName) {
-        if (namespace == null) {
-            throw new IllegalArgumentException("namespace cannot be null");
+    public static @Nullable Metadata getMetadata(Item item, String namespace) {
+        if (item == null) {
+            throw new IllegalArgumentException("item cannot be null");
         }
+        return getMetadata(item.getName(), namespace);
+    }
+
+    @NonNullByDefault({})
+    public static @Nullable Metadata getMetadata(String itemName, String namespace) {
         if (itemName == null) {
             throw new IllegalArgumentException("itemName cannot be null");
+        }
+        if (namespace == null) {
+            throw new IllegalArgumentException("namespace cannot be null");
         }
         return getMetadataRegistry().get(new MetadataKey(namespace, itemName));
     }
 
     @NonNullByDefault({})
-    public static @Nullable Metadata removeMetadata(String namespace, String itemName) {
-        if (namespace == null) {
-            throw new IllegalArgumentException("namespace cannot be null");
+    public static @Nullable Metadata removeMetadata(Item item, String namespace) {
+        if (item == null) {
+            throw new IllegalArgumentException("item cannot be null");
         }
+        return removeMetadata(item.getName(), namespace);
+    }
+
+    @NonNullByDefault({})
+    public static @Nullable Metadata removeMetadata(String itemName, String namespace) {
         if (itemName == null) {
             throw new IllegalArgumentException("itemName cannot be null");
         }
+        if (namespace == null) {
+            throw new IllegalArgumentException("namespace cannot be null");
+        }
         return getMetadataRegistry().remove(new MetadataKey(namespace, itemName));
+    }
+
+    @NonNullByDefault({})
+    public static @Nullable Metadata updateMetadata(Item item, String namespace, String value) {
+        if (item == null) {
+            throw new IllegalArgumentException("item cannot be null");
+        }
+        return updateMetadata(item.getName(), namespace, value);
     }
 
     /**
@@ -273,14 +335,35 @@ public class System {
      * @throws IllegalStateException If no ManagedProvider is available.
      */
     @NonNullByDefault({})
-    public static @Nullable Metadata updateMetadata(String namespace, String itemName, String value) {
-        return updateMetadata(namespace, itemName, value, null);
+    public static @Nullable Metadata updateMetadata(String itemName, String namespace, String value) {
+        return updateMetadata(itemName, namespace, value, (Map<String, Object>) null);
+    }
+
+    @NonNullByDefault({})
+    public static @Nullable Metadata updateMetadata(Item item, String namespace, String value,
+            Object... configuration) {
+        return updateMetadata(item.getName(), namespace, value, parseObjectArray(configuration));
+    }
+
+    @NonNullByDefault({})
+    public static @Nullable Metadata updateMetadata(String itemName, String namespace, String value,
+            Object... configuration) {
+        return updateMetadata(itemName, namespace, value, parseObjectArray(configuration));
+    }
+
+    @NonNullByDefault({})
+    public static @Nullable Metadata updateMetadata(Item item, String namespace, String value,
+            @Nullable Map<@NonNull String, @NonNull Object> configuration) {
+        if (item == null) {
+            throw new IllegalArgumentException("item cannot be null");
+        }
+        return updateMetadata(item.getName(), namespace, value);
     }
 
     /**
      *
-     * @param namespace
      * @param itemName
+     * @param namespace
      * @param value
      * @param configuration
      * @throws IllegalArgumentException If {@code namespace}, {@code itemName} or {@code value} is {@code null} or if
@@ -290,13 +373,13 @@ public class System {
      * @throws IllegalStateException If no ManagedProvider is available.
      */
     @NonNullByDefault({})
-    public static @Nullable Metadata updateMetadata(String namespace, String itemName, String value,
+    public static @Nullable Metadata updateMetadata(String itemName, String namespace, String value,
             @Nullable Map<@NonNull String, @NonNull Object> configuration) {
-        if (namespace == null) {
-            throw new IllegalArgumentException("namespace cannot be null");
-        }
         if (itemName == null) {
             throw new IllegalArgumentException("itemName cannot be null");
+        }
+        if (namespace == null) {
+            throw new IllegalArgumentException("namespace cannot be null");
         }
         if (value == null) {
             throw new IllegalArgumentException("value cannot be null");
