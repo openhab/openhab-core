@@ -12,13 +12,19 @@
  */
 package org.openhab.core.model.script.actions;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
+import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataProvider;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.engine.action.ActionDoc;
@@ -106,6 +112,30 @@ public class System {
      *
      * @param ruleUID the UID of the rule to run.
      * @param considerConditions {@code true} to not run the rule if its conditions don't qualify.
+     * @param context the pairs of {@link String}s and {@link Object}s that constitutes the context. Must be in pairs,
+     *            the first is the key, the second is the value.
+     * @return A copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    @ActionDoc(text = "run the rule with the specified UID, condition evaluation setting and context")
+    public static Map<String, Object> runRule(String ruleUID, boolean considerConditions, Object... context) {
+        RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
+        if (ruleManager == null) {
+            throw new IllegalStateException("RuleManager doesn't exist");
+        }
+        if (ruleManager.getStatus(ruleUID) == null) {
+            throw new IllegalArgumentException("Rule with UID '" + ruleUID + "' doesn't exist");
+        }
+        return ruleManager.runNow(ruleUID, considerConditions, parseObjectArray(context));
+    }
+
+    /**
+     * Run the rule with the specified UID with the specified context, while optionally taking conditions into
+     * account.
+     *
+     * @param ruleUID the UID of the rule to run.
+     * @param considerConditions {@code true} to not run the rule if its conditions don't qualify.
      * @param context the {@link Map} of {@link String} and {@link Object} pairs that constitutes the context.
      * @return A copy of the rule context, including possible return values.
      * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
@@ -162,6 +192,119 @@ public class System {
     }
 
     /**
+     *
+     * @param namespace
+     * @param itemName
+     * @param value
+     * @throws IllegalArgumentException If either value is {@code null} or {@code namespace} or
+     *             {@code itemName} is invalid.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no ManagedProvider is available.
+     */
+    @NonNullByDefault({})
+    public static void addMetadata(String namespace, String itemName, String value) {
+        addMetadata(namespace, itemName, value, (String) null);
+    }
+
+    @NonNullByDefault({})
+    public static void addMetadata(String namespace, String itemName, String value, Object... configuration) {
+        addMetadata(namespace, itemName, value, parseObjectArray(configuration));
+    }
+
+    /**
+     *
+     * @param namespace
+     * @param itemName
+     * @param value
+     * @param configuration
+     * @throws IllegalArgumentException If {@code namespace}, {@code itemName} or {@code value} is {@code null} or if
+     *             {@code namespace} or {@code itemName} is invalid.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no ManagedProvider is available.
+     */
+    @NonNullByDefault({})
+    public static void addMetadata(String namespace, String itemName, String value,
+            @Nullable Map<@NonNull String, @NonNull Object> configuration) {
+        if (namespace == null) {
+            throw new IllegalArgumentException("namespace cannot be null");
+        }
+        if (itemName == null) {
+            throw new IllegalArgumentException("itemName cannot be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value cannot be null");
+        }
+        getMetadataRegistry().add(new Metadata(new MetadataKey(namespace, itemName), value, configuration));
+    }
+
+    @NonNullByDefault({})
+    public static @Nullable Metadata getMetadata(String namespace, String itemName) {
+        if (namespace == null) {
+            throw new IllegalArgumentException("namespace cannot be null");
+        }
+        if (itemName == null) {
+            throw new IllegalArgumentException("itemName cannot be null");
+        }
+        return getMetadataRegistry().get(new MetadataKey(namespace, itemName));
+    }
+
+    @NonNullByDefault({})
+    public static @Nullable Metadata removeMetadata(String namespace, String itemName) {
+        if (namespace == null) {
+            throw new IllegalArgumentException("namespace cannot be null");
+        }
+        if (itemName == null) {
+            throw new IllegalArgumentException("itemName cannot be null");
+        }
+        return getMetadataRegistry().remove(new MetadataKey(namespace, itemName));
+    }
+
+    /**
+     *
+     * @param namespace
+     * @param itemName
+     * @param value
+     * @throws IllegalArgumentException If either value is {@code null} or {@code namespace} or
+     *             {@code itemName} is invalid.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no ManagedProvider is available.
+     */
+    @NonNullByDefault({})
+    public static @Nullable Metadata updateMetadata(String namespace, String itemName, String value) {
+        return updateMetadata(namespace, itemName, value, null);
+    }
+
+    /**
+     *
+     * @param namespace
+     * @param itemName
+     * @param value
+     * @param configuration
+     * @throws IllegalArgumentException If {@code namespace}, {@code itemName} or {@code value} is {@code null} or if
+     *             {@code namespace} or {@code itemName} is invalid.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no ManagedProvider is available.
+     */
+    @NonNullByDefault({})
+    public static @Nullable Metadata updateMetadata(String namespace, String itemName, String value,
+            @Nullable Map<@NonNull String, @NonNull Object> configuration) {
+        if (namespace == null) {
+            throw new IllegalArgumentException("namespace cannot be null");
+        }
+        if (itemName == null) {
+            throw new IllegalArgumentException("itemName cannot be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value cannot be null");
+        }
+        return getMetadataRegistry().update(new Metadata(new MetadataKey(namespace, itemName), value, configuration));
+    }
+
+    /**
      * @return The {@link ThingRegistry}.
      */
     @ActionDoc(text = "get the thing registry")
@@ -199,5 +342,23 @@ public class System {
     @ActionDoc(text = "get the rule manager")
     public static @Nullable RuleManager getRuleManager() {
         return ScriptServiceUtil.getRuleManager();
+    }
+
+    private static Map<String, Object> parseObjectArray(Object @Nullable [] objects) throws IllegalArgumentException {
+        if (objects == null || objects.length == 0) {
+            return Map.of();
+        }
+        if ((objects.length % 2) != 0) {
+            throw new IllegalArgumentException("There must be an even number of objects (" + objects.length + ')');
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (int i = 0; i < objects.length; i += 2) {
+            if (objects[i] instanceof String key) {
+                result.put(key, objects[i + 1]);
+            } else {
+                throw new IllegalArgumentException("Keys must be strings: " + objects[i]);
+            }
+        }
+        return result;
     }
 }
