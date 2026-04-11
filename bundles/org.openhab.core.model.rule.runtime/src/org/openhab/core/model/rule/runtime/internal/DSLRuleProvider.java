@@ -262,9 +262,10 @@ public class DSLRuleProvider
         List<Rule> newMutable = newRules == null ? new ArrayList<>() : new ArrayList<>(newRules);
         List<RulePair> modified = new ArrayList<>();
         Rule oldRule, newRule;
+        boolean found;
         for (Iterator<Rule> iterator = oldMutable.iterator(); iterator.hasNext();) {
             oldRule = iterator.next();
-            boolean found = false;
+            found = false;
             String uid = oldRule.getUID();
             for (Iterator<Rule> newIterator = newMutable.iterator(); newIterator.hasNext() && !found;) {
                 newRule = newIterator.next();
