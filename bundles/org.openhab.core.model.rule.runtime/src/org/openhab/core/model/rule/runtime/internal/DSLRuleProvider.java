@@ -277,7 +277,8 @@ public class DSLRuleProvider
             }
             if (!found) {
                 // Check if the old rule exists in another model file with the same UID
-                Rule existingRule = rulesMap.entrySet().stream().filter(e -> !e.getKey().equals(modelFileName))
+                Rule existingRule = rulesMap.entrySet().stream()
+                        .filter(e -> !e.getKey().equals(modelFileName) && !isIsolatedModel(e.getKey()))
                         .flatMap(e -> e.getValue().stream()).filter(r -> uid.equals(r.getUID())).findAny().orElse(null);
                 if (existingRule != null) {
                     modified.add(new RulePair(oldRule, existingRule));
