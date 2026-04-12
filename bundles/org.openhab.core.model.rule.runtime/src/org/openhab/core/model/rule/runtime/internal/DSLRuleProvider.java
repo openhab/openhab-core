@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -308,11 +307,8 @@ public class DSLRuleProvider
         List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID(ScriptActionHandler.TYPE_ID)
                 .withConfiguration(cfg).build());
 
-        List<String> ruleTags = rule.getTags();
-        Set<String> tags = ruleTags == null ? Set.of() : Set.copyOf(ruleTags);
-
-        return RuleBuilder.create(uid).withTags(tags).withName(name).withTriggers(triggers).withActions(actions)
-                .withConditions(conditions).build();
+        return RuleBuilder.create(uid).withTags(rule.getTags()).withName(name).withTriggers(triggers)
+                .withActions(actions).withConditions(conditions).build();
     }
 
     private String removeIndentation(String script) {
