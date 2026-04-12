@@ -19,7 +19,6 @@ var rootPath = ".."
 var fileExtensions = "rules"
 var projectName = "org.openhab.core.model.rule"
 var languageName = "org.openhab.core.model.rule.Rules"
-var generateXtendStub = true
 var encoding = "UTF-8"
 
 Workflow {
@@ -53,7 +52,7 @@ Workflow {
       referencedResource = "platform:/resource/org.openhab.core.model.script/model/generated/Script.ecore"
       referencedResource = "platform:/resource/org.openhab.core.model.script/model/generated/Script.genmodel"
       serializer = {
-        generateStub = generateXtendStub
+        generateStub = false
       }
     }
   }
