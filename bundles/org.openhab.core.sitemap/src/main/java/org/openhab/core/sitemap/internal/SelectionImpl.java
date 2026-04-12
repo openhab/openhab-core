@@ -29,7 +29,6 @@ public class SelectionImpl extends NonLinkableWidgetImpl implements Selection {
     private List<Mapping> mappings = new CopyOnWriteArrayList<>();
 
     public SelectionImpl() {
-        super();
     }
 
     public SelectionImpl(Parent parent) {

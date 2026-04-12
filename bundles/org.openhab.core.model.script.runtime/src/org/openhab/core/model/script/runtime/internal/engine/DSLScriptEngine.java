@@ -143,7 +143,9 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
         } catch (ScriptExecutionException | ScriptParsingException e) {
             // in case of error, drop the cached script to make sure, it is re-resolved.
             parsedScript = null;
-            throw new ScriptException(e.getMessage(), modelName, -1);
+            ScriptException se = new ScriptException(e.getMessage(), modelName, -1);
+            se.initCause(e);
+            throw se;
         }
     }
 

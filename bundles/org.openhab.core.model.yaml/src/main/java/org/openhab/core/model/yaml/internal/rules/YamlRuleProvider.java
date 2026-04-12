@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -131,30 +130,11 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
     }
 
     private @Nullable Rule mapRule(YamlRuleDTO ruleDto) {
-        String s;
-        RuleBuilder ruleBuilder = RuleBuilder.create(ruleDto.uid);
-        if ((s = ruleDto.label) != null) {
-            ruleBuilder.withName(s);
-        }
-        if ((s = ruleDto.template) != null) {
-            ruleBuilder.withTemplateUID(s);
-        }
+        RuleBuilder ruleBuilder = RuleBuilder.create(ruleDto.uid).withName(ruleDto.label)
+                .withDescription(ruleDto.description).withTags(ruleDto.tags).withVisibility(ruleDto.visibility)
+                .withTemplateUID(ruleDto.template).withConfiguration(new Configuration(ruleDto.config));
         if (ruleDto.templateState != null) {
             ruleBuilder.withTemplateState(ruleDto.templateState);
-        }
-        Set<String> tags = ruleDto.tags;
-        if (tags != null) {
-            ruleBuilder.withTags(tags);
-        }
-        if ((s = ruleDto.description) != null) {
-            ruleBuilder.withDescription(s);
-        }
-        if (ruleDto.visibility != null) {
-            ruleBuilder.withVisibility(ruleDto.visibility);
-        }
-        Map<String, Object> configuration = ruleDto.config;
-        if (configuration != null) {
-            ruleBuilder.withConfiguration(new Configuration(configuration));
         }
         Map<String, YamlConfigDescriptionParameterDTO> configDescriptionDtos = ruleDto.configDescriptions;
         if (configDescriptionDtos != null) {

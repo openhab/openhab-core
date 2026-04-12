@@ -32,7 +32,6 @@ public class SliderImpl extends NonLinkableWidgetImpl implements Slider {
     private @Nullable BigDecimal step;
 
     public SliderImpl() {
-        super();
     }
 
     public SliderImpl(Parent parent) {

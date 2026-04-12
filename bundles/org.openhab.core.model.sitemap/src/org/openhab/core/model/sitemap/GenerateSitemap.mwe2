@@ -19,7 +19,6 @@ var rootPath = ".."
 var projectName = "org.openhab.core.model.sitemap"
 var languageName = "org.openhab.core.model.sitemap.Sitemap"
 var fileExtensions = "sitemap"
-var generateXtendStub = true
 var encoding = "UTF-8"
 
 Workflow {
@@ -54,7 +53,7 @@ Workflow {
       name = languageName
       fileExtensions = fileExtensions
       serializer = {
-        generateStub = generateXtendStub
+        generateStub = false
       }
     }
   }

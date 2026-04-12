@@ -26,7 +26,6 @@ public class DefaultImpl extends NonLinkableWidgetImpl implements Default {
     private @Nullable Integer height;
 
     public DefaultImpl() {
-        super();
     }
 
     public DefaultImpl(Parent parent) {

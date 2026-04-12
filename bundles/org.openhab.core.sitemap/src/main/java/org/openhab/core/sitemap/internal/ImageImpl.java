@@ -27,7 +27,6 @@ public class ImageImpl extends LinkableWidgetImpl implements Image {
     private @Nullable Integer refresh;
 
     public ImageImpl() {
-        super();
     }
 
     public ImageImpl(Parent parent) {
