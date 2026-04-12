@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -28,22 +29,30 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.internal.module.handler.ChannelEventTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.DateTimeTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
+import org.openhab.core.automation.internal.module.handler.EphemerisConditionHandler;
 import org.openhab.core.automation.internal.module.handler.GenericCronTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.GroupCommandTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.GroupStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.IntervalConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ItemStateConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ThingStatusConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayConditionHandler;
 import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
 import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;
 import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
 import org.openhab.core.automation.util.ActionBuilder;
+import org.openhab.core.automation.util.ConditionBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.automation.util.TriggerBuilder;
 import org.openhab.core.common.registry.ProviderChangeListener;
@@ -55,19 +64,27 @@ import org.openhab.core.model.rule.jvmmodel.RulesRefresher;
 import org.openhab.core.model.rule.rules.ChangedEventTrigger;
 import org.openhab.core.model.rule.rules.CommandEventTrigger;
 import org.openhab.core.model.rule.rules.DateTimeTrigger;
+import org.openhab.core.model.rule.rules.DayOfWeekCondition;
 import org.openhab.core.model.rule.rules.EventEmittedTrigger;
 import org.openhab.core.model.rule.rules.EventTrigger;
 import org.openhab.core.model.rule.rules.GroupMemberChangedEventTrigger;
 import org.openhab.core.model.rule.rules.GroupMemberCommandEventTrigger;
 import org.openhab.core.model.rule.rules.GroupMemberUpdateEventTrigger;
+import org.openhab.core.model.rule.rules.HolidayCondition;
+import org.openhab.core.model.rule.rules.InDaysetCondition;
+import org.openhab.core.model.rule.rules.IntervalCondition;
+import org.openhab.core.model.rule.rules.ItemStateCondition;
 import org.openhab.core.model.rule.rules.RuleModel;
 import org.openhab.core.model.rule.rules.SystemOnShutdownTrigger;
 import org.openhab.core.model.rule.rules.SystemOnStartupTrigger;
 import org.openhab.core.model.rule.rules.SystemStartlevelTrigger;
 import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger;
 import org.openhab.core.model.rule.rules.ThingStateUpdateEventTrigger;
+import org.openhab.core.model.rule.rules.ThingStatusCondition;
+import org.openhab.core.model.rule.rules.TimeOfDayCondition;
 import org.openhab.core.model.rule.rules.TimerTrigger;
 import org.openhab.core.model.rule.rules.UpdateEventTrigger;
+import org.openhab.core.model.rule.rules.WeekdayCondition;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
 import org.openhab.core.model.script.script.Script;
 import org.openhab.core.service.ReadyMarker;
@@ -84,9 +101,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This RuleProvider provides rules that are defined in DSL rule files.
  * All rules consist out of a list of triggers and a single script action.
- * No rule conditions are used as this concept does not exist for DSL rules.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Add support for conditions
  */
 @NonNullByDefault
 @Component(immediate = true, service = { DSLRuleProvider.class, RuleProvider.class, DSLScriptContextProvider.class })
@@ -273,13 +290,12 @@ public class DSLRuleProvider
 
         // Create Triggers
         triggerId = 0;
-        List<Trigger> triggers = new ArrayList<>();
-        for (EventTrigger t : rule.getEventtrigger()) {
-            Trigger trigger = mapTrigger(t);
-            if (trigger != null) {
-                triggers.add(trigger);
-            }
-        }
+        List<Trigger> triggers = rule.getEventtrigger().stream().map(this::mapTrigger).filter(Objects::nonNull)
+                .toList();
+
+        // Conditions
+        List<Condition> conditions = rule.getConditions().stream().map(this::mapCondition).filter(Objects::nonNull)
+                .toList();
 
         // Create Action
         String context = DSLScriptContextProvider.CONTEXT_IDENTIFIER + modelName + "-" + index + "\n";
@@ -292,7 +308,7 @@ public class DSLRuleProvider
                 .withConfiguration(cfg).build());
 
         return RuleBuilder.create(uid).withTags(rule.getTags()).withName(name).withTriggers(triggers)
-                .withActions(actions).build();
+                .withActions(actions).withConditions(conditions).build();
     }
 
     private String removeIndentation(String script) {
@@ -314,83 +330,80 @@ public class DSLRuleProvider
                 .collect(Collectors.joining("\n"));
     }
 
-    private @Nullable Trigger mapTrigger(EventTrigger t) {
-        if (t instanceof SystemOnStartupTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(SystemTriggerHandler.CFG_STARTLEVEL, 40);
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof SystemStartlevelTrigger slTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(SystemTriggerHandler.CFG_STARTLEVEL, slTrigger.getLevel());
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof SystemOnShutdownTrigger) {
-            logger.warn("System shutdown rule triggers are no longer supported!");
-            return null;
-        } else if (t instanceof CommandEventTrigger ceTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(ItemCommandTriggerHandler.CFG_ITEMNAME, ceTrigger.getItem());
-            if (ceTrigger.getCommand() != null) {
-                cfg.put(ItemCommandTriggerHandler.CFG_COMMAND, ceTrigger.getCommand().getValue());
+    private @Nullable Trigger mapTrigger(EventTrigger eventTrigger) {
+        Configuration cfg = new Configuration();
+        return switch (eventTrigger) {
+            case SystemOnStartupTrigger t -> {
+                cfg.put(SystemTriggerHandler.CFG_STARTLEVEL, 40);
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(ItemCommandTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof GroupMemberCommandEventTrigger ceTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(GroupCommandTriggerHandler.CFG_GROUPNAME, ceTrigger.getGroup());
-            if (ceTrigger.getCommand() != null) {
-                cfg.put(GroupCommandTriggerHandler.CFG_COMMAND, ceTrigger.getCommand().getValue());
+            case SystemStartlevelTrigger sllTrigger -> {
+                cfg.put(SystemTriggerHandler.CFG_STARTLEVEL, sllTrigger.getLevel());
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(GroupCommandTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof UpdateEventTrigger ueTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(ItemStateTriggerHandler.CFG_ITEMNAME, ueTrigger.getItem());
-            if (ueTrigger.getState() != null) {
-                cfg.put(ItemStateTriggerHandler.CFG_STATE, ueTrigger.getState().getValue());
+            case CommandEventTrigger ceTrigger -> {
+                cfg.put(ItemCommandTriggerHandler.CFG_ITEMNAME, ceTrigger.getItem());
+                if (ceTrigger.getCommand() != null) {
+                    cfg.put(ItemCommandTriggerHandler.CFG_COMMAND, ceTrigger.getCommand().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ItemCommandTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof GroupMemberUpdateEventTrigger ueTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(GroupStateTriggerHandler.CFG_GROUPNAME, ueTrigger.getGroup());
-            if (ueTrigger.getState() != null) {
-                cfg.put(GroupStateTriggerHandler.CFG_STATE, ueTrigger.getState().getValue());
+            case GroupMemberCommandEventTrigger ceTrigger -> {
+                cfg.put(GroupCommandTriggerHandler.CFG_GROUPNAME, ceTrigger.getGroup());
+                if (ceTrigger.getCommand() != null) {
+                    cfg.put(GroupCommandTriggerHandler.CFG_COMMAND, ceTrigger.getCommand().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(GroupCommandTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof ChangedEventTrigger ceTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(ItemStateTriggerHandler.CFG_ITEMNAME, ceTrigger.getItem());
-            if (ceTrigger.getNewState() != null) {
-                cfg.put(ItemStateTriggerHandler.CFG_STATE, ceTrigger.getNewState().getValue());
+            case UpdateEventTrigger ueTrigger -> {
+                cfg.put(ItemStateTriggerHandler.CFG_ITEMNAME, ueTrigger.getItem());
+                if (ueTrigger.getState() != null) {
+                    cfg.put(ItemStateTriggerHandler.CFG_STATE, ueTrigger.getState().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            if (ceTrigger.getOldState() != null) {
-                cfg.put(ItemStateTriggerHandler.CFG_PREVIOUS_STATE, ceTrigger.getOldState().getValue());
+            case GroupMemberUpdateEventTrigger ueTrigger -> {
+                cfg.put(GroupStateTriggerHandler.CFG_GROUPNAME, ueTrigger.getGroup());
+                if (ueTrigger.getState() != null) {
+                    cfg.put(GroupStateTriggerHandler.CFG_STATE, ueTrigger.getState().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof GroupMemberChangedEventTrigger ceTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(GroupStateTriggerHandler.CFG_GROUPNAME, ceTrigger.getGroup());
-            if (ceTrigger.getNewState() != null) {
-                cfg.put(GroupStateTriggerHandler.CFG_STATE, ceTrigger.getNewState().getValue());
+            case ChangedEventTrigger ceTrigger -> {
+                cfg.put(ItemStateTriggerHandler.CFG_ITEMNAME, ceTrigger.getItem());
+                if (ceTrigger.getNewState() != null) {
+                    cfg.put(ItemStateTriggerHandler.CFG_STATE, ceTrigger.getNewState().getValue());
+                }
+                if (ceTrigger.getOldState() != null) {
+                    cfg.put(ItemStateTriggerHandler.CFG_PREVIOUS_STATE, ceTrigger.getOldState().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            if (ceTrigger.getOldState() != null) {
-                cfg.put(GroupStateTriggerHandler.CFG_PREVIOUS_STATE, ceTrigger.getOldState().getValue());
+            case GroupMemberChangedEventTrigger ceTrigger -> {
+                cfg.put(GroupStateTriggerHandler.CFG_GROUPNAME, ceTrigger.getGroup());
+                if (ceTrigger.getNewState() != null) {
+                    cfg.put(GroupStateTriggerHandler.CFG_STATE, ceTrigger.getNewState().getValue());
+                }
+                if (ceTrigger.getOldState() != null) {
+                    cfg.put(GroupStateTriggerHandler.CFG_PREVIOUS_STATE, ceTrigger.getOldState().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof TimerTrigger tt) {
-            String triggerType;
-            Configuration cfg = new Configuration();
-            if (tt.getCron() != null) {
-                triggerType = GenericCronTriggerHandler.MODULE_TYPE_ID;
-                cfg.put(GenericCronTriggerHandler.CFG_CRON_EXPRESSION, tt.getCron());
-            } else {
-                triggerType = TimeOfDayTriggerHandler.MODULE_TYPE_ID;
-                String id = tt.getTime();
+            case TimerTrigger timeTrigger when timeTrigger.getCron() != null -> {
+                cfg.put(GenericCronTriggerHandler.CFG_CRON_EXPRESSION, timeTrigger.getCron());
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(GenericCronTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case TimerTrigger timeTrigger when timeTrigger.getCron() == null -> {
+                String id = timeTrigger.getTime();
                 if ("noon".equals(id)) {
                     cfg.put(TimeOfDayTriggerHandler.CFG_TIME, "12:00");
                 } else if ("midnight".equals(id)) {
@@ -398,41 +411,127 @@ public class DSLRuleProvider
                 } else {
                     cfg.put(TimeOfDayTriggerHandler.CFG_TIME, id);
                 }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(TimeOfDayTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID(triggerType)
-                    .withConfiguration(cfg).build();
-        } else if (t instanceof DateTimeTrigger tt) {
-            Configuration cfg = new Configuration();
-            cfg.put(DateTimeTriggerHandler.CONFIG_ITEM_NAME, tt.getItem());
-            cfg.put(DateTimeTriggerHandler.CONFIG_TIME_ONLY, tt.isTimeOnly());
-            cfg.put(DateTimeTriggerHandler.CONFIG_OFFSET, tt.getOffset());
-            return TriggerBuilder.create().withId(Integer.toString((triggerId++)))
-                    .withTypeUID(DateTimeTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof EventEmittedTrigger eeTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(ChannelEventTriggerHandler.CFG_CHANNEL, eeTrigger.getChannel());
-            if (eeTrigger.getTrigger() != null) {
-                cfg.put(ChannelEventTriggerHandler.CFG_CHANNEL_EVENT, eeTrigger.getTrigger().getValue());
+            case DateTimeTrigger dtTrigger -> {
+                cfg.put(DateTimeTriggerHandler.CONFIG_ITEM_NAME, dtTrigger.getItem());
+                cfg.put(DateTimeTriggerHandler.CONFIG_TIME_ONLY, dtTrigger.isTimeOnly());
+                cfg.put(DateTimeTriggerHandler.CONFIG_OFFSET, dtTrigger.getOffset());
+                yield TriggerBuilder.create().withId(Integer.toString((triggerId++)))
+                        .withTypeUID(DateTimeTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(ChannelEventTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof ThingStateUpdateEventTrigger tsuTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(ThingStatusTriggerHandler.CFG_THING_UID, tsuTrigger.getThing());
-            cfg.put(ThingStatusTriggerHandler.CFG_STATUS, tsuTrigger.getState());
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else if (t instanceof ThingStateChangedEventTrigger tscTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put(ThingStatusTriggerHandler.CFG_THING_UID, tscTrigger.getThing());
-            cfg.put(ThingStatusTriggerHandler.CFG_STATUS, tscTrigger.getNewState());
-            cfg.put(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS, tscTrigger.getOldState());
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID(ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
-        } else {
-            logger.warn("Unknown trigger type '{}' - ignoring it.", t.getClass().getSimpleName());
-            return null;
-        }
+            case EventEmittedTrigger eeTrigger -> {
+                cfg.put(ChannelEventTriggerHandler.CFG_CHANNEL, eeTrigger.getChannel());
+                if (eeTrigger.getTrigger() != null) {
+                    cfg.put(ChannelEventTriggerHandler.CFG_CHANNEL_EVENT, eeTrigger.getTrigger().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ChannelEventTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case ThingStateUpdateEventTrigger tsuTrigger -> {
+                cfg.put(ThingStatusTriggerHandler.CFG_THING_UID, tsuTrigger.getThing());
+                cfg.put(ThingStatusTriggerHandler.CFG_STATUS, tsuTrigger.getState());
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case ThingStateChangedEventTrigger tscTrigger -> {
+                cfg.put(ThingStatusTriggerHandler.CFG_THING_UID, tscTrigger.getThing());
+                cfg.put(ThingStatusTriggerHandler.CFG_STATUS, tscTrigger.getNewState());
+                cfg.put(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS, tscTrigger.getOldState());
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case SystemOnShutdownTrigger t -> {
+                logger.warn("System shutdown rule triggers are no longer supported!");
+                yield null;
+            }
+            default -> {
+                logger.warn("Unknown trigger type '{}' - ignoring it.", eventTrigger.getClass().getSimpleName());
+                yield null;
+            }
+        };
+    }
+
+    private @Nullable Condition mapCondition(org.openhab.core.model.rule.rules.Condition condition) {
+        Configuration cfg = new Configuration();
+        return switch (condition) {
+            case TimeOfDayCondition todCond -> {
+                cfg.put(TimeOfDayConditionHandler.CFG_START_TIME, todCond.getStart());
+                cfg.put(TimeOfDayConditionHandler.CFG_END_TIME, todCond.getEnd());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(TimeOfDayConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case DayOfWeekCondition dowCond -> {
+                List<String> days = new ArrayList<>();
+                dowCond.getWeekDays().forEach(day -> {
+                    String d = switch (day) {
+                        case "Monday" -> "MON";
+                        case "Tuesday" -> "TUE";
+                        case "Wednesday" -> "WED";
+                        case "Thursday" -> "THU";
+                        case "Friday" -> "FRI";
+                        case "Saturday" -> "SAT";
+                        case "Sunday" -> "SUN";
+                        default -> null;
+                    };
+                    if (d != null) {
+                        days.add(d);
+                    }
+                });
+                cfg.put(DayOfWeekConditionHandler.CFG_DAYS, days);
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(DayOfWeekConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case WeekdayCondition weekdayCond -> {
+                String offset = weekdayCond.getOffset();
+                cfg.put("offset", offset == null ? 0 : Integer.valueOf(offset));
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID("weekday".equals(weekdayCond.getType())
+                                ? EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID
+                                : EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID)
+                        .withConfiguration(cfg).build();
+            }
+            case HolidayCondition holidayCond -> {
+                String offset = holidayCond.getOffset();
+                cfg.put("offset", offset == null ? 0 : Integer.valueOf(offset));
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(holidayCond.isNegation() ? EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID
+                                : EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID)
+                        .withConfiguration(cfg).build();
+            }
+            case InDaysetCondition daysetCond -> {
+                String offset = daysetCond.getOffset();
+                cfg.put("dayset", daysetCond.getDayset());
+                cfg.put("offset", offset == null ? 0 : Integer.valueOf(offset));
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case IntervalCondition intervalCond -> {
+                cfg.put(IntervalConditionHandler.CFG_MIN_INTERVAL, intervalCond.getInterval());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(IntervalConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case ThingStatusCondition tsCond -> {
+                cfg.put(ThingStatusConditionHandler.CFG_THING_UID, tsCond.getThing());
+                cfg.put(ThingStatusConditionHandler.CFG_OPERATOR, tsCond.isNegation() ? "!=" : "=");
+                cfg.put(ThingStatusConditionHandler.CFG_STATUS, tsCond.getStatus());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ThingStatusConditionHandler.THING_STATUS_CONDITION).withConfiguration(cfg).build();
+            }
+            case ItemStateCondition isCond -> {
+                String operator = isCond.getOperator();
+                cfg.put(ItemStateConditionHandler.ITEM_NAME, isCond.getItem());
+                cfg.put(ItemStateConditionHandler.OPERATOR, operator == null ? "=" : operator);
+                cfg.put(ItemStateConditionHandler.STATE, isCond.getState().getValue());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ItemStateConditionHandler.ITEM_STATE_CONDITION).withConfiguration(cfg).build();
+            }
+            default -> {
+                logger.warn("Unknown condition type '{}' - ignoring it.", condition.getClass().getSimpleName());
+                yield null;
+            }
+        };
     }
 
     @Override

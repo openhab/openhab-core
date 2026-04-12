@@ -30,7 +30,6 @@ public class SetpointImpl extends NonLinkableWidgetImpl implements Setpoint {
     private @Nullable BigDecimal step;
 
     public SetpointImpl() {
-        super();
     }
 
     public SetpointImpl(Parent parent) {

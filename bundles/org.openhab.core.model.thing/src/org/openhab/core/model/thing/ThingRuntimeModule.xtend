@@ -28,10 +28,6 @@ import org.eclipse.xtext.linking.lazy.LazyURIEncoder
         return ThingValueConverters
     }
 
-    override Class<? extends org.eclipse.xtext.serializer.sequencer.ISyntacticSequencer> bindISyntacticSequencer() {
-        return org.openhab.core.model.thing.serializer.ThingSyntacticSequencerExtension
-    }
-
     override Class<? extends IFormatter> bindIFormatter() {
         return ThingFormatter
     }

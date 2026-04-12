@@ -137,12 +137,6 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
 
-      # pinning to SHA to mitigate possible supply chain attacks
-      - name: Set up Maven ${{ matrix.maven }}
-        uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
-        with:
-          maven-version: ${{ matrix.maven }}
-
       - name: JavaDoc
         if: ${{ matrix.type == 'javadoc' }}
         id: javadoc

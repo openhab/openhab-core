@@ -23,7 +23,6 @@ import org.openhab.core.sitemap.Parent;
 public class ColorpickerImpl extends NonLinkableWidgetImpl implements Colorpicker {
 
     public ColorpickerImpl() {
-        super();
     }
 
     public ColorpickerImpl(Parent parent) {

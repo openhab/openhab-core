@@ -29,7 +29,6 @@ public class SwitchImpl extends NonLinkableWidgetImpl implements Switch {
     private List<Mapping> mappings = new CopyOnWriteArrayList<>();
 
     public SwitchImpl() {
-        super();
     }
 
     public SwitchImpl(Parent parent) {

@@ -23,7 +23,6 @@ import org.openhab.core.sitemap.Parent;
 public class NonLinkableWidgetImpl extends WidgetImpl implements NonLinkableWidget {
 
     public NonLinkableWidgetImpl() {
-        super();
     }
 
     public NonLinkableWidgetImpl(Parent parent) {

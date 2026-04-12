@@ -27,7 +27,6 @@ public class WebviewImpl extends NonLinkableWidgetImpl implements Webview {
     private String url = "";
 
     public WebviewImpl() {
-        super();
     }
 
     public WebviewImpl(Parent parent) {

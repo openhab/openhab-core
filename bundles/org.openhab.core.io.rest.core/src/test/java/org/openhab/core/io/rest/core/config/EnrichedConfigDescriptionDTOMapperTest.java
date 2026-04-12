@@ -26,8 +26,8 @@ import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
-import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
+import org.openhab.core.io.rest.core.config.dto.EnrichedConfigDescriptionDTO;
 
 /**
  * @author Christoph Weitkamp - Initial contribution
@@ -46,7 +46,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescription configDescription = ConfigDescriptionBuilder.create(CONFIG_URI)
                 .withParameter(configDescriptionParameter).build();
 
-        ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
+        EnrichedConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));
 
         ConfigDescriptionParameterDTO cdpdto = cddto.parameters.getFirst();
@@ -63,7 +63,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescription configDescription = ConfigDescriptionBuilder.create(CONFIG_URI)
                 .withParameter(configDescriptionParameter).build();
 
-        ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
+        EnrichedConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));
 
         ConfigDescriptionParameterDTO cdpdto = cddto.parameters.getFirst();
@@ -81,7 +81,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescription configDescription = ConfigDescriptionBuilder.create(CONFIG_URI)
                 .withParameter(configDescriptionParameter).build();
 
-        ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
+        EnrichedConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));
 
         ConfigDescriptionParameterDTO cdpdto = cddto.parameters.getFirst();
@@ -102,7 +102,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescription configDescription = ConfigDescriptionBuilder.create(CONFIG_URI)
                 .withParameter(configDescriptionParameter).build();
 
-        ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
+        EnrichedConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));
 
         ConfigDescriptionParameterDTO cdpdto = cddto.parameters.getFirst();
