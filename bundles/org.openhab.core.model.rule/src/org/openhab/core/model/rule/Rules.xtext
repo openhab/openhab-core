@@ -12,7 +12,7 @@ VariableDeclaration:
 ;
 
 Rule:
-	'rule' name=(STRING|ID) (uid=(STRING|ID))? ('[' tags+=(ID|STRING) (',' tags+=(ID|STRING))* ']')?
+	'rule' name=(STRING|ID) ('uid=' uid=(STRING|ID))? ('[' tags+=(ID|STRING) (',' tags+=(ID|STRING))* ']')?
 	'when' eventtrigger+=EventTrigger ('or' eventtrigger+=EventTrigger)*
 	'then' script=XExpressionInClosure
 	'end'
