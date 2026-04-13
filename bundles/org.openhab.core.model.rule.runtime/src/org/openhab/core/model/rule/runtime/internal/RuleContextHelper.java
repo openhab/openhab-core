@@ -44,15 +44,14 @@ public class RuleContextHelper {
      * @return the evaluation context
      */
     public static synchronized IEvaluationContext getContext(RuleModel ruleModel) {
-        Logger logger = LoggerFactory.getLogger(RuleContextHelper.class);
-        Injector injector = RulesStandaloneSetup.getInjector();
-
         // check if a context already exists on the resource
         for (Adapter adapter : ruleModel.eAdapters()) {
             if (adapter instanceof RuleContextAdapter contextAdapter) {
                 return contextAdapter.getContext();
             }
         }
+        Logger logger = LoggerFactory.getLogger(RuleContextHelper.class);
+        Injector injector = RulesStandaloneSetup.getInjector();
         Provider<@NonNull IEvaluationContext> contextProvider = injector.getProvider(IEvaluationContext.class);
         // no evaluation context found, so create a new one
         ScriptEngine scriptEngine = injector.getInstance(ScriptEngine.class);
