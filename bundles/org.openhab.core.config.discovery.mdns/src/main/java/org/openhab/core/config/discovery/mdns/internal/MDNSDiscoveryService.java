@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
 public class MDNSDiscoveryService extends AbstractDiscoveryService implements ServiceListener {
 
     private static final Duration FOREGROUND_SCAN_TIMEOUT = Duration.ofMillis(200);
-    private static final int CONSIDER_SERVICE_WINDOW_MSEC = 200;
+    private static final int CONSIDER_SERVICE_WINDOW_MS = 200;
 
     private final Logger logger = LoggerFactory.getLogger(MDNSDiscoveryService.class);
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
@@ -268,7 +268,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         synchronized (this) {
             oldTask = considerServiceTasks.put(lookupKey,
                     scheduler.schedule(() -> considerServiceTask(serviceInfo, serviceEvent.getType(), lookupKey),
-                            CONSIDER_SERVICE_WINDOW_MSEC, TimeUnit.MILLISECONDS));
+                            CONSIDER_SERVICE_WINDOW_MS, TimeUnit.MILLISECONDS));
         }
         if (oldTask != null) {
             oldTask.cancel(false);
