@@ -103,7 +103,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         Collection<Rule> rules = dslRuleProvider.getAll();
         assertThat(rules.size(), is(0));
 
-        String model = "rule RuleNumberOne [ Test, \"my test\" ]\n" + //
+        String model = "rule RuleNumberOne uid = rule1 [ Test, \"my test\" ]\n" + //
                 "when\n" + //
                 "   System started\n" + //
                 "then\n" + //
@@ -125,7 +125,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         Rule firstRule = it.next();
 
-        assertThat(firstRule.getUID(), is("dslruletest-1"));
+        assertThat(firstRule.getUID(), is("rule1"));
         assertThat(firstRule.getName(), is("RuleNumberOne"));
         assertThat(firstRule.getTags(), hasSize(2));
         assertThat(firstRule.getTags(), hasItem("Test"));
