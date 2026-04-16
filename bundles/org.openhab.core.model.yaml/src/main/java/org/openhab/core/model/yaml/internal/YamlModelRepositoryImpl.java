@@ -45,6 +45,7 @@ import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
+import org.openhab.core.model.yaml.internal.pages.YamlPageDTO;
 import org.openhab.core.model.yaml.internal.rules.YamlRuleDTO;
 import org.openhab.core.model.yaml.internal.rules.YamlRuleTemplateDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
@@ -85,6 +86,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Laurent Garnier - new parameters to retrieve errors and warnings when loading a file
  * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createIsolatedModel and
  *         removeIsolatedModel
+ * @author Jimmy Tanagra - Add YamlPageDTO
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -97,7 +99,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             getElementName(YamlRuleTemplateDTO.class), // "ruleTemplates"
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
-            getElementName(YamlItemDTO.class) // "items"
+            getElementName(YamlItemDTO.class), // "items"
+            getElementName(YamlPageDTO.class) // "pages"
     );
 
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
