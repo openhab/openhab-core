@@ -36,11 +36,9 @@ public class EnrichedRootUIComponent extends RootUIComponent {
         if (component.getTags() != null) {
             addTags(component.getTags());
         }
-        if (component.getTimestamp() != null) {
-            Date ts = component.getTimestamp();
-            if (ts != null) {
-                setTimestamp(ts);
-            }
+        Date timestamp = component.getTimestamp();
+        if (timestamp != null) {
+            setTimestamp(timestamp);
         }
         setProps(component.getProps());
         this.editable = editable;

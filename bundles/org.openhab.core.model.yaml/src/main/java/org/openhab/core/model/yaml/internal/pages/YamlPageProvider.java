@@ -16,6 +16,7 @@ import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -156,6 +157,10 @@ public class YamlPageProvider extends AbstractProvider<RootUIComponent>
         }
         if (dto.props != null) {
             page.setProps(dto.props);
+        }
+        Date timestamp = dto.timestamp;
+        if (timestamp != null) {
+            page.setTimestamp(timestamp);
         }
         return page;
     }

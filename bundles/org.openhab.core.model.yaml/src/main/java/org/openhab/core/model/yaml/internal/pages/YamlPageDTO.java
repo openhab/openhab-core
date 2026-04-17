@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal.pages;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +23,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
+import org.openhab.core.model.yaml.internal.util.FlexibleDateDeserializer;
 import org.openhab.core.ui.components.UIComponent;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * The {@link YamlPageDTO} is a data transfer object used to serialize a UI page in a YAML configuration file.
@@ -39,6 +43,8 @@ public class YamlPageDTO implements YamlElement, Cloneable {
     public Map<String, List<UIComponent>> slots;
     public Set<String> tags;
     public ConfigDescriptionDTO props;
+    @JsonDeserialize(using = FlexibleDateDeserializer.class)
+    public @Nullable Date timestamp;
 
     public YamlPageDTO() {
     }
