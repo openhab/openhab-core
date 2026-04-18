@@ -481,7 +481,7 @@ public class FileFormatResource implements RESTResource {
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
 
-        if (acceptHeader.equals("text/vnd.openhab.dsl.sitemap") && (sitemapNames == null || sitemapNames.size() != 1)) {
+        if ("text/vnd.openhab.dsl.sitemap".equals(acceptHeader) && (sitemapNames == null || sitemapNames.size() != 1)) {
             // DSL format only supports one sitemap at a time
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("For media type 'text/vnd.openhab.dsl.sitemap', exactly one sitemap name must be provided!")

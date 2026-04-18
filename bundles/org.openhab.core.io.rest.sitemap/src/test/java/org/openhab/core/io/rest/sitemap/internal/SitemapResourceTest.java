@@ -164,7 +164,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenGetSitemapsDefinition_shouldSetEditableFlag() {
+    public void whenGetSitemapsDefinitionShouldSetEditableFlag() {
         // sitemapRegistryMock.getAll() already returns Set.of(defaultSitemapMock) via configureSitemapRegistryMock
         // This test will have that sitemap be a managed sitemap
         when(managedSitemapProviderMock.get(SITEMAP_NAME)).thenReturn(new SitemapImpl(SITEMAP_NAME));
@@ -180,20 +180,20 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenGetSitemapDefinition_notFound_shouldReturn404() {
+    public void whenGetSitemapDefinitionNotFoundShouldReturn404() {
         when(sitemapRegistryMock.get("noexist")).thenReturn(null);
         Response resp = sitemapResource.getSitemapDefinition(headersMock, "noexist");
         assertThat(resp.getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test
-    public void whenCreateOrUpdateSitemap_nullBody_shouldReturnBadRequest() {
+    public void whenCreateOrUpdateSitemapNullBodyShouldReturnBadRequest() {
         Object resp = sitemapResource.createOrUpdateSitemap(headersMock, "any", null);
         assertThat(((Response) resp).getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
     }
 
     @Test
-    public void whenCreateOrUpdateSitemap_nameMismatch_shouldReturnBadRequest() {
+    public void whenCreateOrUpdateSitemapNameMismatchShouldReturnBadRequest() {
         SitemapDefinitionDTO dto = new SitemapDefinitionDTO();
         dto.name = "other";
         Object resp = sitemapResource.createOrUpdateSitemap(headersMock, "pathName", dto);
@@ -201,7 +201,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenCreateOrUpdateSitemap_createNew_shouldAddManagedSitemap() {
+    public void whenCreateOrUpdateSitemapCreateNewShouldAddManagedSitemap() {
         SitemapDefinitionDTO dto = new SitemapDefinitionDTO();
         dto.name = "s1";
 
@@ -216,7 +216,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenCreateOrUpdateSitemap_updateManaged_shouldUpdateManagedSitemap() {
+    public void whenCreateOrUpdateSitemapUpdateManagedShouldUpdateManagedSitemap() {
         SitemapDefinitionDTO dto = new SitemapDefinitionDTO();
         dto.name = "s2";
 
@@ -232,14 +232,14 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenRemoveSitemap_notFound_shouldReturn404() {
+    public void whenRemoveSitemapNotFoundShouldReturn404() {
         when(sitemapRegistryMock.get("xyz")).thenReturn(null);
         Response resp = sitemapResource.removeSitemap("xyz");
         assertThat(resp.getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test
-    public void whenRemoveSitemap_notManaged_shouldReturnMethodNotAllowed() {
+    public void whenRemoveSitemapNotManagedShouldReturnMethodNotAllowed() {
         Sitemap sitemap = mock(Sitemap.class);
         when(sitemapRegistryMock.get("sdel")).thenReturn(sitemap);
         when(managedSitemapProviderMock.remove("sdel")).thenReturn(null);
@@ -250,7 +250,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenRemoveSitemap_managed_shouldReturnOk() {
+    public void whenRemoveSitemapManagedShouldReturnOk() {
         Sitemap sitemap = mock(Sitemap.class);
         when(sitemapRegistryMock.get("sdel2")).thenReturn(sitemap);
         when(managedSitemapProviderMock.remove("sdel2")).thenReturn(sitemap);
