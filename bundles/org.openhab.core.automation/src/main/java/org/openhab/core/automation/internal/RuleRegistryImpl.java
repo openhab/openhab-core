@@ -367,13 +367,14 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     }
 
     /**
-     * The method checks if the rule has to be resolved by template or not. If the rule does not contain tempateUID it
-     * returns same rule, otherwise it tries to resolve the rule created from template. If the template is available
-     * the method creates a new rule based on triggers, conditions and actions from template. If the template is not
-     * available returns the same rule.
+     * The method checks if the rule has to be resolved by template or not. If the rule does not contain a
+     * {@code tempateUID} or the {@code templateState} is {@code NO_TEMPLATE} or {@code INSTANTIATED}, it returns same
+     * rule, otherwise it tries to resolve the rule created from template. If the template is available the method
+     * creates a new rule based on triggers, conditions and actions from template. If the template is not available, it
+     * returns the same rule.
      *
      * @param rule a rule defined by template.
-     * @return the resolved rule(containing modules defined by the template) or not resolved rule, if the template is
+     * @return the resolved rule (containing modules defined by the template) or not resolved rule, if the template is
      *         missing.
      */
     private Rule resolveRuleByTemplate(Rule rule) {
@@ -396,7 +397,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
             RuleImpl resolvedRule = (RuleImpl) RuleBuilder
                     .create(template, rule.getUID(), rule.getName(), rule.getConfiguration(), rule.getVisibility())
                     .build();
-            resolveConfigurations(resolvedRule);
+            resolveConfiguration(resolvedRule);
             return resolvedRule;
         }
     }
@@ -458,45 +459,45 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
 
     @Override
     protected void onAddElement(Rule element) throws IllegalArgumentException {
-        String uid = element.getUID();
         try {
-            resolveConfigurations(element);
+            resolveConfiguration(element);
         } catch (IllegalArgumentException e) {
-            logger.debug("Added rule '{}' is invalid", uid, e);
+            logger.debug("Added rule '{}' is invalid", element.getUID(), e);
         }
     }
 
     @Override
     protected void onUpdateElement(Rule oldElement, Rule element) throws IllegalArgumentException {
-        String uid = element.getUID();
         try {
-            resolveConfigurations(element);
+            resolveConfiguration(element);
         } catch (IllegalArgumentException e) {
-            logger.debug("The new version of updated rule '{}' is invalid", uid, e);
+            logger.debug("The new version of updated rule '{}' is invalid", element.getUID(), e);
         }
     }
 
     /**
-     * This method serves to resolve and normalize the {@link Rule}s configuration values and its module configurations.
+     * This method resolves, normalizes and applies the {@link Rule} configuration to a {@link RuleTemplate}'s module
+     * placeholders.
      *
-     * @param rule the {@link Rule}, whose configuration values and module configuration values should be resolved and
-     *            normalized.
+     * @param rule the {@link Rule} to which to try to replace template placeholders with configuration values.
+     * @throws IllegalArgumentException If the configuration is incorrect.
      */
-    private void resolveConfigurations(Rule rule) {
-        List<ConfigDescriptionParameter> configDescriptions = rule.getConfigurationDescriptions();
-        Configuration configuration = rule.getConfiguration();
-        ConfigurationNormalizer.normalizeConfiguration(configuration,
-                ConfigurationNormalizer.getConfigDescriptionMap(configDescriptions));
-        Map<String, Object> configurationProperties = configuration.getProperties();
+    private void resolveConfiguration(Rule rule) throws IllegalArgumentException {
         TemplateState templateState = rule.getTemplateState();
-        if (templateState == TemplateState.INSTANTIATED || templateState == TemplateState.NO_TEMPLATE) {
+        if (templateState == TemplateState.INSTANTIATED) {
+            List<ConfigDescriptionParameter> configDescriptions = rule.getConfigurationDescriptions();
+            Configuration configuration = new Configuration(rule.getConfiguration());
+            ConfigurationNormalizer.normalizeConfiguration(configuration,
+                    ConfigurationNormalizer.getConfigDescriptionMap(configDescriptions));
+            Map<String, Object> configurationProperties = configuration.getProperties();
             String uid = rule.getUID();
             try {
-                validateConfiguration(configDescriptions, new HashMap<>(configurationProperties));
+                validateConfiguration(configDescriptions, configurationProperties);
                 resolveModuleConfigReferences(rule.getModules(), configurationProperties);
                 ConfigurationNormalizer.normalizeModuleConfigurations(rule.getModules(), moduleTypeRegistry);
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(String.format("The rule '%s' has incorrect configurations", uid), e);
+                throw new IllegalArgumentException(
+                        String.format("The rule '%s' has incorrect configuration: %s", uid, e.getMessage()), e);
             }
         }
     }
@@ -505,10 +506,12 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      * This method serves to validate the {@link Rule}s configuration values.
      *
      * @param rule the {@link Rule}, whose configuration values should be validated.
+     * @throws IllegalArgumentException If a required configuration property is missing.
      */
     private void validateConfiguration(List<ConfigDescriptionParameter> configDescriptions,
-            Map<String, Object> configurations) {
-        if (configurations == null || configurations.isEmpty()) {
+            Map<String, Object> configuration) throws IllegalArgumentException {
+        Map<String, Object> config = configuration == null ? new HashMap<>() : new HashMap<>(configuration);
+        if (config.isEmpty()) {
             if (isOptionalConfig(configDescriptions)) {
                 return;
             } else {
@@ -526,15 +529,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
         } else {
             for (ConfigDescriptionParameter configParameter : configDescriptions) {
                 String configParameterName = configParameter.getName();
-                processValue(configurations.remove(configParameterName), configParameter);
-            }
-            if (!configurations.isEmpty()) {
-                StringBuilder statusDescription = new StringBuilder();
-                String msg = " '%s';";
-                for (String name : configurations.keySet()) {
-                    statusDescription.append(String.format(msg, name));
-                }
-                throw new IllegalArgumentException("Extra configuration properties: " + statusDescription.toString());
+                processValue(config.remove(configParameterName), configParameter);
             }
         }
     }
