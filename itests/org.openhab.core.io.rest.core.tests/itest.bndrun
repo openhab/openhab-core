@@ -105,4 +105,5 @@ Fragment-Host: org.openhab.core.io.rest.core
 	stax2-api;version='[4.2.2,4.2.3)',\
 	biz.aQute.tester.junit-platform;version='[7.2.1,7.2.2)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.2,2.3.3)',\
-	org.osgi.service.cm;version='[1.6.1,1.6.2)'
+	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
+	org.openhab.core.sitemap;version='[5.2.0,5.2.1)'
