@@ -206,7 +206,7 @@ public class FileFormatResource implements RESTResource {
                       param: my param value
             """;
 
-    private static final String YAML_ITEMS_AND_THINGS_EXAMPLE = """
+    private static final String YAML_FULL_EXAMPLE = """
             version: 1
             things:
               binding:typeBridge:idBridge:
@@ -251,6 +251,15 @@ public class FileFormatResource implements RESTResource {
                     value: my value
                     config:
                       param: my param value
+            sitemaps:
+              MySitemap:
+                label: My Sitemap
+                widgets:
+                  - type: Frame
+                    widgets:
+                      - type: Input
+                        item: MyItem
+                        label: My Input
             """;
 
     private static final String DSL_SITEMAPS_EXAMPLE = """
@@ -259,6 +268,19 @@ public class FileFormatResource implements RESTResource {
                     Input item=MyItem label="My Input"
                 }
             }
+            """;
+
+    private static final String YAML_SITEMAPS_EXAMPLE = """
+            version: 1
+            sitemaps:
+              MySitemap:
+                label: My Sitemap
+                widgets:
+                  - type: Frame
+                    widgets:
+                      - type: Input
+                        item: MyItem
+                        label: My Input
             """;
 
     private static final String GEN_ID_PATTERN = "gen_file_format_%d";
@@ -463,11 +485,12 @@ public class FileFormatResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/sitemaps")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({ "text/vnd.openhab.dsl.sitemap" })
+    @Produces({ "text/vnd.openhab.dsl.sitemap", "application/yaml" })
     @Operation(operationId = "createFileFormatForSitemaps", summary = "Create file format for a list of sitemaps in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
-                            @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)) }),
+                            @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)),
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_SITEMAPS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "404", description = "One or more sitemaps not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForSitemaps(final @Context HttpHeaders httpHeaders,
@@ -515,7 +538,7 @@ public class FileFormatResource implements RESTResource {
                             @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
                             @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
                             @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)),
-                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_ITEMS_AND_THINGS_EXAMPLE)) }),
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_FULL_EXAMPLE)) }),
                     @ApiResponse(responseCode = "400", description = "Invalid JSON data."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response create(final @Context HttpHeaders httpHeaders,
@@ -581,10 +604,15 @@ public class FileFormatResource implements RESTResource {
                     itemSerializer.setItemsToBeSerialized(genId, items,
                             hideChannelLinksAndMetadata ? List.of() : metadata, stateFormatters, hideDefaultParameters);
                 }
+                if (sitemapSerializer != null) {
+                    sitemapSerializer.setSitemapsToBeSerialized(genId, sitemaps);
+                }
                 if (thingSerializer != null) {
                     thingSerializer.generateFormat(genId, outputStream);
                 } else if (itemSerializer != null) {
                     itemSerializer.generateFormat(genId, outputStream);
+                } else if (sitemapSerializer != null) {
+                    sitemapSerializer.generateFormat(genId, outputStream);
                 }
                 break;
             default:
@@ -610,7 +638,7 @@ public class FileFormatResource implements RESTResource {
                     @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
                     @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
                     @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)),
-                    @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_ITEMS_AND_THINGS_EXAMPLE)) }) String input) {
+                    @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_FULL_EXAMPLE)) }) String input) {
         String contentTypeHeader = httpHeaders.getHeaderString(HttpHeaders.CONTENT_TYPE);
         logger.debug("parse: contentType = {}", contentTypeHeader);
 
@@ -628,6 +656,7 @@ public class FileFormatResource implements RESTResource {
         SitemapParser sitemapParser = getSitemapParser(contentTypeHeader);
         String modelName = null;
         String modelName2 = null;
+        String modelName3 = null;
         switch (contentTypeHeader) {
             case "text/vnd.openhab.dsl.thing":
                 if (thingParser == null) {
@@ -671,13 +700,13 @@ public class FileFormatResource implements RESTResource {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                             .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
                 }
-                modelName2 = sitemapParser.startParsingFormat(input, errors, warnings);
-                if (modelName2 == null) {
+                modelName3 = sitemapParser.startParsingFormat(input, errors, warnings);
+                if (modelName3 == null) {
                     return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
                 }
-                sitemaps = sitemapParser.getParsedObjects(modelName2);
+                sitemaps = sitemapParser.getParsedObjects(modelName3);
                 if (sitemaps.isEmpty()) {
-                    sitemapParser.finishParsingFormat(modelName2);
+                    sitemapParser.finishParsingFormat(modelName3);
                     return Response.status(Response.Status.BAD_REQUEST).entity("No sitemap loaded from input").build();
                 }
                 break;
@@ -704,6 +733,19 @@ public class FileFormatResource implements RESTResource {
                     metadata = itemParser.getParsedMetadata(modelNameToUse);
                     stateFormatters = itemParser.getParsedStateFormatters(modelNameToUse);
                 }
+                if (sitemapParser != null) {
+                    // Avoid parsing the input a second time
+                    if (modelName == null && modelName2 == null) {
+                        modelName3 = sitemapParser.startParsingFormat(input, errors, warnings);
+                        if (modelName3 == null) {
+                            return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors))
+                                    .build();
+                        }
+                    }
+                    String modelNameToUse = modelName != null ? modelName
+                            : (modelName2 != null ? modelName2 : Objects.requireNonNull(modelName3));
+                    sitemaps = sitemapParser.getParsedObjects(modelNameToUse);
+                }
                 break;
             default:
                 return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
@@ -717,8 +759,8 @@ public class FileFormatResource implements RESTResource {
         if (modelName2 != null && itemParser != null) {
             itemParser.finishParsingFormat(modelName2);
         }
-        if (modelName2 != null && sitemapParser != null) {
-            sitemapParser.finishParsingFormat(modelName2);
+        if (modelName3 != null && sitemapParser != null) {
+            sitemapParser.finishParsingFormat(modelName3);
         }
         return Response.ok(result).build();
     }
@@ -890,6 +932,7 @@ public class FileFormatResource implements RESTResource {
     private @Nullable SitemapSerializer getSitemapSerializer(String mediaType) {
         return switch (mediaType) {
             case "text/vnd.openhab.dsl.sitemap" -> sitemapSerializers.get("DSL");
+            case "application/yaml" -> sitemapSerializers.get("YAML");
             default -> null;
         };
     }
@@ -914,6 +957,7 @@ public class FileFormatResource implements RESTResource {
     private @Nullable SitemapParser getSitemapParser(String contentType) {
         return switch (contentType) {
             case "text/vnd.openhab.dsl.sitemap" -> sitemapParsers.get("DSL");
+            case "application/yaml" -> sitemapParsers.get("YAML");
             default -> null;
         };
     }
