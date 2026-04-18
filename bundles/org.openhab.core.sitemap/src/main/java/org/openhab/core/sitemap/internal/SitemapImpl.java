@@ -31,10 +31,22 @@ public class SitemapImpl implements Sitemap {
     private @Nullable String icon;
     private List<Widget> widgets = new CopyOnWriteArrayList<>();
 
+    private static final String NAME_PATTERN = "^[a-zA-Z0-9_]+$";
+
     public SitemapImpl() {
     }
 
+    /**
+     * Method to create a sitemap with the given name.
+     *
+     * @param name the name of the sitemap, must match the pattern defined in NAME_PATTERN.
+     *
+     * @throws IllegalArgumentException if the provided name is null or does not match the required pattern.
+     */
     public SitemapImpl(String name) {
+        if (!name.matches(NAME_PATTERN)) {
+            throw new IllegalArgumentException("Sitemap name must match the pattern: " + NAME_PATTERN);
+        }
         this.name = name;
     }
 

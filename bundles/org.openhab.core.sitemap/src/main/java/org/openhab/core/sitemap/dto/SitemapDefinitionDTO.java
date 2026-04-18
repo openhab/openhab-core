@@ -10,23 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.sitemap.internal;
+package org.openhab.core.sitemap.dto;
 
-import org.openhab.core.sitemap.dto.AbstractSitemapDTO;
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * This is a data transfer object that is used to serialize sitemaps.
  *
- * @author Kai Kreuzer - Initial contribution
- * @author Chris Jackson - Initial contribution
- * @author Mark Herwege - Moved to abstract class and extend
+ * @author Mark Herwege - Initial contribution
  */
-@Schema(name = "Sitemap")
-public class SitemapDTO extends AbstractSitemapDTO {
+@Schema(name = "SitemapDefinition")
+public class SitemapDefinitionDTO extends AbstractSitemapDTO {
 
-    public String link;
-
-    public PageDTO homepage;
+    public List<WidgetDefinitionDTO> widgets;
 }
