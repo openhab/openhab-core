@@ -54,6 +54,9 @@ Workflow {
       serializer = {
         generateStub = false
       }
+      validator = {
+        generateStub = false
+      }
     }
   }
 }
