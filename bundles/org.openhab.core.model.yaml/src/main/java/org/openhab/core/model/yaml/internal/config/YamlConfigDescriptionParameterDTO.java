@@ -99,8 +99,8 @@ public class YamlConfigDescriptionParameterDTO {
         List<@NonNull FilterCriteria> filterCriteria = parameter.getFilterCriteria();
         if (!filterCriteria.isEmpty()) {
             List<FilterCriteriaDTO> filterCriteriaDtos = new ArrayList<>(filterCriteria.size());
-            for (FilterCriteria filterCriterium : filterCriteria) {
-                filterCriteriaDtos.add(new FilterCriteriaDTO(filterCriterium.getName(), filterCriterium.getValue()));
+            for (FilterCriteria filterCriterion : filterCriteria) {
+                filterCriteriaDtos.add(new FilterCriteriaDTO(filterCriterion.getName(), filterCriterion.getValue()));
             }
             this.filterCriteria = filterCriteriaDtos;
         }
