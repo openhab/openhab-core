@@ -96,11 +96,11 @@ public class YamlConfigDescriptionParameterDTO {
             }
             this.options = optionDtos;
         }
-        List<@NonNull FilterCriteria> filterCriterias = parameter.getFilterCriteria();
-        if (!filterCriterias.isEmpty()) {
-            List<FilterCriteriaDTO> filterCriteriaDtos = new ArrayList<>(filterCriterias.size());
-            for (FilterCriteria filterCriteria : filterCriterias) {
-                filterCriteriaDtos.add(new FilterCriteriaDTO(filterCriteria.getName(), filterCriteria.getValue()));
+        List<@NonNull FilterCriteria> filterCriteria = parameter.getFilterCriteria();
+        if (!filterCriteria.isEmpty()) {
+            List<FilterCriteriaDTO> filterCriteriaDtos = new ArrayList<>(filterCriteria.size());
+            for (FilterCriteria filterCriterium : filterCriteria) {
+                filterCriteriaDtos.add(new FilterCriteriaDTO(filterCriterium.getName(), filterCriterium.getValue()));
             }
             this.filterCriteria = filterCriteriaDtos;
         }

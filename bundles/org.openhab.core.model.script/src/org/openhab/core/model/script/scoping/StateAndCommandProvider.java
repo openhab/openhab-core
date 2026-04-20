@@ -39,13 +39,35 @@ import org.openhab.core.types.UnDefType;
  */
 public class StateAndCommandProvider {
 
-    protected static final Set<Command> COMMANDS = Set.of(OnOffType.ON, OnOffType.OFF, UpDownType.UP, UpDownType.DOWN,
-            IncreaseDecreaseType.INCREASE, IncreaseDecreaseType.DECREASE, StopMoveType.STOP, StopMoveType.MOVE,
-            PlayPauseType.PLAY, PlayPauseType.PAUSE, NextPreviousType.NEXT, NextPreviousType.PREVIOUS,
-            RewindFastforwardType.REWIND, RewindFastforwardType.FASTFORWARD, RefreshType.REFRESH);
-    protected static final Set<State> STATES = Set.of(UnDefType.UNDEF, UnDefType.NULL, OnOffType.ON, OnOffType.OFF,
-            UpDownType.UP, UpDownType.DOWN, OpenClosedType.OPEN, OpenClosedType.CLOSED, PlayPauseType.PLAY,
-            PlayPauseType.PAUSE, RewindFastforwardType.REWIND, RewindFastforwardType.FASTFORWARD);
+    protected static final Set<Command> COMMANDS = Set.of( //
+            IncreaseDecreaseType.DECREASE, //
+            IncreaseDecreaseType.INCREASE, //
+            NextPreviousType.NEXT, //
+            NextPreviousType.PREVIOUS, //
+            OnOffType.OFF, //
+            OnOffType.ON, //
+            PlayPauseType.PLAY, //
+            PlayPauseType.PAUSE, //
+            RefreshType.REFRESH, //
+            RewindFastforwardType.FASTFORWARD, //
+            RewindFastforwardType.REWIND, //
+            StopMoveType.MOVE, //
+            StopMoveType.STOP, //
+            UpDownType.DOWN, //
+            UpDownType.UP);
+    protected static final Set<State> STATES = Set.of( //
+            OnOffType.OFF, //
+            OnOffType.ON, //
+            OpenClosedType.CLOSED, //
+            OpenClosedType.OPEN, //
+            PlayPauseType.PAUSE, //
+            PlayPauseType.PLAY, //
+            RewindFastforwardType.FASTFORWARD, //
+            RewindFastforwardType.REWIND, //
+            UnDefType.NULL, //
+            UnDefType.UNDEF, //
+            UpDownType.DOWN, //
+            UpDownType.UP);
     protected static final Set<Type> TYPES;
 
     static {
@@ -55,7 +77,7 @@ public class StateAndCommandProvider {
         TYPES = Collections.unmodifiableSet(types);
     }
 
-    static public Iterable<Type> getAllTypes() {
+    public static Iterable<Type> getAllTypes() {
         return TYPES;
     }
 
