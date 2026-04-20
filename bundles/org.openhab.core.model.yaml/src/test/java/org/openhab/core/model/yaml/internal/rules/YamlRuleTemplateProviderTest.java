@@ -18,10 +18,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +50,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.FilterCriteria;
 import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.model.yaml.YamlModelUtils;
 import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.service.WatchService;
 
@@ -380,6 +384,118 @@ public class YamlRuleTemplateProviderTest {
         assertThat(action.getConfiguration().getProperties(), hasEntry("script", "puts \"Hello and welcome\"\n"));
         assertThat(action.getConfiguration().getProperties(), is(aMapWithSize(2)));
         assertThat(action.getInputs(), is(anEmptyMap()));
+    }
+
+    @Test
+    public void createIsolatedModelWithRuleTemplateTest() throws IOException {
+        Files.copy(SOURCE_PATH.resolve("BasicRuleTemplate.yaml"), templatesPath);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlRuleTemplateProvider templateProvider = new YamlRuleTemplateProvider();
+        TestRuleTemplateChangeListener templateListener = new TestRuleTemplateChangeListener();
+        templateProvider.addProviderChangeListener(templateListener);
+        modelRepository.addYamlModelListener(templateProvider);
+        try (InputStream inputStream = Files.newInputStream(templatesPath)) {
+            List<String> errors = new ArrayList<>();
+            List<String> warnings = new ArrayList<>();
+            String name = modelRepository.createIsolatedModel(inputStream, errors, warnings);
+            assertNotNull(name);
+            assertEquals(0, errors.size());
+            assertEquals(0, warnings.size());
+
+            assertTrue(YamlModelUtils.isIsolatedModel(name));
+            assertThat(templateListener.templates, is(aMapWithSize(0)));
+            assertThat(templateProvider.getAll(), hasSize(0));
+            Collection<RuleTemplate> templates = templateProvider.getAllFromModel(name);
+            assertThat(templates, hasSize(1));
+            RuleTemplate template = templates.iterator().next();
+            assertThat(template.getUID(), is("basic:yaml-rule-template"));
+            assertThat(template.getLabel(), is("Basic YAML Rule Template"));
+            assertThat(template.getDescription(), is("A YAML rule made from a template."));
+            assertThat(template.getVisibility(), is(Visibility.VISIBLE));
+
+            List<ConfigDescriptionParameter> configDescriptions = template.getConfigurationDescriptions();
+            assertThat(configDescriptions, hasSize(1));
+            ConfigDescriptionParameter parameter = configDescriptions.getFirst();
+            assertThat(parameter.getName(), is("startLevel"));
+            assertThat(parameter.getLabel(), is("Start Level"));
+            assertThat(parameter.getDescription(), is("The start level which will trigger the rule."));
+            assertThat(parameter.getDefault(), is("80"));
+            assertThat(parameter.getType(), is(Type.INTEGER));
+            assertThat(parameter.getContext(), is(emptyOrNullString()));
+            assertTrue(parameter.isRequired());
+            assertThat(parameter.getPattern(), is(emptyOrNullString()));
+            assertFalse(parameter.isReadOnly());
+            assertFalse(parameter.isMultiple());
+            assertThat(parameter.getMultipleLimit(), is(nullValue()));
+            assertThat(parameter.getGroupName(), is(emptyOrNullString()));
+            assertFalse(parameter.isAdvanced());
+            assertFalse(parameter.isVerifyable());
+            assertTrue(parameter.getLimitToOptions());
+            assertThat(parameter.getOptions(), is(empty()));
+            assertThat(parameter.getFilterCriteria(), is(empty()));
+
+            assertThat(template.getTags(), hasSize(1));
+            assertThat(template.getTags(), hasItem("Basic"));
+
+            List<Trigger> triggers = template.getTriggers();
+            assertThat(triggers, hasSize(2));
+            Trigger trigger = triggers.getFirst();
+            assertThat(trigger.getId(), is("3"));
+            assertThat(trigger.getLabel(), is(emptyOrNullString()));
+            assertThat(trigger.getDescription(), is(emptyOrNullString()));
+            assertThat(trigger.getTypeUID(), is("core.SystemStartlevelTrigger"));
+            assertThat(trigger.getConfiguration().getProperties(), hasEntry("startlevel", "{{startLevel}}"));
+            assertThat(trigger.getConfiguration().getProperties(), is(aMapWithSize(1)));
+            trigger = triggers.get(1);
+            assertThat(trigger.getId(), is("timeofday"));
+            assertThat(trigger.getLabel(), is(emptyOrNullString()));
+            assertThat(trigger.getDescription(), is(emptyOrNullString()));
+            assertThat(trigger.getTypeUID(), is("timer.TimeOfDayTrigger"));
+            assertThat(trigger.getConfiguration().getProperties(), hasEntry("time", "14:05"));
+            assertThat(trigger.getConfiguration().getProperties(), is(aMapWithSize(1)));
+
+            List<Condition> conditions = template.getConditions();
+            assertThat(conditions, hasSize(2));
+            Condition condition = conditions.getFirst();
+            assertThat(condition.getId(), is("4"));
+            assertThat(condition.getLabel(), is(emptyOrNullString()));
+            assertThat(condition.getDescription(), is(emptyOrNullString()));
+            assertThat(condition.getTypeUID(), is("ephemeris.WeekdayCondition"));
+            assertThat(condition.getConfiguration().getProperties(), hasEntry("offset", BigDecimal.valueOf(0L)));
+            assertThat(condition.getConfiguration().getProperties(), is(aMapWithSize(1)));
+            assertThat(condition.getInputs(), is(anEmptyMap()));
+            condition = conditions.get(1);
+            assertThat(condition.getId(), is("5"));
+            assertThat(condition.getLabel(), is(emptyOrNullString()));
+            assertThat(condition.getDescription(), is(emptyOrNullString()));
+            assertThat(condition.getTypeUID(), is("ephemeris.WeekdayCondition"));
+            assertThat(condition.getConfiguration().getProperties(), hasEntry("offset", BigDecimal.valueOf(2L)));
+            assertThat(condition.getConfiguration().getProperties(), is(aMapWithSize(1)));
+            assertThat(condition.getInputs(), is(anEmptyMap()));
+
+            List<Action> actions = template.getActions();
+            assertThat(actions, hasSize(2));
+            Action action = actions.getFirst();
+            assertThat(action.getId(), is("1"));
+            assertThat(action.getLabel(), is(emptyOrNullString()));
+            assertThat(action.getDescription(), is(emptyOrNullString()));
+            assertThat(action.getTypeUID(), is("core.ItemCommandAction"));
+            assertThat(action.getConfiguration().getProperties(), hasEntry("itemName", "SleepSetTemperature"));
+            assertThat(action.getConfiguration().getProperties(), hasEntry("command", "21.0"));
+            assertThat(action.getConfiguration().getProperties(), is(aMapWithSize(2)));
+            assertThat(action.getInputs(), is(anEmptyMap()));
+            action = actions.get(1);
+            assertThat(action.getId(), is("2"));
+            assertThat(action.getLabel(), is(emptyOrNullString()));
+            assertThat(action.getDescription(), is(emptyOrNullString()));
+            assertThat(action.getTypeUID(), is("media.SayAction"));
+            assertThat(action.getConfiguration().getProperties(), hasEntry("sink", "webaudio"));
+            assertThat(action.getConfiguration().getProperties(),
+                    hasEntry("text", "The sleep temperature has been set"));
+            assertThat(action.getConfiguration().getProperties(), is(aMapWithSize(2)));
+            assertThat(action.getInputs(), is(anEmptyMap()));
+
+        }
     }
 
     public static class TestRuleTemplateChangeListener implements ProviderChangeListener<RuleTemplate> {

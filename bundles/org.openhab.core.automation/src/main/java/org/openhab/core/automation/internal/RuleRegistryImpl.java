@@ -368,8 +368,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
 
     /**
      * The method checks if the rule has to be resolved by template or not. If the rule does not contain a
-     * {@code tempateUID} or the {@code templateState} is {@code NO_TEMPLATE} or {@code INSTANTIATED}, it returns same
-     * rule, otherwise it tries to resolve the rule created from template. If the template is available the method
+     * {@code templateUID} or the {@code templateState} is {@code NO_TEMPLATE} or {@code INSTANTIATED}, it returns the
+     * same rule, otherwise it tries to resolve the rule created from template. If the template is available the method
      * creates a new rule based on triggers, conditions and actions from template. If the template is not available, it
      * returns the same rule.
      *
@@ -505,7 +505,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * This method serves to validate the {@link Rule}s configuration values.
      *
-     * @param rule the {@link Rule}, whose configuration values should be validated.
+     * @param configDescriptions the configuration parameter descriptions used to validate the configuration.
+     * @param configuration the configuration whose properties to validate.
      * @throws IllegalArgumentException If a required configuration property is missing.
      */
     private void validateConfiguration(List<ConfigDescriptionParameter> configDescriptions,
