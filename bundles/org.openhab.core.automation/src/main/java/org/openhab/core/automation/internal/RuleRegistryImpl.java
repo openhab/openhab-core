@@ -397,7 +397,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
             RuleImpl resolvedRule = (RuleImpl) RuleBuilder
                     .create(template, rule.getUID(), rule.getName(), rule.getConfiguration(), rule.getVisibility())
                     .build();
-            resolveConfiguration(resolvedRule);
+            resolveConfigurations(resolvedRule);
             return resolvedRule;
         }
     }
@@ -460,7 +460,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     @Override
     protected void onAddElement(Rule element) throws IllegalArgumentException {
         try {
-            resolveConfiguration(element);
+            resolveConfigurations(element);
         } catch (IllegalArgumentException e) {
             logger.debug("Added rule '{}' is invalid", element.getUID(), e);
         }
@@ -469,27 +469,27 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     @Override
     protected void onUpdateElement(Rule oldElement, Rule element) throws IllegalArgumentException {
         try {
-            resolveConfiguration(element);
+            resolveConfigurations(element);
         } catch (IllegalArgumentException e) {
             logger.debug("The new version of updated rule '{}' is invalid", element.getUID(), e);
         }
     }
 
     /**
-     * This method resolves, normalizes and applies the {@link Rule} configuration to a {@link RuleTemplate}'s module
-     * placeholders.
+     * This method serves to resolve and normalize the {@link Rule}s configuration values and its module configurations.
      *
-     * @param rule the {@link Rule} to which to try to replace template placeholders with configuration values.
+     * @param rule the {@link Rule}, whose configuration values and module configuration values should be resolved and
+     *            normalized.
      * @throws IllegalArgumentException If the configuration is incorrect.
      */
-    private void resolveConfiguration(Rule rule) throws IllegalArgumentException {
+    private void resolveConfigurations(Rule rule) throws IllegalArgumentException {
+        List<ConfigDescriptionParameter> configDescriptions = rule.getConfigurationDescriptions();
+        Configuration configuration = rule.getConfiguration();
+        ConfigurationNormalizer.normalizeConfiguration(configuration,
+                ConfigurationNormalizer.getConfigDescriptionMap(configDescriptions));
+        Map<String, Object> configurationProperties = configuration.getProperties();
         TemplateState templateState = rule.getTemplateState();
-        if (templateState == TemplateState.INSTANTIATED) {
-            List<ConfigDescriptionParameter> configDescriptions = rule.getConfigurationDescriptions();
-            Configuration configuration = new Configuration(rule.getConfiguration());
-            ConfigurationNormalizer.normalizeConfiguration(configuration,
-                    ConfigurationNormalizer.getConfigDescriptionMap(configDescriptions));
-            Map<String, Object> configurationProperties = configuration.getProperties();
+        if (templateState == TemplateState.INSTANTIATED || templateState == TemplateState.NO_TEMPLATE) {
             String uid = rule.getUID();
             try {
                 validateConfiguration(configDescriptions, configurationProperties);
