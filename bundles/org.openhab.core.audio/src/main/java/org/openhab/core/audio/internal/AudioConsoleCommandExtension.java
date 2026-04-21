@@ -35,6 +35,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import io.reactivex.annotations.NonNull;
+
 /**
  * Console command extension for all audio features.
  *
@@ -237,9 +239,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
     }
 
     private void playOnSinks(String pattern, String fileName, @Nullable PercentType volume, Console console) {
-        for (String sinkId : audioManager.getSinkIds(pattern)) {
-            playOnSink(sinkId, fileName, volume, console);
-        }
+        playOnSinks(audioManager.getSinkIds(pattern), fileName, volume, console);
     }
 
     private void playOnSink(@Nullable String sinkId, String fileName, @Nullable PercentType volume, Console console) {
@@ -248,6 +248,16 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
         } catch (AudioException e) {
             console.println(Objects.requireNonNullElse(e.getMessage(),
                     String.format("An error occurred while playing '%s' on sink '%s'", fileName, sinkId)));
+        }
+    }
+
+    private void playOnSinks(@NonNull Set<String> sinkIds, String fileName, @Nullable PercentType volume,
+            Console console) {
+        try {
+            audioManager.playFile(fileName, sinkIds, volume);
+        } catch (AudioException e) {
+            console.println(Objects.requireNonNullElse(e.getMessage(),
+                    String.format("An error occurred while playing '%s' on sinks '%s'", fileName, sinkIds)));
         }
     }
 
