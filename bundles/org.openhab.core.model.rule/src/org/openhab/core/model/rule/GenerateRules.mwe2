@@ -51,6 +51,9 @@ Workflow {
       fileExtensions = fileExtensions
       referencedResource = "platform:/resource/org.openhab.core.model.script/model/generated/Script.ecore"
       referencedResource = "platform:/resource/org.openhab.core.model.script/model/generated/Script.genmodel"
+      scopeProvider = {
+        generateStub = false
+      }
       serializer = {
         generateStub = false
       }
