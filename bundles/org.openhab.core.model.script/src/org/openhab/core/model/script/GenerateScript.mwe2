@@ -49,6 +49,9 @@ Workflow {
     language = StandardLanguage {
       name = languageName
       fileExtensions = fileExtensions
+      scopeProvider = {
+        generateStub = false
+      }
       serializer = {
         generateStub = false
       }
