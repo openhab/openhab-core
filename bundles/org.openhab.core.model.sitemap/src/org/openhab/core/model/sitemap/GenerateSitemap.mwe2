@@ -52,6 +52,7 @@ Workflow {
     language = StandardLanguage {
       name = languageName
       fileExtensions = fileExtensions
+      generator = null
       serializer = {
         generateStub = false
       }
