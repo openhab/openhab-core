@@ -24,6 +24,13 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.1.0</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>5.14.2</version>

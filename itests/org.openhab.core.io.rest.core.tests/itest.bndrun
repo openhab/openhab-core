@@ -6,6 +6,12 @@ Fragment-Host: org.openhab.core.io.rest.core
 -runrequires: \
 	bnd.identity;id='org.openhab.core.io.rest.core.tests'
 
+# Blacklist raw guice 7 from the resolver: xtext.util 2.41+ requires it (Require-Bundle: bundle-version>=7.0.0)
+# but hk2-locator's DynamicImport:* causes SAT explosion when both guice 7 and Orbit 5.x are in the index.
+# Model tests (which need guice 7 for xtext.util) are unaffected as they don't pull hk2-locator.
+-runblacklist: \
+	bnd.identity;id='com.google.inject';version='[7.0,8)'
+
 #
 # done
 #
