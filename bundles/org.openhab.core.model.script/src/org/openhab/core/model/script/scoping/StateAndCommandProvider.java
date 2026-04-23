@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.script.scoping;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,53 +39,53 @@ import org.openhab.core.types.UnDefType;
  */
 public class StateAndCommandProvider {
 
-    protected static final Set<Command> COMMANDS = new HashSet<>();
-    protected static final Set<State> STATES = new HashSet<>();
-    protected static final Set<Type> TYPES = new HashSet<>();
+    protected static final Set<Command> COMMANDS = Set.of( //
+            IncreaseDecreaseType.DECREASE, //
+            IncreaseDecreaseType.INCREASE, //
+            NextPreviousType.NEXT, //
+            NextPreviousType.PREVIOUS, //
+            OnOffType.OFF, //
+            OnOffType.ON, //
+            PlayPauseType.PLAY, //
+            PlayPauseType.PAUSE, //
+            RefreshType.REFRESH, //
+            RewindFastforwardType.FASTFORWARD, //
+            RewindFastforwardType.REWIND, //
+            StopMoveType.MOVE, //
+            StopMoveType.STOP, //
+            UpDownType.DOWN, //
+            UpDownType.UP);
+    protected static final Set<State> STATES = Set.of( //
+            OnOffType.OFF, //
+            OnOffType.ON, //
+            OpenClosedType.CLOSED, //
+            OpenClosedType.OPEN, //
+            PlayPauseType.PAUSE, //
+            PlayPauseType.PLAY, //
+            RewindFastforwardType.FASTFORWARD, //
+            RewindFastforwardType.REWIND, //
+            UnDefType.NULL, //
+            UnDefType.UNDEF, //
+            UpDownType.DOWN, //
+            UpDownType.UP);
+    protected static final Set<Type> TYPES;
 
     static {
-        COMMANDS.add(OnOffType.ON);
-        COMMANDS.add(OnOffType.OFF);
-        COMMANDS.add(UpDownType.UP);
-        COMMANDS.add(UpDownType.DOWN);
-        COMMANDS.add(IncreaseDecreaseType.INCREASE);
-        COMMANDS.add(IncreaseDecreaseType.DECREASE);
-        COMMANDS.add(StopMoveType.STOP);
-        COMMANDS.add(StopMoveType.MOVE);
-        COMMANDS.add(PlayPauseType.PLAY);
-        COMMANDS.add(PlayPauseType.PAUSE);
-        COMMANDS.add(NextPreviousType.NEXT);
-        COMMANDS.add(NextPreviousType.PREVIOUS);
-        COMMANDS.add(RewindFastforwardType.REWIND);
-        COMMANDS.add(RewindFastforwardType.FASTFORWARD);
-        COMMANDS.add(RefreshType.REFRESH);
-
-        STATES.add(UnDefType.UNDEF);
-        STATES.add(UnDefType.NULL);
-        STATES.add(OnOffType.ON);
-        STATES.add(OnOffType.OFF);
-        STATES.add(UpDownType.UP);
-        STATES.add(UpDownType.DOWN);
-        STATES.add(OpenClosedType.OPEN);
-        STATES.add(OpenClosedType.CLOSED);
-        STATES.add(PlayPauseType.PLAY);
-        STATES.add(PlayPauseType.PAUSE);
-        STATES.add(RewindFastforwardType.REWIND);
-        STATES.add(RewindFastforwardType.FASTFORWARD);
-
-        TYPES.addAll(COMMANDS);
-        TYPES.addAll(STATES);
+        Set<Type> types = new HashSet<>();
+        types.addAll(COMMANDS);
+        types.addAll(STATES);
+        TYPES = Collections.unmodifiableSet(types);
     }
 
-    static public Iterable<Type> getAllTypes() {
+    public static Iterable<Type> getAllTypes() {
         return TYPES;
     }
 
-    static public Iterable<Command> getAllCommands() {
+    public static Iterable<Command> getAllCommands() {
         return COMMANDS;
     }
 
-    static public Iterable<State> getAllStates() {
+    public static Iterable<State> getAllStates() {
         return STATES;
     }
 }

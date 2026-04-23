@@ -18,10 +18,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +52,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.FilterCriteria;
 import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.model.yaml.YamlModelUtils;
 import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.service.WatchService;
 
@@ -622,6 +626,100 @@ public class YamlRuleProviderTest {
         assertThat(action.getConfiguration().getProperties(), hasEntry("script", "puts \"Hello and welcome\"\n"));
         assertThat(action.getConfiguration().getProperties(), is(aMapWithSize(2)));
         assertThat(action.getInputs(), is(anEmptyMap()));
+    }
+
+    @Test
+    public void createIsolatedModelWithRuleTest() throws IOException {
+        Files.copy(SOURCE_PATH.resolve("BasicRule.yaml"), rulesPath);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlRuleProvider ruleProvider = new YamlRuleProvider();
+        TestRuleChangeListener ruleListener = new TestRuleChangeListener();
+        ruleProvider.addProviderChangeListener(ruleListener);
+        modelRepository.addYamlModelListener(ruleProvider);
+        try (InputStream inputStream = Files.newInputStream(rulesPath)) {
+            List<String> errors = new ArrayList<>();
+            List<String> warnings = new ArrayList<>();
+            String name = modelRepository.createIsolatedModel(inputStream, errors, warnings);
+            assertNotNull(name);
+            assertEquals(0, errors.size());
+            assertEquals(0, warnings.size());
+
+            assertTrue(YamlModelUtils.isIsolatedModel(name));
+            assertThat(ruleListener.rules, is(aMapWithSize(0)));
+            assertThat(ruleProvider.getAll(), hasSize(0));
+            Collection<Rule> rules = ruleProvider.getAllFromModel(name);
+            assertThat(rules, hasSize(1));
+            Rule rule = rules.iterator().next();
+
+            assertThat(rule.getUID(), is("basic:basicyamlrule"));
+            assertThat(rule.getName(), is("Basic YAML Rule"));
+            assertThat(rule.getDescription(), is(emptyOrNullString()));
+            assertThat(rule.getTemplateUID(), is(emptyOrNullString()));
+            assertThat(rule.getTemplateState(), is(TemplateState.NO_TEMPLATE));
+            assertThat(rule.getVisibility(), is(Visibility.VISIBLE));
+            assertThat(rule.getConfiguration().getProperties(), is(anEmptyMap()));
+            assertThat(rule.getConfigurationDescriptions(), is(empty()));
+
+            assertThat(rule.getTags(), is(empty()));
+
+            List<Trigger> triggers = rule.getTriggers();
+            assertThat(triggers, hasSize(2));
+            Trigger trigger = triggers.getFirst();
+            assertThat(trigger.getId(), is("2"));
+            assertThat(trigger.getLabel(), is(emptyOrNullString()));
+            assertThat(trigger.getDescription(), is(emptyOrNullString()));
+            assertThat(trigger.getTypeUID(), is("core.SystemStartlevelTrigger"));
+            assertThat(trigger.getConfiguration().getProperties(), hasEntry("startlevel", BigDecimal.valueOf(100L)));
+            assertThat(trigger.getConfiguration().getProperties(), is(aMapWithSize(1)));
+            trigger = triggers.get(1);
+            assertThat(trigger.getId(), is("22"));
+            assertThat(trigger.getLabel(), is(emptyOrNullString()));
+            assertThat(trigger.getDescription(), is(emptyOrNullString()));
+            assertThat(trigger.getTypeUID(), is("timer.TimeOfDayTrigger"));
+            assertThat(trigger.getConfiguration().getProperties(), hasEntry("time", "14:05"));
+            assertThat(trigger.getConfiguration().getProperties(), is(aMapWithSize(1)));
+
+            List<Condition> conditions = rule.getConditions();
+            assertThat(conditions, hasSize(2));
+            Condition condition = conditions.getFirst();
+            assertThat(condition.getId(), is("3"));
+            assertThat(condition.getLabel(), is(emptyOrNullString()));
+            assertThat(condition.getDescription(), is(emptyOrNullString()));
+            assertThat(condition.getTypeUID(), is("ephemeris.WeekdayCondition"));
+            assertThat(condition.getConfiguration().getProperties(), hasEntry("offset", BigDecimal.valueOf(0L)));
+            assertThat(condition.getConfiguration().getProperties(), is(aMapWithSize(1)));
+            assertThat(condition.getInputs(), is(anEmptyMap()));
+            condition = conditions.get(1);
+            assertThat(condition.getId(), is("4"));
+            assertThat(condition.getLabel(), is(emptyOrNullString()));
+            assertThat(condition.getDescription(), is(emptyOrNullString()));
+            assertThat(condition.getTypeUID(), is("ephemeris.WeekdayCondition"));
+            assertThat(condition.getConfiguration().getProperties(), hasEntry("offset", BigDecimal.valueOf(2L)));
+            assertThat(condition.getConfiguration().getProperties(), is(aMapWithSize(1)));
+            assertThat(condition.getInputs(), is(anEmptyMap()));
+
+            List<Action> actions = rule.getActions();
+            assertThat(actions, hasSize(2));
+            Action action = actions.getFirst();
+            assertThat(action.getId(), is("1"));
+            assertThat(action.getLabel(), is(emptyOrNullString()));
+            assertThat(action.getDescription(), is(emptyOrNullString()));
+            assertThat(action.getTypeUID(), is("core.ItemCommandAction"));
+            assertThat(action.getConfiguration().getProperties(), hasEntry("itemName", "SleepSetTemperature"));
+            assertThat(action.getConfiguration().getProperties(), hasEntry("command", "21.0"));
+            assertThat(action.getConfiguration().getProperties(), is(aMapWithSize(2)));
+            assertThat(action.getInputs(), is(anEmptyMap()));
+            action = actions.get(1);
+            assertThat(action.getId(), is("11"));
+            assertThat(action.getLabel(), is(emptyOrNullString()));
+            assertThat(action.getDescription(), is(emptyOrNullString()));
+            assertThat(action.getTypeUID(), is("media.SayAction"));
+            assertThat(action.getConfiguration().getProperties(), hasEntry("sink", "webaudio"));
+            assertThat(action.getConfiguration().getProperties(),
+                    hasEntry("text", "The sleep temperature has been set"));
+            assertThat(action.getConfiguration().getProperties(), is(aMapWithSize(2)));
+            assertThat(action.getInputs(), is(anEmptyMap()));
+        }
     }
 
     public static class TestRuleChangeListener implements ProviderChangeListener<Rule> {

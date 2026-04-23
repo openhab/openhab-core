@@ -367,13 +367,14 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     }
 
     /**
-     * The method checks if the rule has to be resolved by template or not. If the rule does not contain tempateUID it
-     * returns same rule, otherwise it tries to resolve the rule created from template. If the template is available
-     * the method creates a new rule based on triggers, conditions and actions from template. If the template is not
-     * available returns the same rule.
+     * The method checks if the rule has to be resolved by template or not. If the rule does not contain a
+     * {@code templateUID} or the {@code templateState} is {@code NO_TEMPLATE} or {@code INSTANTIATED}, it returns the
+     * same rule, otherwise it tries to resolve the rule created from template. If the template is available the method
+     * creates a new rule based on triggers, conditions and actions from template. If the template is not available, it
+     * returns the same rule.
      *
      * @param rule a rule defined by template.
-     * @return the resolved rule(containing modules defined by the template) or not resolved rule, if the template is
+     * @return the resolved rule (containing modules defined by the template) or not resolved rule, if the template is
      *         missing.
      */
     private Rule resolveRuleByTemplate(Rule rule) {
@@ -458,21 +459,19 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
 
     @Override
     protected void onAddElement(Rule element) throws IllegalArgumentException {
-        String uid = element.getUID();
         try {
             resolveConfigurations(element);
         } catch (IllegalArgumentException e) {
-            logger.debug("Added rule '{}' is invalid", uid, e);
+            logger.debug("Added rule '{}' is invalid", element.getUID(), e);
         }
     }
 
     @Override
     protected void onUpdateElement(Rule oldElement, Rule element) throws IllegalArgumentException {
-        String uid = element.getUID();
         try {
             resolveConfigurations(element);
         } catch (IllegalArgumentException e) {
-            logger.debug("The new version of updated rule '{}' is invalid", uid, e);
+            logger.debug("The new version of updated rule '{}' is invalid", element.getUID(), e);
         }
     }
 
@@ -481,8 +480,9 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      *
      * @param rule the {@link Rule}, whose configuration values and module configuration values should be resolved and
      *            normalized.
+     * @throws IllegalArgumentException If the configuration is incorrect.
      */
-    private void resolveConfigurations(Rule rule) {
+    private void resolveConfigurations(Rule rule) throws IllegalArgumentException {
         List<ConfigDescriptionParameter> configDescriptions = rule.getConfigurationDescriptions();
         Configuration configuration = rule.getConfiguration();
         ConfigurationNormalizer.normalizeConfiguration(configuration,
@@ -492,11 +492,12 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
         if (templateState == TemplateState.INSTANTIATED || templateState == TemplateState.NO_TEMPLATE) {
             String uid = rule.getUID();
             try {
-                validateConfiguration(configDescriptions, new HashMap<>(configurationProperties));
+                validateConfiguration(configDescriptions, configurationProperties);
                 resolveModuleConfigReferences(rule.getModules(), configurationProperties);
                 ConfigurationNormalizer.normalizeModuleConfigurations(rule.getModules(), moduleTypeRegistry);
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(String.format("The rule '%s' has incorrect configurations", uid), e);
+                throw new IllegalArgumentException(
+                        String.format("The rule '%s' has incorrect configuration: %s", uid, e.getMessage()), e);
             }
         }
     }
@@ -504,11 +505,14 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * This method serves to validate the {@link Rule}s configuration values.
      *
-     * @param rule the {@link Rule}, whose configuration values should be validated.
+     * @param configDescriptions the configuration parameter descriptions used to validate the configuration.
+     * @param configuration the configuration whose properties to validate.
+     * @throws IllegalArgumentException If a required configuration property is missing.
      */
     private void validateConfiguration(List<ConfigDescriptionParameter> configDescriptions,
-            Map<String, Object> configurations) {
-        if (configurations == null || configurations.isEmpty()) {
+            Map<String, Object> configuration) throws IllegalArgumentException {
+        Map<String, Object> config = configuration == null ? new HashMap<>() : new HashMap<>(configuration);
+        if (config.isEmpty()) {
             if (isOptionalConfig(configDescriptions)) {
                 return;
             } else {
@@ -526,15 +530,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
         } else {
             for (ConfigDescriptionParameter configParameter : configDescriptions) {
                 String configParameterName = configParameter.getName();
-                processValue(configurations.remove(configParameterName), configParameter);
-            }
-            if (!configurations.isEmpty()) {
-                StringBuilder statusDescription = new StringBuilder();
-                String msg = " '%s';";
-                for (String name : configurations.keySet()) {
-                    statusDescription.append(String.format(msg, name));
-                }
-                throw new IllegalArgumentException("Extra configuration properties: " + statusDescription.toString());
+                processValue(config.remove(configParameterName), configParameter);
             }
         }
     }

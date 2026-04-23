@@ -48,6 +48,7 @@ public class ModuleTypeAliasesTest {
         assertThat(ModuleTypeAliases.aliasToType(Condition.class, "ItemState"), is("core.ItemStateCondition"));
         assertThat(ModuleTypeAliases.aliasToType(Condition.class, "NotHoliday"), is("ephemeris.NotHolidayCondition"));
         assertThat(ModuleTypeAliases.aliasToType(Condition.class, "Script"), is("script.ScriptCondition"));
+        assertThat(ModuleTypeAliases.aliasToType(Condition.class, "ThingStatus"), is("core.ThingStatusCondition"));
         assertThat(ModuleTypeAliases.aliasToType(Condition.class, "TimeOfDay"), is("core.TimeOfDayCondition"));
         assertThat(ModuleTypeAliases.aliasToType(Condition.class, "Weekday"), is("ephemeris.WeekdayCondition"));
         assertThat(ModuleTypeAliases.aliasToType(Condition.class, "Weekend"), is("ephemeris.WeekendCondition"));
@@ -86,6 +87,7 @@ public class ModuleTypeAliasesTest {
         assertThat(ModuleTypeAliases.typeToAlias(Condition.class, "core.ItemStateCondition"), is("ItemState"));
         assertThat(ModuleTypeAliases.typeToAlias(Condition.class, "ephemeris.NotHolidayCondition"), is("NotHoliday"));
         assertThat(ModuleTypeAliases.typeToAlias(Condition.class, "script.ScriptCondition"), is("Script"));
+        assertThat(ModuleTypeAliases.typeToAlias(Condition.class, "core.ThingStatusCondition"), is("ThingStatus"));
         assertThat(ModuleTypeAliases.typeToAlias(Condition.class, "core.TimeOfDayCondition"), is("TimeOfDay"));
         assertThat(ModuleTypeAliases.typeToAlias(Condition.class, "ephemeris.WeekdayCondition"), is("Weekday"));
         assertThat(ModuleTypeAliases.typeToAlias(Condition.class, "ephemeris.WeekendCondition"), is("Weekend"));

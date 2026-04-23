@@ -69,19 +69,54 @@ public class RuleBuilder {
         this.description = rule.getDescription();
     }
 
-    public static RuleBuilder create(String ruleId) {
-        Rule rule = new RuleImpl(ruleId);
+    /**
+     * Build a new {@link Rule} using the specified rule UID.
+     *
+     * @param ruleUid the UID to use.
+     * @return The new {@link RuleBuilder}.
+     */
+    public static RuleBuilder create(String ruleUid) {
+        Rule rule = new RuleImpl(ruleUid);
         return new RuleBuilder(rule);
     }
 
+    /**
+     * Build a new {@link Rule} based on an existing rule.
+     *
+     * @param r the {@link Rule} to base the builder on.
+     * @return The new {@link RuleBuilder}.
+     */
     public static RuleBuilder create(Rule r) {
-        return create(r.getUID()).withActions(r.getActions()).withConditions(r.getConditions())
+        return create(r.getUID(), r);
+    }
+
+    /**
+     * Build a new {@link Rule} with a new UID, based on an existing rule.
+     *
+     * @param ruleUid the UID to use.
+     * @param r the {@link Rule} to base the builder on.
+     * @return The new {@link RuleBuilder}.
+     */
+    public static RuleBuilder create(String ruleUid, Rule r) {
+        return create(ruleUid).withActions(r.getActions()).withConditions(r.getConditions())
                 .withTriggers(r.getTriggers()).withConfiguration(r.getConfiguration())
                 .withConfigurationDescriptions(r.getConfigurationDescriptions()).withDescription(r.getDescription())
                 .withName(r.getName()).withTags(r.getTags()).withTemplateUID(r.getTemplateUID())
                 .withTemplateState(r.getTemplateState());
     }
 
+    /**
+     * Build a new {@link Rule} from the specified {@link RuleTemplate} and {@link Configuration}. The resulting rule
+     * will be ready for template placeholder substitution, but the placeholders won't actually have been substituted.
+     * This constructor is only suitable for preparing to substitute placeholders.
+     *
+     * @param template the {@link RuleTemplate} to use.
+     * @param uid the UID of the resulting {@link Rule}.
+     * @param name the name to initialize the builder with.
+     * @param configuration the configuration to initialize the builder with.
+     * @param visibility the {@link Visibility} to initialize the builder with.
+     * @return The new {@link RuleBuilder}.
+     */
     public static RuleBuilder create(RuleTemplate template, String uid, @Nullable String name,
             Configuration configuration, Visibility visibility) {
         return create(uid).withActions(template.getActions()).withConditions(template.getConditions())
