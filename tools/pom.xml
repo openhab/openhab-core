@@ -19,6 +19,7 @@
   <modules>
     <module>archetype</module>
     <module>i18n-plugin</module>
+    <module>mapdb1-shaded</module>
     <module>upgradetool</module>
   </modules>
 
