@@ -116,19 +116,19 @@ TimeOfDayCondition:
 ;
 
 DayOfWeekCondition:
-	'Day' 'is' weekDays+=WeekDay ('or' weekDays+=WeekDay)*
+	'Day' 'is' weekDays+=WeekDay (',' weekDays+=WeekDay)*
 ;
 
 WeekdayCondition:
-	'Day' ('offset' '='? offset=SIGNED_INT)? 'is' 'a' type=('weekday' | 'weekend')
+	'Day' ('offset' '='? offset=SIGNED_INT)? 'is' type=('weekday' | 'weekend')
 ;
 
 HolidayCondition:
-	'Day' ('offset' '='? offset=SIGNED_INT)? 'is' (negation?='not')? 'a' 'holiday'
+	'Day' ('offset' '='? offset=SIGNED_INT)? 'is' (negation?='not')? holiday='holiday'
 ;
 
 InDaysetCondition:
-	'Day' ('offset' '='? offset=SIGNED_INT)? 'is' 'in' dayset=(STRING|ID)
+	'Day' ('offset' '='? offset=SIGNED_INT)? 'in' dayset=(STRING|ID)
 ;
 
 IntervalCondition:

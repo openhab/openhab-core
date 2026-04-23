@@ -265,12 +265,12 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
                 "   Item X received command ON\n" + //
                 "but only if\n" + //
                 "   Time is between 19:20 and 22:10 and\n" + //
-                "   Day is Thursday or Tuesday or Sunday and\n" + //
-                "   Day is a weekday and\n" + //
-                "   Day is a weekend and\n" + //
-                "   Day offset 3 is a holiday and\n" + //
-                "   Day offset = -2 is not a holiday and\n" + //
-                "   Day is in \"my-dayset\" and\n" + //
+                "   Day is Thursday, Tuesday, Sunday and\n" + //
+                "   Day is weekday and\n" + //
+                "   Day is weekend and\n" + //
+                "   Day offset 3 is holiday and\n" + //
+                "   Day offset = -2 is not holiday and\n" + //
+                "   Day in \"my-dayset\" and\n" + //
                 "   Thing \"T1\" is ONLINE and\n" + //
                 "   Thing \"T2\" is not UNKNOWN and\n" + //
                 "   Item W = \"a value\" and\n" + //
