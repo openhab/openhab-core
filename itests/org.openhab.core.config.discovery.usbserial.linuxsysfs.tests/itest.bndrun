@@ -57,10 +57,10 @@ Fragment-Host: org.openhab.core.config.discovery.usbserial.linuxsysfs
 	org.eclipse.jetty.util;version='[9.4.58,9.4.59)',\
 	org.eclipse.jetty.util.ajax;version='[9.4.58,9.4.59)',\
 	org.objectweb.asm;version='[9.9.1,9.9.2)',\
-	org.objectweb.asm.commons;version='[9.6.0,9.6.1)',\
-	org.objectweb.asm.tree;version='[9.6.0,9.6.1)',\
-	org.objectweb.asm.tree.analysis;version='[9.6.0,9.6.1)',\
-	org.objectweb.asm.util;version='[9.6.0,9.6.1)',\
+	org.objectweb.asm.commons;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.tree;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.tree.analysis;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.util;version='[9.9.1,9.9.2)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.3,2.3.4)',\
 	org.openhab.core;version='[5.2.0,5.2.1)',\
 	org.openhab.core.addon;version='[5.2.0,5.2.1)',\

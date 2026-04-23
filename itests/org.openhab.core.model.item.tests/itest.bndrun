@@ -82,10 +82,10 @@ Fragment-Host: org.openhab.core.model.item
 	org.eclipse.xtext.xbase;version='[2.43.0,2.43.1)',\
 	org.eclipse.xtext.xbase.lib;version='[2.43.0,2.43.1)',\
 	org.objectweb.asm;version='[9.9.1,9.9.2)',\
-	org.objectweb.asm.commons;version='[9.6.0,9.6.1)',\
-	org.objectweb.asm.tree;version='[9.6.0,9.6.1)',\
-	org.objectweb.asm.tree.analysis;version='[9.6.0,9.6.1)',\
-	org.objectweb.asm.util;version='[9.6.0,9.6.1)',\
+	org.objectweb.asm.commons;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.tree;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.tree.analysis;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.util;version='[9.9.1,9.9.2)',\
 	org.ops4j.pax.web.pax-web-api;version='[8.0.34,8.0.35)',\
 	org.ops4j.pax.web.pax-web-jetty;version='[8.0.34,8.0.35)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[8.0.34,8.0.35)',\
