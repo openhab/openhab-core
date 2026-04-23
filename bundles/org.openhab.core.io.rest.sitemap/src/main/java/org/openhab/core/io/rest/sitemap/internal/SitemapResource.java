@@ -33,29 +33,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.sse.OutboundSseEvent;
-import javax.ws.rs.sse.Sse;
-import javax.ws.rs.sse.SseEventSink;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -114,11 +91,11 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.osgi.service.jakartars.whiteboard.JakartarsWhiteboardConstants;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationSelect;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,6 +107,30 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.sse.OutboundSseEvent;
+import jakarta.ws.rs.sse.Sse;
+import jakarta.ws.rs.sse.SseEventSink;
 
 /**
  * <p>
@@ -154,9 +155,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Mark Herwege - Implement sitemap definition endpoints
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
-@JaxrsResource
-@JaxrsName(SitemapResource.PATH_SITEMAPS)
-@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JakartarsResource
+@JakartarsName(SitemapResource.PATH_SITEMAPS)
+@JakartarsApplicationSelect("(" + JakartarsWhiteboardConstants.JAKARTA_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(SitemapResource.PATH_SITEMAPS)
 @RolesAllowed({ Role.USER, Role.ADMIN })

@@ -17,14 +17,12 @@
 
   <properties>
     <californium.version>4.0.0-M2</californium.version>
-    <!-- cxf can be updated independently of karaf, only used in karaf tests -->
-    <cxf.version>3.6.10</cxf.version>
     <jackson.annotations.version>2.21</jackson.annotations.version>
     <jackson.version>2.21.1</jackson.version>
-    <jetty.version>9.4.58.v20250814</jetty.version>
+    <jetty.version>12.0.23</jetty.version>
     <pax.logging.version>2.3.2</pax.logging.version>
-    <pax.web.version>8.0.34</pax.web.version>
-    <swagger.version>2.2.43</swagger.version>
+    <pax.web.version>11.0.1</pax.web.version>
+    <swagger.version>2.2.31</swagger.version>
   </properties>
 
   <dependencyManagement>
@@ -132,85 +130,57 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- Http Servlet 3.1 API with contract -->
+    <!-- Jakarta Servlet 6.x API -->
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.http.servlet-api</artifactId>
-      <version>1.2.0</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.tomcat</groupId>
-          <artifactId>tomcat-servlet-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <!-- JAX-RS Whiteboard -->
-    <dependency>
-      <groupId>org.apache.aries.jax.rs</groupId>
-      <artifactId>org.apache.aries.jax.rs.whiteboard</artifactId>
-      <version>2.0.2</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-annotation_1.3_spec</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-jaxrs_2.1_spec</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-rs-client</artifactId>
-      <version>${cxf.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-rs-sse</artifactId>
-      <version>${cxf.version}</version>
-    </dependency>
-    <!-- needed as long as cxf3 requires wstx 6.x -->
-    <dependency>
-      <groupId>com.fasterxml.woodstox</groupId>
-      <artifactId>woodstox-core</artifactId>
-      <version>6.6.2</version>
-    </dependency>
-
-    <!-- JAX-RS 2.1 API with contract -->
-    <dependency>
-      <groupId>org.apache.aries.spec</groupId>
-      <artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
-      <version>1.0.4</version>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.1.0</version>
       <scope>compile</scope>
     </dependency>
 
-    <!-- JAX-B 2.3 API -->
+    <!-- Jakarta REST Whiteboard (Eclipse Jakarta REST / Jersey) -->
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>3.1.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.jakartars</artifactId>
+      <version>2.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.osgi-technology.rest</groupId>
+      <artifactId>org.eclipse.osgitech.rest</artifactId>
+      <version>1.2.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.osgi-technology.rest</groupId>
+      <artifactId>org.eclipse.osgitech.rest.servlet.whiteboard</artifactId>
+      <version>1.2.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.osgi-technology.rest</groupId>
+      <artifactId>org.eclipse.osgitech.rest.sse</artifactId>
+      <version>1.2.3</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- JAX-B 3.0 API -->
     <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>2.3.3</version>
+      <version>3.0.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
       <artifactId>jaxb-osgi</artifactId>
-      <version>2.3.9</version>
-    </dependency>
-
-    <!-- Activation 1.2 API -->
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.activation-api-1.2.1</artifactId>
-      <version>1.2.1_3</version>
-      <scope>compile</scope>
+      <version>3.0.2</version>
     </dependency>
 
     <!-- Annotation API -->
@@ -487,7 +457,7 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>3.0.4</version>
+      <version>4.0.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 
@@ -557,6 +527,12 @@
     <!-- Pax Web -->
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
+      <artifactId>pax-web-compatibility-servlet</artifactId>
+      <version>${pax.web.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-api</artifactId>
       <version>${pax.web.version}</version>
       <scope>compile</scope>
@@ -606,8 +582,8 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-continuation</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-servlet</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -626,12 +602,6 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-io</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-jaas</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -672,8 +642,8 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-jaspi</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-jaspi</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -684,14 +654,8 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlet</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlets</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-servlets</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -708,50 +672,26 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-webapp</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-webapp</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>websocket-api</artifactId>
+      <artifactId>jetty-websocket-jetty-api</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>websocket-client</artifactId>
+      <artifactId>jetty-websocket-jetty-client</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>websocket-common</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>javax-websocket-client-impl</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>javax-websocket-server-impl</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>websocket-server</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>websocket-servlet</artifactId>
+      <groupId>org.eclipse.jetty.ee10.websocket</groupId>
+      <artifactId>jetty-ee10-websocket-jetty-server</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -765,13 +705,13 @@
     <!-- Jetty HTTP2 -->
     <dependency>
       <groupId>org.eclipse.jetty.http2</groupId>
-      <artifactId>http2-client</artifactId>
+      <artifactId>jetty-http2-client</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.http2</groupId>
-      <artifactId>http2-server</artifactId>
+      <artifactId>jetty-http2-server</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -945,7 +885,7 @@
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>osgi-resource-locator</artifactId>
-      <version>3.0.0</version>
+      <version>1.0.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -1039,28 +979,28 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- Swagger -->
+    <!-- Swagger (Jakarta EE variants) -->
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-annotations</artifactId>
+      <artifactId>swagger-annotations-jakarta</artifactId>
       <version>${swagger.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-core</artifactId>
+      <artifactId>swagger-core-jakarta</artifactId>
       <version>${swagger.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-jaxrs2</artifactId>
+      <artifactId>swagger-jaxrs2-jakarta</artifactId>
       <version>${swagger.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-models</artifactId>
+      <artifactId>swagger-models-jakarta</artifactId>
       <version>${swagger.version}</version>
       <scope>compile</scope>
     </dependency>

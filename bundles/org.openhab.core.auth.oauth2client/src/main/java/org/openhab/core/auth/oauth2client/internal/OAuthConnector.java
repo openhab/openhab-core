@@ -38,10 +38,10 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.client.ContentResponse;
+import org.eclipse.jetty.client.FormRequestContent;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.util.FormContentProvider;
+import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
@@ -317,8 +317,8 @@ public class OAuthConnector {
     private Request getMethod(HttpClient httpClient, String tokenUrl) {
         Request request = httpClient.newRequest(tokenUrl).method(HttpMethod.POST).timeout(TIMEOUT_SECONDS,
                 TimeUnit.SECONDS);
-        request.header(HttpHeader.ACCEPT, "application/json");
-        request.header(HttpHeader.ACCEPT_CHARSET, StandardCharsets.UTF_8.name());
+        request.headers(f -> f.add(HttpHeader.ACCEPT, "application/json"));
+        request.headers(f -> f.add(HttpHeader.ACCEPT_CHARSET, StandardCharsets.UTF_8.name()));
         return request;
     }
 
@@ -327,8 +327,8 @@ public class OAuthConnector {
         logger.debug("Setting authentication for clientId {}. Using basic auth {}", clientId, supportsBasicAuth);
         if (supportsBasicAuth && clientSecret != null) {
             String authString = clientId + ":" + clientSecret;
-            request.header(HttpHeader.AUTHORIZATION,
-                    "Basic " + Base64.getEncoder().encodeToString(authString.getBytes(StandardCharsets.UTF_8)));
+            request.headers(f -> f.add(HttpHeader.AUTHORIZATION,
+                    "Basic " + Base64.getEncoder().encodeToString(authString.getBytes(StandardCharsets.UTF_8))));
         } else {
             if (clientId != null) {
                 fields.add(CLIENT_ID, clientId);
@@ -364,8 +364,8 @@ public class OAuthConnector {
         int statusCode = 0;
         String content = "";
         try {
-            final FormContentProvider entity = new FormContentProvider(fields);
-            Request requestWithContent = request.content(entity);
+            final FormRequestContent entity = new FormRequestContent(fields);
+            Request requestWithContent = request.body(entity);
             final ContentResponse response = requestWithContent.send();
 
             statusCode = response.getStatus();
