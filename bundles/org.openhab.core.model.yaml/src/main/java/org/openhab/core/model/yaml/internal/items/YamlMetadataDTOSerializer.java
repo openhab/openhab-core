@@ -12,12 +12,12 @@
  */
 package org.openhab.core.model.yaml.internal.items;
 
-import java.io.IOException;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Custom serializer for {@link YamlMetadataDTO} that writes the namespace as a scalar
@@ -25,17 +25,20 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-public class YamlMetadataDTOSerializer extends JsonSerializer<YamlMetadataDTO> {
+public class YamlMetadataDTOSerializer extends ValueSerializer<YamlMetadataDTO> {
     @Override
-    public void serialize(YamlMetadataDTO value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(YamlMetadataDTO value, JsonGenerator gen, SerializationContext serializers)
+            throws JacksonException {
         Map<?, ?> config = value.config;
         boolean configIsEmpty = (config == null || config.isEmpty());
         if (configIsEmpty) {
             gen.writeString(value.getValue());
         } else {
             gen.writeStartObject();
-            gen.writeStringField("value", value.getValue());
-            gen.writeObjectField("config", value.config);
+            gen.writeName("value");
+            gen.writeString(value.getValue());
+            gen.writeName("config");
+            serializers.writeValue(gen, value.config);
             gen.writeEndObject();
         }
     }

@@ -37,8 +37,9 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles block libraries as YAML files and installs
@@ -58,9 +59,8 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
     @Activate
     public CommunityBlockLibaryAddonHandler(final @Reference UIComponentRegistryFactory uiComponentRegistryFactory) {
         this.blocksRegistry = uiComponentRegistryFactory.getRegistry("ui:blocks");
-        this.yamlMapper = new ObjectMapper(new YAMLFactory());
-        yamlMapper.findAndRegisterModules();
-        this.yamlMapper.setDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa", Locale.ENGLISH));
+        this.yamlMapper = YAMLMapper.builder().findAndAddModules()
+                .defaultDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa", Locale.ENGLISH)).build();
     }
 
     @Override
@@ -122,7 +122,7 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
             // add a tag with the add-on ID to be able to identify the block library in the registry
             widget.addTag(id);
             blocksRegistry.add(widget);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             logger.error("Unable to parse YAML: {}", e.getMessage());
             throw new IllegalArgumentException("Unable to parse YAML");
         }

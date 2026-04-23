@@ -43,8 +43,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * This is a {@link RuleTemplateProvider}, which gets its content from the marketplace add-on service
@@ -65,8 +65,7 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
     @Activate
     public MarketplaceRuleTemplateProvider(final @Reference StorageService storageService) {
         super(storageService);
-        this.yamlMapper = new ObjectMapper(new YAMLFactory());
-        yamlMapper.findAndRegisterModules();
+        this.yamlMapper = YAMLMapper.builder().findAndAddModules().build();
     }
 
     /**
