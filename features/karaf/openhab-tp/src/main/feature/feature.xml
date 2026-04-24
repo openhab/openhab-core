@@ -223,6 +223,15 @@
 		<bundle>mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.x86_64/1.2.201</bundle>
 	</feature>
 
+	<conditional>
+		<condition>req:osgi.native;filter:="(&amp;(osgi.native.osname=MacOSX)(osgi.native.processor=AArch64))"</condition>
+		<feature name="openhab.tp-serial-purejavacomm" version="${project.version}">
+			<capability>openhab.tp;feature=serial;impl=purejavacomm</capability>
+			<feature dependency="true">openhab.tp-jna</feature>
+			<bundle>mvn:org.opensmarthouse/purejavacomm/1.0.5</bundle>
+		</feature>
+	</conditional>
+
 	<feature name="openhab.tp-serial-rxtx" version="${project.version}">
 		<capability>openhab.tp;feature=serial;impl=rxtx</capability>
 		<bundle>mvn:com.neuronrobotics/nrjavaserial/5.2.1.OH1</bundle>
