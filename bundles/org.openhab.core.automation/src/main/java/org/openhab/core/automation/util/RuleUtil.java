@@ -73,7 +73,7 @@ public class RuleUtil {
      */
     public static void assertValidRuleUID(String uid) throws IllegalArgumentException { // TODO: Update Javadocs to reflect final decision
         if (!isValidRuleUID(uid)) {
-            throw new IllegalArgumentException("The specified UID of the rule '" + uid + "' is not valid!");
+            throw new IllegalArgumentException("The specified UID of rule '" + uid + "' is invalid!");
         }
     }
 }
