@@ -38,6 +38,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
+import org.eclipse.xtext.validation.AbstractValidationDiagnostic;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -340,7 +341,9 @@ public class ModelRepositoryImpl implements ModelRepository {
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
                         if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
-                                && !"rules".equalsIgnoreCase(modelType) && !"script".equalsIgnoreCase(modelType)) {
+                                && ((d instanceof AbstractValidationDiagnostic vd && "uid".equals(vd.getIssueCode()))
+                                        || (!"rules".equalsIgnoreCase(modelType)
+                                                && !"script".equalsIgnoreCase(modelType)))) {
                             errors.add(d.getMessage());
                         } else {
                             warnings.add(d.getMessage());

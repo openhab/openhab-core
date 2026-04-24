@@ -40,7 +40,7 @@ public class RulesValidator extends AbstractRulesValidator {
         }
         if (!RuleUtil.isValidRuleUID(uid)) {
             error(buildMsgWithLineNum(rule, "Rule UID '" + uid + "' is invalid."), rule,
-                    RulesPackage.Literals.RULE__UID);
+                    RulesPackage.Literals.RULE__UID, "uid");
         }
     }
 
