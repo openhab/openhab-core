@@ -57,9 +57,6 @@ public class UIComponentSitemapMapper {
 
     public static RootUIComponent map(Sitemap element) {
         String sitemapName = element.getName();
-        sitemapName = sitemapName.startsWith(UIComponentSitemapProvider.SITEMAP_PREFIX)
-                ? sitemapName.substring(UIComponentSitemapProvider.SITEMAP_PREFIX.length())
-                : sitemapName;
         RootUIComponent sitemapComponent = new RootUIComponent(sitemapName, "Sitemap");
         addConfig(sitemapComponent, "label", element.getLabel());
         addConfig(sitemapComponent, "icon", element.getIcon());

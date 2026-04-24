@@ -92,8 +92,6 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
 
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
-    static final String SITEMAP_PREFIX = "uicomponents_";
-
     private static final Pattern CONDITION_PATTERN = Pattern
             .compile("((?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>))?\\s*(?<value>(\\+|-)?.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
@@ -133,7 +131,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             throw new IllegalArgumentException("Root component type is not Sitemap");
         }
 
-        Sitemap sitemap = sitemapFactory.createSitemap(SITEMAP_PREFIX + rootComponent.getUID());
+        Sitemap sitemap = sitemapFactory.createSitemap(rootComponent.getUID());
         Object label = rootComponent.getConfig().get("label");
         if (label != null) {
             sitemap.setLabel(label.toString());
@@ -442,7 +440,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     @Override
     public void added(RootUIComponent element) {
         if ("Sitemap".equals(element.getType())) {
-            String sitemapName = SITEMAP_PREFIX + element.getUID();
+            String sitemapName = element.getUID();
             if (sitemaps.get(sitemapName) == null) {
                 Sitemap sitemap = buildSitemap(element);
                 sitemaps.put(sitemapName, sitemap);
@@ -454,7 +452,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     @Override
     public void removed(RootUIComponent element) {
         if ("Sitemap".equals(element.getType())) {
-            String sitemapName = SITEMAP_PREFIX + element.getUID();
+            String sitemapName = element.getUID();
             Sitemap sitemap = sitemaps.remove(sitemapName);
             if (sitemap != null) {
                 notifyListenersAboutRemovedElement(sitemap);
@@ -465,8 +463,8 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     @Override
     public void updated(RootUIComponent oldElement, RootUIComponent element) {
         if ("Sitemap".equals(oldElement.getType()) && "Sitemap".equals(element.getType())) {
-            String oldSitemapName = SITEMAP_PREFIX + oldElement.getUID();
-            String sitemapName = SITEMAP_PREFIX + element.getUID();
+            String oldSitemapName = oldElement.getUID();
+            String sitemapName = element.getUID();
             Sitemap oldSitemap = sitemaps.get(oldSitemapName);
             Sitemap sitemap = buildSitemap(element);
             if (!oldSitemapName.equals(sitemapName)) {
@@ -494,8 +492,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         Sitemap sitemap = sitemaps.get(key);
         UIComponentRegistry sitemapComponentRegistry = this.sitemapComponentRegistry;
         if (sitemapComponentRegistry != null) {
-            String sitemapName = key.startsWith(SITEMAP_PREFIX) ? key.substring(SITEMAP_PREFIX.length()) : key;
-            sitemapComponentRegistry.remove(sitemapName);
+            sitemapComponentRegistry.remove(key);
             return sitemap;
         }
         return null;
