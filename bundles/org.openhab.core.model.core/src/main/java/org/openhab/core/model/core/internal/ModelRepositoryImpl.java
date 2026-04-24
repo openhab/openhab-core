@@ -340,13 +340,26 @@ public class ModelRepositoryImpl implements ModelRepository {
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
-                        if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
-                                && ((d instanceof AbstractValidationDiagnostic vd && "uid".equals(vd.getIssueCode()))
-                                        || (!"rules".equalsIgnoreCase(modelType)
-                                                && !"script".equalsIgnoreCase(modelType)))) {
-                            errors.add(d.getMessage());
-                        } else {
-                            warnings.add(d.getMessage());
+                        switch (modelType) {
+                            case "rules":
+                                if (d instanceof AbstractValidationDiagnostic vd
+                                        && d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
+                                        && "uid".equals(vd.getIssueCode())) {
+                                    errors.add(d.getMessage());
+                                } else {
+                                    warnings.add(d.getMessage());
+                                }
+                                break;
+                            case "script":
+                                warnings.add(d.getMessage());
+                                break;
+                            default:
+                                if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR) {
+                                    errors.add(d.getMessage());
+                                } else {
+                                    warnings.add(d.getMessage());
+                                }
+                                break;
                         }
                     }
                     if (!errors.isEmpty()) {
