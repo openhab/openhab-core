@@ -61,4 +61,22 @@ class ChannelEventTriggerHandlerTest {
 
         assertFalse(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
     }
+
+    @Test
+    public void testWildcardAsteriskMatchingChannelIsApplied() {
+        when(moduleMock.getConfiguration())
+                .thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL, "foo:bar:baz:*")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+    }
+
+    @Test
+    public void testWildcardQuestionMarkMatchingChannelIsApplied() {
+        when(moduleMock.getConfiguration())
+                .thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL, "foo:bar:baz:quu?")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+    }
 }
