@@ -24,6 +24,7 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.events.ChannelTriggeredEvent;
 import org.osgi.framework.BundleContext;
@@ -48,7 +49,8 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
     private final Logger logger = LoggerFactory.getLogger(ChannelEventTriggerHandler.class);
 
     private @Nullable final String eventOnChannel;
-    private final ChannelUID channelUID;
+    private final @Nullable ChannelUID channelUID;
+    private final @Nullable TopicEventFilter eventTopicFilter;
     private final Set<String> types;
     private final BundleContext bundleContext;
     private final ServiceRegistration<?> eventSubscriberRegistration;
@@ -57,7 +59,18 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
         super(module);
 
         this.eventOnChannel = (String) module.getConfiguration().get(CFG_CHANNEL_EVENT);
-        this.channelUID = new ChannelUID((String) module.getConfiguration().get(CFG_CHANNEL));
+        String cfgChannel = (String) module.getConfiguration().get(CFG_CHANNEL);
+        TopicEventFilter topicFilter = null;
+        ChannelUID parsedChannel = null;
+        if (cfgChannel != null && (cfgChannel.contains("?") || cfgChannel.contains("*"))) {
+            String topicRegex = "^openhab/channels/" + cfgChannel.replace("?", ".?").replace("*", ".*?")
+                    + "/triggered$";
+            topicFilter = new TopicEventFilter(topicRegex);
+        } else {
+            parsedChannel = new ChannelUID(cfgChannel);
+        }
+        this.channelUID = parsedChannel;
+        this.eventTopicFilter = topicFilter;
         this.types = Set.of("ChannelTriggeredEvent");
         this.bundleContext = bundleContext;
 
@@ -78,19 +91,19 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
     public boolean apply(Event event) {
         boolean eventMatches = false;
         if (event instanceof ChannelTriggeredEvent cte) {
-            if (channelUID.equals(cte.getChannel())) {
-                String eventOnChannel = this.eventOnChannel;
-                logger.trace("->FILTER: {}:{}", cte.getEvent(), eventOnChannel);
-                eventMatches = eventOnChannel == null || eventOnChannel.isBlank()
-                        || eventOnChannel.equals(cte.getEvent());
+            if (channelUID != null && !channelUID.equals(cte.getChannel())) {
+                return false;
             }
+            String eventOnChannel = this.eventOnChannel;
+            logger.trace("->FILTER: {}:{}", cte.getEvent(), eventOnChannel);
+            eventMatches = eventOnChannel == null || eventOnChannel.isBlank() || eventOnChannel.equals(cte.getEvent());
         }
         return eventMatches;
     }
 
     @Override
     public @Nullable EventFilter getEventFilter() {
-        return this;
+        return eventTopicFilter != null ? eventTopicFilter : this;
     }
 
     @Override
