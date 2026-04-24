@@ -93,7 +93,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
     private static final Pattern CONDITION_PATTERN = Pattern
-            .compile("((?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>))?\\s*(?<value>(\\+|-)?.+)");
+            .compile("(?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>(\\+|-)?.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
@@ -404,7 +404,10 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         String conditions = rule;
         if (argument != null) {
             conditions = rule.substring(0, rule.lastIndexOf(argument)).trim();
-            if (conditions.endsWith("=")) {
+            if (conditions.endsWith("=\"")) {
+                // If the argument was surrounded by quotes, we need to remove the quote and the preceding =
+                conditions = conditions.substring(0, conditions.length() - 2);
+            } else if (conditions.endsWith("=")) {
                 conditions = conditions.substring(0, conditions.length() - 1);
             }
         }
