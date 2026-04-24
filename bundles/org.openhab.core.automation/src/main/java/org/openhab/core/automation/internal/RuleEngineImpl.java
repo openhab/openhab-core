@@ -88,6 +88,7 @@ import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -113,7 +114,7 @@ import org.slf4j.LoggerFactory;
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field
  * @author Florian Hotze - add support for script condition/action compilation
  */
-@Component(immediate = true, service = { RuleManager.class })
+@Component(immediate = true, service = { RuleManager.class }, configurationPid = RuleEngineImpl.SERVICE_PID)
 @NonNullByDefault
 public class RuleEngineImpl implements RuleManager, RegistryChangeListener<ModuleType>, ReadyTracker {
 
@@ -127,6 +128,14 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     private static final int RULE_INIT_DELAY = 500;
 
     private static final ReadyMarker MARKER = new ReadyMarker("ruleengine", "start");
+
+    static final String SERVICE_PID = "org.openhab.ruleengine";
+    private static final String DISABLED_RULES_CLEANUP_DELAY_PROP = "disabledRules.cleanupDelayMinutes";
+
+    // Delay (in minutes) after reaching startlevel rules to run cleanup. 0 = disabled.
+    private volatile long disabledRulesCleanupDelayMinutes = 30L;
+
+    private volatile @Nullable Future<?> disabledRulesCleanupFuture;
 
     private final Map<String, WrappedRule> managedRules = new ConcurrentHashMap<>();
 
@@ -312,6 +321,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
         for (Future<?> f : scheduleTasks.values()) {
             f.cancel(true);
+        }
+        Future<?> cf = disabledRulesCleanupFuture;
+        if (cf != null && !cf.isDone()) {
+            cf.cancel(true);
+            disabledRulesCleanupFuture = null;
         }
         if (scheduleTasks.isEmpty() && executor != null) {
             executor.shutdown();
@@ -1571,7 +1585,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        compileRules();
+        String id = readyMarker.getIdentifier();
+        if (Integer.toString(StartLevelService.STARTLEVEL_RULES).equals(id)) {
+            compileRules();
+            scheduleDisabledRulesCleanup();
+        }
     }
 
     @Override
@@ -1606,6 +1624,95 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             readyService.markReady(MARKER);
             logger.info("Rule engine started.");
         });
+    }
+
+    @Activate
+    protected void activate(Map<String, Object> configuration) {
+        updateDisabledRulesCleanupDelay(configuration);
+        if (disabledRulesCleanupDelayMinutes > 0
+                && startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_RULES) {
+            scheduleDisabledRulesCleanup();
+        }
+    }
+
+    @Modified
+    protected void modified(Map<String, Object> configuration) {
+        long old = disabledRulesCleanupDelayMinutes;
+        updateDisabledRulesCleanupDelay(configuration);
+        if (old != disabledRulesCleanupDelayMinutes) {
+            Future<?> f = disabledRulesCleanupFuture;
+            if (f != null && !f.isDone()) {
+                f.cancel(true);
+                disabledRulesCleanupFuture = null;
+            }
+            if (disabledRulesCleanupDelayMinutes > 0
+                    && startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_RULES) {
+                scheduleDisabledRulesCleanup();
+            }
+        }
+    }
+
+    private void updateDisabledRulesCleanupDelay(Map<String, Object> configuration) {
+        if (configuration == null) {
+            disabledRulesCleanupDelayMinutes = 30L;
+            return;
+        }
+        Object v = configuration.get(DISABLED_RULES_CLEANUP_DELAY_PROP);
+        if (v == null) {
+            disabledRulesCleanupDelayMinutes = 30L;
+            return;
+        }
+        try {
+            if (v instanceof Number) {
+                disabledRulesCleanupDelayMinutes = ((Number) v).longValue();
+            } else {
+                disabledRulesCleanupDelayMinutes = Long.parseLong(v.toString());
+            }
+        } catch (Exception e) {
+            logger.warn("Invalid configuration for {}: {} - using default 30 minutes",
+                    DISABLED_RULES_CLEANUP_DELAY_PROP, v);
+            disabledRulesCleanupDelayMinutes = 30L;
+        }
+    }
+
+    private synchronized void scheduleDisabledRulesCleanup() {
+        if (disabledRulesCleanupDelayMinutes <= 0) {
+            logger.debug("Disabled rules cleanup is disabled ({} = {})", DISABLED_RULES_CLEANUP_DELAY_PROP,
+                    disabledRulesCleanupDelayMinutes);
+            return;
+        }
+        if (disabledRulesCleanupFuture != null && !disabledRulesCleanupFuture.isDone()) {
+            logger.debug("Disabled rules cleanup already scheduled");
+            return;
+        }
+        disabledRulesCleanupFuture = getScheduledExecutor().schedule(() -> {
+            try {
+                cleanupDisabledRules();
+            } catch (Throwable t) {
+                logger.warn("Failed to cleanup disabled rules: {}", t.getMessage());
+            }
+        }, disabledRulesCleanupDelayMinutes, TimeUnit.MINUTES);
+        logger.debug("Scheduled disabled rules cleanup in {} minutes", disabledRulesCleanupDelayMinutes);
+    }
+
+    private void cleanupDisabledRules() {
+        logger.debug("Starting cleanup of orphan disabled rules from storage '{}'", DISABLED_RULE_STORAGE);
+        int removed = 0;
+        try {
+            Collection<String> keys = new HashSet<>(disabledRulesStorage.getKeys());
+            for (String uid : keys) {
+                if (ruleRegistry.get(uid) == null) {
+                    disabledRulesStorage.remove(uid);
+                    removed++;
+                    logger.info("Removed disabled-rules entry for non-existing rule '{}'", uid);
+                }
+            }
+            if (removed > 0) {
+                logger.info("Disabled rules cleanup: removed {} orphan entries.", removed);
+            }
+        } catch (Throwable t) {
+            logger.warn("Exception during disabled rules cleanup: {}", t.getMessage());
+        }
     }
 
     private boolean mustTrigger(Rule r) {
