@@ -881,7 +881,8 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                     handler.handleRemoval();
                     logger.trace("Handler of thing '{}' returned from handling its removal.", thing.getUID());
                 } else {
-                    logger.trace("No handler of thing '{}' available, so deferring the removal call.", thing.getUID());
+                    logger.trace("No handler of thing '{}' available, proceeding with force remove.", thing.getUID());
+                    notifyRegistryAboutForceRemove(thing);
                 }
             } catch (Exception ex) {
                 logger.error("The ThingHandler caused an exception while handling the removal of its thing", ex);
