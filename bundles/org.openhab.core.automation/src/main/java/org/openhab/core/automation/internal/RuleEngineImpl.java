@@ -319,13 +319,14 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
         compositeFactory.deactivate();
 
-        for (Future<?> f : scheduleTasks.values()) {
-            f.cancel(true);
-        }
         Future<?> cf = disabledRulesCleanupFuture;
         if (cf != null && !cf.isDone()) {
             cf.cancel(true);
             disabledRulesCleanupFuture = null;
+        }
+
+        for (Future<?> f : scheduleTasks.values()) {
+            f.cancel(true);
         }
         if (scheduleTasks.isEmpty() && executor != null) {
             executor.shutdown();
@@ -1585,11 +1586,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        String id = readyMarker.getIdentifier();
-        if (Integer.toString(StartLevelService.STARTLEVEL_RULES).equals(id)) {
-            compileRules();
-            scheduleDisabledRulesCleanup();
-        }
+        compileRules();
+        scheduleDisabledRulesCleanup();
     }
 
     @Override
@@ -1624,15 +1622,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             readyService.markReady(MARKER);
             logger.info("Rule engine started.");
         });
-    }
-
-    @Activate
-    protected void activate(Map<String, Object> configuration) {
-        updateDisabledRulesCleanupDelay(configuration);
-        if (disabledRulesCleanupDelayMinutes > 0
-                && startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_RULES) {
-            scheduleDisabledRulesCleanup();
-        }
     }
 
     @Modified
@@ -1709,6 +1698,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             }
             if (removed > 0) {
                 logger.info("Disabled rules cleanup: removed {} orphan entries.", removed);
+            } else {
+                logger.debug("Disabled rules cleanup: no orphan entries found.");
             }
         } catch (Throwable t) {
             logger.warn("Exception during disabled rules cleanup: {}", t.getMessage());
