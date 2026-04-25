@@ -63,4 +63,10 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
         }
         super.removeProvider(provider);
     }
+
+    @Override
+    public boolean isEditable(String uid) {
+        ManagedProvider<RootUIComponent, String> managed = getManagedProvider();
+        return managed != null && managed.get(uid) != null;
+    }
 }
