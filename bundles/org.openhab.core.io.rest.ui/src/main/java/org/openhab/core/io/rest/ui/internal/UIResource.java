@@ -217,7 +217,7 @@ public class UIResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedRootUIComponent.class))),
                     @ApiResponse(responseCode = "404", description = "Component not found"),
-                    @ApiResponse(responseCode = "409", description = "Component is not editable.") })
+                    @ApiResponse(responseCode = "405", description = "Component is not editable.") })
     public Response updateComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
@@ -226,7 +226,7 @@ public class UIResource implements RESTResource {
             return Response.status(Status.NOT_FOUND).build();
         }
         if (!registry.isEditable(componentUID)) {
-            return Response.status(Status.CONFLICT)
+            return Response.status(Status.METHOD_NOT_ALLOWED)
                     .entity("Cannot update component " + componentUID + " as it is not editable.").build();
         }
         if (!componentUID.equals(component.getUID())) {
@@ -246,7 +246,7 @@ public class UIResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Component not found"),
-                    @ApiResponse(responseCode = "409", description = "Component is not editable.") })
+                    @ApiResponse(responseCode = "405", description = "Component is not editable.") })
     public Response deleteComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
@@ -255,7 +255,7 @@ public class UIResource implements RESTResource {
             return Response.status(Status.NOT_FOUND).build();
         }
         if (!registry.isEditable(componentUID)) {
-            return Response.status(Status.CONFLICT)
+            return Response.status(Status.METHOD_NOT_ALLOWED)
                     .entity("Cannot delete component " + componentUID + " as it is not editable.").build();
         }
         registry.remove(componentUID);
