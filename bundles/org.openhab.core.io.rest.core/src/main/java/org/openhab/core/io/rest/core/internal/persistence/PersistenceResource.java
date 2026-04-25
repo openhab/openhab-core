@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
+import javax.measure.Unit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -55,9 +56,11 @@ import org.openhab.core.io.rest.core.config.ConfigurationService;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
@@ -79,9 +82,12 @@ import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationDTOMapper;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
+import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.types.util.UnitUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -302,8 +308,10 @@ public class PersistenceResource implements RESTResource {
             @Parameter(description = "Page number of data to return. This parameter will enable paging.") @QueryParam("page") int pageNumber,
             @Parameter(description = "The length of each page.") @QueryParam("pagelength") int pageLength,
             @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary,
-            @Parameter(description = "Adds the current Item state into the requested period (the Item state will be before or at the endtime)") @QueryParam("itemState") boolean itemState) {
-        return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary, itemState);
+            @Parameter(description = "Adds the current Item state into the requested period (the Item state will be before or at the endtime)") @QueryParam("itemState") boolean itemState,
+            @Parameter(description = "If set to true, the unit from the state description is applied to convert the values.") @QueryParam("displayState") boolean displayState) {
+        return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary, itemState,
+                displayState);
     }
 
     @DELETE
@@ -431,7 +439,8 @@ public class PersistenceResource implements RESTResource {
     }
 
     private Response getItemHistoryDTO(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
-            @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary, boolean itemState) {
+            @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary, boolean itemState,
+            boolean displayState) {
         // Benchmarking timer...
         long timerStart = System.currentTimeMillis();
 
@@ -456,7 +465,7 @@ public class PersistenceResource implements RESTResource {
 
         @Nullable
         ItemHistoryDTO dto = createDTO(qService, itemName, timeBegin, timeEnd, pageNumber, pageLength, boundary,
-                itemState);
+                itemState, displayState);
         if (dto == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Item not found: " + itemName);
         }
@@ -467,7 +476,7 @@ public class PersistenceResource implements RESTResource {
 
     protected @Nullable ItemHistoryDTO createDTO(QueryablePersistenceService qService, String itemName,
             @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary,
-            boolean itemState) {
+            boolean itemState, boolean displayState) {
         String serviceId = qService.getId();
         PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(serviceId);
         String alias = config != null ? config.getAliases().get(itemName) : null;
@@ -500,12 +509,35 @@ public class PersistenceResource implements RESTResource {
                     timeZoneProvider.getTimeZone());
         }
 
+        @Nullable
+        Unit<?> targetUnit = null;
+        Item item;
+        try {
+            item = itemRegistry.getItem(itemName);
+            if (item instanceof NumberItem numberItem) {
+                if (displayState) {
+                    StateDescription stateDescription = numberItem.getStateDescription(null);
+                    if (stateDescription != null) {
+                        targetUnit = UnitUtils.parseUnit(stateDescription.getPattern());
+                    }
+                }
+                if (targetUnit == null) {
+                    targetUnit = numberItem.getUnit();
+                }
+            }
+        } catch (ItemNotFoundException e) {
+            throw new IllegalStateException("Unexpectedly failed to retrieve Item '" + itemName + "' from registry", e);
+        }
+
         Iterable<HistoricItem> result;
 
         long quantity = 0L;
 
         ItemHistoryDTO dto = new ItemHistoryDTO();
         dto.name = itemName;
+        if (targetUnit != null) {
+            dto.unit = targetUnit.toString();
+        }
 
         // If "boundary" is true then we want to get one value before and after the requested period
         // This is necessary for values that don't change often otherwise data will start after the start of the graph
@@ -519,7 +551,9 @@ public class PersistenceResource implements RESTResource {
             filterBeforeStart.setOrdering(Ordering.DESCENDING);
             result = qService.query(filterBeforeStart, alias);
             if (result.iterator().hasNext()) {
-                dto.addData(dateTimeBegin.toInstant().toEpochMilli(), result.iterator().next().getState());
+                long timestamp = dateTimeBegin.toInstant().toEpochMilli();
+                State state = result.iterator().next().getState();
+                addData(dto, item, state, timestamp, displayState, targetUnit);
                 quantity++;
             }
         }
@@ -550,12 +584,12 @@ public class PersistenceResource implements RESTResource {
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
                 if (lastState != null && !lastState.equals(state)) {
-                    dto.addData(timestamp, lastState);
+                    addData(dto, item, lastState, timestamp, displayState, targetUnit);
                     quantity++;
                 }
             }
 
-            dto.addData(timestamp, state);
+            addData(dto, item, state, timestamp, displayState, targetUnit);
             quantity++;
             lastState = state;
         }
@@ -570,7 +604,9 @@ public class PersistenceResource implements RESTResource {
             filterAfterEnd.setOrdering(Ordering.ASCENDING);
             result = qService.query(filterAfterEnd, alias);
             if (result.iterator().hasNext()) {
-                dto.addData(dateTimeEnd.toInstant().toEpochMilli(), result.iterator().next().getState());
+                long timestamp = dateTimeEnd.toInstant().toEpochMilli();
+                State state = result.iterator().next().getState();
+                addData(dto, item, state, timestamp, displayState, targetUnit);
                 quantity++;
                 addedBoundaryEnd = true;
             }
@@ -590,7 +626,7 @@ public class PersistenceResource implements RESTResource {
                     logger.debug("State of Item '{}' is undefined, not adding it to the response.", itemName);
                 } else {
                     logger.debug("Adding state of Item '{}' to the response: {} - {}", itemName, time, state);
-                    dto.addData(time, state);
+                    addData(dto, item, state, time, displayState, targetUnit);
                     quantity++;
                     dto.sortData();
                 }
@@ -602,6 +638,26 @@ public class PersistenceResource implements RESTResource {
 
         dto.datapoints = Long.toString(quantity);
         return dto;
+    }
+
+    private @Nullable String getDisplayState(Item item, State state) {
+        return ItemDisplayStateUtil.getDisplayState(item, state, localeService.getLocale(null),
+                timeZoneProvider.getTimeZone());
+    }
+
+    private void addData(ItemHistoryDTO dto, Item item, State state, long timestamp, boolean displayState,
+            @Nullable Unit<?> targetUnit) {
+        if (displayState) {
+            if (state instanceof QuantityType<?> quantityState && targetUnit != null) {
+                QuantityType<?> convertedState = quantityState.toInvertibleUnit(targetUnit);
+                dto.addData(timestamp, convertedState != null ? convertedState : state);
+            } else {
+                String displayStateStr = getDisplayState(item, state);
+                dto.addData(timestamp, displayStateStr != null ? displayStateStr : state.toString());
+            }
+        } else {
+            dto.addData(timestamp, state);
+        }
     }
 
     /**
