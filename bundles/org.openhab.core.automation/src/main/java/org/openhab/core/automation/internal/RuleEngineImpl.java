@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -135,7 +136,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     // Delay (in minutes) after reaching startlevel rules to run cleanup. 0 = disabled.
     private volatile long disabledRulesCleanupDelayMinutes = 30L;
 
-    private volatile @Nullable Future<?> disabledRulesCleanupFuture;
+    private final AtomicReference<@Nullable DisabledRulesCleaner> disabledRulesCleaner = new AtomicReference<>();
 
     private final Map<String, WrappedRule> managedRules = new ConcurrentHashMap<>();
 
@@ -265,9 +266,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * Constructor of {@link RuleEngineImpl}.
      */
     @Activate
-    public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
-            final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService,
-            final @Reference ReadyService readyService, final @Reference StartLevelService startLevelService) {
+    public RuleEngineImpl(final Map<String, Object> configuration,
+            final @Reference ModuleTypeRegistry moduleTypeRegistry, final @Reference RuleRegistry ruleRegistry,
+            final @Reference StorageService storageService, final @Reference ReadyService readyService,
+            final @Reference StartLevelService startLevelService) {
         this.disabledRulesStorage = storageService.getStorage(DISABLED_RULE_STORAGE, this.getClass().getClassLoader());
 
         mtRegistry = moduleTypeRegistry;
@@ -301,8 +303,27 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             addRule(rule);
         }
 
+        updateDisabledRulesCleanupDelay(configuration);
+
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
                 .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_RULES)));
+    }
+
+    private DisabledRulesCleaner getOrCreateDisabledRulesCleaner() {
+        for (;;) {
+            DisabledRulesCleaner cur = disabledRulesCleaner.get();
+            if (cur != null) {
+                return cur;
+            }
+            DisabledRulesCleaner created = new DisabledRulesCleaner(this.ruleRegistry, this.disabledRulesStorage,
+                    this::getScheduledExecutor);
+            // when the cleaner naturally finishes, clear the reference so it can be GC'ed
+            created.setOnFinished(() -> disabledRulesCleaner.compareAndSet(created, null));
+            if (disabledRulesCleaner.compareAndSet(null, created)) {
+                return created;
+            }
+            // CAS failed; another thread installed a cleaner — retry
+        }
     }
 
     /**
@@ -319,10 +340,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
         compositeFactory.deactivate();
 
-        Future<?> cf = disabledRulesCleanupFuture;
-        if (cf != null && !cf.isDone()) {
-            cf.cancel(true);
-            disabledRulesCleanupFuture = null;
+        DisabledRulesCleaner prev = disabledRulesCleaner.getAndSet(null);
+        if (prev != null) {
+            prev.stop();
         }
 
         for (Future<?> f : scheduleTasks.values()) {
@@ -467,6 +487,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         final String rUID = newRule.getUID();
         final WrappedRule rule = new WrappedRule(newRule);
         managedRules.put(rUID, rule);
+        // Inform cleaner that the rule is present again (clears missing timestamp)
+        DisabledRulesCleaner c = disabledRulesCleaner.get();
+        if (c != null) {
+            c.onRuleAdded(rUID);
+        }
         RuleStatusInfo initStatusInfo = disabledRulesStorage.get(rUID) == null
                 ? new RuleStatusInfo(RuleStatus.INITIALIZING)
                 : new RuleStatusInfo(RuleStatus.UNINITIALIZED, RuleStatusDetail.DISABLED);
@@ -1587,7 +1612,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         compileRules();
-        scheduleDisabledRulesCleanup();
+        if (disabledRulesCleanupDelayMinutes > 0) {
+            getOrCreateDisabledRulesCleaner().start(disabledRulesCleanupDelayMinutes);
+        }
     }
 
     @Override
@@ -1629,14 +1656,13 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         long old = disabledRulesCleanupDelayMinutes;
         updateDisabledRulesCleanupDelay(configuration);
         if (old != disabledRulesCleanupDelayMinutes) {
-            Future<?> f = disabledRulesCleanupFuture;
-            if (f != null && !f.isDone()) {
-                f.cancel(true);
-                disabledRulesCleanupFuture = null;
+            DisabledRulesCleaner prev = disabledRulesCleaner.getAndSet(null);
+            if (prev != null) {
+                prev.stop();
             }
             if (disabledRulesCleanupDelayMinutes > 0
                     && startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_RULES) {
-                scheduleDisabledRulesCleanup();
+                getOrCreateDisabledRulesCleaner().start(disabledRulesCleanupDelayMinutes);
             }
         }
     }
@@ -1661,48 +1687,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             logger.warn("Invalid configuration for {}: {} - using default 30 minutes",
                     DISABLED_RULES_CLEANUP_DELAY_PROP, v);
             disabledRulesCleanupDelayMinutes = 30L;
-        }
-    }
-
-    private synchronized void scheduleDisabledRulesCleanup() {
-        if (disabledRulesCleanupDelayMinutes <= 0) {
-            logger.debug("Disabled rules cleanup is disabled ({} = {})", DISABLED_RULES_CLEANUP_DELAY_PROP,
-                    disabledRulesCleanupDelayMinutes);
-            return;
-        }
-        if (disabledRulesCleanupFuture != null && !disabledRulesCleanupFuture.isDone()) {
-            logger.debug("Disabled rules cleanup already scheduled");
-            return;
-        }
-        disabledRulesCleanupFuture = getScheduledExecutor().schedule(() -> {
-            try {
-                cleanupDisabledRules();
-            } catch (Throwable t) {
-                logger.warn("Failed to cleanup disabled rules: {}", t.getMessage());
-            }
-        }, disabledRulesCleanupDelayMinutes, TimeUnit.MINUTES);
-        logger.debug("Scheduled disabled rules cleanup in {} minutes", disabledRulesCleanupDelayMinutes);
-    }
-
-    private void cleanupDisabledRules() {
-        logger.debug("Starting cleanup of orphan disabled rules from storage '{}'", DISABLED_RULE_STORAGE);
-        int removed = 0;
-        try {
-            Collection<String> keys = new HashSet<>(disabledRulesStorage.getKeys());
-            for (String uid : keys) {
-                if (ruleRegistry.get(uid) == null) {
-                    disabledRulesStorage.remove(uid);
-                    removed++;
-                    logger.info("Removed disabled-rules entry for non-existing rule '{}'", uid);
-                }
-            }
-            if (removed > 0) {
-                logger.info("Disabled rules cleanup: removed {} orphan entries.", removed);
-            } else {
-                logger.debug("Disabled rules cleanup: no orphan entries found.");
-            }
-        } catch (Throwable t) {
-            logger.warn("Exception during disabled rules cleanup: {}", t.getMessage());
         }
     }
 
