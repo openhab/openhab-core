@@ -48,6 +48,7 @@ import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
 import org.openhab.core.model.yaml.internal.rules.YamlRuleDTO;
 import org.openhab.core.model.yaml.internal.rules.YamlRuleTemplateDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
+import org.openhab.core.model.yaml.internal.sitemaps.YamlSitemapDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
@@ -97,14 +98,15 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             getElementName(YamlRuleTemplateDTO.class), // "ruleTemplates"
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
-            getElementName(YamlItemDTO.class) // "items"
+            getElementName(YamlItemDTO.class), // "items"
+            getElementName(YamlSitemapDTO.class) // "sitemaps"
     );
 
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
     private static final String UNWANTED_EXCEPTION_TEXT2 = "\\n \\(through reference chain: .*";
 
-    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "rules", "yaml").map(Path::of)
-            .toList();
+    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "sitemaps", "rules", "yaml")
+            .map(Path::of).toList();
 
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 

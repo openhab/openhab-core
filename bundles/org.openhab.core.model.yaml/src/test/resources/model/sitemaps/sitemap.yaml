@@ -1,0 +1,15 @@
+version: 1
+sitemaps:
+  demo:
+    label: Demo Sitemap
+    widgets:
+      - type: Frame
+        label: Demo Items
+        widgets:
+          - type: Text
+            item: DemoContact
+            label:
+              label: Contact
+              format: MAP(en.map):%s
+          - type: Group
+            item: DemoSwitchGroup
