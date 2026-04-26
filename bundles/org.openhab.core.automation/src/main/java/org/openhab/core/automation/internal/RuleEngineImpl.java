@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -88,6 +89,7 @@ import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -113,7 +115,7 @@ import org.slf4j.LoggerFactory;
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field
  * @author Florian Hotze - add support for script condition/action compilation
  */
-@Component(immediate = true, service = { RuleManager.class })
+@Component(immediate = true, service = { RuleManager.class }, configurationPid = RuleEngineImpl.SERVICE_PID)
 @NonNullByDefault
 public class RuleEngineImpl implements RuleManager, RegistryChangeListener<ModuleType>, ReadyTracker {
 
@@ -127,6 +129,14 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     private static final int RULE_INIT_DELAY = 500;
 
     private static final ReadyMarker MARKER = new ReadyMarker("ruleengine", "start");
+
+    static final String SERVICE_PID = "org.openhab.ruleengine";
+    private static final String DISABLED_RULES_CLEANUP_DELAY_PROP = "disabledRules.cleanupDelayMinutes";
+
+    // Delay (in minutes) after reaching startlevel rules to run cleanup. 0 = disabled.
+    private volatile long disabledRulesCleanupDelayMinutes = 30L;
+
+    private final AtomicReference<@Nullable DisabledRulesCleaner> disabledRulesCleaner = new AtomicReference<>();
 
     private final Map<String, WrappedRule> managedRules = new ConcurrentHashMap<>();
 
@@ -256,9 +266,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * Constructor of {@link RuleEngineImpl}.
      */
     @Activate
-    public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
-            final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService,
-            final @Reference ReadyService readyService, final @Reference StartLevelService startLevelService) {
+    public RuleEngineImpl(final Map<String, Object> configuration,
+            final @Reference ModuleTypeRegistry moduleTypeRegistry, final @Reference RuleRegistry ruleRegistry,
+            final @Reference StorageService storageService, final @Reference ReadyService readyService,
+            final @Reference StartLevelService startLevelService) {
         this.disabledRulesStorage = storageService.getStorage(DISABLED_RULE_STORAGE, this.getClass().getClassLoader());
 
         mtRegistry = moduleTypeRegistry;
@@ -292,8 +303,27 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             addRule(rule);
         }
 
+        updateDisabledRulesCleanupDelay(configuration);
+
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
                 .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_RULES)));
+    }
+
+    private DisabledRulesCleaner getOrCreateDisabledRulesCleaner() {
+        for (;;) {
+            DisabledRulesCleaner cur = disabledRulesCleaner.get();
+            if (cur != null) {
+                return cur;
+            }
+            DisabledRulesCleaner created = new DisabledRulesCleaner(this.ruleRegistry, this.disabledRulesStorage,
+                    this::getScheduledExecutor);
+            // when the cleaner naturally finishes, clear the reference so it can be GC'ed
+            created.setOnFinished(() -> disabledRulesCleaner.compareAndSet(created, null));
+            if (disabledRulesCleaner.compareAndSet(null, created)) {
+                return created;
+            }
+            // CAS failed; another thread installed a cleaner — retry
+        }
     }
 
     /**
@@ -309,6 +339,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         }
 
         compositeFactory.deactivate();
+
+        DisabledRulesCleaner prev = disabledRulesCleaner.getAndSet(null);
+        if (prev != null) {
+            prev.stop();
+        }
 
         for (Future<?> f : scheduleTasks.values()) {
             f.cancel(true);
@@ -452,6 +487,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         final String rUID = newRule.getUID();
         final WrappedRule rule = new WrappedRule(newRule);
         managedRules.put(rUID, rule);
+        // Inform cleaner that the rule is present again (clears missing timestamp)
+        DisabledRulesCleaner c = disabledRulesCleaner.get();
+        if (c != null) {
+            c.onRuleAdded(rUID);
+        }
         RuleStatusInfo initStatusInfo = disabledRulesStorage.get(rUID) == null
                 ? new RuleStatusInfo(RuleStatus.INITIALIZING)
                 : new RuleStatusInfo(RuleStatus.UNINITIALIZED, RuleStatusDetail.DISABLED);
@@ -1572,6 +1612,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         compileRules();
+        if (disabledRulesCleanupDelayMinutes > 0) {
+            getOrCreateDisabledRulesCleaner().start(disabledRulesCleanupDelayMinutes);
+        }
     }
 
     @Override
@@ -1606,6 +1649,45 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             readyService.markReady(MARKER);
             logger.info("Rule engine started.");
         });
+    }
+
+    @Modified
+    protected void modified(Map<String, Object> configuration) {
+        long old = disabledRulesCleanupDelayMinutes;
+        updateDisabledRulesCleanupDelay(configuration);
+        if (old != disabledRulesCleanupDelayMinutes) {
+            DisabledRulesCleaner prev = disabledRulesCleaner.getAndSet(null);
+            if (prev != null) {
+                prev.stop();
+            }
+            if (disabledRulesCleanupDelayMinutes > 0
+                    && startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_RULES) {
+                getOrCreateDisabledRulesCleaner().start(disabledRulesCleanupDelayMinutes);
+            }
+        }
+    }
+
+    private void updateDisabledRulesCleanupDelay(Map<String, Object> configuration) {
+        if (configuration == null) {
+            disabledRulesCleanupDelayMinutes = 30L;
+            return;
+        }
+        Object v = configuration.get(DISABLED_RULES_CLEANUP_DELAY_PROP);
+        if (v == null) {
+            disabledRulesCleanupDelayMinutes = 30L;
+            return;
+        }
+        try {
+            if (v instanceof Number) {
+                disabledRulesCleanupDelayMinutes = ((Number) v).longValue();
+            } else {
+                disabledRulesCleanupDelayMinutes = Long.parseLong(v.toString());
+            }
+        } catch (Exception e) {
+            logger.warn("Invalid configuration for {}: {} - using default 30 minutes",
+                    DISABLED_RULES_CLEANUP_DELAY_PROP, v);
+            disabledRulesCleanupDelayMinutes = 30L;
+        }
     }
 
     private boolean mustTrigger(Rule r) {
