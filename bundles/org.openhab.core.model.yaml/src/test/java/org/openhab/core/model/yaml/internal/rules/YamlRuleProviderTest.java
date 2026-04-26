@@ -215,7 +215,7 @@ public class YamlRuleProviderTest {
         assertThat(rule.getName(), is("Mode TV"));
         assertThat(rule.getDescription(), is(emptyOrNullString()));
         assertThat(rule.getTemplateUID(), is(emptyOrNullString()));
-        assertThat(rule.getTemplateState(), is(TemplateState.INSTANTIATED));
+        assertThat(rule.getTemplateState(), is(TemplateState.NO_TEMPLATE));
         assertThat(rule.getVisibility(), is(Visibility.VISIBLE));
         Configuration config = rule.getConfiguration();
         assertThat(config.getProperties(), is(aMapWithSize(1)));
@@ -275,7 +275,7 @@ public class YamlRuleProviderTest {
         assertThat(rule.getDescription(),
                 is("Creates timers to transition a state Item to a new state at defined times of day."));
         assertThat(rule.getTemplateUID(), is("none"));
-        assertThat(rule.getTemplateState(), is(TemplateState.TEMPLATE_MISSING));
+        assertThat(rule.getTemplateState(), is(TemplateState.PENDING));
         assertThat(rule.getVisibility(), is(Visibility.VISIBLE));
         config = rule.getConfiguration();
         assertThat(config.getProperties(), is(aMapWithSize(3)));
@@ -364,7 +364,7 @@ public class YamlRuleProviderTest {
         assertThat(rule.getDescription(), is(
                 "This will monitor the power consumption of a washing machine and send an alert command when it gets below a threshold, meaning it has finished."));
         assertThat(rule.getTemplateUID(), is(emptyOrNullString()));
-        assertThat(rule.getTemplateState(), is(TemplateState.TEMPLATE_MISSING));
+        assertThat(rule.getTemplateState(), is(TemplateState.NO_TEMPLATE));
         assertThat(rule.getVisibility(), is(Visibility.HIDDEN));
         assertThat(rule.getConfiguration().getProperties(), is(anEmptyMap()));
         configDescriptions = rule.getConfigurationDescriptions();
@@ -449,7 +449,7 @@ public class YamlRuleProviderTest {
         assertThat(rule.getName(), is("Full Rule"));
         assertThat(rule.getDescription(), is("The description of the full rule"));
         assertThat(rule.getTemplateUID(), is("template:non-existing"));
-        assertThat(rule.getTemplateState(), is(TemplateState.TEMPLATE_MISSING));
+        assertThat(rule.getTemplateState(), is(TemplateState.PENDING));
         assertThat(rule.getVisibility(), is(Visibility.EXPERT));
         Configuration config = rule.getConfiguration();
         assertThat(config.getProperties(), is(aMapWithSize(4)));

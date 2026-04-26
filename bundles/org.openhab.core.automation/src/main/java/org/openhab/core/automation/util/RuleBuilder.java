@@ -60,8 +60,10 @@ public class RuleBuilder {
         this.actions = new LinkedList<>(rule.getActions());
         this.configuration = new Configuration(rule.getConfiguration());
         this.configDescriptions = new LinkedList<>(rule.getConfigurationDescriptions());
-        this.templateUID = rule.getTemplateUID();
-        this.templateState = TemplateState.NO_TEMPLATE;
+        String templateUID = rule.getTemplateUID();
+        this.templateUID = templateUID;
+        this.templateState = templateUID == null || templateUID.isBlank() ? TemplateState.NO_TEMPLATE
+                : TemplateState.PENDING;
         this.uid = rule.getUID();
         this.name = rule.getName();
         this.tags = new HashSet<>(rule.getTags());
@@ -87,7 +89,7 @@ public class RuleBuilder {
      * @return The new {@link RuleBuilder}.
      */
     public static RuleBuilder create(Rule r) {
-        return create(r.getUID(), r);
+        return new RuleBuilder(r);
     }
 
     /**
@@ -108,7 +110,7 @@ public class RuleBuilder {
     /**
      * Build a new {@link Rule} from the specified {@link RuleTemplate} and {@link Configuration}. The resulting rule
      * will be ready for template placeholder substitution, but the placeholders won't actually have been substituted.
-     * This constructor is only suitable for preparing to substitute placeholders.
+     * This method is only suitable for preparing to substitute placeholders.
      *
      * @param template the {@link RuleTemplate} to use.
      * @param uid the UID of the resulting {@link Rule}.
