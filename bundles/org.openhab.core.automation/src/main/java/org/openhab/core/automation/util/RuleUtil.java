@@ -22,12 +22,12 @@ import org.openhab.core.automation.Rule;
  *
  * This class cannot be instantiated, it only contains static methods.
  *
- * @author Laurent Garnier - Initial contribution
+ * @author Ravi Nadahar - Initial contribution
  */
 @NonNullByDefault
 public class RuleUtil {
 
-    private static final Pattern RULE_UID_PATTERN = Pattern.compile("\\S(?:[^/\\\\]*\\S)?",
+    private static final Pattern RULE_UID_PATTERN = Pattern.compile("[^\\s/\\\\](?:[^/\\\\]*[^\\s/\\\\])?",
             Pattern.UNICODE_CHARACTER_CLASS);
 
     /**
@@ -57,7 +57,8 @@ public class RuleUtil {
      */
     public static void assertValidRuleUID(String uid) throws IllegalArgumentException {
         if (!isValidRuleUID(uid)) {
-            throw new IllegalArgumentException("The specified UID of rule '" + uid + "' is invalid!");
+            throw new IllegalArgumentException("The specified UID of rule '" + uid
+                    + "' is invalid! A rule UID can't contain '/', '\\' or have leading or trailing whitespace.");
         }
     }
 }

@@ -271,8 +271,9 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
 
         // Validate the UID
         if (!RuleUtil.isValidRuleUID(uid)) {
-            addToList(errors,
-                    String.format(Locale.ROOT, "invalid rule \"%s\": UID doesn't match the expected syntax", uid));
+            addToList(errors, String.format(Locale.ROOT,
+                    "invalid rule \"%s\": UID is invalid. A rule UID can't contain '/', '\\' or have leading or trailing whitespace.",
+                    uid));
             ok = false;
         }
 

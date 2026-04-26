@@ -39,7 +39,8 @@ public class RulesValidator extends AbstractRulesValidator {
             return;
         }
         if (!RuleUtil.isValidRuleUID(uid)) {
-            error(buildMsgWithLineNum(rule, "Rule UID '" + uid + "' is invalid."), rule,
+            error(buildMsgWithLineNum(rule, "Rule UID '" + uid
+                    + "' is invalid. A rule UID can't contain '/', '\\' or have leading or trailing whitespace."), rule,
                     RulesPackage.Literals.RULE__UID, "uid");
         }
     }
