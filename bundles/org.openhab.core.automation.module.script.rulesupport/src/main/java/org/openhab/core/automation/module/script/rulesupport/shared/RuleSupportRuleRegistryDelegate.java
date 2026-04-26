@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleRegistry;
+import org.openhab.core.automation.util.RuleUtil;
 import org.openhab.core.common.registry.RegistryChangeListener;
 
 /**
@@ -70,8 +71,10 @@ public class RuleSupportRuleRegistryDelegate implements RuleRegistry {
 
     @Override
     public Rule add(Rule element) {
+        String uid = element.getUID();
+        RuleUtil.assertValidRuleUID(uid);
         ruleProvider.add(element);
-        rules.add(element.getUID());
+        rules.add(uid);
 
         return element;
     }
