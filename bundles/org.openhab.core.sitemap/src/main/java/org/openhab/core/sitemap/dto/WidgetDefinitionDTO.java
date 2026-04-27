@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * @author Mark Herwege - Initial contribution
  */
-@Schema(name = "WidgetDefinition")
+@Schema(name = "SitemapWidgetDefinition")
 public class WidgetDefinitionDTO extends AbstractWidgetDTO {
 
     public String item;

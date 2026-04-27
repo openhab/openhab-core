@@ -33,7 +33,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Laurent Garnier - New fields row, column, command, releaseCommand and stateless for Button element
  * @author Mark Herwege - Extends abstract widget DTO
  */
-@Schema(name = "Widget")
+@Schema(name = "SitemapWidget")
 public class WidgetDTO extends AbstractWidgetDTO {
 
     public String widgetId;
