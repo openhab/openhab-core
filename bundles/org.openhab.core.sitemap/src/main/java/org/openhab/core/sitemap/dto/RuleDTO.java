@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * @author Mark Herwege - Initial contribution
  */
-@Schema(name = "Rule")
+@Schema(name = "SitemapRule")
 public class RuleDTO {
 
     public List<ConditionDTO> conditions;

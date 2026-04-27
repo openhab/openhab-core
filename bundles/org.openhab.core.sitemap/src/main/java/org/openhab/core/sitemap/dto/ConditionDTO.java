@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * @author Mark Herwege - Initial contribution
  */
-@Schema(name = "Condition")
+@Schema(name = "SitemapCondition")
 public class ConditionDTO {
 
     public String item;

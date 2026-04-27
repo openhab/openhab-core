@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * @author Mark Herwege - Initial contribution
  */
-@Schema(name = "ButtonDefinition")
+@Schema(name = "SitemapButtonDefinition")
 public class ButtonDefinitionDTO {
 
     public Integer row;

@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Laurent Garnier - Replace field position by fields row and column
  * @author Laurent Garnier - New field releaseCommand
  */
-@Schema(name = "Mapping")
+@Schema(name = "SitemapMapping")
 public class MappingDTO {
 
     public Integer row;
