@@ -149,9 +149,7 @@ public class YamlPageProvider extends AbstractProvider<RootUIComponent>
         if (dto.config != null) {
             page.setConfig(dto.config);
         }
-        if (dto.slots != null) {
-            page.setSlots(dto.slots);
-        }
+        page.setSlots(dto.slots);
         if (dto.tags != null) {
             page.addTags(dto.tags);
         }
