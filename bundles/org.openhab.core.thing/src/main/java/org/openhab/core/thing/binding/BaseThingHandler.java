@@ -311,6 +311,7 @@ public abstract class BaseThingHandler implements ThingHandler {
 
     /**
      * Send a time series to the channel. This can be used to transfer historic data or forecasts.
+     * Will use the thing UID to infer the unique channel UID from the given ID.
      *
      * @param channelID id of the channel
      * @param timeSeries the {@link TimeSeries} that is sent
@@ -351,17 +352,16 @@ public abstract class BaseThingHandler implements ThingHandler {
 
     /**
      * Emits an event for the given channel. Will use the thing UID to infer the
-     * unique channel UID.
+     * unique channel UID from the given ID.
      *
-     * @param channelUID UID of the channel over which the event will be emitted
+     * @param channelID ID of the channel over which the event will be emitted
      */
-    protected void triggerChannel(String channelUID) {
-        triggerChannel(new ChannelUID(this.getThing().getUID(), channelUID), "");
+    protected void triggerChannel(String channelID) {
+        triggerChannel(new ChannelUID(this.getThing().getUID(), channelID), "");
     }
 
     /**
-     * Emits an event for the given channel. Will use the thing UID to infer the
-     * unique channel UID.
+     * Emits an event for the given channel.
      *
      * @param channelUID UID of the channel over which the event will be emitted
      */
@@ -370,7 +370,8 @@ public abstract class BaseThingHandler implements ThingHandler {
     }
 
     /**
-     * Sends a command for a channel of the thing.
+     * Sends a command for a channel of the thing. Will use the thing UID to infer the
+     * unique channel UID from the given ID.
      *
      * @param channelID id of the channel, which sends the command
      * @param command command
@@ -639,6 +640,7 @@ public abstract class BaseThingHandler implements ThingHandler {
 
     /**
      * Returns whether at least one item is linked for the given channel ID.
+     * Will use the thing UID to infer the unique channel UID from the given ID.
      *
      * @param channelId channel ID (must not be null)
      * @return true if at least one item is linked, false otherwise
