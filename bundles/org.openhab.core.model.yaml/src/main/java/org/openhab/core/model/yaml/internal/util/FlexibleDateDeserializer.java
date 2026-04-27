@@ -61,12 +61,6 @@ public class FlexibleDateDeserializer extends StdDeserializer<Date> {
 
         String text = p.getText().trim();
 
-        // Try ISO 8601 via Instant first (handles Z, offsets, etc.)
-        try {
-            return Date.from(Instant.parse(text));
-        } catch (DateTimeParseException ignored) {
-        }
-
         // Try each string pattern
         for (String pattern : STRING_PATTERNS) {
             try {
@@ -75,6 +69,12 @@ public class FlexibleDateDeserializer extends StdDeserializer<Date> {
                 return sdf.parse(text);
             } catch (ParseException ignored) {
             }
+        }
+
+        // Try ISO 8601 via Instant (handles Z, offsets, etc.)
+        try {
+            return Date.from(Instant.parse(text));
+        } catch (DateTimeParseException ignored) {
         }
 
         // Try parsing as epoch millis from string
