@@ -27,7 +27,8 @@ import org.openhab.core.automation.Rule;
 @NonNullByDefault
 public class RuleUtil {
 
-    private static final Pattern RULE_UID_PATTERN = Pattern.compile("[^\\s/\\\\](?:[^/\\\\]*[^\\s/\\\\])?",
+    private static final Pattern RULE_UID_PATTERN = Pattern.compile(
+            "[^\\s/\\\\\\x00-\\x1F\\x7F](?:[^/\\\\\\x00-\\x08\\x0A-\\x1F\\x7F]*[^\\s/\\\\\\x00-\\x1F\\x7F])?",
             Pattern.UNICODE_CHARACTER_CLASS);
 
     /**
@@ -44,7 +45,7 @@ public class RuleUtil {
     }
 
     /**
-     * Ensures that the specified rule UID of is valid.
+     * Ensures that the specified rule UID is valid.
      * <p>
      * If the rule UID is invalid an {@link IllegalArgumentException} is thrown, otherwise this method returns
      * silently.

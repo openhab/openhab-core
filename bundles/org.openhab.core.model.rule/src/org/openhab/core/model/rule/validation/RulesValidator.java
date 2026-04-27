@@ -39,13 +39,13 @@ public class RulesValidator extends AbstractRulesValidator {
             return;
         }
         if (!RuleUtil.isValidRuleUID(uid)) {
-            error(buildMsgWithLineNum(rule, "Rule UID '" + uid
+            error(buildMsgWithLineNb(rule, "Rule UID '" + uid
                     + "' is invalid. A rule UID can't contain '/', '\\' or have leading or trailing whitespace."), rule,
                     RulesPackage.Literals.RULE__UID, "uid");
         }
     }
 
-    private String buildMsgWithLineNum(EObject object, String msg) {
+    private static String buildMsgWithLineNb(EObject object, String msg) {
         ICompositeNode node = NodeModelUtils.getNode(object);
         if (node == null) {
             return msg;

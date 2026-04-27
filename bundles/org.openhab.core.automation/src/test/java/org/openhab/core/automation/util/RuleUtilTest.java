@@ -29,6 +29,8 @@ public class RuleUtilTest {
         assertFalse(isValidRuleUID(""));
         assertTrue(isValidRuleUID("a"));
         assertTrue(isValidRuleUID("a b"));
+        assertFalse(isValidRuleUID("a\nb"));
+        assertTrue(isValidRuleUID("a\tb"));
         assertTrue(isValidRuleUID("OH™"));
         assertFalse(isValidRuleUID("/OH™"));
         assertFalse(isValidRuleUID("\\OH™"));
@@ -48,6 +50,8 @@ public class RuleUtilTest {
         assertThrows(IllegalArgumentException.class, () -> assertValidRuleUID(""));
         assertDoesNotThrow(() -> assertValidRuleUID("a"));
         assertDoesNotThrow(() -> assertValidRuleUID("a b"));
+        assertThrows(IllegalArgumentException.class, () -> assertValidRuleUID("a\nb"));
+        assertDoesNotThrow(() -> assertValidRuleUID("a\tb"));
         assertDoesNotThrow(() -> assertValidRuleUID("OH™"));
         assertThrows(IllegalArgumentException.class, () -> assertValidRuleUID("/OH™"));
         assertThrows(IllegalArgumentException.class, () -> assertValidRuleUID("\\OH™"));

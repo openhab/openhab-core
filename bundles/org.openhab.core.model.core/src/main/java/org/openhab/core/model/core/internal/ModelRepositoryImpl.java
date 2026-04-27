@@ -23,6 +23,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -336,7 +337,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
                 // Check for validation errors, but log them only
                 try {
-                    String modelType = resource.getURI().fileExtension();
+                    String modelType = resource.getURI().fileExtension().toLowerCase(Locale.ROOT);
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
