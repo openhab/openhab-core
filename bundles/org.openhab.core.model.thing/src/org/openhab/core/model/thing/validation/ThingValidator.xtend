@@ -28,8 +28,6 @@ import org.openhab.core.thing.ThingUID
  */
 class ThingValidator extends AbstractThingValidator {
 
-  public static val INVALID_NAME = 'invalidName'
-
 	@Check
 	def check_thing_has_valid_id(ModelThing thing) {
 		if (thing.nested) {
