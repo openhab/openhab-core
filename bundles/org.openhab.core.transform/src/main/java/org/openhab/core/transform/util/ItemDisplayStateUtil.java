@@ -49,6 +49,37 @@ public class ItemDisplayStateUtil {
     private static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
 
     /**
+     * Transform an Item state with a transformation service
+     * 
+     * @param serviceName the name of the transformation service
+     * @param function the name of the transformation function
+     * @param format the format to apply to the state before applying the transformation function
+     * @param state the state to transform
+     * @return the transformed state, can be null if the transformation function returns null
+     * @throws TransformationException when state formatting failed, the transformation service is unavailable, or the
+     *             transformation failed
+     */
+    public static @Nullable String transform(String serviceName, String function, String format, State state)
+            throws TransformationException {
+        TransformationService transformation = TransformationHelper.getTransformationService(serviceName);
+        if (transformation != null) {
+            String effectiveFormat = state instanceof UnDefType ? "%s" : format;
+            try {
+                return transformation.transform(function, state.format(effectiveFormat));
+            } catch (IllegalArgumentException e) {
+                throw new TransformationException(
+                        "Cannot format state '" + state + "' to format '" + effectiveFormat + "'", e);
+            } catch (RuntimeException e) {
+                throw new TransformationException(
+                        "Transformation service of type '" + serviceName + "' threw an exception: " + e.getMessage(),
+                        e);
+            }
+        } else {
+            throw new TransformationException("Transformation service of type '" + serviceName + "' is not available.");
+        }
+    }
+
+    /**
      * Get the display state of an item.
      *
      * @param item the item
@@ -84,26 +115,11 @@ public class ItemDisplayStateUtil {
             try {
                 String type = matcher.group(1);
                 String function = matcher.group(2);
-                String value = matcher.group(3);
-                TransformationService transformation = TransformationHelper.getTransformationService(type);
-                if (transformation != null) {
-                    String format = state instanceof UnDefType ? "%s" : value;
-                    try {
-                        displayState = transformation.transform(function, state.format(format));
-                        if (displayState == null) {
-                            displayState = state.toString();
-                        }
-                    } catch (IllegalArgumentException e) {
-                        throw new TransformationException(
-                                "Cannot format state '" + state + "' to format '" + format + "'", e);
-                    } catch (RuntimeException e) {
-                        throw new TransformationException(
-                                "Transformation service of type '" + type + "' threw an exception: " + e.getMessage(),
-                                e);
-                    }
-                } else {
-                    throw new TransformationException(
-                            "Transformation service of type '" + type + "' is not available.");
+                String format = matcher.group(3);
+
+                displayState = transform(type, function, format, state);
+                if (displayState == null) {
+                    displayState = state.toString();
                 }
             } catch (TransformationException e) {
                 LOGGER.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
