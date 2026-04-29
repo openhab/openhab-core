@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -77,7 +76,6 @@ import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
-import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
 import org.openhab.core.ui.items.ItemUIProvider;
@@ -347,14 +345,15 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return transform(label, true, null, null);
         }
 
-        String labelMappedOption = null;
-        State state = null;
-        StateDescription stateDescription = null;
+        State state;
+        StateDescription stateDescription;
         String formatPattern = getFormatPattern(w);
 
         if (formatPattern != null && label.indexOf("[") < 0) {
             label = label + " [" + formatPattern + "]";
         }
+
+        String value = null;
 
         // now insert the value, if the state is a string or decimal value and there is some formatting pattern defined
         // in the label or state description (i.e. it contains at least a %)
@@ -374,131 +373,54 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
             if (formatPattern != null) {
                 state = item.getState();
-
-                if (formatPattern.contains("%d")) {
-                    if (!(state instanceof UnDefType) && !(state instanceof Number)) {
+                if (state == null || state instanceof UnDefType) {
+                    if (!EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern).find()) {
+                        value = formatUndefined(formatPattern);
+                    }
+                } else {
+                    if (formatPattern.contains("%d") && !(state instanceof Number)) {
                         // States which do not provide a Number will be converted to DecimalType.
                         // e.g.: GroupItem can provide a count of items matching the active state
                         // for some group functions.
                         state = item.getStateAs(DecimalType.class);
                     }
 
-                    // for fraction digits in state we don't want to risk format exceptions,
-                    // so treat everything as floats:
-                    formatPattern = formatPattern.replace("%d", "%.0f");
+                    if (formatPattern.contains("%d")) {
+                        // for fraction digits in state we don't want to risk format exceptions,
+                        // so treat everything as floats:
+                        formatPattern = formatPattern.replace("%d", "%.0f");
+                    }
+
+                    if (!(state instanceof QuantityType) && formatPattern.contains("%unit%")) {
+                        formatPattern = formatPattern.replace("%unit%", "").trim();
+                    }
+
+                    if (state != null) {
+                        value = ItemDisplayStateUtil.formatState(itemName, formatPattern,
+                                stateDescription != null ? stateDescription.getOptions() : Collections.emptyList(),
+                                state, timeZoneProvider.getTimeZone());
+                    }
                 }
             }
         } catch (ItemNotFoundException e) {
             logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.getClass().getSimpleName());
         }
 
-        boolean considerTransform = false;
-        String transformFailbackValue = null;
-        if (formatPattern != null) {
-            if (formatPattern.isEmpty()) {
-                label = label.substring(0, label.indexOf("[")).trim();
+        label = label.trim();
+        int index = label.indexOf("[");
+        if (index >= 0) {
+            if (formatPattern != null && !formatPattern.isEmpty()) {
+                label = label.substring(0, index + 1) + formatPattern + "]";
             } else {
-                if (state == null) {
-                    formatPattern = formatUndefined(formatPattern);
-                    considerTransform = true;
-                } else if (state instanceof UnDefType) {
-                    Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
-                    if (matcher.find()) {
-                        considerTransform = true;
-                        String type = matcher.group(1);
-                        String function = matcher.group(2);
-                        formatPattern = type + "(" + function + "):" + state.toString();
-                        transformFailbackValue = "-";
-                    } else {
-                        formatPattern = formatUndefined(formatPattern);
-                    }
-                } else {
-                    // if the channel contains options, we build a label with the mapped option value
-                    if (stateDescription != null) {
-                        for (StateOption option : stateDescription.getOptions()) {
-                            String optionLabel = option.getLabel();
-                            if (option.getValue().equals(state.toString()) && optionLabel != null) {
-                                String formatPatternOption;
-                                try {
-                                    formatPatternOption = String.format(formatPattern, optionLabel);
-                                } catch (IllegalFormatException e) {
-                                    logger.debug(
-                                            "Mapping option value '{}' for item {} using format '{}' failed ({}); format is ignored and option label is used",
-                                            optionLabel, itemName, formatPattern, e.getMessage());
-                                    formatPatternOption = optionLabel;
-                                }
-                                labelMappedOption = label.trim();
-                                labelMappedOption = labelMappedOption.substring(0, labelMappedOption.indexOf("[") + 1)
-                                        + formatPatternOption + "]";
-                                break;
-                            }
-                        }
-                    }
-
-                    if (state instanceof DecimalType) {
-                        // for DecimalTypes we don't want to risk format exceptions, if pattern contains unit
-                        // placeholder
-                        if (formatPattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
-                            formatPattern = formatPattern.replaceAll(UnitUtils.UNIT_PLACEHOLDER, "").stripTrailing();
-                        }
-                    } else if (state instanceof QuantityType quantityState) {
-                        // sanity convert current state to the item state description unit in case it was updated in the
-                        // meantime. The item state is still in the "original" unit while the state description will
-                        // display the new unit:
-                        Unit<?> patternUnit = UnitUtils.parseUnit(formatPattern);
-                        if (patternUnit != null && !quantityState.getUnit().equals(patternUnit)) {
-                            quantityState = quantityState.toInvertibleUnit(patternUnit);
-                        }
-
-                        // The widget may define its own unit in the widget label. Convert to this unit:
-                        if (quantityState != null) {
-                            quantityState = convertStateToWidgetUnit(quantityState, w);
-                            state = quantityState;
-                        }
-                    }
-
-                    // The following exception handling has been added to work around a Java bug with formatting
-                    // numbers. See http://bugs.sun.com/view_bug.do?bug_id=6476425
-                    // Without this catch, the whole sitemap, or page can not be displayed!
-                    // This also handles IllegalFormatConversionException, which is a subclass of IllegalArgument.
-                    try {
-                        Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
-                        if (matcher.find()) {
-                            considerTransform = true;
-                            String type = matcher.group(1);
-                            String function = matcher.group(2);
-                            String value = matcher.group(3);
-                            formatPattern = type + "(" + function + "):";
-                            if (state instanceof DateTimeType dateTimeState) {
-                                formatPattern += dateTimeState.format(value, timeZoneProvider.getTimeZone());
-                                transformFailbackValue = dateTimeState.toFullString(timeZoneProvider.getTimeZone());
-                            } else {
-                                formatPattern += state.format(value);
-                                transformFailbackValue = state.toString();
-                            }
-                        } else {
-                            if (state instanceof DateTimeType dateTimeState) {
-                                formatPattern = dateTimeState.format(formatPattern, timeZoneProvider.getTimeZone());
-                            } else {
-                                formatPattern = state.format(formatPattern);
-                            }
-                        }
-                    } catch (IllegalArgumentException e) {
-                        logger.warn("Exception while formatting value '{}' of item {} with format '{}': {}", state,
-                                itemName, formatPattern, e.getMessage());
-                        formatPattern = "Err";
-                    }
-                }
-
-                label = label.trim();
-                int index = label.indexOf("[");
-                if (index >= 0) {
-                    label = label.substring(0, index + 1) + formatPattern + "]";
-                }
+                return label.substring(0, index).trim();
             }
         }
 
-        return transform(label, considerTransform, transformFailbackValue, labelMappedOption);
+        if (value == null) {
+            value = "-";
+        }
+
+        return insertInLabel(label, value);
     }
 
     @Override
@@ -628,7 +550,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     private String insertInLabel(String label, Object o) {
-        return label.substring(0, label.indexOf("[") + 1) + o + "]";
+        int index = label.indexOf("[");
+        if (index >= 0) {
+            return label.substring(0, index + 1) + o + "]";
+        }
+        return label;
     }
 
     /*

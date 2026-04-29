@@ -14,6 +14,7 @@ package org.openhab.core.transform.util;
 
 import java.time.ZoneId;
 import java.util.IllegalFormatException;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -104,7 +105,7 @@ public class ItemDisplayStateUtil {
      * @param zoneId the timezone id
      * @return the display state
      */
-    public static @Nullable String getDisplayState(Item item, Locale locale, ZoneId zoneId) {
+    public static @Nullable String getDisplayState(Item item, @Nullable Locale locale, ZoneId zoneId) {
         return getDisplayState(item, item.getState(), locale, zoneId);
     }
 
@@ -117,15 +118,26 @@ public class ItemDisplayStateUtil {
      * @param zoneId the timezone id
      * @return the display state
      */
-    public static @Nullable String getDisplayState(Item item, State state, Locale locale, ZoneId zoneId) {
-        String displayState = state.toString();
-
+    public static @Nullable String getDisplayState(Item item, State state, @Nullable Locale locale, ZoneId zoneId) {
         StateDescription stateDescription = item.getStateDescription(locale);
         if (stateDescription == null) {
-            return displayState;
+            return state.toString();
         }
+        return formatState(item.getName(), stateDescription.getPattern(), stateDescription.getOptions(), state, zoneId);
+    }
 
-        String pattern = stateDescription.getPattern();
+    /**
+     * Format a state with the provided pattern.
+     *
+     * @param pattern the pattern to format
+     * @param state the state
+     * @param zoneId the timezone id
+     * @return the display state
+     */
+    public static @Nullable String formatState(String itemName, @Nullable String pattern, List<StateOption> options,
+            State state, ZoneId zoneId) {
+        String displayState = state.toString();
+
         // First check if the pattern is a transformation
         Matcher matcher;
         if (pattern != null && (matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(pattern)).find()) {
@@ -139,16 +151,16 @@ public class ItemDisplayStateUtil {
                     displayState = state.toString();
                 }
             } catch (TransformationException e) {
-                LOGGER.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
-                        item.getName(), pattern, e.getMessage());
+                LOGGER.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state, itemName,
+                        pattern, e.getMessage());
             }
         }
         // If no transformation, NULL/UNDEF state is returned as "NULL"/"UNDEF" without considering anything else
         else if (!(state instanceof UnDefType)) {
             boolean optionMatched = false;
-            if (!stateDescription.getOptions().isEmpty()) {
+            if (!options.isEmpty()) {
                 // Look for a state option with a value corresponding to the state
-                for (StateOption option : stateDescription.getOptions()) {
+                for (StateOption option : options) {
                     String label = option.getLabel();
                     if (option.getValue().equals(state.toString()) && label != null) {
                         optionMatched = true;
@@ -157,7 +169,7 @@ public class ItemDisplayStateUtil {
                         } catch (IllegalFormatException e) {
                             LOGGER.debug(
                                     "Unable to format option label '{}' of item {} using format pattern '{}': {}, displaying option label",
-                                    label, item.getName(), pattern, e.getMessage());
+                                    label, itemName, pattern, e.getMessage());
                             displayState = label;
                         }
                         break;
@@ -194,7 +206,7 @@ public class ItemDisplayStateUtil {
                 } catch (IllegalArgumentException e) {
                     LOGGER.debug(
                             "Unable to format value '{}' of item {} using format pattern '{}': {}, displaying raw state",
-                            state, item.getName(), pattern, e.getMessage());
+                            state, itemName, pattern, e.getMessage());
                     displayState = state.toString();
                 }
             }
