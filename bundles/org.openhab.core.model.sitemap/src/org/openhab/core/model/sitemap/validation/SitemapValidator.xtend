@@ -83,6 +83,16 @@ class SitemapValidator extends AbstractSitemapValidator {
     }
 
     @Check
+    def void checkAtLeastOneWidget(ModelSitemap sitemap) {
+        if (sitemap.children === null || sitemap.children.size === 0) {
+            val node = NodeModelUtils.getNode(sitemap)
+            val line = node.startLine
+            warning(errorString("Sitemap should have at least one widget", line),
+                    SitemapPackage.Literals.MODEL_SITEMAP.getEStructuralFeature(SitemapPackage.MODEL_SITEMAP__NAME))
+        }
+    }
+    
+    @Check
     def void checkDuplicates(ModelWidget w) {
         val seen = new HashSet<String>
         val duplicates = new HashSet<String>
