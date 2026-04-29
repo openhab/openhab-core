@@ -309,7 +309,7 @@ public class PersistenceResource implements RESTResource {
             @Parameter(description = "The length of each page.") @QueryParam("pagelength") int pageLength,
             @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary,
             @Parameter(description = "Adds the current Item state into the requested period (the Item state will be before or at the endtime)") @QueryParam("itemState") boolean itemState,
-            @Parameter(description = "If set to true, the unit from the state description is applied to convert the values.") @QueryParam("displayState") boolean displayState) {
+            @Parameter(description = "If set to true, formatting from the state description is applied to the values. For QuantityType states, only the value is returned, regardless of the pattern.") @QueryParam("displayState") boolean displayState) {
         return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary, itemState,
                 displayState);
     }
@@ -526,7 +526,8 @@ public class PersistenceResource implements RESTResource {
                 }
             }
         } catch (ItemNotFoundException e) {
-            throw new IllegalStateException("Unexpectedly failed to retrieve Item '" + itemName + "' from registry", e);
+            logger.debug("Failed to retrieve Item '{}' from registry", itemName);
+            return null;
         }
 
         Iterable<HistoricItem> result;

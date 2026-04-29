@@ -44,7 +44,6 @@ public class ItemHistoryDTO {
 
     /**
      * Add a new record to the data history.
-     * This method returns a double value equal to the state. This may be used for comparison by the caller.
      *
      * @param time the time of the record
      * @param state the state at this time
@@ -66,7 +65,6 @@ public class ItemHistoryDTO {
 
     /**
      * Add a new record to the data history.
-     * This method returns a double value equal to the state. This may be used for comparison by the caller.
      *
      * @param time the time of the record
      * @param state the state at this time
