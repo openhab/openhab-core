@@ -73,8 +73,7 @@ import org.openhab.core.sitemap.Switch;
 import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.transform.TransformationException;
-import org.openhab.core.transform.TransformationHelper;
-import org.openhab.core.transform.TransformationService;
+import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
@@ -652,23 +651,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 String value = matcher.group(3);
                 String failbackValue = transformFailbackValue != null ? transformFailbackValue : value;
                 try {
-                    TransformationService transformation = TransformationHelper.getTransformationService(type);
-                    if (transformation != null) {
-                        try {
-                            String transformationResult = transformation.transform(function, value);
-                            if (transformationResult != null) {
-                                ret = insertInLabel(label, transformationResult);
-                            } else {
-                                logger.warn("Transformation of type {} did not return a valid result", type);
-                                ret = insertInLabel(label, failbackValue);
-                            }
-                        } catch (RuntimeException e) {
-                            throw new TransformationException("Transformation service of type '" + type
-                                    + "' threw an exception: " + e.getMessage(), e);
-                        }
+                    String transformationResult = ItemDisplayStateUtil.transform(type, function, value);
+                    if (transformationResult != null) {
+                        ret = insertInLabel(label, transformationResult);
                     } else {
-                        throw new TransformationException(
-                                "Transformation service of type '" + type + "' is not available.");
+                        logger.warn("Transformation of type {} did not return a valid result", type);
+                        ret = insertInLabel(label, failbackValue);
                     }
                 } catch (TransformationException e) {
                     Throwable cause = e.getCause();
