@@ -70,96 +70,99 @@ public class ItemDisplayStateUtil {
      * @return the display state
      */
     public static @Nullable String getDisplayState(Item item, State state, Locale locale, ZoneId zoneId) {
-        StateDescription stateDescription = item.getStateDescription(locale);
         String displayState = state.toString();
 
-        if (stateDescription != null) {
-            String pattern = stateDescription.getPattern();
-            // First check if the pattern is a transformation
-            Matcher matcher;
-            if (pattern != null && (matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(pattern)).find()) {
-                try {
-                    String type = matcher.group(1);
-                    String function = matcher.group(2);
-                    String value = matcher.group(3);
-                    TransformationService transformation = TransformationHelper.getTransformationService(type);
-                    if (transformation != null) {
-                        String format = state instanceof UnDefType ? "%s" : value;
-                        try {
-                            displayState = transformation.transform(function, state.format(format));
-                            if (displayState == null) {
-                                displayState = state.toString();
-                            }
-                        } catch (IllegalArgumentException e) {
-                            throw new TransformationException(
-                                    "Cannot format state '" + state + "' to format '" + format + "'", e);
-                        } catch (RuntimeException e) {
-                            throw new TransformationException("Transformation service of type '" + type
-                                    + "' threw an exception: " + e.getMessage(), e);
-                        }
-                    } else {
-                        throw new TransformationException(
-                                "Transformation service of type '" + type + "' is not available.");
-                    }
-                } catch (TransformationException e) {
-                    LOGGER.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
-                            item.getName(), pattern, e.getMessage());
-                }
-            }
-            // If no transformation, NULL/UNDEF state is returned as "NULL"/"UNDEF" without considering anything else
-            else if (!(state instanceof UnDefType)) {
-                boolean optionMatched = false;
-                if (!stateDescription.getOptions().isEmpty()) {
-                    // Look for a state option with a value corresponding to the state
-                    for (StateOption option : stateDescription.getOptions()) {
-                        String label = option.getLabel();
-                        if (option.getValue().equals(state.toString()) && label != null) {
-                            optionMatched = true;
-                            try {
-                                displayState = pattern == null ? label : String.format(pattern, label);
-                            } catch (IllegalFormatException e) {
-                                LOGGER.debug(
-                                        "Unable to format option label '{}' of item {} using format pattern '{}': {}, displaying option label",
-                                        label, item.getName(), pattern, e.getMessage());
-                                displayState = label;
-                            }
-                            break;
-                        }
-                    }
-                }
-                if (pattern != null && !optionMatched) {
-                    // if it's not a transformation pattern and there is no matching state option,
-                    // then it must be a format string
-                    if (state instanceof QuantityType quantityState) {
-                        // sanity convert current state to the item state description unit in case it was
-                        // updated in the meantime. The item state is still in the "original" unit while the
-                        // state description will display the new unit:
-                        Unit<?> patternUnit = UnitUtils.parseUnit(pattern);
-                        if (patternUnit != null && !quantityState.getUnit().equals(patternUnit)) {
-                            quantityState = quantityState.toInvertibleUnit(patternUnit);
-                        }
+        StateDescription stateDescription = item.getStateDescription(locale);
+        if (stateDescription == null) {
+            return displayState;
+        }
 
-                        if (quantityState != null) {
-                            state = quantityState;
-                        }
-                    }
-
-                    // The following exception handling has been added to work around a Java bug with formatting
-                    // numbers. See http://bugs.sun.com/view_bug.do?bug_id=6476425
-                    // This also handles IllegalFormatConversionException, which is a subclass of
-                    // IllegalArgument.
+        String pattern = stateDescription.getPattern();
+        // First check if the pattern is a transformation
+        Matcher matcher;
+        if (pattern != null && (matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(pattern)).find()) {
+            try {
+                String type = matcher.group(1);
+                String function = matcher.group(2);
+                String value = matcher.group(3);
+                TransformationService transformation = TransformationHelper.getTransformationService(type);
+                if (transformation != null) {
+                    String format = state instanceof UnDefType ? "%s" : value;
                     try {
-                        if (state instanceof DateTimeType dateTimeState) {
-                            displayState = dateTimeState.format(pattern, zoneId);
-                        } else {
-                            displayState = state.format(pattern);
+                        displayState = transformation.transform(function, state.format(format));
+                        if (displayState == null) {
+                            displayState = state.toString();
                         }
                     } catch (IllegalArgumentException e) {
-                        LOGGER.debug(
-                                "Unable to format value '{}' of item {} using format pattern '{}': {}, displaying raw state",
-                                state, item.getName(), pattern, e.getMessage());
-                        displayState = state.toString();
+                        throw new TransformationException(
+                                "Cannot format state '" + state + "' to format '" + format + "'", e);
+                    } catch (RuntimeException e) {
+                        throw new TransformationException(
+                                "Transformation service of type '" + type + "' threw an exception: " + e.getMessage(),
+                                e);
                     }
+                } else {
+                    throw new TransformationException(
+                            "Transformation service of type '" + type + "' is not available.");
+                }
+            } catch (TransformationException e) {
+                LOGGER.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
+                        item.getName(), pattern, e.getMessage());
+            }
+        }
+        // If no transformation, NULL/UNDEF state is returned as "NULL"/"UNDEF" without considering anything else
+        else if (!(state instanceof UnDefType)) {
+            boolean optionMatched = false;
+            if (!stateDescription.getOptions().isEmpty()) {
+                // Look for a state option with a value corresponding to the state
+                for (StateOption option : stateDescription.getOptions()) {
+                    String label = option.getLabel();
+                    if (option.getValue().equals(state.toString()) && label != null) {
+                        optionMatched = true;
+                        try {
+                            displayState = pattern == null ? label : String.format(pattern, label);
+                        } catch (IllegalFormatException e) {
+                            LOGGER.debug(
+                                    "Unable to format option label '{}' of item {} using format pattern '{}': {}, displaying option label",
+                                    label, item.getName(), pattern, e.getMessage());
+                            displayState = label;
+                        }
+                        break;
+                    }
+                }
+            }
+            if (pattern != null && !optionMatched) {
+                // if it's not a transformation pattern and there is no matching state option,
+                // then it must be a format string
+                if (state instanceof QuantityType quantityState) {
+                    // sanity convert current state to the item state description unit in case it was
+                    // updated in the meantime. The item state is still in the "original" unit while the
+                    // state description will display the new unit:
+                    Unit<?> patternUnit = UnitUtils.parseUnit(pattern);
+                    if (patternUnit != null && !quantityState.getUnit().equals(patternUnit)) {
+                        quantityState = quantityState.toInvertibleUnit(patternUnit);
+                    }
+
+                    if (quantityState != null) {
+                        state = quantityState;
+                    }
+                }
+
+                // The following exception handling has been added to work around a Java bug with formatting
+                // numbers. See http://bugs.sun.com/view_bug.do?bug_id=6476425
+                // This also handles IllegalFormatConversionException, which is a subclass of
+                // IllegalArgument.
+                try {
+                    if (state instanceof DateTimeType dateTimeState) {
+                        displayState = dateTimeState.format(pattern, zoneId);
+                    } else {
+                        displayState = state.format(pattern);
+                    }
+                } catch (IllegalArgumentException e) {
+                    LOGGER.debug(
+                            "Unable to format value '{}' of item {} using format pattern '{}': {}, displaying raw state",
+                            state, item.getName(), pattern, e.getMessage());
+                    displayState = state.toString();
                 }
             }
         }
