@@ -12,6 +12,8 @@
  */
 package org.openhab.core.ui.internal.items;
 
+import static org.openhab.core.transform.util.ItemDisplayStateUtil.EXTRACT_TRANSFORM_FUNCTION_PATTERN;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -114,9 +116,6 @@ import org.slf4j.LoggerFactory;
 public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     protected static final String CONFIG_URI = "system:sitemap";
-
-    /* RegEx to extract and parse a function String <code>'(.*?)\((.*)\):(.*)'</code> */
-    protected static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
 
     /* RegEx to identify format patterns. See java.util.Formatter#formatSpecifier (without the '%' at the very end). */
     protected static final String IDENTIFY_FORMAT_PATTERN_PATTERN = "%(?:(unit%)|(?:(?:\\d+\\$)?(?:[-#+ 0,(<]*)?(?:\\d+)?(?:\\.\\d+)?(?:[tT])?(?:[a-zA-Z])))";
@@ -342,18 +341,16 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         String itemName = w.getItem();
         if (itemName == null || itemName.isBlank()) {
-            return transform(label, true, null, null);
+            return transform(label, null);
         }
 
-        State state;
-        StateDescription stateDescription;
+        State state = null;
+        StateDescription stateDescription = null;
         String formatPattern = getFormatPattern(w);
 
         if (formatPattern != null && label.indexOf("[") < 0) {
             label = label + " [" + formatPattern + "]";
         }
-
-        String value = null;
 
         // now insert the value, if the state is a string or decimal value and there is some formatting pattern defined
         // in the label or state description (i.e. it contains at least a %)
@@ -373,37 +370,48 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
             if (formatPattern != null) {
                 state = item.getState();
-                if (state == null || state instanceof UnDefType) {
-                    if (!EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern).find()) {
-                        value = formatUndefined(formatPattern);
-                    }
-                } else {
-                    if (formatPattern.contains("%d") && !(state instanceof Number)) {
+
+                if (formatPattern.contains("%d")) {
+                    if (!(state instanceof UnDefType) && !(state instanceof Number)) {
                         // States which do not provide a Number will be converted to DecimalType.
                         // e.g.: GroupItem can provide a count of items matching the active state
                         // for some group functions.
                         state = item.getStateAs(DecimalType.class);
                     }
 
-                    if (formatPattern.contains("%d")) {
-                        // for fraction digits in state we don't want to risk format exceptions,
-                        // so treat everything as floats:
-                        formatPattern = formatPattern.replace("%d", "%.0f");
-                    }
-
-                    if (!(state instanceof QuantityType) && formatPattern.contains("%unit%")) {
-                        formatPattern = formatPattern.replace("%unit%", "").trim();
-                    }
-
-                    if (state != null) {
-                        value = ItemDisplayStateUtil.formatState(itemName, formatPattern,
-                                stateDescription != null ? stateDescription.getOptions() : Collections.emptyList(),
-                                state, timeZoneProvider.getTimeZone());
-                    }
+                    // for fraction digits in state we don't want to risk format exceptions,
+                    // so treat everything as floats:
+                    formatPattern = formatPattern.replace("%d", "%.0f");
                 }
             }
         } catch (ItemNotFoundException e) {
             logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.getClass().getSimpleName());
+        }
+
+        String value = null;
+        if (formatPattern != null) {
+            if (formatPattern.isEmpty()) {
+                label = label.substring(0, label.indexOf("[")).trim();
+            } else {
+                if (state == null || state instanceof UnDefType) {
+                    Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
+                    if (matcher.find()) {
+                        String type = matcher.group(1);
+                        String function = matcher.group(2);
+                        value = transform(label, "-");
+                    } else {
+                        value = formatUndefined(formatPattern);
+                    }
+                } else if (!(state instanceof QuantityType) && formatPattern.contains("%unit%")) {
+                    formatPattern = formatPattern.replace("%unit%", "").trim();
+                }
+            }
+        }
+
+        if (value == null) {
+            value = ItemDisplayStateUtil.formatState(itemName, formatPattern,
+                    stateDescription != null ? stateDescription.getOptions() : Collections.emptyList(),
+                    state == null ? UnDefType.NULL : state, timeZoneProvider.getTimeZone());
         }
 
         label = label.trim();
@@ -565,13 +573,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
      * If the value does not start with the call to a transformation service,
      * we return the label with the mapped option value if provided (not null).
      */
-    private String transform(String label, boolean matchTransform, @Nullable String transformFailbackValue,
-            @Nullable String labelMappedOption) {
+    private String transform(String label, @Nullable String transformFailbackValue) {
         String ret = label;
         String formatPattern = getFormatPattern(label);
         if (formatPattern != null) {
             Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
-            if (matchTransform && matcher.find()) {
+            if (matcher.find()) {
                 String type = matcher.group(1);
                 String function = matcher.group(2);
                 String value = matcher.group(3);
@@ -579,19 +586,17 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 try {
                     String transformationResult = ItemDisplayStateUtil.transform(type, function, value);
                     if (transformationResult != null) {
-                        ret = insertInLabel(label, transformationResult);
+                        return transformationResult;
                     } else {
                         logger.warn("Transformation of type {} did not return a valid result", type);
-                        ret = insertInLabel(label, failbackValue);
+                        return failbackValue;
                     }
                 } catch (TransformationException e) {
                     Throwable cause = e.getCause();
                     logger.warn("Failed transforming the value '{}' with pattern '{}': {}", value, formatPattern,
                             cause instanceof ScriptException ? cause.getMessage() : e.getMessage());
-                    ret = insertInLabel(label, failbackValue);
+                    return failbackValue;
                 }
-            } else if (labelMappedOption != null) {
-                ret = labelMappedOption;
             }
         }
         return ret;

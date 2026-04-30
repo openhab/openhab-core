@@ -47,7 +47,10 @@ public class ItemDisplayStateUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ItemDisplayStateUtil.class);
 
-    private static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
+    /**
+     * RegEx to extract and parse a transformation function call, e.g., <code>MAP(en.map):%s</code>
+     */
+    public static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
 
     /**
      * Transform an arbitrary value with a transformation service
@@ -86,11 +89,15 @@ public class ItemDisplayStateUtil {
      * @throws TransformationException when state formatting failed, the transformation service is unavailable, or the
      *             transformation failed
      */
-    public static @Nullable String transform(String serviceName, String function, String format, State state)
-            throws TransformationException {
+    public static @Nullable String transform(String serviceName, String function, String format, State state,
+            ZoneId zoneId) throws TransformationException {
         String effectiveFormat = state instanceof UnDefType ? "%s" : format;
         try {
-            return transform(serviceName, function, state.format(effectiveFormat));
+            if (state instanceof DateTimeType dtt) {
+                return transform(serviceName, function, dtt.format(format, zoneId));
+            } else {
+                return transform(serviceName, function, state.format(effectiveFormat));
+            }
         } catch (IllegalArgumentException e) {
             throw new TransformationException("Cannot format state '" + state + "' to format '" + effectiveFormat + "'",
                     e);
@@ -146,7 +153,7 @@ public class ItemDisplayStateUtil {
                 String function = matcher.group(2);
                 String format = matcher.group(3);
 
-                displayState = transform(type, function, format, state);
+                displayState = transform(type, function, format, state, zoneId);
                 if (displayState == null) {
                     displayState = state.toString();
                 }

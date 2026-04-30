@@ -297,7 +297,8 @@ public class PersistenceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
             @ApiResponse(responseCode = "404", description = "Unknown persistence service or Item not found in persistence store"),
             @ApiResponse(responseCode = "405", description = "Persistence service not queryable") })
-    public Response httpGetPersistenceItemData(@Context HttpHeaders headers,
+    public Response httpGetPersistenceItemData(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
             @Parameter(description = "The Item name") @PathParam("itemName") String itemName,
             @Parameter(description = "Start time of the data to return. Will default to 1 day before endtime. ["
@@ -310,8 +311,10 @@ public class PersistenceResource implements RESTResource {
             @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary,
             @Parameter(description = "Adds the current Item state into the requested period (the Item state will be before or at the endtime)") @QueryParam("itemState") boolean itemState,
             @Parameter(description = "If set to true, formatting from the state description is applied to the values. For QuantityType states, only the value is returned, regardless of the pattern.") @QueryParam("displayState") boolean displayState) {
+        Locale locale = localeService.getLocale(language);
+
         return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary, itemState,
-                displayState);
+                displayState, locale);
     }
 
     @DELETE
@@ -440,7 +443,7 @@ public class PersistenceResource implements RESTResource {
 
     private Response getItemHistoryDTO(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
             @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary, boolean itemState,
-            boolean displayState) {
+            boolean displayState, @Nullable Locale locale) {
         // Benchmarking timer...
         long timerStart = System.currentTimeMillis();
 
@@ -465,7 +468,7 @@ public class PersistenceResource implements RESTResource {
 
         @Nullable
         ItemHistoryDTO dto = createDTO(qService, itemName, timeBegin, timeEnd, pageNumber, pageLength, boundary,
-                itemState, displayState);
+                itemState, displayState, locale);
         if (dto == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Item not found: " + itemName);
         }
@@ -476,7 +479,7 @@ public class PersistenceResource implements RESTResource {
 
     protected @Nullable ItemHistoryDTO createDTO(QueryablePersistenceService qService, String itemName,
             @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary,
-            boolean itemState, boolean displayState) {
+            boolean itemState, boolean displayState, @Nullable Locale locale) {
         String serviceId = qService.getId();
         PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(serviceId);
         String alias = config != null ? config.getAliases().get(itemName) : null;
@@ -554,7 +557,7 @@ public class PersistenceResource implements RESTResource {
             if (result.iterator().hasNext()) {
                 long timestamp = dateTimeBegin.toInstant().toEpochMilli();
                 State state = result.iterator().next().getState();
-                addData(dto, item, state, timestamp, displayState, targetUnit);
+                addData(dto, item, state, timestamp, displayState, targetUnit, locale);
                 quantity++;
             }
         }
@@ -585,12 +588,12 @@ public class PersistenceResource implements RESTResource {
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
                 if (lastState != null && !lastState.equals(state)) {
-                    addData(dto, item, lastState, timestamp, displayState, targetUnit);
+                    addData(dto, item, lastState, timestamp, displayState, targetUnit, locale);
                     quantity++;
                 }
             }
 
-            addData(dto, item, state, timestamp, displayState, targetUnit);
+            addData(dto, item, state, timestamp, displayState, targetUnit, locale);
             quantity++;
             lastState = state;
         }
@@ -607,7 +610,7 @@ public class PersistenceResource implements RESTResource {
             if (result.iterator().hasNext()) {
                 long timestamp = dateTimeEnd.toInstant().toEpochMilli();
                 State state = result.iterator().next().getState();
-                addData(dto, item, state, timestamp, displayState, targetUnit);
+                addData(dto, item, state, timestamp, displayState, targetUnit, locale);
                 quantity++;
                 addedBoundaryEnd = true;
             }
@@ -627,7 +630,7 @@ public class PersistenceResource implements RESTResource {
                     logger.debug("State of Item '{}' is undefined, not adding it to the response.", itemName);
                 } else {
                     logger.debug("Adding state of Item '{}' to the response: {} - {}", itemName, time, state);
-                    addData(dto, item, state, time, displayState, targetUnit);
+                    addData(dto, item, state, time, displayState, targetUnit, locale);
                     quantity++;
                     dto.sortData();
                 }
@@ -641,19 +644,24 @@ public class PersistenceResource implements RESTResource {
         return dto;
     }
 
-    private @Nullable String getDisplayState(Item item, State state) {
-        return ItemDisplayStateUtil.getDisplayState(item, state, localeService.getLocale(null),
-                timeZoneProvider.getTimeZone());
+    private @Nullable String getDisplayState(Item item, State state, @Nullable Locale locale) {
+        return ItemDisplayStateUtil.getDisplayState(item, state, locale, timeZoneProvider.getTimeZone());
     }
 
     private void addData(ItemHistoryDTO dto, Item item, State state, long timestamp, boolean displayState,
-            @Nullable Unit<?> targetUnit) {
+            @Nullable Unit<?> targetUnit, @Nullable Locale locale) {
         if (displayState) {
             if (state instanceof QuantityType<?> quantityState && targetUnit != null) {
                 QuantityType<?> convertedState = quantityState.toInvertibleUnit(targetUnit);
-                dto.addData(timestamp, convertedState != null ? convertedState : state);
+                if (convertedState != null) {
+                    dto.addData(timestamp, convertedState);
+                } else {
+                    logger.warn(
+                            "Cannot convert state '{}' to unit '{}' for item '{}', excluding this state from the response",
+                            state, targetUnit, item.getName());
+                }
             } else {
-                String displayStateStr = getDisplayState(item, state);
+                String displayStateStr = getDisplayState(item, state, locale);
                 dto.addData(timestamp, displayStateStr != null ? displayStateStr : state.toString());
             }
         } else {
