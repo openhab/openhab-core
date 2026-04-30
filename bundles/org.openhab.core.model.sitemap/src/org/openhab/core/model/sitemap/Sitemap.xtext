@@ -8,7 +8,7 @@ SitemapModel:
 
 ModelSitemap:
     name=ID ('label=' label=STRING)? ('icon=' icon=STRING)? '{'
-    (children+=ModelWidget)+
+    (children+=ModelWidget)*
     '}';
 
 ModelWidget:
