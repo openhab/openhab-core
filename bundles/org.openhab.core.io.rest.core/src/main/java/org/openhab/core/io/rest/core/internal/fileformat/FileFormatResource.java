@@ -468,7 +468,6 @@ public class FileFormatResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
                             @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)) }),
-                    @ApiResponse(responseCode = "400", description = "Payload invalid."),
                     @ApiResponse(responseCode = "404", description = "One or more sitemaps not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForSitemaps(final @Context HttpHeaders httpHeaders,
@@ -479,13 +478,6 @@ public class FileFormatResource implements RESTResource {
         if (serializer == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
-        }
-
-        if ("text/vnd.openhab.dsl.sitemap".equals(acceptHeader) && (sitemapNames == null || sitemapNames.size() != 1)) {
-            // DSL format only supports one sitemap at a time
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("For media type 'text/vnd.openhab.dsl.sitemap', exactly one sitemap name must be provided!")
-                    .build();
         }
 
         List<Sitemap> sitemaps;
@@ -577,11 +569,6 @@ public class FileFormatResource implements RESTResource {
                             .entity("Unsupported media type '" + acceptHeader + "'!").build();
                 } else if (sitemaps.isEmpty()) {
                     return Response.status(Response.Status.BAD_REQUEST).entity("No sitemaps loaded from input").build();
-                } else if (sitemaps.size() != 1) {
-                    // DSL format only supports one sitemap at a time
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            "For media type 'text/vnd.openhab.dsl.sitemap', the JSON payload must contain exactly one sitemap definition!")
-                            .build();
                 }
                 sitemapSerializer.setSitemapsToBeSerialized(genId, sitemaps);
                 sitemapSerializer.generateFormat(genId, outputStream);
