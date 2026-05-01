@@ -14,6 +14,7 @@ package org.openhab.core.transform.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.time.ZoneId;
@@ -28,6 +29,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
 import org.openhab.core.transform.TransformationService;
 import org.openhab.core.types.State;
@@ -87,19 +89,11 @@ public class ItemDisplayStateUtilTest {
     }
 
     @Test
-    public void getDisplayStateReturnsUnDefStateAsString() {
-        State state = UnDefType.NULL;
-        when(stateDescription.getPattern()).thenReturn("%s");
-
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
-
-        assertThat(result, is("NULL"));
-    }
-
-    @Test
-    public void getDisplayStateAppliesTransformation() throws Exception {
+    public void getDisplayStateCallsFormatState() throws Exception {
         State state = new StringType("ON");
+        when(item.getName()).thenReturn("testItem");
         when(stateDescription.getPattern()).thenReturn("MAP(test.map):%s");
+        when(stateDescription.getOptions()).thenReturn(Collections.emptyList());
         when(mapTransformationService.transform("test.map", "ON")).thenReturn("Active");
 
         String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
@@ -108,111 +102,167 @@ public class ItemDisplayStateUtilTest {
     }
 
     @Test
-    public void getDisplayStateReturnsRawStateWhenTransformationReturnsNull() throws Exception {
+    public void formatStateReturnsUnDefStateAsString() {
+        State state = UnDefType.NULL;
+        String result = ItemDisplayStateUtil.formatState("item", "%s", Collections.emptyList(), state, zoneId);
+        assertThat(result, is("NULL"));
+    }
+
+    @Test
+    public void formatStateAppliesTransformation() throws Exception {
         State state = new StringType("ON");
-        when(stateDescription.getPattern()).thenReturn("MAP(test.map):%s");
+        when(mapTransformationService.transform("test.map", "ON")).thenReturn("Active");
+
+        String result = ItemDisplayStateUtil.formatState("item", "MAP(test.map):%s", Collections.emptyList(), state,
+                zoneId);
+
+        assertThat(result, is("Active"));
+    }
+
+    @Test
+    public void formatStateReturnsRawStateWhenTransformationReturnsNull() throws Exception {
+        State state = new StringType("ON");
         when(mapTransformationService.transform("test.map", "ON")).thenReturn(null);
 
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+        String result = ItemDisplayStateUtil.formatState("item", "MAP(test.map):%s", Collections.emptyList(), state,
+                zoneId);
 
         assertThat(result, is("ON"));
     }
 
     @Test
-    public void getDisplayStateReturnsRawStateWhenTransformationServiceNotAvailable() {
+    public void formatStateReturnsRawStateWhenTransformationServiceNotAvailable() {
         State state = new StringType("ON");
-        when(stateDescription.getPattern()).thenReturn("UNKNOWN(test.map):%s");
 
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+        String result = ItemDisplayStateUtil.formatState("item", "UNKNOWN(test.map):%s", Collections.emptyList(), state,
+                zoneId);
 
         assertThat(result, is("ON"));
     }
 
     @Test
-    public void getDisplayStateAppliesStateOptionLabel() {
+    public void formatStateAppliesStateOptionLabel() {
         State state = new StringType("1");
-
         StateOption option = new StateOption("1", "Option Label");
 
-        when(stateDescription.getOptions()).thenReturn(List.of(option));
-        when(stateDescription.getPattern()).thenReturn("Prefix: %s");
-
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+        String result = ItemDisplayStateUtil.formatState("item", "Prefix: %s", List.of(option), state, zoneId);
 
         assertThat(result, is("Prefix: Option Label"));
     }
 
     @Test
-    public void getDisplayStateAppliesStateOptionLabelWithoutPattern() {
+    public void formatStateAppliesStateOptionLabelWithoutPattern() {
         State state = new StringType("1");
-
         StateOption option = new StateOption("1", "Option Label");
 
-        when(stateDescription.getOptions()).thenReturn(List.of(option));
-        when(stateDescription.getPattern()).thenReturn(null);
-
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+        String result = ItemDisplayStateUtil.formatState("item", null, List.of(option), state, zoneId);
 
         assertThat(result, is("Option Label"));
     }
 
     @Test
-    public void getDisplayStateReturnsLabelWhenOptionPatternIsInvalid() {
+    public void formatStateReturnsLabelWhenOptionPatternIsInvalid() {
         State state = new StringType("1");
-
         StateOption option = new StateOption("1", "Option Label");
 
-        when(stateDescription.getOptions()).thenReturn(List.of(option));
-        when(stateDescription.getPattern()).thenReturn("%d"); // Label is String, %d will fail
-
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+        String result = ItemDisplayStateUtil.formatState("item", "%d", List.of(option), state, zoneId);
 
         assertThat(result, is("Option Label"));
     }
 
     @Test
-    public void getDisplayStateConvertsQuantityTypeToPatternUnit() {
+    public void formatStateConvertsQuantityTypeToPatternUnit() {
         QuantityType<?> state = new QuantityType<>("20 °C");
-        when(stateDescription.getPattern()).thenReturn("%.1f °F");
-        when(stateDescription.getOptions()).thenReturn(Collections.emptyList());
 
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+        String result = ItemDisplayStateUtil.formatState("item", "%.1f °F", Collections.emptyList(), state, zoneId);
 
         // 20°C = 68°F
         assertThat(result, is("68.0 °F"));
     }
 
     @Test
-    public void getDisplayStateFormatsDateTimeTypeWithZoneId() {
+    public void formatStateFormatsDateTimeTypeWithZoneId() {
         DateTimeType state = new DateTimeType("2023-01-01T10:00:00Z");
-        when(stateDescription.getPattern()).thenReturn("%1$tH:%1$tM");
-        when(stateDescription.getOptions()).thenReturn(Collections.emptyList());
 
         // UTC 10:00 is 11:00 in Europe/Berlin (CET)
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+        String result = ItemDisplayStateUtil.formatState("item", "%1$tH:%1$tM", Collections.emptyList(), state, zoneId);
 
         assertThat(result, is("11:00"));
     }
 
     @Test
-    public void getDisplayStateFormatsStateWithRegularPattern() {
+    public void formatStateFormatsStateWithRegularPattern() {
         State state = new StringType("test");
-        when(stateDescription.getPattern()).thenReturn("Result: %s");
-        when(stateDescription.getOptions()).thenReturn(Collections.emptyList());
 
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+        String result = ItemDisplayStateUtil.formatState("item", "Result: %s", Collections.emptyList(), state, zoneId);
 
         assertThat(result, is("Result: test"));
     }
 
     @Test
-    public void getDisplayStateReturnsRawStateWhenPatternIsInvalid() {
+    public void formatStateReturnsRawStateWhenPatternIsInvalid() {
         State state = new StringType("test");
-        when(stateDescription.getPattern()).thenReturn("%d"); // String cannot be formatted as %d
-        when(stateDescription.getOptions()).thenReturn(Collections.emptyList());
 
-        String result = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+        String result = ItemDisplayStateUtil.formatState("item", "%d", Collections.emptyList(), state, zoneId);
 
         assertThat(result, is("test"));
+    }
+
+    @Test
+    public void transformValueSucceeds() throws Exception {
+        when(mapTransformationService.transform("test.map", "input")).thenReturn("output");
+        String result = ItemDisplayStateUtil.transform("MAP", "test.map", "input");
+        assertThat(result, is("output"));
+    }
+
+    @Test
+    public void transformValueThrowsWhenServiceNotFound() {
+        TransformationException exception = assertThrows(TransformationException.class, () -> {
+            ItemDisplayStateUtil.transform("UNKNOWN", "test.map", "input");
+        });
+        assertThat(exception.getMessage(), is("Transformation service of type 'UNKNOWN' is not available."));
+    }
+
+    @Test
+    public void transformValueThrowsWhenServiceFails() throws Exception {
+        when(mapTransformationService.transform("test.map", "input")).thenThrow(new RuntimeException("error"));
+        TransformationException exception = assertThrows(TransformationException.class, () -> {
+            ItemDisplayStateUtil.transform("MAP", "test.map", "input");
+        });
+        assertThat(exception.getMessage(), is("Transformation service of type 'MAP' threw an exception: error"));
+    }
+
+    @Test
+    public void transformStateSucceeds() throws Exception {
+        State state = new StringType("ON");
+        when(mapTransformationService.transform("test.map", "ON")).thenReturn("Active");
+        String result = ItemDisplayStateUtil.transform("MAP", "test.map", "%s", state, zoneId);
+        assertThat(result, is("Active"));
+    }
+
+    @Test
+    public void transformStateFormatsDateTimeWithZone() throws Exception {
+        DateTimeType state = new DateTimeType("2023-01-01T10:00:00Z");
+        // UTC 10:00 is 11:00 in Europe/Berlin
+        when(mapTransformationService.transform("test.map", "11:00")).thenReturn("Eleven");
+        String result = ItemDisplayStateUtil.transform("MAP", "test.map", "%1$tH:%1$tM", state, zoneId);
+        assertThat(result, is("Eleven"));
+    }
+
+    @Test
+    public void transformStateUsesDefaultFormatForUnDef() throws Exception {
+        State state = UnDefType.NULL;
+        when(mapTransformationService.transform("test.map", "NULL")).thenReturn("Missing");
+        String result = ItemDisplayStateUtil.transform("MAP", "test.map", "invalid-format", state, zoneId);
+        assertThat(result, is("Missing"));
+    }
+
+    @Test
+    public void transformStateThrowsOnInvalidFormat() {
+        State state = new StringType("ON");
+        TransformationException exception = assertThrows(TransformationException.class, () -> {
+            ItemDisplayStateUtil.transform("MAP", "test.map", "%d", state, zoneId);
+        });
+        assertThat(exception.getMessage(), is("Cannot format state 'ON' to format '%d'"));
     }
 }
