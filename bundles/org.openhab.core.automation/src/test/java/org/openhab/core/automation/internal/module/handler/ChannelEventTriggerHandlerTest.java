@@ -96,7 +96,8 @@ class ChannelEventTriggerHandlerTest {
                 .thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL, "foo:bar:baz:quu?")));
         handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
 
-        assertFalse(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quxx"))));
+        assertFalse(
+                handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quuxx"))));
     }
 
     @Test
