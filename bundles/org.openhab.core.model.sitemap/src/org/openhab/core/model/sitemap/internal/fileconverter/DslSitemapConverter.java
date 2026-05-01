@@ -263,7 +263,9 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                 modelChart.setPeriod(chartWidget.getPeriod());
                 modelChart.setService(chartWidget.getService());
                 modelChart.setLegend(chartWidget.hasLegend());
-                modelChart.setForceAsItem(chartWidget.forceAsItem());
+                if (chartWidget.forceAsItem()) {
+                    modelChart.setForceAsItem(chartWidget.forceAsItem());
+                }
                 modelChart.setYAxisDecimalPattern(chartWidget.getYAxisDecimalPattern());
                 modelChart.setInterpolation(chartWidget.getInterpolation());
                 modelWidget = modelChart;
