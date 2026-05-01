@@ -514,7 +514,7 @@ public class PersistenceResource implements RESTResource {
 
         @Nullable
         Unit<?> targetUnit = null;
-        Item item;
+        Item item = null;
         try {
             item = itemRegistry.getItem(itemName);
             if (item instanceof NumberItem numberItem) {
@@ -529,8 +529,11 @@ public class PersistenceResource implements RESTResource {
                 }
             }
         } catch (ItemNotFoundException e) {
-            logger.debug("Failed to retrieve Item '{}' from registry", itemName);
-            return null;
+            if (displayState) {
+                logger.warn("Failed to retrieve Item '{}' from registry, display state conversion is not available",
+                        itemName);
+            }
+            displayState = false;
         }
 
         Iterable<HistoricItem> result;
@@ -557,7 +560,7 @@ public class PersistenceResource implements RESTResource {
             if (result.iterator().hasNext()) {
                 long timestamp = dateTimeBegin.toInstant().toEpochMilli();
                 State state = result.iterator().next().getState();
-                addData(dto, item, state, timestamp, displayState, targetUnit, locale);
+                addData(dto, state, timestamp, displayState, item, targetUnit, locale);
                 quantity++;
             }
         }
@@ -588,12 +591,12 @@ public class PersistenceResource implements RESTResource {
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
                 if (lastState != null && !lastState.equals(state)) {
-                    addData(dto, item, lastState, timestamp, displayState, targetUnit, locale);
+                    addData(dto, lastState, timestamp, displayState, item, targetUnit, locale);
                     quantity++;
                 }
             }
 
-            addData(dto, item, state, timestamp, displayState, targetUnit, locale);
+            addData(dto, state, timestamp, displayState, item, targetUnit, locale);
             quantity++;
             lastState = state;
         }
@@ -610,7 +613,7 @@ public class PersistenceResource implements RESTResource {
             if (result.iterator().hasNext()) {
                 long timestamp = dateTimeEnd.toInstant().toEpochMilli();
                 State state = result.iterator().next().getState();
-                addData(dto, item, state, timestamp, displayState, targetUnit, locale);
+                addData(dto, state, timestamp, displayState, item, targetUnit, locale);
                 quantity++;
                 addedBoundaryEnd = true;
             }
@@ -630,7 +633,7 @@ public class PersistenceResource implements RESTResource {
                     logger.debug("State of Item '{}' is undefined, not adding it to the response.", itemName);
                 } else {
                     logger.debug("Adding state of Item '{}' to the response: {} - {}", itemName, time, state);
-                    addData(dto, item, state, time, displayState, targetUnit, locale);
+                    addData(dto, state, time, displayState, item, targetUnit, locale);
                     quantity++;
                     dto.sortData();
                 }
@@ -648,22 +651,20 @@ public class PersistenceResource implements RESTResource {
         return ItemDisplayStateUtil.getDisplayState(item, state, locale, timeZoneProvider.getTimeZone());
     }
 
-    private void addData(ItemHistoryDTO dto, Item item, State state, long timestamp, boolean displayState,
+    private void addData(ItemHistoryDTO dto, State state, long timestamp, boolean displayState, @Nullable Item item,
             @Nullable Unit<?> targetUnit, @Nullable Locale locale) {
-        if (displayState) {
-            if (state instanceof QuantityType<?> quantityState && targetUnit != null) {
-                QuantityType<?> convertedState = quantityState.toInvertibleUnit(targetUnit);
-                if (convertedState != null) {
-                    dto.addData(timestamp, convertedState);
-                } else {
-                    logger.warn(
-                            "Cannot convert state '{}' to unit '{}' for item '{}', excluding this state from the response",
-                            state, targetUnit, item.getName());
-                }
+        if (state instanceof QuantityType<?> quantityState && targetUnit != null && item != null) {
+            QuantityType<?> convertedState = quantityState.toInvertibleUnit(targetUnit);
+            if (convertedState != null) {
+                dto.addData(timestamp, convertedState);
             } else {
-                String displayStateStr = getDisplayState(item, state, locale);
-                dto.addData(timestamp, displayStateStr != null ? displayStateStr : state.toString());
+                logger.warn(
+                        "Cannot convert state '{}' to unit '{}' for item '{}', excluding this state from the response",
+                        state, targetUnit, item.getName());
             }
+        } else if (displayState && item != null) {
+            String displayStateStr = getDisplayState(item, state, locale);
+            dto.addData(timestamp, displayStateStr != null ? displayStateStr : state.toString());
         } else {
             dto.addData(timestamp, state);
         }
