@@ -225,7 +225,9 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 break;
         }
 
-        setWidgetPropertyFromComponentConfig(widget, component, "item");
+        if (!(widget instanceof Buttongrid)) {
+            setWidgetPropertyFromComponentConfig(widget, component, "item");
+        }
         setWidgetPropertyFromComponentConfig(widget, component, "label");
         setWidgetPropertyFromComponentConfig(widget, component, "icon");
         setWidgetPropertyFromComponentConfig(widget, component, "staticIcon");

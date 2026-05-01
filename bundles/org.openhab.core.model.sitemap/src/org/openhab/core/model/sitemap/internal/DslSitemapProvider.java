@@ -251,7 +251,9 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     break;
             }
 
-            widget.setItem(modelWidget.getItem());
+            if (!(widget instanceof Buttongrid)) {
+                widget.setItem(modelWidget.getItem());
+            }
             widget.setLabel(modelWidget.getLabel());
             String staticIcon = modelWidget.getStaticIcon();
             if (staticIcon != null && !staticIcon.isEmpty()) {
