@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * This is a ModuleHandler implementation for trigger channels with specific events
  *
  * @author Stefan Triller - Initial contribution
+ * @author Jimmy Tanagra - Add support for wildcard channel matching
  */
 @NonNullByDefault
 public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
@@ -94,6 +95,9 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
             if (channelUID != null && !channelUID.equals(cte.getChannel())) {
                 return false;
             }
+            if (eventTopicFilter != null && !eventTopicFilter.apply(event)) {
+                return false;
+            }
             String eventOnChannel = this.eventOnChannel;
             logger.trace("->FILTER: {}:{}", cte.getEvent(), eventOnChannel);
             eventMatches = eventOnChannel == null || eventOnChannel.isBlank() || eventOnChannel.equals(cte.getEvent());
@@ -103,7 +107,7 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
 
     @Override
     public @Nullable EventFilter getEventFilter() {
-        return eventTopicFilter != null ? eventTopicFilter : this;
+        return this;
     }
 
     @Override
