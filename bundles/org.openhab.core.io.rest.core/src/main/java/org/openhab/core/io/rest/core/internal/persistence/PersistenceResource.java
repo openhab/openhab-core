@@ -85,6 +85,7 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateOption;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
@@ -514,14 +515,29 @@ public class PersistenceResource implements RESTResource {
 
         @Nullable
         Unit<?> targetUnit = null;
+        @Nullable
+        String pattern = null;
+        List<StateOption> options = List.of();
         Item item = null;
         try {
             item = itemRegistry.getItem(itemName);
+            if (displayState) {
+                StateDescription stateDescription = item.getStateDescription(locale);
+                if (stateDescription != null) {
+                    pattern = stateDescription.getPattern();
+                    options = stateDescription.getOptions();
+                }
+            }
             if (item instanceof NumberItem numberItem) {
                 if (displayState) {
-                    StateDescription stateDescription = numberItem.getStateDescription(null);
-                    if (stateDescription != null) {
-                        targetUnit = UnitUtils.parseUnit(stateDescription.getPattern());
+                    if (pattern != null) {
+                        targetUnit = UnitUtils.parseUnit(pattern);
+                    }
+                    if (targetUnit == null) {
+                        StateDescription stateDescription = numberItem.getStateDescription(locale);
+                        if (stateDescription != null) {
+                            targetUnit = UnitUtils.parseUnit(stateDescription.getPattern());
+                        }
                     }
                 }
                 if (targetUnit == null) {
@@ -560,7 +576,7 @@ public class PersistenceResource implements RESTResource {
             if (result.iterator().hasNext()) {
                 long timestamp = dateTimeBegin.toInstant().toEpochMilli();
                 State state = result.iterator().next().getState();
-                addData(dto, state, timestamp, displayState, item, targetUnit, locale);
+                addData(dto, state, timestamp, displayState, item, pattern, options, targetUnit);
                 quantity++;
             }
         }
@@ -591,12 +607,12 @@ public class PersistenceResource implements RESTResource {
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
                 if (lastState != null && !lastState.equals(state)) {
-                    addData(dto, lastState, timestamp, displayState, item, targetUnit, locale);
+                    addData(dto, lastState, timestamp, displayState, item, pattern, options, targetUnit);
                     quantity++;
                 }
             }
 
-            addData(dto, state, timestamp, displayState, item, targetUnit, locale);
+            addData(dto, state, timestamp, displayState, item, pattern, options, targetUnit);
             quantity++;
             lastState = state;
         }
@@ -613,7 +629,7 @@ public class PersistenceResource implements RESTResource {
             if (result.iterator().hasNext()) {
                 long timestamp = dateTimeEnd.toInstant().toEpochMilli();
                 State state = result.iterator().next().getState();
-                addData(dto, state, timestamp, displayState, item, targetUnit, locale);
+                addData(dto, state, timestamp, displayState, item, pattern, options, targetUnit);
                 quantity++;
                 addedBoundaryEnd = true;
             }
@@ -633,7 +649,7 @@ public class PersistenceResource implements RESTResource {
                     logger.debug("State of Item '{}' is undefined, not adding it to the response.", itemName);
                 } else {
                     logger.debug("Adding state of Item '{}' to the response: {} - {}", itemName, time, state);
-                    addData(dto, state, time, displayState, item, targetUnit, locale);
+                    addData(dto, state, time, displayState, item, pattern, options, targetUnit);
                     quantity++;
                     dto.sortData();
                 }
@@ -647,12 +663,13 @@ public class PersistenceResource implements RESTResource {
         return dto;
     }
 
-    private @Nullable String getDisplayState(Item item, State state, @Nullable Locale locale) {
-        return ItemDisplayStateUtil.getDisplayState(item, state, locale, timeZoneProvider.getTimeZone());
+    private @Nullable String getDisplayState(String itemName, @Nullable String pattern, List<StateOption> options,
+            State state) {
+        return ItemDisplayStateUtil.formatState(itemName, pattern, options, state, timeZoneProvider.getTimeZone());
     }
 
     private void addData(ItemHistoryDTO dto, State state, long timestamp, boolean displayState, @Nullable Item item,
-            @Nullable Unit<?> targetUnit, @Nullable Locale locale) {
+            @Nullable String pattern, List<StateOption> options, @Nullable Unit<?> targetUnit) {
         if (state instanceof QuantityType<?> quantityState && targetUnit != null && item != null) {
             QuantityType<?> convertedState = quantityState.toInvertibleUnit(targetUnit);
             if (convertedState != null) {
@@ -663,7 +680,7 @@ public class PersistenceResource implements RESTResource {
                         state, targetUnit, item.getName());
             }
         } else if (displayState && item != null) {
-            String displayStateStr = getDisplayState(item, state, locale);
+            String displayStateStr = getDisplayState(item.getName(), pattern, options, state);
             dto.addData(timestamp, displayStateStr != null ? displayStateStr : state.toString());
         } else {
             dto.addData(timestamp, state);
