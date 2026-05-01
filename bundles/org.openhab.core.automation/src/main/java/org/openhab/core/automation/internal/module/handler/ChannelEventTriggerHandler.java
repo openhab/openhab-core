@@ -59,11 +59,16 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
     public ChannelEventTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
 
-        this.eventOnChannel = (String) module.getConfiguration().get(CFG_CHANNEL_EVENT);
         String cfgChannel = (String) module.getConfiguration().get(CFG_CHANNEL);
+
+        if (cfgChannel == null || cfgChannel.isBlank()) {
+            throw new IllegalArgumentException("Configuration must contain a non-empty channelUID");
+        }
+
+        this.eventOnChannel = (String) module.getConfiguration().get(CFG_CHANNEL_EVENT);
         TopicEventFilter topicFilter = null;
         ChannelUID parsedChannel = null;
-        if (cfgChannel != null && (cfgChannel.contains("?") || cfgChannel.contains("*"))) {
+        if (cfgChannel.contains("?") || cfgChannel.contains("*")) {
             String topicRegex = "^openhab/channels/" + cfgChannel.replace("?", ".?").replace("*", ".*?")
                     + "/triggered$";
             topicFilter = new TopicEventFilter(topicRegex);
