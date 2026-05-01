@@ -18,10 +18,14 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.sitemap.Button;
+import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
+import org.openhab.core.sitemap.Colorpicker;
 import org.openhab.core.sitemap.Colortemperaturepicker;
 import org.openhab.core.sitemap.Condition;
 import org.openhab.core.sitemap.Default;
+import org.openhab.core.sitemap.Frame;
+import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.Image;
 import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
@@ -34,6 +38,7 @@ import org.openhab.core.sitemap.Setpoint;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Slider;
 import org.openhab.core.sitemap.Switch;
+import org.openhab.core.sitemap.Text;
 import org.openhab.core.sitemap.Video;
 import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
@@ -190,8 +195,23 @@ public class SitemapDTOMapper {
                     widgetDTO.height = height;
                 }
             }
-            default -> {
+            case Buttongrid buttongridWidget -> {
                 // nothing to do
+            }
+            case Frame frameWidget -> {
+                // nothing to do
+            }
+            case Group groupWidget -> {
+                // nothing to do
+            }
+            case Colorpicker colorpickerWidget -> {
+                // nothing to do
+            }
+            case Text textWidget -> {
+                // nothing to do
+            }
+            default -> {
+                LOGGER.debug("Widget type {} is currently not supported", widget.getWidgetType());
             }
         }
 
@@ -332,7 +352,6 @@ public class SitemapDTOMapper {
                 // nothing to do
             }
         }
-        ;
 
         widget.setItem(widgetDTO.item);
         widget.setLabel(widgetDTO.label);
