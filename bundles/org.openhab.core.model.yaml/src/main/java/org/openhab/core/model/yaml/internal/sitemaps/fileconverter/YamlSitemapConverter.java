@@ -117,8 +117,8 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
         dto.type = widget.getWidgetType();
         dto.item = widget instanceof Buttongrid ? null : widget.getItem();
 
-        List<Object> labelColorRules = buidRules(widget.getLabelColor(), false);
-        List<Object> valueColorRules = buidRules(widget.getValueColor(), false);
+        List<Object> labelColorRules = buildRules(widget.getLabelColor(), false);
+        List<Object> valueColorRules = buildRules(widget.getValueColor(), false);
         if (widget.getLabel() != null || !labelColorRules.isEmpty() || !valueColorRules.isEmpty()) {
             String label = widget.getLabel();
             String format = null;
@@ -171,8 +171,8 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
             }
         }
 
-        List<Object> iconRules = buidRules(widget.getIconRules(), false);
-        List<Object> iconColorRules = buidRules(widget.getIconColor(), false);
+        List<Object> iconRules = buildRules(widget.getIconRules(), false);
+        List<Object> iconColorRules = buildRules(widget.getIconColor(), false);
         if (widget.getIcon() != null || !iconRules.isEmpty() || !iconColorRules.isEmpty()) {
             if (widget.isStaticIcon() || !iconRules.isEmpty() || !iconColorRules.isEmpty()) {
                 YamlWidgetIconDTO widgetIcon = new YamlWidgetIconDTO();
@@ -218,7 +218,7 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
             }
         }
 
-        List<Object> visibilityRules = buidRules(widget.getVisibility(), true);
+        List<Object> visibilityRules = buildRules(widget.getVisibility(), true);
         if (!visibilityRules.isEmpty()) {
             if (visibilityRules.size() == 1) {
                 dto.visibility = visibilityRules.getFirst();
@@ -348,7 +348,7 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
         return dtos;
     }
 
-    private List<Object> buidRules(List<Rule> rules, boolean ignoreValue) {
+    private List<Object> buildRules(List<Rule> rules, boolean ignoreValue) {
         List<Object> dtos = new ArrayList<>();
         rules.forEach(rule -> {
             List<Condition> conditions = rule.getConditions();
