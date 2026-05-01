@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -30,7 +31,6 @@ import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
@@ -209,7 +209,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 setWidgetPropertyFromComponentConfig(colortemperaturepickerWidget, component, "maxValue");
                 break;
             case Buttongrid buttongridWidget:
-                addWidgetButtons(buttongridWidget.getButtons(), component);
+                addWidgetButtons(buttongridWidget, component);
                 break;
             case Button buttonWidget:
                 setWidgetPropertyFromComponentConfig(buttonWidget, component, "row");
@@ -323,10 +323,12 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         }
     }
 
-    private void addWidgetButtons(List<ButtonDefinition> buttons, UIComponent component) {
+    private void addWidgetButtons(Buttongrid buttongridWidget, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
             Object sourceButtons = component.getConfig().get("buttons");
             if (sourceButtons instanceof Collection<?> sourceButtonsCollection) {
+                logger.warn(
+                        "Defining buttons as properties of a Butongrid widget is deprecated although still supported; please prefer Button sub-widgets");
                 for (Object sourceButton : sourceButtonsCollection) {
                     if (sourceButton instanceof String) {
                         String[] splitted1 = sourceButton.toString().split(":", 3);
@@ -336,7 +338,12 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                         String cmd = stripQuotes(splitted2[0].trim());
                         String label = stripQuotes(splitted2[1].trim());
                         String icon = splitted2.length < 3 ? null : stripQuotes(splitted2[2].trim());
-                        ButtonDefinition button = sitemapFactory.createButtonDefinition();
+                        Button button = (Button) Objects.requireNonNull(sitemapFactory.createWidget(
+                                org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.BUTTON,
+                                buttongridWidget));
+                        if (component.getConfig().get("item") instanceof String item) {
+                            button.setItem(item);
+                        }
                         button.setRow(row);
                         button.setColumn(column);
                         if (cmd != null) {
@@ -346,7 +353,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                             button.setLabel(label);
                         }
                         button.setIcon(icon);
-                        buttons.add(button);
+                        buttongridWidget.getWidgets().add(button);
                     }
                 }
             }

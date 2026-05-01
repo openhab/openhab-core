@@ -12,11 +12,7 @@
  */
 package org.openhab.core.sitemap.internal;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Parent;
 
@@ -26,22 +22,10 @@ import org.openhab.core.sitemap.Parent;
 @NonNullByDefault
 public class ButtongridImpl extends LinkableWidgetImpl implements Buttongrid {
 
-    private List<ButtonDefinition> buttons = new CopyOnWriteArrayList<>();
-
     public ButtongridImpl() {
     }
 
     public ButtongridImpl(Parent parent) {
         super(parent);
-    }
-
-    @Override
-    public List<ButtonDefinition> getButtons() {
-        return buttons;
-    }
-
-    @Override
-    public void setButtons(List<ButtonDefinition> buttons) {
-        this.buttons = new CopyOnWriteArrayList<>(buttons);
     }
 }

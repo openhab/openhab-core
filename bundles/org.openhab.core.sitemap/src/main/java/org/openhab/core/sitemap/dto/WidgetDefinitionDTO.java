@@ -32,7 +32,5 @@ public class WidgetDefinitionDTO extends AbstractWidgetDTO {
     public List<RuleDTO> valueColorRules;
     public List<RuleDTO> iconColorRules;
 
-    public List<ButtonDefinitionDTO> buttons;
-
     public List<WidgetDefinitionDTO> widgets;
 }

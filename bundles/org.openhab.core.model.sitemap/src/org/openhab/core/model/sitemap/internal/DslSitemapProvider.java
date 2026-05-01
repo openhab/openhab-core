@@ -17,6 +17,7 @@ import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -59,7 +60,6 @@ import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.ModelWebview;
 import org.openhab.core.model.sitemap.sitemap.ModelWidget;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
@@ -233,7 +233,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     break;
                 case Buttongrid buttongridWidget:
                     ModelButtongrid modelButtongrid = (ModelButtongrid) modelWidget;
-                    addWidgetButtons(buttongridWidget.getButtons(), modelButtongrid.getButtons());
+                    addWidgetButtons(buttongridWidget, modelButtongrid);
                     break;
                 case Button buttonWidget:
                     ModelButton modelButton = (ModelButton) modelWidget;
@@ -299,17 +299,22 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         }
     }
 
-    private void addWidgetButtons(List<ButtonDefinition> buttons, @Nullable ModelButtonDefinitionList modelButtonList) {
+    private void addWidgetButtons(Buttongrid buttongridWidget, ModelButtongrid modelButtongrid) {
+        ModelButtonDefinitionList modelButtonList = modelButtongrid.getButtons();
         if (modelButtonList != null) {
+            logger.warn(
+                    "Defining buttons as properties of a Butongrid widget is deprecated although still supported; please prefer Button sub-widgets");
             EList<ModelButtonDefinition> modelButtons = modelButtonList.getElements();
             modelButtons.forEach(modelButton -> {
-                ButtonDefinition button = sitemapFactory.createButtonDefinition();
+                Button button = (Button) Objects.requireNonNull(sitemapFactory.createWidget(
+                        org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.BUTTON, buttongridWidget));
+                button.setItem(modelButtongrid.getItem());
                 button.setRow(modelButton.getRow());
                 button.setColumn(modelButton.getColumn());
                 button.setCmd(modelButton.getCmd());
                 button.setLabel(modelButton.getLabel());
                 button.setIcon(modelButton.getIcon());
-                buttons.add(button);
+                buttongridWidget.getWidgets().add(button);
             });
         }
     }

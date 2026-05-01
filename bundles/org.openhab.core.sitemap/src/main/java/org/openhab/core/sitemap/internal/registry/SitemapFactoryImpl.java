@@ -14,14 +14,12 @@ package org.openhab.core.sitemap.internal.registry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Condition;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Widget;
-import org.openhab.core.sitemap.internal.ButtonDefinitionImpl;
 import org.openhab.core.sitemap.internal.ButtonImpl;
 import org.openhab.core.sitemap.internal.ButtongridImpl;
 import org.openhab.core.sitemap.internal.ChartImpl;
@@ -132,11 +130,6 @@ public class SitemapFactoryImpl implements SitemapFactory {
             case WEBVIEW -> new WebviewImpl(parent);
             default -> null;
         };
-    }
-
-    @Override
-    public ButtonDefinition createButtonDefinition() {
-        return new ButtonDefinitionImpl();
     }
 
     @Override
