@@ -880,13 +880,38 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                 if (handler != null) {
                     handler.handleRemoval();
                     logger.trace("Handler of thing '{}' returned from handling its removal.", thing.getUID());
+                    return;
+                }
+
+                logger.trace("No handler registered for thing '{}', attempting to register for cleanup.",
+                        thing.getUID());
+
+                ThingHandlerFactory factory = findThingHandlerFactory(thing.getThingTypeUID());
+                if (factory != null) {
+                    try {
+                        // Register handler WITHOUT initializing - this allows cleanup but prevents going online
+                        doRegisterHandler(thing, factory);
+                        handler = thing.getHandler();
+                        if (handler != null) {
+                            handler.handleRemoval();
+                            logger.trace("Handler of thing '{}' cleanup completed.", thing.getUID());
+                            return;
+                        }
+                        logger.trace(
+                                "No handler instance for thing '{}' after registration attempt, proceeding with force remove.",
+                                thing.getUID());
+                    } catch (Exception ex) {
+                        logger.warn("Could not register handler for cleanup of thing '{}': {}", thing.getUID(),
+                                ex.getMessage());
+                    }
                 } else {
-                    logger.trace("No handler of thing '{}' available, proceeding with force remove.", thing.getUID());
-                    notifyRegistryAboutForceRemove(thing);
+                    logger.trace("No handler factory for thing '{}' available, proceeding with force remove.",
+                            thing.getUID());
                 }
             } catch (Exception ex) {
-                logger.error("The ThingHandler caused an exception while handling the removal of its thing", ex);
+                logger.error("Exception occurred while handling removal of thing '{}'", thing.getUID(), ex);
             }
+            notifyRegistryAboutForceRemove(thing);
         });
     }
 
