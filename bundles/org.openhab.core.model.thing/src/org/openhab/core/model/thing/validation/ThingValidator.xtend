@@ -15,10 +15,11 @@
  */
 package org.openhab.core.model.thing.validation
 
-import org.openhab.core.model.thing.thing.ModelThing
-import org.eclipse.xtext.validation.Check
-import org.openhab.core.model.thing.thing.ThingPackage
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.validation.Check
+import org.openhab.core.model.thing.thing.ModelThing
+import org.openhab.core.model.thing.thing.ThingPackage
 import org.openhab.core.thing.ThingUID
 
 /**
@@ -31,18 +32,19 @@ class ThingValidator extends AbstractThingValidator {
 	@Check
 	def check_thing_has_valid_id(ModelThing thing) {
 		if (thing.nested) {
+			val warnMsg = buildMsgWithLineNb(thing, "Provide a thing type ID and a thing ID in this format:\n <thingTypeId> <thingId>")
 			// We have to provide thingTypeId and a thingId
 			if (!thing.eIsSet(ThingPackage.Literals.MODEL_THING__THING_TYPE_ID)) {
 				if (thing.eIsSet(ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)) {
-					warning("Provide a thing type ID and a thing ID in this format:\n <thingTypeId> <thingId>", ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
+					warning(warnMsg, thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
 				} else {
 					if (thing.eIsSet(ThingPackage.Literals.MODEL_BRIDGE__BRIDGE)) {
-						warning("Provide a thing type ID and a thing ID in this format:\n <thingTypeId> <thingId>", ThingPackage.Literals.MODEL_BRIDGE__BRIDGE)
+						warning(warnMsg, thing, ThingPackage.Literals.MODEL_BRIDGE__BRIDGE)
 					}
 				}
 			} else {
 				if (!thing.eIsSet(ThingPackage.Literals.MODEL_THING__THING_ID)) {
-					warning("Provide a thing type ID and a thing ID in this format:\n <thingTypeId> <thingId>", ThingPackage.Literals.MODEL_THING__THING_TYPE_ID)
+					warning(warnMsg, thing, ThingPackage.Literals.MODEL_THING__THING_TYPE_ID)
 				}
 			}
 		} else { // thing in container
@@ -51,21 +53,36 @@ class ThingValidator extends AbstractThingValidator {
 				val thingIdFeature = NodeModelUtils.findNodesForFeature(thing, ThingPackage.Literals.MODEL_THING__THING_ID).head
 				val startOffset = thingTypeIdFeature.offset
 				val endOffset = thingIdFeature.endOffset
-				getMessageAcceptor().acceptWarning("Provide a thing UID in this format:\n <bindingId>:<thingTypeId>:<thingId>", thing, startOffset, endOffset - startOffset, null, null)
+				getMessageAcceptor().acceptWarning(
+					buildMsgWithLineNb(thing, "Provide a thing UID in this format:\n <bindingId>:<thingTypeId>:<thingId>"),
+					thing, startOffset, endOffset - startOffset, null, null)
 			} else {
 				if (thing.id !== null) {
 					try {
 						new ThingUID(thing.id)
 					} catch (IllegalArgumentException e) {
-						error(e.message, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
+						error(buildMsgWithLineNb(thing, e.message), thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
 					}
 				}
 			}
 		}
-
 	}
 
 	def private isNested(ModelThing thing) {
 		thing.eContainingFeature == ThingPackage.Literals.MODEL_BRIDGE__THINGS
+	}
+
+	def private buildMsgWithLineNb(EObject object, String msg) {
+		val node = NodeModelUtils.getNode(object)
+		if (node === null) {
+			return msg
+		}
+		val startLine = node.startLine
+		val endLine = node.endLine
+		if (startLine == endLine) {
+			return "Line " + startLine + ": " + msg
+		} else {
+			return "Line " + startLine + "-" + endLine + ": " + msg
+		}
 	}
 }
