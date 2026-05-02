@@ -532,8 +532,10 @@ public class DSLRuleProvider
                         .withTypeUID(DayOfWeekConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
             case WeekdayCondition weekdayCond -> {
-                String offset = weekdayCond.getOffset();
-                cfg.put("offset", offset == null ? 0 : Integer.valueOf(offset));
+                int offsetValue;
+                if (weekdayCond.getOffset() instanceof String offset && (offsetValue = Integer.parseInt(offset)) != 0) {
+                    cfg.put("offset", offsetValue);
+                }
                 yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
                         .withTypeUID("weekday".equals(weekdayCond.getType())
                                 ? EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID
@@ -541,17 +543,21 @@ public class DSLRuleProvider
                         .withConfiguration(cfg).build();
             }
             case HolidayCondition holidayCond -> {
-                String offset = holidayCond.getOffset();
-                cfg.put("offset", offset == null ? 0 : Integer.valueOf(offset));
+                int offsetValue;
+                if (holidayCond.getOffset() instanceof String offset && (offsetValue = Integer.parseInt(offset)) != 0) {
+                    cfg.put("offset", offsetValue);
+                }
                 yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
                         .withTypeUID(holidayCond.isNegation() ? EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID
                                 : EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID)
                         .withConfiguration(cfg).build();
             }
             case InDaysetCondition daysetCond -> {
-                String offset = daysetCond.getOffset();
+                int offsetValue;
+                if (daysetCond.getOffset() instanceof String offset && (offsetValue = Integer.parseInt(offset)) != 0) {
+                    cfg.put("offset", offsetValue);
+                }
                 cfg.put("dayset", daysetCond.getDayset());
-                cfg.put("offset", offset == null ? 0 : Integer.valueOf(offset));
                 yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
                         .withTypeUID(EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
