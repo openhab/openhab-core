@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -30,7 +31,6 @@ import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
@@ -158,6 +158,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             return null;
         }
 
+        boolean deprecatedButtonsDefinition = false;
         switch (widget) {
             case Image imageWidget:
                 setWidgetPropertyFromComponentConfig(imageWidget, component, "url");
@@ -209,7 +210,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 setWidgetPropertyFromComponentConfig(colortemperaturepickerWidget, component, "maxValue");
                 break;
             case Buttongrid buttongridWidget:
-                addWidgetButtons(buttongridWidget.getButtons(), component);
+                deprecatedButtonsDefinition = addWidgetButtons(buttongridWidget, component);
                 break;
             case Button buttonWidget:
                 setWidgetPropertyFromComponentConfig(buttonWidget, component, "row");
@@ -225,7 +226,10 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 break;
         }
 
-        setWidgetPropertyFromComponentConfig(widget, component, "item");
+        // In case deprecated button definition was encountered, the item is not set on the Buttongrid widget
+        if (!deprecatedButtonsDefinition) {
+            setWidgetPropertyFromComponentConfig(widget, component, "item");
+        }
         setWidgetPropertyFromComponentConfig(widget, component, "label");
         setWidgetPropertyFromComponentConfig(widget, component, "icon");
         setWidgetPropertyFromComponentConfig(widget, component, "staticIcon");
@@ -323,8 +327,15 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         }
     }
 
-    private void addWidgetButtons(List<ButtonDefinition> buttons, UIComponent component) {
+    private boolean addWidgetButtons(Buttongrid buttongridWidget, UIComponent component) {
+        boolean deprecated = false;
         if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
+            // Defining buttons through "buttons" component config is now deprecated.
+            // The relevant way to define buttons in a Buttongrid is now to use Button widget as sub-widgets.
+            // This old way to do is still supported for backward compatibility, sub-widgets are created.
+            deprecated = true;
+            logger.warn(
+                    "Defining buttons as properties of a Butongrid widget is deprecated although still supported; please prefer Button sub-widgets");
             Object sourceButtons = component.getConfig().get("buttons");
             if (sourceButtons instanceof Collection<?> sourceButtonsCollection) {
                 for (Object sourceButton : sourceButtonsCollection) {
@@ -336,7 +347,12 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                         String cmd = stripQuotes(splitted2[0].trim());
                         String label = stripQuotes(splitted2[1].trim());
                         String icon = splitted2.length < 3 ? null : stripQuotes(splitted2[2].trim());
-                        ButtonDefinition button = sitemapFactory.createButtonDefinition();
+                        Button button = (Button) Objects.requireNonNull(sitemapFactory.createWidget(
+                                org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.BUTTON,
+                                buttongridWidget));
+                        if (component.getConfig().get("item") instanceof String item) {
+                            button.setItem(item);
+                        }
                         button.setRow(row);
                         button.setColumn(column);
                         if (cmd != null) {
@@ -346,11 +362,12 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                             button.setLabel(label);
                         }
                         button.setIcon(icon);
-                        buttons.add(button);
+                        buttongridWidget.getWidgets().add(button);
                     }
                 }
             }
         }
+        return deprecated;
     }
 
     private void addWidgetRules(List<Rule> rules, UIComponent component, String key) {

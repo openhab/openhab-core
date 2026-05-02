@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.ButtonDefinition;
-import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
 import org.openhab.core.sitemap.Condition;
@@ -88,9 +86,6 @@ public class UIComponentSitemapMapper {
         switch (widget) {
             case Switch switchWidget -> {
                 addConfig(widgetComponent, "mappings", map(switchWidget.getMappings()));
-            }
-            case Buttongrid buttongridWidget -> {
-                addConfig(widgetComponent, "buttons", map(buttongridWidget.getButtons()));
             }
             case Button buttonWidget -> {
                 addConfig(widgetComponent, "row", buttonWidget.getRow());
@@ -170,7 +165,7 @@ public class UIComponentSitemapMapper {
                 }
             }
             default -> {
-                LOGGER.debug("Widget type {} is currently not supported", widget.getWidgetType());
+                // nothing to do
             }
         }
 
@@ -194,8 +189,6 @@ public class UIComponentSitemapMapper {
             return map(rule);
         } else if (object instanceof Mapping mapping) {
             return map(mapping);
-        } else if (object instanceof ButtonDefinition buttonDefinition) {
-            return map(buttonDefinition);
         }
         return null;
     }
@@ -233,17 +226,6 @@ public class UIComponentSitemapMapper {
         }
         builder.append("=\"").append(mapping.getLabel()).append("\"");
         String icon = mapping.getIcon();
-        if (icon != null) {
-            builder.append("=").append(icon);
-        }
-        return builder.toString();
-    }
-
-    private static String map(ButtonDefinition button) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(button.getRow()).append(":").append(button.getColumn()).append(":").append(button.getCmd());
-        builder.append("=").append(button.getLabel());
-        String icon = button.getIcon();
         if (icon != null) {
             builder.append("=").append(icon);
         }

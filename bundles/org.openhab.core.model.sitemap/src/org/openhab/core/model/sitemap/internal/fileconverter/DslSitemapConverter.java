@@ -25,8 +25,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.sitemap.internal.DslSitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.ModelButton;
-import org.openhab.core.model.sitemap.sitemap.ModelButtonDefinition;
-import org.openhab.core.model.sitemap.sitemap.ModelButtonDefinitionList;
 import org.openhab.core.model.sitemap.sitemap.ModelButtongrid;
 import org.openhab.core.model.sitemap.sitemap.ModelChart;
 import org.openhab.core.model.sitemap.sitemap.ModelColorArray;
@@ -59,7 +57,6 @@ import org.openhab.core.model.sitemap.sitemap.ModelWidget;
 import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapModel;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colorpicker;
@@ -178,10 +175,6 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             }
             case Buttongrid buttongridWidget -> {
                 ModelButtongrid modelButtongrid = SitemapFactory.eINSTANCE.createModelButtongrid();
-                List<ButtonDefinition> buttons = buttongridWidget.getButtons();
-                if (!buttons.isEmpty()) {
-                    modelButtongrid.setButtons(modelButtons(buttons));
-                }
                 modelWidget = modelButtongrid;
             }
             case Button buttonWidget -> {
@@ -331,21 +324,6 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             modelMappings.add(modelMapping);
         });
         return modelMappingList;
-    }
-
-    private ModelButtonDefinitionList modelButtons(List<ButtonDefinition> buttons) {
-        ModelButtonDefinitionList modelButtonList = SitemapFactory.eINSTANCE.createModelButtonDefinitionList();
-        EList<ModelButtonDefinition> modelButtons = modelButtonList.getElements();
-        buttons.forEach(button -> {
-            ModelButtonDefinition modelButton = SitemapFactory.eINSTANCE.createModelButtonDefinition();
-            modelButton.setRow(button.getRow());
-            modelButton.setColumn(button.getColumn());
-            modelButton.setCmd(button.getCmd());
-            modelButton.setLabel(button.getLabel());
-            modelButton.setIcon(button.getIcon());
-            modelButtons.add(modelButton);
-        });
-        return modelButtonList;
     }
 
     private ModelIconRuleList modelIconRules(List<Rule> rules) {

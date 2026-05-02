@@ -18,8 +18,6 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.ButtonDefinition;
-import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
 import org.openhab.core.sitemap.Condition;
@@ -110,12 +108,6 @@ public class SitemapDTOMapper {
                     widgetDTO.mappings = mappings.stream().map(SitemapDTOMapper::map).toList();
                 }
             }
-            case Buttongrid buttongridWidget -> {
-                List<ButtonDefinition> buttons = buttongridWidget.getButtons();
-                if (!buttons.isEmpty()) {
-                    widgetDTO.buttons = buttons.stream().map(SitemapDTOMapper::map).toList();
-                }
-            }
             case Button buttonWidget -> {
                 widgetDTO.row = buttonWidget.getRow();
                 widgetDTO.column = buttonWidget.getColumn();
@@ -199,7 +191,7 @@ public class SitemapDTOMapper {
                 }
             }
             default -> {
-                LOGGER.debug("Widget type {} is currently not supported", widget.getWidgetType());
+                // nothing to do
             }
         }
 
@@ -239,16 +231,6 @@ public class SitemapDTOMapper {
         return mappingDTO;
     }
 
-    private static ButtonDefinitionDTO map(ButtonDefinition button) {
-        ButtonDefinitionDTO buttonDTO = new ButtonDefinitionDTO();
-        buttonDTO.row = button.getRow();
-        buttonDTO.column = button.getColumn();
-        buttonDTO.command = button.getCmd();
-        buttonDTO.label = button.getLabel();
-        buttonDTO.icon = button.getIcon();
-        return buttonDTO;
-    }
-
     public static Sitemap map(SitemapDefinitionDTO sitemapDTO, SitemapFactory sitemapFactory) {
         if (sitemapDTO.name == null) {
             throw new IllegalArgumentException("Sitemap name must not be null");
@@ -274,10 +256,6 @@ public class SitemapDTOMapper {
             case Switch switchWidget -> {
                 List<MappingDTO> mappings = widgetDTO.mappings != null ? widgetDTO.mappings : List.of();
                 switchWidget.setMappings(mappings.stream().map(mapping -> map(mapping, sitemapFactory)).toList());
-            }
-            case Buttongrid buttongridWidget -> {
-                List<ButtonDefinitionDTO> buttons = widgetDTO.buttons != null ? widgetDTO.buttons : List.of();
-                buttongridWidget.setButtons(buttons.stream().map(button -> map(button, sitemapFactory)).toList());
             }
             case Button buttonWidget -> {
                 if (widgetDTO.row != null) {
@@ -354,7 +332,6 @@ public class SitemapDTOMapper {
                 // nothing to do
             }
         }
-        ;
 
         widget.setItem(widgetDTO.item);
         widget.setLabel(widgetDTO.label);
@@ -392,24 +369,6 @@ public class SitemapDTOMapper {
         }
         mapping.setReleaseCmd(mappingDTO.releaseCommand);
         return mapping;
-    }
-
-    private static ButtonDefinition map(ButtonDefinitionDTO buttonDefinitionDTO, SitemapFactory sitemapFactory) {
-        ButtonDefinition buttonDefinition = sitemapFactory.createButtonDefinition();
-        if (buttonDefinitionDTO.row != null) {
-            buttonDefinition.setRow(buttonDefinitionDTO.row);
-        }
-        if (buttonDefinitionDTO.column != null) {
-            buttonDefinition.setColumn(buttonDefinitionDTO.column);
-        }
-        if (buttonDefinitionDTO.command != null) {
-            buttonDefinition.setCmd(buttonDefinitionDTO.command);
-        }
-        if (buttonDefinitionDTO.label != null) {
-            buttonDefinition.setLabel(buttonDefinitionDTO.label);
-        }
-        buttonDefinition.setIcon(buttonDefinitionDTO.icon);
-        return buttonDefinition;
     }
 
     private static Rule map(RuleDTO ruleDTO, SitemapFactory sitemapFactory) {

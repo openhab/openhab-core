@@ -817,17 +817,6 @@ public class SitemapResource
             bean.minValue = colortemperaturepickerWidget.getMinValue();
             bean.maxValue = colortemperaturepickerWidget.getMaxValue();
         }
-        if (widget instanceof Buttongrid buttonGridWidget) {
-            bean.mappings = buttonGridWidget.getButtons().stream().map(button -> {
-                MappingDTO mappingBean = new MappingDTO();
-                mappingBean.row = button.getRow();
-                mappingBean.column = button.getColumn();
-                mappingBean.command = button.getCmd();
-                mappingBean.label = button.getLabel();
-                mappingBean.icon = button.getIcon();
-                return mappingBean;
-            }).toList();
-        }
         if (widget instanceof Button buttonWidget) {
             // Get the icon from the widget only
             if (widget.getIcon() == null && widget.getIconRules().isEmpty()) {
