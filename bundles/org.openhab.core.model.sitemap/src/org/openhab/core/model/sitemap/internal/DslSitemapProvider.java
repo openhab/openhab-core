@@ -14,6 +14,7 @@ package org.openhab.core.model.sitemap.internal;
 
 import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.ModelWebview;
 import org.openhab.core.model.sitemap.sitemap.ModelWidget;
+import org.openhab.core.model.sitemap.sitemap.SitemapModel;
 import org.openhab.core.sitemap.Button;
 import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
@@ -102,7 +104,9 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         implements SitemapProvider, ModelRepositoryChangeListener {
 
     private static final String SITEMAP_MODEL_NAME = "sitemap";
-    protected static final String SITEMAP_FILEEXT = "." + SITEMAP_MODEL_NAME;
+    private static final String SITEMAP_FILEEXT = "." + SITEMAP_MODEL_NAME;
+    private static final String SITEMAPS_MODEL_NAME = "sitemaps";
+    private static final String SITEMAPS_FILEEXT = "." + SITEMAPS_MODEL_NAME;
     protected static final String MODEL_TYPE_PREFIX = "Model";
 
     private final Logger logger = LoggerFactory.getLogger(DslSitemapProvider.class);
@@ -119,7 +123,9 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         this.modelRepo = modelRepo;
         this.sitemapRegistry = sitemapRegistry;
         this.sitemapFactory = sitemapFactory;
-        refreshSitemapModels();
+        sitemapCache.clear();
+        refreshSitemapModels(SITEMAP_MODEL_NAME);
+        refreshSitemapModels(SITEMAPS_MODEL_NAME);
         sitemapRegistry.addSitemapProvider(this);
         modelRepo.addModelRepositoryChangeListener(this);
     }
@@ -146,24 +152,26 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         return sitemapCache.getOrDefault(modelName, List.of()).stream().toList();
     }
 
-    private void refreshSitemapModels() {
-        sitemapCache.clear();
-        Iterable<String> sitemapFilenames = modelRepo.getAllModelNamesOfType(SITEMAP_MODEL_NAME);
-        for (String filename : sitemapFilenames) {
-            ModelSitemap modelSitemap = (ModelSitemap) modelRepo.getModel(filename);
-            if (modelSitemap != null) {
-                sitemapCache.put(filename, parseModelSitemap(modelSitemap));
+    private void refreshSitemapModels(String type) {
+        for (String filename : modelRepo.getAllModelNamesOfType(type)) {
+            EObject model = modelRepo.getModel(filename);
+            if (model instanceof SitemapModel sitemapModel) {
+                List<Sitemap> newSitemaps = new ArrayList<>();
+                for (ModelSitemap modelSitemap : sitemapModel.getSitemaps()) {
+                    newSitemaps.add(parseModelSitemap(modelSitemap));
+                }
+                sitemapCache.put(filename, newSitemaps);
             }
         }
     }
 
-    private Collection<Sitemap> parseModelSitemap(ModelSitemap modelSitemap) {
+    private Sitemap parseModelSitemap(ModelSitemap modelSitemap) {
         Sitemap sitemap = sitemapFactory.createSitemap(modelSitemap.getName());
         sitemap.setLabel(modelSitemap.getLabel());
         sitemap.setIcon(modelSitemap.getIcon());
         List<Widget> widgets = sitemap.getWidgets();
         modelSitemap.getChildren().forEach(child -> addWidget(widgets, child, sitemap));
-        return List.of(sitemap);
+        return sitemap;
     }
 
     private void addWidget(List<Widget> widgets, ModelWidget modelWidget, Parent parent) {
@@ -369,7 +377,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
 
     @Override
     public void modelChanged(String modelName, EventType type) {
-        if (!modelName.endsWith(SITEMAP_FILEEXT)) {
+        if (!modelName.endsWith(SITEMAP_FILEEXT) && !modelName.endsWith(SITEMAPS_FILEEXT)) {
             return;
         }
 
@@ -381,10 +389,10 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                 });
             }
         } else {
-            EObject modelSitemapObject = modelRepo.getModel(modelName);
+            EObject model = modelRepo.getModel(modelName);
             // if the sitemap file is empty it will not be in the repo and thus there is no need to cache it here
-            if (modelSitemapObject instanceof ModelSitemap modelSitemap) {
-                Map<String, Sitemap> newSitemaps = parseModelSitemap(modelSitemap).stream()
+            if (model instanceof SitemapModel sitemapModel) {
+                Map<String, Sitemap> newSitemaps = sitemapModel.getSitemaps().stream().map(this::parseModelSitemap)
                         .collect(Collectors.toMap(Sitemap::getName, Function.identity()));
                 if (!isIsolatedModel(modelName)) {
                     Map<String, Sitemap> oldSitemaps = sitemapCache.getOrDefault(modelName, Set.of()).stream()

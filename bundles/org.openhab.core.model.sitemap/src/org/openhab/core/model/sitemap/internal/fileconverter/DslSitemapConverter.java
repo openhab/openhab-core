@@ -125,11 +125,10 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
         if (sitemaps.isEmpty()) {
             return;
         }
-        if (sitemaps.size() > 1) {
-            logger.warn("Only one sitemap at a time can be serialized to DSL");
-            return;
+        SitemapModel model = SitemapFactory.eINSTANCE.createSitemapModel();
+        for (Sitemap sitemap : sitemaps) {
+            model.getSitemaps().add(buildModelSitemap(sitemap));
         }
-        SitemapModel model = buildModelSitemap(sitemaps.getFirst());
         elementsToGenerate.put(id, model);
     }
 
@@ -137,7 +136,7 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
     public void generateFormat(String id, OutputStream out) {
         SitemapModel model = elementsToGenerate.remove(id);
         if (model != null) {
-            modelRepository.generateFileFormat(out, "sitemap", model);
+            modelRepository.generateFileFormat(out, "sitemaps", model);
         }
     }
 
@@ -413,7 +412,7 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
     @Override
     public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
-        return modelRepository.createIsolatedModel("sitemap", inputStream, errors, warnings);
+        return modelRepository.createIsolatedModel("sitemaps", inputStream, errors, warnings);
     }
 
     @Override

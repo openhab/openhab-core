@@ -25,7 +25,7 @@ public interface ModelParser {
     /**
      * Returns the file extensions of the models this parser registers for.
      *
-     * @return file extension of model files
+     * @return file extensions of model files as a comma-separated list
      */
     String getExtension();
 }
