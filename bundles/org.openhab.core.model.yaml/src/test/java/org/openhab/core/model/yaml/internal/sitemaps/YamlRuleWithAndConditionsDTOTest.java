@@ -80,8 +80,8 @@ public class YamlRuleWithAndConditionsDTOTest {
         YamlRuleWithAndConditionsDTO rule1 = new YamlRuleWithAndConditionsDTO();
         YamlRuleWithAndConditionsDTO rule2 = new YamlRuleWithAndConditionsDTO();
 
-        assertTrue(rule1.equals(rule1));
-        assertEquals(rule1.hashCode(), rule1.hashCode());
+        assertTrue(rule1.equals(rule2));
+        assertEquals(rule1.hashCode(), rule2.hashCode());
 
         rule1.value = "green";
         assertFalse(rule1.equals(rule2));

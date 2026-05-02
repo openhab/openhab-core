@@ -81,8 +81,8 @@ public class YamlConditionDTOTest {
         YamlConditionDTO condition1 = new YamlConditionDTO();
         YamlConditionDTO condition2 = new YamlConditionDTO();
 
-        assertTrue(condition1.equals(condition1));
-        assertEquals(condition1.hashCode(), condition1.hashCode());
+        assertTrue(condition1.equals(condition2));
+        assertEquals(condition1.hashCode(), condition2.hashCode());
 
         condition1.argument = "ON";
         assertFalse(condition1.equals(condition2));
