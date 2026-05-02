@@ -230,7 +230,7 @@ public class YamlWidgetLabelDTOTest {
 
         label1.label = "Label";
         assertFalse(label1.equals(label2));
-        label2.label = "Other llabel";
+        label2.label = "Other label";
         assertFalse(label1.equals(label2));
         label2.label = "Label";
         assertTrue(label1.equals(label2));

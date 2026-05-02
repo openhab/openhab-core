@@ -80,7 +80,7 @@ public class YamlWidgetLabelDTO {
             addToList(errors, "invalid rule in \"labelColor\" field: %s".formatted(error));
         });
         ruleWarnings.forEach(warning -> {
-            addToList(errors, "rule in \"labelColor\" field: %s".formatted(warning));
+            addToList(warnings, "rule in \"labelColor\" field: %s".formatted(warning));
         });
 
         ruleErrors.clear();
@@ -126,7 +126,7 @@ public class YamlWidgetLabelDTO {
             addToList(errors, "invalid rule in \"valueColor\" field: %s".formatted(error));
         });
         ruleWarnings.forEach(warning -> {
-            addToList(errors, "rule in \"valueColor\" field: %s".formatted(warning));
+            addToList(warnings, "rule in \"valueColor\" field: %s".formatted(warning));
         });
 
         return ok;

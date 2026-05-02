@@ -67,7 +67,7 @@ public class YamlElementUtils {
     }
 
     public static boolean isValidIcon(String icon) {
-        String[] segments = icon.split(AbstractUID.SEPARATOR);
+        String[] segments = icon.split(AbstractUID.SEPARATOR, -1);
         int nb = segments.length;
         if (nb > 3) {
             return false;

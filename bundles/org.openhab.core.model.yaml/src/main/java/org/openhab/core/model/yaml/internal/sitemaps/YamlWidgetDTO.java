@@ -197,6 +197,7 @@ public class YamlWidgetDTO {
                     }
                 } else {
                     addToList(errors, "invalid type for rule in \"visibility\" field");
+                    ok = false;
                 }
             }
         } else if (visibility instanceof YamlRuleWithAndConditionsDTO rule) {

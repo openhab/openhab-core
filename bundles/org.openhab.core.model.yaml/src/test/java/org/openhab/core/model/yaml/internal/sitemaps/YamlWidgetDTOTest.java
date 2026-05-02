@@ -123,7 +123,7 @@ public class YamlWidgetDTOTest {
         assertEquals(0, warn.size());
 
         widget.visibility = List.of();
-        assertTrue(label.isValid(err, warn));
+        assertTrue(widget.isValid(err, warn));
 
         YamlRuleWithUniqueConditionDTO rule1 = new YamlRuleWithUniqueConditionDTO();
         widget.visibility = rule1;

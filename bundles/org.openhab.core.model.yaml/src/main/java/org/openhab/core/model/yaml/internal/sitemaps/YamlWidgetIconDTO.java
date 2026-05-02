@@ -110,7 +110,7 @@ public class YamlWidgetIconDTO {
             addToList(errors, "invalid rule in \"name\" field: %s".formatted(error));
         });
         ruleWarnings.forEach(warning -> {
-            addToList(errors, "rule in \"name\" field: %s".formatted(warning));
+            addToList(warnings, "rule in \"name\" field: %s".formatted(warning));
         });
 
         ruleErrors.clear();
@@ -154,7 +154,7 @@ public class YamlWidgetIconDTO {
             addToList(errors, "invalid rule in \"color\" field: %s".formatted(error));
         });
         ruleWarnings.forEach(warning -> {
-            addToList(errors, "rule in \"color\" field: %s".formatted(warning));
+            addToList(warnings, "rule in \"color\" field: %s".formatted(warning));
         });
 
         return ok;
