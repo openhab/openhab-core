@@ -129,6 +129,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Add YAML output for things
  * @author Laurent Garnier - Add new API for conversion between file format and JSON
  * @author Mark Herwege - Add sitemap DSL
+ * @author Laurent Garnier - Add sitemap YAML
  */
 @Component
 @JaxrsResource
@@ -206,6 +207,27 @@ public class FileFormatResource implements RESTResource {
                       param: my param value
             """;
 
+    private static final String DSL_SITEMAPS_EXAMPLE = """
+            sitemap MySitemap label="My Sitemap" {
+                Frame {
+                    Input item=MyItem label="My Input"
+                }
+            }
+            """;
+
+    private static final String YAML_SITEMAPS_EXAMPLE = """
+            version: 1
+            sitemaps:
+              MySitemap:
+                label: My Sitemap
+                widgets:
+                  - type: Frame
+                    widgets:
+                      - type: Input
+                        item: MyItem
+                        label: My Input
+            """;
+
     private static final String YAML_FULL_EXAMPLE = """
             version: 1
             things:
@@ -251,27 +273,6 @@ public class FileFormatResource implements RESTResource {
                     value: my value
                     config:
                       param: my param value
-            sitemaps:
-              MySitemap:
-                label: My Sitemap
-                widgets:
-                  - type: Frame
-                    widgets:
-                      - type: Input
-                        item: MyItem
-                        label: My Input
-            """;
-
-    private static final String DSL_SITEMAPS_EXAMPLE = """
-            sitemap MySitemap label="My Sitemap" {
-                Frame {
-                    Input item=MyItem label="My Input"
-                }
-            }
-            """;
-
-    private static final String YAML_SITEMAPS_EXAMPLE = """
-            version: 1
             sitemaps:
               MySitemap:
                 label: My Sitemap

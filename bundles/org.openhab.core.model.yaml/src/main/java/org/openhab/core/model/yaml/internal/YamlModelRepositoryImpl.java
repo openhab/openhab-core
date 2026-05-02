@@ -89,6 +89,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createIsolatedModel and
  *         removeIsolatedModel
  * @author Jimmy Tanagra - Add YamlPageDTO and YamlWidgetDTO
+ * @author Laurent Garnier - Add YamlSitemapDTO
  */
 @NonNullByDefault
 @Component(immediate = true)

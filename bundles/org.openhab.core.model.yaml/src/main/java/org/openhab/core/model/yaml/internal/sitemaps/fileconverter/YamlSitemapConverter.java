@@ -32,7 +32,6 @@ import org.openhab.core.model.yaml.internal.sitemaps.YamlWidgetDTO;
 import org.openhab.core.model.yaml.internal.sitemaps.YamlWidgetIconDTO;
 import org.openhab.core.model.yaml.internal.sitemaps.YamlWidgetLabelDTO;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
 import org.openhab.core.sitemap.Condition;
@@ -113,7 +112,7 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
     private YamlWidgetDTO buildWidgetDTO(Widget widget) {
         YamlWidgetDTO dto = new YamlWidgetDTO();
         dto.type = widget.getWidgetType();
-        dto.item = widget instanceof Buttongrid ? null : widget.getItem();
+        dto.item = widget.getItem();
 
         List<Object> labelColorRules = buildRules(widget.getLabelColor(), false);
         List<Object> valueColorRules = buildRules(widget.getValueColor(), false);
