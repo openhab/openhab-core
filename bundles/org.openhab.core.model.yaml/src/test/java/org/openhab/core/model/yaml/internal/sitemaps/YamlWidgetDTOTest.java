@@ -1051,24 +1051,24 @@ public class YamlWidgetDTOTest {
         widget2.type = "Frame";
         assertFalse(widget1.equals(widget2));
         widget2.type = "Text";
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
 
         widget1.item = "item";
         assertFalse(widget1.equals(widget2));
         widget2.item = "item2";
         assertFalse(widget1.equals(widget2));
         widget2.item = "item";
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
 
         widget1.label = "Label";
         assertFalse(widget1.equals(widget2));
         widget2.label = "Other label";
         assertFalse(widget1.equals(widget2));
         widget2.label = "Label";
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
         YamlWidgetLabelDTO label = new YamlWidgetLabelDTO();
         label.label = "Label";
         label.format = "%s";
@@ -1082,8 +1082,8 @@ public class YamlWidgetDTOTest {
         label2.labelColor = "green";
         label2.valueColor = "red";
         widget2.label = label2;
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
         label2.label = "Other label";
         assertFalse(widget1.equals(widget2));
         label2.label = "Label";
@@ -1096,15 +1096,15 @@ public class YamlWidgetDTOTest {
         label2.valueColor = "orange";
         assertFalse(widget1.equals(widget2));
         label2.valueColor = "red";
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
 
         widget1.icon = "material:home";
         assertFalse(widget1.equals(widget2));
         widget2.icon = "material:favorite";
         assertFalse(widget1.equals(widget2));
         widget2.icon = "material:home";
-        assertTrue(widget1.equals(widget1));
+        assertTrue(widget1.equals(widget2));
         YamlWidgetIconDTO icon1 = new YamlWidgetIconDTO();
         icon1.name = "material:home";
         icon1.staticIcon = true;
@@ -1116,8 +1116,8 @@ public class YamlWidgetDTOTest {
         icon2.staticIcon = true;
         icon2.color = "green";
         widget2.icon = icon2;
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
         icon2.name = "material:favorite";
         assertFalse(widget1.equals(widget2));
         icon2.name = "material:home";
@@ -1127,8 +1127,8 @@ public class YamlWidgetDTOTest {
         icon2.color = "blue";
         assertFalse(widget1.equals(widget2));
         icon2.color = "green";
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
 
         YamlWidgetDTO subWidgetText2 = new YamlWidgetDTO();
         subWidgetText2.type = "Text";
@@ -1138,8 +1138,8 @@ public class YamlWidgetDTOTest {
 
         widget1.widgets = List.of();
         widget2.widgets = List.of();
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
 
         widget1.widgets = List.of(subWidgetText, subWidgetSwitch);
         widget2.widgets = null;
@@ -1153,8 +1153,8 @@ public class YamlWidgetDTOTest {
         widget2.widgets = List.of(subWidgetSwitch2, subWidgetText2);
         assertFalse(widget1.equals(widget2));
         widget2.widgets = List.of(subWidgetText2, subWidgetSwitch2);
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
 
         YamlRuleWithUniqueConditionDTO rule1 = new YamlRuleWithUniqueConditionDTO();
         rule1.operator = "<";
@@ -1180,16 +1180,16 @@ public class YamlWidgetDTOTest {
         widget2.visibility = rule4;
         assertFalse(widget1.equals(widget2));
         widget2.visibility = rule3;
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
         widget1.visibility = rule2;
         widget2.visibility = null;
         assertFalse(widget1.equals(widget2));
         widget2.visibility = rule3;
         assertFalse(widget1.equals(widget2));
         widget2.visibility = rule4;
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
         widget1.visibility = List.of(rule1, rule2);
         assertFalse(widget1.equals(widget2));
         widget2.visibility = null;
@@ -1199,8 +1199,8 @@ public class YamlWidgetDTOTest {
         widget2.visibility = List.of(rule4, rule3);
         assertFalse(widget1.equals(widget2));
         widget2.visibility = List.of(rule3, rule4);
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
 
         widget1.widgets = null;
         widget1.type = "Input";
@@ -1208,14 +1208,14 @@ public class YamlWidgetDTOTest {
         widget2.widgets = null;
         widget2.type = "Input";
         widget2.item = "item";
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
         widget1.hint = "number";
         assertFalse(widget1.equals(widget2));
         widget2.hint = "date";
         assertFalse(widget1.equals(widget2));
         widget2.hint = "number";
-        assertTrue(widget1.equals(widget1));
-        assertEquals(widget1.hashCode(), widget1.hashCode());
+        assertTrue(widget1.equals(widget2));
+        assertEquals(widget1.hashCode(), widget2.hashCode());
     }
 }

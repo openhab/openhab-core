@@ -183,8 +183,9 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
                 String format = null;
                 if (label != null) {
                     int idx = label.indexOf("[");
-                    if (idx >= 0) {
-                        format = label.substring(idx + 1, label.length() - 1).trim();
+                    int idx2 = label.lastIndexOf("]");
+                    if (idx >= 0 && idx2 >= 0 && idx < idx2) {
+                        format = (idx + 1) == idx2 ? "" : label.substring(idx + 1, idx2);
                         label = label.substring(0, idx).trim();
                     }
                 }

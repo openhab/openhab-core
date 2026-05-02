@@ -108,8 +108,8 @@ public class YamlSitemapDTOTest {
         sitemap2.name = "demo2";
         assertFalse(sitemap1.equals(sitemap2));
         sitemap2.name = "demo";
-        assertTrue(sitemap1.equals(sitemap1));
-        assertEquals(sitemap1.hashCode(), sitemap1.hashCode());
+        assertTrue(sitemap1.equals(sitemap2));
+        assertEquals(sitemap1.hashCode(), sitemap2.hashCode());
 
         YamlWidgetDTO widget1 = new YamlWidgetDTO();
         widget1.type = "Text";
@@ -122,8 +122,8 @@ public class YamlSitemapDTOTest {
 
         sitemap1.widgets = List.of();
         sitemap2.widgets = List.of();
-        assertTrue(sitemap1.equals(sitemap1));
-        assertEquals(sitemap1.hashCode(), sitemap1.hashCode());
+        assertTrue(sitemap1.equals(sitemap2));
+        assertEquals(sitemap1.hashCode(), sitemap2.hashCode());
 
         sitemap1.widgets = List.of(widget1, widget2);
         sitemap2.widgets = null;
@@ -135,8 +135,8 @@ public class YamlSitemapDTOTest {
         sitemap2.widgets = List.of(widget4, widget3);
         assertFalse(sitemap1.equals(sitemap2));
         sitemap2.widgets = List.of(widget3, widget4);
-        assertTrue(sitemap1.equals(sitemap1));
-        assertEquals(sitemap1.hashCode(), sitemap1.hashCode());
+        assertTrue(sitemap1.equals(sitemap2));
+        assertEquals(sitemap1.hashCode(), sitemap2.hashCode());
 
         sitemap1.label = "Demo Sitemap";
         assertFalse(sitemap1.equals(sitemap2));
