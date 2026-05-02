@@ -158,6 +158,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             return null;
         }
 
+        boolean deprecatedButtonsDefinition = false;
         switch (widget) {
             case Image imageWidget:
                 setWidgetPropertyFromComponentConfig(imageWidget, component, "url");
@@ -209,7 +210,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 setWidgetPropertyFromComponentConfig(colortemperaturepickerWidget, component, "maxValue");
                 break;
             case Buttongrid buttongridWidget:
-                addWidgetButtons(buttongridWidget, component);
+                deprecatedButtonsDefinition = addWidgetButtons(buttongridWidget, component);
                 break;
             case Button buttonWidget:
                 setWidgetPropertyFromComponentConfig(buttonWidget, component, "row");
@@ -225,7 +226,8 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 break;
         }
 
-        if (!(widget instanceof Buttongrid)) {
+        // In case deprecated button definition was encountered, the item is not set on the Buttongrid widget
+        if (!deprecatedButtonsDefinition) {
             setWidgetPropertyFromComponentConfig(widget, component, "item");
         }
         setWidgetPropertyFromComponentConfig(widget, component, "label");
@@ -325,12 +327,17 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         }
     }
 
-    private void addWidgetButtons(Buttongrid buttongridWidget, UIComponent component) {
+    private boolean addWidgetButtons(Buttongrid buttongridWidget, UIComponent component) {
+        boolean deprecated = false;
         if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
+            // Defining buttons through "buttons" component config is now deprecated.
+            // The relevant way to define buttons in a Buttongrid is now to use Button widget as sub-widgets.
+            // This old way to do is still supported for backward compatibility, sub-widgets are created.
+            deprecated = true;
+            logger.warn(
+                    "Defining buttons as properties of a Butongrid widget is deprecated although still supported; please prefer Button sub-widgets");
             Object sourceButtons = component.getConfig().get("buttons");
             if (sourceButtons instanceof Collection<?> sourceButtonsCollection) {
-                logger.warn(
-                        "Defining buttons as properties of a Butongrid widget is deprecated although still supported; please prefer Button sub-widgets");
                 for (Object sourceButton : sourceButtonsCollection) {
                     if (sourceButton instanceof String) {
                         String[] splitted1 = sourceButton.toString().split(":", 3);
@@ -360,6 +367,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 }
             }
         }
+        return deprecated;
     }
 
     private void addWidgetRules(List<Rule> rules, UIComponent component, String key) {

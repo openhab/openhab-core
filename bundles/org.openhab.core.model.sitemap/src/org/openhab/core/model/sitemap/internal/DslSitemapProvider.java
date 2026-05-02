@@ -170,6 +170,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         String widgetType = getWidgetType(modelWidget);
         Widget widget = sitemapFactory.createWidget(widgetType, parent);
         if (widget != null) {
+            boolean deprecatedButtonsDefinition = false;
             switch (widget) {
                 case Image imageWidget:
                     ModelImage modelImage = (ModelImage) modelWidget;
@@ -233,7 +234,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     break;
                 case Buttongrid buttongridWidget:
                     ModelButtongrid modelButtongrid = (ModelButtongrid) modelWidget;
-                    addWidgetButtons(buttongridWidget, modelButtongrid);
+                    deprecatedButtonsDefinition = addWidgetButtons(buttongridWidget, modelButtongrid);
                     break;
                 case Button buttonWidget:
                     ModelButton modelButton = (ModelButton) modelWidget;
@@ -251,9 +252,8 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     break;
             }
 
-            if (!(widget instanceof Buttongrid)) {
-                widget.setItem(modelWidget.getItem());
-            }
+            // In case deprecated button definition was encountered, the item is not set on the Buttongrid widget
+            widget.setItem(deprecatedButtonsDefinition ? null : modelWidget.getItem());
             widget.setLabel(modelWidget.getLabel());
             String staticIcon = modelWidget.getStaticIcon();
             if (staticIcon != null && !staticIcon.isEmpty()) {
@@ -301,9 +301,14 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         }
     }
 
-    private void addWidgetButtons(Buttongrid buttongridWidget, ModelButtongrid modelButtongrid) {
+    private boolean addWidgetButtons(Buttongrid buttongridWidget, ModelButtongrid modelButtongrid) {
+        boolean deprecated = false;
         ModelButtonDefinitionList modelButtonList = modelButtongrid.getButtons();
         if (modelButtonList != null) {
+            // Defining buttons through "buttons" field is now deprecated.
+            // The relevant way to define buttons in a Buttongrid is now to use Button widget as sub-widgets.
+            // This old way to do is still supported for backward compatibility, sub-widgets are created.
+            deprecated = true;
             logger.warn(
                     "Defining buttons as properties of a Butongrid widget is deprecated although still supported; please prefer Button sub-widgets");
             EList<ModelButtonDefinition> modelButtons = modelButtonList.getElements();
@@ -319,6 +324,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                 buttongridWidget.getWidgets().add(button);
             });
         }
+        return deprecated;
     }
 
     private void addWidgetVisibilityRules(List<Rule> visibilityRules,
