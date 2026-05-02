@@ -12,8 +12,6 @@
  */
 package org.openhab.core.model.yaml.internal.sitemaps.fileconverter;
 
-import static org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.BUTTON;
-
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -313,19 +311,6 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
 
         if (widget instanceof LinkableWidget linkableWidget) {
             List<YamlWidgetDTO> widgets = new ArrayList<>();
-            if (linkableWidget instanceof Buttongrid buttongridWidget) {
-                buttongridWidget.getButtons().forEach(button -> {
-                    YamlWidgetDTO w = new YamlWidgetDTO();
-                    w.type = BUTTON;
-                    w.item = buttongridWidget.getItem();
-                    w.label = button.getLabel();
-                    w.icon = button.getIcon();
-                    w.row = button.getRow();
-                    w.column = button.getColumn();
-                    w.command = button.getCmd();
-                    widgets.add(w);
-                });
-            }
             linkableWidget.getWidgets().forEach(w -> {
                 widgets.add(buildWidgetDTO(w));
             });
