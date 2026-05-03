@@ -1,7 +1,6 @@
 Bundle-SymbolicName: ${project.artifactId}
 Export-Package: org.openhab.core.model.sitemap,\
  org.openhab.core.model.sitemap.formatting,\
- org.openhab.core.model.sitemap.generator,\
  org.openhab.core.model.sitemap.parser.antlr,\
  org.openhab.core.model.sitemap.parser.antlr.internal,\
  org.openhab.core.model.sitemap.scoping,\

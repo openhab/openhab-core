@@ -1,7 +1,6 @@
 Bundle-SymbolicName: ${project.artifactId}
 Export-Package: org.openhab.core.model,\
  org.openhab.core.model.formatting,\
- org.openhab.core.model.generator,\
  org.openhab.core.model.item,\
  org.openhab.core.model.items,\
  org.openhab.core.model.items.impl,\
