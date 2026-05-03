@@ -288,7 +288,7 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.io.webhook</artifactId>
+      <artifactId>org.openhab.core.io.rest.webhook</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>

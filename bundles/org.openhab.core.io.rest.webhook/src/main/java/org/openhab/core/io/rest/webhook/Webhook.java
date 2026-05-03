@@ -10,8 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.webhook;
+package org.openhab.core.io.rest.webhook;
 
+import java.net.URL;
 import java.time.Instant;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -26,5 +27,5 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Dan Cunningham - Initial contribution
  */
 @NonNullByDefault
-public record Webhook(String url, Instant expiresAt) {
+public record Webhook(URL url, Instant expiresAt) {
 }

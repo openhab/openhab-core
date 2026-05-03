@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.webhook;
+package org.openhab.core.io.rest.webhook;
 
 import java.util.concurrent.CompletableFuture;
 

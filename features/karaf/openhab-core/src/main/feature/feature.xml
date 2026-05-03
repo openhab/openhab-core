@@ -64,7 +64,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.net/${project.version}</bundle>
 		<feature dependency="true">pax-http-whiteboard</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.webhook/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.webhook/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
