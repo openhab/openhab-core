@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.measure.Unit;
@@ -687,8 +688,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     // Old id coding used 2 digits per level; this coding is still supported.
                     // New id coding follows this format <n>:<value> where <n> defines how digits are used
                     // per level in <value>.
-                    // Example: "0002" and "2:0002" are both valid and reference the same widget
-                    // in the sitemap, the third sub-widget in the first sitemap widget.
+                    // Example: "0002" and "1:02" are both valid and reference the same widget in the
+                    // sitemap, the third sub-widget in the first sitemap widget.
                     int codingSize = 2;
                     String idValue = id;
                     String splittedId[] = id.split(":", 2);
@@ -984,43 +985,24 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
 
         // Build the id by concatenating the child index at each level from top (main page) to bottom (sub-page),
-        // using same number of digits at each level.
-        // We first try to use 2 digits and if this is not enough, we increment it. That way, we can support
-        // any number of widgets in a page.
-        int codingSize = 2;
-        String id = "";
+        // using same number of digits at each level. The number of digits is automatically determined.
+        // That way, we can support any number of widgets in a page.
+        List<Integer> indexes = new ArrayList<>();
         Widget w = widget;
-        boolean built = false;
-        while (!built) {
-            id = "";
+        while (w.getParent() instanceof LinkableWidget parent) {
+            indexes.add(parent.getWidgets().indexOf(w));
+            w = parent;
+        }
+        if (w.getParent() instanceof Sitemap sitemap) {
+            indexes.add(sitemap.getWidgets().indexOf(w));
+        }
+        String id = "";
+        if (!indexes.isEmpty()) {
+            int codingSize = "%d".formatted(Collections.max(indexes)).length();
             String codingFormat = "%0" + codingSize + "d";
-            int maxChildren = (int) Math.round(Math.pow(10, codingSize));
-            boolean error = false;
-            while (w.getParent() instanceof LinkableWidget parent) {
-                int num = parent.getWidgets().indexOf(w);
-                if (num >= maxChildren) {
-                    error = true;
-                    break;
-                }
-                String index = String.format(codingFormat, num);
-                id = index + id;
-                w = parent;
-            }
-            if (error) {
-                codingSize++;
-                continue;
-            }
-            if (w.getParent() instanceof Sitemap sitemap) {
-                int num = sitemap.getWidgets().indexOf(w);
-                if (num >= maxChildren) {
-                    codingSize++;
-                    continue;
-                }
-                String index = String.format(codingFormat, num);
-                id = index + id;
-            }
-            id = codingSize + ":" + id;
-            built = true;
+            Collections.reverse(indexes);
+            id = indexes.stream().map(idx -> codingFormat.formatted(idx))
+                    .collect(Collectors.joining("", codingSize + ":", ""));
         }
 
         // if the widget is dynamically created and not available in the sitemap,
