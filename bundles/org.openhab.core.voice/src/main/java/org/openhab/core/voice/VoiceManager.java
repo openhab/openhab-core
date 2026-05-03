@@ -22,8 +22,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.voice.text.Conversation;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.LLMTool;
 
 /**
  * This service provides functionality around voice services and is the central service to be used directly by others.
@@ -120,7 +122,7 @@ public interface VoiceManager {
      * Interprets the passed string using the default services for HLI and locale.
      *
      * @param text The text to interpret
-     * @throws InterpretationException
+     * @throws InterpretationException when unable to succeed.
      * @return a human language response
      */
     String interpret(String text) throws InterpretationException;
@@ -133,7 +135,18 @@ public interface VoiceManager {
      * @throws InterpretationException
      * @return a human language response
      */
+    @Deprecated
     String interpret(String text, @Nullable String hliIdList) throws InterpretationException;
+
+    /**
+     * Interprets the passed string using a particular HLI service and the default locale.
+     *
+     * @param text The text to interpret
+     * @param args instance of {@link InterpretationArguments} with the options for this execution.
+     * @throws InterpretationException when unable to succeed.
+     * @return a human language response
+     */
+    String interpret(String text, @Nullable InterpretationArguments args) throws InterpretationException;
 
     /**
      * Determines the preferred voice for the currently set locale
@@ -322,6 +335,24 @@ public interface VoiceManager {
     /**
      * Retrieves a HumanLanguageInterpreter collection.
      * If no services are available returns an empty list.
+     * 
+     * @param ids Comma separated list of LLM tool ids to use
+     * @return a list of {@link LLMTool} or an empty list if none of them is available
+     */
+    List<LLMTool> getLLMToolsByIds(@Nullable String ids);
+
+    /**
+     * Retrieves a HumanLanguageInterpreter collection.
+     * If no services are available returns an empty list.
+     * 
+     * @param ids List of LLM tool ids to use
+     * @return a list of {@link LLMTool} or an empty list if none of them is available
+     */
+    List<LLMTool> getLLMToolsByIds(List<String> ids);
+
+    /**
+     * Retrieves a HumanLanguageInterpreter collection.
+     * If no services are available returns an empty list.
      *
      * @param ids Comma separated list of HLI service ids to use
      * @return a List<HumanLanguageInterpreter> or empty, if none of the services is available
@@ -332,7 +363,7 @@ public interface VoiceManager {
      * Retrieves a HumanLanguageInterpreter collection.
      * If no services are available returns an empty list.
      *
-     * @param ids List of HLI service ids to use or null
+     * @param ids List of HLI service ids to use
      * @return a List<HumanLanguageInterpreter> or empty, if none of the services is available
      */
     List<HumanLanguageInterpreter> getHLIsByIds(List<String> ids);
@@ -386,4 +417,22 @@ public interface VoiceManager {
      */
     @Nullable
     Voice getDefaultVoice();
+
+    /**
+     * Returns a Conversation.
+     * If id is null or blank returns a conversation with black id that can not be stored.
+     * If no conversation with that id exists it creates a new one.
+     *
+     * @param id the conversation id or none to get a non-persistent conversation
+     * @return a new {@link Conversation} or an already existing one from the storage
+     */
+    Conversation getConversation(@Nullable String id);
+
+    /**
+     * Persist a conversation, if a conversation has no messages it gets removed from the storage.
+     *
+     * @param conversation the conversation to store or delete.
+     * @return true if the conversation was saved or deleted.
+     */
+    boolean persistConversation(Conversation conversation);
 }
