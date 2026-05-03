@@ -521,23 +521,15 @@ public class PersistenceResource implements RESTResource {
         Item item = null;
         try {
             item = itemRegistry.getItem(itemName);
-            if (displayState) {
-                StateDescription stateDescription = item.getStateDescription(locale);
-                if (stateDescription != null) {
-                    pattern = stateDescription.getPattern();
-                    options = stateDescription.getOptions();
-                }
+            StateDescription stateDescription = item.getStateDescription(locale);
+            if (displayState && stateDescription != null) {
+                pattern = stateDescription.getPattern();
+                options = stateDescription.getOptions();
             }
             if (item instanceof NumberItem numberItem) {
                 if (displayState) {
                     if (pattern != null) {
                         targetUnit = UnitUtils.parseUnit(pattern);
-                    }
-                    if (targetUnit == null) {
-                        StateDescription stateDescription = numberItem.getStateDescription(locale);
-                        if (stateDescription != null) {
-                            targetUnit = UnitUtils.parseUnit(stateDescription.getPattern());
-                        }
                     }
                 }
                 if (targetUnit == null) {
