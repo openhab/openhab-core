@@ -19,6 +19,7 @@ Export-Package: org.openhab.core.model.script,\
  org.openhab.core.model.script.validation
 Import-Package: \
  org.openhab.core.audio,\
+ org.openhab.core.automation,\
  org.openhab.core.automation.module.script.action,\
  org.openhab.core.automation.module.script.rulesupport.shared,\
  org.openhab.core.common.registry,\
