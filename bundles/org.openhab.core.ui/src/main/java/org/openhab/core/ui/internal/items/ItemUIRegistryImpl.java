@@ -12,6 +12,8 @@
  */
 package org.openhab.core.ui.internal.items;
 
+import static org.openhab.core.transform.util.ItemDisplayStateUtil.EXTRACT_TRANSFORM_FUNCTION_PATTERN;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -19,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -73,8 +74,7 @@ import org.openhab.core.sitemap.Switch;
 import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.transform.TransformationException;
-import org.openhab.core.transform.TransformationHelper;
-import org.openhab.core.transform.TransformationService;
+import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
@@ -109,6 +109,7 @@ import org.slf4j.LoggerFactory;
  * @author Danny Baumann - widget label source support
  * @author Laurent Garnier - Consider Colortemperaturepicker element as possible default widget
  * @author Mark Herwege - Implement sitemap registry
+ * @author Florian Hotze - Refactor getLabel(Widget w) to use {@link ItemDisplayStateUtil}
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -117,9 +118,6 @@ import org.slf4j.LoggerFactory;
 public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     protected static final String CONFIG_URI = "system:sitemap";
-
-    /* RegEx to extract and parse a function String <code>'(.*?)\((.*)\):(.*)'</code> */
-    protected static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
 
     /* RegEx to identify format patterns. See java.util.Formatter#formatSpecifier (without the '%' at the very end). */
     protected static final String IDENTIFY_FORMAT_PATTERN_PATTERN = "%(?:(unit%)|(?:(?:\\d+\\$)?(?:[-#+ 0,(<]*)?(?:\\d+)?(?:\\.\\d+)?(?:[tT])?(?:[a-zA-Z])))";
@@ -342,164 +340,93 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public @Nullable String getLabel(Widget w) {
         String label = getLabelFromWidget(w).label;
-
         String itemName = w.getItem();
+
+        // If no item is associated, just transform the label
         if (itemName == null || itemName.isBlank()) {
-            return transform(label, true, null, null);
+            return transform(label, null);
         }
 
-        String labelMappedOption = null;
-        State state = null;
-        StateDescription stateDescription = null;
+        // If no format pattern is defined, we don't want to display any value
         String formatPattern = getFormatPattern(w);
-
-        if (formatPattern != null && label.indexOf("[") < 0) {
-            label = label + " [" + formatPattern + "]";
+        if (formatPattern == null) {
+            return label;
         }
 
-        // now insert the value, if the state is a string or decimal value and there is some formatting pattern defined
-        // in the label or state description (i.e. it contains at least a %)
+        // If the pattern is empty, we don't want to display any value
+        if (formatPattern.isEmpty()) {
+            return stripPatternFromLabel(label);
+        }
+
+        // Fetch item and its state
+        @Nullable
+        Item item = null;
         try {
-            final Item item = getItem(itemName);
-
-            // There is a known issue in the implementation of the method getStateDescription() of class Item
-            // in the following case:
-            // - the item provider returns as expected a state description without pattern but with for
-            // example a min value because a min value is set in the item definition but no label with
-            // pattern is set.
-            // - the channel state description provider returns as expected a state description with a pattern
-            // In this case, the result is no display of value by UIs because no pattern is set in the
-            // returned StateDescription. What is expected is the display of a value using the pattern
-            // provided by the channel state description provider.
-            stateDescription = item.getStateDescription();
-
-            if (formatPattern != null) {
-                state = item.getState();
-
-                if (formatPattern.contains("%d")) {
-                    if (!(state instanceof UnDefType) && !(state instanceof Number)) {
-                        // States which do not provide a Number will be converted to DecimalType.
-                        // e.g.: GroupItem can provide a count of items matching the active state
-                        // for some group functions.
-                        state = item.getStateAs(DecimalType.class);
-                    }
-
-                    // for fraction digits in state we don't want to risk format exceptions,
-                    // so treat everything as floats:
-                    formatPattern = formatPattern.replace("%d", "%.0f");
-                }
-            }
+            item = getItem(itemName);
         } catch (ItemNotFoundException e) {
             logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.getClass().getSimpleName());
         }
 
-        boolean considerTransform = false;
-        String transformFailbackValue = null;
-        if (formatPattern != null) {
-            if (formatPattern.isEmpty()) {
-                label = label.substring(0, label.indexOf("[")).trim();
-            } else {
-                if (state == null) {
-                    formatPattern = formatUndefined(formatPattern);
-                    considerTransform = true;
-                } else if (state instanceof UnDefType) {
-                    Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
-                    if (matcher.find()) {
-                        considerTransform = true;
-                        String type = matcher.group(1);
-                        String function = matcher.group(2);
-                        formatPattern = type + "(" + function + "):" + state.toString();
-                        transformFailbackValue = "-";
-                    } else {
-                        formatPattern = formatUndefined(formatPattern);
-                    }
-                } else {
-                    // if the channel contains options, we build a label with the mapped option value
-                    if (stateDescription != null) {
-                        for (StateOption option : stateDescription.getOptions()) {
-                            String optionLabel = option.getLabel();
-                            if (option.getValue().equals(state.toString()) && optionLabel != null) {
-                                String formatPatternOption;
-                                try {
-                                    formatPatternOption = String.format(formatPattern, optionLabel);
-                                } catch (IllegalFormatException e) {
-                                    logger.debug(
-                                            "Mapping option value '{}' for item {} using format '{}' failed ({}); format is ignored and option label is used",
-                                            optionLabel, itemName, formatPattern, e.getMessage());
-                                    formatPatternOption = optionLabel;
-                                }
-                                labelMappedOption = label.trim();
-                                labelMappedOption = labelMappedOption.substring(0, labelMappedOption.indexOf("[") + 1)
-                                        + formatPatternOption + "]";
-                                break;
-                            }
-                        }
-                    }
+        State itemState = item != null ? item.getState() : null;
+        State state = itemState != null ? itemState : UnDefType.NULL;
+        @Nullable
+        StateDescription stateDescription = item != null ? item.getStateDescription() : null;
 
-                    if (state instanceof DecimalType) {
-                        // for DecimalTypes we don't want to risk format exceptions, if pattern contains unit
-                        // placeholder
-                        if (formatPattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
-                            formatPattern = formatPattern.replaceAll(UnitUtils.UNIT_PLACEHOLDER, "").stripTrailing();
-                        }
-                    } else if (state instanceof QuantityType quantityState) {
-                        // sanity convert current state to the item state description unit in case it was updated in the
-                        // meantime. The item state is still in the "original" unit while the state description will
-                        // display the new unit:
-                        Unit<?> patternUnit = UnitUtils.parseUnit(formatPattern);
-                        if (patternUnit != null && !quantityState.getUnit().equals(patternUnit)) {
-                            quantityState = quantityState.toInvertibleUnit(patternUnit);
-                        }
+        // Handle specific pattern requirements
+        String effectivePattern = formatPattern;
+        if (effectivePattern.contains("%d")) {
+            if (!(state instanceof UnDefType) && !(state instanceof Number) && item != null) {
+                // States which do not provide a Number will be converted to DecimalType.
+                // e.g.: GroupItem can provide a count of items matching the active state
+                // for some group functions.
+                state = item.getStateAs(DecimalType.class);
+            }
 
-                        // The widget may define its own unit in the widget label. Convert to this unit:
-                        if (quantityState != null) {
-                            quantityState = convertStateToWidgetUnit(quantityState, w);
-                            state = quantityState;
-                        }
-                    }
+            // for fraction digits in state we don't want to risk format exceptions,
+            // so treat everything as floats:
+            effectivePattern = effectivePattern.replace("%d", "%.0f");
+        }
 
-                    // The following exception handling has been added to work around a Java bug with formatting
-                    // numbers. See http://bugs.sun.com/view_bug.do?bug_id=6476425
-                    // Without this catch, the whole sitemap, or page can not be displayed!
-                    // This also handles IllegalFormatConversionException, which is a subclass of IllegalArgument.
-                    try {
-                        Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
-                        if (matcher.find()) {
-                            considerTransform = true;
-                            String type = matcher.group(1);
-                            String function = matcher.group(2);
-                            String value = matcher.group(3);
-                            formatPattern = type + "(" + function + "):";
-                            if (state instanceof DateTimeType dateTimeState) {
-                                formatPattern += dateTimeState.format(value, timeZoneProvider.getTimeZone());
-                                transformFailbackValue = dateTimeState.toFullString(timeZoneProvider.getTimeZone());
-                            } else {
-                                formatPattern += state.format(value);
-                                transformFailbackValue = state.toString();
-                            }
-                        } else {
-                            if (state instanceof DateTimeType dateTimeState) {
-                                formatPattern = dateTimeState.format(formatPattern, timeZoneProvider.getTimeZone());
-                            } else {
-                                formatPattern = state.format(formatPattern);
-                            }
-                        }
-                    } catch (IllegalArgumentException e) {
-                        logger.warn("Exception while formatting value '{}' of item {} with format '{}': {}", state,
-                                itemName, formatPattern, e.getMessage());
-                        formatPattern = "Err";
-                    }
-                }
+        // Determine the display value
+        String value = getDisplayValue(itemName, label, effectivePattern, state,
+                stateDescription != null ? stateDescription.getOptions() : Collections.emptyList());
 
-                label = label.trim();
-                int index = label.indexOf("[");
-                if (index >= 0) {
-                    label = label.substring(0, index + 1) + formatPattern + "]";
-                }
+        // Build the final label by combining the base label and the formatted value
+        return insertValueIntoLabel(label, value);
+    }
+
+    private String stripPatternFromLabel(String label) {
+        int index = label.indexOf("[");
+        return index >= 0 ? label.substring(0, index).trim() : label.trim();
+    }
+
+    private String insertValueIntoLabel(String label, @Nullable String value) {
+        return stripPatternFromLabel(label) + " [" + (value != null ? value : "-") + "]";
+    }
+
+    private String getDisplayValue(String itemName, String label, String pattern, State state,
+            List<StateOption> options) {
+        if (state instanceof UnDefType) {
+            Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(pattern);
+            if (matcher.find()) {
+                return transform(label, "-");
+            }
+            return formatUndefined(pattern);
+        }
+
+        String effectivePattern = pattern;
+        if (state instanceof DecimalType) {
+            // for DecimalTypes we don't want to risk format exceptions, if pattern contains unit
+            // placeholder
+            if (effectivePattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
+                effectivePattern = effectivePattern.replaceAll(UnitUtils.UNIT_PLACEHOLDER, "").stripTrailing();
             }
         }
 
-        return transform(label, considerTransform, transformFailbackValue, labelMappedOption);
+        String formatted = ItemDisplayStateUtil.formatState(itemName, effectivePattern, options, state,
+                timeZoneProvider.getTimeZone());
+
+        return formatted != null ? formatted : "-";
     }
 
     @Override
@@ -628,10 +555,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
     }
 
-    private String insertInLabel(String label, Object o) {
-        return label.substring(0, label.indexOf("[") + 1) + o + "]";
-    }
-
     /*
      * check if there is a status value being displayed on the right side of the
      * label (the right side is signified by being enclosed in square brackets [].
@@ -640,47 +563,32 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
      * If the value does not start with the call to a transformation service,
      * we return the label with the mapped option value if provided (not null).
      */
-    private String transform(String label, boolean matchTransform, @Nullable String transformFailbackValue,
-            @Nullable String labelMappedOption) {
-        String ret = label;
+    private String transform(String label, @Nullable String transformFailbackValue) {
         String formatPattern = getFormatPattern(label);
         if (formatPattern != null) {
             Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
-            if (matchTransform && matcher.find()) {
+            if (matcher.find()) {
                 String type = matcher.group(1);
                 String function = matcher.group(2);
                 String value = matcher.group(3);
                 String failbackValue = transformFailbackValue != null ? transformFailbackValue : value;
                 try {
-                    TransformationService transformation = TransformationHelper.getTransformationService(type);
-                    if (transformation != null) {
-                        try {
-                            String transformationResult = transformation.transform(function, value);
-                            if (transformationResult != null) {
-                                ret = insertInLabel(label, transformationResult);
-                            } else {
-                                logger.warn("Transformation of type {} did not return a valid result", type);
-                                ret = insertInLabel(label, failbackValue);
-                            }
-                        } catch (RuntimeException e) {
-                            throw new TransformationException("Transformation service of type '" + type
-                                    + "' threw an exception: " + e.getMessage(), e);
-                        }
+                    String transformationResult = ItemDisplayStateUtil.transform(type, function, value);
+                    if (transformationResult != null) {
+                        return transformationResult;
                     } else {
-                        throw new TransformationException(
-                                "Transformation service of type '" + type + "' is not available.");
+                        logger.warn("Transformation of type {} did not return a valid result", type);
+                        return failbackValue;
                     }
                 } catch (TransformationException e) {
                     Throwable cause = e.getCause();
                     logger.warn("Failed transforming the value '{}' with pattern '{}': {}", value, formatPattern,
                             cause instanceof ScriptException ? cause.getMessage() : e.getMessage());
-                    ret = insertInLabel(label, failbackValue);
+                    return failbackValue;
                 }
-            } else if (labelMappedOption != null) {
-                ret = labelMappedOption;
             }
         }
-        return ret;
+        return label;
     }
 
     @Override
