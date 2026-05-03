@@ -58,7 +58,7 @@ Workflow {
         generateStub = false
       }
       validator = {
-        generateStub = false
+        generateXtendStub = false
       }
     }
   }

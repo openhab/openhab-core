@@ -42,6 +42,7 @@ import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.util.ConfigurationNormalizer;
 import org.openhab.core.automation.util.ReferenceResolver;
 import org.openhab.core.automation.util.RuleBuilder;
+import org.openhab.core.automation.util.RuleUtil;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -234,7 +235,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      *             nor
      *             in the module's module type definition.
      * @throws IllegalArgumentException
-     *             when a module id contains dot or when the rule with the same UID already exists.
+     *             If a module id contains a dot, if the rule UID is invalid, or if a rule with the
+     *             same UID already exists.
      */
     @Override
     public Rule add(Rule rule) {
@@ -459,6 +461,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
 
     @Override
     protected void onAddElement(Rule element) throws IllegalArgumentException {
+        RuleUtil.assertValidRuleUID(element.getUID());
         try {
             resolveConfigurations(element);
         } catch (IllegalArgumentException e) {

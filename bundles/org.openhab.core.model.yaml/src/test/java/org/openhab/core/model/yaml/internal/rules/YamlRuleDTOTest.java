@@ -94,13 +94,13 @@ public class YamlRuleDTOTest {
         rule.uid = "rule:id";
         assertTrue(rule.isValid(null, null));
 
-        rule.uid = "rule:type:@id";
+        rule.uid = "rule:type:/id";
         assertFalse(rule.isValid(null, null));
 
         rule.uid = "rule:type:id";
         assertTrue(rule.isValid(null, null));
 
-        rule.uid = "rule:type:$subType:id";
+        rule.uid = "rule:type:\\subType:id";
         assertFalse(rule.isValid(null, null));
 
         rule.uid = "rule:type:subType:id";

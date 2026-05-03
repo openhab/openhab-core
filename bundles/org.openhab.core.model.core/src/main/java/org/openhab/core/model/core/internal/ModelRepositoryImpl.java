@@ -23,6 +23,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
+import org.eclipse.xtext.validation.AbstractValidationDiagnostic;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -335,15 +337,30 @@ public class ModelRepositoryImpl implements ModelRepository {
 
                 // Check for validation errors, but log them only
                 try {
-                    String modelType = resource.getURI().fileExtension();
+                    String modelType = resource.getURI().fileExtension().toLowerCase(Locale.ROOT);
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
-                        if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
-                                && !"rules".equalsIgnoreCase(modelType) && !"script".equalsIgnoreCase(modelType)) {
-                            errors.add(d.getMessage());
-                        } else {
-                            warnings.add(d.getMessage());
+                        switch (modelType) {
+                            case "rules":
+                                if (d instanceof AbstractValidationDiagnostic vd
+                                        && d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
+                                        && "uid".equals(vd.getIssueCode())) {
+                                    errors.add(d.getMessage());
+                                } else {
+                                    warnings.add(d.getMessage());
+                                }
+                                break;
+                            case "script":
+                                warnings.add(d.getMessage());
+                                break;
+                            default:
+                                if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR) {
+                                    errors.add(d.getMessage());
+                                } else {
+                                    warnings.add(d.getMessage());
+                                }
+                                break;
                         }
                     }
                     if (!errors.isEmpty()) {
