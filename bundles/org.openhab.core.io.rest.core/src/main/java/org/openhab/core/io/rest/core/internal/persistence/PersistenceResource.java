@@ -527,10 +527,8 @@ public class PersistenceResource implements RESTResource {
                 options = stateDescription.getOptions();
             }
             if (item instanceof NumberItem numberItem) {
-                if (displayState) {
-                    if (pattern != null) {
-                        targetUnit = UnitUtils.parseUnit(pattern);
-                    }
+                if (displayState && pattern != null) {
+                    targetUnit = UnitUtils.parseUnit(pattern);
                 }
                 if (targetUnit == null) {
                     targetUnit = numberItem.getUnit();
