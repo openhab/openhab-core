@@ -47,9 +47,11 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemInfo;
@@ -62,6 +64,7 @@ import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 
 /**
@@ -224,7 +227,42 @@ public class PersistenceResourceTest {
     }
 
     @Test
-    public void testGetPersistenceItemDataWithUnitConversion() throws ItemNotFoundException {
+    public void testGetPersistenceItemDataWithPersistedUnitDifferentThanItemUnit() throws ItemNotFoundException {
+        NumberItem item = mock(NumberItem.class);
+        doReturn(SIUnits.CELSIUS).when(item).getUnit();
+        when(itemRegistryMock.getItem(ITEM_NAME)).thenReturn(item);
+
+        List<HistoricItem> historicItems = new ArrayList<>();
+        historicItems.add(new HistoricItem() {
+            @Override
+            public ZonedDateTime getTimestamp() {
+                return ZonedDateTime.now();
+            }
+
+            @Override
+            public State getState() {
+                return new QuantityType<>("68 °F");
+            }
+
+            @Override
+            public String getName() {
+                return ITEM_NAME;
+            }
+        });
+        assertEquals(1, historicItems.size());
+        when(pServiceMock.query(any(), any())).thenReturn(historicItems);
+
+        ItemHistoryDTO dto = pResource.createDTO(pServiceMock, ITEM_NAME, null, null, 0, 0, false, false, false, null);
+
+        assertNotNull(dto);
+        assertEquals("°C", dto.unit);
+        assertThat(dto.data, hasSize(1));
+        // 68 °F = 20 °C, we expect only the numeric value in the state field
+        assertEquals(20, Float.parseFloat(dto.data.get(0).state), 1e-16);
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithDisplayStateUnitConversion() throws ItemNotFoundException {
         NumberItem item = mock(NumberItem.class);
         when(itemRegistryMock.getItem(ITEM_NAME)).thenReturn(item);
         StateDescription stateDescriptionMock = mock(StateDescription.class);
@@ -240,7 +278,7 @@ public class PersistenceResourceTest {
 
             @Override
             public State getState() {
-                return new QuantityType<>("20 °C");
+                return new QuantityType<>("20.5 °C");
             }
 
             @Override
@@ -248,6 +286,7 @@ public class PersistenceResourceTest {
                 return ITEM_NAME;
             }
         });
+        assertEquals(1, historicItems.size());
         when(pServiceMock.query(any(), any())).thenReturn(historicItems);
 
         ItemHistoryDTO dto = pResource.createDTO(pServiceMock, ITEM_NAME, null, null, 0, 0, false, false, true, null);
@@ -255,8 +294,31 @@ public class PersistenceResourceTest {
         assertNotNull(dto);
         assertEquals("°F", dto.unit);
         assertThat(dto.data, hasSize(1));
-        // 20 °C = 68 °F, we expect only the numeric value in the state field
-        assertEquals("68", dto.data.get(0).state);
+        // 20.5 °C = 68.9 °F, we expect only the numeric value in the state field
+        assertEquals("68.900", dto.data.get(0).state);
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithDisplayStateOptions() throws ItemNotFoundException {
+        SwitchItem item = mock(SwitchItem.class);
+        when(itemRegistryMock.getItem(ITEM_NAME)).thenReturn(item);
+        StateDescription stateDescriptionMock = mock(StateDescription.class);
+        when(item.getStateDescription(null)).thenReturn(stateDescriptionMock);
+        when(stateDescriptionMock.getOptions())
+                .thenReturn(List.of(new StateOption("ON", "an"), new StateOption("OFF", "aus")));
+
+        ItemHistoryDTO dto = pResource.createDTO(pServiceMock, ITEM_NAME, null, null, 0, 0, false, false, true, null);
+
+        assertNotNull(dto);
+        assertNull(dto.unit);
+        assertThat(Integer.parseInt(dto.datapoints), is(5));
+        assertThat(dto.data, hasSize(5));
+        // dto.data with raw state would be: [ON, ON, OFF, OFF, ON]
+        assertEquals("an", dto.data.get(0).state);
+        assertEquals("an", dto.data.get(1).state);
+        assertEquals("aus", dto.data.get(2).state);
+        assertEquals("aus", dto.data.get(3).state);
+        assertEquals("an", dto.data.get(4).state);
     }
 
     @Test

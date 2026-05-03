@@ -311,7 +311,7 @@ public class PersistenceResource implements RESTResource {
             @Parameter(description = "The length of each page.") @QueryParam("pagelength") int pageLength,
             @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary,
             @Parameter(description = "Adds the current Item state into the requested period (the Item state will be before or at the endtime)") @QueryParam("itemState") boolean itemState,
-            @Parameter(description = "If set to true, formatting from the state description is applied to the values. For QuantityType states, only the value is returned, regardless of the pattern.") @QueryParam("displayState") boolean displayState) {
+            @Parameter(description = "If set to true, formatting from the state description is applied to the values. For QuantityType states, the value in the display unit as defined by the pattern, is returned.") @QueryParam("displayState") boolean displayState) {
         Locale locale = localeService.getLocale(language);
 
         return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary, itemState,
