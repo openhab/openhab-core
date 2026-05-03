@@ -1,0 +1,198 @@
+version: 1
+sitemaps:
+  demo:
+    label: Demo Sitemap
+    widgets:
+      - type: Frame
+        label: Demo Widgets
+        widgets:
+          - type: Switch
+            item: DemoSwitch
+          - type: Switch
+            item: DemoSwitch
+            label: Button with release
+            mappings:
+              - command: "ON"
+                releaseCommand: "OFF"
+                label: Switch ON
+                icon: switch-on
+          - type: Selection
+            item: DemoSwitch
+            label: Test Selection
+            icon: switch
+            mappings:
+              - command: "ON"
+                label: Switch ON
+              - command: "OFF"
+                label: Switch OFF
+          - type: Text
+            item: DemoContact
+            label:
+              label: Contact
+              format: MAP(en.map):%s
+              labelColor:
+                item: DemoSwitch
+                argument: "ON"
+                value: blue
+              valueColor:
+                item: DemoSwitch
+                argument: "OFF"
+                value: green
+            icon:
+              name: material:home
+              color:
+                item: DemoSwitch
+                argument: "ON"
+                value: red
+          - type: Input
+            item: DemoNumber
+            label: Test Input
+            hint: number
+          - type: Text
+            item: DemoNumber
+            label:
+              label: Test Text
+              format: '%d'
+              labelColor:
+                - and:
+                    - operator: <
+                      argument: "50"
+                    - item: DemoSwitch
+                      operator: ==
+                      argument: "ON"
+                  value: green
+                - operator: <=
+                  argument: "75"
+                  value: orange
+                - value: blue
+              valueColor:
+                - and:
+                    - operator: <
+                      argument: "50"
+                    - item: DemoSwitch
+                      operator: ==
+                      argument: "ON"
+                  value: blue
+                - operator: <=
+                  argument: "75"
+                  value: red
+                - value: green
+            icon:
+              name: material:settings
+              color:
+                - and:
+                    - operator: <
+                      argument: "50"
+                    - item: DemoSwitch
+                      operator: ==
+                      argument: "ON"
+                  value: red
+                - operator: <=
+                  argument: "75"
+                  value: green
+                - value: violet
+              static: true
+          - type: Slider
+            item: DemoNumber
+            label:
+              label: Test Slider
+              format: '%.0f'
+              labelColor: green
+              valueColor: red
+            icon:
+              name:
+                - item: DemoSwitch
+                  operator: ==
+                  argument: "ON"
+                  value: material:home
+                - value: material:favorite
+              color: blue
+            releaseOnly: true
+            min: 25
+            max: 75
+            step: 5
+          - type: Setpoint
+            item: DemoNumber
+            label: Test Setpoint
+            min: 12.5
+            max: 22.5
+            step: 0.5
+          - type: Colorpicker
+            item: DemoColor
+            label: Test Colorpicker
+          - type: Colortemperaturepicker
+            item: DemoColorTemp
+            label: Test Colortemperaturepicker
+            min: 3000
+            max: 5000
+          - type: Image
+            item: DemoImage
+            label: Test Image
+            url: https://raw.githubusercontent.com/wiki/openhab/openhab/images/features.png
+            refresh: 600000
+          - type: Chart
+            item: DemoNumber
+            label: Test Chart
+            refresh: 10000
+            period: D
+            service: rrd4j
+            legend: false
+            forceAsItem: true
+            yAxisDecimalPattern: "#.##E0"
+            interpolation: linear
+          - type: Video
+            label: Test Video
+            url: https://demo.openhab.org/Hue.m4v
+            encoding: hls
+          - type: Buttongrid
+            widgets:
+              - type: Button
+                item: DemoSwitch
+                label: "Off"
+                icon: switch-off
+                row: 1
+                column: 1
+                command: "ON"
+                stateless: true
+                visibility:
+                  item: DemoSwitch
+                  operator: '!='
+                  argument: "ON"
+              - type: Button
+                item: DemoSwitch
+                label: "On"
+                icon: switch-on
+                row: 1
+                column: 1
+                command: "OFF"
+                visibility:
+                  item: DemoSwitch
+                  operator: ==
+                  argument: "ON"
+          - type: Mapview
+            item: DemoLocation
+            label: Test Mapview
+            height: 10
+            visibility:
+              and:
+                - item: DemoSwitch
+                  operator: '!='
+                  argument: "ON"
+                - item: DemoNumber
+                  operator: <
+                  argument: "100"
+          - type: Webview
+            label: Test Webview
+            height: 15
+            url: https://www.openhab.org/
+            visibility:
+              - item: DemoSwitch
+                operator: '!='
+                argument: "ON"
+              - item: DemoNumber
+                operator: <
+                argument: "100"
+          - type: Group
+            item: DemoSwitchGroup
+          - type: Default
+            item: DemoLocation
