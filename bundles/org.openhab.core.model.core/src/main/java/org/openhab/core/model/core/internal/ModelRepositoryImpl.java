@@ -111,7 +111,11 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream, @Nullable List<String> errors,
             @Nullable List<String> warnings) {
-        logger.info("Loading DSL model '{}'", name);
+        if (isIsolatedModel(name)) {
+            logger.debug("Loading DSL model '{}'", name);
+        } else {
+            logger.info("Loading DSL model '{}'", name);
+        }
         Resource resource = null;
         byte[] bytes;
         try (InputStream inputStream = originalInputStream) {
@@ -183,7 +187,11 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean removeModel(String name) {
-        logger.info("Unloading DSL model '{}'", name);
+        if (isIsolatedModel(name)) {
+            logger.debug("Unloading DSL model '{}'", name);
+        } else {
+            logger.info("Unloading DSL model '{}'", name);
+        }
         return removeResource(name);
     }
 

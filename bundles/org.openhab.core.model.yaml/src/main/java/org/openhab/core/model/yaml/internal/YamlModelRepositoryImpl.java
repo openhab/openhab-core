@@ -246,9 +246,17 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return false;
         }
         if (kind == Kind.CREATE) {
-            logger.info("Adding YAML model {}", modelName);
+            if (isIsolatedModel(modelName)) {
+                logger.debug("Adding YAML model {}", modelName);
+            } else {
+                logger.info("Adding YAML model {}", modelName);
+            }
         } else {
-            logger.info("Updating YAML model {}", modelName);
+            if (isIsolatedModel(modelName)) {
+                logger.debug("Updating YAML model {}", modelName);
+            } else {
+                logger.info("Updating YAML model {}", modelName);
+            }
         }
         JsonNode readOnlyNode = fileContent.get(READ_ONLY);
         boolean readOnly = readOnlyNode == null || readOnlyNode.asBoolean(false);
@@ -354,7 +362,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         if (removedModel == null) {
             return;
         }
-        logger.info("Removing YAML model {}", modelName);
+        if (isIsolatedModel(modelName)) {
+            logger.debug("Removing YAML model {}", modelName);
+        } else {
+            logger.info("Removing YAML model {}", modelName);
+        }
         int version = removedModel.getVersion();
         for (Map.Entry<String, @Nullable JsonNode> modelEntry : removedModel.getNodes().entrySet()) {
             String elementName = modelEntry.getKey();
