@@ -14,6 +14,8 @@ package org.openhab.core.model.rule.runtime;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +23,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.xtext.naming.QualifiedName;
@@ -31,13 +34,20 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.internal.module.handler.ChannelEventTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
+import org.openhab.core.automation.internal.module.handler.EphemerisConditionHandler;
 import org.openhab.core.automation.internal.module.handler.GenericCronTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.GroupCommandTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.GroupStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.IntervalConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ItemStateConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ThingStatusConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayConditionHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
 import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;
 import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
 import org.openhab.core.events.EventPublisher;
@@ -93,7 +103,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         Collection<Rule> rules = dslRuleProvider.getAll();
         assertThat(rules.size(), is(0));
 
-        String model = "rule RuleNumberOne\n" + //
+        String model = "rule RuleNumberOne uid = rule1 [ Test, \"my test\" ]\n" + //
                 "when\n" + //
                 "   System started\n" + //
                 "then\n" + //
@@ -115,8 +125,12 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         Rule firstRule = it.next();
 
-        assertThat(firstRule.getUID(), is("dslruletest-1"));
+        assertThat(firstRule.getUID(), is("rule1"));
         assertThat(firstRule.getName(), is("RuleNumberOne"));
+        assertThat(firstRule.getTags(), hasSize(2));
+        assertThat(firstRule.getTags(), hasItem("Test"));
+        assertThat(firstRule.getTags(), hasItem("my test"));
+        assertThat(firstRule.getConditions(), hasSize(0));
         assertThat(firstRule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
         assertThat(firstRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
         assertThat(firstRule.getActions().getFirst().getConfiguration()
@@ -126,9 +140,11 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(secondRule.getUID(), is("dslruletest-2"));
         assertThat(secondRule.getName(), is("Rule Number Two"));
+        assertThat(secondRule.getTags(), hasSize(0));
         assertThat(secondRule.getTriggers().getFirst().getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
         assertThat(secondRule.getTriggers().getFirst().getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME),
                 is("X"));
+        assertThat(secondRule.getConditions(), hasSize(0));
         assertThat(secondRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
         assertThat(secondRule.getActions().getFirst().getConfiguration()
                 .get(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE), is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
@@ -144,6 +160,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
                 "   System started or\n" + //
                 "   Time is noon or\n" + //
                 "   Time is midnight or\n" + //
+                "   Time is 20:57 or\n" + //
                 "   Time cron \"0 0/1 * * * ?\" or\n" + //
                 "   Item X received command ON or\n" + //
                 "   Item Y received update \"A\" or\n" + //
@@ -170,71 +187,182 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(rule.getUID(), is("dslruletest-1"));
         assertThat(rule.getName(), is("RuleWithAllTriggers"));
-        assertThat(rule.getTriggers().size(), is(13));
+        assertThat(rule.getTriggers().size(), is(14));
 
         assertThat(rule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
         assertThat(rule.getTriggers().getFirst().getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL),
                 is(new BigDecimal(40)));
-        assertThat(rule.getTriggers().get(1).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(1).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
-                is("0 0 12 * * ?"));
+        assertThat(rule.getTriggers().get(1).getTypeUID(), is(TimeOfDayTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(1).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("12:00"));
 
-        assertThat(rule.getTriggers().get(2).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(2).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
-                is("0 0 0 * * ?"));
+        assertThat(rule.getTriggers().get(2).getTypeUID(), is(TimeOfDayTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(2).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("00:00"));
 
-        assertThat(rule.getTriggers().get(3).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(3).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
+        assertThat(rule.getTriggers().get(3).getTypeUID(), is(TimeOfDayTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(3).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("20:57"));
+
+        assertThat(rule.getTriggers().get(4).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(4).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
                 is("0 0/1 * * * ?"));
 
-        assertThat(rule.getTriggers().get(4).getTypeUID(), is(ItemCommandTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(4).getConfiguration().get(ItemCommandTriggerHandler.CFG_ITEMNAME), is("X"));
-        assertThat(rule.getTriggers().get(4).getConfiguration().get(ItemCommandTriggerHandler.CFG_COMMAND), is("ON"));
+        assertThat(rule.getTriggers().get(5).getTypeUID(), is(ItemCommandTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(5).getConfiguration().get(ItemCommandTriggerHandler.CFG_ITEMNAME), is("X"));
+        assertThat(rule.getTriggers().get(5).getConfiguration().get(ItemCommandTriggerHandler.CFG_COMMAND), is("ON"));
 
-        assertThat(rule.getTriggers().get(5).getTypeUID(), is(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(5).getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME), is("Y"));
-        assertThat(rule.getTriggers().get(5).getConfiguration().get(ItemStateTriggerHandler.CFG_STATE), is("A"));
+        assertThat(rule.getTriggers().get(6).getTypeUID(), is(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME), is("Y"));
+        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_STATE), is("A"));
 
-        assertThat(rule.getTriggers().get(6).getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME), is("Z"));
-        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_PREVIOUS_STATE),
+        assertThat(rule.getTriggers().get(7).getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(7).getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME), is("Z"));
+        assertThat(rule.getTriggers().get(7).getConfiguration().get(ItemStateTriggerHandler.CFG_PREVIOUS_STATE),
                 is("1"));
-        assertThat(rule.getTriggers().get(6).getConfiguration().get(ItemStateTriggerHandler.CFG_STATE), is("2"));
+        assertThat(rule.getTriggers().get(7).getConfiguration().get(ItemStateTriggerHandler.CFG_STATE), is("2"));
 
-        assertThat(rule.getTriggers().get(7).getTypeUID(), is(GroupCommandTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(7).getConfiguration().get(GroupCommandTriggerHandler.CFG_GROUPNAME),
+        assertThat(rule.getTriggers().get(8).getTypeUID(), is(GroupCommandTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(8).getConfiguration().get(GroupCommandTriggerHandler.CFG_GROUPNAME),
                 is("G1"));
-        assertThat(rule.getTriggers().get(7).getConfiguration().get(GroupCommandTriggerHandler.CFG_COMMAND), is("UP"));
+        assertThat(rule.getTriggers().get(8).getConfiguration().get(GroupCommandTriggerHandler.CFG_COMMAND), is("UP"));
 
-        assertThat(rule.getTriggers().get(8).getTypeUID(), is(GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(8).getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME), is("G2"));
-        assertThat(rule.getTriggers().get(8).getConfiguration().get(GroupStateTriggerHandler.CFG_STATE), is("10|°C"));
+        assertThat(rule.getTriggers().get(9).getTypeUID(), is(GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME), is("G2"));
+        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_STATE), is("10|°C"));
 
-        assertThat(rule.getTriggers().get(9).getTypeUID(), is(GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME), is("G3"));
-        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_PREVIOUS_STATE),
+        assertThat(rule.getTriggers().get(10).getTypeUID(), is(GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(10).getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME), is("G3"));
+        assertThat(rule.getTriggers().get(10).getConfiguration().get(GroupStateTriggerHandler.CFG_PREVIOUS_STATE),
                 is("PLAY"));
-        assertThat(rule.getTriggers().get(9).getConfiguration().get(GroupStateTriggerHandler.CFG_STATE), is("PAUSE"));
+        assertThat(rule.getTriggers().get(10).getConfiguration().get(GroupStateTriggerHandler.CFG_STATE), is("PAUSE"));
 
-        assertThat(rule.getTriggers().get(10).getTypeUID(), is(ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(10).getConfiguration().get(ThingStatusTriggerHandler.CFG_THING_UID),
-                is("T1"));
-        assertThat(rule.getTriggers().get(10).getConfiguration().get(ThingStatusTriggerHandler.CFG_STATUS),
-                is("OFFLINE"));
-
-        assertThat(rule.getTriggers().get(11).getTypeUID(), is(ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(11).getTypeUID(), is(ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID));
         assertThat(rule.getTriggers().get(11).getConfiguration().get(ThingStatusTriggerHandler.CFG_THING_UID),
-                is("T2"));
-        assertThat(rule.getTriggers().get(11).getConfiguration().get(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS),
-                is("OFFLINE"));
+                is("T1"));
         assertThat(rule.getTriggers().get(11).getConfiguration().get(ThingStatusTriggerHandler.CFG_STATUS),
+                is("OFFLINE"));
+
+        assertThat(rule.getTriggers().get(12).getTypeUID(), is(ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(12).getConfiguration().get(ThingStatusTriggerHandler.CFG_THING_UID),
+                is("T2"));
+        assertThat(rule.getTriggers().get(12).getConfiguration().get(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS),
+                is("OFFLINE"));
+        assertThat(rule.getTriggers().get(12).getConfiguration().get(ThingStatusTriggerHandler.CFG_STATUS),
                 is("ONLINE"));
 
-        assertThat(rule.getTriggers().get(12).getTypeUID(), is(ChannelEventTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(12).getConfiguration().get(ChannelEventTriggerHandler.CFG_CHANNEL),
+        assertThat(rule.getTriggers().get(13).getTypeUID(), is(ChannelEventTriggerHandler.MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().get(13).getConfiguration().get(ChannelEventTriggerHandler.CFG_CHANNEL),
                 is("a:b:c:1"));
-        assertThat(rule.getTriggers().get(12).getConfiguration().get(ChannelEventTriggerHandler.CFG_CHANNEL_EVENT),
+        assertThat(rule.getTriggers().get(13).getConfiguration().get(ChannelEventTriggerHandler.CFG_CHANNEL_EVENT),
                 is("START"));
+    }
+
+    @Test
+    public void testAllConditions() {
+        Collection<Rule> rules = dslRuleProvider.getAll();
+        assertThat(rules.size(), is(0));
+
+        String model = "rule RuleWithAllConditions\n" + //
+                "when\n" + //
+                "   Item X received command ON\n" + //
+                "but only if\n" + //
+                "   Time is between 19:20 and 22:10 and\n" + //
+                "   Day is Thursday, Tuesday, Sunday and\n" + //
+                "   Day is weekday and\n" + //
+                "   Day is weekend and\n" + //
+                "   Day offset 3 is holiday and\n" + //
+                "   Day offset = -2 is not holiday and\n" + //
+                "   Day in \"my-dayset\" and\n" + //
+                "   Thing \"T1\" is ONLINE and\n" + //
+                "   Thing \"T2\" is not UNKNOWN and\n" + //
+                "   Item W = \"a value\" and\n" + //
+                "   Item X ON and\n" + //
+                "   Item Y != 0 and\n" + //
+                "   Item Z > 5.25 and\n" + //
+                "   15000 ms between executions\n" + //
+                "then\n" + //
+                "   logInfo('Test', 'Test')\n" + //
+                "end\n\n";
+
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME,
+                new ByteArrayInputStream(model.getBytes(StandardCharsets.UTF_8)));
+        Collection<Rule> actualRules = dslRuleProvider.getAll();
+
+        assertThat(actualRules.size(), is(1));
+
+        Iterator<Rule> it = actualRules.iterator();
+
+        Rule rule = it.next();
+
+        assertThat(rule.getUID(), is("dslruletest-1"));
+        assertThat(rule.getName(), is("RuleWithAllConditions"));
+        assertThat(rule.getConditions().size(), is(14));
+
+        assertThat(rule.getConditions().getFirst().getTypeUID(), is(TimeOfDayConditionHandler.MODULE_TYPE_ID));
+        assertThat(rule.getConditions().getFirst().getConfiguration().get(TimeOfDayConditionHandler.CFG_START_TIME),
+                is("19:20"));
+        assertThat(rule.getConditions().getFirst().getConfiguration().get(TimeOfDayConditionHandler.CFG_END_TIME),
+                is("22:10"));
+
+        assertThat(rule.getConditions().get(1).getTypeUID(), is(DayOfWeekConditionHandler.MODULE_TYPE_ID));
+        Object days = rule.getConditions().get(1).getConfiguration().get(DayOfWeekConditionHandler.CFG_DAYS);
+        assertThat(days, instanceOf(List.class));
+        assertThat((List<String>) days, hasSize(3));
+        assertThat((List<String>) days, contains("THU", "TUE", "SUN"));
+
+        assertThat(rule.getConditions().get(2).getTypeUID(), is(EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID));
+        assertThat(rule.getConditions().get(2).getConfiguration().get("offset"), is(new BigDecimal(0)));
+
+        assertThat(rule.getConditions().get(3).getTypeUID(), is(EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID));
+        assertThat(rule.getConditions().get(3).getConfiguration().get("offset"), is(new BigDecimal(0)));
+
+        assertThat(rule.getConditions().get(4).getTypeUID(), is(EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID));
+        assertThat(rule.getConditions().get(4).getConfiguration().get("offset"), is(new BigDecimal(3)));
+
+        assertThat(rule.getConditions().get(5).getTypeUID(), is(EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID));
+        assertThat(rule.getConditions().get(5).getConfiguration().get("offset"), is(new BigDecimal(-2)));
+
+        assertThat(rule.getConditions().get(6).getTypeUID(), is(EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID));
+        assertThat(rule.getConditions().get(6).getConfiguration().get("dayset"), is("my-dayset"));
+        assertThat(rule.getConditions().get(6).getConfiguration().get("offset"), is(new BigDecimal(0)));
+
+        assertThat(rule.getConditions().get(7).getTypeUID(), is(ThingStatusConditionHandler.THING_STATUS_CONDITION));
+        assertThat(rule.getConditions().get(7).getConfiguration().get(ThingStatusConditionHandler.CFG_THING_UID),
+                is("T1"));
+        assertThat(rule.getConditions().get(7).getConfiguration().get(ThingStatusConditionHandler.CFG_OPERATOR),
+                is("="));
+        assertThat(rule.getConditions().get(7).getConfiguration().get(ThingStatusConditionHandler.CFG_STATUS),
+                is("ONLINE"));
+
+        assertThat(rule.getConditions().get(8).getTypeUID(), is(ThingStatusConditionHandler.THING_STATUS_CONDITION));
+        assertThat(rule.getConditions().get(8).getConfiguration().get(ThingStatusConditionHandler.CFG_THING_UID),
+                is("T2"));
+        assertThat(rule.getConditions().get(8).getConfiguration().get(ThingStatusConditionHandler.CFG_OPERATOR),
+                is("!="));
+        assertThat(rule.getConditions().get(8).getConfiguration().get(ThingStatusConditionHandler.CFG_STATUS),
+                is("UNKNOWN"));
+
+        assertThat(rule.getConditions().get(9).getTypeUID(), is(ItemStateConditionHandler.ITEM_STATE_CONDITION));
+        assertThat(rule.getConditions().get(9).getConfiguration().get(ItemStateConditionHandler.ITEM_NAME), is("W"));
+        assertThat(rule.getConditions().get(9).getConfiguration().get(ItemStateConditionHandler.OPERATOR), is("="));
+        assertThat(rule.getConditions().get(9).getConfiguration().get(ItemStateConditionHandler.STATE), is("a value"));
+
+        assertThat(rule.getConditions().get(10).getTypeUID(), is(ItemStateConditionHandler.ITEM_STATE_CONDITION));
+        assertThat(rule.getConditions().get(10).getConfiguration().get(ItemStateConditionHandler.ITEM_NAME), is("X"));
+        assertThat(rule.getConditions().get(10).getConfiguration().get(ItemStateConditionHandler.OPERATOR), is("="));
+        assertThat(rule.getConditions().get(10).getConfiguration().get(ItemStateConditionHandler.STATE), is("ON"));
+
+        assertThat(rule.getConditions().get(11).getTypeUID(), is(ItemStateConditionHandler.ITEM_STATE_CONDITION));
+        assertThat(rule.getConditions().get(11).getConfiguration().get(ItemStateConditionHandler.ITEM_NAME), is("Y"));
+        assertThat(rule.getConditions().get(11).getConfiguration().get(ItemStateConditionHandler.OPERATOR), is("!="));
+        assertThat(rule.getConditions().get(11).getConfiguration().get(ItemStateConditionHandler.STATE), is("0"));
+
+        assertThat(rule.getConditions().get(12).getTypeUID(), is(ItemStateConditionHandler.ITEM_STATE_CONDITION));
+        assertThat(rule.getConditions().get(12).getConfiguration().get(ItemStateConditionHandler.ITEM_NAME), is("Z"));
+        assertThat(rule.getConditions().get(12).getConfiguration().get(ItemStateConditionHandler.OPERATOR), is(">"));
+        assertThat(rule.getConditions().get(12).getConfiguration().get(ItemStateConditionHandler.STATE), is("5.25"));
+
+        assertThat(rule.getConditions().get(13).getTypeUID(), is(IntervalConditionHandler.MODULE_TYPE_ID));
+        assertThat(rule.getConditions().get(13).getConfiguration().get(IntervalConditionHandler.CFG_MIN_INTERVAL),
+                is(new BigDecimal(15000)));
     }
 
     @Test

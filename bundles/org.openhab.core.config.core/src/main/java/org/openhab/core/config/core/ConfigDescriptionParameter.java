@@ -286,7 +286,7 @@ public class ConfigDescriptionParameter {
     }
 
     /**
-     * @return true if the value is required, otherwise false.
+     * @return {@code true} if the value is read-only, {@code false} otherwise.
      */
     public boolean isReadOnly() {
         return readOnly;

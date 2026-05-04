@@ -51,16 +51,22 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
     @Override
     public void addProvider(Provider<RootUIComponent> provider) {
         super.addProvider(provider);
-        if (getManagedProvider().isEmpty() && provider instanceof ManagedProvider) {
+        if (getManagedProvider() == null && provider instanceof ManagedProvider) {
             setManagedProvider((ManagedProvider<RootUIComponent, String>) provider);
         }
     }
 
     @Override
     public void removeProvider(Provider<RootUIComponent> provider) {
-        if (getManagedProvider().isPresent() && provider instanceof ManagedProvider) {
+        if (getManagedProvider() != null && provider instanceof ManagedProvider) {
             unsetManagedProvider((ManagedProvider<RootUIComponent, String>) provider);
         }
         super.removeProvider(provider);
+    }
+
+    @Override
+    public boolean isEditable(String uid) {
+        ManagedProvider<RootUIComponent, String> managed = getManagedProvider();
+        return managed != null && managed.get(uid) != null;
     }
 }
