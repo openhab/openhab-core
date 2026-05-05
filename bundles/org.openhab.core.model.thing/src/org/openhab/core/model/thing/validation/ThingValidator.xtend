@@ -37,17 +37,17 @@ class ThingValidator extends AbstractThingValidator {
 			// We have to provide thingTypeId and a thingId
 			if (!thing.eIsSet(ThingPackage.Literals.MODEL_THING__THING_TYPE_ID)) {
 				if (thing.eIsSet(ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)) {
-					geeratenWarning(thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID,
+					generateWarning(thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID,
 						"Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>")
 				} else {
 					if (thing.eIsSet(ThingPackage.Literals.MODEL_BRIDGE__BRIDGE)) {
-						geeratenWarning(thing, ThingPackage.Literals.MODEL_BRIDGE__BRIDGE,
+						generateWarning(thing, ThingPackage.Literals.MODEL_BRIDGE__BRIDGE,
 							"Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>")
 					}
 				}
 			} else {
 				if (!thing.eIsSet(ThingPackage.Literals.MODEL_THING__THING_ID)) {
-					geeratenWarning(thing, ThingPackage.Literals.MODEL_THING__THING_TYPE_ID,
+					generateWarning(thing, ThingPackage.Literals.MODEL_THING__THING_TYPE_ID,
 						"Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>")
 				}
 			}
@@ -65,7 +65,7 @@ class ThingValidator extends AbstractThingValidator {
 					try {
 						new ThingUID(thing.id)
 					} catch (IllegalArgumentException e) {
-						geeratenError(thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID, e.message)
+						generateError(thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID, e.message)
 					}
 				}
 			}
@@ -76,11 +76,11 @@ class ThingValidator extends AbstractThingValidator {
 		thing.eContainingFeature == ThingPackage.Literals.MODEL_BRIDGE__THINGS
 	}
 
-	def private geeratenWarning(EObject object, EAttribute attribute, String msg) {
+	def private generateWarning(EObject object, EAttribute attribute, String msg) {
 		warning(buildMsgWithLineNb(object, attribute, msg), object, attribute)
 	}
 
-	def private geeratenError(EObject object, EAttribute attribute, String msg) {
+	def private generateError(EObject object, EAttribute attribute, String msg) {
 		error(buildMsgWithLineNb(object, attribute, msg), object, attribute)
 	}
 
