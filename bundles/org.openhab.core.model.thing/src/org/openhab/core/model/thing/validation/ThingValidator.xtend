@@ -37,18 +37,18 @@ class ThingValidator extends AbstractThingValidator {
 			// We have to provide thingTypeId and a thingId
 			if (!thing.eIsSet(ThingPackage.Literals.MODEL_THING__THING_TYPE_ID)) {
 				if (thing.eIsSet(ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)) {
-					generateWarning(thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID,
-						"Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>")
+					generateWarning("Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>",
+						thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
 				} else {
 					if (thing.eIsSet(ThingPackage.Literals.MODEL_BRIDGE__BRIDGE)) {
-						generateWarning(thing, ThingPackage.Literals.MODEL_BRIDGE__BRIDGE,
-							"Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>")
+						generateWarning("Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>",
+							thing, ThingPackage.Literals.MODEL_BRIDGE__BRIDGE)
 					}
 				}
 			} else {
 				if (!thing.eIsSet(ThingPackage.Literals.MODEL_THING__THING_ID)) {
-					generateWarning(thing, ThingPackage.Literals.MODEL_THING__THING_TYPE_ID,
-						"Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>")
+					generateWarning("Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>",
+						thing, ThingPackage.Literals.MODEL_THING__THING_TYPE_ID)
 				}
 			}
 		} else { // thing in container
@@ -58,14 +58,14 @@ class ThingValidator extends AbstractThingValidator {
 				val startOffset = thingTypeIdFeature.offset
 				val endOffset = thingIdFeature.endOffset
 				getMessageAcceptor().acceptWarning(
-					buildMsgWithLineNb(thingTypeIdFeature, thingIdFeature, "Provide a thing UID in this format: <bindingId>:<thingTypeId>:<thingId>"),
+					buildMsgWithLineNb("Provide a thing UID in this format: <bindingId>:<thingTypeId>:<thingId>", thingTypeIdFeature, thingIdFeature),
 					thing, startOffset, endOffset - startOffset, null, null)
 			} else {
 				if (thing.id !== null) {
 					try {
 						new ThingUID(thing.id)
 					} catch (IllegalArgumentException e) {
-						generateError(thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID, e.message)
+						generateError(e.message, thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
 					}
 				}
 			}
@@ -76,15 +76,15 @@ class ThingValidator extends AbstractThingValidator {
 		thing.eContainingFeature == ThingPackage.Literals.MODEL_BRIDGE__THINGS
 	}
 
-	def private generateWarning(EObject object, EAttribute attribute, String msg) {
-		warning(buildMsgWithLineNb(object, attribute, msg), object, attribute)
+	def private generateWarning(String msg, EObject object, EAttribute attribute) {
+		warning(buildMsgWithLineNb(msg, object, attribute), object, attribute)
 	}
 
-	def private generateError(EObject object, EAttribute attribute, String msg) {
-		error(buildMsgWithLineNb(object, attribute, msg), object, attribute)
+	def private generateError(String msg, EObject object, EAttribute attribute) {
+		error(buildMsgWithLineNb(msg, object, attribute), object, attribute)
 	}
 
-	def private buildMsgWithLineNb(EObject object, EAttribute attribute, String msg) {
+	def private buildMsgWithLineNb(String msg, EObject object, EAttribute attribute) {
 		var node = NodeModelUtils.findNodesForFeature(object, attribute).head
 		if (node === null) {
 			node = NodeModelUtils.getNode(object)
@@ -92,10 +92,10 @@ class ThingValidator extends AbstractThingValidator {
 				return msg
 			}
 		}
-		return buildMsgWithLineNb(node, node, msg)
+		return buildMsgWithLineNb(msg, node, node)
 	}
 
-	def private buildMsgWithLineNb(INode start, INode end, String msg) {
+	def private buildMsgWithLineNb(String msg, INode start, INode end) {
 		val startLine = start.startLine
 		val endLine = end.endLine
 		if (startLine == endLine) {
