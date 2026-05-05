@@ -62,18 +62,24 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.sitemap.Button;
+import org.openhab.core.sitemap.Buttongrid;
+import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colorpicker;
 import org.openhab.core.sitemap.Condition;
+import org.openhab.core.sitemap.Frame;
 import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.Image;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
+import org.openhab.core.sitemap.Setpoint;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Slider;
 import org.openhab.core.sitemap.Switch;
 import org.openhab.core.sitemap.Text;
+import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.types.CommandDescriptionBuilder;
@@ -128,6 +134,7 @@ public class ItemUIRegistryImplTest {
         TimeZone.setDefault(initialTimeZone);
     }
 
+    private @Mock @NonNullByDefault({}) Frame frameMock;
     private @Mock @NonNullByDefault({}) Group groupMock;
     private @Mock @NonNullByDefault({}) Text textMock;
     private @Mock @NonNullByDefault({}) Colorpicker colorpickerMock;
@@ -136,6 +143,11 @@ public class ItemUIRegistryImplTest {
     private @Mock @NonNullByDefault({}) Slider sliderMock;
     private @Mock @NonNullByDefault({}) Switch switchMock;
     private @Mock @NonNullByDefault({}) Selection selectionMock;
+    private @Mock @NonNullByDefault({}) Setpoint setpointMock;
+    private @Mock @NonNullByDefault({}) Chart chartMock;
+    private @Mock @NonNullByDefault({}) Webview webviewMock;
+    private @Mock @NonNullByDefault({}) Buttongrid buttongridMock;
+    private @Mock @NonNullByDefault({}) Button buttonMock;
     private @Mock @NonNullByDefault({}) Mapping mappingMock;
 
     @BeforeEach
@@ -1440,5 +1452,81 @@ public class ItemUIRegistryImplTest {
 
         String icon = uiRegistry.getCategory(widgetMock);
         assertEquals("text", icon);
+    }
+
+    @Test
+    public void getWidgetId() throws ItemNotFoundException {
+        when(sitemapMock.getWidgets()).thenReturn(List.of(frameMock));
+        when(frameMock.getWidgets()).thenReturn(List.of(switchMock, sliderMock, groupMock, colorpickerMock, imageMock,
+                mapviewMock, selectionMock, setpointMock, chartMock, webviewMock, textMock, buttongridMock));
+        when(buttongridMock.getWidgets()).thenReturn(List.of(buttonMock));
+        when(frameMock.getParent()).thenReturn(sitemapMock);
+        when(switchMock.getParent()).thenReturn(frameMock);
+        when(sliderMock.getParent()).thenReturn(frameMock);
+        when(groupMock.getParent()).thenReturn(frameMock);
+        when(colorpickerMock.getParent()).thenReturn(frameMock);
+        when(imageMock.getParent()).thenReturn(frameMock);
+        when(mapviewMock.getParent()).thenReturn(frameMock);
+        when(selectionMock.getParent()).thenReturn(frameMock);
+        when(setpointMock.getParent()).thenReturn(frameMock);
+        when(chartMock.getParent()).thenReturn(frameMock);
+        when(webviewMock.getParent()).thenReturn(frameMock);
+        when(textMock.getParent()).thenReturn(frameMock);
+        when(buttongridMock.getParent()).thenReturn(frameMock);
+        when(buttonMock.getParent()).thenReturn(buttongridMock);
+
+        assertEquals("1:0", uiRegistry.getWidgetId(frameMock));
+        assertEquals("1:00", uiRegistry.getWidgetId(switchMock));
+        assertEquals("1:01", uiRegistry.getWidgetId(sliderMock));
+        assertEquals("1:02", uiRegistry.getWidgetId(groupMock));
+        assertEquals("1:03", uiRegistry.getWidgetId(colorpickerMock));
+        assertEquals("1:04", uiRegistry.getWidgetId(imageMock));
+        assertEquals("1:05", uiRegistry.getWidgetId(mapviewMock));
+        assertEquals("1:06", uiRegistry.getWidgetId(selectionMock));
+        assertEquals("1:07", uiRegistry.getWidgetId(setpointMock));
+        assertEquals("1:08", uiRegistry.getWidgetId(chartMock));
+        assertEquals("1:09", uiRegistry.getWidgetId(webviewMock));
+        assertEquals("2:0010", uiRegistry.getWidgetId(textMock));
+        assertEquals("2:0011", uiRegistry.getWidgetId(buttongridMock));
+        assertEquals("2:001100", uiRegistry.getWidgetId(buttonMock));
+    }
+
+    @Test
+    public void getWidget() throws ItemNotFoundException {
+        when(sitemapMock.getWidgets()).thenReturn(List.of(frameMock));
+        when(frameMock.getWidgets()).thenReturn(List.of(switchMock, buttongridMock));
+        when(buttongridMock.getWidgets()).thenReturn(List.of(buttonMock));
+
+        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
+
+        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "1:0"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "1:00"));
+        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "1:01"));
+        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "1:010"));
+        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "2:00"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "2:0000"));
+        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "2:0001"));
+        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "2:000100"));
+        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "3:000"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "3:000000"));
+        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "3:000001"));
+        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "3:000001000"));
+        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "00"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "0000"));
+        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "0001"));
+        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "000100"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "1:1"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "1:02"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "1:011"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2:0"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2:000"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2:01"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2:0002"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2:000101"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "0"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "000"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "01"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "0002"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "000101"));
     }
 }
