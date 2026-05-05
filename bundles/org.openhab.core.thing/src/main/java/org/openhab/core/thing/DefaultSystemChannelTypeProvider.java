@@ -146,7 +146,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(true).withPattern("%.0f %%")
                     .build())
-            .withTags(Point.MEASUREMENT, Property.ENERGY).build();
+            .withTags(Point.MEASUREMENT, Property.STATE_OF_CHARGE).build();
 
     /**
      * System wide trigger {@link ChannelType} without event options.
