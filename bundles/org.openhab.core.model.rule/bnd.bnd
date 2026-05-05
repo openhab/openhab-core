@@ -14,6 +14,7 @@ Export-Package: org.openhab.core.model.rule,\
 Import-Package: \
  org.openhab.core.automation,\
  org.openhab.core.automation.module.script.rulesupport.shared,\
+ org.openhab.core.automation.util,\
  org.openhab.core.common,\
  org.openhab.core.common.registry,\
  org.openhab.core.events,\
