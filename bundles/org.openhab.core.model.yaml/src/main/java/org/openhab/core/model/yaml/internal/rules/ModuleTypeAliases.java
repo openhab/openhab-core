@@ -26,6 +26,7 @@ import org.openhab.core.automation.internal.module.handler.DateTimeTriggerHandle
 import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
 import org.openhab.core.automation.internal.module.handler.EphemerisConditionHandler;
 import org.openhab.core.automation.internal.module.handler.GenericCronTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GenericEventTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.GroupCommandTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.GroupStateTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.IntervalConditionHandler;
@@ -82,6 +83,7 @@ public class ModuleTypeAliases {
                 { "T", "ChannelEvent", ChannelEventTriggerHandler.MODULE_TYPE_ID }, //
                 { "T", "Cron", GenericCronTriggerHandler.MODULE_TYPE_ID }, //
                 { "T", "DateTime", DateTimeTriggerHandler.MODULE_TYPE_ID }, //
+                { "T", "GenericEvent", GenericEventTriggerHandler.MODULE_TYPE_ID }, //
                 { "T", "MemberReceivedCommand", GroupCommandTriggerHandler.MODULE_TYPE_ID }, //
                 { "T", "MemberChanged", GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID }, //
                 { "T", "MemberUpdated", GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID }, //
