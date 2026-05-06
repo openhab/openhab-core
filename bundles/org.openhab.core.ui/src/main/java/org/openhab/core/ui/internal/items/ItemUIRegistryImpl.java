@@ -686,13 +686,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     // Widget id is defined by concatenating the child index at each level from top
                     // (main page) to bottom (sub-page) using same number of digits at each level.
                     // Old id coding used 2 digits per level; this coding is still supported.
-                    // New id coding follows this format <n>:<value> where <n> defines how digits are used
+                    // New id coding follows this format <n>_<value> where <n> defines how digits are used
                     // per level in <value>.
-                    // Example: "0002" and "1:02" are both valid and reference the same widget in the
+                    // Example: "0002" and "1_02" are both valid and reference the same widget in the
                     // sitemap, the third sub-widget in the first sitemap widget.
                     int codingSize = 2;
                     String idValue = id;
-                    String splittedId[] = id.split(":", 2);
+                    String splittedId[] = id.split("_", 2);
                     if (splittedId.length == 2) {
                         codingSize = Integer.parseInt(splittedId[0]);
                         idValue = splittedId[1];
@@ -1002,7 +1002,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             String codingFormat = "%0" + codingSize + "d";
             Collections.reverse(indexes);
             id = indexes.stream().map(idx -> codingFormat.formatted(idx))
-                    .collect(Collectors.joining("", codingSize + ":", ""));
+                    .collect(Collectors.joining("", codingSize + "_", ""));
         }
 
         // if the widget is dynamically created and not available in the sitemap,
