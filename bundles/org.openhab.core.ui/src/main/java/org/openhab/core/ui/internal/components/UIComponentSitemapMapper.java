@@ -29,6 +29,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
 import org.openhab.core.sitemap.Setpoint;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * The {@link UIComponentSitemapMapper} is a utility class to map sitemaps into UI Component objects.
  *
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 public class UIComponentSitemapMapper {
@@ -163,6 +165,9 @@ public class UIComponentSitemapMapper {
                 if (height > 0) {
                     addConfig(widgetComponent, "height", height);
                 }
+            }
+            case NestedSitemap nestedSitemapWidget -> {
+                addConfig(widgetComponent, "sitemapName", nestedSitemapWidget.getSitemapName());
             }
             default -> {
                 // nothing to do

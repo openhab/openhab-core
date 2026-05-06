@@ -33,6 +33,7 @@ import org.openhab.core.sitemap.internal.ImageImpl;
 import org.openhab.core.sitemap.internal.InputImpl;
 import org.openhab.core.sitemap.internal.MappingImpl;
 import org.openhab.core.sitemap.internal.MapviewImpl;
+import org.openhab.core.sitemap.internal.NestedSitemapImpl;
 import org.openhab.core.sitemap.internal.RuleImpl;
 import org.openhab.core.sitemap.internal.SelectionImpl;
 import org.openhab.core.sitemap.internal.SetpointImpl;
@@ -49,6 +50,7 @@ import org.osgi.service.component.annotations.Component;
  * The {@link SitemapFactoryImpl} implements the {@link SitemapFactory}
  *
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(service = SitemapFactory.class, immediate = true)
@@ -73,9 +75,11 @@ public class SitemapFactoryImpl implements SitemapFactory {
     public static final String TEXT = "Text";
     public static final String VIDEO = "Video";
     public static final String WEBVIEW = "Webview";
+    public static final String NESTED_SITEMAP = "NestedSitemap";
 
     private static final String[] WIDGET_TYPES = { BUTTON, BUTTON_GRID, CHART, COLOR_PICKER, COLOR_TEMPERATURE_PICKER,
-            DEFAULT, FRAME, GROUP, IMAGE, INPUT, MAPVIEW, SELECTION, SETPOINT, SLIDER, SWITCH, TEXT, VIDEO, WEBVIEW };
+            DEFAULT, FRAME, GROUP, IMAGE, INPUT, MAPVIEW, SELECTION, SETPOINT, SLIDER, SWITCH, TEXT, VIDEO, WEBVIEW,
+            NESTED_SITEMAP };
 
     @Override
     public Sitemap createSitemap(String sitemapName) {
@@ -103,6 +107,7 @@ public class SitemapFactoryImpl implements SitemapFactory {
             case TEXT -> new TextImpl();
             case VIDEO -> new VideoImpl();
             case WEBVIEW -> new WebviewImpl();
+            case NESTED_SITEMAP -> new NestedSitemapImpl();
             default -> null;
         };
     }
@@ -128,6 +133,7 @@ public class SitemapFactoryImpl implements SitemapFactory {
             case TEXT -> new TextImpl(parent);
             case VIDEO -> new VideoImpl(parent);
             case WEBVIEW -> new WebviewImpl(parent);
+            case NESTED_SITEMAP -> new NestedSitemapImpl(parent);
             default -> null;
         };
     }

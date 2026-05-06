@@ -43,6 +43,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelLinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.ModelMapping;
 import org.openhab.core.model.sitemap.sitemap.ModelMappingList;
 import org.openhab.core.model.sitemap.sitemap.ModelMapview;
+import org.openhab.core.model.sitemap.sitemap.ModelNestedSitemap;
 import org.openhab.core.model.sitemap.sitemap.ModelSelection;
 import org.openhab.core.model.sitemap.sitemap.ModelSetpoint;
 import org.openhab.core.model.sitemap.sitemap.ModelSitemap;
@@ -54,6 +55,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.ModelWebview;
 import org.openhab.core.model.sitemap.sitemap.ModelWidget;
+import org.openhab.core.model.sitemap.sitemap.ModelWidgetWithItem;
 import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapModel;
 import org.openhab.core.sitemap.Button;
@@ -70,6 +72,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
 import org.openhab.core.sitemap.Setpoint;
@@ -93,6 +96,7 @@ import org.slf4j.LoggerFactory;
  * with the capabilities of parsing and generating file.
  *
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapSerializer.class, SitemapParser.class })
@@ -262,6 +266,11 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                 modelChart.setInterpolation(chartWidget.getInterpolation());
                 modelWidget = modelChart;
             }
+            case NestedSitemap nestedSitemapWidget -> {
+                ModelNestedSitemap modelNestedSitemap = SitemapFactory.eINSTANCE.createModelNestedSitemap();
+                modelNestedSitemap.setSitemapName(nestedSitemapWidget.getSitemapName());
+                modelWidget = modelNestedSitemap;
+            }
             default -> {
                 ModelDefault modelDefault = SitemapFactory.eINSTANCE.createModelDefault();
                 if (widget instanceof Default defaultWidget) {
@@ -271,12 +280,19 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             }
         }
 
-        modelWidget.setItem(widget.getItem());
         modelWidget.setLabel(widget.getLabel());
         String icon = widget.getIcon();
-        if (widget.isStaticIcon()) {
-            modelWidget.setStaticIcon(icon);
-        } else {
+        if (modelWidget instanceof ModelWidgetWithItem modelWidgetWithItem) {
+            modelWidgetWithItem.setItem(widget.getItem());
+            List<Rule> valueColorRules = widget.getValueColor();
+            if (!valueColorRules.isEmpty()) {
+                modelWidgetWithItem.setValueColor(modelColorRules(valueColorRules));
+            }
+            if (widget.isStaticIcon()) {
+                modelWidgetWithItem.setStaticIcon(icon);
+            }
+        }
+        if (!widget.isStaticIcon()) {
             modelWidget.setIcon(icon);
         }
 
@@ -291,10 +307,6 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
         List<Rule> labelColorRules = widget.getLabelColor();
         if (!labelColorRules.isEmpty()) {
             modelWidget.setLabelColor(modelColorRules(labelColorRules));
-        }
-        List<Rule> valueColorRules = widget.getValueColor();
-        if (!valueColorRules.isEmpty()) {
-            modelWidget.setValueColor(modelColorRules(valueColorRules));
         }
         List<Rule> iconColorRules = widget.getIconColor();
         if (!iconColorRules.isEmpty()) {

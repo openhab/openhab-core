@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,13 +68,17 @@ import org.openhab.core.sitemap.Default;
 import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Slider;
 import org.openhab.core.sitemap.Switch;
+import org.openhab.core.sitemap.Text;
 import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl;
 import org.openhab.core.sitemap.registry.SitemapFactory;
+import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.CommandDescription;
@@ -112,6 +117,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Implement sitemap registry
  * @author Florian Hotze - Refactor getLabel(Widget w) to use {@link ItemDisplayStateUtil}
  * @author Laurent Garnier - Change widget id coding to support any number of widgets in frame/page
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -135,9 +141,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private final ItemRegistry itemRegistry;
     private final SitemapFactory sitemapFactory;
+    private final SitemapRegistry sitemapRegistry;
     private final TimeZoneProvider timeZoneProvider;
 
-    private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<Widget, Widget> substitutedWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
     private String groupMembersSorting = DEFAULT_SORTING;
 
@@ -153,9 +160,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Activate
     public ItemUIRegistryImpl(final @Reference ItemRegistry itemRegistry,
-            final @Reference SitemapFactory sitemapFactory, final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference SitemapFactory sitemapFactory, final @Reference SitemapRegistry sitemapRegistry,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
         this.sitemapFactory = sitemapFactory;
+        this.sitemapRegistry = sitemapRegistry;
         this.timeZoneProvider = timeZoneProvider;
     }
 
@@ -725,7 +734,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     // no valid number, so the requested page id does not exist
                 }
             }
-            return resolveDefault(w);
+            Widget resolvedWidget = resolveDefault(w);
+            if (resolvedWidget instanceof NestedSitemap) {
+                resolvedWidget = resolveNestedSitemap(resolvedWidget, getParent(w));
+            }
+            return resolvedWidget;
         }
         logger.warn("Cannot find page for id '{}'.", id);
         return null;
@@ -735,10 +748,48 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     public List<Widget> getChildren(Sitemap sitemap) {
         List<Widget> widgets = sitemap.getWidgets();
 
+        // Check there are no loops in the sitemap due to nested sitemaps. If there are loops, we would end up with a
+        // StackOverflowException.
+        String sitemapName = sitemap.getName();
+        boolean loop = widgets.stream().anyMatch(widget -> {
+            if (widget instanceof NestedSitemap nestedSitemap) {
+                Sitemap nested = sitemapRegistry.get(nestedSitemap.getSitemapName());
+                if (nested != null) {
+                    return hasDuplicateSitemapInHierarchy(nested, new LinkedHashSet<>(Set.of(sitemapName)));
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        });
+        if (loop) {
+            return List.of();
+        }
+
         List<Widget> result = new ArrayList<>();
-        widgets.stream().map(this::resolveDefault).filter(Objects::nonNull).map(Objects::requireNonNull)
-                .forEach(result::add);
+        widgets.stream().map(this::resolveDefault).filter(Objects::nonNull)
+                .map(widget -> resolveNestedSitemap(widget, sitemap)).filter(Objects::nonNull).forEach(result::add);
         return result;
+    }
+
+    boolean hasDuplicateSitemapInHierarchy(Sitemap sitemap, Set<String> visitedSitemaps) {
+        if (visitedSitemaps.contains(sitemap.getName())) {
+            visitedSitemaps.add(sitemap.getName());
+            logger.warn("Detected loop in nested sitemap hierarchy: '{}'", String.join(" -> ", visitedSitemaps));
+            return true;
+        }
+        visitedSitemaps.add(sitemap.getName());
+        for (Widget widget : sitemap.getWidgets()) {
+            if (widget instanceof NestedSitemap nestedSitemap) {
+                Sitemap nested = sitemapRegistry.get(nestedSitemap.getSitemapName());
+                if (nested != null) {
+                    return hasDuplicateSitemapInHierarchy(nested, visitedSitemaps);
+                }
+            }
+        }
+        visitedSitemaps.remove(sitemap.getName());
+        return false;
     }
 
     @Override
@@ -751,15 +802,15 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
 
         List<Widget> result = new ArrayList<>();
-        widgets.stream().map(this::resolveDefault).filter(Objects::nonNull).map(Objects::requireNonNull)
-                .forEach(result::add);
+        widgets.stream().map(this::resolveDefault).filter(Objects::nonNull)
+                .map(widget -> resolveNestedSitemap(widget, w)).filter(Objects::nonNull).forEach(result::add);
 
         return result;
     }
 
     @Override
     public @Nullable Parent getParent(Widget w) {
-        Widget w2 = defaultWidgets.get(w);
+        Widget w2 = substitutedWidgets.get(w);
         return (w2 == null) ? w.getParent() : w2.getParent();
     }
 
@@ -774,12 +825,46 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     Widget defaultWidget = getDefaultWidget(item.getClass(), item.getName());
                     if (defaultWidget != null) {
                         copyProperties(widget, defaultWidget);
-                        defaultWidgets.put(defaultWidget, widget);
+                        substitutedWidgets.put(defaultWidget, widget);
                         return defaultWidget;
                     }
                 }
             }
             return null;
+        }
+    }
+
+    private @Nullable Widget resolveNestedSitemap(Widget widget, @Nullable Parent parent) {
+        if (widget instanceof NestedSitemap nestedSitemap) {
+            if (parent == null) {
+                logger.warn("Cannot resolve nested sitemap widget '{}', because no parent is given",
+                        nestedSitemap.getLabel());
+                return null;
+            }
+            String sitemapName = nestedSitemap.getSitemapName();
+            Sitemap sitemap = sitemapRegistry.get(sitemapName);
+            if (sitemap == null) {
+                logger.warn("Cannot find sitemap '{}' for nested sitemap widget '{}'", sitemapName,
+                        nestedSitemap.getLabel());
+                return null;
+            }
+
+            Text textWidget = Objects
+                    .requireNonNull((Text) sitemapFactory.createWidget(SitemapFactoryImpl.TEXT, parent));
+
+            textWidget.setLabel(nestedSitemap.getLabel() != null ? nestedSitemap.getLabel() : sitemap.getLabel());
+            textWidget.setIcon(nestedSitemap.getIcon() != null ? nestedSitemap.getIcon() : sitemap.getIcon());
+
+            textWidget.setLabelColor(nestedSitemap.getLabelColor());
+            textWidget.setIconColor(nestedSitemap.getIconColor());
+            textWidget.setVisibility(nestedSitemap.getVisibility());
+
+            textWidget.setWidgets(sitemap.getWidgets());
+
+            substitutedWidgets.put(textWidget, nestedSitemap);
+            return textWidget;
+        } else {
+            return widget;
         }
     }
 
@@ -979,7 +1064,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public String getWidgetId(Widget widget) {
-        Widget w2 = defaultWidgets.get(widget);
+        Widget w2 = substitutedWidgets.get(widget);
         if (w2 != null) {
             return getWidgetId(w2);
         }

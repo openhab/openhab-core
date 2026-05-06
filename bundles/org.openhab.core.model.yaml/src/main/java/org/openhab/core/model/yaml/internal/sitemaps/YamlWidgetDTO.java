@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
  * This is a data transfer object that is used to serialize widgets.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 public class YamlWidgetDTO {
 
@@ -62,6 +63,7 @@ public class YamlWidgetDTO {
         MANDATORY_FIELDS.put(MAPVIEW, Set.of("item"));
         MANDATORY_FIELDS.put(WEBVIEW, Set.of("url"));
         MANDATORY_FIELDS.put(DEFAULT, Set.of("item"));
+        MANDATORY_FIELDS.put(NESTED_SITEMAP, Set.of("name"));
 
         OPTIONAL_FIELDS.put(FRAME, Set.of("item"));
         OPTIONAL_FIELDS.put(BUTTON_GRID, Set.of());
@@ -113,6 +115,7 @@ public class YamlWidgetDTO {
     public String command;
     public String releaseCommand;
     public Boolean stateless;
+    public String name; // for NestedSitemap
 
     public Object visibility;
 

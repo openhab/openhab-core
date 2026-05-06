@@ -50,6 +50,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelLinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.ModelMapping;
 import org.openhab.core.model.sitemap.sitemap.ModelMappingList;
 import org.openhab.core.model.sitemap.sitemap.ModelMapview;
+import org.openhab.core.model.sitemap.sitemap.ModelNestedSitemap;
 import org.openhab.core.model.sitemap.sitemap.ModelSelection;
 import org.openhab.core.model.sitemap.sitemap.ModelSetpoint;
 import org.openhab.core.model.sitemap.sitemap.ModelSitemap;
@@ -60,6 +61,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.ModelWebview;
 import org.openhab.core.model.sitemap.sitemap.ModelWidget;
+import org.openhab.core.model.sitemap.sitemap.ModelWidgetWithItem;
 import org.openhab.core.model.sitemap.sitemap.SitemapModel;
 import org.openhab.core.sitemap.Button;
 import org.openhab.core.sitemap.Buttongrid;
@@ -72,6 +74,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
@@ -96,6 +99,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Mark Herwege - Separate registry from model
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(service = { SitemapProvider.class, DslSitemapProvider.class }, immediate = true)
@@ -251,14 +255,22 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     ModelDefault modelDefault = (ModelDefault) modelWidget;
                     defaultWidget.setHeight(modelDefault.getHeight());
                     break;
+                case NestedSitemap nestedSitemapWidget:
+                    ModelNestedSitemap modelNestedSitemap = (ModelNestedSitemap) modelWidget;
+                    nestedSitemapWidget.setSitemapName(modelNestedSitemap.getSitemapName());
+                    break;
                 default:
                     break;
             }
 
-            // In case deprecated button definition was encountered, the item is not set on the Buttongrid widget
-            widget.setItem(deprecatedButtonsDefinition ? null : modelWidget.getItem());
             widget.setLabel(modelWidget.getLabel());
-            String staticIcon = modelWidget.getStaticIcon();
+            String staticIcon = null;
+            if (modelWidget instanceof ModelWidgetWithItem modelWidgetWithItem) {
+                // In case deprecated button definition was encountered, the item is not set on the Buttongrid widget
+                widget.setItem(deprecatedButtonsDefinition ? null : modelWidgetWithItem.getItem());
+                addWidgetColorRules(widget.getValueColor(), modelWidgetWithItem.getValueColor());
+                staticIcon = modelWidgetWithItem.getStaticIcon();
+            }
             if (staticIcon != null && !staticIcon.isEmpty()) {
                 widget.setIcon(staticIcon);
                 widget.setStaticIcon(true);
@@ -275,7 +287,6 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
 
             addWidgetVisibilityRules(widget.getVisibility(), modelWidget.getVisibility());
             addWidgetColorRules(widget.getLabelColor(), modelWidget.getLabelColor());
-            addWidgetColorRules(widget.getValueColor(), modelWidget.getValueColor());
             addWidgetColorRules(widget.getIconColor(), modelWidget.getIconColor());
             addWidgetIconRules(widget.getIconRules(), modelWidget.getIconRules());
 

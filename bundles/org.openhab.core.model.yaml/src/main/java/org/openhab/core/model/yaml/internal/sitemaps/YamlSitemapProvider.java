@@ -38,6 +38,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
@@ -64,6 +65,7 @@ import org.slf4j.LoggerFactory;
  * These sitemaps are automatically exposed to the {@link SitemapRegistry}.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapProvider.class, YamlSitemapProvider.class, YamlModelListener.class })
@@ -297,6 +299,9 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
                     break;
                 case Default defaultWidget:
                     defaultWidget.setHeight(widgetDTO.height);
+                    break;
+                case NestedSitemap nestedSitemapWidget:
+                    nestedSitemapWidget.setSitemapName(widgetDTO.name);
                     break;
                 default:
                     break;

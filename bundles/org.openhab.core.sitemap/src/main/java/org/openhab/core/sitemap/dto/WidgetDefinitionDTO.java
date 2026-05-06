@@ -20,11 +20,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * This is a data transfer object that is used to serialize widgets.
  *
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @Schema(name = "SitemapWidgetDefinition")
 public class WidgetDefinitionDTO extends AbstractWidgetDTO {
 
     public String item;
+
+    // Nested sitemaps are only supported in the definition, not in the instance. The instance replaces them with a Text
+    // widget containing the sitemap definition as child widgets.
+    public String sitemapName;
 
     public List<RuleDTO> visibilityRules;
     public List<RuleDTO> iconRules;

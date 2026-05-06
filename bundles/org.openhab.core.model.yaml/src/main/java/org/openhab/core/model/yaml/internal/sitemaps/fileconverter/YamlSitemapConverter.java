@@ -41,6 +41,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
 import org.openhab.core.sitemap.Setpoint;
@@ -60,6 +61,7 @@ import org.osgi.service.component.annotations.Reference;
  * {@link YamlSitemapConverter} is the YAML converter for {@link Sitemap} objects.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapSerializer.class, SitemapParser.class })
@@ -303,6 +305,9 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
                 if (defaultWidget.getHeight() > 0) {
                     dto.height = defaultWidget.getHeight();
                 }
+            }
+            case NestedSitemap nestedSitemapWidget -> {
+                dto.name = nestedSitemapWidget.getSitemapName();
             }
             default -> {
             }

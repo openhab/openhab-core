@@ -35,6 +35,8 @@ import org.openhab.core.model.sitemap.sitemap.ModelWebview
 import org.openhab.core.model.sitemap.sitemap.ModelVideo
 import org.openhab.core.model.sitemap.sitemap.ModelWidget
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage
+import org.openhab.core.model.sitemap.sitemap.ModelNestedSitemap
+import org.openhab.core.model.sitemap.sitemap.ModelWidgetWithItem
 
 /**
  * Custom validation rules.
@@ -47,7 +49,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         "item=", "label=", "icon=", "staticIcon=", "labelcolor=", "valuecolor=", "iconcolor=", "visibility=",
         "url=", "encoding=", "service=", "refresh=", "period=", "legend=", "forceasitem=", "yAxisDecimalPattern=",
         "interpolation=", "mappings=", "height=", "switchSupport", "releaseOnly", "minValue=", "maxValue=", "step=",
-        "inputHint=", "buttons=", "row=", "column=", "stateless", "click=", "release="
+        "inputHint=", "buttons=", "row=", "column=", "stateless", "click=", "release=", "sitemapname="
     }
     val ALLOWED_HINTS = #{"text", "number", "date", "time", "datetime"}
     val ALLOWED_INTERPOLATION = #{"linear", "step"}
@@ -114,27 +116,36 @@ class SitemapValidator extends AbstractSitemapValidator {
 
     @Check
     def void checkWidgetHasItem(ModelWidget w) {
-        if (!(w instanceof ModelFrame || w instanceof ModelText || w instanceof ModelImage || w instanceof ModelVideo || w instanceof ModelWebview || w instanceof ModelButtongrid) && w.item === null) {
+        if (!(w instanceof ModelWidgetWithItem)) {
+            return
+        }
+        if (w instanceof ModelFrame || w instanceof ModelText || w instanceof ModelImage || w instanceof ModelVideo || w instanceof ModelWebview || w instanceof ModelButtongrid) {
+            return
+        }
+        if ((w as ModelWidgetWithItem).item === null) {
             val node = NodeModelUtils.getNode(w)
             val line = node.startLine
             error(errorString(getWidgetType(w) + " widget doesn't have item defined", line),
-                SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_WIDGET__ITEM))
+                SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_WIDGET_WITH_ITEM__ITEM))
         }
     }
 
     @Check
     def void checkWidgetIcon(ModelWidget w) {
+        if (!(w instanceof ModelWidgetWithItem)) {
+            return
+        }
         val className = getWidgetType(w)
-        if (w.icon !== null && w.staticIcon !== null) {
+        if (w.icon !== null && (w as ModelWidgetWithItem).staticIcon !== null) {
             val node = NodeModelUtils.getNode(w)
             val line = node.startLine
-            warning(errorString(className + " widget has icon '" + w.icon + "' and staticIcon '" + w.staticIcon + "' defined at the same time", line), null)
+            warning(errorString(className + " widget has icon '" + w.icon + "' and staticIcon '" + (w as ModelWidgetWithItem).staticIcon + "' defined at the same time", line), null)
         }
-        if (w.iconRules !== null && w.staticIcon !== null) {
+        if (w.iconRules !== null && (w as ModelWidgetWithItem).staticIcon !== null) {
             val node = NodeModelUtils.getNode(w)
             val line = node.startLine
             val iconRules = NodeModelUtils.getTokenText(NodeModelUtils.getNode(w.iconRules))
-            warning(errorString(className + " widget has icon rules '" + iconRules + "' and staticIcon '" + w.staticIcon + "' defined at the same time", line), null)
+            warning(errorString(className + " widget has icon rules '" + iconRules + "' and staticIcon '" + (w as ModelWidgetWithItem).staticIcon + "' defined at the same time", line), null)
         }
     }
 
@@ -375,6 +386,16 @@ class SitemapValidator extends AbstractSitemapValidator {
             val line = node.startLine
             error(errorString("Webview widget doesn't have url defined", line),
                 SitemapPackage.Literals.MODEL_WEBVIEW.getEStructuralFeature(SitemapPackage.MODEL_WEBVIEW__URL))
+        }
+    }
+    
+    @Check
+    def void checkNestedSitemapParameters(ModelNestedSitemap w) {
+        if (w.sitemapName === null) {
+            val node = NodeModelUtils.getNode(w)
+            val line = node.startLine
+            error(errorString("Sitemap widget doesn't have sitemapname defined", line),
+                SitemapPackage.Literals.MODEL_NESTED_SITEMAP.getEStructuralFeature(SitemapPackage.MODEL_NESTED_SITEMAP__SITEMAP_NAME))
         }
     }
 }

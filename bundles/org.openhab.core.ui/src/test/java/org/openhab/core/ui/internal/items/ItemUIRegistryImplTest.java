@@ -82,6 +82,7 @@ import org.openhab.core.sitemap.Text;
 import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
+import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
@@ -117,6 +118,7 @@ public class ItemUIRegistryImplTest {
 
     private @Mock @NonNullByDefault({}) ItemRegistry registryMock;
     private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactoryMock;
+    private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistryMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) Sitemap sitemapMock;
     private @Mock @NonNullByDefault({}) Widget widgetMock;
@@ -153,7 +155,8 @@ public class ItemUIRegistryImplTest {
     @BeforeEach
     @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registryMock, sitemapFactoryMock, timeZoneProviderMock);
+        uiRegistry = new ItemUIRegistryImpl(registryMock, sitemapFactoryMock, sitemapRegistryMock,
+                timeZoneProviderMock);
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
