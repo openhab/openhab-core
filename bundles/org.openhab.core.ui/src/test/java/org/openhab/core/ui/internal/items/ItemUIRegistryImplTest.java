@@ -1475,20 +1475,20 @@ public class ItemUIRegistryImplTest {
         when(buttongridMock.getParent()).thenReturn(frameMock);
         when(buttonMock.getParent()).thenReturn(buttongridMock);
 
-        assertEquals("1:0", uiRegistry.getWidgetId(frameMock));
-        assertEquals("1:00", uiRegistry.getWidgetId(switchMock));
-        assertEquals("1:01", uiRegistry.getWidgetId(sliderMock));
-        assertEquals("1:02", uiRegistry.getWidgetId(groupMock));
-        assertEquals("1:03", uiRegistry.getWidgetId(colorpickerMock));
-        assertEquals("1:04", uiRegistry.getWidgetId(imageMock));
-        assertEquals("1:05", uiRegistry.getWidgetId(mapviewMock));
-        assertEquals("1:06", uiRegistry.getWidgetId(selectionMock));
-        assertEquals("1:07", uiRegistry.getWidgetId(setpointMock));
-        assertEquals("1:08", uiRegistry.getWidgetId(chartMock));
-        assertEquals("1:09", uiRegistry.getWidgetId(webviewMock));
-        assertEquals("2:0010", uiRegistry.getWidgetId(textMock));
-        assertEquals("2:0011", uiRegistry.getWidgetId(buttongridMock));
-        assertEquals("2:001100", uiRegistry.getWidgetId(buttonMock));
+        assertEquals("1_0", uiRegistry.getWidgetId(frameMock));
+        assertEquals("1_00", uiRegistry.getWidgetId(switchMock));
+        assertEquals("1_01", uiRegistry.getWidgetId(sliderMock));
+        assertEquals("1_02", uiRegistry.getWidgetId(groupMock));
+        assertEquals("1_03", uiRegistry.getWidgetId(colorpickerMock));
+        assertEquals("1_04", uiRegistry.getWidgetId(imageMock));
+        assertEquals("1_05", uiRegistry.getWidgetId(mapviewMock));
+        assertEquals("1_06", uiRegistry.getWidgetId(selectionMock));
+        assertEquals("1_07", uiRegistry.getWidgetId(setpointMock));
+        assertEquals("1_08", uiRegistry.getWidgetId(chartMock));
+        assertEquals("1_09", uiRegistry.getWidgetId(webviewMock));
+        assertEquals("2_0010", uiRegistry.getWidgetId(textMock));
+        assertEquals("2_0011", uiRegistry.getWidgetId(buttongridMock));
+        assertEquals("2_001100", uiRegistry.getWidgetId(buttonMock));
     }
 
     @Test
@@ -1499,30 +1499,30 @@ public class ItemUIRegistryImplTest {
 
         when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
 
-        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "1:0"));
-        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "1:00"));
-        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "1:01"));
-        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "1:010"));
-        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "2:00"));
-        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "2:0000"));
-        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "2:0001"));
-        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "2:000100"));
-        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "3:000"));
-        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "3:000000"));
-        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "3:000001"));
-        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "3:000001000"));
+        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "1_0"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "1_00"));
+        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "1_01"));
+        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "1_010"));
+        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "2_00"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "2_0000"));
+        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "2_0001"));
+        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "2_000100"));
+        assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "3_000"));
+        assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "3_000000"));
+        assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "3_000001"));
+        assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "3_000001000"));
         assertEquals(frameMock, uiRegistry.getWidget(sitemapMock, "00"));
         assertEquals(switchMock, uiRegistry.getWidget(sitemapMock, "0000"));
         assertEquals(buttongridMock, uiRegistry.getWidget(sitemapMock, "0001"));
         assertEquals(buttonMock, uiRegistry.getWidget(sitemapMock, "000100"));
-        assertNull(uiRegistry.getWidget(sitemapMock, "1:1"));
-        assertNull(uiRegistry.getWidget(sitemapMock, "1:02"));
-        assertNull(uiRegistry.getWidget(sitemapMock, "1:011"));
-        assertNull(uiRegistry.getWidget(sitemapMock, "2:0"));
-        assertNull(uiRegistry.getWidget(sitemapMock, "2:000"));
-        assertNull(uiRegistry.getWidget(sitemapMock, "2:01"));
-        assertNull(uiRegistry.getWidget(sitemapMock, "2:0002"));
-        assertNull(uiRegistry.getWidget(sitemapMock, "2:000101"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "1_1"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "1_02"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "1_011"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2_0"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2_000"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2_01"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2_0002"));
+        assertNull(uiRegistry.getWidget(sitemapMock, "2_000101"));
         assertNull(uiRegistry.getWidget(sitemapMock, "0"));
         assertNull(uiRegistry.getWidget(sitemapMock, "000"));
         assertNull(uiRegistry.getWidget(sitemapMock, "01"));
