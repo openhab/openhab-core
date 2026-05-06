@@ -19,8 +19,8 @@
 
   <properties>
     <jackson.annotations.version>2.21</jackson.annotations.version>
-    <jackson.version>2.21.0</jackson.version>
     <maven.version>3.9.12</maven.version>
+    <jackson.version>2.21.2</jackson.version>
   </properties>
 
   <dependencies>

@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -81,7 +80,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
 
     private final Collection<RegistryChangeListener<E>> listeners = new CopyOnWriteArraySet<>();
 
-    private Optional<ManagedProvider<E, K>> managedProvider = Optional.empty();
+    private @Nullable ManagedProvider<E, K> managedProvider = null;
 
     private @Nullable EventPublisher eventPublisher;
     private @Nullable ReadyService readyService;
@@ -363,20 +362,33 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
 
     @Override
     public E add(E element) {
-        managedProvider.orElseThrow(() -> new IllegalStateException("ManagedProvider is not available")).add(element);
+        @Nullable
+        ManagedProvider<E, K> mp = managedProvider;
+        if (mp == null) {
+            throw new IllegalStateException("ManagedProvider is not available");
+        }
+        mp.add(element);
         return element;
     }
 
     @Override
     public @Nullable E update(E element) {
-        return managedProvider.orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"))
-                .update(element);
+        @Nullable
+        ManagedProvider<E, K> mp = managedProvider;
+        if (mp == null) {
+            throw new IllegalStateException("ManagedProvider is not available");
+        }
+        return mp.update(element);
     }
 
     @Override
     public @Nullable E remove(K key) {
-        return managedProvider.orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"))
-                .remove(key);
+        @Nullable
+        ManagedProvider<E, K> mp = managedProvider;
+        if (mp == null) {
+            throw new IllegalStateException("ManagedProvider is not available");
+        }
+        return mp.remove(key);
     }
 
     protected void notifyListeners(E element, EventType eventType) {
@@ -563,17 +575,17 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         }
     }
 
-    protected Optional<ManagedProvider<E, K>> getManagedProvider() {
+    protected @Nullable ManagedProvider<E, K> getManagedProvider() {
         return managedProvider;
     }
 
     protected void setManagedProvider(ManagedProvider<E, K> provider) {
-        managedProvider = Optional.ofNullable(provider);
+        managedProvider = provider;
     }
 
     protected void unsetManagedProvider(ManagedProvider<E, K> provider) {
-        if (managedProvider.isPresent() && managedProvider.get().equals(provider)) {
-            managedProvider = Optional.empty();
+        if (managedProvider != null && managedProvider.equals(provider)) {
+            managedProvider = null;
         }
     }
 

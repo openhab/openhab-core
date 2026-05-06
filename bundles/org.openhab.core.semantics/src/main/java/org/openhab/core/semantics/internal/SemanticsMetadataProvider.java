@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -106,6 +107,11 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     @Override
     public Collection<Metadata> getAll() {
         return semantics.values();
+    }
+
+    @Override
+    public Collection<String> getReservedNamespaces() {
+        return Set.of(NAMESPACE);
     }
 
     /**

@@ -15,7 +15,6 @@ package org.openhab.core.automation.module.script.internal.handler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.script.Compilable;
@@ -65,8 +64,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     private final String engineIdentifier;
 
-    private Optional<ScriptEngine> scriptEngine = Optional.empty();
-    private Optional<CompiledScript> compiledScript = Optional.empty();
+    private @Nullable ScriptEngine scriptEngine = null;
+    private @Nullable CompiledScript compiledScript = null;
     private final String type;
     protected final String script;
 
@@ -98,7 +97,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
      * {@link Compilable}.
      */
     protected void compileScript() throws ScriptException {
-        if (compiledScript.isPresent() || script.isEmpty()) {
+        if (compiledScript != null || script.isEmpty()) {
             return;
         }
         if (!scriptEngineManager.isSupported(type)) {
@@ -107,12 +106,11 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
                     type, engineIdentifier);
             return;
         }
-        Optional<ScriptEngine> engine = getScriptEngine();
-        if (engine.isPresent()) {
-            ScriptEngine scriptEngine = engine.get();
-            if (scriptEngine instanceof Compilable compilable) {
+        ScriptEngine engine = getScriptEngine();
+        if (engine != null) {
+            if (engine instanceof Compilable compilable) {
                 logger.debug("Pre-compiling script of rule with UID '{}'", ruleUID);
-                compiledScript = Optional.ofNullable(compilable.compile(script));
+                compiledScript = compilable.compile(script);
             }
         }
     }
@@ -127,8 +125,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
      */
     public synchronized void resetScriptEngine() {
         scriptEngineManager.removeEngine(engineIdentifier);
-        scriptEngine = Optional.empty();
-        compiledScript = Optional.empty();
+        scriptEngine = null;
+        compiledScript = null;
     }
 
     /**
@@ -159,22 +157,22 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     /**
      * Get the script engine instance used by this module handler.
      *
-     * @return the script engine instance if available, otherwise Optional.empty()
+     * @return the script engine instance if available, otherwise null
      */
-    protected Optional<ScriptEngine> getScriptEngine() {
-        return scriptEngine.isPresent() ? scriptEngine : createScriptEngine();
+    protected @Nullable ScriptEngine getScriptEngine() {
+        return scriptEngine != null ? scriptEngine : createScriptEngine();
     }
 
     /**
      * Creates a new script engine for the type defined in the module configuration.
      *
-     * @return the script engine if available, otherwise Optional.empty()
+     * @return the script engine if available, otherwise null
      */
-    private Optional<ScriptEngine> createScriptEngine() {
+    private @Nullable ScriptEngine createScriptEngine() {
         ScriptEngineContainer container = scriptEngineManager.createScriptEngine(type, engineIdentifier);
 
         if (container != null) {
-            scriptEngine = Optional.ofNullable(container.getScriptEngine());
+            scriptEngine = container.getScriptEngine();
             // Inject the module type id into the script context early, so engines can access it before script
             // invocation.
             ScriptContext scriptContext = container.getScriptEngine().getContext();
@@ -188,7 +186,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             return scriptEngine;
         } else {
             logger.debug("No engine available for script type '{}' in action '{}'.", type, module.getId());
-            return Optional.empty();
+            return null;
         }
     }
 
@@ -257,9 +255,9 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             return null;
         }
         try {
-            if (compiledScript.isPresent()) {
+            if (compiledScript != null) {
                 logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);
-                return compiledScript.get().eval(engine.getContext());
+                return compiledScript.eval(engine.getContext());
             }
             logger.debug("Executing script of rule with UID '{}'", ruleUID);
             return engine.eval(script);

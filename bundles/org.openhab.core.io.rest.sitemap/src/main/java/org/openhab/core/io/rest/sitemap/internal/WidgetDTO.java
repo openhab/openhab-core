@@ -12,11 +12,11 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
+import org.openhab.core.sitemap.dto.AbstractWidgetDTO;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -31,24 +31,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Danny Baumann - New field labelSource
  * @author Laurent Garnier - Remove field columns
  * @author Laurent Garnier - New fields row, column, command, releaseCommand and stateless for Button element
+ * @author Mark Herwege - Extends abstract widget DTO
  */
-@Schema(name = "Widget")
-public class WidgetDTO {
+@Schema(name = "SitemapWidget")
+public class WidgetDTO extends AbstractWidgetDTO {
 
     public String widgetId;
-    public String type;
-    public String name;
     public boolean visibility;
-
-    public String label;
     public String labelSource;
-    public String icon;
-    /**
-     * staticIcon is a boolean indicating if the widget state must be ignored when requesting the icon.
-     * It is set to true when the widget has either the staticIcon property set or the icon property set
-     * with conditional rules.
-     */
-    public Boolean staticIcon;
+
     public String labelcolor;
     public String valuecolor;
     public String iconcolor;
@@ -56,29 +47,6 @@ public class WidgetDTO {
     public String pattern;
     public String unit;
 
-    // widget-specific attributes
-    public final List<MappingDTO> mappings = new ArrayList<>();
-    public Boolean switchSupport;
-    public Boolean releaseOnly;
-    public Integer refresh;
-    public Integer height;
-    public BigDecimal minValue;
-    public BigDecimal maxValue;
-    public BigDecimal step;
-    public String inputHint;
-    public String url;
-    public String encoding;
-    public String service;
-    public String period;
-    public String yAxisDecimalPattern;
-    public String interpolation;
-    public Boolean legend;
-    public Boolean forceAsItem;
-    public Integer row;
-    public Integer column;
-    public String command;
-    public String releaseCommand;
-    public Boolean stateless;
     public String state;
 
     public EnrichedItemDTO item;

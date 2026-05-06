@@ -15,10 +15,13 @@
  */
 package org.openhab.core.model.thing.validation
 
-import org.openhab.core.model.thing.thing.ModelThing
-import org.eclipse.xtext.validation.Check
-import org.openhab.core.model.thing.thing.ThingPackage
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.nodemodel.INode
+import org.eclipse.xtext.validation.Check
+import org.openhab.core.model.thing.thing.ModelThing
+import org.openhab.core.model.thing.thing.ThingPackage
 import org.openhab.core.thing.ThingUID
 
 /**
@@ -28,23 +31,24 @@ import org.openhab.core.thing.ThingUID
  */
 class ThingValidator extends AbstractThingValidator {
 
-  public static val INVALID_NAME = 'invalidName'
-
 	@Check
 	def check_thing_has_valid_id(ModelThing thing) {
 		if (thing.nested) {
 			// We have to provide thingTypeId and a thingId
 			if (!thing.eIsSet(ThingPackage.Literals.MODEL_THING__THING_TYPE_ID)) {
 				if (thing.eIsSet(ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)) {
-					warning("Provide a thing type ID and a thing ID in this format:\n <thingTypeId> <thingId>", ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
+					generateWarning("Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>",
+						thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
 				} else {
 					if (thing.eIsSet(ThingPackage.Literals.MODEL_BRIDGE__BRIDGE)) {
-						warning("Provide a thing type ID and a thing ID in this format:\n <thingTypeId> <thingId>", ThingPackage.Literals.MODEL_BRIDGE__BRIDGE)
+						generateWarning("Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>",
+							thing, ThingPackage.Literals.MODEL_BRIDGE__BRIDGE)
 					}
 				}
 			} else {
 				if (!thing.eIsSet(ThingPackage.Literals.MODEL_THING__THING_ID)) {
-					warning("Provide a thing type ID and a thing ID in this format:\n <thingTypeId> <thingId>", ThingPackage.Literals.MODEL_THING__THING_TYPE_ID)
+					generateWarning("Provide a thing type ID and a thing ID in this format: <thingTypeId> <thingId>",
+						thing, ThingPackage.Literals.MODEL_THING__THING_TYPE_ID)
 				}
 			}
 		} else { // thing in container
@@ -53,21 +57,51 @@ class ThingValidator extends AbstractThingValidator {
 				val thingIdFeature = NodeModelUtils.findNodesForFeature(thing, ThingPackage.Literals.MODEL_THING__THING_ID).head
 				val startOffset = thingTypeIdFeature.offset
 				val endOffset = thingIdFeature.endOffset
-				getMessageAcceptor().acceptWarning("Provide a thing UID in this format:\n <bindingId>:<thingTypeId>:<thingId>", thing, startOffset, endOffset - startOffset, null, null)
+				getMessageAcceptor().acceptWarning(
+					buildMsgWithLineNb("Provide a thing UID in this format: <bindingId>:<thingTypeId>:<thingId>", thingTypeIdFeature, thingIdFeature),
+					thing, startOffset, endOffset - startOffset, null, null)
 			} else {
 				if (thing.id !== null) {
 					try {
 						new ThingUID(thing.id)
 					} catch (IllegalArgumentException e) {
-						error(e.message, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
+						generateError(e.message, thing, ThingPackage.Literals.MODEL_PROPERTY_CONTAINER__ID)
 					}
 				}
 			}
 		}
-
 	}
 
 	def private isNested(ModelThing thing) {
 		thing.eContainingFeature == ThingPackage.Literals.MODEL_BRIDGE__THINGS
+	}
+
+	def private generateWarning(String msg, EObject object, EAttribute attribute) {
+		warning(buildMsgWithLineNb(msg, object, attribute), object, attribute)
+	}
+
+	def private generateError(String msg, EObject object, EAttribute attribute) {
+		error(buildMsgWithLineNb(msg, object, attribute), object, attribute)
+	}
+
+	def private buildMsgWithLineNb(String msg, EObject object, EAttribute attribute) {
+		var node = NodeModelUtils.findNodesForFeature(object, attribute).head
+		if (node === null) {
+			node = NodeModelUtils.getNode(object)
+			if (node === null) {
+				return msg
+			}
+		}
+		return buildMsgWithLineNb(msg, node, node)
+	}
+
+	def private buildMsgWithLineNb(String msg, INode start, INode end) {
+		val startLine = start.startLine
+		val endLine = end.endLine
+		if (startLine == endLine) {
+			return "Line " + startLine + ": " + msg
+		} else {
+			return "Line " + startLine + "-" + endLine + ": " + msg
+		}
 	}
 }

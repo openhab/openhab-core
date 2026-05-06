@@ -95,27 +95,35 @@ public class FolderObserver implements WatchService.WatchEventListener {
 
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
     protected void addModelParser(ModelParser modelParser) {
-        String extension = modelParser.getExtension();
-        logger.debug("Adding parser for '{}' extension", extension);
-        parsers.add(extension);
+        String extensionList = modelParser.getExtension();
+        String extensions[] = extensionList.split(",");
+        for (String extension : extensions) {
+            logger.debug("Adding parser for '{}' extension", extension);
+            parsers.add(extension);
+        }
 
         if (activated) {
-            processIgnoredPaths(extension);
-            readyService.markReady(new ReadyMarker(READYMARKER_TYPE, extension));
-            logger.debug("Marked extension '{}' as ready", extension);
+            for (String extension : extensions) {
+                processIgnoredPaths(extension);
+                readyService.markReady(new ReadyMarker(READYMARKER_TYPE, extension));
+                logger.debug("Marked extension '{}' as ready", extension);
+            }
         } else {
             logger.debug("{} is not yet activated", FolderObserver.class.getSimpleName());
         }
     }
 
     protected void removeModelParser(ModelParser modelParser) {
-        String extension = modelParser.getExtension();
-        logger.debug("Removing parser for '{}' extension", extension);
-        parsers.remove(extension);
+        String extensionList = modelParser.getExtension();
+        String extensions[] = extensionList.split(",");
+        for (String extension : extensions) {
+            logger.debug("Removing parser for '{}' extension", extension);
+            parsers.remove(extension);
 
-        Set<String> removed = modelRepository.removeAllModelsOfType(extension);
-        ignoredPaths
-                .addAll(removed.stream().map(namePathMap::get).filter(Objects::nonNull).collect(Collectors.toSet()));
+            Set<String> removed = modelRepository.removeAllModelsOfType(extension);
+            ignoredPaths.addAll(
+                    removed.stream().map(namePathMap::get).filter(Objects::nonNull).collect(Collectors.toSet()));
+        }
     }
 
     @Activate
@@ -137,6 +145,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
             }
 
             Path folderPath = watchPath.resolve(folderName);
+            logger.debug("Extensions set in config for folder {}: {}", folderName, config.get(folderName));
             Set<String> validExtensions = Set.of(((String) config.get(folderName)).split(","));
             if (Files.exists(folderPath) && Files.isDirectory(folderPath)) {
                 folderFileExtMap.put(folderName, validExtensions);

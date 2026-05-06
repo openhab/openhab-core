@@ -57,6 +57,11 @@ public class ProfileContextImpl implements ProfileContext {
     }
 
     @Override
+    public <T> T getConfigurationAs(Class<T> configurationClass) {
+        return getConfiguration().as(configurationClass);
+    }
+
+    @Override
     public ScheduledExecutorService getExecutorService() {
         return ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME);
     }

@@ -15,7 +15,12 @@ package org.openhab.core.auth.client.oauth2;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * This is the Access Token Response, a simple value-object that holds the result of the
@@ -28,6 +33,7 @@ import java.util.Objects;
  * @author Michael Bock - Initial contribution
  * @author Gary Tse - Adaptation for Eclipse SmartHome
  */
+@NonNullByDefault
 public final class AccessTokenResponse implements Serializable, Cloneable {
 
     /**
@@ -46,14 +52,14 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-1.4">rfc6749 section-1.4</a>
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-10.3">rfc6749 section-10.3</a>
      */
-    private String accessToken;
+    private @Nullable String accessToken;
 
     /**
      * Token type. e.g. Bearer, MAC
      *
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-7.1">rfc6749 section-7.1</a>
      */
-    private String tokenType;
+    private @Nullable String tokenType;
 
     /**
      * Number of seconds that this OAuthToken is valid for since the time it was created.
@@ -74,7 +80,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-1.5">rfc6749 section-1.5</a>
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-10.4">rfc6749 section-10.4</a>
      */
-    private String refreshToken;
+    private @Nullable String refreshToken;
 
     /**
      * A space-delimited case-sensitive un-ordered string. This may be used
@@ -83,7 +89,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      *
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3">rfc6749 section-3.3</a>
      */
-    private String scope;
+    private @Nullable String scope;
 
     /**
      * If the {@code state} parameter was present in the access token request.
@@ -91,7 +97,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      *
      * <a href="https://tools.ietf.org/html/rfc6749#section-4.2.2">rfc6749 section-4.2.2</a>
      */
-    private String state;
+    private @Nullable String state;
 
     /**
      * Created datetime of this access token. This is generated locally
@@ -100,7 +106,37 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * This should be slightly later than the actual time the access token
      * is produced at the server.
      */
-    private Instant createdOn;
+    private @Nullable Instant createdOn;
+
+    /**
+     * Extra elements that may be passed in the token response by a specific OAuth implementation.
+     * <p>
+     * These fields are provider-specific and are not restricted to standard OAuth fields. As such,
+     * they may contain sensitive information (for example, identifiers, metadata or other values
+     * that should not be logged or exposed).
+     * <p>
+     * Consumers of this value MUST treat all entries as potentially sensitive and avoid logging or
+     * otherwise exposing them unless they have explicitly verified that the data is safe to do so.
+     */
+
+    private Map<String, String> extraFields = Collections.emptyMap();
+
+    /**
+     * Returns the additional provider-specific fields from the token response.
+     * <p>
+     * Note: the returned map may contain sensitive information in non-standard fields. Callers
+     * MUST take care not to log, persist, or expose these values without first ensuring that
+     * doing so is appropriate in their security context.
+     *
+     * @return a map of additional fields as provided by the authorization server
+     */
+    public Map<String, String> getExtraFields() {
+        return Collections.unmodifiableMap(extraFields);
+    }
+
+    public void setExtraFields(Map<String, String> extraFields) {
+        this.extraFields = (extraFields.isEmpty()) ? Collections.emptyMap() : Map.copyOf(extraFields);
+    }
 
     /**
      * Calculate if the token is expired against the given time.
@@ -117,19 +153,19 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
                 || createdOn.plusSeconds(expiresIn).minusSeconds(tokenExpiresInBuffer).isBefore(givenTime);
     }
 
-    public String getAccessToken() {
+    public @Nullable String getAccessToken() {
         return accessToken;
     }
 
-    public void setAccessToken(String accessToken) {
+    public void setAccessToken(@Nullable String accessToken) {
         this.accessToken = accessToken;
     }
 
-    public String getTokenType() {
+    public @Nullable String getTokenType() {
         return tokenType;
     }
 
-    public void setTokenType(String tokenType) {
+    public void setTokenType(@Nullable String tokenType) {
         this.tokenType = tokenType;
     }
 
@@ -141,35 +177,35 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         this.expiresIn = expiresIn;
     }
 
-    public String getRefreshToken() {
+    public @Nullable String getRefreshToken() {
         return refreshToken;
     }
 
-    public void setRefreshToken(String refreshToken) {
+    public void setRefreshToken(@Nullable String refreshToken) {
         this.refreshToken = refreshToken;
     }
 
-    public String getScope() {
+    public @Nullable String getScope() {
         return scope;
     }
 
-    public void setScope(String scope) {
+    public void setScope(@Nullable String scope) {
         this.scope = scope;
     }
 
-    public String getState() {
+    public @Nullable String getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(@Nullable String state) {
         this.state = state;
     }
 
-    public Instant getCreatedOn() {
+    public @Nullable Instant getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(Instant createdOn) {
+    public void setCreatedOn(@Nullable Instant createdOn) {
         this.createdOn = createdOn;
     }
 
@@ -184,11 +220,11 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(accessToken, tokenType, expiresIn, refreshToken, scope, state, createdOn);
+        return Objects.hash(accessToken, tokenType, expiresIn, refreshToken, scope, state, createdOn, extraFields);
     }
 
     @Override
-    public boolean equals(Object thatAuthTokenObj) {
+    public boolean equals(@Nullable Object thatAuthTokenObj) {
         if (this == thatAuthTokenObj) {
             return true;
         }
@@ -203,13 +239,18 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         return Objects.equals(this.accessToken, that.accessToken) && Objects.equals(this.tokenType, that.tokenType)
                 && Objects.equals(this.expiresIn, that.expiresIn)
                 && Objects.equals(this.refreshToken, that.refreshToken) && Objects.equals(this.scope, that.scope)
-                && Objects.equals(this.state, that.state) && Objects.equals(this.createdOn, that.createdOn);
+                && Objects.equals(this.state, that.state) && Objects.equals(this.createdOn, that.createdOn)
+                && Objects.equals(this.extraFields, that.extraFields);
     }
 
     @Override
+    /*
+     * Warning: the toString() function may returns sensitive information that should not go into the log.
+     *
+     */
     public String toString() {
         return "AccessTokenResponse [accessToken=" + accessToken + ", tokenType=" + tokenType + ", expiresIn="
                 + expiresIn + ", refreshToken=" + refreshToken + ", scope=" + scope + ", state=" + state
-                + ", createdOn=" + createdOn + "]";
+                + ", createdOn=" + createdOn + ", extraFields= " + extraFields + "]";
     }
 }

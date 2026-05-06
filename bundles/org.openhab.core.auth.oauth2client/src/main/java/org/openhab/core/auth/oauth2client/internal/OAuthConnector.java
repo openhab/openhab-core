@@ -12,7 +12,17 @@
  */
 package org.openhab.core.auth.oauth2client.internal;
 
-import static org.openhab.core.auth.oauth2client.internal.Keyword.*;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.AUTHORIZATION_CODE;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.CLIENT_CREDENTIALS;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.CLIENT_ID;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.CLIENT_SECRET;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.CODE;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.GRANT_TYPE;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.PASSWORD;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.REDIRECT_URI;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.REFRESH_TOKEN;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.SCOPE;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.USERNAME;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -37,6 +47,7 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.Fields;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.AccessTokenResponseExtraFieldsAdapterFactory;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
 import org.openhab.core.io.net.http.HttpClientFactory;
@@ -89,7 +100,11 @@ public class OAuthConnector {
     public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Fields extraFields, GsonBuilder gsonBuilder) {
         this.httpClientFactory = httpClientFactory;
         this.extraFields = extraFields;
-        gson = gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
+        this.gson = getGson(gsonBuilder);
+    }
+
+    static Gson getGson(GsonBuilder gsonBuilder) {
+        return gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(OAuthResponseException.class,
                         (JsonDeserializer<OAuthResponseException>) (json, typeOfT, context) -> {
@@ -120,7 +135,7 @@ public class OAuthConnector {
                     } catch (DateTimeParseException e) {
                         return LocalDateTime.parse(json.getAsString()).atZone(ZoneId.systemDefault()).toInstant();
                     }
-                }).create();
+                }).registerTypeAdapterFactory(new AccessTokenResponseExtraFieldsAdapterFactory()).create();
     }
 
     /**
@@ -214,8 +229,8 @@ public class OAuthConnector {
      * @throws OAuthResponseException Error codes given by authorization provider, as in RFC 6749 section 5.2 Error
      *             Response
      */
-    public AccessTokenResponse grantTypeRefreshToken(String tokenUrl, String refreshToken, @Nullable String clientId,
-            @Nullable String clientSecret, @Nullable String scope, boolean supportsBasicAuth)
+    public AccessTokenResponse grantTypeRefreshToken(String tokenUrl, @Nullable String refreshToken,
+            @Nullable String clientId, @Nullable String clientSecret, @Nullable String scope, boolean supportsBasicAuth)
             throws OAuthResponseException, OAuthException, IOException {
         HttpClient httpClient = null;
         try {
@@ -356,27 +371,53 @@ public class OAuthConnector {
             statusCode = response.getStatus();
             content = response.getContentAsString();
 
-            if (statusCode == HttpStatus.OK_200) {
-                AccessTokenResponse jsonResponse = gson.fromJson(content, AccessTokenResponse.class);
-                if (jsonResponse == null) {
-                    throw new OAuthException("Empty response content when deserializing AccessTokenResponse");
+            switch (statusCode) {
+                case HttpStatus.OK_200 -> {
+                    AccessTokenResponse jsonResponse = gson.fromJson(content, AccessTokenResponse.class);
+                    if (jsonResponse == null) {
+                        throw new OAuthException("Empty response content when deserializing AccessTokenResponse");
+                    }
+                    jsonResponse.setCreatedOn(Instant.now()); // this is not supplied by the response
+                    logger.debug("grant type {} to URL {} success", grantType, request.getURI());
+                    return jsonResponse;
                 }
-                jsonResponse.setCreatedOn(Instant.now()); // this is not supplied by the response
-                logger.debug("grant type {} to URL {} success", grantType, request.getURI());
-                return jsonResponse;
-            } else if (statusCode == HttpStatus.BAD_REQUEST_400) {
-                OAuthResponseException errorResponse = gson.fromJson(content, OAuthResponseException.class);
-                if (errorResponse == null) {
-                    throw new OAuthException("Empty response content when deserializing OAuthResponseException");
-                }
-                logger.error("grant type {} to URL {} failed with error code {}, description {}", grantType,
-                        request.getURI(), errorResponse.getError(), errorResponse.getErrorDescription());
+                case HttpStatus.BAD_REQUEST_400 -> {
+                    OAuthResponseException errorResponse = gson.fromJson(content, OAuthResponseException.class);
+                    if (errorResponse == null) {
+                        throw new OAuthException("Empty response content when deserializing OAuthResponseException");
+                    }
+                    logger.error("grant type {} to URL {} failed with error code {}, description {}", grantType,
+                            request.getURI(), errorResponse.getError(), errorResponse.getErrorDescription());
 
-                throw errorResponse;
-            } else {
-                logger.error("grant type {} to URL {} failed with HTTP response code {}", grantType, request.getURI(),
-                        statusCode);
-                throw new OAuthException("Bad http response, http code " + statusCode);
+                    throw errorResponse;
+                }
+                case HttpStatus.UNAUTHORIZED_401 -> {
+                    // Per RFC 6749 section 5.2, HTTP 401 indicates client authentication failure (invalid_client).
+                    // The response body may contain JSON error details; fall back to invalid_client if not present
+                    // or if the body is non-JSON (plain-text, HTML, etc.).
+                    OAuthResponseException errorResponse = null;
+                    if (!content.isBlank()) {
+                        try {
+                            errorResponse = gson.fromJson(content, OAuthResponseException.class);
+                        } catch (JsonSyntaxException e) {
+                            logger.debug(
+                                    "grant type {} to URL {} returned HTTP 401 with non-JSON body, treating as invalid_client",
+                                    grantType, request.getURI());
+                        }
+                    }
+                    if (errorResponse == null || errorResponse.getError().isEmpty()) {
+                        errorResponse = new OAuthResponseException();
+                        errorResponse.setError("invalid_client");
+                    }
+                    logger.debug("grant type {} to URL {} failed with HTTP 401, error: {}, description: {}", grantType,
+                            request.getURI(), errorResponse.getError(), errorResponse.getErrorDescription());
+                    throw errorResponse;
+                }
+                default -> {
+                    logger.error("grant type {} to URL {} failed with HTTP response code {}", grantType,
+                            request.getURI(), statusCode);
+                    throw new OAuthException("Bad http response, http code " + statusCode);
+                }
             }
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             throw new IOException("Exception in oauth communication, grant type " + grantType, e);

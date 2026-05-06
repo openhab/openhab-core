@@ -28,7 +28,7 @@
 
 		<feature dependency="true">openhab.tp-gson</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.41.0)(!(version&gt;=2.42.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.43.0)(!(version&gt;=2.44.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
 		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
@@ -53,6 +53,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.sitemap/${project.version}</bundle>
 		<feature dependency="true">asm</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
@@ -201,7 +202,6 @@
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-ui</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sitemap/${project.version}</bundle>
-		<feature dependency="true">openhab-core-model-sitemap</feature>
 	</feature>
 
 	<feature name="openhab-core-io-rest-swagger" version="${project.version}">
@@ -412,10 +412,10 @@
 
 	<feature name="openhab-core-model-lsp" version="${project.version}">
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.41.0)(!(version&gt;=2.42.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.43.0)(!(version&gt;=2.44.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.24.0)(!(version&gt;=0.24.1)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=1.0.0)(!(version&gt;=1.0.1)))"</requirement>
 		<feature dependency="true">openhab.tp-lsp4j</feature>
 
 		<feature>openhab-core-model-item-ide</feature>
@@ -429,6 +429,7 @@
 
 	<feature name="openhab-core-model-yaml" version="${project.version}">
 		<feature>openhab-core-base</feature>
+		<feature>openhab-core-ui</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.yaml/${project.version}</bundle>
 		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
 		<feature dependency="true">openhab.tp-jackson</feature>
@@ -442,8 +443,6 @@
 
 	<feature name="openhab-core-ui" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature>openhab-core-model-item</feature>
-		<feature>openhab-core-model-sitemap</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ui/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.ui/${project.version}</bundle>
 	</feature>

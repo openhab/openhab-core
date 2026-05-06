@@ -24,6 +24,8 @@ import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.FilterCriteriaDTO;
 import org.openhab.core.config.core.dto.ParameterOptionDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is an enriched data transfer object that is used to serialize config descriptions parameters with a list of
  * default values if a configuration description defines <code>multiple="true"</code>.
@@ -34,6 +36,7 @@ import org.openhab.core.config.core.dto.ParameterOptionDTO;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@Schema(name = "EnrichedConfigDescriptionParameter")
 public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionParameterDTO {
 
     public Collection<String> defaultValues;

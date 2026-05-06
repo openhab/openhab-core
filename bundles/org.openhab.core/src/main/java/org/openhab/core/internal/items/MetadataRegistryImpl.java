@@ -13,10 +13,16 @@
 package org.openhab.core.internal.items;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Provider;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ManagedMetadataProvider;
 import org.openhab.core.items.Metadata;
@@ -31,17 +37,23 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the main implementing class of the {@link MetadataRegistry} interface. It
  * keeps track of all declared metadata of all metadata providers.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Mark Herwege - semantics namespace not in managed provider
  */
 @Component(immediate = true, service = MetadataRegistry.class)
 @NonNullByDefault
 public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey, MetadataProvider>
         implements MetadataRegistry {
+
+    private final Logger logger = LoggerFactory.getLogger(MetadataRegistryImpl.class);
+    private final Map<String, Set<MetadataProvider>> reservedNamespaces = new ConcurrentHashMap<>();
 
     @Activate
     public MetadataRegistryImpl(final @Reference ReadyService readyService) {
@@ -111,7 +123,77 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
     @Override
     public void removeItemMetadata(String itemName) {
         // remove our metadata for that item
-        getManagedProvider()
-                .ifPresent(managedProvider -> ((ManagedMetadataProvider) managedProvider).removeItemMetadata(itemName));
+        @Nullable
+        ManagedMetadataProvider mp = (ManagedMetadataProvider) getManagedProvider();
+        if (mp != null) {
+            mp.removeItemMetadata(itemName);
+        }
+    }
+
+    @Override
+    public Metadata add(Metadata element) {
+        String namespace = element.getUID().getNamespace();
+        Set<MetadataProvider> providers = reservedNamespaces.get(namespace);
+        if (providers == null || providers.isEmpty()
+                || providers.stream().anyMatch(p -> p.equals(getManagedProvider()))) {
+            return super.add(element);
+        }
+        throw new UnsupportedOperationException("Cannot add metadata to '" + namespace + "' namespace");
+    }
+
+    @Override
+    public @Nullable Metadata update(Metadata element) {
+        String namespace = element.getUID().getNamespace();
+        Set<MetadataProvider> providers = reservedNamespaces.get(namespace);
+        if (providers == null || providers.isEmpty()
+                || providers.stream().anyMatch(p -> p.equals(getManagedProvider()))) {
+            return super.update(element);
+        }
+        throw new UnsupportedOperationException("Cannot update metadata in '" + namespace + "' namespace");
+    }
+
+    @Override
+    public @Nullable Metadata remove(MetadataKey key) {
+        String namespace = key.getNamespace();
+        Set<MetadataProvider> providers = reservedNamespaces.get(namespace);
+        if (providers == null || providers.isEmpty()
+                || providers.stream().anyMatch(p -> p.equals(getManagedProvider()))) {
+            return super.remove(key);
+        }
+        throw new UnsupportedOperationException("Cannot remove metadata from '" + namespace + "' namespace");
+    }
+
+    @Override
+    protected void addProvider(Provider<Metadata> provider) {
+        if (provider instanceof MetadataProvider metadataProvider) {
+            metadataProvider.getReservedNamespaces().stream().forEach(namespace -> {
+                Set<MetadataProvider> currentProviders = reservedNamespaces.getOrDefault(namespace, Set.of());
+                if (!currentProviders.isEmpty()) {
+                    logger.debug("Multiple metadata providers are reserving namespace '{}', there should only be one.",
+                            namespace);
+                }
+                Set<MetadataProvider> providers = Stream
+                        .concat(currentProviders.stream(), Set.of(metadataProvider).stream())
+                        .collect(Collectors.toSet());
+                reservedNamespaces.put(namespace, providers);
+            });
+        }
+        super.addProvider(provider);
+    }
+
+    @Override
+    protected void removeProvider(Provider<Metadata> provider) {
+        if (provider instanceof MetadataProvider metadataProvider) {
+            metadataProvider.getReservedNamespaces().stream().forEach(namespace -> {
+                Set<MetadataProvider> providers = reservedNamespaces.getOrDefault(namespace, Set.of()).stream()
+                        .filter(p -> !provider.equals(p)).collect(Collectors.toSet());
+                if (providers.isEmpty()) {
+                    reservedNamespaces.remove(namespace);
+                } else {
+                    reservedNamespaces.put(namespace, providers);
+                }
+            });
+        }
+        super.removeProvider(provider);
     }
 }

@@ -71,7 +71,7 @@ jobs:
 
       - name: Upload Build Log
         if: ${{ always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-log-java-${{ matrix.java }}-${{ matrix.os }}
           path: build.log
@@ -137,12 +137,6 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
 
-      # pinning to SHA to mitigate possible supply chain attacks
-      - name: Set up Maven ${{ matrix.maven }}
-        uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
-        with:
-          maven-version: ${{ matrix.maven }}
-
       - name: JavaDoc
         if: ${{ matrix.type == 'javadoc' }}
         id: javadoc
@@ -150,7 +144,7 @@ jobs:
 
       - name: Upload JavaDoc
         if: ${{ always() && (steps.javadoc.outcome == 'success') }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: javadoc
           path: target/site/apidocs/
@@ -162,7 +156,7 @@ jobs:
 
       - name: Upload SAT Summary Report
         if: ${{ always() && ((steps.sat.outcome == 'success') || (steps.sat.outcome == 'failure')) }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sat-summary-report
           path: target/summary_report.html

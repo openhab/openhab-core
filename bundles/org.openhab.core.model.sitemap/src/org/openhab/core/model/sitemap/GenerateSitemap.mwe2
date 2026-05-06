@@ -18,8 +18,7 @@ import org.eclipse.xtext.xtext.generator.model.project.*
 var rootPath = ".."
 var projectName = "org.openhab.core.model.sitemap"
 var languageName = "org.openhab.core.model.sitemap.Sitemap"
-var fileExtensions = "sitemap"
-var generateXtendStub = true
+var fileExtensions = "sitemap,sitemaps"
 var encoding = "UTF-8"
 
 Workflow {
@@ -53,8 +52,9 @@ Workflow {
     language = StandardLanguage {
       name = languageName
       fileExtensions = fileExtensions
+      generator = null
       serializer = {
-        generateStub = generateXtendStub
+        generateStub = false
       }
     }
   }

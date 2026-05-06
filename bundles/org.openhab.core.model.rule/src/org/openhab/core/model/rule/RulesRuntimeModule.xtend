@@ -18,13 +18,12 @@ org.openhab.core.model.rule
 
 import com.google.inject.Binder
 import com.google.inject.name.Names
-import org.openhab.core.model.rule.scoping.RulesImplicitlyImportedTypes
 import org.openhab.core.model.rule.scoping.RulesJavaReflectAccess
 import org.openhab.core.model.script.interpreter.ScriptInterpreter
 import org.openhab.core.model.script.jvmmodel.ScriptTypeComputer
 import org.openhab.core.model.script.scoping.ActionClassLoader
+import org.openhab.core.model.script.scoping.ScriptImplicitlyImportedTypes
 import org.openhab.core.model.script.scoping.ScriptImportSectionNamespaceScopeProvider
-import org.openhab.core.model.script.scoping.StateAndCommandProvider
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeProviderFactory
 import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeScopeProvider
@@ -54,11 +53,7 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
     }
 
     def Class<? extends ImplicitlyImportedFeatures> bindImplicitlyImportedTypes() {
-        return RulesImplicitlyImportedTypes
-    }
-
-    def Class<StateAndCommandProvider> bindStateAndCommandProvider() {
-        return StateAndCommandProvider
+        return ScriptImplicitlyImportedTypes
     }
 
     override Class<? extends IGenerator> bindIGenerator() {

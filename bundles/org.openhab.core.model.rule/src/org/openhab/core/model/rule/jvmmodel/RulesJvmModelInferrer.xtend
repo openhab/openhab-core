@@ -17,7 +17,6 @@ import java.time.ZonedDateTime
 import java.util.Set
 import org.openhab.core.items.Item
 import org.openhab.core.items.ItemRegistry
-import org.openhab.core.thing.ThingRegistry
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
 import org.openhab.core.model.rule.rules.ChangedEventTrigger
@@ -62,12 +61,6 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
     @Inject
     ItemRegistry itemRegistry
 
-    @Inject
-    ThingRegistry thingRegistry
-
-    @Inject
-    StateAndCommandProvider stateAndCommandProvider
-
     /**
      * Is called for each instance of the first argument's type contained in a resource.
      * 
@@ -90,8 +83,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
 
             val Set<String> fieldNames = newHashSet()
 
-            val types = stateAndCommandProvider.allTypes
-            types.forEach [ type |
+            StateAndCommandProvider::allTypes.forEach [ type |
                 val name = type.toString
                 if (fieldNames.add(name)) {
                     members += ruleModel.toField(name, typeRef(type.class)) [
@@ -110,18 +102,6 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                     ]
                 } else {
                     logger.warn("Duplicate field: '{}'. Ignoring '{}'.", item.name, item.class.name)
-                }
-            ]
-
-            val things = thingRegistry?.getAll()
-            things?.forEach [ thing |
-                val name = thing.getUID().toString()
-                if (fieldNames.add(name)) {
-                    members += ruleModel.toField(name, typeRef(thing.class)) [
-                        static = true
-                    ]
-                } else {
-                    logger.warn("Duplicate field: '{}'. Ignoring '{}'.", name, thing.class.name)
                 }
             ]
 

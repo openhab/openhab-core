@@ -43,7 +43,6 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
-import org.openhab.core.service.StartLevelService;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -125,8 +124,6 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             logger.debug("Lazy retry thread ran out of work. Good bye.");
         }
     };
-
-    private boolean modelLoaded = false;
 
     private @Nullable Thread lazyRetryThread;
 
@@ -222,16 +219,15 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     @Override
     public void removedModel(String modelName, Collection<YamlThingDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
-        List<Thing> removed = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, List.of());
-        removed.forEach(t -> {
-            modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldThing -> {
+        elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
+            modelThings.stream().filter(th -> th.getUID().equals(uid)).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
-                logger.debug("model {} removed thing {}", modelName, t.getUID());
+                logger.debug("model {} removed thing {}", modelName, uid);
                 if (!isolated) {
                     notifyListenersAboutRemovedElement(oldThing);
                 }
-            }, () -> logger.debug("model {} thing {} not found", modelName, t.getUID()));
+            }, () -> logger.debug("model {} thing {} not found", modelName, uid));
         });
         if (modelThings.isEmpty()) {
             thingsMap.remove(modelName);
@@ -260,10 +256,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        String type = readyMarker.getType();
-        if (StartLevelService.STARTLEVEL_MARKER_TYPE.equals(type)) {
-            modelLoaded = Integer.parseInt(readyMarker.getIdentifier()) >= StartLevelService.STARTLEVEL_MODEL;
-        } else if (XML_THING_TYPE.equals(type)) {
+        if (XML_THING_TYPE.equals(readyMarker.getType())) {
             String bsn = readyMarker.getIdentifier();
             loadedXmlThingTypes.add(bsn);
             thingHandlerFactories.stream().filter(factory -> bsn.equals(getBundleName(factory))).forEach(factory -> {
@@ -351,6 +344,14 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     private @Nullable String getBundleName(ThingHandlerFactory thingHandlerFactory) {
         Bundle bundle = bundleResolver.resolveBundle(thingHandlerFactory.getClass());
         return bundle == null ? null : bundle.getSymbolicName();
+    }
+
+    private @Nullable ThingUID buildThingUID(YamlThingDTO thingDto) {
+        try {
+            return new ThingUID(thingDto.uid);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private @Nullable Thing mapThing(YamlThingDTO thingDto, boolean isolatedModel) {

@@ -31,6 +31,7 @@ import org.osgi.framework.BundleContext;
  * Basic test cases for {@link ChannelEventTriggerHandler}
  *
  * @author Thomas Weißschuh - Initial contribution
+ * @author Jimmy Tanagra - Add test cases for wildcard channel matching and channel event matching
  */
 @NonNullByDefault
 class ChannelEventTriggerHandlerTest {
@@ -57,6 +58,99 @@ class ChannelEventTriggerHandlerTest {
     public void testSubstringMatchingChannelIsNotApplied() {
         when(moduleMock.getConfiguration())
                 .thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL, "foo:bar:baz:q")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertFalse(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+    }
+
+    @Test
+    public void testWildcardAsteriskMatchingChannelIsApplied() {
+        when(moduleMock.getConfiguration())
+                .thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL, "foo:bar:baz:*")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+    }
+
+    @Test
+    public void testWildcardAsteriskNonMatchingChannelIsNotApplied() {
+        when(moduleMock.getConfiguration())
+                .thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL, "foo:bar:baz:*")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertFalse(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baa:quux"))));
+    }
+
+    @Test
+    public void testWildcardQuestionMarkMatchingChannelIsApplied() {
+        when(moduleMock.getConfiguration())
+                .thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL, "foo:bar:baz:quu?")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+    }
+
+    @Test
+    public void testWildcardQuestionMarkNonMatchingChannelIsNotApplied() {
+        when(moduleMock.getConfiguration())
+                .thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL, "foo:bar:baz:quu?")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertFalse(
+                handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quuxx"))));
+    }
+
+    @Test
+    public void testMatchingChannelEventIsApplied() {
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL,
+                "foo:bar:baz:quux", ChannelEventTriggerHandler.CFG_CHANNEL_EVENT, "PRESSED")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+    }
+
+    @Test
+    public void testNonMatchingChannelEventIsNotApplied() {
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL,
+                "foo:bar:baz:quux", ChannelEventTriggerHandler.CFG_CHANNEL_EVENT, "RELEASED")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertFalse(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+    }
+
+    @Test
+    public void testBlankChannelEventMatchesAllEvents() {
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL,
+                "foo:bar:baz:quux", ChannelEventTriggerHandler.CFG_CHANNEL_EVENT, "")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("RELEASED", new ChannelUID("foo:bar:baz:quux"))));
+    }
+
+    @Test
+    public void testOmittedChannelEventMatchesAllEvents() {
+        when(moduleMock.getConfiguration())
+                .thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL, "foo:bar:baz:quux")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("RELEASED", new ChannelUID("foo:bar:baz:quux"))));
+    }
+
+    @Test
+    public void testWildcardChannelWithMatchingChannelEventIsApplied() {
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL,
+                "foo:bar:baz:*", ChannelEventTriggerHandler.CFG_CHANNEL_EVENT, "PRESSED")));
+        handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
+
+        assertTrue(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));
+    }
+
+    @Test
+    public void testWildcardChannelWithNonMatchingChannelEventIsNotApplied() {
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of(ChannelEventTriggerHandler.CFG_CHANNEL,
+                "foo:bar:baz:*", ChannelEventTriggerHandler.CFG_CHANNEL_EVENT, "RELEASED")));
         handler = new ChannelEventTriggerHandler(moduleMock, contextMock);
 
         assertFalse(handler.apply(ThingEventFactory.createTriggerEvent("PRESSED", new ChannelUID("foo:bar:baz:quux"))));

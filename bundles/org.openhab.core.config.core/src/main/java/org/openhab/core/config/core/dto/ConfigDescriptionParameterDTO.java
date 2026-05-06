@@ -33,6 +33,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class ConfigDescriptionParameterDTO {
 
     public String context;
+    @Schema(name = "default")
     @SerializedName(value = "default", alternate = "defaultValue")
     public String defaultValue;
     public String description;
@@ -44,6 +45,7 @@ public class ConfigDescriptionParameterDTO {
     public Type type;
     public BigDecimal min;
     public BigDecimal max;
+    @Schema(name = "step")
     @SerializedName(value = "step", alternate = "stepsize")
     public BigDecimal stepsize;
     public String pattern;

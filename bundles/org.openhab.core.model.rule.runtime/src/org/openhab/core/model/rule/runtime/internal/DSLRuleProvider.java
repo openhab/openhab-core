@@ -12,12 +12,15 @@
  */
 package org.openhab.core.model.rule.runtime.internal;
 
+import static org.openhab.core.model.core.ModelCoreConstants.isIsolatedModel;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -25,14 +28,33 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
-import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.internal.module.handler.ChannelEventTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.DateTimeTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
+import org.openhab.core.automation.internal.module.handler.EphemerisConditionHandler;
+import org.openhab.core.automation.internal.module.handler.GenericCronTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GroupCommandTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GroupStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.IntervalConditionHandler;
+import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ItemStateConditionHandler;
+import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ThingStatusConditionHandler;
+import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayConditionHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
+import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;
+import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
 import org.openhab.core.automation.util.ActionBuilder;
+import org.openhab.core.automation.util.ConditionBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.automation.util.TriggerBuilder;
 import org.openhab.core.common.registry.ProviderChangeListener;
@@ -44,19 +66,27 @@ import org.openhab.core.model.rule.jvmmodel.RulesRefresher;
 import org.openhab.core.model.rule.rules.ChangedEventTrigger;
 import org.openhab.core.model.rule.rules.CommandEventTrigger;
 import org.openhab.core.model.rule.rules.DateTimeTrigger;
+import org.openhab.core.model.rule.rules.DayOfWeekCondition;
 import org.openhab.core.model.rule.rules.EventEmittedTrigger;
 import org.openhab.core.model.rule.rules.EventTrigger;
 import org.openhab.core.model.rule.rules.GroupMemberChangedEventTrigger;
 import org.openhab.core.model.rule.rules.GroupMemberCommandEventTrigger;
 import org.openhab.core.model.rule.rules.GroupMemberUpdateEventTrigger;
+import org.openhab.core.model.rule.rules.HolidayCondition;
+import org.openhab.core.model.rule.rules.InDaysetCondition;
+import org.openhab.core.model.rule.rules.IntervalCondition;
+import org.openhab.core.model.rule.rules.ItemStateCondition;
 import org.openhab.core.model.rule.rules.RuleModel;
 import org.openhab.core.model.rule.rules.SystemOnShutdownTrigger;
 import org.openhab.core.model.rule.rules.SystemOnStartupTrigger;
 import org.openhab.core.model.rule.rules.SystemStartlevelTrigger;
 import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger;
 import org.openhab.core.model.rule.rules.ThingStateUpdateEventTrigger;
+import org.openhab.core.model.rule.rules.ThingStatusCondition;
+import org.openhab.core.model.rule.rules.TimeOfDayCondition;
 import org.openhab.core.model.rule.rules.TimerTrigger;
 import org.openhab.core.model.rule.rules.UpdateEventTrigger;
+import org.openhab.core.model.rule.rules.WeekdayCondition;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
 import org.openhab.core.model.script.script.Script;
 import org.openhab.core.service.ReadyMarker;
@@ -73,9 +103,10 @@ import org.slf4j.LoggerFactory;
 /**
  * This RuleProvider provides rules that are defined in DSL rule files.
  * All rules consist out of a list of triggers and a single script action.
- * No rule conditions are used as this concept does not exist for DSL rules.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Add support for conditions
+ * @author Laurent Garnier - Add optional rule UID + registry notification refactoring
  */
 @NonNullByDefault
 @Component(immediate = true, service = { DSLRuleProvider.class, RuleProvider.class, DSLScriptContextProvider.class })
@@ -86,7 +117,7 @@ public class DSLRuleProvider
 
     private final Logger logger = LoggerFactory.getLogger(DSLRuleProvider.class);
     private final Collection<ProviderChangeListener<Rule>> listeners = new ArrayList<>();
-    private final Map<String, Rule> rules = new ConcurrentHashMap<>();
+    private final Map<String, List<Rule>> rulesMap = new ConcurrentHashMap<>();
     private final Map<String, IEvaluationContext> contexts = new ConcurrentHashMap<>();
     private final Map<String, XExpression> xExpressions = new ConcurrentHashMap<>();
     private final ReadyMarker marker = new ReadyMarker("rules", "dslprovider");
@@ -110,7 +141,7 @@ public class DSLRuleProvider
     @Deactivate
     protected void deactivate() {
         modelRepository.removeModelRepositoryChangeListener(this);
-        rules.clear();
+        rulesMap.clear();
         contexts.clear();
         xExpressions.clear();
     }
@@ -121,82 +152,106 @@ public class DSLRuleProvider
     }
 
     @Override
-    public Collection<Rule> getAll() {
-        return rules.values();
-    }
-
-    @Override
     public void removeProviderChangeListener(ProviderChangeListener<Rule> listener) {
         listeners.remove(listener);
     }
 
     @Override
+    public Collection<Rule> getAll() {
+        // Ignore isolated models
+        return rulesMap.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
+                .flatMap(e -> e.getValue().stream()).toList();
+    }
+
+    /**
+     * Returns all rules originating from the given model name.
+     *
+     * @param modelFileName the full model file name, including ".rules" or ".script" extension
+     * @return the rules associated with the given model name, or an empty collection if none exist
+     */
+    public Collection<Rule> getAllFromModel(String modelFileName) {
+        return List.copyOf(rulesMap.getOrDefault(modelFileName, List.of()));
+    }
+
+    @Override
     public void modelChanged(String modelFileName, EventType type) {
         String ruleModelType = modelFileName.substring(modelFileName.lastIndexOf(".") + 1);
+        List<Rule> oldRules;
+        List<Rule> newRules = new ArrayList<>();
         if ("rules".equalsIgnoreCase(ruleModelType)) {
+            boolean isolated = isIsolatedModel(modelFileName);
             String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-            List<ModelRulePair> modelRules = new ArrayList<>();
             switch (type) {
                 case ADDED:
-                    EObject model = modelRepository.getModel(modelFileName);
-                    if (model instanceof RuleModel ruleModel) {
-                        int index = 1;
-                        for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                            Rule newRule = toRule(ruleModelName, rule, index);
-                            rules.put(newRule.getUID(), newRule);
-                            xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                            modelRules.add(new ModelRulePair(newRule, null));
-                            index++;
-                        }
-                        handleVarDeclarations(ruleModelName, ruleModel);
-                    }
-                    break;
                 case MODIFIED:
-                    removeRuleModel(ruleModelName);
-                    EObject modifiedModel = modelRepository.getModel(modelFileName);
-                    if (modifiedModel instanceof RuleModel ruleModel) {
-                        int index = 1;
+                    EObject model = modelRepository.getModel(modelFileName);
+                    int index = 1;
+                    if (model instanceof RuleModel ruleModel) {
                         for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                            Rule newRule = toRule(ruleModelName, rule, index);
-                            Rule oldRule = rules.remove(ruleModelName);
-                            rules.put(newRule.getUID(), newRule);
-                            xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                            modelRules.add(new ModelRulePair(newRule, oldRule));
+                            newRules.add(toRule(ruleModelName, rule, index));
+                            if (!isolated) {
+                                xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                            }
                             index++;
                         }
-                        handleVarDeclarations(ruleModelName, ruleModel);
+                        if (!isolated) {
+                            handleVarDeclarations(ruleModelName, ruleModel);
+                        }
+                    }
+                    oldRules = rulesMap.put(modelFileName, newRules);
+                    if (!isolated) {
+                        // Cleanup xExpressions for old rules
+                        int nbOldRules = oldRules == null ? 0 : oldRules.size();
+                        while (index <= nbOldRules) {
+                            xExpressions.remove(ruleModelName + "-" + index);
+                            index++;
+                        }
+                        // Cleanup contexts if no new rules
+                        if (newRules.isEmpty()) {
+                            contexts.remove(ruleModelName);
+                        }
+                        notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, newRules));
                     }
                     break;
                 case REMOVED:
-                    removeRuleModel(ruleModelName);
+                    oldRules = rulesMap.remove(modelFileName);
+                    if (!isolated) {
+                        for (Iterator<Entry<String, XExpression>> it = xExpressions.entrySet().iterator(); it
+                                .hasNext();) {
+                            Entry<String, XExpression> entry = it.next();
+                            if (belongsToModel(entry.getKey(), ruleModelName)) {
+                                it.remove();
+                            }
+                        }
+                        contexts.remove(ruleModelName);
+                        notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, null));
+                    }
                     break;
                 default:
                     logger.debug("Unknown event type.");
             }
-            notifyProviderChangeListeners(modelRules);
         } else if ("script".equals(ruleModelType)) {
-            List<ModelRulePair> modelRules = new ArrayList<>();
             switch (type) {
-                case MODIFIED:
                 case ADDED:
+                case MODIFIED:
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof Script script) {
-                        Rule oldRule = rules.remove(modelFileName);
-                        Rule newRule = toRule(modelFileName, script);
-                        rules.put(newRule.getUID(), newRule);
-                        modelRules.add(new ModelRulePair(newRule, oldRule));
+                        newRules.add(toRule(modelFileName, script));
+                    }
+                    oldRules = rulesMap.put(modelFileName, newRules);
+                    if (!isIsolatedModel(modelFileName)) {
+                        notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, newRules));
                     }
                     break;
                 case REMOVED:
-                    Rule oldRule = rules.remove(modelFileName);
-                    if (oldRule != null) {
-                        listeners.forEach(listener -> listener.removed(this, oldRule));
+                    oldRules = rulesMap.remove(modelFileName);
+                    if (!isIsolatedModel(modelFileName)) {
+                        notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, null));
                     }
                     break;
                 default:
                     logger.debug("Unknown event type.");
             }
-            notifyProviderChangeListeners(modelRules);
         }
     }
 
@@ -215,24 +270,42 @@ public class DSLRuleProvider
         contexts.put(modelName, context);
     }
 
-    private void removeRuleModel(String modelName) {
-        Iterator<Entry<String, Rule>> it = rules.entrySet().iterator();
-        while (it.hasNext()) {
-            Entry<String, Rule> entry = it.next();
-            if (belongsToModel(entry.getKey(), modelName)) {
-                listeners.forEach(listener -> listener.removed(this, entry.getValue()));
-
-                it.remove();
+    private Changes calcChanges(String modelFileName, @Nullable List<Rule> oldRules, @Nullable List<Rule> newRules) {
+        if (oldRules == null || oldRules.isEmpty()) {
+            return new Changes(newRules == null ? List.of() : List.copyOf(newRules), List.of(), List.of());
+        }
+        List<Rule> oldMutable = new ArrayList<>(oldRules);
+        List<Rule> newMutable = newRules == null ? new ArrayList<>() : new ArrayList<>(newRules);
+        List<RulePair> modified = new ArrayList<>();
+        Rule oldRule, newRule;
+        boolean found;
+        for (Iterator<Rule> iterator = oldMutable.iterator(); iterator.hasNext();) {
+            oldRule = iterator.next();
+            found = false;
+            String uid = oldRule.getUID();
+            for (Iterator<Rule> newIterator = newMutable.iterator(); newIterator.hasNext() && !found;) {
+                newRule = newIterator.next();
+                if (uid.equals(newRule.getUID())) {
+                    modified.add(new RulePair(oldRule, newRule));
+                    newIterator.remove();
+                    found = true;
+                }
+            }
+            if (!found) {
+                // Check if the old rule exists in another model file with the same UID
+                Rule existingRule = rulesMap.entrySet().stream()
+                        .filter(e -> !e.getKey().equals(modelFileName) && !isIsolatedModel(e.getKey()))
+                        .flatMap(e -> e.getValue().stream()).filter(r -> uid.equals(r.getUID())).findAny().orElse(null);
+                if (existingRule != null) {
+                    modified.add(new RulePair(oldRule, existingRule));
+                    found = true;
+                }
+            }
+            if (found) {
+                iterator.remove();
             }
         }
-        Iterator<Entry<String, XExpression>> it2 = xExpressions.entrySet().iterator();
-        while (it2.hasNext()) {
-            Entry<String, XExpression> entry = it2.next();
-            if (belongsToModel(entry.getKey(), modelName)) {
-                it2.remove();
-            }
-        }
-        contexts.remove(modelName);
+        return new Changes(newMutable, modified, oldMutable);
     }
 
     private boolean belongsToModel(String id, String modelName) {
@@ -248,9 +321,9 @@ public class DSLRuleProvider
         String scriptText = NodeModelUtils.findActualNodeFor(script).getText();
 
         Configuration cfg = new Configuration();
-        cfg.put("script", removeIndentation(scriptText));
-        cfg.put("type", MIMETYPE_OPENHAB_DSL_RULE);
-        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID("script.ScriptAction")
+        cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT, removeIndentation(scriptText));
+        cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE, MIMETYPE_OPENHAB_DSL_RULE);
+        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID(ScriptActionHandler.TYPE_ID)
                 .withConfiguration(cfg).build());
 
         return RuleBuilder.create(modelName).withTags("Script").withName(modelName).withActions(actions).build();
@@ -258,29 +331,32 @@ public class DSLRuleProvider
 
     private Rule toRule(String modelName, org.openhab.core.model.rule.rules.Rule rule, int index) {
         String name = rule.getName();
-        String uid = modelName + "-" + index;
+        String uid = rule.getUid();
+        if (uid == null || uid.isBlank()) {
+            uid = modelName + "-" + index;
+        }
 
         // Create Triggers
         triggerId = 0;
-        List<Trigger> triggers = new ArrayList<>();
-        for (EventTrigger t : rule.getEventtrigger()) {
-            Trigger trigger = mapTrigger(t);
-            if (trigger != null) {
-                triggers.add(trigger);
-            }
-        }
+        List<Trigger> triggers = rule.getEventtrigger().stream().map(this::mapTrigger).filter(Objects::nonNull)
+                .toList();
+
+        // Conditions
+        List<Condition> conditions = rule.getConditions().stream().map(this::mapCondition).filter(Objects::nonNull)
+                .toList();
 
         // Create Action
         String context = DSLScriptContextProvider.CONTEXT_IDENTIFIER + modelName + "-" + index + "\n";
-        XBlockExpression expression = rule.getScript();
+        XExpression expression = rule.getScript();
         String script = NodeModelUtils.findActualNodeFor(expression).getText();
         Configuration cfg = new Configuration();
-        cfg.put("script", context + removeIndentation(script));
-        cfg.put("type", MIMETYPE_OPENHAB_DSL_RULE);
-        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID("script.ScriptAction")
+        cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT, context + removeIndentation(script));
+        cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE, MIMETYPE_OPENHAB_DSL_RULE);
+        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID(ScriptActionHandler.TYPE_ID)
                 .withConfiguration(cfg).build());
 
-        return RuleBuilder.create(uid).withName(name).withTriggers(triggers).withActions(actions).build();
+        return RuleBuilder.create(uid).withTags(rule.getTags()).withName(name).withTriggers(triggers)
+                .withActions(actions).withConditions(conditions).build();
     }
 
     private String removeIndentation(String script) {
@@ -302,162 +378,262 @@ public class DSLRuleProvider
                 .collect(Collectors.joining("\n"));
     }
 
-    private @Nullable Trigger mapTrigger(EventTrigger t) {
-        if (t instanceof SystemOnStartupTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("startlevel", 40);
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof SystemStartlevelTrigger slTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("startlevel", slTrigger.getLevel());
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof SystemOnShutdownTrigger) {
-            logger.warn("System shutdown rule triggers are no longer supported!");
-            return null;
-        } else if (t instanceof CommandEventTrigger ceTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("itemName", ceTrigger.getItem());
-            if (ceTrigger.getCommand() != null) {
-                cfg.put("command", ceTrigger.getCommand().getValue());
+    private @Nullable Trigger mapTrigger(EventTrigger eventTrigger) {
+        Configuration cfg = new Configuration();
+        return switch (eventTrigger) {
+            case SystemOnStartupTrigger t -> {
+                cfg.put(SystemTriggerHandler.CFG_STARTLEVEL, 40);
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.ItemCommandTrigger")
-                    .withConfiguration(cfg).build();
-        } else if (t instanceof GroupMemberCommandEventTrigger ceTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("groupName", ceTrigger.getGroup());
-            if (ceTrigger.getCommand() != null) {
-                cfg.put("command", ceTrigger.getCommand().getValue());
+            case SystemStartlevelTrigger sllTrigger -> {
+                cfg.put(SystemTriggerHandler.CFG_STARTLEVEL, sllTrigger.getLevel());
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.GroupCommandTrigger")
-                    .withConfiguration(cfg).build();
-        } else if (t instanceof UpdateEventTrigger ueTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("itemName", ueTrigger.getItem());
-            if (ueTrigger.getState() != null) {
-                cfg.put("state", ueTrigger.getState().getValue());
-            }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.ItemStateUpdateTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof GroupMemberUpdateEventTrigger ueTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("groupName", ueTrigger.getGroup());
-            if (ueTrigger.getState() != null) {
-                cfg.put("state", ueTrigger.getState().getValue());
-            }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.GroupStateUpdateTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof ChangedEventTrigger ceTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("itemName", ceTrigger.getItem());
-            if (ceTrigger.getNewState() != null) {
-                cfg.put("state", ceTrigger.getNewState().getValue());
-            }
-            if (ceTrigger.getOldState() != null) {
-                cfg.put("previousState", ceTrigger.getOldState().getValue());
-            }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.ItemStateChangeTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof GroupMemberChangedEventTrigger ceTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("groupName", ceTrigger.getGroup());
-            if (ceTrigger.getNewState() != null) {
-                cfg.put("state", ceTrigger.getNewState().getValue());
-            }
-            if (ceTrigger.getOldState() != null) {
-                cfg.put("previousState", ceTrigger.getOldState().getValue());
-            }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.GroupStateChangeTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof TimerTrigger tt) {
-            Configuration cfg = new Configuration();
-            String id;
-            if (tt.getCron() != null) {
-                id = tt.getCron();
-                cfg.put("cronExpression", tt.getCron());
-            } else {
-                id = tt.getTime();
-                if ("noon".equals(id)) {
-                    cfg.put("cronExpression", "0 0 12 * * ?");
-                } else if ("midnight".equals(id)) {
-                    cfg.put("cronExpression", "0 0 0 * * ?");
-                } else {
-                    logger.warn("Unrecognized time expression '{}' in rule trigger", tt.getTime());
-                    return null;
+            case CommandEventTrigger ceTrigger -> {
+                cfg.put(ItemCommandTriggerHandler.CFG_ITEMNAME, ceTrigger.getItem());
+                if (ceTrigger.getCommand() != null) {
+                    cfg.put(ItemCommandTriggerHandler.CFG_COMMAND, ceTrigger.getCommand().getValue());
                 }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ItemCommandTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("timer.GenericCronTrigger")
-                    .withConfiguration(cfg).build();
-        } else if (t instanceof DateTimeTrigger tt) {
-            Configuration cfg = new Configuration();
-            cfg.put("itemName", tt.getItem());
-            cfg.put("timeOnly", tt.isTimeOnly());
-            cfg.put("offset", tt.getOffset());
-            return TriggerBuilder.create().withId(Integer.toString((triggerId++))).withTypeUID("timer.DateTimeTrigger")
-                    .withConfiguration(cfg).build();
-        } else if (t instanceof EventEmittedTrigger eeTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("channelUID", eeTrigger.getChannel());
-            if (eeTrigger.getTrigger() != null) {
-                cfg.put("event", eeTrigger.getTrigger().getValue());
+            case GroupMemberCommandEventTrigger ceTrigger -> {
+                cfg.put(GroupCommandTriggerHandler.CFG_GROUPNAME, ceTrigger.getGroup());
+                if (ceTrigger.getCommand() != null) {
+                    cfg.put(GroupCommandTriggerHandler.CFG_COMMAND, ceTrigger.getCommand().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(GroupCommandTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++)).withTypeUID("core.ChannelEventTrigger")
-                    .withConfiguration(cfg).build();
-        } else if (t instanceof ThingStateUpdateEventTrigger tsuTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("thingUID", tsuTrigger.getThing());
-            cfg.put("status", tsuTrigger.getState());
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.ThingStatusUpdateTrigger").withConfiguration(cfg).build();
-        } else if (t instanceof ThingStateChangedEventTrigger tscTrigger) {
-            Configuration cfg = new Configuration();
-            cfg.put("thingUID", tscTrigger.getThing());
-            cfg.put("status", tscTrigger.getNewState());
-            cfg.put("previousStatus", tscTrigger.getOldState());
-            return TriggerBuilder.create().withId(Integer.toString(triggerId++))
-                    .withTypeUID("core.ThingStatusChangeTrigger").withConfiguration(cfg).build();
-        } else {
-            logger.warn("Unknown trigger type '{}' - ignoring it.", t.getClass().getSimpleName());
-            return null;
-        }
+            case UpdateEventTrigger ueTrigger -> {
+                cfg.put(ItemStateTriggerHandler.CFG_ITEMNAME, ueTrigger.getItem());
+                if (ueTrigger.getState() != null) {
+                    cfg.put(ItemStateTriggerHandler.CFG_STATE, ueTrigger.getState().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case GroupMemberUpdateEventTrigger ueTrigger -> {
+                cfg.put(GroupStateTriggerHandler.CFG_GROUPNAME, ueTrigger.getGroup());
+                if (ueTrigger.getState() != null) {
+                    cfg.put(GroupStateTriggerHandler.CFG_STATE, ueTrigger.getState().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case ChangedEventTrigger ceTrigger -> {
+                cfg.put(ItemStateTriggerHandler.CFG_ITEMNAME, ceTrigger.getItem());
+                if (ceTrigger.getNewState() != null) {
+                    cfg.put(ItemStateTriggerHandler.CFG_STATE, ceTrigger.getNewState().getValue());
+                }
+                if (ceTrigger.getOldState() != null) {
+                    cfg.put(ItemStateTriggerHandler.CFG_PREVIOUS_STATE, ceTrigger.getOldState().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case GroupMemberChangedEventTrigger ceTrigger -> {
+                cfg.put(GroupStateTriggerHandler.CFG_GROUPNAME, ceTrigger.getGroup());
+                if (ceTrigger.getNewState() != null) {
+                    cfg.put(GroupStateTriggerHandler.CFG_STATE, ceTrigger.getNewState().getValue());
+                }
+                if (ceTrigger.getOldState() != null) {
+                    cfg.put(GroupStateTriggerHandler.CFG_PREVIOUS_STATE, ceTrigger.getOldState().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case TimerTrigger timeTrigger when timeTrigger.getCron() != null -> {
+                cfg.put(GenericCronTriggerHandler.CFG_CRON_EXPRESSION, timeTrigger.getCron());
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(GenericCronTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case TimerTrigger timeTrigger when timeTrigger.getCron() == null -> {
+                String id = timeTrigger.getTime();
+                if ("noon".equals(id)) {
+                    cfg.put(TimeOfDayTriggerHandler.CFG_TIME, "12:00");
+                } else if ("midnight".equals(id)) {
+                    cfg.put(TimeOfDayTriggerHandler.CFG_TIME, "00:00");
+                } else {
+                    cfg.put(TimeOfDayTriggerHandler.CFG_TIME, id);
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(TimeOfDayTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case DateTimeTrigger dtTrigger -> {
+                cfg.put(DateTimeTriggerHandler.CONFIG_ITEM_NAME, dtTrigger.getItem());
+                cfg.put(DateTimeTriggerHandler.CONFIG_TIME_ONLY, dtTrigger.isTimeOnly());
+                cfg.put(DateTimeTriggerHandler.CONFIG_OFFSET, dtTrigger.getOffset());
+                yield TriggerBuilder.create().withId(Integer.toString((triggerId++)))
+                        .withTypeUID(DateTimeTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case EventEmittedTrigger eeTrigger -> {
+                cfg.put(ChannelEventTriggerHandler.CFG_CHANNEL, eeTrigger.getChannel());
+                if (eeTrigger.getTrigger() != null) {
+                    cfg.put(ChannelEventTriggerHandler.CFG_CHANNEL_EVENT, eeTrigger.getTrigger().getValue());
+                }
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ChannelEventTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case ThingStateUpdateEventTrigger tsuTrigger -> {
+                cfg.put(ThingStatusTriggerHandler.CFG_THING_UID, tsuTrigger.getThing());
+                cfg.put(ThingStatusTriggerHandler.CFG_STATUS, tsuTrigger.getState());
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case ThingStateChangedEventTrigger tscTrigger -> {
+                cfg.put(ThingStatusTriggerHandler.CFG_THING_UID, tscTrigger.getThing());
+                cfg.put(ThingStatusTriggerHandler.CFG_STATUS, tscTrigger.getNewState());
+                cfg.put(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS, tscTrigger.getOldState());
+                yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case SystemOnShutdownTrigger t -> {
+                logger.warn("System shutdown rule triggers are no longer supported!");
+                yield null;
+            }
+            default -> {
+                logger.warn("Unknown trigger type '{}' - ignoring it.", eventTrigger.getClass().getSimpleName());
+                yield null;
+            }
+        };
+    }
+
+    private @Nullable Condition mapCondition(org.openhab.core.model.rule.rules.Condition condition) {
+        Configuration cfg = new Configuration();
+        return switch (condition) {
+            case TimeOfDayCondition todCond -> {
+                cfg.put(TimeOfDayConditionHandler.CFG_START_TIME, todCond.getStart());
+                cfg.put(TimeOfDayConditionHandler.CFG_END_TIME, todCond.getEnd());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(TimeOfDayConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case DayOfWeekCondition dowCond -> {
+                List<String> days = new ArrayList<>();
+                dowCond.getWeekDays().forEach(day -> {
+                    String d = switch (day) {
+                        case "Monday" -> "MON";
+                        case "Tuesday" -> "TUE";
+                        case "Wednesday" -> "WED";
+                        case "Thursday" -> "THU";
+                        case "Friday" -> "FRI";
+                        case "Saturday" -> "SAT";
+                        case "Sunday" -> "SUN";
+                        default -> null;
+                    };
+                    if (d != null) {
+                        days.add(d);
+                    }
+                });
+                cfg.put(DayOfWeekConditionHandler.CFG_DAYS, days);
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(DayOfWeekConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case WeekdayCondition weekdayCond -> {
+                int offsetValue;
+                if (weekdayCond.getOffset() instanceof String offset && (offsetValue = Integer.parseInt(offset)) != 0) {
+                    cfg.put("offset", offsetValue);
+                }
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID("weekday".equals(weekdayCond.getType())
+                                ? EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID
+                                : EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID)
+                        .withConfiguration(cfg).build();
+            }
+            case HolidayCondition holidayCond -> {
+                int offsetValue;
+                if (holidayCond.getOffset() instanceof String offset && (offsetValue = Integer.parseInt(offset)) != 0) {
+                    cfg.put("offset", offsetValue);
+                }
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(holidayCond.isNegation() ? EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID
+                                : EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID)
+                        .withConfiguration(cfg).build();
+            }
+            case InDaysetCondition daysetCond -> {
+                int offsetValue;
+                if (daysetCond.getOffset() instanceof String offset && (offsetValue = Integer.parseInt(offset)) != 0) {
+                    cfg.put("offset", offsetValue);
+                }
+                cfg.put("dayset", daysetCond.getDayset());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case IntervalCondition intervalCond -> {
+                cfg.put(IntervalConditionHandler.CFG_MIN_INTERVAL, intervalCond.getInterval());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(IntervalConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case ThingStatusCondition tsCond -> {
+                cfg.put(ThingStatusConditionHandler.CFG_THING_UID, tsCond.getThing());
+                cfg.put(ThingStatusConditionHandler.CFG_OPERATOR, tsCond.isNegation() ? "!=" : "=");
+                cfg.put(ThingStatusConditionHandler.CFG_STATUS, tsCond.getStatus());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ThingStatusConditionHandler.THING_STATUS_CONDITION).withConfiguration(cfg).build();
+            }
+            case ItemStateCondition isCond -> {
+                String operator = isCond.getOperator();
+                cfg.put(ItemStateConditionHandler.ITEM_NAME, isCond.getItem());
+                cfg.put(ItemStateConditionHandler.OPERATOR, operator == null ? "=" : operator);
+                cfg.put(ItemStateConditionHandler.STATE, isCond.getState().getValue());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(ItemStateConditionHandler.ITEM_STATE_CONDITION).withConfiguration(cfg).build();
+            }
+            default -> {
+                logger.warn("Unknown condition type '{}' - ignoring it.", condition.getClass().getSimpleName());
+                yield null;
+            }
+        };
     }
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        for (String ruleFileName : modelRepository.getAllModelNamesOfType("rules")) {
-            EObject model = modelRepository.getModel(ruleFileName);
-            String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
+        for (String modelFileName : modelRepository.getAllModelNamesOfType("rules")) {
+            EObject model = modelRepository.getModel(modelFileName);
             if (model instanceof RuleModel ruleModel) {
+                boolean isolated = isIsolatedModel(modelFileName);
+                String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
                 int index = 1;
-                List<ModelRulePair> modelRules = new ArrayList<>();
+                List<Rule> newRules = new ArrayList<>();
                 for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                    Rule newRule = toRule(ruleModelName, rule, index);
-                    xExpressions.put(ruleModelName + "-" + index, rule.getScript());
-                    modelRules.add(new ModelRulePair(newRule, null));
+                    newRules.add(toRule(ruleModelName, rule, index));
+                    if (!isolated) {
+                        xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                    }
                     index++;
                 }
-                handleVarDeclarations(ruleModelName, ruleModel);
-
-                notifyProviderChangeListeners(modelRules);
+                List<Rule> oldRules = rulesMap.put(modelFileName, newRules);
+                if (!isolated) {
+                    handleVarDeclarations(ruleModelName, ruleModel);
+                    notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, newRules));
+                }
             }
         }
         modelRepository.addModelRepositoryChangeListener(this);
         readyService.markReady(marker);
     }
 
-    private void notifyProviderChangeListeners(List<ModelRulePair> modelRules) {
-        modelRules.forEach(rulePair -> {
-            Rule oldRule = rulePair.oldRule();
-            if (oldRule != null) {
-                rules.remove(oldRule.getUID());
-                rules.put(rulePair.newRule().getUID(), rulePair.newRule());
-                listeners.forEach(listener -> listener.updated(this, oldRule, rulePair.newRule()));
-            } else {
-                rules.put(rulePair.newRule().getUID(), rulePair.newRule());
-                listeners.forEach(listener -> listener.added(this, rulePair.newRule()));
+    private void notifyProviderChangeListeners(Changes changes) {
+        if (listeners.isEmpty()) {
+            return;
+        }
+        for (Rule rule : changes.removed) {
+            for (ProviderChangeListener<Rule> listener : listeners) {
+                listener.removed(this, rule);
             }
-        });
+        }
+        for (RulePair pair : changes.modified) {
+            for (ProviderChangeListener<Rule> listener : listeners) {
+                listener.updated(this, pair.oldRule, pair.newRule);
+            }
+        }
+        for (Rule rule : changes.added) {
+            for (ProviderChangeListener<Rule> listener : listeners) {
+                listener.added(this, rule);
+            }
+        }
     }
 
     @Override
@@ -465,6 +641,9 @@ public class DSLRuleProvider
         readyService.unmarkReady(marker);
     }
 
-    private record ModelRulePair(Rule newRule, @Nullable Rule oldRule) {
+    private record RulePair(Rule oldRule, Rule newRule) {
+    }
+
+    private record Changes(List<Rule> added, List<RulePair> modified, List<Rule> removed) {
     }
 }

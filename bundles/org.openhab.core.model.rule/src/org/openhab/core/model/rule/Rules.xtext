@@ -1,9 +1,5 @@
 grammar org.openhab.core.model.rule.Rules with org.openhab.core.model.script.Script
 
-import "http://www.eclipse.org/xtext/xbase/Xbase" as xbase
-import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
-import "http://www.eclipse.org/emf/2002/Ecore" as ecore
-
 generate rules "https://openhab.org/model/Rules"
 
 RuleModel:
@@ -11,18 +7,15 @@ RuleModel:
 	(variables+=VariableDeclaration)*
 	(rules += Rule)*;
 
-//Import:
-//	'import' importedNamespace=QualifiedNameWithWildcard
-//;
-
 VariableDeclaration:
 	(writeable?='var'|'val') (=>(type=JvmTypeReference name=ValidID) | name=ValidID) ('=' right=XExpression)?
 ;
 
 Rule:
-	'rule' name=(STRING|ID)
+	'rule' name=(STRING|ID) ('uid' '=' uid=(STRING|ID))? ('[' tags+=(ID|STRING) (',' tags+=(ID|STRING))* ']')?
 	'when' eventtrigger+=EventTrigger ('or' eventtrigger+=EventTrigger)*
-	'then' script=Script
+	('but' 'only' 'if' conditions+=Condition ('and' conditions+=Condition)*)?
+	'then' script=XExpressionInClosure
 	'end'
 ;
 
@@ -46,7 +39,7 @@ CommandEventTrigger:
 ;
 
 GroupMemberCommandEventTrigger:
-    'Member of' group=ItemName 'received command' (command=ValidCommand)?
+	'Member of' group=ItemName 'received command' (command=ValidCommand)?
 ;
 
 UpdateEventTrigger:
@@ -54,11 +47,11 @@ UpdateEventTrigger:
 ;
 
 GroupMemberUpdateEventTrigger:
-    'Member of' group=ItemName 'received update' (state=ValidState)?
+	'Member of' group=ItemName 'received update' (state=ValidState)?
 ;
 
 ChangedEventTrigger:
-    'Item' item=ItemName 'changed' ('from' oldState=ValidState)? ('to' newState=ValidState)?
+	'Item' item=ItemName 'changed' ('from' oldState=ValidState)? ('to' newState=ValidState)?
 ;
 
 GroupMemberChangedEventTrigger:
@@ -69,19 +62,18 @@ EventEmittedTrigger:
 	'Channel' channel=(STRING|ID) 'triggered' (trigger=ValidTrigger)?
 ;
 
-
 TimerTrigger:
 	'Time' 'cron' cron=STRING |
-	'Time' 'is' time=('midnight' | 'noon')
+	'Time' 'is' time=('midnight' | 'noon' | TIME)
 ;
 
 DateTimeTrigger:
-    'Time' 'is' item=ItemName (timeOnly?='timeOnly')? ('offset' '='? offset=SIGNED_INT)?
+	'Time' 'is' item=ItemName (timeOnly?='timeOnly')? ('offset' '='? offset=SIGNED_INT)?
 ;
 
 SystemTrigger:
 	SystemOnStartupTrigger |
-        SystemStartlevelTrigger |
+	SystemStartlevelTrigger |
 	SystemOnShutdownTrigger
 ;
 
@@ -91,8 +83,8 @@ SystemOnStartupTrigger:
 ;
 
 SystemStartlevelTrigger:
-        {SystemStartlevelTrigger}
-        'System' 'reached start level' level=INT
+	{SystemStartlevelTrigger}
+	'System' 'reached start level' level=INT
 ;
 
 SystemOnShutdownTrigger:
@@ -101,11 +93,54 @@ SystemOnShutdownTrigger:
 ;
 
 ThingStateUpdateEventTrigger:
-    'Thing' thing=STRING 'received update' (state=ThingValidState)?
+	'Thing' thing=STRING 'received update' (state=ThingValidState)?
 ;
 
 ThingStateChangedEventTrigger:
-    'Thing' thing=STRING 'changed' ('from' oldState=ThingValidState)? ('to' newState=ThingValidState)?
+	'Thing' thing=STRING 'changed' ('from' oldState=ThingValidState)? ('to' newState=ThingValidState)?
+;
+
+Condition:
+	TimeOfDayCondition |
+	DayOfWeekCondition |
+	WeekdayCondition |
+	HolidayCondition |
+	InDaysetCondition |
+	IntervalCondition |
+	ThingStatusCondition |
+	ItemStateCondition
+;
+
+TimeOfDayCondition:
+	'Time' 'is' 'between' start=TIME 'and' end=TIME
+;
+
+DayOfWeekCondition:
+	'Day' 'is' weekDays+=WeekDay (',' weekDays+=WeekDay)*
+;
+
+WeekdayCondition:
+	'Day' ('offset' '='? offset=SIGNED_INT)? 'is' type=('weekday' | 'weekend')
+;
+
+HolidayCondition:
+	'Day' ('offset' '='? offset=SIGNED_INT)? 'is' (negation?='not')? holiday='holiday'
+;
+
+InDaysetCondition:
+	'Day' ('offset' '='? offset=SIGNED_INT)? 'in' dayset=(STRING|ID)
+;
+
+IntervalCondition:
+	interval=INT 'ms' 'between' 'executions'
+;
+
+ThingStatusCondition:
+	'Thing' thing=STRING 'is' (negation?='not')? status=ThingValidState
+;
+
+ItemStateCondition:
+	'Item' item=ItemName (operator=Operator)? state=ValidState
 ;
 
 ItemName :
@@ -113,61 +148,67 @@ ItemName :
 ;
 
 ValidState:
-    ValidStateId | ValidStateNumber | ValidStateString
+	ValidStateId | ValidStateNumber | ValidStateString
 ;
 
 ValidStateId:
-    value=ID
+	value=ID
 ;
 
 ValidStateNumber:
-    value=Number
+	value=Number
 ;
 
 ValidStateString:
-    value=STRING
+	value=STRING
 ;
 
 ValidCommand:
-    ValidCommandId | ValidCommandNumber | ValidCommandString
+	ValidCommandId | ValidCommandNumber | ValidCommandString
 ;
 
 ValidCommandId:
-    value=ID
+	value=ID
 ;
 
 ValidCommandNumber:
-    value=Number
+	value=Number
 ;
 
 ValidCommandString:
-    value=STRING
+	value=STRING
 ;
 
 ValidTrigger:
-    ValidTriggerId | ValidTriggerNumber | ValidTriggerString
+	ValidTriggerId | ValidTriggerNumber | ValidTriggerString
 ;
 
 ValidTriggerId:
-    value=ID
+	value=ID
 ;
 
 ValidTriggerNumber:
-    value=Number
+	value=Number
 ;
 
 ValidTriggerString:
-    value=STRING
+	value=STRING
 ;
 
 ThingValidState:
-    'UNINITIALIZED' |
-    'INITIALIZING' |
-    'UNKNOWN' |
-    'ONLINE' |
-    'OFFLINE' |
-    'REMOVING' |
-    'REMOVED'
+	'UNINITIALIZED' | 'INITIALIZING' | 'UNKNOWN' | 'ONLINE' | 'OFFLINE' | 'REMOVING' | 'REMOVED'
+;
+
+WeekDay:
+	'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'
+;
+
+Operator:
+	'=' | '!=' | '>' | '>=' | '<' | '<' '='
+;
+
+terminal TIME:
+	(('0'..'1') ('0'..'9') ':' ('0'..'5') ('0'..'9')) | ('2' ('0'..'3') ':' ('0'..'5') ('0'..'9'))
 ;
 
 SIGNED_INT:

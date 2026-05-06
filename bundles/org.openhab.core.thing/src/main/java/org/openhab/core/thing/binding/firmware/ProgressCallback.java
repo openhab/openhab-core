@@ -105,11 +105,13 @@ public interface ProgressCallback {
      * Callback operation to update the percentage progress of the firmware update.
      * This method can be used to provide detailed progress information additional to the sequence or even without a
      * previous defined sequence.
+     * <br>
+     * Note that calling this method before the first call to next() will cause the iterator to be stepped to the first
+     * state!
      *
      * @param progress the progress between 0 and 100
      * @throws IllegalArgumentException if given progress is {@code < 0} or {@code > 100} or if given progress is
-     *             smaller than old
-     *             progress
+     *             smaller than old progress
      * @throws IllegalStateException if update is finished
      */
     void update(int progress);

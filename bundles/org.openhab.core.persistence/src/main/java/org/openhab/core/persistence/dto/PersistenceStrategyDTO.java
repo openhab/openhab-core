@@ -24,16 +24,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "PersistenceStrategy")
 @NonNullByDefault
 public class PersistenceStrategyDTO {
-    public String type;
-    public String configuration;
+    public String name;
 
     // do not remove - needed by GSON
     PersistenceStrategyDTO() {
-        this("", "");
+        this("");
     }
 
-    public PersistenceStrategyDTO(String type, String configuration) {
-        this.type = type;
-        this.configuration = configuration;
+    public PersistenceStrategyDTO(String name) {
+        this.name = name;
     }
 }
