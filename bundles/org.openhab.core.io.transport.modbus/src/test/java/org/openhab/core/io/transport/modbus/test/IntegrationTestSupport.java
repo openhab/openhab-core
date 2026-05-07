@@ -26,6 +26,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.LongSupplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -309,9 +311,16 @@ public class IntegrationTestSupport extends JavaTest {
 
     public class TCPSlaveConnectionFactoryImpl implements TCPSlaveConnectionFactory {
 
+        public final Queue<Socket> acceptedSockets = new ConcurrentLinkedQueue<>();
+
         @Override
         public TCPSlaveConnection create(@NonNullByDefault({}) Socket socket) {
+            acceptedSockets.add(socket);
             return new TCPSlaveConnection(socket, new SpyingModbusTCPTransportFactory());
+        }
+
+        public long countOpenSockets() {
+            return acceptedSockets.stream().filter(s -> !s.isClosed()).count();
         }
     }
 

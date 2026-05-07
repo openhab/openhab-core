@@ -12,6 +12,7 @@
  */
 package org.openhab.core.tools;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
@@ -20,10 +21,10 @@ import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.json.internal.JsonStorage;
@@ -69,15 +70,15 @@ public class UpgradeTool {
 
         options.addOption(Option.builder().longOpt(OPT_USERDATA_DIR).desc(
                 "USERDATA directory to process. Enclose it in double quotes to ensure that any backslashes are not ignored by your command shell.")
-                .numberOfArgs(1).build());
+                .numberOfArgs(1).get());
         options.addOption(Option.builder().longOpt(OPT_CONF_DIR).desc(
                 "CONF directory to process. Enclose it in double quotes to ensure that any backslashes are not ignored by your command shell.")
-                .numberOfArgs(1).build());
+                .numberOfArgs(1).get());
         options.addOption(Option.builder().longOpt(OPT_COMMAND).numberOfArgs(1)
-                .desc("command to execute (executes all if omitted)").build());
-        options.addOption(Option.builder().longOpt(OPT_LIST_COMMANDS).desc("list available commands").build());
-        options.addOption(Option.builder().longOpt(OPT_LOG).numberOfArgs(1).desc("log verbosity").build());
-        options.addOption(Option.builder().longOpt(OPT_FORCE).desc("force execution (even if already done)").build());
+                .desc("command to execute (executes all if omitted)").get());
+        options.addOption(Option.builder().longOpt(OPT_LIST_COMMANDS).desc("list available commands").get());
+        options.addOption(Option.builder().longOpt(OPT_LOG).numberOfArgs(1).desc("log verbosity").get());
+        options.addOption(Option.builder().longOpt(OPT_FORCE).desc("force execution (even if already done)").get());
 
         return options;
     }
@@ -143,8 +144,12 @@ public class UpgradeTool {
                 }
             });
         } catch (ParseException e) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("upgradetool", "", options, "", true);
+            HelpFormatter formatter = HelpFormatter.builder().get();
+            try {
+                formatter.printHelp("upgradetool", "", options, "", true);
+            } catch (IOException ioException) {
+                LOGGER.error("Error printing help: {}", ioException.getMessage());
+            }
         }
 
         System.exit(0);
