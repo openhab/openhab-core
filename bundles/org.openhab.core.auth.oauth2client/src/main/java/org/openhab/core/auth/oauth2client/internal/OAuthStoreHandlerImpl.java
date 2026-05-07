@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -91,7 +90,8 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
     private final StorageFacade storageFacade;
 
     private final Set<StorageCipher> allAvailableStorageCiphers = new LinkedHashSet<>();
-    private Optional<StorageCipher> storageCipher = Optional.empty();
+    @Nullable
+    private StorageCipher storageCipher = null;
 
     private final Logger logger = LoggerFactory.getLogger(OAuthStoreHandlerImpl.class);
 
@@ -107,10 +107,12 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
 
         // choose the cipher by the cipherTarget
         storageCipher = allAvailableStorageCiphers.stream()
-                .filter(cipher -> cipher.getUniqueCipherId().equals(cipherTarget)).findFirst();
+                .filter(cipher -> cipher.getUniqueCipherId().equals(cipherTarget)).findFirst().orElse(null);
 
-        logger.debug("Using Cipher: {}", storageCipher
-                .orElseThrow(() -> new GeneralSecurityException("No StorageCipher with target=" + cipherTarget)));
+        if (storageCipher == null) {
+            throw new GeneralSecurityException("No StorageCipher with target=" + cipherTarget);
+        }
+        logger.debug("Using Cipher: {}", storageCipher);
     }
 
     /**
@@ -230,25 +232,27 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
 
     private AccessTokenResponse decryptToken(AccessTokenResponse accessTokenResponse) throws GeneralSecurityException {
         AccessTokenResponse decryptedToken = (AccessTokenResponse) accessTokenResponse.clone();
-        if (storageCipher.isEmpty()) {
+        StorageCipher tmpStorageCipher = storageCipher; // avoid NPE when cipher is unset during decryption
+        if (tmpStorageCipher == null) {
             return decryptedToken; // do nothing if no cipher
         }
         logger.debug("Decrypting: {}", accessTokenResponse);
-        decryptedToken.setAccessToken(storageCipher.get().decrypt(accessTokenResponse.getAccessToken()));
-        decryptedToken.setRefreshToken(storageCipher.get().decrypt(accessTokenResponse.getRefreshToken()));
+        decryptedToken.setAccessToken(tmpStorageCipher.decrypt(accessTokenResponse.getAccessToken()));
+        decryptedToken.setRefreshToken(tmpStorageCipher.decrypt(accessTokenResponse.getRefreshToken()));
         return decryptedToken;
     }
 
     private DeviceCodeResponseDTO decryptDeviceCodeResponse(DeviceCodeResponseDTO dcr) throws GeneralSecurityException {
         DeviceCodeResponseDTO dcrDecrypted = (DeviceCodeResponseDTO) dcr.clone();
-        if (storageCipher.isEmpty()) {
+        StorageCipher tmpStorageCipher = storageCipher; // avoid NPE when cipher is unset during decryption
+        if (tmpStorageCipher == null) {
             return dcrDecrypted; // do nothing if no cipher
         }
         logger.debug("Decrypting: {}", dcr);
-        dcrDecrypted.setDeviceCode(storageCipher.get().decrypt(dcr.getDeviceCode()));
-        dcrDecrypted.setUserCode(storageCipher.get().decrypt(dcr.getUserCode()));
-        dcrDecrypted.setVerificationUri(storageCipher.get().decrypt(dcr.getVerificationUri()));
-        dcrDecrypted.setVerificationUriComplete(storageCipher.get().decrypt(dcr.getVerificationUriComplete()));
+        dcrDecrypted.setDeviceCode(tmpStorageCipher.decrypt(dcr.getDeviceCode()));
+        dcrDecrypted.setUserCode(tmpStorageCipher.decrypt(dcr.getUserCode()));
+        dcrDecrypted.setVerificationUri(tmpStorageCipher.decrypt(dcr.getVerificationUri()));
+        dcrDecrypted.setVerificationUriComplete(tmpStorageCipher.decrypt(dcr.getVerificationUriComplete()));
         return dcrDecrypted;
     }
 
@@ -256,11 +260,11 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         if (token == null) {
             return null;
         }
-        if (storageCipher.isEmpty()) {
+        StorageCipher tmpStorageCipher = storageCipher; // avoid NPE when cipher is unset during encryption
+        if (tmpStorageCipher == null) {
             return token; // do nothing if no cipher
         } else {
-            StorageCipher cipher = storageCipher.get();
-            return cipher.encrypt(token);
+            return tmpStorageCipher.encrypt(token);
         }
     }
 
@@ -278,8 +282,8 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     protected synchronized void unsetStorageCipher(StorageCipher storageCipher) {
         allAvailableStorageCiphers.remove(storageCipher);
-        if (this.storageCipher.isPresent() && this.storageCipher.get() == storageCipher) {
-            this.storageCipher = Optional.empty();
+        if ((this.storageCipher != null) && (this.storageCipher == storageCipher)) {
+            this.storageCipher = null;
         }
     }
 

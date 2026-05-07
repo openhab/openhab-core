@@ -59,7 +59,6 @@ public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
      *
      * @param element the element to add (must not be null)
      * @return the added element or newly created object of the same type
-     *
      * @throws UnsupportedOperationException if the metadata namespace has a reserved {@link MetadataProvider} that is
      *             not a {@link ManagedProvider}
      * @throws IllegalStateException if no ManagedProvider is available
@@ -73,7 +72,6 @@ public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
      * @param element the element to update (must not be null)
      * @return returns the old element or null if no element with the same key
      *         exists
-     *
      * @throws UnsupportedOperationException if the metadata namespace has a reserved {@link MetadataProvider} that is
      *             not a {@link ManagedProvider}
      * @throws IllegalStateException if no ManagedProvider is available
@@ -87,7 +85,6 @@ public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
      *
      * @param key the key of the element to remove (must not be null)
      * @return the removed element, or null if no element with the given key exists
-     *
      * @throws UnsupportedOperationException if the metadata namespace has a reserved {@link MetadataProvider} that is
      *             not a {@link ManagedProvider}
      * @throws IllegalStateException if no ManagedProvider is available

@@ -1387,7 +1387,6 @@ public class LightModel {
          * <p>
          *
          * @param rgb a 3-element array of double: [R,G,B].
-         *
          * @return a 5-element array of double: [R',G',B',C,W], where R', G', B' are the remaining RGB values
          *         and C and W are the calculated cold and warm white values.
          * @throws IllegalArgumentException if the input array length is not 3, or if any of its values are outside
@@ -1411,7 +1410,6 @@ public class LightModel {
          *            [0.0..1.0]. For example see {@link #COOL_PROFILE}.
          * @param warmProfile the warm white LED RGB profile, a normalized 3-element [R,G,B] array in the range
          *            [0.0..1.0]. For example see {@link #WARM_PROFILE}.
-         *
          * @return a 5-element array of double: [R',G',B',C,W], where R', G', B' are the remaining RGB values
          *         and C and W are the calculated cold and warm white values.
          * @throws IllegalArgumentException if the input array length is not 3, or if any of its values are outside
@@ -1477,7 +1475,6 @@ public class LightModel {
          *
          * @param rgbcw a 5-element array of double: [R,G,B,C,W], where R, G, B are the RGB values and C and W are
          *            the cold and warm white LED RGB profile contributions.
-         *
          * @return double[] a 3-element array of double: [R,G,B].
          * @throws IllegalArgumentException if the input array length is not 5, or if any its values are
          *             outside the range [0.0..1.0]
@@ -1496,7 +1493,6 @@ public class LightModel {
          *            [0.0..1.0]. For example see {@link #COOL_PROFILE}.
          * @param warmProfile the warm white LED RGB profile, a normalized 3-element [R,G,B] array in the range
          *            [0.0..1.0]. For example see {@link #WARM_PROFILE}.
-         *
          * @return double[] a 3-element array of double: [R,G,B].
          * @throws IllegalArgumentException if the input array length is not 5, or if any its values are
          *             outside the range [0.0..1.0]
