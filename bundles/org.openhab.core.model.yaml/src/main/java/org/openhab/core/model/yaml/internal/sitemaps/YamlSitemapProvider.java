@@ -204,7 +204,11 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     private @Nullable Widget mapWidget(YamlWidgetDTO widgetDTO, Parent parent) {
-        Widget widget = sitemapFactory.createWidget(widgetDTO.type, parent);
+        String widgetType = widgetDTO.type;
+        if (widgetType == "Sitemap") {
+            widgetType = "NestedSitemap";
+        }
+        Widget widget = sitemapFactory.createWidget(widgetType, parent);
         if (widget != null) {
             widget.setItem(widgetDTO.item);
 

@@ -113,7 +113,11 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
 
     private YamlWidgetDTO buildWidgetDTO(Widget widget) {
         YamlWidgetDTO dto = new YamlWidgetDTO();
-        dto.type = widget.getWidgetType();
+        String widgetType = widget.getWidgetType();
+        if (widgetType.equals("NestedSitemap")) {
+            widgetType = "Sitemap";
+        }
+        dto.type = widgetType;
         dto.item = widget.getItem();
 
         List<Object> labelColorRules = buildRules(widget.getLabelColor(), false);

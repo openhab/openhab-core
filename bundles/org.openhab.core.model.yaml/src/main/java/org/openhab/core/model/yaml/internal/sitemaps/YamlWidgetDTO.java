@@ -63,7 +63,6 @@ public class YamlWidgetDTO {
         MANDATORY_FIELDS.put(MAPVIEW, Set.of("item"));
         MANDATORY_FIELDS.put(WEBVIEW, Set.of("url"));
         MANDATORY_FIELDS.put(DEFAULT, Set.of("item"));
-        MANDATORY_FIELDS.put(NESTED_SITEMAP, Set.of("name"));
 
         OPTIONAL_FIELDS.put(FRAME, Set.of("item"));
         OPTIONAL_FIELDS.put(BUTTON_GRID, Set.of());
@@ -83,6 +82,7 @@ public class YamlWidgetDTO {
         OPTIONAL_FIELDS.put(VIDEO, Set.of("item", "encoding"));
         OPTIONAL_FIELDS.put(MAPVIEW, Set.of("height"));
         OPTIONAL_FIELDS.put(WEBVIEW, Set.of("item", "height"));
+        OPTIONAL_FIELDS.put(NESTED_SITEMAP, Set.of("item", "name"));
         OPTIONAL_FIELDS.put(DEFAULT, Set.of("height"));
     }
 
@@ -177,6 +177,10 @@ public class YamlWidgetDTO {
                 && minValue.doubleValue() > maxValue.doubleValue()) {
             addToList(warnings, "larger value %f for \"min\" field than value %f for \"max\" field"
                     .formatted(minValue.doubleValue(), maxValue.doubleValue()));
+        } else if (NESTED_SITEMAP.equals(type) && (name == null || name.isBlank())
+                && (item == null || item.isBlank())) {
+            addToList(errors, "\"name\" or \"item\" field missing while mandatory for Sitemap widget");
+            ok = false;
         }
 
         List<String> ruleErrors = new ArrayList<>();

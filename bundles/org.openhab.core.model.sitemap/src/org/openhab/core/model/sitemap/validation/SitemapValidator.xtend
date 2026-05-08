@@ -384,7 +384,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     
     @Check
     def void checkNestedSitemapParameters(ModelNestedSitemap w) {
-        if (w.icon === null && w.sitemapName === null) {
+        if (w.item === null && w.sitemapName === null) {
             val node = NodeModelUtils.getNode(w)
             val line = node.startLine
             error(errorString("Sitemap widget doesn't have item or sitemapname defined", line),
