@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Mark Herwege - Initial contribution
  */
 @NonNullByDefault
-public interface NestedSitemap extends LinkableWidget {
+public interface NestedSitemap extends NonLinkableWidget {
 
     /**
      * Get the name of the nested sitemap.

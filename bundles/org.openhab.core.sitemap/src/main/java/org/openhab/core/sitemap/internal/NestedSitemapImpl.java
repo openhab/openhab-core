@@ -21,7 +21,7 @@ import org.openhab.core.sitemap.Parent;
  * @author Mark Herwege - Initial contribution
  */
 @NonNullByDefault
-public class NestedSitemapImpl extends LinkableWidgetImpl implements NestedSitemap {
+public class NestedSitemapImpl extends NonLinkableWidgetImpl implements NestedSitemap {
 
     private String sitemapName = "";
 

@@ -15,10 +15,10 @@ ModelWidget:
     ModelLinkableWidget | ModelNonLinkableWidget;
 
 ModelNonLinkableWidget:
-    ModelSwitch | ModelSelection | ModelSlider | ModelSetpoint | ModelVideo | ModelChart | ModelWebview | ModelColorpicker | ModelColortemperaturepicker | ModelMapview | ModelInput | ModelButton | ModelDefault;
+    ModelSwitch | ModelSelection | ModelSlider | ModelSetpoint | ModelVideo | ModelChart | ModelWebview | ModelColorpicker | ModelColortemperaturepicker | ModelMapview | ModelInput | ModelButton | ModelNestedSitemap | ModelDefault;
 
 ModelLinkableWidget:
-    (ModelText | ModelGroup | ModelImage | ModelFrame | ModelButtongrid | ModelNestedSitemap)
+    (ModelText | ModelGroup | ModelImage | ModelFrame | ModelButtongrid)
     ('{'
     (children+=ModelWidget)+
     '}')?;
