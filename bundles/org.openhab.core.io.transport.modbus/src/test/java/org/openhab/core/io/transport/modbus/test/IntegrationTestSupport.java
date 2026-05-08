@@ -311,7 +311,7 @@ public class IntegrationTestSupport extends JavaTest {
 
     public class TCPSlaveConnectionFactoryImpl implements TCPSlaveConnectionFactory {
 
-        public final Queue<Socket> acceptedSockets = new ConcurrentLinkedQueue<>();
+        private final Queue<Socket> acceptedSockets = new ConcurrentLinkedQueue<>();
 
         @Override
         public TCPSlaveConnection create(@NonNullByDefault({}) Socket socket) {
@@ -321,6 +321,10 @@ public class IntegrationTestSupport extends JavaTest {
 
         public long countOpenSockets() {
             return acceptedSockets.stream().filter(s -> !s.isClosed()).count();
+        }
+
+        public void clearAcceptedSockets() {
+            acceptedSockets.clear();
         }
     }
 

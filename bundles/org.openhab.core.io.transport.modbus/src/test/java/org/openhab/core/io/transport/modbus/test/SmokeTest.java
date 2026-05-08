@@ -118,7 +118,7 @@ public class SmokeTest extends IntegrationTestSupport {
 
     @BeforeEach
     public void setUpSocketSpy() {
-        ((TCPSlaveConnectionFactoryImpl) tcpConnectionFactory).acceptedSockets.clear();
+        ((TCPSlaveConnectionFactoryImpl) tcpConnectionFactory).clearAcceptedSockets();
     }
 
     /**
