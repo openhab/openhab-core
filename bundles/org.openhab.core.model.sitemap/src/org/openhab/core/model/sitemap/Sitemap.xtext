@@ -12,24 +12,23 @@ ModelSitemap:
     '}';
 
 ModelWidget:
-    ModelNestedSitemap | ModelWidgetWithItem;
-
-ModelWidgetWithItem: 
     ModelLinkableWidget | ModelNonLinkableWidget;
 
 ModelNonLinkableWidget:
     ModelSwitch | ModelSelection | ModelSlider | ModelSetpoint | ModelVideo | ModelChart | ModelWebview | ModelColorpicker | ModelColortemperaturepicker | ModelMapview | ModelInput | ModelButton | ModelDefault;
 
 ModelLinkableWidget:
-    (ModelText | ModelGroup | ModelImage | ModelFrame | ModelButtongrid)
+    (ModelText | ModelGroup | ModelImage | ModelFrame | ModelButtongrid | ModelNestedSitemap)
     ('{'
     (children+=ModelWidget)+
     '}')?;
 
 ModelNestedSitemap:
-    {ModelNestedSitemap} 'Sitemap' (('sitemapname=' sitemapName=ID) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) |
+    {ModelNestedSitemap} 'Sitemap' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
+    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('sitemapname=' sitemapName=ID) | 
     ('labelcolor=' labelColor=ModelColorArrayList) |
+    ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
     ('visibility=' visibility=ModelVisibilityRuleList))*;
 

@@ -61,7 +61,6 @@ import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.ModelWebview;
 import org.openhab.core.model.sitemap.sitemap.ModelWidget;
-import org.openhab.core.model.sitemap.sitemap.ModelWidgetWithItem;
 import org.openhab.core.model.sitemap.sitemap.SitemapModel;
 import org.openhab.core.sitemap.Button;
 import org.openhab.core.sitemap.Buttongrid;
@@ -263,14 +262,10 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     break;
             }
 
+            // In case deprecated button definition was encountered, the item is not set on the Buttongrid widget
+            widget.setItem(deprecatedButtonsDefinition ? null : modelWidget.getItem());
             widget.setLabel(modelWidget.getLabel());
-            String staticIcon = null;
-            if (modelWidget instanceof ModelWidgetWithItem modelWidgetWithItem) {
-                // In case deprecated button definition was encountered, the item is not set on the Buttongrid widget
-                widget.setItem(deprecatedButtonsDefinition ? null : modelWidgetWithItem.getItem());
-                addWidgetColorRules(widget.getValueColor(), modelWidgetWithItem.getValueColor());
-                staticIcon = modelWidgetWithItem.getStaticIcon();
-            }
+            String staticIcon = modelWidget.getStaticIcon();
             if (staticIcon != null && !staticIcon.isEmpty()) {
                 widget.setIcon(staticIcon);
                 widget.setStaticIcon(true);
@@ -287,6 +282,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
 
             addWidgetVisibilityRules(widget.getVisibility(), modelWidget.getVisibility());
             addWidgetColorRules(widget.getLabelColor(), modelWidget.getLabelColor());
+            addWidgetColorRules(widget.getValueColor(), modelWidget.getValueColor());
             addWidgetColorRules(widget.getIconColor(), modelWidget.getIconColor());
             addWidgetIconRules(widget.getIconRules(), modelWidget.getIconRules());
 

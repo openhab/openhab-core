@@ -13,6 +13,7 @@
 package org.openhab.core.sitemap.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
 
@@ -20,7 +21,7 @@ import org.openhab.core.sitemap.Parent;
  * @author Mark Herwege - Initial contribution
  */
 @NonNullByDefault
-public class NestedSitemapImpl extends NonLinkableWidgetImpl implements NestedSitemap {
+public class NestedSitemapImpl extends LinkableWidgetImpl implements NestedSitemap {
 
     private String sitemapName = "";
 
@@ -32,7 +33,7 @@ public class NestedSitemapImpl extends NonLinkableWidgetImpl implements NestedSi
     }
 
     @Override
-    public String getSitemapName() {
+    public @Nullable String getSitemapName() {
         return sitemapName;
     }
 

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.sitemap;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -23,4 +25,18 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public interface Parent {
 
+    /**
+     * Get the child {@link Widget}s. This method should return a modifiable list, allowing updates to the child
+     * widgets.
+     *
+     * @return widgets
+     */
+    List<Widget> getWidgets();
+
+    /**
+     * Replace the child widgets with a new list of widgets.
+     *
+     * @param widgets
+     */
+    void setWidgets(List<Widget> widgets);
 }

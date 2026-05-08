@@ -13,6 +13,7 @@
 package org.openhab.core.sitemap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A representation of a sitemap NestedSitemap widget.
@@ -20,13 +21,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Mark Herwege - Initial contribution
  */
 @NonNullByDefault
-public interface NestedSitemap extends NonLinkableWidget {
+public interface NestedSitemap extends LinkableWidget {
 
     /**
      * Get the name of the nested sitemap.
      *
-     * @return input hint
+     * @return name of nested sitemap
      */
+    @Nullable
     String getSitemapName();
 
     /**

@@ -55,7 +55,6 @@ import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.ModelWebview;
 import org.openhab.core.model.sitemap.sitemap.ModelWidget;
-import org.openhab.core.model.sitemap.sitemap.ModelWidgetWithItem;
 import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapModel;
 import org.openhab.core.sitemap.Button;
@@ -280,19 +279,12 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             }
         }
 
+        modelWidget.setItem(widget.getItem());
         modelWidget.setLabel(widget.getLabel());
         String icon = widget.getIcon();
-        if (modelWidget instanceof ModelWidgetWithItem modelWidgetWithItem) {
-            modelWidgetWithItem.setItem(widget.getItem());
-            List<Rule> valueColorRules = widget.getValueColor();
-            if (!valueColorRules.isEmpty()) {
-                modelWidgetWithItem.setValueColor(modelColorRules(valueColorRules));
-            }
-            if (widget.isStaticIcon()) {
-                modelWidgetWithItem.setStaticIcon(icon);
-            }
-        }
-        if (!widget.isStaticIcon()) {
+        if (widget.isStaticIcon()) {
+            modelWidget.setStaticIcon(icon);
+        } else {
             modelWidget.setIcon(icon);
         }
 
@@ -307,6 +299,10 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
         List<Rule> labelColorRules = widget.getLabelColor();
         if (!labelColorRules.isEmpty()) {
             modelWidget.setLabelColor(modelColorRules(labelColorRules));
+        }
+        List<Rule> valueColorRules = widget.getValueColor();
+        if (!valueColorRules.isEmpty()) {
+            modelWidget.setValueColor(modelColorRules(valueColorRules));
         }
         List<Rule> iconColorRules = widget.getIconColor();
         if (!iconColorRules.isEmpty()) {
