@@ -389,7 +389,21 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         }
     }
 
-    private List<Condition> getConditions(List<String> conditionsString, UIComponent component, String key) {
+    /**
+     * Get conditions from a list of condition strings. Each condition string is expected to have the format "[item]
+     * [condition] value", where item and condition are optional. For example, "Temperature > 25" or "ON". The supported
+     * conditions are ==, !=, <, >, <=, >=. If the condition string does not match this format, it is ignored and a
+     * warning is logged.
+     * This method is package private for testing purposes, to allow testing the parsing of conditions without having to
+     * mock the whole widget building process.
+     *
+     * @param conditionsString
+     * @param component
+     * @param key
+     * @return the list of conditions parsed from the given list of condition strings. If a condition string has a
+     *         syntax error, it is ignored and a warning is logged.
+     */
+    List<Condition> getConditions(List<String> conditionsString, UIComponent component, String key) {
         List<Condition> conditions = new ArrayList<>();
         for (String conditionString : conditionsString) {
             Matcher matcher = CONDITION_PATTERN.matcher(conditionString);
