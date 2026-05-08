@@ -44,6 +44,8 @@ public class YamlWidgetDTO {
     private static final Map<String, Set<String>> MANDATORY_FIELDS = new HashMap<>();
     private static final Map<String, Set<String>> OPTIONAL_FIELDS = new HashMap<>();
 
+    private static final String NESTED_SITEMAP = "Sitemap";
+
     static {
         MANDATORY_FIELDS.put(FRAME, Set.of());
         MANDATORY_FIELDS.put(BUTTON_GRID, Set.of());
@@ -62,6 +64,7 @@ public class YamlWidgetDTO {
         MANDATORY_FIELDS.put(VIDEO, Set.of("url"));
         MANDATORY_FIELDS.put(MAPVIEW, Set.of("item"));
         MANDATORY_FIELDS.put(WEBVIEW, Set.of("url"));
+        MANDATORY_FIELDS.put(NESTED_SITEMAP, Set.of());
         MANDATORY_FIELDS.put(DEFAULT, Set.of("item"));
 
         OPTIONAL_FIELDS.put(FRAME, Set.of("item"));

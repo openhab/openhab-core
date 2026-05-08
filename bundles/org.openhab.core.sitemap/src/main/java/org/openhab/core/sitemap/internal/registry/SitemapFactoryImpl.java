@@ -75,11 +75,11 @@ public class SitemapFactoryImpl implements SitemapFactory {
     public static final String TEXT = "Text";
     public static final String VIDEO = "Video";
     public static final String WEBVIEW = "Webview";
-    public static final String NESTED_SITEMAP = "NestedSitemap";
+    public static final String SITEMAP = "Sitemap";
 
     private static final String[] WIDGET_TYPES = { BUTTON, BUTTON_GRID, CHART, COLOR_PICKER, COLOR_TEMPERATURE_PICKER,
             DEFAULT, FRAME, GROUP, IMAGE, INPUT, MAPVIEW, SELECTION, SETPOINT, SLIDER, SWITCH, TEXT, VIDEO, WEBVIEW,
-            NESTED_SITEMAP };
+            SITEMAP };
 
     @Override
     public Sitemap createSitemap(String sitemapName) {
@@ -107,7 +107,7 @@ public class SitemapFactoryImpl implements SitemapFactory {
             case TEXT -> new TextImpl();
             case VIDEO -> new VideoImpl();
             case WEBVIEW -> new WebviewImpl();
-            case NESTED_SITEMAP -> new NestedSitemapImpl();
+            case SITEMAP -> new NestedSitemapImpl();
             default -> null;
         };
     }
@@ -133,7 +133,7 @@ public class SitemapFactoryImpl implements SitemapFactory {
             case TEXT -> new TextImpl(parent);
             case VIDEO -> new VideoImpl(parent);
             case WEBVIEW -> new WebviewImpl(parent);
-            case NESTED_SITEMAP -> new NestedSitemapImpl(parent);
+            case SITEMAP -> new NestedSitemapImpl(parent);
             default -> null;
         };
     }

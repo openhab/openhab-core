@@ -57,6 +57,7 @@ import org.openhab.core.sitemap.Image;
 import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
 import org.openhab.core.sitemap.Setpoint;
@@ -80,6 +81,7 @@ import org.openhab.core.sitemap.internal.ImageImpl;
 import org.openhab.core.sitemap.internal.InputImpl;
 import org.openhab.core.sitemap.internal.MappingImpl;
 import org.openhab.core.sitemap.internal.MapviewImpl;
+import org.openhab.core.sitemap.internal.NestedSitemapImpl;
 import org.openhab.core.sitemap.internal.RuleImpl;
 import org.openhab.core.sitemap.internal.SelectionImpl;
 import org.openhab.core.sitemap.internal.SetpointImpl;
@@ -175,6 +177,9 @@ public class YamlSitemapProviderTest {
                 case "Button" -> {
                     yield new ButtonImpl(i.getArgument(1));
                 }
+                case "Sitemap" -> {
+                    yield new NestedSitemapImpl(i.getArgument(1));
+                }
                 case "Default" -> {
                     yield new DefaultImpl(i.getArgument(1));
                 }
@@ -232,7 +237,7 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getVisibility(), hasSize(0));
         assertTrue(widget instanceof Frame);
         widgets = ((Frame) widget).getWidgets();
-        assertThat(widgets, hasSize(18));
+        assertThat(widgets, hasSize(19));
 
         widget = widgets.getFirst();
         assertEquals("Switch", widget.getWidgetType());
@@ -684,6 +689,20 @@ public class YamlSitemapProviderTest {
         assertThat(((Group) widget).getWidgets(), hasSize(0));
 
         widget = widgets.get(17);
+        assertEquals("Sitemap", widget.getWidgetType());
+        assertNull(widget.getItem());
+        assertEquals("Test Nested Sitemap", widget.getLabel());
+        assertThat(widget.getLabelColor(), hasSize(0));
+        assertThat(widget.getValueColor(), hasSize(0));
+        assertNull(widget.getIcon());
+        assertThat(widget.getIconRules(), hasSize(0));
+        assertThat(widget.getIconColor(), hasSize(0));
+        assertThat(widget.getVisibility(), hasSize(0));
+        assertTrue(widget instanceof NestedSitemap);
+        NestedSitemap nestedSitemapWidget = (NestedSitemap) widget;
+        assertEquals("sitemap", nestedSitemapWidget.getSitemapName());
+
+        widget = widgets.get(18);
         assertEquals("Default", widget.getWidgetType());
         assertEquals("DemoLocation", widget.getItem());
         assertNull(widget.getLabel());
