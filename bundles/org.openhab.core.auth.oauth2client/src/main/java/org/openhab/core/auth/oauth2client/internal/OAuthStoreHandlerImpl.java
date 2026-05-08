@@ -91,7 +91,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
 
     private final Set<StorageCipher> allAvailableStorageCiphers = new LinkedHashSet<>();
     @Nullable
-    private StorageCipher storageCipher = null;
+    private volatile StorageCipher storageCipher = null;
 
     private final Logger logger = LoggerFactory.getLogger(OAuthStoreHandlerImpl.class);
 
