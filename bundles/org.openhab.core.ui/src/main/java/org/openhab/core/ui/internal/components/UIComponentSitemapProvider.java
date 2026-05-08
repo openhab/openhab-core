@@ -246,10 +246,10 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         }
 
         addWidgetRules(widget.getVisibility(), component, "visibility");
-        addWidgetRules(widget.getLabelColor(), component, "labelColor");
-        addWidgetRules(widget.getValueColor(), component, "valueColor");
-        addWidgetRules(widget.getIconColor(), component, "iconColor");
-        addWidgetRules(widget.getIconRules(), component, "iconRules");
+        addWidgetRules(widget.getLabelColor(), component, "labelcolor");
+        addWidgetRules(widget.getValueColor(), component, "valuecolor");
+        addWidgetRules(widget.getIconColor(), component, "iconcolor");
+        addWidgetRules(widget.getIconRules(), component, "iconrules");
 
         return widget;
     }

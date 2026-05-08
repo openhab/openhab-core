@@ -77,11 +77,11 @@ public class UIComponentSitemapMapper {
             addConfig(widgetComponent, "staticIcon", true);
         }
 
-        addConfig(widgetComponent, "iconRules", map(widget.getIconRules()));
+        addConfig(widgetComponent, "iconrules", map(widget.getIconRules()));
         addConfig(widgetComponent, "visibility", map(widget.getVisibility()));
-        addConfig(widgetComponent, "labelColor", map(widget.getLabelColor()));
-        addConfig(widgetComponent, "valueColor", map(widget.getValueColor()));
-        addConfig(widgetComponent, "iconColor", map(widget.getIconColor()));
+        addConfig(widgetComponent, "labelcolor", map(widget.getLabelColor()));
+        addConfig(widgetComponent, "valuecolor", map(widget.getValueColor()));
+        addConfig(widgetComponent, "iconcolor", map(widget.getIconColor()));
 
         switch (widget) {
             case Switch switchWidget -> {
