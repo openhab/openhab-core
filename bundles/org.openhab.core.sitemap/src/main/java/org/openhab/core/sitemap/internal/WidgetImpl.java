@@ -150,10 +150,6 @@ public class WidgetImpl implements Widget {
 
     @Override
     public String getWidgetType() {
-        String widgetType = this.getClass().getInterfaces()[0].getSimpleName();
-        if ("NestedSitemap".equals(widgetType)) {
-            return "Sitemap";
-        }
-        return widgetType;
+        return this.getClass().getInterfaces()[0].getSimpleName();
     }
 }
