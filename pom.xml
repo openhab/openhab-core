@@ -73,7 +73,7 @@
 
     <asm.version>9.9.1</asm.version>
     <bnd.version>7.2.3</bnd.version>
-    <commons.net.version>3.12.0</commons.net.version>
+    <commons.net.version>3.13.0</commons.net.version>
     <eea.version>2.4.0</eea.version>
     <karaf.compile.version>4.4.11</karaf.compile.version>
     <karaf.tooling.version>4.4.11</karaf.tooling.version>
