@@ -131,8 +131,8 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(firstRule.getTags(), hasSize(2));
         assertThat(firstRule.getTags(), hasItem("Test"));
         assertThat(firstRule.getTags(), hasItem("my test"));
-        assertThat(firstRule.getTriggers(), hasSize(1));
         assertThat(firstRule.getConditions(), hasSize(0));
+        assertThat(firstRule.getTriggers(), hasSize(1));
         assertThat(firstRule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
         assertThat(firstRule.getActions(), hasSize(1));
         assertThat(firstRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
@@ -148,8 +148,8 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(secondRule.getTriggers().getFirst().getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
         assertThat(secondRule.getTriggers().getFirst().getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME),
                 is("X"));
-        assertThat(secondRule.getActions(), hasSize(1));
         assertThat(secondRule.getConditions(), hasSize(0));
+        assertThat(secondRule.getActions(), hasSize(1));
         assertThat(secondRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
         assertThat(secondRule.getActions().getFirst().getConfiguration()
                 .get(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE), is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
