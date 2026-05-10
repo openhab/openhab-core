@@ -161,7 +161,6 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(rules.size(), is(0));
 
         String model = "rule RuleNoTrigger\n" + //
-                "when\n" + //
                 "then\n" + //
                 "   logInfo('Test', 'Test')\n" + //
                 "end\n\n";
@@ -177,6 +176,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(rule.getUID(), is("dslruletest-1"));
         assertThat(rule.getName(), is("RuleNoTrigger"));
         assertThat(rule.getTags(), hasSize(0));
+        assertThat(rule.getConditions(), hasSize(0));
         assertThat(rule.getTriggers(), hasSize(0));
         assertThat(rule.getActions(), hasSize(1));
         assertThat(rule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
