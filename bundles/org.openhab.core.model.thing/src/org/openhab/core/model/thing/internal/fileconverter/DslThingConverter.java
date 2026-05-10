@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -241,7 +242,7 @@ public class DslThingConverter extends AbstractThingSerializer implements ThingP
 
     @Override
     public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes(StandardCharsets.UTF_8));
         return modelRepository.createIsolatedModel("things", inputStream, errors, warnings);
     }
 

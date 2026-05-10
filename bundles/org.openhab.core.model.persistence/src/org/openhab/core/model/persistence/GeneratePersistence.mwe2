@@ -19,7 +19,6 @@ var rootPath = ".."
 var projectName = "org.openhab.core.model.persistence"
 var languageName = "org.openhab.core.model.persistence.Persistence"
 var fileExtensions = "persist"
-var generateXtendStub = true
 var encoding = "UTF-8"
 
 Workflow {
@@ -50,8 +49,12 @@ Workflow {
     language = StandardLanguage {
       name = languageName
       fileExtensions = fileExtensions
+      generator = null
       serializer = {
-        generateStub = generateXtendStub
+        generateStub = false
+      }
+      validator = {
+        generateStub = false
       }
     }
   }

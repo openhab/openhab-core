@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.State;
@@ -33,6 +34,9 @@ public class ItemHistoryDTO {
     public String name;
     public String datapoints;
 
+    @Schema(description = "The unit for the returned values (if available)")
+    public @Nullable String unit;
+
     public List<HistoryDataBean> data = new ArrayList<>();
 
     public ItemHistoryDTO() {
@@ -40,7 +44,6 @@ public class ItemHistoryDTO {
 
     /**
      * Add a new record to the data history.
-     * This method returns a double value equal to the state. This may be used for comparison by the caller.
      *
      * @param time the time of the record
      * @param state the state at this time
@@ -57,6 +60,19 @@ public class ItemHistoryDTO {
         } else {
             newVal.state = state.toString();
         }
+        data.add(newVal);
+    }
+
+    /**
+     * Add a new record to the data history.
+     *
+     * @param time the time of the record
+     * @param state the state at this time
+     */
+    public void addData(long time, String state) {
+        HistoryDataBean newVal = new HistoryDataBean();
+        newVal.time = time;
+        newVal.state = state;
         data.add(newVal);
     }
 

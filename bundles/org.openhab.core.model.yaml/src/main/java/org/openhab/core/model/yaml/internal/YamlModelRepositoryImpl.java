@@ -45,10 +45,13 @@ import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
+import org.openhab.core.model.yaml.internal.pages.YamlPageDTO;
 import org.openhab.core.model.yaml.internal.rules.YamlRuleDTO;
 import org.openhab.core.model.yaml.internal.rules.YamlRuleTemplateDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
+import org.openhab.core.model.yaml.internal.sitemaps.YamlSitemapDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
+import org.openhab.core.model.yaml.internal.widgets.YamlWidgetDTO;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.service.component.annotations.Activate;
@@ -85,6 +88,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Laurent Garnier - new parameters to retrieve errors and warnings when loading a file
  * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createIsolatedModel and
  *         removeIsolatedModel
+ * @author Jimmy Tanagra - Add YamlPageDTO and YamlWidgetDTO
+ * @author Laurent Garnier - Add YamlSitemapDTO
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -97,14 +102,17 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             getElementName(YamlRuleTemplateDTO.class), // "ruleTemplates"
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
-            getElementName(YamlItemDTO.class) // "items"
+            getElementName(YamlItemDTO.class), // "items"
+            getElementName(YamlPageDTO.class), // "pages"
+            getElementName(YamlWidgetDTO.class), // "widgets"
+            getElementName(YamlSitemapDTO.class) // "sitemaps"
     );
 
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
     private static final String UNWANTED_EXCEPTION_TEXT2 = "\\n \\(through reference chain: .*";
 
-    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "rules", "yaml").map(Path::of)
-            .toList();
+    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "sitemaps", "rules", "yaml")
+            .map(Path::of).toList();
 
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
@@ -238,9 +246,17 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return false;
         }
         if (kind == Kind.CREATE) {
-            logger.info("Adding YAML model {}", modelName);
+            if (isIsolatedModel(modelName)) {
+                logger.debug("Adding YAML model {}", modelName);
+            } else {
+                logger.info("Adding YAML model {}", modelName);
+            }
         } else {
-            logger.info("Updating YAML model {}", modelName);
+            if (isIsolatedModel(modelName)) {
+                logger.debug("Updating YAML model {}", modelName);
+            } else {
+                logger.info("Updating YAML model {}", modelName);
+            }
         }
         JsonNode readOnlyNode = fileContent.get(READ_ONLY);
         boolean readOnly = readOnlyNode == null || readOnlyNode.asBoolean(false);
@@ -346,7 +362,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         if (removedModel == null) {
             return;
         }
-        logger.info("Removing YAML model {}", modelName);
+        if (isIsolatedModel(modelName)) {
+            logger.debug("Removing YAML model {}", modelName);
+        } else {
+            logger.info("Removing YAML model {}", modelName);
+        }
         int version = removedModel.getVersion();
         for (Map.Entry<String, @Nullable JsonNode> modelEntry : removedModel.getNodes().entrySet()) {
             String elementName = modelEntry.getKey();

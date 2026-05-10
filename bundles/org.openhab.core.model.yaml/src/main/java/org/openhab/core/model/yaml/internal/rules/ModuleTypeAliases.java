@@ -21,6 +21,28 @@ import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.internal.module.handler.ChannelEventTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.DateTimeTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
+import org.openhab.core.automation.internal.module.handler.EphemerisConditionHandler;
+import org.openhab.core.automation.internal.module.handler.GenericCronTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GroupCommandTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GroupStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.IntervalConditionHandler;
+import org.openhab.core.automation.internal.module.handler.ItemCommandActionHandler;
+import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ItemStateConditionHandler;
+import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ItemStateUpdateActionHandler;
+import org.openhab.core.automation.internal.module.handler.RuleEnablementActionHandler;
+import org.openhab.core.automation.internal.module.handler.RunRuleActionHandler;
+import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.ThingStatusConditionHandler;
+import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayConditionHandler;
+import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
+import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
+import org.openhab.core.automation.module.script.internal.handler.ScriptConditionHandler;
 
 /**
  * This class provides translations to and from aliases for {@link Module} typeUIDs.
@@ -39,36 +61,37 @@ public class ModuleTypeAliases {
          * Action (A), Condition (C) or Trigger (T).
          */
         String[][] table = { //
-                { "A", "EnableRule", "core.RuleEnablementAction" }, //
-                { "A", "SendCommand", "core.ItemCommandAction" }, //
-                { "A", "PostUpdate", "core.ItemStateUpdateAction" }, //
+                { "A", "EnableRule", RuleEnablementActionHandler.UID }, //
+                { "A", "SendCommand", ItemCommandActionHandler.ITEM_COMMAND_ACTION }, //
+                { "A", "PostUpdate", ItemStateUpdateActionHandler.ITEM_STATE_UPDATE_ACTION }, //
                 { "A", "Play", "media.PlayAction" }, //
-                { "A", "RunRule", "core.RunRuleAction" }, //
+                { "A", "RunRule", RunRuleActionHandler.UID }, //
                 { "A", "Say", "media.SayAction" }, //
-                { "A", "Script", "script.ScriptAction" }, //
-                { "C", "DayOfWeek", "timer.DayOfWeekCondition" }, //
-                { "C", "Dayset", "ephemeris.DaysetCondition" }, //
-                { "C", "Holiday", "ephemeris.HolidayCondition" }, //
-                { "C", "Interval", "timer.IntervalCondition" }, //
-                { "C", "ItemState", "core.ItemStateCondition" }, //
-                { "C", "NotHoliday", "ephemeris.NotHolidayCondition" }, //
-                { "C", "Script", "script.ScriptCondition" }, //
-                { "C", "TimeOfDay", "core.TimeOfDayCondition" }, //
-                { "C", "Weekday", "ephemeris.WeekdayCondition" }, //
-                { "C", "Weekend", "ephemeris.WeekendCondition" }, //
-                { "T", "ChannelEvent", "core.ChannelEventTrigger" }, //
-                { "T", "Cron", "timer.GenericCronTrigger" }, //
-                { "T", "DateTime", "timer.DateTimeTrigger" }, //
-                { "T", "MemberReceivedCommand", "core.GroupCommandTrigger" }, //
-                { "T", "MemberChanged", "core.GroupStateChangeTrigger" }, //
-                { "T", "MemberUpdated", "core.GroupStateUpdateTrigger" }, //
-                { "T", "ItemReceivedCommand", "core.ItemCommandTrigger" }, //
-                { "T", "ItemChanged", "core.ItemStateChangeTrigger" }, //
-                { "T", "ItemUpdated", "core.ItemStateUpdateTrigger" }, //
-                { "T", "StartLevel", "core.SystemStartlevelTrigger" }, //
-                { "T", "ThingChanged", "core.ThingStatusChangeTrigger" }, //
-                { "T", "ThingUpdated", "core.ThingStatusUpdateTrigger" }, //
-                { "T", "TimeOfDay", "timer.TimeOfDayTrigger" } //
+                { "A", "Script", ScriptActionHandler.TYPE_ID }, //
+                { "C", "DayOfWeek", DayOfWeekConditionHandler.MODULE_TYPE_ID }, //
+                { "C", "Dayset", EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID }, //
+                { "C", "Holiday", EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID }, //
+                { "C", "Interval", IntervalConditionHandler.MODULE_TYPE_ID }, //
+                { "C", "ItemState", ItemStateConditionHandler.ITEM_STATE_CONDITION }, //
+                { "C", "NotHoliday", EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID }, //
+                { "C", "Script", ScriptConditionHandler.TYPE_ID }, //
+                { "C", "ThingStatus", ThingStatusConditionHandler.THING_STATUS_CONDITION }, //
+                { "C", "TimeOfDay", TimeOfDayConditionHandler.MODULE_TYPE_ID }, //
+                { "C", "Weekday", EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID }, //
+                { "C", "Weekend", EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID }, //
+                { "T", "ChannelEvent", ChannelEventTriggerHandler.MODULE_TYPE_ID }, //
+                { "T", "Cron", GenericCronTriggerHandler.MODULE_TYPE_ID }, //
+                { "T", "DateTime", DateTimeTriggerHandler.MODULE_TYPE_ID }, //
+                { "T", "MemberReceivedCommand", GroupCommandTriggerHandler.MODULE_TYPE_ID }, //
+                { "T", "MemberChanged", GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID }, //
+                { "T", "MemberUpdated", GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID }, //
+                { "T", "ItemReceivedCommand", ItemCommandTriggerHandler.MODULE_TYPE_ID }, //
+                { "T", "ItemChanged", ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID }, //
+                { "T", "ItemUpdated", ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID }, //
+                { "T", "StartLevel", SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID }, //
+                { "T", "ThingChanged", ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID }, //
+                { "T", "ThingUpdated", ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID }, //
+                { "T", "TimeOfDay", TimeOfDayTriggerHandler.MODULE_TYPE_ID } //
         };
 
         Map<Class<? extends Module>, Map<String, String>> aliasIdx = new HashMap<>();
@@ -128,12 +151,22 @@ public class ModuleTypeAliases {
     /**
      * Translates a {@link Module} {@code typeUID} to an alias if such a mapping exists, otherwise returns the argument.
      *
-     * @param clazz the {@link Module} subclass for which to translate aliases.
+     * @param clazz the {@link Module} subinterface or implementation for which to translate aliases.
      * @param type {@code typeUID} to potentially translate to an alias.
      * @return The corresponding alias or the unmodified argument if no matching mapping was found.
      */
     public static String typeToAlias(Class<? extends Module> clazz, String type) {
-        Map<String, String> map = TYPE_IDX.get(clazz);
+        Class<? extends Module> iface;
+        if (Trigger.class.isAssignableFrom(clazz)) {
+            iface = Trigger.class;
+        } else if (Condition.class.isAssignableFrom(clazz)) {
+            iface = Condition.class;
+        } else if (Action.class.isAssignableFrom(clazz)) {
+            iface = Action.class;
+        } else {
+            return type;
+        }
+        Map<String, String> map = TYPE_IDX.get(iface);
         return map != null ? map.getOrDefault(type, type) : type;
     }
 }

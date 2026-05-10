@@ -23,7 +23,6 @@ import org.openhab.core.sitemap.Parent;
 public class GroupImpl extends LinkableWidgetImpl implements Group {
 
     public GroupImpl() {
-        super();
     }
 
     public GroupImpl(Parent parent) {

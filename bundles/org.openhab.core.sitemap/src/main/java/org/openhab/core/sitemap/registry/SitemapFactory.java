@@ -14,7 +14,6 @@ package org.openhab.core.sitemap.registry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Condition;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Parent;
@@ -57,13 +56,6 @@ public interface SitemapFactory {
      */
     @Nullable
     Widget createWidget(String widgetTypeName, Parent parent);
-
-    /**
-     * Creates a {@link ButtonDefinition} instance
-     *
-     * @return a new ButtonDefinition.
-     */
-    ButtonDefinition createButtonDefinition();
 
     /**
      * Creates a {@link Mapping} instance

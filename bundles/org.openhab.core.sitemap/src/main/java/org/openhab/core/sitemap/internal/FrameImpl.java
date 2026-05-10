@@ -23,7 +23,6 @@ import org.openhab.core.sitemap.Parent;
 public class FrameImpl extends LinkableWidgetImpl implements Frame {
 
     public FrameImpl() {
-        super();
     }
 
     public FrameImpl(Parent parent) {

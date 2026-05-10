@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.core.fileformat;
 
 import java.util.List;
 
+import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
 import org.openhab.core.thing.dto.ThingDTO;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * in a file format (items, things, ...).
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add sitemaps
  */
 @Schema(name = "FileFormat")
 public class FileFormatDTO {
@@ -31,4 +33,6 @@ public class FileFormatDTO {
     public List<FileFormatItemDTO> items;
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public List<ThingDTO> things;
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    public List<SitemapDefinitionDTO> sitemaps;
 }

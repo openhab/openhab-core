@@ -12,12 +12,13 @@
  */
 package org.openhab.core.model.yaml.internal.rules;
 
+import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -65,7 +66,13 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
 
     @Override
     public Collection<Rule> getAll() {
-        return rulesMap.values().stream().flatMap(list -> list.stream()).toList();
+        // Ignore isolated models
+        return rulesMap.entrySet().stream().filter(entry -> !isIsolatedModel(entry.getKey()))
+                .flatMap(entry -> entry.getValue().stream()).toList();
+    }
+
+    public Collection<Rule> getAllFromModel(String modelName) {
+        return rulesMap.getOrDefault(modelName, List.of());
     }
 
     @Override
@@ -85,18 +92,22 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
 
     @Override
     public void addedModel(String modelName, Collection<YamlRuleDTO> elements) {
+        boolean isolated = isIsolatedModel(modelName);
         List<Rule> added = elements.stream().map(this::mapRule).filter(Objects::nonNull).toList();
         Collection<Rule> modelRules = Objects
                 .requireNonNull(rulesMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
         modelRules.addAll(added);
         added.forEach(r -> {
-            logger.debug("model {} added rule {}", modelName, r.getUID());
-            notifyListenersAboutAddedElement(r);
+            logger.debug("{}model {} added rule {}", isolated ? "isolated " : "", modelName, r.getUID());
+            if (!isolated) {
+                notifyListenersAboutAddedElement(r);
+            }
         });
     }
 
     @Override
     public void updatedModel(String modelName, Collection<YamlRuleDTO> elements) {
+        boolean isolated = isIsolatedModel(modelName);
         List<Rule> updated = elements.stream().map(this::mapRule).filter(Objects::nonNull).toList();
         Collection<Rule> modelRules = Objects
                 .requireNonNull(rulesMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
@@ -105,25 +116,32 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
                     .ifPresentOrElse(oldRule -> {
                         modelRules.remove(oldRule);
                         modelRules.add(r);
-                        logger.debug("model {} updated rule {}", modelName, r.getUID());
-                        notifyListenersAboutUpdatedElement(oldRule, r);
+                        logger.debug("{}model {} updated rule {}", isolated ? "isolated " : "", modelName, r.getUID());
+                        if (!isolated) {
+                            notifyListenersAboutUpdatedElement(oldRule, r);
+                        }
                     }, () -> {
                         modelRules.add(r);
-                        logger.debug("model {} added rule {}", modelName, r.getUID());
-                        notifyListenersAboutAddedElement(r);
+                        logger.debug("{}model {} added rule {}", isolated ? "isolated " : "", modelName, r.getUID());
+                        if (!isolated) {
+                            notifyListenersAboutAddedElement(r);
+                        }
                     });
         });
     }
 
     @Override
     public void removedModel(String modelName, Collection<YamlRuleDTO> elements) {
+        boolean isolated = isIsolatedModel(modelName);
         Collection<Rule> modelRules = rulesMap.getOrDefault(modelName, List.of());
         elements.stream().map(element -> element.uid).forEach(uid -> {
             modelRules.stream().filter(rule -> rule.getUID().equals(uid)).findFirst().ifPresentOrElse(oldRule -> {
                 modelRules.remove(oldRule);
-                logger.debug("model {} removed rule {}", modelName, uid);
-                notifyListenersAboutRemovedElement(oldRule);
-            }, () -> logger.debug("model {} rule {} not found", modelName, uid));
+                logger.debug("{}model {} removed rule {}", isolated ? "isolated " : "", modelName, uid);
+                if (!isolated) {
+                    notifyListenersAboutRemovedElement(oldRule);
+                }
+            }, () -> logger.debug("{}model {} rule {} not found", isolated ? "isolated " : "", modelName, uid));
         });
         if (modelRules.isEmpty()) {
             rulesMap.remove(modelName);
@@ -131,30 +149,11 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
     }
 
     private @Nullable Rule mapRule(YamlRuleDTO ruleDto) {
-        String s;
-        RuleBuilder ruleBuilder = RuleBuilder.create(ruleDto.uid);
-        if ((s = ruleDto.label) != null) {
-            ruleBuilder.withName(s);
-        }
-        if ((s = ruleDto.template) != null) {
-            ruleBuilder.withTemplateUID(s);
-        }
+        RuleBuilder ruleBuilder = RuleBuilder.create(ruleDto.uid).withName(ruleDto.label)
+                .withDescription(ruleDto.description).withTags(ruleDto.tags).withVisibility(ruleDto.visibility)
+                .withTemplateUID(ruleDto.template).withConfiguration(new Configuration(ruleDto.config));
         if (ruleDto.templateState != null) {
             ruleBuilder.withTemplateState(ruleDto.templateState);
-        }
-        Set<String> tags = ruleDto.tags;
-        if (tags != null) {
-            ruleBuilder.withTags(tags);
-        }
-        if ((s = ruleDto.description) != null) {
-            ruleBuilder.withDescription(s);
-        }
-        if (ruleDto.visibility != null) {
-            ruleBuilder.withVisibility(ruleDto.visibility);
-        }
-        Map<String, Object> configuration = ruleDto.config;
-        if (configuration != null) {
-            ruleBuilder.withConfiguration(new Configuration(configuration));
         }
         Map<String, YamlConfigDescriptionParameterDTO> configDescriptionDtos = ruleDto.configDescriptions;
         if (configDescriptionDtos != null) {

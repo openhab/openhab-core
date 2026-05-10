@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -30,7 +31,6 @@ import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.sitemap.Button;
-import org.openhab.core.sitemap.ButtonDefinition;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colortemperaturepicker;
@@ -54,6 +54,7 @@ import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapProvider;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
+import org.openhab.core.ui.components.ManagedSitemapProvider;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
@@ -79,19 +80,20 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Add support for Button element
  * @author Laurent Garnier - Added support for new sitemap element Colortemperaturepicker
  * @author Mark Herwege - Implement sitemap registry
+ * @author Mark Herwege - Make provider managed and add support for adding/updating/removing sitemaps via the provider
+ *         interface
  */
 @NonNullByDefault
-@Component(service = SitemapProvider.class, immediate = true)
+@Component(service = { SitemapProvider.class, ManagedSitemapProvider.class }, immediate = true)
 public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
-        implements SitemapProvider, RegistryChangeListener<RootUIComponent> {
+        implements ManagedSitemapProvider, SitemapProvider, RegistryChangeListener<RootUIComponent> {
+
     private final Logger logger = LoggerFactory.getLogger(UIComponentSitemapProvider.class);
 
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
-    private static final String SITEMAP_PREFIX = "uicomponents_";
-
     private static final Pattern CONDITION_PATTERN = Pattern
-            .compile("((?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>))?\\s*(?<value>(\\+|-)?.+)");
+            .compile("(?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>(\\+|-)?.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
@@ -129,7 +131,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             throw new IllegalArgumentException("Root component type is not Sitemap");
         }
 
-        Sitemap sitemap = sitemapFactory.createSitemap(SITEMAP_PREFIX + rootComponent.getUID());
+        Sitemap sitemap = sitemapFactory.createSitemap(rootComponent.getUID());
         Object label = rootComponent.getConfig().get("label");
         if (label != null) {
             sitemap.setLabel(label.toString());
@@ -156,6 +158,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             return null;
         }
 
+        boolean deprecatedButtonsDefinition = false;
         switch (widget) {
             case Image imageWidget:
                 setWidgetPropertyFromComponentConfig(imageWidget, component, "url");
@@ -207,7 +210,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 setWidgetPropertyFromComponentConfig(colortemperaturepickerWidget, component, "maxValue");
                 break;
             case Buttongrid buttongridWidget:
-                addWidgetButtons(buttongridWidget.getButtons(), component);
+                deprecatedButtonsDefinition = addWidgetButtons(buttongridWidget, component);
                 break;
             case Button buttonWidget:
                 setWidgetPropertyFromComponentConfig(buttonWidget, component, "row");
@@ -223,7 +226,10 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 break;
         }
 
-        setWidgetPropertyFromComponentConfig(widget, component, "item");
+        // In case deprecated button definition was encountered, the item is not set on the Buttongrid widget
+        if (!deprecatedButtonsDefinition) {
+            setWidgetPropertyFromComponentConfig(widget, component, "item");
+        }
         setWidgetPropertyFromComponentConfig(widget, component, "label");
         setWidgetPropertyFromComponentConfig(widget, component, "icon");
         setWidgetPropertyFromComponentConfig(widget, component, "staticIcon");
@@ -321,8 +327,15 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         }
     }
 
-    private void addWidgetButtons(List<ButtonDefinition> buttons, UIComponent component) {
+    private boolean addWidgetButtons(Buttongrid buttongridWidget, UIComponent component) {
+        boolean deprecated = false;
         if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
+            // Defining buttons through "buttons" component config is now deprecated.
+            // The relevant way to define buttons in a Buttongrid is now to use Button widget as sub-widgets.
+            // This old way to do is still supported for backward compatibility, sub-widgets are created.
+            deprecated = true;
+            logger.warn(
+                    "Defining buttons as properties of a Butongrid widget is deprecated although still supported; please prefer Button sub-widgets");
             Object sourceButtons = component.getConfig().get("buttons");
             if (sourceButtons instanceof Collection<?> sourceButtonsCollection) {
                 for (Object sourceButton : sourceButtonsCollection) {
@@ -334,7 +347,12 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                         String cmd = stripQuotes(splitted2[0].trim());
                         String label = stripQuotes(splitted2[1].trim());
                         String icon = splitted2.length < 3 ? null : stripQuotes(splitted2[2].trim());
-                        ButtonDefinition button = sitemapFactory.createButtonDefinition();
+                        Button button = (Button) Objects.requireNonNull(sitemapFactory.createWidget(
+                                org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.BUTTON,
+                                buttongridWidget));
+                        if (component.getConfig().get("item") instanceof String item) {
+                            button.setItem(item);
+                        }
                         button.setRow(row);
                         button.setColumn(column);
                         if (cmd != null) {
@@ -344,11 +362,12 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                             button.setLabel(label);
                         }
                         button.setIcon(icon);
-                        buttons.add(button);
+                        buttongridWidget.getWidgets().add(button);
                     }
                 }
             }
         }
+        return deprecated;
     }
 
     private void addWidgetRules(List<Rule> rules, UIComponent component, String key) {
@@ -402,7 +421,10 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         String conditions = rule;
         if (argument != null) {
             conditions = rule.substring(0, rule.lastIndexOf(argument)).trim();
-            if (conditions.endsWith("=")) {
+            if (conditions.endsWith("=\"")) {
+                // If the argument was surrounded by quotes, we need to remove the quote and the preceding =
+                conditions = conditions.substring(0, conditions.length() - 2);
+            } else if (conditions.endsWith("=")) {
                 conditions = conditions.substring(0, conditions.length() - 1);
             }
         }
@@ -438,7 +460,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     @Override
     public void added(RootUIComponent element) {
         if ("Sitemap".equals(element.getType())) {
-            String sitemapName = SITEMAP_PREFIX + element.getUID();
+            String sitemapName = element.getUID();
             if (sitemaps.get(sitemapName) == null) {
                 Sitemap sitemap = buildSitemap(element);
                 sitemaps.put(sitemapName, sitemap);
@@ -450,7 +472,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     @Override
     public void removed(RootUIComponent element) {
         if ("Sitemap".equals(element.getType())) {
-            String sitemapName = SITEMAP_PREFIX + element.getUID();
+            String sitemapName = element.getUID();
             Sitemap sitemap = sitemaps.remove(sitemapName);
             if (sitemap != null) {
                 notifyListenersAboutRemovedElement(sitemap);
@@ -461,8 +483,8 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     @Override
     public void updated(RootUIComponent oldElement, RootUIComponent element) {
         if ("Sitemap".equals(oldElement.getType()) && "Sitemap".equals(element.getType())) {
-            String oldSitemapName = SITEMAP_PREFIX + oldElement.getUID();
-            String sitemapName = SITEMAP_PREFIX + element.getUID();
+            String oldSitemapName = oldElement.getUID();
+            String sitemapName = element.getUID();
             Sitemap oldSitemap = sitemaps.get(oldSitemapName);
             Sitemap sitemap = buildSitemap(element);
             if (!oldSitemapName.equals(sitemapName)) {
@@ -475,5 +497,36 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 notifyListenersAboutAddedElement(sitemap);
             }
         }
+    }
+
+    @Override
+    public void add(Sitemap element) {
+        UIComponentRegistry sitemapComponentRegistry = this.sitemapComponentRegistry;
+        if (sitemapComponentRegistry != null) {
+            sitemapComponentRegistry.add(UIComponentSitemapMapper.map(element));
+        }
+    }
+
+    @Override
+    public @Nullable Sitemap remove(String key) {
+        Sitemap sitemap = sitemaps.get(key);
+        UIComponentRegistry sitemapComponentRegistry = this.sitemapComponentRegistry;
+        if (sitemapComponentRegistry != null) {
+            sitemapComponentRegistry.remove(key);
+            return sitemap;
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable Sitemap update(Sitemap element) {
+        Sitemap sitemap = remove(element.getName());
+        add(element);
+        return sitemap;
+    }
+
+    @Override
+    public @Nullable Sitemap get(String key) {
+        return getSitemap(key);
     }
 }

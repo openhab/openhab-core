@@ -17,11 +17,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -31,7 +31,7 @@ import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.Rule.TemplateState;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
-import org.openhab.core.common.AbstractUID;
+import org.openhab.core.automation.util.RuleUtil;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.io.dto.ModularDTO;
 import org.openhab.core.io.dto.SerializationException;
@@ -52,8 +52,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 @YamlElementName("rules")
 public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNode>, YamlElement, Cloneable {
-
-    protected static final Pattern UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
     public String uid;
     public String template;
@@ -270,14 +268,13 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
             return false;
         }
         boolean ok = true;
-        // Check that uid only contains valid characters
-        String[] segments = uid.split(AbstractUID.SEPARATOR);
-        for (String segment : segments) {
-            if (!UID_SEGMENT_PATTERN.matcher(segment).matches()) {
-                addToList(errors, "invalid rule \"%s\": segment \"%s\" in the uid doesn't match the expected syntax %s"
-                        .formatted(uid, segment, UID_SEGMENT_PATTERN.pattern()));
-                ok = false;
-            }
+
+        // Validate the UID
+        if (!RuleUtil.isValidRuleUID(uid)) {
+            addToList(errors, String.format(Locale.ROOT,
+                    "invalid rule \"%s\": UID is invalid. A rule UID can't contain '/', '\\' or have leading or trailing whitespace.",
+                    uid));
+            ok = false;
         }
 
         // Check that name is present

@@ -26,7 +26,6 @@ public class InputImpl extends NonLinkableWidgetImpl implements Input {
     private @Nullable String inputHint;
 
     public InputImpl() {
-        super();
     }
 
     public InputImpl(Parent parent) {

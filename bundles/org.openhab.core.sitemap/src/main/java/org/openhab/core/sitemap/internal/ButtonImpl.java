@@ -30,7 +30,6 @@ public class ButtonImpl extends NonLinkableWidgetImpl implements Button {
     private @Nullable String releaseCmd;
 
     public ButtonImpl() {
-        super();
     }
 
     public ButtonImpl(Parent parent) {

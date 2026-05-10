@@ -4,11 +4,11 @@ import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 generate sitemap "https://openhab.org/model/Sitemap"
 
 SitemapModel:
-    'sitemap' ModelSitemap;
+    {SitemapModel} (sitemaps += ModelSitemap)*;
 
 ModelSitemap:
-    name=ID ('label=' label=STRING)? ('icon=' icon=STRING)? '{'
-    (children+=ModelWidget)+
+    'sitemap' name=ID ('label=' label=STRING)? ('icon=' icon=STRING)? '{'
+    (children+=ModelWidget)*
     '}';
 
 ModelWidget:
@@ -168,10 +168,10 @@ ModelButtongrid:
     ('visibility=' visibility=ModelVisibilityRuleList))*;
 
 ModelButton:
-    'Button' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
+    'Button' (('row=' row=INT) | ('column=' column=INT) |
+    ('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
     ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
-    ('row=' row=INT) | ('column=' column=INT) | (stateless?='stateless') |
-    ('click=' cmd=Command) | ('release=' releaseCmd=Command) |
+    (stateless?='stateless') | ('click=' cmd=Command) | ('release=' releaseCmd=Command) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |

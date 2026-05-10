@@ -36,7 +36,7 @@ public interface Chart extends NonLinkableWidget {
      *
      * @param service
      */
-    void setService(String service);
+    void setService(@Nullable String service);
 
     /**
      * Get the chart refresh interval in s. If no interval is set, 0 should be returned.
