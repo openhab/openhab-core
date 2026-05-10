@@ -983,7 +983,7 @@
     <dependency>
       <groupId>de.focus-shift</groupId>
       <artifactId>jollyday-jackson</artifactId>
-      <version>1.8.1</version>
+      <version>1.9.3</version>
       <scope>compile</scope>
     </dependency>
 

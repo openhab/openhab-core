@@ -76,8 +76,8 @@ Fragment-Host: org.openhab.core.automation
 	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.3,2.3.4)',\
 	org.openhab.core.semantics;version='[5.2.0,5.2.1)',\
-	de.focus_shift.jollyday-core;version='[1.8.1,1.8.2)',\
-	de.focus_shift.jollyday-jackson;version='[1.8.1,1.8.2)',\
+	de.focus_shift.jollyday-core;version='[1.9.3,1.9.4)',\
+	de.focus_shift.jollyday-jackson;version='[1.9.3,1.9.4)',\
 	com.fasterxml.jackson.core.jackson-annotations;version='[2.21.0,2.21.1)',\
 	com.fasterxml.jackson.core.jackson-core;version='[2.21.2,2.21.3)',\
 	com.fasterxml.jackson.core.jackson-databind;version='[2.21.2,2.21.3)',\
