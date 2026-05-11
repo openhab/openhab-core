@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.io.monitor.internal.metrics;
+
+import static org.mockito.Mockito.mock;
+import static org.openhab.core.io.monitor.internal.metrics.RuleMetric.*;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.openhab.core.automation.RuleRegistry;
+import org.openhab.core.automation.RuleStatus;
+import org.openhab.core.automation.RuleStatusInfo;
+import org.openhab.core.automation.events.RuleStatusInfoEvent;
+import org.osgi.framework.BundleContext;
+
+import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.MockClock;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleConfig;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
+/**
+ * Tests for RuleMetric class
+ *
+ * @author Robert Delbrück - Initial contribution
+ */
+@ExtendWith(MockitoExtension.class)
+class RuleMetricTest {
+
+    public static final String RULE1 = "any";
+    public static final String RULE2 = "anything-else";
+
+    @Test
+    void testRuleExecution() {
+        MockClock clock = new MockClock();
+        SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry(SimpleConfig.DEFAULT, clock);
+
+        RuleMetric ruleMetric = new RuleMetric(mock(BundleContext.class), List.of(), mock(RuleRegistry.class));
+        ruleMetric.bindTo(meterRegistry);
+        fireRule(ruleMetric, clock, RULE1);
+        assertMeters(meterRegistry, 1);
+        assertMeter(meterRegistry, RULE1, 1, 1);
+
+        fireRule(ruleMetric, clock, RULE2);
+        assertMeters(meterRegistry, 2);
+        assertMeter(meterRegistry, RULE2, 1, 1);
+
+        // fire again, use the same metric
+        fireRule(ruleMetric, clock, RULE2);
+        assertMeters(meterRegistry, 2);
+        assertMeter(meterRegistry, RULE2, 2, 2);
+    }
+
+    private static void fireRule(RuleMetric ruleMetric, MockClock clock, String ruleName) {
+        ruleMetric.receive(new RuleStatusInfoEvent(RULES_TOPIC_PREFIX + ruleName + RULES_TOPIC_SUFFIX,
+                RuleStatus.RUNNING.name(), ruleName, mock(RuleStatusInfo.class), ruleName));
+        clock.add(Duration.ofSeconds(1));
+        ruleMetric.receive(new RuleStatusInfoEvent(RULES_TOPIC_PREFIX + ruleName + RULES_TOPIC_SUFFIX,
+                RuleStatus.IDLE.name(), ruleName, mock(RuleStatusInfo.class), ruleName));
+    }
+
+    private static void assertMeter(SimpleMeterRegistry meterRegistry, String ruleName, int count, int totalTime) {
+        var meter = getMeters(meterRegistry).stream().filter(m -> ruleName.equals(m.getId().getTag("rule")))
+                .map(m -> (Timer) m).findFirst().orElseThrow();
+        Assertions.assertEquals(count, meter.count());
+        Assertions.assertTrue(meter.totalTime(TimeUnit.SECONDS) >= totalTime);
+    }
+
+    private static void assertMeters(SimpleMeterRegistry meterRegistry, int size) {
+        List<Meter> durationMeters = getMeters(meterRegistry);
+        Assertions.assertEquals(size, durationMeters.size());
+    }
+
+    private static @NonNullByDefault List<Meter> getMeters(SimpleMeterRegistry meterRegistry) {
+        List<Meter> meters = meterRegistry.getMeters();
+        return meters.stream().filter(m -> m.getId().getName().equals(METRIC_DURATION_NAME)).toList();
+    }
+}
