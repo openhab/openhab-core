@@ -92,8 +92,8 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
 
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
-    private static final Pattern CONDITION_PATTERN = Pattern
-            .compile("(?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>(\\+|-)?.+)");
+    private static final Pattern CONDITION_PATTERN = Pattern.compile(
+            "(?:(?<item>[a-zA-Z_][a-zA-Z0-9_]*)(?=(?:\\s+|==|!=|<=|>=|<|>)\\S))?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>\\\"[^\\\"]*\\\"|(\\+|-)?.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
@@ -246,10 +246,10 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         }
 
         addWidgetRules(widget.getVisibility(), component, "visibility");
-        addWidgetRules(widget.getLabelColor(), component, "labelColor");
-        addWidgetRules(widget.getValueColor(), component, "valueColor");
-        addWidgetRules(widget.getIconColor(), component, "iconColor");
-        addWidgetRules(widget.getIconRules(), component, "iconRules");
+        addWidgetRules(widget.getLabelColor(), component, "labelcolor");
+        addWidgetRules(widget.getValueColor(), component, "valuecolor");
+        addWidgetRules(widget.getIconColor(), component, "iconcolor");
+        addWidgetRules(widget.getIconRules(), component, "iconrules");
 
         return widget;
     }
@@ -389,7 +389,23 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         }
     }
 
-    private List<Condition> getConditions(List<String> conditionsString, UIComponent component, String key) {
+    /**
+     * Get conditions from a list of condition strings. Each condition string may use an optional item name, an optional
+     * comparison operator, and a value. The operator may be written either with surrounding whitespace (for example,
+     * "Temperature > 25") or without whitespace (for example, "Temperature>25" or "item==\"value\""). Values may be
+     * quoted or unquoted, and item and operator may be omitted entirely for simple values such as "ON". The supported
+     * comparison operators are ==, !=, <, >, <=, >=. If a condition string does not match one of the accepted forms,
+     * it is ignored and a warning is logged.
+     * This method is package-private for testing purposes, to allow testing the parsing of conditions without having to
+     * mock the whole widget building process.
+     *
+     * @param conditionsString
+     * @param component
+     * @param key
+     * @return the list of conditions parsed from the given list of condition strings. If a condition string has a
+     *         syntax error, it is ignored and a warning is logged.
+     */
+    List<Condition> getConditions(List<String> conditionsString, UIComponent component, String key) {
         List<Condition> conditions = new ArrayList<>();
         for (String conditionString : conditionsString) {
             Matcher matcher = CONDITION_PATTERN.matcher(conditionString);
