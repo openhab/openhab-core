@@ -78,6 +78,16 @@ class UIComponentSitemapProviderTest {
     }
 
     @Test
+    void testItemConditionValueNoSpaces() {
+        Condition condition = mockCondition();
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item>=42"), component, "key");
+        assertEquals(1, result.size());
+        verify(condition).setItem("item");
+        verify(condition).setCondition(">=");
+        verify(condition).setValue("42");
+    }
+
+    @Test
     void testConditionAndValueOnly() {
         Condition condition = mockCondition();
         List<Condition> result = uiComponentSitemapProvider.getConditions(List.of(">= 42"), component, "key");
@@ -103,6 +113,17 @@ class UIComponentSitemapProviderTest {
         Condition condition = mockCondition();
         List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item == \"value string\""),
                 component, "key");
+        assertEquals(1, result.size());
+        verify(condition).setItem("item");
+        verify(condition).setCondition("==");
+        verify(condition).setValue("value string");
+    }
+
+    @Test
+    void testItemConditionQuotedValueNoSpaces() {
+        Condition condition = mockCondition();
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item==\"value string\""), component,
+                "key");
         assertEquals(1, result.size());
         verify(condition).setItem("item");
         verify(condition).setCondition("==");

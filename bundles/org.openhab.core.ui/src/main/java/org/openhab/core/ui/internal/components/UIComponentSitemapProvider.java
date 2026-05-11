@@ -93,7 +93,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
     private static final Pattern CONDITION_PATTERN = Pattern.compile(
-            "(?:(?<item>[A-Za-z]\\w*)(?=\\s+\\S))?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>\\\"[^\\\"]*\\\"|(\\+|-)?.+)");
+            "(?:(?<item>[A-Za-z]\\w+)(?=(?:\\s+|==|!=|<=|>=|<|>)\\S))?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>\\\"[^\\\"]*\\\"|(\\+|-)?.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
