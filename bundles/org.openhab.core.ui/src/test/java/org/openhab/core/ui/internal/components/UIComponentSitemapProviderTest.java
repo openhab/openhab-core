@@ -153,6 +153,26 @@ class UIComponentSitemapProviderTest {
     }
 
     @Test
+    void testUnderscorePrefixedItemConditionValueNoSpaces() {
+        Condition condition = mockCondition();
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("_temp>=42"), component, "key");
+        assertEquals(1, result.size());
+        verify(condition).setItem("_temp");
+        verify(condition).setCondition(">=");
+        verify(condition).setValue("42");
+    }
+
+    @Test
+    void testSingleCharacterItemConditionQuotedValueNoSpaces() {
+        Condition condition = mockCondition();
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("T==\"ON\""), component, "key");
+        assertEquals(1, result.size());
+        verify(condition).setItem("T");
+        verify(condition).setCondition("==");
+        verify(condition).setValue("ON");
+    }
+
+    @Test
     void testInvalidInput() {
         List<Condition> result = uiComponentSitemapProvider.getConditions(List.of(""), component, "key");
         assertEquals(0, result.size());

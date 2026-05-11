@@ -93,7 +93,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
     private static final Pattern CONDITION_PATTERN = Pattern.compile(
-            "(?:(?<item>[A-Za-z]\\w+)(?=(?:\\s+|==|!=|<=|>=|<|>)\\S))?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>\\\"[^\\\"]*\\\"|(\\+|-)?.+)");
+            "(?:(?<item>[a-zA-Z_][a-zA-Z0-9_]*)(?=(?:\\s+|==|!=|<=|>=|<|>)\\S))?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>\\\"[^\\\"]*\\\"|(\\+|-)?.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
@@ -390,10 +390,12 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     /**
-     * Get conditions from a list of condition strings. Each condition string is expected to have the format "[item]
-     * [condition] value", where item and condition are optional. For example, "Temperature > 25" or "ON". The supported
-     * conditions are ==, !=, <, >, <=, >=. If the condition string does not match this format, it is ignored and a
-     * warning is logged.
+     * Get conditions from a list of condition strings. Each condition string may use an optional item name, an optional
+     * comparison operator, and a value. The operator may be written either with surrounding whitespace (for example,
+     * "Temperature > 25") or without whitespace (for example, "Temperature>25" or "item==\"value\""). Values may be
+     * quoted or unquoted, and item and operator may be omitted entirely for simple values such as "ON". The supported
+     * comparison operators are ==, !=, <, >, <=, >=. If a condition string does not match one of the accepted forms,
+     * it is ignored and a warning is logged.
      * This method is package private for testing purposes, to allow testing the parsing of conditions without having to
      * mock the whole widget building process.
      *
