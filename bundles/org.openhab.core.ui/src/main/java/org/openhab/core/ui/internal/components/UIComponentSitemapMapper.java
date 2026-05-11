@@ -212,6 +212,8 @@ public class UIComponentSitemapMapper {
         String operator = condition.getCondition();
         if (operator != null) {
             builder.append(operator);
+        } else if (item != null) {
+            builder.append(" ");
         }
         builder.append("\"").append(condition.getValue()).append("\"");
         return builder.toString();
