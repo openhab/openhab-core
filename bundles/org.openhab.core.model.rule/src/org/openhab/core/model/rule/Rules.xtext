@@ -217,7 +217,7 @@ SIGNED_INT:
 
 @Override
 ValidID:
-	ID | 'rule' | 'uid' | 'when' | 'or' | 'but' | 'only' | 'and' | 'then' | 'end' |
+	ID | 'rule' | 'uid' | 'when' | 'or' | 'but' | 'only' | 'and' | 'then' |
 	'changed' | 'triggered' | 'from' | 'to' | 'started' |
 	'cron' | 'is' | 'midnight' | 'noon' | 'timeOnly' | 'offset' | 'between' | 'in' |
 	'weekday' | 'weekend' | 'holiday' | 'not' | 'ms' | 'executions'
