@@ -18,14 +18,6 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -40,11 +32,11 @@ import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.osgi.service.jakartars.whiteboard.JakartarsWhiteboardConstants;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationSelect;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,6 +45,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * This class acts as a REST resource for audio features.
@@ -62,9 +62,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
-@JaxrsResource
-@JaxrsName(AudioResource.PATH_AUDIO)
-@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JakartarsResource
+@JakartarsName(AudioResource.PATH_AUDIO)
+@JakartarsApplicationSelect("(" + JakartarsWhiteboardConstants.JAKARTA_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(AudioResource.PATH_AUDIO)
 @RolesAllowed({ Role.USER, Role.ADMIN })

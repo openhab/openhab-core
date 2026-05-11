@@ -20,17 +20,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.websocket.api.WebSocketPolicy;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketCreator;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +40,8 @@ import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.io.rest.auth.AnonymousUserSecurityContext;
 import org.openhab.core.io.rest.auth.AuthFilter;
 import org.openhab.core.io.websocket.event.EventWebSocket;
-import org.osgi.service.http.NamespaceException;
+
+import jakarta.servlet.ServletException;
 
 /**
  * The {@link CommonWebSocketServletTest} contains tests for the {@link EventWebSocket}
@@ -59,19 +56,17 @@ public class CommonWebSocketServletTest {
 
     private @NonNullByDefault({}) CommonWebSocketServlet servlet;
     private @Mock @NonNullByDefault({}) AuthFilter authFilter;
-    private @Mock @NonNullByDefault({}) WebSocketServletFactory factory;
+    private @Mock @NonNullByDefault({}) JettyWebSocketServletFactory factory;
     private @Mock @NonNullByDefault({}) WebSocketAdapter testDefaultWsAdapter;
     private @Mock @NonNullByDefault({}) WebSocketAdapter testWsAdapter;
 
-    private @Mock @NonNullByDefault({}) WebSocketPolicy wsPolicy;
-    private @Mock @NonNullByDefault({}) ServletUpgradeRequest request;
-    private @Mock @NonNullByDefault({}) ServletUpgradeResponse response;
-    private @Captor @NonNullByDefault({}) ArgumentCaptor<WebSocketCreator> webSocketCreatorAC;
+    private @Mock @NonNullByDefault({}) JettyServerUpgradeRequest request;
+    private @Mock @NonNullByDefault({}) JettyServerUpgradeResponse response;
+    private @Captor @NonNullByDefault({}) ArgumentCaptor<JettyWebSocketCreator> webSocketCreatorAC;
 
     @BeforeEach
-    public void setup() throws ServletException, NamespaceException, AuthenticationException, IOException {
+    public void setup() throws ServletException, AuthenticationException, IOException {
         servlet = new CommonWebSocketServlet(authFilter);
-        when(factory.getPolicy()).thenReturn(wsPolicy);
         servlet.configure(factory);
         verify(factory).setCreator(webSocketCreatorAC.capture());
         when(request.getParameterMap()).thenReturn(Map.of());
@@ -83,14 +78,14 @@ public class CommonWebSocketServletTest {
     }
 
     @Test
-    public void createWebsocketUsingDefaultAdapterPath() throws URISyntaxException {
+    public void createWebsocketUsingDefaultAdapterPath() throws Exception {
         when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws"));
         webSocketCreatorAC.getValue().createWebSocket(request, response);
         verify(testDefaultWsAdapter, times(1)).createWebSocket(request, response);
     }
 
     @Test
-    public void createWebsocketUsingAdapterPath() throws URISyntaxException {
+    public void createWebsocketUsingAdapterPath() throws Exception {
         when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws/" + testAdapterId));
         webSocketCreatorAC.getValue().createWebSocket(request, response);
         verify(testWsAdapter, times(1)).createWebSocket(request, response);

@@ -30,17 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -102,11 +91,11 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.osgi.service.jakartars.whiteboard.JakartarsWhiteboardConstants;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationSelect;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,6 +107,17 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * This class acts as a REST resource and provides different methods to generate file format
@@ -132,9 +132,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Add sitemap YAML
  */
 @Component
-@JaxrsResource
-@JaxrsName(FileFormatResource.PATH_FILE_FORMAT)
-@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JakartarsResource
+@JakartarsName(FileFormatResource.PATH_FILE_FORMAT)
+@JakartarsApplicationSelect("(" + JakartarsWhiteboardConstants.JAKARTA_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(FileFormatResource.PATH_FILE_FORMAT)
 @Tag(name = FileFormatResource.PATH_FILE_FORMAT)

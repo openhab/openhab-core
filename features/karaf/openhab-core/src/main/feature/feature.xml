@@ -40,6 +40,9 @@
 		<requirement>openhab.tp;filter:="(feature=jna)"</requirement>
 		<feature dependency="true">openhab.tp-jna</feature>
 
+		<requirement>openhab.tp;filter:="(feature=jaxb)"</requirement>
+		<feature dependency="true">openhab.tp-jaxb</feature>
+
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>

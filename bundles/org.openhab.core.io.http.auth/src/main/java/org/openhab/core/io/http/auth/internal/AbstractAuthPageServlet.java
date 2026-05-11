@@ -26,9 +26,6 @@ import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Authentication;
@@ -42,6 +39,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Abstract class for servlets to perform sensible operations requiring user authentication.

@@ -18,15 +18,14 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -38,8 +37,6 @@ import org.openhab.core.audio.utils.AudioSinkUtilsImpl;
 import org.openhab.core.test.TestPortUtil;
 import org.openhab.core.test.TestServer;
 import org.openhab.core.test.java.JavaTest;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 
 /**
  * Base class for tests using the {@link AudioServlet}.
@@ -61,8 +58,6 @@ public abstract class AbstractAudioServletTest extends JavaTest {
     private @NonNullByDefault({}) HttpClient httpClient;
     private @NonNullByDefault({}) CompletableFuture<Boolean> serverStarted;
 
-    public @Mock @NonNullByDefault({}) HttpService httpServiceMock;
-    public @Mock @NonNullByDefault({}) HttpContext httpContextMock;
     public AudioSinkUtils audioSinkUtils = new AudioSinkUtilsImpl();
 
     @BeforeEach
@@ -101,7 +96,7 @@ public abstract class AbstractAudioServletTest extends JavaTest {
 
     protected ContentResponse getHttpResponseWithAccept(AudioStream audioStream, String acceptHeader) throws Exception {
         String url = serveStream(audioStream);
-        return getHttpRequest(url).header("Accept", acceptHeader).send();
+        return getHttpRequest(url).headers(f -> f.add("Accept", acceptHeader)).send();
     }
 
     protected String serveStream(AudioStream stream) throws Exception {
