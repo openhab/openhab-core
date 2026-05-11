@@ -396,7 +396,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
      * quoted or unquoted, and item and operator may be omitted entirely for simple values such as "ON". The supported
      * comparison operators are ==, !=, <, >, <=, >=. If a condition string does not match one of the accepted forms,
      * it is ignored and a warning is logged.
-     * This method is package private for testing purposes, to allow testing the parsing of conditions without having to
+     * This method is package-private for testing purposes, to allow testing the parsing of conditions without having to
      * mock the whole widget building process.
      *
      * @param conditionsString
