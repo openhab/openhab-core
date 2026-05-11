@@ -214,3 +214,11 @@ terminal TIME:
 SIGNED_INT:
 	'-'? INT
 ;
+
+@Override
+ValidID:
+	ID | 'rule' | 'uid' | 'when' | 'or' | 'but' | 'only' | 'and' | 'then' | 'end' |
+	'changed' | 'triggered' | 'from' | 'to' | 'started' |
+	'cron' | 'is' | 'midnight' | 'noon' | 'timeOnly' | 'offset' | 'between' | 'in' |
+	'weekday' | 'weekend' | 'holiday' | 'not' | 'ms' | 'executions'
+;
