@@ -60,7 +60,7 @@ public class ConfigUtil {
     private static EnvProvider envProvider = System::getenv;
 
     /**
-     * Package-private setter for envProvider to allow overwriting it in tests.
+     * Setter for envProvider to allow overwriting it in tests.
      * 
      * @param provider the env provider to use for resolving environment variables
      */

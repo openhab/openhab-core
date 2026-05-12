@@ -274,7 +274,7 @@ public abstract class BaseThingHandler implements ThingHandler {
                 }
             }
         }
-        return resolvedConfig;
+        return new Configuration(resolvedConfig);
     }
 
     /**
