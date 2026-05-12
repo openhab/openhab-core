@@ -171,13 +171,20 @@ public class ItemDisplayStateUtilTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void formatStateConvertsQuantityTypeToPatternUnit() {
         QuantityType<?> state = new QuantityType<>("20 °C");
+        Locale defaultLocale = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.ENGLISH);
 
-        String result = ItemDisplayStateUtil.formatState("item", "%.1f °F", Collections.emptyList(), state, zoneId);
+            String result = ItemDisplayStateUtil.formatState("item", "%.1f °F", Collections.emptyList(), state, zoneId);
 
-        // 20°C = 68°F
-        assertThat(result, is("68.0 °F"));
+            // 20°C = 68°F
+            assertThat(result, is("68.0 °F"));
+        } finally {
+            Locale.setDefault(defaultLocale);
+        }
     }
 
     @Test
