@@ -786,13 +786,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.29</version>
+      <version>4.30</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.29</version>
+      <version>4.30</version>
       <scope>compile</scope>
     </dependency>
 
