@@ -138,8 +138,8 @@
 	</feature>
 
 	<feature name="openhab.tp-jbbp" description="Java Binary Block Parser library" version="${project.version}">
-		<capability>openhab.tp;feature=jbbp;version=3.0.1</capability>
-		<bundle dependency="true">mvn:org.openhab.osgiify/com.igormaznitsa.jbbp/3.0.1</bundle>
+		<capability>openhab.tp;feature=jbbp;version=3.0.2</capability>
+		<bundle dependency="true">mvn:org.openhab.osgiify/com.igormaznitsa.jbbp/3.0.2</bundle>
 	</feature>
 
 	<feature name="openhab.tp-netty" description="Netty bundles" version="${project.version}">
