@@ -64,7 +64,7 @@ public class ConfigUtil {
      * 
      * @param provider the env provider to use for resolving environment variables
      */
-    static void setEnvProvider(EnvProvider provider) {
+    protected static void setEnvProvider(EnvProvider provider) {
         envProvider = provider;
     }
 
@@ -379,7 +379,7 @@ public class ConfigUtil {
      * A provider for environment variables.
      */
     @FunctionalInterface
-    interface EnvProvider {
+    protected interface EnvProvider {
         @Nullable
         String get(String name);
     }
