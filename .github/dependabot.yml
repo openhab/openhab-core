@@ -29,7 +29,6 @@ updates:
     registries: "*"
     allow:
       - dependency-name: "*"
-      - dependency-name: "org.openhab.core.tools:i18n-maven-plugin"
     ignore:
     # some manually generated entries, mostly plugins handled together with other upgrades
       - dependency-name: "com.diffplug.spotless:spotless-maven-plugin" # done with SAT
@@ -209,7 +208,6 @@ updates:
       - dependency-name: "org.apache.maven.resolver:maven-resolver-util"
       - dependency-name: "org.apache.maven:maven-artifact"
       - dependency-name: "org.apache.maven:maven-model"
-      - dependency-name: "org.apache.maven:maven-plugin-api"
       - dependency-name: "org.apache.mina:mina-core"
       - dependency-name: "org.apache.pdfbox:fontbox"
       - dependency-name: "org.apache.pdfbox:pdfbox"
