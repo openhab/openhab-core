@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -48,11 +49,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Höfer - Minor changes for type normalization based on config description
+ * @author Florian Hotze - Add support for environment variable substitution in config values
  */
 @NonNullByDefault
 public class ConfigUtil {
 
     private static final Pattern DEFAULT_LIST_SPLITTER = Pattern.compile("(?<!\\\\),");
+    private static final Pattern ENV_PATTERN = Pattern.compile("\\$\\{ENV:([^}]+)}");
+
+    private static EnvProvider envProvider = System::getenv;
+
+    /**
+     * Package-private setter for envProvider to allow overwriting it in tests.
+     * 
+     * @param provider the env provider to use for resolving environment variables
+     */
+    static void setEnvProvider(EnvProvider provider) {
+        envProvider = provider;
+    }
 
     /**
      * Maps the provided (default) value of the given {@link ConfigDescriptionParameter} to the corresponding Java type.
@@ -285,5 +299,88 @@ public class ConfigUtil {
     private static boolean isOSGiConfigParameter(String name) {
         return Constants.OBJECTCLASS.equals(name) || ComponentConstants.COMPONENT_NAME.equals(name)
                 || ComponentConstants.COMPONENT_ID.equals(name);
+    }
+
+    /**
+     * Checks a string value for the variable patterns and resolves referenced variables.
+     *
+     * <p>
+     * Note: At the moment, only environment variables are supported.
+     * If no variable is referenced, or it has no value, the string value is returned as-is.
+     *
+     * @param value the value to resolve
+     * @return the resolved value
+     */
+    private static String resolveVariables(String value) {
+        final Matcher matcher = ENV_PATTERN.matcher(value);
+
+        return matcher.replaceAll(matchResult -> {
+            final String envVarName = matchResult.group(1);
+            final @Nullable String envVarValue = envProvider.get(envVarName);
+
+            // Return the resolved value, or the original placeholder if not found
+            String replacement = envVarValue != null ? envVarValue : matchResult.group(0);
+            // Safely escape the replacement string so '$' and '\' are treated as literals
+            return Matcher.quoteReplacement(replacement);
+        });
+    }
+
+    /**
+     * Resolves variables in the given value by replacing the variable patterns through the variable values.
+     *
+     * <p>
+     * The following rules are applied:
+     * <ol>
+     * <li>If the given value is a string, it is checked for variable patterns and referenced variables are
+     * resolved.</li>
+     * <li>If the value is a collection, this method is called for each element.</li>
+     * <li>If the value is neither a string nor a collection, it is returned as-is.</li>
+     * </ol>
+     *
+     * @param value the value to resolve
+     * @return the resolved value
+     */
+    public static Object resolveVariables(Object value) {
+        if (value instanceof String stringValue) {
+            return resolveVariables(stringValue);
+        } else if (value instanceof Collection<?> collectionValue) {
+            final List<Object> entry = new ArrayList<>(collectionValue.size());
+            for (final Object it : collectionValue) {
+                final Object resolved = resolveVariables(it);
+                entry.add(resolved);
+            }
+            return entry;
+        }
+        return value;
+    }
+
+    /**
+     * Resolve variables in the given {@link Configuration}.
+     *
+     * @param configuration the configuration to resolve variables in
+     * @return the resolved configuration
+     */
+    public static Configuration resolveVariables(Configuration configuration) {
+        final Map<String, @Nullable Object> rawProperties = configuration.getProperties();
+        final Map<String, @Nullable Object> resolvedProperties = new HashMap<>();
+        for (final Entry<String, @Nullable Object> entry : rawProperties.entrySet()) {
+            final @Nullable Object value = entry.getValue();
+            if (value != null) {
+                final Object resolved = resolveVariables(value);
+                resolvedProperties.put(entry.getKey(), resolved);
+            } else {
+                resolvedProperties.put(entry.getKey(), null);
+            }
+        }
+        return new Configuration(resolvedProperties);
+    }
+
+    /**
+     * A provider for environment variables.
+     */
+    @FunctionalInterface
+    interface EnvProvider {
+        @Nullable
+        String get(String name);
     }
 }

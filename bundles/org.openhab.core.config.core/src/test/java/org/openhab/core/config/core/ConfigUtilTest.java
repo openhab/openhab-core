@@ -14,6 +14,9 @@ package org.openhab.core.config.core;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.openhab.core.config.core.ConfigDescriptionParameter.Type.*;
 
 import java.math.BigDecimal;
@@ -22,20 +25,41 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * @author Simon Kaufmann - Initial contribution
+ * @author Florian Hotze - Add tests for env variable substitution
  */
+@Execution(ExecutionMode.SAME_THREAD) // Force sequential test execution to avoid multi-threaded access to
+                                      // ConfigUtil::setEnvProvider
 @NonNullByDefault
 public class ConfigUtilTest {
 
     private final URI configUri = URI.create("system:ephemeris");
+    private @NonNullByDefault({}) ConfigUtil.EnvProvider mockEnv;
 
     private final ConfigDescriptionParameterBuilder configDescriptionParameterBuilder1 = ConfigDescriptionParameterBuilder
             .create("p1", DECIMAL).withMultiple(true).withMultipleLimit(7);
     private final ConfigDescriptionParameterBuilder configDescriptionParameterBuilder2 = ConfigDescriptionParameterBuilder
             .create("p2", TEXT).withMultiple(true).withMultipleLimit(2);
+
+    @BeforeEach
+    public void setup() {
+        mockEnv = mock(ConfigUtil.EnvProvider.class);
+        when(mockEnv.get("HOSTNAME")).thenReturn("openhab-host");
+        when(mockEnv.get("PATH")).thenReturn("openhab-path");
+        ConfigUtil.setEnvProvider(mockEnv);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ConfigUtil.setEnvProvider(System::getenv);
+    }
 
     @Test
     public void verifyNormalizeDefaultTypeForTextReturnsString() {
@@ -173,7 +197,7 @@ public class ConfigUtilTest {
     }
 
     @Test
-    public void firstDesciptionWinsForNormalization() {
+    public void firstDescriptionWinsForNormalization() {
         ConfigDescription configDescriptionInteger = ConfigDescriptionBuilder.create(URI.create("thing:fooThing"))
                 .withParameter(ConfigDescriptionParameterBuilder.create("foo", INTEGER).build()).build();
 
@@ -190,5 +214,68 @@ public class ConfigUtilTest {
         assertThat(ConfigUtil
                 .normalizeTypes(Map.of("foo", "1"), List.of(configDescriptionString, configDescriptionInteger))
                 .get("foo"), is(instanceOf(String.class)));
+    }
+
+    @Test
+    public void resolveVariablesResolvesSingleEnvVariable() {
+        String hostname = mockEnv.get("HOSTNAME");
+
+        assertEquals(hostname, ConfigUtil.resolveVariables("${ENV:HOSTNAME}"));
+        assertEquals("prefix-" + hostname + "-suffix", ConfigUtil.resolveVariables("prefix-${ENV:HOSTNAME}-suffix"));
+    }
+
+    @Test
+    public void resolveVariablesResolvesMultipleEnvVariables() {
+        String hostname = mockEnv.get("HOSTNAME");
+        String path = mockEnv.get("PATH");
+
+        assertEquals(hostname + ":" + path, ConfigUtil.resolveVariables("${ENV:HOSTNAME}:${ENV:PATH}"));
+    }
+
+    @Test
+    public void resolveVariablesPassesThroughUnknownEnvVariable() {
+        assertEquals("${ENV:UNKNOWN_VAR_123}", ConfigUtil.resolveVariables("${ENV:UNKNOWN_VAR_123}"));
+    }
+
+    @Test
+    public void resolveVariablesResolvesList() {
+        String hostname = mockEnv.get("HOSTNAME");
+        List<Object> input = List.of("plain", "${ENV:HOSTNAME}", true, 42, 3.14159);
+        List<Object> expected = List.of("plain", hostname, true, 42, 3.14159);
+
+        assertEquals(expected, ConfigUtil.resolveVariables(input));
+    }
+
+    @Test
+    public void resolveVariablesPassesThroughPrimitivesNotString() {
+        assertEquals(42, ConfigUtil.resolveVariables(42));
+        assertEquals(3.14159, ConfigUtil.resolveVariables(3.14159));
+        assertEquals(true, ConfigUtil.resolveVariables(true));
+        assertEquals(false, ConfigUtil.resolveVariables(false));
+    }
+
+    @Test
+    public void resolveVariablesPassesThroughIncorrectPatterns() {
+        String noEnv = "${HOSTNAME}";
+        String noBraces = "$ENV:HOSTNAME";
+        String unclosedBraces = "${ENV:HOSTNAME";
+
+        assertEquals(noEnv, ConfigUtil.resolveVariables(noEnv));
+        assertEquals(noBraces, ConfigUtil.resolveVariables(noBraces));
+        assertEquals(unclosedBraces, ConfigUtil.resolveVariables(unclosedBraces));
+    }
+
+    @Test
+    public void resolveVariablesResolvesEnvVariablesInConfiguration() {
+        String hostname = mockEnv.get("HOSTNAME");
+        Configuration config = new Configuration(
+                Map.of("p1", "plain", "p2", "${ENV:HOSTNAME}", "p3", true, "p4", 42, "p5", 3.14159));
+
+        Configuration resolvedConfig = ConfigUtil.resolveVariables(config);
+        assertEquals("plain", resolvedConfig.get("p1"));
+        assertEquals(hostname, resolvedConfig.get("p2"));
+        assertEquals(true, resolvedConfig.get("p3"));
+        assertEquals(new BigDecimal("42"), resolvedConfig.get("p4"));
+        assertEquals(new BigDecimal("3.14159"), resolvedConfig.get("p5"));
     }
 }
