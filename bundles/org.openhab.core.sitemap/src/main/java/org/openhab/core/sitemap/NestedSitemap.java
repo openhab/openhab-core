@@ -37,5 +37,5 @@ public interface NestedSitemap extends NonLinkableWidget {
      *
      * @param sitemapName the name of the nested sitemap
      */
-    void setSitemapName(String sitemapName);
+    void setSitemapName(@Nullable String sitemapName);
 }
