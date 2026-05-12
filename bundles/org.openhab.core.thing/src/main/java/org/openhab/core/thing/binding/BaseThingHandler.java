@@ -274,7 +274,7 @@ public abstract class BaseThingHandler implements ThingHandler {
                 }
             }
         }
-        return new Configuration(resolvedConfig);
+        return new Configuration(new HashMap<>(resolvedConfig.getProperties()));
     }
 
     /**

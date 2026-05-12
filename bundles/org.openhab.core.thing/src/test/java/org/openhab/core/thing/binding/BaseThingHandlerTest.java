@@ -66,21 +66,6 @@ class BaseThingHandlerTest {
         public void initialize() {
             this.configInInitialize = getConfig();
         }
-
-        @Override
-        public Configuration getConfig() {
-            return super.getConfig();
-        }
-
-        @Override
-        public void updateConfiguration(Configuration configuration) {
-            super.updateConfiguration(configuration);
-        }
-
-        @Override
-        public void updateThing(Thing thing) {
-            super.updateThing(thing);
-        }
     }
 
     private static class ConfigUtilAccessor extends ConfigUtil {
