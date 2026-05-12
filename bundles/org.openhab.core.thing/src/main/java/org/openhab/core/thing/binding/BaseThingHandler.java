@@ -158,8 +158,8 @@ public abstract class BaseThingHandler implements ThingHandler {
         dispose();
         Configuration resolvedConfig = ConfigUtil.resolveVariables(thing.getConfiguration());
         synchronized (this) {
-            this.resolvedConfig = resolvedConfig;
             this.thing = thing;
+            this.resolvedConfig = resolvedConfig;
         }
         initialize();
     }
