@@ -306,7 +306,8 @@ public class ConfigUtil {
      *
      * <p>
      * Note: At the moment, only environment variables are supported.
-     * If no variable is referenced, or it has no value, the string value is returned as-is.
+     * If no variable is referenced, the string value is returned as-is.
+     * If a referenced variable fails to resolve, a {@link IllegalArgumentException} is thrown.
      *
      * @param value the value to resolve
      * @return the resolved value
@@ -337,6 +338,7 @@ public class ConfigUtil {
      * <ol>
      * <li>If the given value is a string, it is checked for variable patterns and referenced variables are
      * resolved.</li>
+     * <li>If a variable fails to resolve, a {@link IllegalArgumentException} is thrown.</li>
      * <li>If the value is a collection, this method is called for each element.</li>
      * <li>If the value is neither a string nor a collection, it is returned as-is.</li>
      * </ol>

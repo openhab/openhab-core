@@ -162,7 +162,7 @@ public abstract class BaseThingHandler implements ThingHandler {
         } catch (IllegalArgumentException e) {
             logger.warn("Updated thing '{}' with a thing containing invalid configuration '{}': {}", thing.getUID(),
                     thing.getConfiguration(), e.getMessage());
-            return;
+            resolvedConfiguration = thing.getConfiguration();
         }
         synchronized (this) {
             this.thing = thing;
@@ -287,7 +287,7 @@ public abstract class BaseThingHandler implements ThingHandler {
                 }
             }
         }
-        return new Configuration(new HashMap<>(resolvedConfig.getProperties()));
+        return new Configuration(resolvedConfig);
     }
 
     /**
@@ -576,8 +576,8 @@ public abstract class BaseThingHandler implements ThingHandler {
         try {
             resolvedConfiguration = ConfigUtil.resolveVariables(configuration);
         } catch (IllegalArgumentException e) {
-            logger.warn("Attempt to update thing '{}' with a thing containing invalid configuration '{}' blocked: {}",
-                    thing.getUID(), configuration, e.getMessage());
+            logger.warn("Attempt to apply configuration '{}' on thing '{}' blocked: {}", configuration, thing.getUID(),
+                    e.getMessage());
             return;
         }
         try {
