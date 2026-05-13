@@ -847,8 +847,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     }
                     // we return an empty nested text widget, so the link to the sitemap is visible in the UI
                     Text nestedText = Objects
-                            .requireNonNull((Text) sitemapFactory.createWidget(SitemapFactoryImpl.TEXT, text));
+                            .requireNonNull((Text) sitemapFactory.createWidget(SitemapFactoryImpl.TEXT));
                     text.setWidgets(new ArrayList<Widget>(List.of(nestedText)));
+                    nestedText.setParent(text);
                     return text;
                 });
             }

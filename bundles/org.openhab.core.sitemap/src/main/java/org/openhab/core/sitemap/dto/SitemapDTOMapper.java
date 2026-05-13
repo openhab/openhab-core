@@ -27,6 +27,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
@@ -190,6 +191,9 @@ public class SitemapDTOMapper {
                     widgetDTO.height = height;
                 }
             }
+            case NestedSitemap nestedSitemapWidget -> {
+                widgetDTO.sitemapName = nestedSitemapWidget.getSitemapName();
+            }
             default -> {
                 // nothing to do
             }
@@ -324,6 +328,9 @@ public class SitemapDTOMapper {
                 chartWidget.setForceAsItem(widgetDTO.forceAsItem);
                 chartWidget.setYAxisDecimalPattern(widgetDTO.yAxisDecimalPattern);
                 chartWidget.setInterpolation(widgetDTO.interpolation);
+            }
+            case NestedSitemap nestedSitemapWidget -> {
+                nestedSitemapWidget.setSitemapName(widgetDTO.sitemapName);
             }
             case Default defaultWidget -> {
                 defaultWidget.setHeight(widgetDTO.height);

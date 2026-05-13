@@ -75,7 +75,7 @@ public class SitemapFactoryImpl implements SitemapFactory {
     public static final String TEXT = "Text";
     public static final String VIDEO = "Video";
     public static final String WEBVIEW = "Webview";
-    public static final String SITEMAP = "Sitemap";
+    public static final String SITEMAP = "NestedSitemap";
 
     private static final String[] WIDGET_TYPES = { BUTTON, BUTTON_GRID, CHART, COLOR_PICKER, COLOR_TEMPERATURE_PICKER,
             DEFAULT, FRAME, GROUP, IMAGE, INPUT, MAPVIEW, SELECTION, SETPOINT, SLIDER, SWITCH, TEXT, VIDEO, WEBVIEW,
