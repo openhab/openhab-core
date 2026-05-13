@@ -754,13 +754,21 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                             w = sitemapWidgets.get(widgetID);
                             for (int i = codingSize; i < idValue.length(); i += codingSize) {
                                 int childWidgetID = Integer.parseInt(idValue.substring(i, i + codingSize));
-                                List<Widget> childWidgets = getChildren((LinkableWidget) w);
-                                if (childWidgetID < childWidgets.size()) {
-                                    w = childWidgets.get(childWidgetID);
+                                if (w instanceof LinkableWidget lw) {
+                                    List<Widget> childWidgets = getChildren(lw);
+                                    if (childWidgetID < childWidgets.size()) {
+                                        w = childWidgets.get(childWidgetID);
+                                    } else {
+                                        logger.warn(
+                                                "Widget id '{}' is invalid, index {} outside the number ({}) of widgets in the page",
+                                                id, childWidgetID, lw.getWidgets().size());
+                                        w = null;
+                                        break;
+                                    }
                                 } else {
                                     logger.warn(
-                                            "Widget id '{}' is invalid, index {} outside the number ({}) of widgets in the page",
-                                            id, childWidgetID, ((LinkableWidget) w).getWidgets().size());
+                                            "Widget id '{}' is invalid, widget at sub-id {} cannot have child widgets",
+                                            id, idValue.substring(0, i + codingSize));
                                     w = null;
                                     break;
                                 }
