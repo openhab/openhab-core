@@ -342,8 +342,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                         String label = stripQuotes(splitted2[1].trim());
                         String icon = splitted2.length < 3 ? null : stripQuotes(splitted2[2].trim());
                         Button button = (Button) Objects.requireNonNull(sitemapFactory.createWidget(
-                                org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.BUTTON,
-                                buttongridWidget));
+                                org.openhab.core.sitemap.registry.SitemapFactory.BUTTON, buttongridWidget));
                         if (component.getConfig().get("item") instanceof String item) {
                             button.setItem(item);
                         }

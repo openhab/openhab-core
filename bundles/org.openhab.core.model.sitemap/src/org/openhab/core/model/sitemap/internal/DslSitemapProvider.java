@@ -297,7 +297,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         if (widgetType.equals("NestedSitemap")) {
             // We need a different type for nested sitemaps, but can keep a common name for the model type, so we need
             // to distinguish them here
-            widgetType = org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.SITEMAP;
+            widgetType = SitemapFactory.SITEMAP;
         }
         return widgetType;
     }
@@ -328,8 +328,8 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     "Defining buttons as properties of a Butongrid widget is deprecated although still supported; please prefer Button sub-widgets");
             EList<ModelButtonDefinition> modelButtons = modelButtonList.getElements();
             modelButtons.forEach(modelButton -> {
-                Button button = (Button) Objects.requireNonNull(sitemapFactory.createWidget(
-                        org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.BUTTON, buttongridWidget));
+                Button button = (Button) Objects
+                        .requireNonNull(sitemapFactory.createWidget(SitemapFactory.BUTTON, buttongridWidget));
                 button.setItem(modelButtongrid.getItem());
                 button.setRow(modelButton.getRow());
                 button.setColumn(modelButton.getColumn());

@@ -29,6 +29,27 @@ import org.openhab.core.sitemap.Widget;
 @NonNullByDefault
 public interface SitemapFactory {
 
+    // Sitemap widget types, put in the interface to be easily accessible for all implementations of Widget and Sitemap
+    public static final String BUTTON = "Button";
+    public static final String BUTTON_GRID = "Buttongrid";
+    public static final String CHART = "Chart";
+    public static final String COLOR_PICKER = "Colorpicker";
+    public static final String COLOR_TEMPERATURE_PICKER = "Colortemperaturepicker";
+    public static final String DEFAULT = "Default";
+    public static final String FRAME = "Frame";
+    public static final String GROUP = "Group";
+    public static final String IMAGE = "Image";
+    public static final String INPUT = "Input";
+    public static final String MAPVIEW = "Mapview";
+    public static final String SELECTION = "Selection";
+    public static final String SETPOINT = "Setpoint";
+    public static final String SLIDER = "Slider";
+    public static final String SWITCH = "Switch";
+    public static final String TEXT = "Text";
+    public static final String VIDEO = "Video";
+    public static final String WEBVIEW = "Webview";
+    public static final String SITEMAP = "Sitemap";
+
     /**
      * Creates a new {@link Sitemap} instance with name <code>sitemapName</code>
      *

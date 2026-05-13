@@ -79,7 +79,6 @@ import org.openhab.core.sitemap.Slider;
 import org.openhab.core.sitemap.Switch;
 import org.openhab.core.sitemap.Text;
 import org.openhab.core.sitemap.Widget;
-import org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.transform.TransformationException;
@@ -761,7 +760,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                                     } else {
                                         logger.warn(
                                                 "Widget id '{}' is invalid, index {} outside the number ({}) of widgets in the page",
-                                                id, childWidgetID, lw.getWidgets().size());
+                                                id, childWidgetID, childWidgets.size());
                                         w = null;
                                         break;
                                     }
@@ -857,7 +856,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                     return null;
                 }
                 return sitemapWidgets.computeIfAbsent(sitemapName, sn -> {
-                    Text text = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactoryImpl.TEXT));
+                    Text text = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactory.TEXT));
                     copyProperties(widget, text);
                     if (text.getLabel() == null) {
                         text.setLabel(sitemap.getLabel());
@@ -878,15 +877,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                     if (name != null && sitemap == null) {
                         logger.warn("Cannot find sitemap '{}' for nested sitemap widget", name);
                     }
-                    Text text = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactoryImpl.TEXT));
+                    Text text = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactory.TEXT));
                     copyProperties(widget, text);
                     Parent parent = nestedSitemap.getParent();
                     if (parent != null) {
                         text.setParent(parent);
                     }
                     // we return an empty nested text widget, so the link to the sitemap is visible in the UI
-                    Text nestedText = Objects
-                            .requireNonNull((Text) sitemapFactory.createWidget(SitemapFactoryImpl.TEXT));
+                    Text nestedText = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactory.TEXT));
                     text.setWidgets(new ArrayList<Widget>(List.of(nestedText)));
                     nestedText.setParent(text);
                     return text;

@@ -12,7 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal.sitemaps;
 
-import static org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.*;
+import static org.openhab.core.sitemap.registry.SitemapFactory.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -170,6 +170,7 @@ public class YamlWidgetDTO {
         ok &= isValidField("command", command, errors, warnings);
         ok &= isValidField("releaseCommand", releaseCommand, errors, warnings);
         ok &= isValidField("stateless", stateless, errors, warnings);
+        ok &= isValidField("name", name, errors, warnings);
 
         if ((SWITCH.equals(type) || SELECTION.equals(type)) && mappings != null && !mappings.isEmpty()) {
             for (YamlMappingDTO mapping : mappings) {
