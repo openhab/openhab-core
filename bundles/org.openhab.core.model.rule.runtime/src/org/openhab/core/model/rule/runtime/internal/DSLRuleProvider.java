@@ -27,11 +27,14 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.xtext.nodemodel.ILeafNode;
+import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
+import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.Trigger;
@@ -87,6 +90,7 @@ import org.openhab.core.model.rule.rules.TimeOfDayCondition;
 import org.openhab.core.model.rule.rules.TimerTrigger;
 import org.openhab.core.model.rule.rules.UpdateEventTrigger;
 import org.openhab.core.model.rule.rules.WeekdayCondition;
+import org.openhab.core.model.rule.rules.impl.RuleImpl;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
 import org.openhab.core.model.script.script.Script;
 import org.openhab.core.service.ReadyMarker;
@@ -352,15 +356,49 @@ public class DSLRuleProvider
         Configuration cfg = new Configuration();
         cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT, context + removeIndentation(script));
         cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE, MIMETYPE_OPENHAB_DSL_RULE);
+        INode ruleNode = NodeModelUtils.findActualNodeFor(rule);
+        boolean sharedContext = hasSharedContext(ruleNode);
+        if (sharedContext) {
+            cfg.put(Module.SHARED_CONTEXT, Boolean.TRUE);
+        }
         List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID(ScriptActionHandler.TYPE_ID)
                 .withConfiguration(cfg).build());
 
         Configuration ruleCfg = new Configuration();
-        ruleCfg.put(Rule.SOURCE,
-                NodeModelUtils.findActualNodeFor(rule).getParent().getText().replaceFirst("^\\R+", ""));
+        String source = sharedContext ? ruleNode.getParent().getText() : ruleNode.getText().replaceFirst("^\\R+", "");
+        source = source.replaceAll("\\R", "\n");
+        if (!source.endsWith("\n")) {
+            source += '\n';
+        }
+        ruleCfg.put(Rule.SOURCE, source);
         ruleCfg.put(Rule.SOURCE_TYPE, MIMETYPE_OPENHAB_DSL_RULE);
         return RuleBuilder.create(uid).withTags(rule.getTags()).withName(name).withTriggers(triggers)
                 .withActions(actions).withConditions(conditions).withConfiguration(ruleCfg).build();
+    }
+
+    private boolean hasSharedContext(INode ruleNode) {
+        INode node = ruleNode;
+        EObject eObject;
+        while ((node = node.getPreviousSibling()) != null) {
+            if (node instanceof ILeafNode leaf && leaf.isHidden()) {
+                continue;
+            }
+            if ((eObject = node.getSemanticElement()) != null && !(eObject instanceof RuleImpl)) {
+                return true;
+            }
+        }
+
+        node = ruleNode;
+        while ((node = node.getNextSibling()) != null) {
+            if (node instanceof ILeafNode leaf && leaf.isHidden()) {
+                continue;
+            }
+            if ((eObject = node.getSemanticElement()) != null && !(eObject instanceof RuleImpl)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private String removeIndentation(String script) {
