@@ -282,7 +282,7 @@ public abstract class BaseThingHandler implements ThingHandler {
                     } catch (IllegalArgumentException e) {
                         logger.warn("Failed to resolve variables for configuration '{}' of thing '{}': {}",
                                 getRawConfig(), getThing().getUID(), e.getMessage());
-                        return getRawConfig();
+                        return new Configuration(getRawConfig());
                     }
                 }
             }

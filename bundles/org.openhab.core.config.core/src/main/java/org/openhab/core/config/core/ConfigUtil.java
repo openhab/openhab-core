@@ -65,7 +65,7 @@ public class ConfigUtil {
      * @param provider the env provider to use for resolving environment variables
      */
     protected static void setEnvProvider(EnvProvider provider) {
-        envProvider = provider;
+        envProvider = Objects.requireNonNull(provider, "provider must not be null");
     }
 
     /**
@@ -322,7 +322,7 @@ public class ConfigUtil {
 
             if (envVarValue == null) {
                 throw new IllegalArgumentException(
-                        "Could not resolve environment variable '{%s}'!".formatted(envVarName));
+                        "Could not resolve environment variable '%s'!".formatted(envVarName));
             }
 
             // Safely escape the replacement string so '$' and '\' are treated as literals
