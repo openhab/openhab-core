@@ -74,17 +74,22 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
 
     private final Logger logger = LoggerFactory.getLogger(YamlSitemapProvider.class);
 
+    private SitemapRegistry sitemapRegistry;
     private SitemapFactory sitemapFactory;
 
     private final Map<String, Collection<Sitemap>> sitemapsMap = new ConcurrentHashMap<>();
 
     @Activate
-    public YamlSitemapProvider(final @Reference SitemapFactory sitemapFactory) {
+    public YamlSitemapProvider(final @Reference SitemapRegistry sitemapRegistry,
+            final @Reference SitemapFactory sitemapFactory) {
         this.sitemapFactory = sitemapFactory;
+        this.sitemapRegistry = sitemapRegistry;
+        sitemapRegistry.addSitemapProvider(this);
     }
 
     @Deactivate
     public void deactivate() {
+        sitemapRegistry.removeSitemapProvider(this);
         sitemapsMap.clear();
     }
 

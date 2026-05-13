@@ -95,6 +95,7 @@ import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -126,7 +127,7 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
         property = Constants.SERVICE_PID + "=org.openhab.sitemap")
 @ConfigurableService(category = "system", label = "Sitemap", description_uri = ItemUIRegistryImpl.CONFIG_URI)
-public class ItemUIRegistryImpl implements ItemUIRegistry {
+public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListener<Sitemap> {
 
     protected static final String CONFIG_URI = "system:sitemap";
 
@@ -176,30 +177,16 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         this.sitemapFactory = sitemapFactory;
         this.sitemapRegistry = sitemapRegistry;
         this.timeZoneProvider = timeZoneProvider;
-        addSitemapChangeListener(sitemapRegistry);
+        sitemapRegistry.addRegistryChangeListener(this);
     }
 
-    private void addSitemapChangeListener(final SitemapRegistry sitemapRegistry) {
-        sitemapRegistry.addRegistryChangeListener(new RegistryChangeListener<Sitemap>() {
-
-            @Override
-            public void added(Sitemap element) {
-                // nothing to do
-            }
-
-            @Override
-            public void removed(Sitemap element) {
-                updated(element, element);
-            }
-
-            @Override
-            public void updated(Sitemap oldElement, Sitemap element) {
-                // remove cached text widget for sitemap, will be recreated if it was an update
-                String sitemapName = oldElement.getName();
-                nestedSitemapWidgetsCache.values()
-                        .forEach(widgets -> widgets.keySet().removeIf(name -> name.equals(sitemapName)));
-            }
-        });
+    @Deactivate
+    protected void deactivate() {
+        itemUIProviders.clear();
+        defaultWidgets.clear();
+        nestedSitemapWidgetsCache.clear();
+        defaultNestedSitemapWidgetsCache.clear();
+        sitemapRegistry.removeRegistryChangeListener(this);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -219,6 +206,26 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Modified
     protected void modified(@Nullable Map<String, Object> config) {
         applyConfig(config);
+    }
+
+    @Override
+    public void added(Sitemap element) {
+        // nothing to do
+    }
+
+    @Override
+    public void removed(Sitemap element) {
+        updated(element, element);
+    }
+
+    @Override
+    public void updated(Sitemap oldElement, Sitemap element) {
+        // remove cached text widget for sitemap, will be recreated if it was an update on first use
+        String sitemapName = oldElement.getName();
+        synchronized (nestedSitemapWidgetsCache) {
+            nestedSitemapWidgetsCache.values()
+                    .forEach(widgets -> widgets.keySet().removeIf(name -> name.equals(sitemapName)));
+        }
     }
 
     /**
