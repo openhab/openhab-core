@@ -84,7 +84,6 @@ import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapProvider;
-import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -112,28 +111,24 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
     private final Logger logger = LoggerFactory.getLogger(DslSitemapProvider.class);
 
     private final ModelRepository modelRepo;
-    private final SitemapRegistry sitemapRegistry;
     private final SitemapFactory sitemapFactory;
 
     private final Map<String, Collection<Sitemap>> sitemapCache = new ConcurrentHashMap<>();
 
     @Activate
     public DslSitemapProvider(final @Reference ModelRepository modelRepo,
-            final @Reference SitemapRegistry sitemapRegistry, final @Reference SitemapFactory sitemapFactory) {
+            final @Reference SitemapFactory sitemapFactory) {
         this.modelRepo = modelRepo;
-        this.sitemapRegistry = sitemapRegistry;
         this.sitemapFactory = sitemapFactory;
         sitemapCache.clear();
         refreshSitemapModels(SITEMAP_MODEL_NAME);
         refreshSitemapModels(SITEMAPS_MODEL_NAME);
-        sitemapRegistry.addSitemapProvider(this);
         modelRepo.addModelRepositoryChangeListener(this);
     }
 
     @Deactivate
     protected void deactivate() {
         modelRepo.removeModelRepositoryChangeListener(this);
-        sitemapRegistry.removeSitemapProvider(this);
         sitemapCache.clear();
     }
 

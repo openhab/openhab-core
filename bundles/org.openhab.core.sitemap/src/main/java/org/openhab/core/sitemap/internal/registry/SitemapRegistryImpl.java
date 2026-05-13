@@ -14,10 +14,10 @@ package org.openhab.core.sitemap.internal.registry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractRegistry;
-import org.openhab.core.common.registry.Provider;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.registry.SitemapProvider;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -29,17 +29,8 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = SitemapRegistry.class, immediate = true)
 public class SitemapRegistryImpl extends AbstractRegistry<Sitemap, String, SitemapProvider> implements SitemapRegistry {
 
+    @Activate
     public SitemapRegistryImpl() {
-        super(null);
-    }
-
-    @Override
-    public void addSitemapProvider(Provider<Sitemap> provider) {
-        addProvider(provider);
-    }
-
-    @Override
-    public void removeSitemapProvider(Provider<Sitemap> provider) {
-        removeProvider(provider);
+        super(SitemapProvider.class);
     }
 }

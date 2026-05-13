@@ -53,7 +53,6 @@ import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapProvider;
-import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.ui.components.ManagedSitemapProvider;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponent;
@@ -61,7 +60,6 @@ import org.openhab.core.ui.components.UIComponentRegistry;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -100,20 +98,11 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
     private @Nullable UIComponentRegistry sitemapComponentRegistry;
 
-    private final SitemapRegistry sitemapRegistry;
     private final SitemapFactory sitemapFactory;
 
     @Activate
-    public UIComponentSitemapProvider(final @Reference SitemapRegistry sitemapRegistry,
-            final @Reference SitemapFactory sitemapFactory) {
-        this.sitemapRegistry = sitemapRegistry;
+    public UIComponentSitemapProvider(final @Reference SitemapFactory sitemapFactory) {
         this.sitemapFactory = sitemapFactory;
-        sitemapRegistry.addSitemapProvider(this);
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        sitemapRegistry.removeSitemapProvider(this);
     }
 
     @Override
