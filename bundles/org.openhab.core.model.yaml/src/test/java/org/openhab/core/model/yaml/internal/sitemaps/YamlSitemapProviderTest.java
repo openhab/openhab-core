@@ -200,7 +200,7 @@ public class YamlSitemapProviderTest {
             return new ConditionImpl();
         });
 
-        sitemapProvider = new YamlSitemapProvider(sitemapRegistry, sitemapFactory);
+        sitemapProvider = new YamlSitemapProvider(sitemapFactory);
 
         sitemapListener = new TestSitemapChangeListener();
         sitemapProvider.addProviderChangeListener(sitemapListener);

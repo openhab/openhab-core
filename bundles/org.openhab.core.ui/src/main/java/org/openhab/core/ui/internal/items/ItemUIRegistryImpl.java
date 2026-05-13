@@ -869,7 +869,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                             "Nested sitemap widget with sitemap name '{}' links to the root sitemap, which is not supported to avoid loops",
                             sitemapName);
                     sitemapName = null;
-                    ;
                 }
             }
             Sitemap sitemap = sitemapName != null ? sitemapRegistry.get(sitemapName) : null;
