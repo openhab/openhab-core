@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.config.core.ConfigDescriptionParameter.Type.*;
 
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +47,7 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 public class ConfigUtilTest {
 
     private final URI configUri = URI.create("system:ephemeris");
-    private @NonNullByDefault({}) ConfigUtil.EnvProvider mockEnv;
+    private final ConfigUtil.EnvProvider mockEnv = mock(ConfigUtil.EnvProvider.class);
 
     private final ConfigDescriptionParameterBuilder configDescriptionParameterBuilder1 = ConfigDescriptionParameterBuilder
             .create("p1", DECIMAL).withMultiple(true).withMultipleLimit(7);
@@ -54,7 +56,7 @@ public class ConfigUtilTest {
 
     @BeforeEach
     public void setup() {
-        mockEnv = mock(ConfigUtil.EnvProvider.class);
+        reset(mockEnv);
         when(mockEnv.get("HOSTNAME")).thenReturn("openhab-host");
         when(mockEnv.get("PATH")).thenReturn("openhab-path");
         ConfigUtil.setEnvProvider(mockEnv);
@@ -272,14 +274,40 @@ public class ConfigUtilTest {
     @Test
     public void resolveVariablesResolvesEnvVariablesInConfiguration() {
         String hostname = mockEnv.get("HOSTNAME");
-        Configuration config = new Configuration(
-                Map.of("p1", "plain", "p2", "${ENV:HOSTNAME}", "p3", true, "p4", 42, "p5", 3.14159));
+        Map<String, @Nullable Object> config = Map.of("p1", "plain", "p2", "${ENV:HOSTNAME}", "p3", true, "p4", 42,
+                "p5", 3.14159);
 
-        Configuration resolvedConfig = ConfigUtil.resolveVariables(config);
+        Map<String, @Nullable Object> resolvedConfig = ConfigUtil.resolveVariables(config);
         assertEquals("plain", resolvedConfig.get("p1"));
         assertEquals(hostname, resolvedConfig.get("p2"));
         assertEquals(true, resolvedConfig.get("p3"));
-        assertEquals(new BigDecimal("42"), resolvedConfig.get("p4"));
-        assertEquals(new BigDecimal("3.14159"), resolvedConfig.get("p5"));
+        assertEquals(42, resolvedConfig.get("p4"));
+        assertEquals(3.14159, resolvedConfig.get("p5"));
+    }
+
+    @Test
+    public void resolveVariablesAndNormalizeTypesResolvesThenNormalizedConfiguration() {
+        String hostname = mockEnv.get("HOSTNAME");
+        when(mockEnv.get("BOOLEAN")).thenReturn("true");
+        when(mockEnv.get("INTEGER")).thenReturn("42");
+        when(mockEnv.get("DECIMAL")).thenReturn("3.14159");
+
+        Map<String, @Nullable Object> config = Map.of("p1", "plain", "p2", "${ENV:HOSTNAME}", "p3", "${ENV:BOOLEAN}",
+                "p4", "${ENV:INTEGER}", "p5", "${ENV:DECIMAL}");
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(URI.create("thingType:fooThing"))
+                .withParameter(ConfigDescriptionParameterBuilder.create("p1", TEXT).build())
+                .withParameter(ConfigDescriptionParameterBuilder.create("p2", TEXT).build())
+                .withParameter(ConfigDescriptionParameterBuilder.create("p3", BOOLEAN).build())
+                .withParameter(ConfigDescriptionParameterBuilder.create("p4", INTEGER).build())
+                .withParameter(ConfigDescriptionParameterBuilder.create("p5", DECIMAL).build()).build();
+
+        Configuration normalizedAndResolvedConfig = ConfigUtil
+                .resolveVariablesAndNormalizeTypes(new Configuration(config), List.of(configDescription));
+
+        assertEquals("plain", normalizedAndResolvedConfig.get("p1"));
+        assertEquals(hostname, normalizedAndResolvedConfig.get("p2"));
+        assertEquals(true, normalizedAndResolvedConfig.get("p3"));
+        assertEquals(new BigDecimal("42"), normalizedAndResolvedConfig.get("p4"));
+        assertEquals(new BigDecimal("3.14159"), normalizedAndResolvedConfig.get("p5"));
     }
 }

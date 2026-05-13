@@ -315,7 +315,7 @@ public class ConfigUtil {
      *
      * @param value the value to resolve
      * @return the resolved value
-     * @throws IllegalArgumentException when a variable fails to resolve
+     * @throws IllegalArgumentException if a variable fails to resolve
      */
     private static String resolveVariables(String value) throws IllegalArgumentException {
         final Matcher matcher = ENV_PATTERN.matcher(value);
@@ -349,7 +349,7 @@ public class ConfigUtil {
      *
      * @param value the value to resolve
      * @return the resolved value
-     * @throws IllegalArgumentException when a variable fails to resolve
+     * @throws IllegalArgumentException if a variable fails to resolve
      */
     public static Object resolveVariables(Object value) throws IllegalArgumentException {
         if (value instanceof String stringValue) {
@@ -366,16 +366,20 @@ public class ConfigUtil {
     }
 
     /**
-     * Resolve variables in the given {@link Configuration}.
+     * Resolve variables in the given configuration.
+     *
+     * <p>
+     * Note that when substituting variables in non-TEXT values such as BOOLEAN, DECIMAL, etc., the config needs to be
+     * normalized.
      *
      * @param configuration the configuration to resolve variables in
      * @return the resolved configuration
-     * @throws IllegalArgumentException when a variable fails to resolve
+     * @throws IllegalArgumentException if a variable fails to resolve
      */
-    public static Configuration resolveVariables(Configuration configuration) throws IllegalArgumentException {
-        final Map<String, @Nullable Object> rawProperties = configuration.getProperties();
+    public static Map<String, @Nullable Object> resolveVariables(Map<String, @Nullable Object> configuration)
+            throws IllegalArgumentException {
         final Map<String, @Nullable Object> resolvedProperties = new HashMap<>();
-        for (final Entry<String, @Nullable Object> entry : rawProperties.entrySet()) {
+        for (final Entry<String, @Nullable Object> entry : configuration.entrySet()) {
             final @Nullable Object value = entry.getValue();
             if (value != null) {
                 final Object resolved = resolveVariables(value);
@@ -384,7 +388,40 @@ public class ConfigUtil {
                 resolvedProperties.put(entry.getKey(), null);
             }
         }
-        return new Configuration(resolvedProperties);
+        return resolvedProperties;
+    }
+
+    /**
+     * Resolve variables in the given {@link Configuration}.
+     *
+     * <p>
+     * Note that when substituting variables in non-TEXT values such as BOOLEAN, DECIMAL, etc., the config needs to be
+     * normalized.
+     *
+     * @param configuration the configuration to resolve variables in
+     * @return the resolved configuration
+     * @throws IllegalArgumentException if a variable fails to resolve
+     */
+    public static Configuration resolveVariables(Configuration configuration) throws IllegalArgumentException {
+        return new Configuration(resolveVariables(configuration.getProperties()));
+    }
+
+    /**
+     * Resolve variables and normalize the results in the given {@link Configuration}.
+     *
+     * <p>
+     * Normalizing after the resolve step allows to use variable substitution for non-TEXT values such as BOOLEAN,
+     * DECIMAL, etc.
+     *
+     * @param configuration the configuration to resolve variables in and normalize afterward
+     * @param configDescriptions the configuration descriptions that should be applied (must not be empty).
+     * @return the normalized configuration
+     * @throws IllegalArgumentException if a variable fails to refresh or the given config description is null
+     */
+    public static Configuration resolveVariablesAndNormalizeTypes(Configuration configuration,
+            List<ConfigDescription> configDescriptions) throws IllegalArgumentException {
+        final Map<String, @Nullable Object> resolvedConfiguration = resolveVariables(configuration.getProperties());
+        return new Configuration(normalizeTypes(resolvedConfiguration, configDescriptions));
     }
 
     /**
