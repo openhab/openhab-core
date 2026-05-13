@@ -13,7 +13,6 @@
 package org.openhab.core.sitemap.registry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.Registry;
 import org.openhab.core.sitemap.Sitemap;
 
@@ -25,18 +24,4 @@ import org.openhab.core.sitemap.Sitemap;
  */
 @NonNullByDefault
 public interface SitemapRegistry extends Registry<Sitemap, String> {
-
-    /**
-     * Add a sitemap provider to the registry.
-     *
-     * @param provider
-     */
-    public void addSitemapProvider(Provider<Sitemap> provider);
-
-    /**
-     * Remove a sitemap provider from the registry.
-     *
-     * @param provider
-     */
-    public void removeSitemapProvider(Provider<Sitemap> provider);
 }
