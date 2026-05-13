@@ -47,7 +47,7 @@ public interface RuleTemplateSerializer extends ObjectSerializer<RuleTemplate> {
      *
      * @param id the identifier of the {@link RuleTemplate} format generation.
      * @param templates the {@link List} of {@link RuleTemplate}s to serialize.
-     * @param the option that determines how to serialize the {@link RuleTemplate}s.
+     * @param option the option that determines how to serialize the {@link RuleTemplate}s.
      * @throws SerializationException If one or more of the rule templates can't be serialized.
      */
     void setTemplatesToBeSerialized(String id, List<RuleTemplate> templates, RuleTemplateSerializationOption option)
