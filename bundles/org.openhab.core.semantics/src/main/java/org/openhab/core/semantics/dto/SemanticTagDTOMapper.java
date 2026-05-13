@@ -32,7 +32,7 @@ public class SemanticTagDTOMapper {
      * @param tagDTO the DTO
      * @return the semantic tag object
      */
-    public static @Nullable SemanticTag map(@Nullable SemanticTagDTO tagDTO) {
+    public static SemanticTag map(@Nullable SemanticTagDTO tagDTO) {
         if (tagDTO == null) {
             throw new IllegalArgumentException("The argument 'tagDTO' must not be null.");
         }

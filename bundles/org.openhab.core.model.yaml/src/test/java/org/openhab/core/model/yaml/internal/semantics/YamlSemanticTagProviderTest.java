@@ -14,15 +14,18 @@ package org.openhab.core.model.yaml.internal.semantics;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +41,7 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.model.yaml.YamlElement;
+import org.openhab.core.model.yaml.YamlModelUtils;
 import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.service.WatchService;
@@ -83,29 +87,44 @@ public class YamlSemanticTagProviderTest {
     public void testShortFormTagsLoadingAndGeneration() throws IOException {
         processYamlResource("tagWithShortFormSyntax.yaml");
 
-        assertThat(semanticTagListener.semanticTags, is(aMapWithSize(1)));
-        assertThat(semanticTagListener.semanticTags, hasKey("Tag_uid"));
+        assertFalse(YamlModelUtils.isIsolatedModel(MODEL_NAME));
+        assertThat(semanticTagListener.semanticTags, is(aMapWithSize(2)));
+        assertThat(semanticTagListener.semanticTags, hasKey("Tag_Uid"));
+        assertThat(semanticTagListener.semanticTags, hasKey("Tag_Uid_SubUid"));
+        assertThat(semanticTagProvider.getAllFromModel(MODEL_NAME), hasSize(2));
         Collection<SemanticTag> tags = semanticTagProvider.getAll();
-        assertThat(tags, hasSize(1));
-        SemanticTag tag = tags.iterator().next();
-        assertThat(tag.getUID(), is("Tag_uid"));
-        assertThat(tag.getName(), is("uid"));
+        assertThat(tags, hasSize(2));
+        Iterator<SemanticTag> it = tags.iterator();
+        SemanticTag tag = it.next();
+        assertThat(tag.getUID(), is("Tag_Uid"));
+        assertThat(tag.getName(), is("Uid"));
         assertThat(tag.getParentUID(), is("Tag"));
-        assertThat(tag.getLabel(), is("TagLabel"));
+        assertThat(tag.getLabel(), is("Label for Uid"));
+        assertThat(tag.getDescription(), is(""));
+        assertThat(tag.getSynonyms(), hasSize(0));
+
+        tag = it.next();
+        assertThat(tag.getUID(), is("Tag_Uid_SubUid"));
+        assertThat(tag.getName(), is("SubUid"));
+        assertThat(tag.getParentUID(), is("Tag_Uid"));
+        assertThat(tag.getLabel(), is("Label for SubUid"));
         assertThat(tag.getDescription(), is(""));
         assertThat(tag.getSynonyms(), hasSize(0));
 
         // Verify YAML output contains short form
         String outYaml = generateYamlFromTags(tags);
-        assertThat(outYaml, containsString("Tag_uid: TagLabel"));
+        assertThat(outYaml, containsString("Tag_Uid: Label for Uid"));
+        assertThat(outYaml, containsString("Tag_Uid_SubUid: Label for SubUid"));
     }
 
     @Test
     public void testMapFormTagsLoadingAndGeneration() throws IOException {
         processYamlResource("tagWithMapForm.yaml");
 
+        assertFalse(YamlModelUtils.isIsolatedModel(MODEL_NAME));
         assertThat(semanticTagListener.semanticTags, is(aMapWithSize(1)));
         assertThat(semanticTagListener.semanticTags, hasKey("Tag_uid"));
+        assertThat(semanticTagProvider.getAllFromModel(MODEL_NAME), hasSize(1));
         Collection<SemanticTag> tags = semanticTagProvider.getAll();
         assertThat(tags, hasSize(1));
         SemanticTag tag = tags.iterator().next();
@@ -128,8 +147,10 @@ public class YamlSemanticTagProviderTest {
     public void testShortFormTagWithNullLabelDeserializesAndSerializes() throws IOException {
         processYamlResource("tagWithShortFormSyntaxWithNullLabel.yaml");
 
+        assertFalse(YamlModelUtils.isIsolatedModel(MODEL_NAME));
         assertThat(semanticTagListener.semanticTags, is(aMapWithSize(1)));
         assertThat(semanticTagListener.semanticTags, hasKey("Tag_null"));
+        assertThat(semanticTagProvider.getAllFromModel(MODEL_NAME), hasSize(1));
         Collection<SemanticTag> tags = semanticTagProvider.getAll();
         assertThat(tags, hasSize(1));
         SemanticTag tag = tags.iterator().next();
@@ -147,6 +168,41 @@ public class YamlSemanticTagProviderTest {
         assertThat(outYaml, not(containsString("label:")));
         assertThat(outYaml, not(containsString("description:")));
         assertThat(outYaml, not(containsString("synonyms:")));
+    }
+
+    @Test
+    public void testCreateIsolatedModelWithSemanticTag() throws IOException {
+        Files.copy(SOURCE_PATH.resolve("tagWithShortFormSyntax.yaml"), fullModelPath);
+        List<String> errors = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+        try (FileInputStream inputStream = new FileInputStream(fullModelPath.toFile())) {
+            String name = modelRepository.createIsolatedModel(inputStream, errors, warnings);
+            assertNotNull(name);
+            assertEquals(0, errors.size());
+            assertEquals(0, warnings.size());
+
+            assertTrue(YamlModelUtils.isIsolatedModel(name));
+            assertThat(semanticTagListener.semanticTags, is(aMapWithSize(0)));
+            assertThat(semanticTagProvider.getAll(), hasSize(0)); // No semantic tag for the registry
+            Collection<SemanticTag> tags = semanticTagProvider.getAllFromModel(name);
+            assertThat(tags, hasSize(2));
+            Iterator<SemanticTag> it = tags.iterator();
+            SemanticTag tag = it.next();
+            assertThat(tag.getUID(), is("Tag_Uid_SubUid"));
+            assertThat(tag.getName(), is("SubUid"));
+            assertThat(tag.getParentUID(), is("Tag_Uid"));
+            assertThat(tag.getLabel(), is("Label for SubUid"));
+            assertThat(tag.getDescription(), is(""));
+            assertThat(tag.getSynonyms(), hasSize(0));
+
+            tag = it.next();
+            assertThat(tag.getUID(), is("Tag_Uid"));
+            assertThat(tag.getName(), is("Uid"));
+            assertThat(tag.getParentUID(), is("Tag"));
+            assertThat(tag.getLabel(), is("Label for Uid"));
+            assertThat(tag.getDescription(), is(""));
+            assertThat(tag.getSynonyms(), hasSize(0));
+        }
     }
 
     private void processYamlResource(String resourceName) throws IOException {

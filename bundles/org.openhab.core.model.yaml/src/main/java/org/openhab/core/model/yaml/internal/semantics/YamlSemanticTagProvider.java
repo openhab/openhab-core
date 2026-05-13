@@ -12,11 +12,15 @@
  */
 package org.openhab.core.model.yaml.internal.semantics;
 
+import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
@@ -38,6 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laurent Garnier - Initial contribution
  * @author Laurent Garnier - Added basic version management
+ * @author Laurent Garnier - Managed isolated models
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SemanticTagProvider.class, YamlSemanticTagProvider.class,
@@ -47,7 +52,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     private final Logger logger = LoggerFactory.getLogger(YamlSemanticTagProvider.class);
 
-    private final Set<SemanticTag> tags = new TreeSet<>(Comparator.comparing(SemanticTag::getUID));
+    private final Map<String, Collection<SemanticTag>> tagsMap = new ConcurrentHashMap<>();
 
     @Activate
     public YamlSemanticTagProvider() {
@@ -55,56 +60,25 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     @Deactivate
     public void deactivate() {
-        tags.clear();
+        tagsMap.clear();
     }
 
     @Override
     public Collection<SemanticTag> getAll() {
-        return tags;
+        // Ignore isolated models
+        // Tags are returned sorted by their UID
+        return tagsMap.entrySet().stream().filter(entry -> !isIsolatedModel(entry.getKey()))
+                .flatMap(entry -> entry.getValue().stream()).sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+    }
+
+    public Collection<SemanticTag> getAllFromModel(String modelName) {
+        // Tags are returned not sorted but rather in their original order in the file
+        return tagsMap.getOrDefault(modelName, List.of());
     }
 
     @Override
     public Class<YamlSemanticTagDTO> getElementClass() {
         return YamlSemanticTagDTO.class;
-    }
-
-    @Override
-    public void addedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
-        List<SemanticTag> added = elements.stream().map(this::mapSemanticTag)
-                .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
-        tags.addAll(added);
-        added.forEach(t -> {
-            logger.debug("model {} added tag {}", modelName, t.getUID());
-            notifyListenersAboutAddedElement(t);
-        });
-    }
-
-    @Override
-    public void updatedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
-        List<SemanticTag> updated = elements.stream().map(this::mapSemanticTag).toList();
-        updated.forEach(t -> {
-            tags.stream().filter(tag -> tag.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldTag -> {
-                tags.remove(oldTag);
-                tags.add(t);
-                logger.debug("model {} updated tag {}", modelName, t.getUID());
-                notifyListenersAboutUpdatedElement(oldTag, t);
-            }, () -> logger.debug("model {} tag {} not found", modelName, t.getUID()));
-        });
-    }
-
-    @Override
-    public void removedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
-        elements.stream().map(elt -> elt.uid).sorted(Comparator.reverseOrder()).forEach(uid -> {
-            tags.stream().filter(tag -> tag.getUID().equals(uid)).findFirst().ifPresentOrElse(oldTag -> {
-                tags.remove(oldTag);
-                logger.debug("model {} removed tag {}", modelName, uid);
-                notifyListenersAboutRemovedElement(oldTag);
-            }, () -> logger.debug("model {} tag {} not found", modelName, uid));
-        });
-    }
-
-    private SemanticTag mapSemanticTag(YamlSemanticTagDTO tagDTO) {
-        return new SemanticTagImpl(tagDTO.uid, tagDTO.label, tagDTO.description, tagDTO.synonyms);
     }
 
     @Override
@@ -115,5 +89,66 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     @Override
     public boolean isDeprecated() {
         return false;
+    }
+
+    @Override
+    public void addedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
+        boolean isolated = isIsolatedModel(modelName);
+        List<SemanticTag> added = elements.stream().map(this::mapSemanticTag).toList();
+        Collection<SemanticTag> modelTags = Objects
+                .requireNonNull(tagsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
+        modelTags.addAll(added);
+        added.stream().sorted(Comparator.comparing(SemanticTag::getUID)).forEach(t -> {
+            logger.debug("model {} added tag {}", modelName, t.getUID());
+            if (!isolated) {
+                notifyListenersAboutAddedElement(t);
+            }
+        });
+    }
+
+    @Override
+    public void updatedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
+        boolean isolated = isIsolatedModel(modelName);
+        List<SemanticTag> updated = elements.stream().map(this::mapSemanticTag).toList();
+        Collection<SemanticTag> modelTags = Objects
+                .requireNonNull(tagsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
+        updated.stream().sorted(Comparator.comparing(SemanticTag::getUID)).forEach(t -> {
+            modelTags.stream().filter(tag -> tag.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldTag -> {
+                modelTags.remove(oldTag);
+                modelTags.add(t);
+                logger.debug("model {} updated tag {}", modelName, t.getUID());
+                if (!isolated) {
+                    notifyListenersAboutUpdatedElement(oldTag, t);
+                }
+            }, () -> {
+                modelTags.add(t);
+                logger.debug("model {} added tag {}", modelName, t.getUID());
+                if (!isolated) {
+                    notifyListenersAboutAddedElement(t);
+                }
+            });
+        });
+    }
+
+    @Override
+    public void removedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
+        boolean isolated = isIsolatedModel(modelName);
+        Collection<SemanticTag> modelTags = tagsMap.getOrDefault(modelName, List.of());
+        elements.stream().map(elt -> elt.uid).sorted(Comparator.reverseOrder()).forEach(uid -> {
+            modelTags.stream().filter(tag -> tag.getUID().equals(uid)).findFirst().ifPresentOrElse(oldTag -> {
+                modelTags.remove(oldTag);
+                logger.debug("model {} removed tag {}", modelName, uid);
+                if (!isolated) {
+                    notifyListenersAboutRemovedElement(oldTag);
+                }
+            }, () -> logger.debug("model {} tag {} not found", modelName, uid));
+        });
+        if (modelTags.isEmpty()) {
+            tagsMap.remove(modelName);
+        }
+    }
+
+    private SemanticTag mapSemanticTag(YamlSemanticTagDTO tagDTO) {
+        return new SemanticTagImpl(tagDTO.uid, tagDTO.label, tagDTO.description, tagDTO.synonyms);
     }
 }
