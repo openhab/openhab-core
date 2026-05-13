@@ -75,7 +75,8 @@ public abstract class BaseThingHandler implements ThingHandler {
             .getScheduledPool(THING_HANDLER_THREADPOOL_NAME);
 
     protected Thing thing;
-    protected volatile @Nullable Configuration resolvedConfig;
+
+    private volatile @Nullable Configuration resolvedConfig;
 
     private @Nullable ThingHandlerCallback callback;
 

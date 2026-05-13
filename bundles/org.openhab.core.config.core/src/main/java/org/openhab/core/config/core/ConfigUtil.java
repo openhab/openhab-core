@@ -61,6 +61,10 @@ public class ConfigUtil {
 
     /**
      * Setter for envProvider to allow overwriting it in tests.
+     *
+     * <p>
+     * This <strong>MUST NOT</strong> be called in production environments as it can break environment variable
+     * resolving.
      * 
      * @param provider the env provider to use for resolving environment variables
      */
