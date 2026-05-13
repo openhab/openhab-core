@@ -15,6 +15,7 @@ package org.openhab.core.config.core;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.config.core.ConfigDescriptionParameter.Type.*;
@@ -236,8 +237,8 @@ public class ConfigUtilTest {
     }
 
     @Test
-    public void resolveVariablesPassesThroughUnknownEnvVariable() {
-        assertEquals("${ENV:UNKNOWN_VAR_123}", ConfigUtil.resolveVariables("${ENV:UNKNOWN_VAR_123}"));
+    public void resolveVariablesThrowsIAEForUnknownEnvVariable() {
+        assertThrows(IllegalArgumentException.class, () -> ConfigUtil.resolveVariables("${ENV:UNKNOWN_VAR}"));
     }
 
     @Test

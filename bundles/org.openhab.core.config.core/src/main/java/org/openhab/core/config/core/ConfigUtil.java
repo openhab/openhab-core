@@ -310,18 +310,22 @@ public class ConfigUtil {
      *
      * @param value the value to resolve
      * @return the resolved value
+     * @throws IllegalArgumentException when a variable fails to resolve
      */
-    private static String resolveVariables(String value) {
+    private static String resolveVariables(String value) throws IllegalArgumentException {
         final Matcher matcher = ENV_PATTERN.matcher(value);
 
         return matcher.replaceAll(matchResult -> {
             final String envVarName = matchResult.group(1);
             final @Nullable String envVarValue = envProvider.get(envVarName);
 
-            // Return the resolved value, or the original placeholder if not found
-            String replacement = envVarValue != null ? envVarValue : matchResult.group(0);
+            if (envVarValue == null) {
+                throw new IllegalArgumentException(
+                        "Could not resolve environment variable '{%s}'!".formatted(envVarName));
+            }
+
             // Safely escape the replacement string so '$' and '\' are treated as literals
-            return Matcher.quoteReplacement(replacement);
+            return Matcher.quoteReplacement(envVarValue);
         });
     }
 
@@ -339,8 +343,9 @@ public class ConfigUtil {
      *
      * @param value the value to resolve
      * @return the resolved value
+     * @throws IllegalArgumentException when a variable fails to resolve
      */
-    public static Object resolveVariables(Object value) {
+    public static Object resolveVariables(Object value) throws IllegalArgumentException {
         if (value instanceof String stringValue) {
             return resolveVariables(stringValue);
         } else if (value instanceof Collection<?> collectionValue) {
@@ -359,8 +364,9 @@ public class ConfigUtil {
      *
      * @param configuration the configuration to resolve variables in
      * @return the resolved configuration
+     * @throws IllegalArgumentException when a variable fails to resolve
      */
-    public static Configuration resolveVariables(Configuration configuration) {
+    public static Configuration resolveVariables(Configuration configuration) throws IllegalArgumentException {
         final Map<String, @Nullable Object> rawProperties = configuration.getProperties();
         final Map<String, @Nullable Object> resolvedProperties = new HashMap<>();
         for (final Entry<String, @Nullable Object> entry : rawProperties.entrySet()) {

@@ -156,10 +156,17 @@ public abstract class BaseThingHandler implements ThingHandler {
     @Override
     public void thingUpdated(Thing thing) {
         dispose();
-        Configuration resolvedConfig = ConfigUtil.resolveVariables(thing.getConfiguration());
+        Configuration resolvedConfiguration;
+        try {
+            resolvedConfiguration = ConfigUtil.resolveVariables(thing.getConfiguration());
+        } catch (IllegalArgumentException e) {
+            logger.warn("Updated thing '{}' with a thing containing invalid configuration '{}': {}", thing.getUID(),
+                    thing.getConfiguration(), e.getMessage());
+            return;
+        }
         synchronized (this) {
             this.thing = thing;
-            this.resolvedConfig = resolvedConfig;
+            this.resolvedConfig = resolvedConfiguration;
         }
         initialize();
     }
@@ -270,7 +277,13 @@ public abstract class BaseThingHandler implements ThingHandler {
             synchronized (this) {
                 resolvedConfig = this.resolvedConfig;
                 if (resolvedConfig == null) {
-                    this.resolvedConfig = resolvedConfig = ConfigUtil.resolveVariables(getRawConfig());
+                    try {
+                        this.resolvedConfig = resolvedConfig = ConfigUtil.resolveVariables(getRawConfig());
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("Failed to resolve variables for configuration '{}' of thing '{}': {}",
+                                getRawConfig(), getThing().getUID(), e.getMessage());
+                        return getRawConfig();
+                    }
                 }
             }
         }
@@ -506,13 +519,19 @@ public abstract class BaseThingHandler implements ThingHandler {
                     this.getClass().getSimpleName(), thing.getUID());
             return;
         }
-        Configuration resolvedConfiguration = ConfigUtil.resolveVariables(thing.getConfiguration());
+        Configuration resolvedConfiguration;
+        try {
+            resolvedConfiguration = ConfigUtil.resolveVariables(thing.getConfiguration());
+        } catch (IllegalArgumentException e) {
+            logger.warn("Attempt to update thing '{}' with a thing containing invalid configuration '{}' blocked: {}",
+                    thing.getUID(), thing.getConfiguration(), e.getMessage());
+            return;
+        }
         try {
             callback.validateConfigurationParameters(thing, resolvedConfiguration.getProperties());
             thing.getChannels().forEach(channel -> callback.validateConfigurationParameters(channel,
                     channel.getConfiguration().getProperties()));
         } catch (ConfigValidationException e) {
-            // Don't log resolvedConfiguration to avoid logging variable values
             logger.warn(
                     "Attempt to update thing '{}' with a thing containing invalid configuration '{}' blocked. This is most likely a bug: {}",
                     thing.getUID(), thing.getConfiguration(), e.getValidationMessages());
@@ -553,11 +572,17 @@ public abstract class BaseThingHandler implements ThingHandler {
                     this.getClass().getSimpleName());
             return;
         }
-        Configuration resolvedConfiguration = ConfigUtil.resolveVariables(configuration);
+        Configuration resolvedConfiguration;
+        try {
+            resolvedConfiguration = ConfigUtil.resolveVariables(configuration);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Attempt to update thing '{}' with a thing containing invalid configuration '{}' blocked: {}",
+                    thing.getUID(), configuration, e.getMessage());
+            return;
+        }
         try {
             callback.validateConfigurationParameters(this.thing, resolvedConfiguration.getProperties());
         } catch (ConfigValidationException e) {
-            // Don't log resolvedConfiguration to avoid logging variable values
             logger.warn(
                     "Attempt to apply invalid configuration '{}' on thing '{}' blocked. This is most likely a bug: {}",
                     configuration, thing.getUID(), e.getValidationMessages());
