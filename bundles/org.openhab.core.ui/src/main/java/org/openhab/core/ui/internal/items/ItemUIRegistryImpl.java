@@ -148,10 +148,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     private final TimeZoneProvider timeZoneProvider;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
-    private final Map<NestedSitemap, Map<String, Text>> nestedSitemapWidgetsCache = Collections
-            .synchronizedMap(new WeakHashMap<>());
-    private final Map<NestedSitemap, Text> defaultNestedSitemapWidgetsCache = Collections
-            .synchronizedMap(new WeakHashMap<>());
+    private final Map<NestedSitemap, Map<String, Text>> nestedSitemapWidgetsCache = new ConcurrentHashMap<>();
+    private final Map<NestedSitemap, Text> defaultNestedSitemapWidgetsCache = new ConcurrentHashMap<>();
 
     // Cache for reflection fields to avoid performance issues with reflection in copying widgets
     private final Map<Class<?>, List<Field>> fieldCache = new ConcurrentHashMap<>();
@@ -219,12 +217,24 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
 
     @Override
     public void updated(Sitemap oldElement, Sitemap element) {
+        // if a nested sitemap is a widget in an updated or removed sitemap, remove the nested sitemap from the cache,
+        // so it will be recreated on first use with the new sitemap
+        nestedSitemapWidgetsCache.keySet().removeIf(nestedSitemap -> {
+            Parent parent = nestedSitemap.getParent();
+            while (parent instanceof LinkableWidget linkableWidget) {
+                parent = linkableWidget.getParent();
+            }
+            if (parent instanceof Sitemap sitemap && !sitemap.getName().equals(oldElement.getName())) {
+                return false;
+            }
+            defaultNestedSitemapWidgetsCache.remove(nestedSitemap);
+            return true;
+        });
+
         // remove cached text widget for sitemap, will be recreated if it was an update on first use
         String sitemapName = oldElement.getName();
-        synchronized (nestedSitemapWidgetsCache) {
-            nestedSitemapWidgetsCache.values()
-                    .forEach(widgets -> widgets.keySet().removeIf(name -> name.equals(sitemapName)));
-        }
+        nestedSitemapWidgetsCache.values()
+                .forEach(widgets -> widgets.keySet().removeIf(name -> name.equals(sitemapName)));
     }
 
     /**
