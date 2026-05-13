@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.core.internal.fileformat;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUID;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -78,6 +79,7 @@ import org.openhab.core.io.rest.core.fileformat.ExtendedFileFormatDTO;
 import org.openhab.core.io.rest.core.fileformat.FileFormatDTO;
 import org.openhab.core.io.rest.core.fileformat.FileFormatItemDTO;
 import org.openhab.core.io.rest.core.fileformat.FileFormatItemDTOMapper;
+import org.openhab.core.io.rest.core.internal.rule.SerializabilityResultsDTO;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemBuilderFactory;
@@ -87,6 +89,7 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemParser;
 import org.openhab.core.items.fileconverter.ItemSerializer;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.dto.SitemapDTOMapper;
 import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
@@ -130,9 +133,15 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -254,6 +263,74 @@ public class FileFormatResource implements RESTResource {
                     config:
                       time: 12:00
                     type: TimeOfDay
+            """;
+
+    private static final String JSON_RULE_UID_CHECK_EXAMPLE = """
+            [ "ruleUid1", "ruleUid2" ]
+            """;
+
+    private static final String JSON_RULE_CHECK_EXAMPLE = """
+            {
+              "rules": [
+                {
+                  "uid": "string",
+                  "name": "string",
+                  "description": "string",
+                  "tags": [
+                    "string"
+                  ],
+                  "triggers": [
+                    {
+                      "id": "string",
+                      "label": "string",
+                      "description": "string",
+                      "configuration": {
+                        "additionalProp1": {},
+                        "additionalProp2": {},
+                        "additionalProp3": {}
+                      },
+                      "type": "string"
+                    }
+                  ],
+                  "conditions": [
+                    {
+                      "id": "string",
+                      "label": "string",
+                      "description": "string",
+                      "configuration": {
+                        "additionalProp1": {},
+                        "additionalProp2": {},
+                        "additionalProp3": {}
+                      },
+                      "type": "string",
+                      "inputs": {
+                        "additionalProp1": "string",
+                        "additionalProp2": "string",
+                        "additionalProp3": "string"
+                      }
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "id": "string",
+                      "label": "string",
+                      "description": "string",
+                      "configuration": {
+                        "additionalProp1": {},
+                        "additionalProp2": {},
+                        "additionalProp3": {}
+                      },
+                      "type": "string",
+                      "inputs": {
+                        "additionalProp1": "string",
+                        "additionalProp2": "string",
+                        "additionalProp3": "string"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
             """;
 
     private static final String YAML_RULE_TEMPLATE_EXAMPLE = """
@@ -432,6 +509,7 @@ public class FileFormatResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
+    private final Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT).create();
     private final ItemBuilderFactory itemBuilderFactory;
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
@@ -709,7 +787,7 @@ public class FileFormatResource implements RESTResource {
                 Rule rule = ruleRegistry.get(ruleUID);
                 if (rule == null) {
                     return JSONResponse.createErrorResponse(Response.Status.NOT_FOUND,
-                            "Rule with ID '" + ruleUID + "' not found in the rule registry!");
+                            "Rule with UID '" + ruleUID + "' not found in the rule registry!");
                 }
                 rules.add(rule);
             }
@@ -723,6 +801,64 @@ public class FileFormatResource implements RESTResource {
         }
         serializer.generateFormat(genId, outputStream);
         return Response.ok(new String(outputStream.toByteArray(), StandardCharsets.UTF_8)).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/rules/check")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "canSerializeRules", summary = "Checks if the specified rule(s) can be serialized to the target format.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SerializabilityResultsDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "No rule specified."),
+                    @ApiResponse(responseCode = "404", description = "One or more rules not found in the registry.") })
+    public Response canSerializeRules(@Context HttpHeaders httpHeaders,
+            @DefaultValue("application/yaml") @QueryParam("targetFormat") @Parameter(description = "Target format", schema = @Schema(type = "string", allowableValues = {
+                    "application/vnd.openhab.dsl.rule", "application/yaml" })) String targetFormat,
+            @RequestBody(description = "JSON rule data", content = @Content(mediaType = MediaType.APPLICATION_JSON, examples = {
+                    @ExampleObject(name = "Rule UID example", value = JSON_RULE_UID_CHECK_EXAMPLE),
+                    @ExampleObject(name = "Rule example", value = JSON_RULE_CHECK_EXAMPLE) }, schema = @Schema(oneOf = {
+                            StringList.class, FileFormatDTO.class }))) JsonElement data) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("createFileFormatForRules: targetFormat = {}, data = {}", targetFormat, data.getAsString());
+        }
+        RuleSerializer serializer = getRuleSerializer(targetFormat);
+        if (serializer == null) {
+            return JSONResponse.createErrorResponse(Response.Status.UNSUPPORTED_MEDIA_TYPE,
+                    "Unsupported target format '" + targetFormat + "'");
+        }
+        List<Rule> rules = new ArrayList<>();
+        if (data.isJsonArray()) {
+            Type uidListType = new TypeToken<List<String>>() {
+            }.getType();
+            List<String> uids = gson.fromJson(data, uidListType);
+            if (uids == null || uids.isEmpty()) {
+                return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, "No Rule UID specified");
+            }
+            for (String ruleUID : uids) {
+                Rule rule = ruleRegistry.get(ruleUID);
+                if (rule == null) {
+                    return JSONResponse.createErrorResponse(Response.Status.NOT_FOUND,
+                            "Rule with UID '" + ruleUID + "' not found in the rule registry!");
+                }
+                rules.add(rule);
+            }
+        } else if (data.isJsonObject()) {
+            FileFormatDTO dto = gson.fromJson(data, FileFormatDTO.class);
+            if (dto != null && dto.rules != null) {
+                for (RuleDTO ruleData : dto.rules) {
+                    rules.add(RuleDTOMapper.map(ruleData));
+                }
+            }
+            if (rules.isEmpty()) {
+                return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, "No Rule specified");
+            }
+        } else {
+            return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, "Unsupported input");
+        }
+        return JSONResponse.createResponse(Response.Status.OK,
+                new SerializabilityResultsDTO(serializer.checkSerializability(rules)), null);
     }
 
     @POST
@@ -761,7 +897,7 @@ public class FileFormatResource implements RESTResource {
                 RuleTemplate template = templateRegistry.get(templateUID);
                 if (template == null) {
                     return JSONResponse.createErrorResponse(Response.Status.NOT_FOUND,
-                            "Rule template with ID '" + templateUID + "' not found in the registry!");
+                            "Rule template with UID '" + templateUID + "' not found in the registry!");
                 }
                 templates.add(template);
             }
@@ -1509,7 +1645,7 @@ public class FileFormatResource implements RESTResource {
             }
         }
         if (data.rules != null) {
-            for (RuleDTO ruleData : data.rules) { // TODO: (Nad) Any checks/validation to do?
+            for (RuleDTO ruleData : data.rules) {
                 rules.add(RuleDTOMapper.map(ruleData));
             }
         }
@@ -1704,5 +1840,8 @@ public class FileFormatResource implements RESTResource {
         } catch (URISyntaxException e) {
             throw new BadRequestException("Invalid URI syntax: " + uriString);
         }
+    }
+
+    private static interface StringList extends List<String> {
     }
 }
