@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -154,7 +154,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             .synchronizedMap(new WeakHashMap<>());
 
     // Cache for reflection fields to avoid performance issues with reflection in copying widgets
-    private final Map<Class<?>, List<Field>> fieldCache = new HashMap<>();
+    private final Map<Class<?>, List<Field>> fieldCache = new ConcurrentHashMap<>();
 
     private String groupMembersSorting = DEFAULT_SORTING;
 
@@ -813,7 +813,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             Sitemap sitemap = sitemapName != null ? sitemapRegistry.get(sitemapName) : null;
             if (sitemap != null && sitemapName != null) {
                 Map<String, Text> sitemapWidgets = nestedSitemapWidgetsCache.computeIfAbsent(nestedSitemap,
-                        ns -> new HashMap<>());
+                        ns -> new ConcurrentHashMap<>());
                 if (sitemapWidgets == null) {
                     return null;
                 }
@@ -834,8 +834,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     return text;
                 });
             } else {
-                logger.warn("Cannot find sitemap '{}' for nested sitemap widget", sitemapName);
+                String name = sitemapName;
                 return defaultNestedSitemapWidgetsCache.computeIfAbsent(nestedSitemap, ns -> {
+                    if (name != null && sitemap == null) {
+                        logger.warn("Cannot find sitemap '{}' for nested sitemap widget", name);
+                    }
                     Text text = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactoryImpl.TEXT));
                     copyProperties(widget, text);
                     Parent parent = nestedSitemap.getParent();
@@ -844,7 +847,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     }
                     // we return an empty nested text widget, so the link to the sitemap is visible in the UI
                     Text nestedText = Objects
-                            .requireNonNull((Text) sitemapFactory.createWidget(SitemapFactoryImpl.TEXT));
+                            .requireNonNull((Text) sitemapFactory.createWidget(SitemapFactoryImpl.TEXT, text));
                     text.setWidgets(new ArrayList<Widget>(List.of(nestedText)));
                     return text;
                 });
@@ -1121,7 +1124,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             if (parentIndex < 0) {
                 parentIndex = sitemap.getWidgets().indexOf(w);
             }
-            indexes.add(getChildren(sitemap).indexOf(w));
+            indexes.add(parentIndex);
         }
         String id = "";
         if (!indexes.isEmpty()) {

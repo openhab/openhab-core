@@ -215,6 +215,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                 break;
             case NestedSitemap nestedSitemapWidget:
                 setWidgetPropertyFromComponentConfig(nestedSitemapWidget, component, "sitemapName");
+                break;
             default:
                 break;
         }
