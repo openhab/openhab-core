@@ -176,6 +176,30 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         this.sitemapFactory = sitemapFactory;
         this.sitemapRegistry = sitemapRegistry;
         this.timeZoneProvider = timeZoneProvider;
+        addSitemapChangeListener(sitemapRegistry);
+    }
+
+    private void addSitemapChangeListener(final SitemapRegistry sitemapRegistry) {
+        sitemapRegistry.addRegistryChangeListener(new RegistryChangeListener<Sitemap>() {
+
+            @Override
+            public void added(Sitemap element) {
+                // nothing to do
+            }
+
+            @Override
+            public void removed(Sitemap element) {
+                updated(element, element);
+            }
+
+            @Override
+            public void updated(Sitemap oldElement, Sitemap element) {
+                // remove cached text widget for sitemap, will be recreated if it was an update
+                String sitemapName = oldElement.getName();
+                nestedSitemapWidgetsCache.values()
+                        .forEach(widgets -> widgets.keySet().removeIf(name -> name.equals(sitemapName)));
+            }
+        });
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

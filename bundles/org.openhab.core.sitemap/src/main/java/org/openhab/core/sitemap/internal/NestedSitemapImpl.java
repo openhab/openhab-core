@@ -41,4 +41,9 @@ public class NestedSitemapImpl extends NonLinkableWidgetImpl implements NestedSi
     public void setSitemapName(@Nullable String sitemapName) {
         this.sitemapName = sitemapName;
     }
+
+    @Override
+    public String getWidgetType() {
+        return "Sitemap";
+    }
 }

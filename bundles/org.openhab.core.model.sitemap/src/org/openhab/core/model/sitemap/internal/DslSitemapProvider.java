@@ -294,6 +294,11 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         String instanceTypeName = modelWidget.eClass().getInstanceTypeName();
         String widgetType = instanceTypeName
                 .substring(instanceTypeName.lastIndexOf("." + MODEL_TYPE_PREFIX) + MODEL_TYPE_PREFIX.length() + 1);
+        if (widgetType.equals("NestedSitemap")) {
+            // We need a different type for nested sitemaps, but can keep a common name for the model type, so we need
+            // to distinguish them here
+            widgetType = org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.SITEMAP;
+        }
         return widgetType;
     }
 
