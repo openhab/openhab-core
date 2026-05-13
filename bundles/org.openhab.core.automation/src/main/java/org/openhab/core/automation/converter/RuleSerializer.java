@@ -45,7 +45,7 @@ public interface RuleSerializer extends ObjectSerializer<Rule> {
      *
      * @param id the identifier of the {@link Rule} format generation.
      * @param rules the {@link List} of {@link Rule}s to serialize.
-     * @param the option that determines how to serialize the {@link Rule}s.
+     * @param option the option that determines how to serialize the {@link Rule}s.
      * @throws SerializationException If one or more of the rules can't be serialized.
      */
     void setRulesToBeSerialized(String id, List<Rule> rules, RuleSerializationOption option)
