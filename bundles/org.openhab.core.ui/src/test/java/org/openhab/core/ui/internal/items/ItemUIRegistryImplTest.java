@@ -1566,6 +1566,7 @@ public class ItemUIRegistryImplTest {
         // place nestedSitemap inside a frame, and frame inside the top-level sitemap
         when(frameMock.getWidgets()).thenReturn(List.of(nestedSitemapMock));
         when(sitemapMock.getWidgets()).thenReturn(List.of(frameMock));
+        when(sitemapMock.getName()).thenReturn(SITEMAP_NAME);
         when(frameMock.getParent()).thenReturn(sitemapMock);
         when(nestedSitemapMock.getParent()).thenReturn(frameMock);
 
@@ -1634,6 +1635,7 @@ public class ItemUIRegistryImplTest {
         // place nestedSitemap inside a frame and the frame in the top-level sitemap
         when(frameMock.getWidgets()).thenReturn(List.of(nestedSitemapMock));
         when(sitemapMock.getWidgets()).thenReturn(List.of(frameMock));
+        when(sitemapMock.getName()).thenReturn(SITEMAP_NAME);
         when(frameMock.getParent()).thenReturn(sitemapMock);
         when(nestedSitemapMock.getParent()).thenReturn(frameMock);
 

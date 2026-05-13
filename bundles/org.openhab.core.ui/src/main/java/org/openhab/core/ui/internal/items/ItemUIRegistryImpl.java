@@ -843,7 +843,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                 Item item = get(itemName);
                 if (item != null) {
                     State state = item.getState();
-                    if (state instanceof StringType stringState && StringType.EMPTY.equals(stringState)) {
+                    if (state instanceof StringType stringState && !StringType.EMPTY.equals(stringState)) {
                         sitemapName = stringState.toString();
                     }
                 }
