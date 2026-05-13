@@ -843,9 +843,23 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                 Item item = get(itemName);
                 if (item != null) {
                     State state = item.getState();
-                    if (state instanceof StringType stringState) {
+                    if (state instanceof StringType stringState && StringType.EMPTY.equals(stringState)) {
                         sitemapName = stringState.toString();
                     }
+                }
+            }
+            // Avoid linking back to the root sitemap to prevent loops
+            if (sitemapName != null) {
+                Parent parent = nestedSitemap.getParent();
+                while (parent instanceof LinkableWidget linkableParent) {
+                    parent = linkableParent.getParent();
+                }
+                if (parent instanceof Sitemap parentSitemap && parentSitemap.getName().equals(sitemapName)) {
+                    logger.warn(
+                            "Nested sitemap widget with sitemap name '{}' links to the root sitemap, which is not supported to avoid loops",
+                            sitemapName);
+                    sitemapName = null;
+                    ;
                 }
             }
             Sitemap sitemap = sitemapName != null ? sitemapRegistry.get(sitemapName) : null;
