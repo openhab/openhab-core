@@ -185,16 +185,11 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
             if ((s = rule.getDescription()) != null && !s.isBlank()) {
                 errors.add("has a description");
             }
-            List<Trigger> triggers = rule.getTriggers();
-            if (triggers.isEmpty()) {
-                errors.add("has no triggers");
-            } else {
-                for (Trigger trigger : triggers) {
-                    try {
-                        buildModelTrigger(trigger);
-                    } catch (SerializationException e) {
-                        errors.add("trigger '" + trigger.getId() + "': " + e.getMessage());
-                    }
+            for (Trigger trigger : rule.getTriggers()) {
+                try {
+                    buildModelTrigger(trigger);
+                } catch (SerializationException e) {
+                    errors.add("trigger '" + trigger.getId() + "': " + e.getMessage());
                 }
             }
 
