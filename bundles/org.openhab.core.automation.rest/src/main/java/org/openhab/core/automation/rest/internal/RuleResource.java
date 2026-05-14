@@ -213,7 +213,7 @@ public class RuleResource implements RESTResource {
                 .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider)); // map matching rules
         if (summary != null && summary) {
             rules = dtoMapper.limitToFields(rules,
-                    "uid,templateUID,templateState,name,visibility,description,status,tags,editable");
+                    "uid,templateUID,templateState,name,visibility,description,status,tags,configuration,editable");
         }
 
         return Response.ok(new Stream2JSONInputStream(rules)).build();
