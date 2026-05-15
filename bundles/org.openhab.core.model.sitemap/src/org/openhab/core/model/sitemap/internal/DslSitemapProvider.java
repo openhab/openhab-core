@@ -255,7 +255,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     break;
                 case NestedSitemap nestedSitemapWidget:
                     ModelNestedSitemap modelNestedSitemap = (ModelNestedSitemap) modelWidget;
-                    nestedSitemapWidget.setName(modelNestedSitemap.getName());
+                    nestedSitemapWidget.setName(modelNestedSitemap.getSitemapName());
                     break;
                 default:
                     break;
