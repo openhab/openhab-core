@@ -211,30 +211,100 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     }
 
     @Override
-    public void removed(Sitemap element) {
-        updated(element, element);
+    public void updated(Sitemap oldElement, Sitemap element) {
+        if (element.equals(oldElement)) {
+            return;
+        }
+        removed(oldElement);
     }
 
     @Override
-    public void updated(Sitemap oldElement, Sitemap element) {
-        // if a nested sitemap is a widget in an updated or removed sitemap, remove the nested sitemap from the cache,
-        // so it will be recreated on first use with the new sitemap
+    public void removed(Sitemap element) {
+        // Name of the sitemap being updated/removed
+        final String sitemapName = element.getName();
+
+        // 1) Remove nestedSitemap outer keys whose parent chain ends at the updated sitemap
         nestedSitemapWidgetsCache.keySet().removeIf(nestedSitemap -> {
             Parent parent = nestedSitemap.getParent();
             while (parent instanceof LinkableWidget linkableWidget) {
                 parent = linkableWidget.getParent();
             }
-            if (parent instanceof Sitemap sitemap && !sitemap.getName().equals(oldElement.getName())) {
+            // only remove if parent is null or belongs to the updated sitemap (or sitemap equals oldElement)
+            if (parent instanceof Sitemap sitemap && !sitemap.getName().equals(sitemapName)) {
                 return false;
             }
-            defaultNestedSitemapWidgetsCache.remove(nestedSitemap);
+            return true;
+        });
+        defaultNestedSitemapWidgetsCache.keySet().removeIf(nestedSitemap -> {
+            Parent parent = nestedSitemap.getParent();
+            while (parent instanceof LinkableWidget linkableWidget) {
+                parent = linkableWidget.getParent();
+            }
+            // only remove if parent is null or belongs to the updated sitemap (or sitemap equals oldElement)
+            if (parent instanceof Sitemap sitemap && !sitemap.getName().equals(sitemapName)) {
+                return false;
+            }
             return true;
         });
 
-        // remove cached text widget for sitemap, will be recreated if it was an update on first use
-        String sitemapName = oldElement.getName();
-        nestedSitemapWidgetsCache.values()
-                .forEach(widgets -> widgets.keySet().removeIf(name -> name.equals(sitemapName)));
+        // 2) Remove per-name entries for the updated sitemap and collect removed Texts
+        // so we can also purge other caches that reference those Texts
+        Set<Text> removedTexts = ConcurrentHashMap.newKeySet();
+        nestedSitemapWidgetsCache.forEach((ns, innerMap) -> {
+            Text removed = innerMap.remove(sitemapName);
+            if (removed != null) {
+                removedTexts.add(removed);
+            }
+        });
+
+        // 3) Also remove any other inner-map entries whose trees contain a removed Text
+        if (!removedTexts.isEmpty()) {
+            nestedSitemapWidgetsCache.forEach((ns, innerMap) -> {
+                List<String> keysToRemove = new ArrayList<>();
+                for (Map.Entry<String, Text> me : innerMap.entrySet()) {
+                    Text t = me.getValue();
+                    if (removedTexts.contains(t) || containsAnyCachedTextRecursive(t, removedTexts)) {
+                        keysToRemove.add(me.getKey());
+                    }
+                }
+                for (String key : keysToRemove) {
+                    Text removed = innerMap.remove(key);
+                    if (removed != null) {
+                        removedTexts.add(removed);
+                    }
+                }
+            });
+            defaultNestedSitemapWidgetsCache.entrySet().removeIf(e -> {
+                Text t = e.getValue();
+                if (removedTexts.contains(t) || containsAnyCachedTextRecursive(t, removedTexts)) {
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        // 4) Clean up outer entries after possible inner removals
+        nestedSitemapWidgetsCache.entrySet().removeIf(e -> e.getValue().isEmpty());
+    }
+
+    /**
+     * Recursively search the widget tree rooted at 'root' for any Text instances contained in 'targets'.
+     * Returns true as soon as any match is found.
+     */
+    private boolean containsAnyCachedTextRecursive(LinkableWidget root, Set<Text> targets) {
+        if (root instanceof Text rootText && targets.contains(rootText)) {
+            return true;
+        }
+        List<Widget> children = root.getWidgets();
+        if (children.isEmpty()) {
+            return false;
+        }
+        for (Widget child : children) {
+            if (child instanceof LinkableWidget childLw && containsAnyCachedTextRecursive(childLw, targets)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -848,7 +918,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
             return null;
         } else if (widget instanceof NestedSitemap nestedSitemap) {
             String itemName = nestedSitemap.getItem();
-            String sitemapName = nestedSitemap.getSitemapName();
+            String sitemapName = nestedSitemap.getName();
             if (itemName != null) {
                 Item item = get(itemName);
                 if (item != null) {
@@ -1610,5 +1680,25 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
         String unit = index > 0 ? format.substring(index + 1) : null;
         unit = UnitUtils.UNIT_PERCENT_FORMAT_STRING.equals(unit) ? "%" : unit;
         return unit;
+    }
+
+    /**
+     * This method is used to be able to test the nested sitemap widgets cache and is only there for testing purposes.
+     * It is not intended to be used by other classes.
+     *
+     * @return the nestedSitemapWidgetsCache
+     */
+    Map<NestedSitemap, Map<String, Text>> getNestedSitemapWidgetsCache() {
+        return nestedSitemapWidgetsCache;
+    }
+
+    /**
+     * This method is used to be able to test the nested sitemap widgets cache and is only there for testing purposes.
+     * It is not intended to be used by other classes.
+     *
+     * @return the defaultNestedSitemapWidgetsCache
+     */
+    Map<NestedSitemap, Text> getDefaultNestedSitemapWidgetsCache() {
+        return defaultNestedSitemapWidgetsCache;
     }
 }

@@ -23,6 +23,7 @@ import java.text.DecimalFormatSymbols;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import javax.measure.quantity.Temperature;
@@ -1555,14 +1556,14 @@ public class ItemUIRegistryImplTest {
         when(targetSitemap.getIcon()).thenReturn("targetIcon");
 
         // create a concrete child widget inside the target sitemap (real impl via factory impl)
-        Widget sourceChild = sitemapFactory.createWidget("Switch", targetSitemap);
+        Widget sourceChild = sitemapFactory.createWidget(SitemapFactory.SWITCH, targetSitemap);
         assertNotNull(sourceChild);
         sourceChild.setLabel("childLabel");
         List<Widget> sourceChildren = List.of(sourceChild);
         when(targetSitemap.getWidgets()).thenReturn(sourceChildren);
 
         when(sitemapRegistryMock.get("target")).thenReturn(targetSitemap);
-        when(nestedSitemapMock.getSitemapName()).thenReturn("target");
+        when(nestedSitemapMock.getName()).thenReturn("target");
         // place nestedSitemap inside a frame, and frame inside the top-level sitemap
         when(frameMock.getWidgets()).thenReturn(List.of(nestedSitemapMock));
         when(sitemapMock.getWidgets()).thenReturn(List.of(frameMock));
@@ -1570,14 +1571,13 @@ public class ItemUIRegistryImplTest {
         when(frameMock.getParent()).thenReturn(sitemapMock);
         when(nestedSitemapMock.getParent()).thenReturn(frameMock);
 
-        // override the mocked sitemapFactory to return real Text and real Switch implementations
-        // so that setWidgets/getWidgets and parent relationships work as real objects
-        Text realNestedText = (Text) sitemapFactory.createWidget("Text");
-        Widget realSwitchCopy = sitemapFactory.createWidget("Switch");
-        when(sitemapFactoryMock.createWidget("Text")).thenReturn(realNestedText);
-        when(sitemapFactoryMock.createWidget("Switch")).thenReturn(realSwitchCopy);
+        // ensure the factory creates real Widget instances
+        doAnswer(invocation -> {
+            String type = invocation.getArgument(0);
+            return sitemapFactory.createWidget(type);
+        }).when(sitemapFactoryMock).createWidget(anyString());
 
-        // call getChildren on the frame: this will resolve the nested sitemap into a Text (realNestedText)
+        // call getChildren on the frame: this will resolve the nested sitemap into a Text
         List<Widget> frameChildren = uiRegistry.getChildren(frameMock);
         // we expect exactly one child (the nested Text)
         assertThat(frameChildren, hasSize(1));
@@ -1616,7 +1616,7 @@ public class ItemUIRegistryImplTest {
         when(targetSitemap.getIcon()).thenReturn("itemIcon");
 
         // create source widget inside target sitemap
-        Widget sourceChild = sitemapFactory.createWidget("Switch", targetSitemap);
+        Widget sourceChild = sitemapFactory.createWidget(SitemapFactory.SWITCH, targetSitemap);
         assertNotNull(sourceChild);
         when(targetSitemap.getWidgets()).thenReturn(List.of(sourceChild));
 
@@ -1639,11 +1639,11 @@ public class ItemUIRegistryImplTest {
         when(frameMock.getParent()).thenReturn(sitemapMock);
         when(nestedSitemapMock.getParent()).thenReturn(frameMock);
 
-        // ensure the factory creates real Text and Switch copies as before
-        Widget realNestedText = sitemapFactory.createWidget("Text");
-        Widget realSwitchCopy = sitemapFactory.createWidget("Switch");
-        when(sitemapFactoryMock.createWidget("Text")).thenReturn(realNestedText);
-        when(sitemapFactoryMock.createWidget("Switch")).thenReturn(realSwitchCopy);
+        // ensure the factory creates real Widget instances
+        doAnswer(invocation -> {
+            String type = invocation.getArgument(0);
+            return sitemapFactory.createWidget(type);
+        }).when(sitemapFactoryMock).createWidget(anyString());
 
         when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
 
@@ -1664,5 +1664,109 @@ public class ItemUIRegistryImplTest {
         assertNotNull(childId);
         Widget fetched = uiRegistry.getWidget(sitemapMock, childId);
         assertSame(nestedChild, fetched);
+    }
+
+    @Test
+    public void testRemovingNestedSitemapRecreatesWidgetAndId() throws Exception {
+        // Use a real SitemapFactoryImpl to create real widget instances for the target sitemap, so that parent/child
+        // relationships work as expected
+        SitemapFactoryImpl sitemapFactory = new SitemapFactoryImpl();
+
+        // Create root sitemap
+        String rootSitemapName = "root";
+        Sitemap root = sitemapFactory.createSitemap(rootSitemapName);
+
+        // Create sitemap nested1 (the nested sitemap) with some child widgets
+        String nestedSitemap1Name = "nested1";
+        Sitemap nestedSitemap1 = sitemapFactory.createSitemap(nestedSitemap1Name);
+        Switch nestedSwitch = Objects
+                .requireNonNull((Switch) sitemapFactory.createWidget(SitemapFactory.SWITCH, nestedSitemap1));
+        Slider nestedSlider = Objects
+                .requireNonNull((Slider) sitemapFactory.createWidget(SitemapFactory.SLIDER, nestedSitemap1));
+        nestedSitemap1.setWidgets(new ArrayList<>(List.of(nestedSwitch, nestedSlider)));
+
+        // Create sitemap nested2 (the nested sitemap) with some child widgets
+        String nestedSitemap2Name = "nested2";
+        Sitemap nestedSitemap2 = sitemapFactory.createSitemap(nestedSitemap2Name);
+        Image nestedImage = Objects
+                .requireNonNull((Image) sitemapFactory.createWidget(SitemapFactory.IMAGE, nestedSitemap2));
+        nestedSitemap2.setWidgets(new ArrayList<>(List.of(nestedImage)));
+
+        // Create nested sitemap widgets in the root that reference "nested1" and "nested2"
+        NestedSitemap nested1 = (NestedSitemap) sitemapFactory.createWidget(SitemapFactory.SITEMAP, root);
+        assertNotNull(nested1);
+        nested1.setName(nestedSitemap1Name);
+        NestedSitemap nested2 = (NestedSitemap) sitemapFactory.createWidget(SitemapFactory.SITEMAP, root);
+        assertNotNull(nested2);
+        nested2.setName(nestedSitemap2Name);
+        root.setWidgets(new ArrayList<>(List.of(nested1, nested2)));
+
+        // ensure the factory creates real Widget instances
+        doAnswer(invocation -> {
+            String type = invocation.getArgument(0);
+            return sitemapFactory.createWidget(type);
+        }).when(sitemapFactoryMock).createWidget(anyString());
+
+        when(sitemapRegistryMock.get(rootSitemapName)).thenReturn(root);
+        when(sitemapRegistryMock.get(nestedSitemap1Name)).thenReturn(nestedSitemap1);
+        when(sitemapRegistryMock.get(nestedSitemap2Name)).thenReturn(nestedSitemap2);
+        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
+
+        // Compute the widget id for the nested widget in the root sitemap
+        String id = uiRegistry.getWidgetId(nested1);
+        assertEquals("1_0", id);
+        Widget cachedNestedSitemap = uiRegistry.getWidget(root, "1_0");
+        assertThat(cachedNestedSitemap, is(instanceOf(Text.class)));
+
+        id = uiRegistry.getWidgetId(nestedSwitch);
+        assertEquals("1_0", id); // This is the id in the nested sitemap, not the id in the root sitemap
+        Widget nestedSwitchFromNestedSitemap = uiRegistry.getWidget(nestedSitemap1, "1_0");
+        assertNotNull(nestedSwitchFromNestedSitemap);
+        assertThat(nestedSwitchFromNestedSitemap, is(instanceOf(Switch.class)));
+        assertEquals(nestedSwitch, nestedSwitchFromNestedSitemap);
+
+        Widget cachedNestedSwitchWidget = uiRegistry.getWidget(root, "1_00"); // This is the id of the nested widget in
+                                                                              // the root sitemap, which should be
+                                                                              // cached now
+        assertNotNull(cachedNestedSwitchWidget);
+        assertThat(cachedNestedSwitchWidget, is(instanceOf(Switch.class)));
+        assertThat(cachedNestedSwitchWidget.getParent(), is(sameInstance(cachedNestedSitemap)));
+        id = uiRegistry.getWidgetId(cachedNestedSwitchWidget);
+        assertEquals("1_00", id);
+        Widget cachedNestedSliderWidget = uiRegistry.getWidget(root, "1_01");
+        assertNotNull(cachedNestedSliderWidget);
+        assertThat(cachedNestedSliderWidget, is(instanceOf(Slider.class)));
+        assertThat(cachedNestedSliderWidget.getParent(), is(sameInstance(cachedNestedSitemap)));
+        id = uiRegistry.getWidgetId(cachedNestedSliderWidget);
+        assertEquals("1_01", id);
+        assertTrue(uiRegistry.getDefaultNestedSitemapWidgetsCache().isEmpty());
+        assertThat(uiRegistry.getNestedSitemapWidgetsCache().keySet().size(), is(2));
+
+        // Now simulate removal of nested sitemap -> cache invalidation should happen
+        when(sitemapRegistryMock.get(nestedSitemap1Name)).thenReturn(null);
+        uiRegistry.removed(nestedSitemap1);
+        assertNull(sitemapRegistryMock.get(nestedSitemap1Name));
+        assertTrue(uiRegistry.getDefaultNestedSitemapWidgetsCache().isEmpty());
+        assertThat(uiRegistry.getNestedSitemapWidgetsCache().keySet().size(), is(1));
+
+        // On next access, the resolved nested sitemap should be gone from the cache, and a new empty Text placeholder
+        // should be created (since the sitemap cannot be resolved anymore)
+        Widget cachedNestedSitemapAfter = uiRegistry.getWidget(root, "1_0");
+        assertNotNull(cachedNestedSitemapAfter);
+        assertThat(cachedNestedSitemapAfter, is(instanceOf(Text.class)));
+        assertNotEquals(cachedNestedSitemap, cachedNestedSitemapAfter);
+        Text textAfter = (Text) cachedNestedSitemapAfter;
+        // There should only be a single child widget (empty Text placeholder, Switch and Slider should be gone)
+        assertThat(textAfter.getWidgets().size(), is(1));
+        assertThat(textAfter.getWidgets().getFirst(), is(instanceOf(Text.class)));
+        assertThat(uiRegistry.getDefaultNestedSitemapWidgetsCache().keySet().size(), is(1));
+        assertThat(uiRegistry.getNestedSitemapWidgetsCache().keySet().size(), is(1));
+
+        // Finally, simulate removal of the root sitemap and ensure the cache is cleared for all nested widgets as well
+        when(sitemapRegistryMock.get(rootSitemapName)).thenReturn(null);
+        uiRegistry.removed(root);
+        assertNull(sitemapRegistryMock.get(rootSitemapName));
+        assertTrue(uiRegistry.getNestedSitemapWidgetsCache().isEmpty());
+        assertTrue(uiRegistry.getDefaultNestedSitemapWidgetsCache().isEmpty());
     }
 }
