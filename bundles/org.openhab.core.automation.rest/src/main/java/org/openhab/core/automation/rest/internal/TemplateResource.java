@@ -24,13 +24,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.dto.RuleTemplateDTO;
 import org.openhab.core.automation.dto.RuleTemplateDTOMapper;
 import org.openhab.core.automation.template.RuleTemplate;
-import org.openhab.core.automation.template.Template;
 import org.openhab.core.automation.template.TemplateRegistry;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
@@ -73,12 +71,12 @@ public class TemplateResource implements RESTResource {
     public static final String PATH_TEMPLATES = "templates";
 
     private final LocaleService localeService;
-    private final TemplateRegistry<@NonNull RuleTemplate> templateRegistry;
+    private final TemplateRegistry<RuleTemplate> templateRegistry;
 
     @Activate
     public TemplateResource( //
             final @Reference LocaleService localeService,
-            final @Reference TemplateRegistry<@NonNull RuleTemplate> templateRegistry) {
+            final @Reference TemplateRegistry<RuleTemplate> templateRegistry) {
         this.localeService = localeService;
         this.templateRegistry = templateRegistry;
     }
@@ -86,7 +84,7 @@ public class TemplateResource implements RESTResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTemplates", summary = "Get all available templates.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Template.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RuleTemplateDTO.class)))) })
     public Response getAll(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
@@ -99,7 +97,7 @@ public class TemplateResource implements RESTResource {
     @Path("/{templateUID}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTemplateById", summary = "Gets a template corresponding to the given UID.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Template.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RuleTemplateDTO.class))),
             @ApiResponse(responseCode = "404", description = "Template corresponding to the given UID does not found.") })
     public Response getByUID(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
