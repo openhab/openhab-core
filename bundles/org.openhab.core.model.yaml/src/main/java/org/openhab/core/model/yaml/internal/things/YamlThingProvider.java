@@ -108,22 +108,22 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         @Override
         public void run() {
             logger.debug("Starting lazy retry thread");
-            while (!queue.isEmpty()) {
-                synchronized (queueLock) {
-                    for (QueueContent qc : queue) {
-                        if (retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration, qc.thingUID,
-                                qc.bridgeUID)) {
-                            queue.remove(qc);
-                        }
+            boolean stop = false;
+            do {
+                // Wait 1s before retrying
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    stop = true;
+                }
+                if (!stop) {
+                    synchronized (queueLock) {
+                        queue.removeIf(qc -> retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration,
+                                qc.thingUID, qc.bridgeUID));
+                        stop = queue.isEmpty();
                     }
                 }
-                if (!queue.isEmpty()) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
+            } while (!stop);
             logger.debug("Lazy retry thread ran out of work. Good bye.");
         }
     };
@@ -562,11 +562,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     private void removeFromRetryQueue(ThingUID thingUID) {
         synchronized (queueLock) {
-            for (QueueContent qc : queue) {
-                if (thingUID.equals(qc.thingUID)) {
-                    queue.remove(qc);
-                }
-            }
+            queue.removeIf(qc -> thingUID.equals(qc.thingUID));
         }
     }
 
