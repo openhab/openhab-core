@@ -92,7 +92,6 @@ import org.openhab.core.sitemap.internal.TextImpl;
 import org.openhab.core.sitemap.internal.VideoImpl;
 import org.openhab.core.sitemap.internal.WebviewImpl;
 import org.openhab.core.sitemap.registry.SitemapFactory;
-import org.openhab.core.sitemap.registry.SitemapRegistry;
 
 /**
  * The {@link YamlSitemapProviderTest} contains tests for the {@link YamlSitemapProvider} class.
@@ -111,7 +110,6 @@ public class YamlSitemapProviderTest {
     private @TempDir @NonNullByDefault({}) Path watchPath;
     private @NonNullByDefault({}) Path fullModelPath;
 
-    private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistry;
     private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactory;
 
     private @NonNullByDefault({}) YamlModelRepositoryImpl modelRepository;
@@ -702,7 +700,7 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getVisibility(), hasSize(0));
         assertTrue(widget instanceof NestedSitemap);
         NestedSitemap nestedSitemapWidget = (NestedSitemap) widget;
-        assertEquals("sitemap", nestedSitemapWidget.getSitemapName());
+        assertEquals("sitemap", nestedSitemapWidget.getName());
 
         widget = widgets.get(18);
         assertEquals("Default", widget.getWidgetType());

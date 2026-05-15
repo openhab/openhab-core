@@ -267,7 +267,7 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             }
             case NestedSitemap nestedSitemapWidget -> {
                 ModelNestedSitemap modelNestedSitemap = SitemapFactory.eINSTANCE.createModelNestedSitemap();
-                modelNestedSitemap.setSitemapName(nestedSitemapWidget.getSitemapName());
+                modelNestedSitemap.setName(nestedSitemapWidget.getName());
                 modelWidget = modelNestedSitemap;
             }
             default -> {

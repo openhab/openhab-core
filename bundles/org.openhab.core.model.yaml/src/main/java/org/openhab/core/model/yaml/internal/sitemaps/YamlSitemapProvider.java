@@ -301,7 +301,7 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
                     defaultWidget.setHeight(widgetDTO.height);
                     break;
                 case NestedSitemap nestedSitemapWidget:
-                    nestedSitemapWidget.setSitemapName(widgetDTO.name);
+                    nestedSitemapWidget.setName(widgetDTO.name);
                     break;
                 default:
                     break;
@@ -392,12 +392,11 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     @Override
-    public @Nullable Sitemap getSitemap(String sitemapName) {
+    public @Nullable Sitemap getSitemap(String name) {
         Sitemap sitemap = sitemapsMap.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
-                .flatMap(e -> e.getValue().stream()).filter(s -> sitemapName.equals(s.getName())).findAny()
-                .orElse(null);
+                .flatMap(e -> e.getValue().stream()).filter(s -> name.equals(s.getName())).findAny().orElse(null);
         if (sitemap == null) {
-            logger.trace("Sitemap {} cannot be found", sitemapName);
+            logger.trace("Sitemap {} cannot be found", name);
         }
         return sitemap;
     }

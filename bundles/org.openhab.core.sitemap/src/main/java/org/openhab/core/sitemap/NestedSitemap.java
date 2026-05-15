@@ -29,13 +29,13 @@ public interface NestedSitemap extends NonLinkableWidget {
      * @return name of nested sitemap
      */
     @Nullable
-    String getSitemapName();
+    String getName();
 
     /**
      * Set the name of the nested sitemap. This is used to link to another sitemap, which will be rendered when the user
      * clicks on this widget.
      *
-     * @param sitemapName the name of the nested sitemap
+     * @param name the name of the nested sitemap
      */
-    void setSitemapName(@Nullable String sitemapName);
+    void setName(@Nullable String name);
 }

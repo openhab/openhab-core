@@ -29,7 +29,7 @@ public class WidgetDefinitionDTO extends AbstractWidgetDTO {
 
     // Nested sitemaps are only supported in the definition, not in the instance. The instance replaces them with a Text
     // widget containing the sitemap definition as child widgets.
-    public String sitemapName;
+    public String name;
 
     public List<RuleDTO> visibilityRules;
     public List<RuleDTO> iconRules;

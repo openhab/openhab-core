@@ -136,12 +136,11 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     @Override
-    public @Nullable Sitemap getSitemap(String sitemapName) {
+    public @Nullable Sitemap getSitemap(String name) {
         Sitemap sitemap = sitemapCache.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
-                .flatMap(e -> e.getValue().stream()).filter(s -> sitemapName.equals(s.getName())).findAny()
-                .orElse(null);
+                .flatMap(e -> e.getValue().stream()).filter(s -> name.equals(s.getName())).findAny().orElse(null);
         if (sitemap == null) {
-            logger.trace("Sitemap {} cannot be found", sitemapName);
+            logger.trace("Sitemap {} cannot be found", name);
         }
         return sitemap;
     }
@@ -256,7 +255,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     break;
                 case NestedSitemap nestedSitemapWidget:
                     ModelNestedSitemap modelNestedSitemap = (ModelNestedSitemap) modelWidget;
-                    nestedSitemapWidget.setSitemapName(modelNestedSitemap.getSitemapName());
+                    nestedSitemapWidget.setName(modelNestedSitemap.getName());
                     break;
                 default:
                     break;
@@ -445,10 +444,9 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     private void notifyRemovedSitemap(String modelName, Sitemap sitemap) {
-        String sitemapName = sitemap.getName();
+        String name = sitemap.getName();
         Sitemap existingSitemap = sitemapCache.entrySet().stream().filter(e -> !e.getKey().equals(modelName))
-                .flatMap(e -> e.getValue().stream()).filter(s -> sitemapName.equals(s.getName())).findAny()
-                .orElse(null);
+                .flatMap(e -> e.getValue().stream()).filter(s -> name.equals(s.getName())).findAny().orElse(null);
         if (existingSitemap != null) {
             // Another sitemap with the same name exists, so we need to update it to use the other one instead
             // of the removed one

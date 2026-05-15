@@ -307,7 +307,7 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
                 }
             }
             case NestedSitemap nestedSitemapWidget -> {
-                dto.name = nestedSitemapWidget.getSitemapName();
+                dto.name = nestedSitemapWidget.getName();
             }
             default -> {
             }

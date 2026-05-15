@@ -23,7 +23,7 @@ import org.openhab.core.sitemap.Parent;
 @NonNullByDefault
 public class NestedSitemapImpl extends NonLinkableWidgetImpl implements NestedSitemap {
 
-    private @Nullable String sitemapName;
+    private @Nullable String name;
 
     public NestedSitemapImpl() {
     }
@@ -33,13 +33,13 @@ public class NestedSitemapImpl extends NonLinkableWidgetImpl implements NestedSi
     }
 
     @Override
-    public @Nullable String getSitemapName() {
-        return sitemapName;
+    public @Nullable String getName() {
+        return name;
     }
 
     @Override
-    public void setSitemapName(@Nullable String sitemapName) {
-        this.sitemapName = sitemapName;
+    public void setName(@Nullable String name) {
+        this.name = name;
     }
 
     @Override

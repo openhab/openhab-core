@@ -192,7 +192,7 @@ public class SitemapDTOMapper {
                 }
             }
             case NestedSitemap nestedSitemapWidget -> {
-                widgetDTO.sitemapName = nestedSitemapWidget.getSitemapName();
+                widgetDTO.name = nestedSitemapWidget.getName();
             }
             default -> {
                 // nothing to do
@@ -330,7 +330,7 @@ public class SitemapDTOMapper {
                 chartWidget.setInterpolation(widgetDTO.interpolation);
             }
             case NestedSitemap nestedSitemapWidget -> {
-                nestedSitemapWidget.setSitemapName(widgetDTO.sitemapName);
+                nestedSitemapWidget.setName(widgetDTO.name);
             }
             case Default defaultWidget -> {
                 defaultWidget.setHeight(widgetDTO.height);
