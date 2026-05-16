@@ -365,7 +365,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             if (sourceRules instanceof Collection<?> sourceRulesCollection) {
                 for (Object sourceRule : sourceRulesCollection) {
                     if (sourceRule instanceof String) {
-                        String argument = !key.equals("visibility") ? getRuleArgument(sourceRule.toString()) : null;
+                        String argument = !"visibility".equals(key) ? getRuleArgument(sourceRule.toString()) : null;
                         List<String> conditionsString = getRuleConditions(sourceRule.toString(), argument);
                         Rule rule = sitemapFactory.createRule();
                         List<Condition> conditions = getConditions(conditionsString, component, key);

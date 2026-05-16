@@ -500,7 +500,7 @@ public class LightModelTest {
     }
 
     @Test
-    public void testRgbToRgbcwToRgb_RoundTrip() {
+    public void testRgbToRgbcwToRgbRoundTrip() {
         double[] originalRgb = { 0.8, 0.7, 0.6 };
         double[] rgbcw = RgbcwMath.rgb2rgbcw(originalRgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
         double[] reconstructedRgb = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
@@ -508,7 +508,7 @@ public class LightModelTest {
     }
 
     @Test
-    public void testRgbcwToRgbToRgbcw_RoundTrip() {
+    public void testRgbcwToRgbToRgbcwRoundTrip() {
         double[] originalRgbcw = { 0.5, 0.4, 0.3, 0.2, 0.1 };
         double[] rgb = RgbcwMath.rgbcw2rgb(originalRgbcw, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
         double[] reconstructedRgbcw = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
@@ -517,7 +517,7 @@ public class LightModelTest {
     }
 
     @Test
-    public void testEdgeCase_FullWhite() {
+    public void testEdgeCaseFullWhite() {
         double[] white = { 1.0, 1.0, 1.0 };
         double[] rgbcw = RgbcwMath.rgb2rgbcw(white, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
         double[] reconstructed = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
@@ -525,7 +525,7 @@ public class LightModelTest {
     }
 
     @Test
-    public void testEdgeCase_Black() {
+    public void testEdgeCaseBlack() {
         double[] black = { 0.0, 0.0, 0.0 };
         double[] rgbcw = RgbcwMath.rgb2rgbcw(black, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
         double[] reconstructed = RgbcwMath.rgbcw2rgb(rgbcw, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());

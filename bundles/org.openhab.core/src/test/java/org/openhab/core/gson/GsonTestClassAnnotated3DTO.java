@@ -26,16 +26,16 @@ import com.google.gson.annotations.SerializedName;
  * @author Holger Friedrich - Initial contribution
  */
 @NonNullByDefault
-public class GsonTestClassAnnotated3_DTO {
+public class GsonTestClassAnnotated3DTO {
     public @SerializedName("name") @Nullable String n;
     public @SerializedName("email") @Nullable String e;
     public int age;
     public boolean active;
 
-    public GsonTestClassAnnotated3_DTO() {
+    public GsonTestClassAnnotated3DTO() {
     }
 
-    public GsonTestClassAnnotated3_DTO(String name, int age, String email, boolean active) {
+    public GsonTestClassAnnotated3DTO(String name, int age, String email, boolean active) {
         this.n = name;
         this.e = email;
         this.age = age;
@@ -44,7 +44,7 @@ public class GsonTestClassAnnotated3_DTO {
 
     @Override
     public String toString() {
-        return "GsonTestClassAnnotated3_DTO{" + "name='" + n + '\'' + ", age=" + age + ", email='" + e + '\''
+        return "GsonTestClassAnnotated3DTO{" + "name='" + n + '\'' + ", age=" + age + ", email='" + e + '\''
                 + ", active=" + active + '}';
     }
 }

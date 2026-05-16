@@ -116,8 +116,8 @@ class GsonTest {
         assertNotNull(json, "JSON content should not be null");
         assertFalse(json.isEmpty(), "JSON content should not be empty");
 
-        // Deserialize into GsonTestClassAnnotated3_DTO
-        GsonTestClassAnnotated3_DTO test = GSON.fromJson(json, GsonTestClassAnnotated3_DTO.class);
+        // Deserialize into GsonTestClassAnnotated3DTO
+        GsonTestClassAnnotated3DTO test = GSON.fromJson(json, GsonTestClassAnnotated3DTO.class);
         assertNotNull(test, "Deserialized object should not be null");
 
         // Verify all fields are correctly deserialized - this works because @SerializedName
