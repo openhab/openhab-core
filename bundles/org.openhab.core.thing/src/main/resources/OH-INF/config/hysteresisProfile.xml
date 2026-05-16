@@ -18,5 +18,10 @@
 			<description>Inverts resulting mapping of ON / OFF, if true.</description>
 			<default>false</default>
 		</parameter>
+		<parameter name="excludeItemState" type="boolean">
+			<label>Exclude Item State</label>
+			<description>Do not include Item State in comparison.</description>
+			<default>false</default>
+		</parameter>
 	</config-description>
 </config-description:config-descriptions>
