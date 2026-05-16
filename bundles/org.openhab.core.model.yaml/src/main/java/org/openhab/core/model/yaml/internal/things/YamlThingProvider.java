@@ -114,6 +114,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     stop = true;
                 }
                 if (!stop) {
@@ -149,7 +150,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Deactivate
     public void deactivate() {
-        queue.clear();
+        synchronized (queueLock) {
+            queue.clear();
+        }
         thingsMap.clear();
         loadedXmlThingTypes.clear();
     }
