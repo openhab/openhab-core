@@ -101,7 +101,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     private final Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap<>();
 
-    private final List<QueueContent> queue = new CopyOnWriteArrayList<>();
+    protected final List<QueueContent> queue = new CopyOnWriteArrayList<>();
     private final Object queueLock = new Object();
 
     private final Runnable lazyRetryRunnable = new Runnable() {
@@ -129,7 +129,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         }
     };
 
-    private @Nullable Thread lazyRetryThread;
+    protected @Nullable Thread lazyRetryThread;
 
     private record QueueContent(ThingHandlerFactory thingHandlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {

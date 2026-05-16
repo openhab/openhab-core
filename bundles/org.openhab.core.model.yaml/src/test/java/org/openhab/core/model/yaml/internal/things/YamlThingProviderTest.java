@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -143,6 +144,7 @@ public class YamlThingProviderTest {
     private @NonNullByDefault({}) YamlModelRepositoryImpl modelRepository;
     private @NonNullByDefault({}) YamlThingProvider thingProvider;
     private @NonNullByDefault({}) TestThingChangeListener thingListener;
+    private @NonNullByDefault({}) NtpThingHandlerFactory thingHandlerFactory;
 
     @BeforeEach
     public void setup() {
@@ -150,7 +152,7 @@ public class YamlThingProviderTest {
         when(watchServiceMock.getWatchPath()).thenReturn(watchPath);
 
         when(bundleResolver.resolveBundle(any())).thenReturn(bundle);
-        when(bundle.getSymbolicName()).thenReturn("org.openhab.binding.ntp");
+        when(bundle.getSymbolicName()).thenReturn(NTP_BUNDLE_SYMBOLIC_NAME);
 
         URI uriThingType = null;
         URI uriChannelType = null;
@@ -227,7 +229,7 @@ public class YamlThingProviderTest {
 
         when(localeProvider.getLocale()).thenReturn(Locale.FRENCH);
 
-        NtpThingHandlerFactory thingHandlerFactory = new NtpThingHandlerFactory();
+        thingHandlerFactory = new NtpThingHandlerFactory(0);
         thingProvider = new YamlThingProvider(bundleResolver, thingTypeRegistry, channelTypeRegistry,
                 configDescriptionRegistry, localeProvider);
         thingProvider.onReadyMarkerAdded(new ReadyMarker(XML_THING_TYPE, NTP_BUNDLE_SYMBOLIC_NAME));
@@ -305,6 +307,9 @@ public class YamlThingProviderTest {
         assertEquals("dd-MM-yyyy", channel.getConfiguration().get("DateTimeFormat"));
         assertEquals("A parameter that is not in the channel config description.",
                 channel.getConfiguration().get("other"));
+
+        assertNull(thingProvider.lazyRetryThread);
+        assertThat(thingProvider.queue, hasSize(0));
     }
 
     @Test
@@ -368,6 +373,9 @@ public class YamlThingProviderTest {
         // Parameter DateTimeFormat injected with default value
         assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
         assertEquals(DEFAULT_DATE_TIME_FORMAT, channel.getConfiguration().get("DateTimeFormat"));
+
+        assertNull(thingProvider.lazyRetryThread);
+        assertThat(thingProvider.queue, hasSize(0));
     }
 
     @Test
@@ -437,6 +445,9 @@ public class YamlThingProviderTest {
             assertEquals("dd-MM-yyyy", channel.getConfiguration().get("DateTimeFormat"));
             assertEquals("A parameter that is not in the channel config description.",
                     channel.getConfiguration().get("other"));
+
+            assertNull(thingProvider.lazyRetryThread);
+            assertThat(thingProvider.queue, hasSize(0));
         }
     }
 
@@ -495,6 +506,9 @@ public class YamlThingProviderTest {
             assertEquals(0, channel.getProperties().size());
             // default value not injected for parameter DateTimeFormat
             assertThat(channel.getConfiguration().keySet(), hasSize(0));
+
+            assertNull(thingProvider.lazyRetryThread);
+            assertThat(thingProvider.queue, hasSize(0));
         }
     }
 
@@ -525,7 +539,183 @@ public class YamlThingProviderTest {
         assertEquals("123.45", channel.getConfiguration().get("DateTimeFormat"));
     }
 
+    @Test
+    public void testUsageOfRetryJob() throws IOException {
+        thingProvider.removeThingHandlerFactory(thingHandlerFactory);
+        thingHandlerFactory = new NtpThingHandlerFactory(2);
+        thingProvider.addThingHandlerFactory(thingHandlerFactory);
+
+        Files.copy(SOURCE_PATH.resolve("thing.yaml"), fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
+        assertThat(thingProvider.queue, hasSize(1));
+        assertNotNull(thingProvider.lazyRetryThread);
+        assertTrue(thingProvider.lazyRetryThread.isAlive());
+
+        try {
+            Thread.sleep(2500);
+        } catch (InterruptedException e) {
+        }
+
+        assertEquals(3, thingHandlerFactory.getNbCallsToCreateThing());
+        assertThat(thingProvider.queue, hasSize(0));
+        assertNotNull(thingProvider.lazyRetryThread);
+        assertFalse(thingProvider.lazyRetryThread.isAlive());
+
+        assertFalse(YamlModelUtils.isIsolatedModel(MODEL_NAME));
+        assertThat(thingListener.things, is(aMapWithSize(1)));
+        assertThat(thingListener.things, hasKey("ntp:ntp:local"));
+        assertThat(thingProvider.getAllFromModel(MODEL_NAME), hasSize(1));
+        Collection<Thing> things = thingProvider.getAll();
+        assertThat(things, hasSize(1));
+        Thing thing = things.iterator().next();
+        assertFalse(thing instanceof Bridge);
+        assertEquals(NTP_THING_UID, thing.getUID());
+        assertNull(thing.getBridgeUID());
+        assertEquals(NTP_THING_TYPE_UID, thing.getThingTypeUID());
+        assertEquals("NTP Local Server", thing.getLabel());
+        assertEquals("Paris", thing.getLocation());
+        assertEquals(NTP_THING_TYPE_EQUIPMENT_TAG, thing.getSemanticEquipmentTag());
+        assertEquals(0, thing.getProperties().size());
+        // 2 parameters injected with default value
+        assertThat(thing.getConfiguration().keySet(),
+                containsInAnyOrder("hostname", "refreshInterval", "refreshNtp", "serverPort", "timeZone", "other"));
+    }
+
+    @Test
+    public void testRemoveFromRetryQueueWhenCalledFromUpdatedModel() throws IOException {
+        thingProvider.removeThingHandlerFactory(thingHandlerFactory);
+        thingHandlerFactory = new NtpThingHandlerFactory(1);
+        thingProvider.addThingHandlerFactory(thingHandlerFactory);
+
+        Files.copy(SOURCE_PATH.resolve("thing.yaml"), fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
+        assertThat(thingProvider.queue, hasSize(1));
+        assertNotNull(thingProvider.lazyRetryThread);
+        assertTrue(thingProvider.lazyRetryThread.isAlive());
+
+        Files.copy(SOURCE_PATH.resolve("thingWithEmptyConfig.yaml"), fullModelPath,
+                StandardCopyOption.REPLACE_EXISTING);
+        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, fullModelPath);
+
+        assertEquals(2, thingHandlerFactory.getNbCallsToCreateThing());
+        assertThat(thingProvider.queue, hasSize(0));
+
+        // Wait to be sure the job is terminated (it sleeps 1s)
+        try {
+            Thread.sleep(1200);
+        } catch (InterruptedException e) {
+        }
+
+        assertEquals(2, thingHandlerFactory.getNbCallsToCreateThing());
+        assertNotNull(thingProvider.lazyRetryThread);
+        assertFalse(thingProvider.lazyRetryThread.isAlive());
+
+        assertFalse(YamlModelUtils.isIsolatedModel(MODEL_NAME));
+        assertThat(thingListener.things, is(aMapWithSize(1)));
+        assertThat(thingListener.things, hasKey("ntp:ntp:local"));
+        assertThat(thingProvider.getAllFromModel(MODEL_NAME), hasSize(1));
+        Collection<Thing> things = thingProvider.getAll();
+        assertThat(things, hasSize(1));
+        Thing thing = things.iterator().next();
+        assertFalse(thing instanceof Bridge);
+        assertEquals(NTP_THING_UID, thing.getUID());
+        assertNull(thing.getBridgeUID());
+        assertEquals(NTP_THING_TYPE_UID, thing.getThingTypeUID());
+        assertEquals(NTP_THING_TYPE_LABEL, thing.getLabel());
+        assertNull(thing.getLocation());
+        assertEquals(NTP_THING_TYPE_EQUIPMENT_TAG, thing.getSemanticEquipmentTag());
+        assertEquals(0, thing.getProperties().size());
+        // 4 parameters injected with default value
+        assertThat(thing.getConfiguration().keySet(),
+                containsInAnyOrder("hostname", "refreshInterval", "refreshNtp", "serverPort"));
+    }
+
+    @Test
+    public void testRemoveFromRetryQueueWhenCalledFromRemovedModel() throws IOException {
+        thingProvider.removeThingHandlerFactory(thingHandlerFactory);
+        thingHandlerFactory = new NtpThingHandlerFactory(5);
+        thingProvider.addThingHandlerFactory(thingHandlerFactory);
+
+        Files.copy(SOURCE_PATH.resolve("thing.yaml"), fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
+        assertThat(thingProvider.queue, hasSize(1));
+        assertNotNull(thingProvider.lazyRetryThread);
+        assertTrue(thingProvider.lazyRetryThread.isAlive());
+
+        Files.delete(fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.DELETE, fullModelPath);
+
+        assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
+        assertThat(thingProvider.queue, hasSize(0));
+
+        // Wait to be sure the job is terminated (it sleeps 1s)
+        try {
+            Thread.sleep(1200);
+        } catch (InterruptedException e) {
+        }
+
+        assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
+        assertNotNull(thingProvider.lazyRetryThread);
+        assertFalse(thingProvider.lazyRetryThread.isAlive());
+
+        assertThat(thingProvider.getAllFromModel(MODEL_NAME), hasSize(0));
+        assertThat(thingProvider.getAll(), hasSize(0));
+    }
+
+    @Test
+    public void testCreateIsolatedModelNotStartingRetryJob() throws IOException {
+        thingProvider.removeThingHandlerFactory(thingHandlerFactory);
+        thingHandlerFactory = new NtpThingHandlerFactory(4);
+        thingProvider.addThingHandlerFactory(thingHandlerFactory);
+
+        Files.copy(SOURCE_PATH.resolve("thingWithEmptyConfig.yaml"), fullModelPath);
+        List<String> errors = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+        try (FileInputStream inputStream = new FileInputStream(fullModelPath.toFile())) {
+            String name = modelRepository.createIsolatedModel(inputStream, errors, warnings);
+            assertNotNull(name);
+            assertEquals(0, errors.size());
+            assertEquals(0, warnings.size());
+
+            assertTrue(YamlModelUtils.isIsolatedModel(name));
+            assertThat(thingListener.things, is(aMapWithSize(0)));
+            assertThat(thingProvider.getAll(), hasSize(0)); // No thing for the registry
+            Collection<Thing> things = thingProvider.getAllFromModel(name);
+            assertThat(things, hasSize(1));
+            Thing thing = things.iterator().next();
+            assertFalse(thing instanceof Bridge);
+            assertEquals(NTP_THING_UID, thing.getUID());
+            assertNull(thing.getBridgeUID());
+            assertEquals(NTP_THING_TYPE_UID, thing.getThingTypeUID());
+            assertEquals(NTP_THING_TYPE_LABEL, thing.getLabel());
+            assertNull(thing.getLocation());
+            assertNull(thing.getSemanticEquipmentTag()); // Not created by the thing handler factory
+            assertEquals(0, thing.getProperties().size());
+            assertThat(thing.getConfiguration().keySet(), hasSize(0));
+
+            assertNull(thingProvider.lazyRetryThread);
+            assertThat(thingProvider.queue, hasSize(0));
+        }
+    }
+
     private class NtpThingHandlerFactory implements ThingHandlerFactory {
+        private int nbCallsBeforeSucceededCreatingThing;
+        private int nbCallsToCreateThing = 0;;
+
+        public NtpThingHandlerFactory(int nbCallsBeforeSucceededCreatingThing) {
+            this.nbCallsBeforeSucceededCreatingThing = nbCallsBeforeSucceededCreatingThing;
+        }
+
+        public int getNbCallsToCreateThing() {
+            return nbCallsToCreateThing;
+        }
+
         @Override
         public boolean supportsThingType(ThingTypeUID thingTypeUID) {
             return NTP_THING_TYPE_UID.equals(thingTypeUID);
@@ -543,6 +733,9 @@ public class YamlThingProviderTest {
         @Override
         public @Nullable Thing createThing(ThingTypeUID thingTypeUID, Configuration configuration,
                 @Nullable ThingUID thingUID, @Nullable ThingUID bridgeUID) {
+            if (++nbCallsToCreateThing <= nbCallsBeforeSucceededCreatingThing) {
+                return null;
+            }
             ThingUID effectiveUID = thingUID != null ? thingUID : ThingFactory.generateRandomThingUID(thingTypeUID);
             ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
             if (thingType != null) {
