@@ -143,7 +143,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         objectMapper.findAndRegisterModules();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
+        objectMapper.setDefaultPropertyInclusion(Include.NON_NULL);
         objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
 
         this.watchService = watchService;
