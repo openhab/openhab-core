@@ -241,7 +241,7 @@ public class FileFormatResource implements RESTResource {
             tags:
               Equipment_MyEquipment:
                 label: My Equipment
-                description: This is my equiupment
+                description: This is my equipment
                 synonyms:
                   - My Equipments
             """;
@@ -251,7 +251,7 @@ public class FileFormatResource implements RESTResource {
             tags:
               Equipment_MyEquipment:
                 label: My Equipment
-                description: This is my equiupment
+                description: This is my equipment
                 synonyms:
                   - My Equipments
             things:
@@ -313,7 +313,7 @@ public class FileFormatResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
     private final SemanticTagRegistry semanticTagRegistry;
-    private final DefaultSemanticTagProvider DefaultSemanticTagProvider;
+    private final DefaultSemanticTagProvider defaultSemanticTagProvider;
     private final ItemBuilderFactory itemBuilderFactory;
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
@@ -339,7 +339,7 @@ public class FileFormatResource implements RESTResource {
     @Activate
     public FileFormatResource(//
             final @Reference SemanticTagRegistry semanticTagRegistry,
-            final @Reference DefaultSemanticTagProvider DefaultSemanticTagProvider,
+            final @Reference DefaultSemanticTagProvider defaultSemanticTagProvider,
             final @Reference ItemBuilderFactory itemBuilderFactory, //
             final @Reference ItemRegistry itemRegistry, //
             final @Reference MetadataRegistry metadataRegistry,
@@ -352,7 +352,7 @@ public class FileFormatResource implements RESTResource {
             final @Reference SitemapFactory sitemapFactory, //
             final @Reference SitemapRegistry sitemapRegistry) {
         this.semanticTagRegistry = semanticTagRegistry;
-        this.DefaultSemanticTagProvider = DefaultSemanticTagProvider;
+        this.defaultSemanticTagProvider = defaultSemanticTagProvider;
         this.itemBuilderFactory = itemBuilderFactory;
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
@@ -455,7 +455,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "One or more items not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForItems(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "if true, exclude the configuration parameters having the default value from the result.") boolean hideDefaultParameters,
             @Parameter(description = "Array of item names. If empty or omitted, return all Items.") @Nullable List<String> itemNames) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForItems: mediaType = {}, itemNames = {}", acceptHeader, itemNames);
@@ -506,7 +506,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "One or more things not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForThings(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "if true, exclude the configuration parameters having the default value from the result.") boolean hideDefaultParameters,
             @Parameter(description = "Array of Thing UIDs. If empty or omitted, return all Things from the Registry.") @Nullable List<String> thingUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForThings: mediaType = {}, thingUIDs = {}", acceptHeader, thingUIDs);
@@ -588,7 +588,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "One or more semantic tags not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForSemanticTags(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultTags") @Parameter(description = "hide the default semantic tags") boolean hideDefaultTags,
+            @DefaultValue("true") @QueryParam("hideDefaultTags") @Parameter(description = "if true, exclude the default semantic tags from the result. This parameter is ignored when semantic tag UIDs are provided.") boolean hideDefaultTags,
             @Parameter(description = "Array of semantic tag UIDs. If empty or omitted, return all custom semantic tags from the Registry.") @Nullable List<String> semanticTagUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForSemanticTags: mediaType = {}, semanticTagUIDs = {}", acceptHeader,
@@ -601,7 +601,7 @@ public class FileFormatResource implements RESTResource {
 
         List<SemanticTag> tags;
         if (semanticTagUIDs == null || semanticTagUIDs.isEmpty()) {
-            Collection<SemanticTag> defaultTags = hideDefaultTags ? DefaultSemanticTagProvider.getAll() : List.of();
+            Collection<SemanticTag> defaultTags = hideDefaultTags ? defaultSemanticTagProvider.getAll() : List.of();
             tags = semanticTagRegistry.getAll().stream().filter(tag -> !defaultTags.contains(tag))
                     .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
         } else {
@@ -640,9 +640,9 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "400", description = "Invalid JSON data."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response create(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("false") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @DefaultValue("false") @QueryParam("hideDefaultChannels") @Parameter(description = "hide the non extensible channels having a default configuration") boolean hideDefaultChannels,
-            @DefaultValue("false") @QueryParam("hideChannelLinksAndMetadata") @Parameter(description = "hide the channel links and metadata for items") boolean hideChannelLinksAndMetadata,
+            @DefaultValue("false") @QueryParam("hideDefaultParameters") @Parameter(description = "if true, exclude the configuration parameters having the default value from the result.") boolean hideDefaultParameters,
+            @DefaultValue("false") @QueryParam("hideDefaultChannels") @Parameter(description = "if true, exclude the non extensible channels having a default configuration from the result.") boolean hideDefaultChannels,
+            @DefaultValue("false") @QueryParam("hideChannelLinksAndMetadata") @Parameter(description = "if true, exclude the channel links and metadata for items from the result.") boolean hideChannelLinksAndMetadata,
             @RequestBody(description = "JSON data", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FileFormatDTO.class))) FileFormatDTO data) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("create: mediaType = {}", acceptHeader);
@@ -1217,7 +1217,6 @@ public class FileFormatResource implements RESTResource {
                     errors.add("Invalid sitemap data" + (name != null ? " for sitemap '" + name + "'" : "") + ": "
                             + e.getMessage());
                     ok = false;
-                    continue;
                 }
             }
         }
@@ -1226,12 +1225,17 @@ public class FileFormatResource implements RESTResource {
                 String uid = tagData.uid;
                 try {
                     SemanticTag tag = SemanticTagDTOMapper.map(tagData);
-                    tags.add(tag);
+                    if (tag != null) {
+                        tags.add(tag);
+                    } else {
+                        errors.add(
+                                "Invalid semantic tag data" + (uid != null ? " for semantic tag '" + uid + "'" : ""));
+                        ok = false;
+                    }
                 } catch (IllegalArgumentException e) {
                     errors.add("Invalid semantic tag data" + (uid != null ? " for semantic tag '" + uid + "'" : "")
                             + ": " + e.getMessage());
                     ok = false;
-                    continue;
                 }
             }
         }
