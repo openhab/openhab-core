@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.thing.Bridge;
@@ -74,6 +75,8 @@ public abstract class BaseThingHandler implements ThingHandler {
             .getScheduledPool(THING_HANDLER_THREADPOOL_NAME);
 
     protected Thing thing;
+
+    private volatile @Nullable Configuration resolvedConfig;
 
     private @Nullable ThingHandlerCallback callback;
 
@@ -132,7 +135,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @return true if the parameters would result in a modified configuration, false otherwise
      */
     protected boolean isModifyingCurrentConfig(Map<String, Object> configurationParameters) {
-        Configuration currentConfig = getConfig();
+        Configuration currentConfig = getRawConfig();
         for (Entry<String, Object> entry : configurationParameters.entrySet()) {
             if (!Objects.equals(currentConfig.get(entry.getKey()), entry.getValue())) {
                 return true;
@@ -154,7 +157,18 @@ public abstract class BaseThingHandler implements ThingHandler {
     @Override
     public void thingUpdated(Thing thing) {
         dispose();
-        this.thing = thing;
+        Configuration resolvedConfiguration;
+        try {
+            resolvedConfiguration = ConfigUtil.resolveVariables(thing.getConfiguration());
+        } catch (IllegalArgumentException e) {
+            logger.warn("Updated thing '{}' with a thing containing invalid configuration '{}': {}", thing.getUID(),
+                    thing.getConfiguration(), e.getMessage());
+            resolvedConfiguration = thing.getConfiguration();
+        }
+        synchronized (this) {
+            this.thing = thing;
+            this.resolvedConfig = resolvedConfiguration;
+        }
         initialize();
     }
 
@@ -239,12 +253,42 @@ public abstract class BaseThingHandler implements ThingHandler {
     }
 
     /**
+     * Returns the raw configuration of the thing.
+     * Variable patterns are not resolved.
+     *
+     * @return raw configuration of the thing
+     */
+    private Configuration getRawConfig() {
+        return getThing().getConfiguration();
+    }
+
+    /**
      * Returns the configuration of the thing.
+     * Variable patterns are automatically resolved to the variable value.
+     *
+     * <p>
+     * To modify the configuration, retrieve an editable configuration through {@link #editConfiguration()} and persist
+     * the changed configuration with {@link #updateConfiguration(Configuration)}.
      *
      * @return configuration of the thing
      */
     protected Configuration getConfig() {
-        return getThing().getConfiguration();
+        Configuration resolvedConfig = this.resolvedConfig;
+        if (resolvedConfig == null) {
+            synchronized (this) {
+                resolvedConfig = this.resolvedConfig;
+                if (resolvedConfig == null) {
+                    try {
+                        this.resolvedConfig = resolvedConfig = ConfigUtil.resolveVariables(getRawConfig());
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("Failed to resolve variables for configuration '{}' of thing '{}': {}",
+                                getRawConfig(), getThing().getUID(), e.getMessage());
+                        return new Configuration(getRawConfig());
+                    }
+                }
+            }
+        }
+        return new Configuration(resolvedConfig);
     }
 
     /**
@@ -476,8 +520,16 @@ public abstract class BaseThingHandler implements ThingHandler {
                     this.getClass().getSimpleName(), thing.getUID());
             return;
         }
+        Configuration resolvedConfiguration;
         try {
-            callback.validateConfigurationParameters(thing, thing.getConfiguration().getProperties());
+            resolvedConfiguration = ConfigUtil.resolveVariables(thing.getConfiguration());
+        } catch (IllegalArgumentException e) {
+            logger.warn("Attempt to update thing '{}' with a thing containing invalid configuration '{}' blocked: {}",
+                    thing.getUID(), thing.getConfiguration(), e.getMessage());
+            return;
+        }
+        try {
+            callback.validateConfigurationParameters(thing, resolvedConfiguration.getProperties());
             thing.getChannels().forEach(channel -> callback.validateConfigurationParameters(channel,
                     channel.getConfiguration().getProperties()));
         } catch (ConfigValidationException e) {
@@ -487,6 +539,7 @@ public abstract class BaseThingHandler implements ThingHandler {
             return;
         }
         synchronized (this) {
+            this.resolvedConfig = resolvedConfiguration;
             this.thing = thing;
             callback.thingUpdated(thing);
         }
@@ -499,7 +552,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @return copy of the thing configuration (not null)
      */
     protected Configuration editConfiguration() {
-        Map<String, Object> properties = this.thing.getConfiguration().getProperties();
+        Map<String, Object> properties = getRawConfig().getProperties();
         return new Configuration(new HashMap<>(properties));
     }
 
@@ -512,15 +565,24 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param configuration configuration, that was updated and should be persisted
      */
     protected void updateConfiguration(Configuration configuration) {
-        Map<String, Object> old = this.thing.getConfiguration().getProperties();
+        Map<String, Object> old = getRawConfig().getProperties();
+        Configuration oldResolved = getConfig();
         ThingHandlerCallback callback = this.callback;
         if (callback == null) {
             logger.warn("Handler {} tried updating its configuration although the handler was already disposed.",
                     this.getClass().getSimpleName());
             return;
         }
+        Configuration resolvedConfiguration;
         try {
-            callback.validateConfigurationParameters(this.thing, configuration.getProperties());
+            resolvedConfiguration = ConfigUtil.resolveVariables(configuration);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Attempt to apply configuration '{}' on thing '{}' blocked: {}", configuration, thing.getUID(),
+                    e.getMessage());
+            return;
+        }
+        try {
+            callback.validateConfigurationParameters(this.thing, resolvedConfiguration.getProperties());
         } catch (ConfigValidationException e) {
             logger.warn(
                     "Attempt to apply invalid configuration '{}' on thing '{}' blocked. This is most likely a bug: {}",
@@ -528,15 +590,19 @@ public abstract class BaseThingHandler implements ThingHandler {
             return;
         }
         try {
-            this.thing.getConfiguration().setProperties(configuration.getProperties());
             synchronized (this) {
+                this.resolvedConfig = resolvedConfiguration;
+                this.thing.getConfiguration().setProperties(configuration.getProperties());
                 callback.thingUpdated(thing);
             }
         } catch (RuntimeException e) {
             logger.warn(
                     "Error while applying configuration changes: '{}: {}' - reverting configuration changes on thing '{}'.",
                     e.getClass().getSimpleName(), e.getMessage(), this.thing.getUID().getAsString());
-            this.thing.getConfiguration().setProperties(old);
+            synchronized (this) {
+                this.thing.getConfiguration().setProperties(old);
+                this.resolvedConfig = oldResolved;
+            }
             throw e;
         }
     }
