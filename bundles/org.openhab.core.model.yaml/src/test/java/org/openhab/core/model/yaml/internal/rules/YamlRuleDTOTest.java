@@ -29,6 +29,7 @@ import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
+import org.openhab.core.automation.converter.RuleSerializer.RuleSerializationOption;
 import org.openhab.core.automation.util.ActionBuilder;
 import org.openhab.core.automation.util.ConditionBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
@@ -61,18 +62,32 @@ public class YamlRuleDTOTest {
 
         rule = RuleBuilder.create(rule).withConfigurationDescriptions(
                 List.of(ConfigDescriptionParameterBuilder.create("number", Type.DECIMAL).build())).build();
-        YamlRuleDTO ruleDTO = new YamlRuleDTO(rule);
+        YamlRuleDTO ruleDTO = new YamlRuleDTO(rule, RuleSerializationOption.INCLUDE_ALL);
         assertNotNull(ruleDTO);
         assertEquals(
-                "YamlRuleDTO [uid=rule1, templateState=no-template, label=Rule 1, tags=[], visibility=VISIBLE, config={}, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], actions=[YamlActionDTO [inputs={}, id=action1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                "YamlRuleDTO [uid=rule1, templateState=no-template, label=Rule 1, tags=[], visibility=VISIBLE, config={}, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [id=condition1, inputs={}, type=type1, config={}]], actions=[YamlActionDTO [id=action1, inputs={}, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
                 ruleDTO.toString());
 
         rule = RuleBuilder.create(rule).withTemplateUID("templateUID").withActions(List.of())
                 .withDescription("Rule description").build();
-        ruleDTO = new YamlRuleDTO(rule);
+        ruleDTO = new YamlRuleDTO(rule, RuleSerializationOption.INCLUDE_ALL);
         assertNotNull(ruleDTO);
         assertEquals(
-                "YamlRuleDTO [uid=rule1, template=templateUID, templateState=no-template, label=Rule 1, tags=[], description=Rule description, visibility=VISIBLE, config={}, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [inputs={}, id=condition1, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                "YamlRuleDTO [uid=rule1, template=templateUID, templateState=no-template, label=Rule 1, tags=[], description=Rule description, visibility=VISIBLE, config={}, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [id=condition1, inputs={}, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                ruleDTO.toString());
+        ruleDTO = new YamlRuleDTO(rule, RuleSerializationOption.NORMAL);
+        assertNotNull(ruleDTO);
+        assertEquals(
+                "YamlRuleDTO [uid=rule1, template=templateUID, label=Rule 1, description=Rule description, conditions=[YamlConditionDTO [id=condition1, type=type1]], triggers=[YamlModuleDTO [id=trigger1, type=type1]]]",
+                ruleDTO.toString());
+        ruleDTO = new YamlRuleDTO(rule, RuleSerializationOption.STRIP_TEMPLATE);
+        assertNotNull(ruleDTO);
+        assertEquals(
+                "YamlRuleDTO [uid=rule1, label=Rule 1, description=Rule description, conditions=[YamlConditionDTO [id=condition1, type=type1]], triggers=[YamlModuleDTO [id=trigger1, type=type1]]]",
+                ruleDTO.toString());
+        ruleDTO = new YamlRuleDTO(rule, RuleSerializationOption.STUB_ONLY);
+        assertNotNull(ruleDTO);
+        assertEquals("YamlRuleDTO [uid=rule1, template=templateUID, label=Rule 1, description=Rule description, ]",
                 ruleDTO.toString());
     }
 

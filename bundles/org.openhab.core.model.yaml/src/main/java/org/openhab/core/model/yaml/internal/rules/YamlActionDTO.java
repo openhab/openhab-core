@@ -17,6 +17,7 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.automation.Action;
+import org.openhab.core.automation.converter.RuleSerializer.RuleSerializationOption;
 
 /**
  * The {@link YamlActionDTO} is a data transfer object used to serialize an action in a YAML configuration file.
@@ -31,8 +32,15 @@ public class YamlActionDTO extends YamlModuleDTO {
     }
 
     public YamlActionDTO(@NonNull Action action) {
-        super(action);
+        this(action, RuleSerializationOption.NORMAL);
+    }
+
+    public YamlActionDTO(@NonNull Action action, RuleSerializationOption option) {
+        super(action, option);
         this.inputs = action.getInputs();
+        if (option != RuleSerializationOption.INCLUDE_ALL && this.inputs.isEmpty()) {
+            this.inputs = null;
+        }
     }
 
     @Override
@@ -62,23 +70,23 @@ public class YamlActionDTO extends YamlModuleDTO {
     public String toString() {
         StringBuilder builder = new StringBuilder(getClass().getSimpleName());
         builder.append(" [");
-        if (inputs != null) {
-            builder.append("inputs=").append(inputs).append(", ");
-        }
         if (id != null) {
-            builder.append("id=").append(id).append(", ");
+            builder.append("id=").append(id);
+        }
+        if (inputs != null) {
+            builder.append(", inputs=").append(inputs);
         }
         if (type != null) {
-            builder.append("type=").append(type).append(", ");
+            builder.append(", type=").append(type);
         }
         if (label != null) {
-            builder.append("label=").append(label).append(", ");
+            builder.append(", label=").append(label);
         }
         if (description != null) {
-            builder.append("description=").append(description).append(", ");
+            builder.append(", description=").append(description);
         }
         if (config != null) {
-            builder.append("config=").append(config);
+            builder.append(", config=").append(config);
         }
         builder.append("]");
         return builder.toString();
