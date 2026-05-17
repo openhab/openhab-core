@@ -459,9 +459,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         result.setLevel(level);
                         return result;
                     }
-                } else {
-                    throw new SerializationException("Invalid trigger: " + trigger);
                 }
+                throw new SerializationException("Invalid trigger: " + trigger);
             case ItemCommandTriggerHandler.MODULE_TYPE_ID:
                 value = trigger.getConfiguration().get(ItemCommandTriggerHandler.CFG_ITEMNAME);
                 if (value instanceof String str) {
@@ -472,9 +471,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         result.setCommand(createValidCommand(command));
                     }
                     return result;
-                } else {
-                    throw new SerializationException("Invalid trigger: " + trigger);
                 }
+                throw new SerializationException("Invalid trigger: " + trigger);
             case GroupCommandTriggerHandler.MODULE_TYPE_ID:
                 value = trigger.getConfiguration().get(GroupCommandTriggerHandler.CFG_GROUPNAME);
                 if (value instanceof String str) {
@@ -485,9 +483,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         result.setCommand(createValidCommand(command));
                     }
                     return result;
-                } else {
-                    throw new SerializationException("Invalid trigger: " + trigger);
                 }
+                throw new SerializationException("Invalid trigger: " + trigger);
             case ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID:
                 value = trigger.getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME);
                 if (value instanceof String str) {
@@ -498,9 +495,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         result.setState(createValidState(state));
                     }
                     return result;
-                } else {
-                    throw new SerializationException("Invalid trigger: " + trigger);
                 }
+                throw new SerializationException("Invalid trigger: " + trigger);
             case ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID:
                 value = trigger.getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME);
                 if (value instanceof String str) {
@@ -515,9 +511,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         result.setOldState(createValidState(state));
                     }
                     return result;
-                } else {
-                    throw new SerializationException("Invalid trigger: " + trigger);
                 }
+                throw new SerializationException("Invalid trigger: " + trigger);
             case GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID:
                 value = trigger.getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME);
                 if (value instanceof String str) {
@@ -528,9 +523,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         result.setState(createValidState(state));
                     }
                     return result;
-                } else {
-                    throw new SerializationException("Invalid trigger: " + trigger);
                 }
+                throw new SerializationException("Invalid trigger: " + trigger);
             case GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID:
                 value = trigger.getConfiguration().get(GroupStateTriggerHandler.CFG_GROUPNAME);
                 if (value instanceof String str) {
@@ -545,9 +539,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         result.setOldState(createValidState(state));
                     }
                     return result;
-                } else {
-                    throw new SerializationException("Invalid trigger: " + trigger);
                 }
+                throw new SerializationException("Invalid trigger: " + trigger);
             case GenericCronTriggerHandler.MODULE_TYPE_ID:
                 value = trigger.getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION);
                 if (value instanceof String str) {
@@ -560,9 +553,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         result.setCron(str);
                     }
                     return result;
-                } else {
-                    throw new SerializationException("Invalid trigger: " + trigger);
                 }
+                throw new SerializationException("Invalid trigger: " + trigger);
             case TimeOfDayTriggerHandler.MODULE_TYPE_ID:
                 value = trigger.getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME);
                 if (value instanceof String str) {
@@ -575,9 +567,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         result.setTime(str);
                     }
                     return result;
-                } else {
-                    throw new SerializationException("Invalid trigger: " + trigger);
                 }
+                throw new SerializationException("Invalid trigger: " + trigger);
             case DateTimeTriggerHandler.MODULE_TYPE_ID:
                 value = trigger.getConfiguration().get(DateTimeTriggerHandler.CONFIG_ITEM_NAME);
                 if (value instanceof String str) {
