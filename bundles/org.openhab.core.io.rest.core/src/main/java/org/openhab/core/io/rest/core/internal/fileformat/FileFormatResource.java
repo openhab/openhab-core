@@ -67,6 +67,13 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemParser;
 import org.openhab.core.items.fileconverter.ItemSerializer;
+import org.openhab.core.semantics.SemanticTag;
+import org.openhab.core.semantics.SemanticTagRegistry;
+import org.openhab.core.semantics.dto.SemanticTagDTO;
+import org.openhab.core.semantics.dto.SemanticTagDTOMapper;
+import org.openhab.core.semantics.fileconverter.SemanticTagParser;
+import org.openhab.core.semantics.fileconverter.SemanticTagSerializer;
+import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.dto.SitemapDTOMapper;
 import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
@@ -130,6 +137,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Add new API for conversion between file format and JSON
  * @author Mark Herwege - Add sitemap DSL
  * @author Laurent Garnier - Add sitemap YAML
+ * @author Laurent Garnier - Add semantic tags YAML
  */
 @Component
 @JaxrsResource
@@ -228,8 +236,24 @@ public class FileFormatResource implements RESTResource {
                         label: My Input
             """;
 
+    private static final String YAML_SEMANTIC_TAGS_EXAMPLE = """
+            version: 1
+            tags:
+              Equipment_MyEquipment:
+                label: My Equipment
+                description: This is my equipment
+                synonyms:
+                  - My Equipments
+            """;
+
     private static final String YAML_FULL_EXAMPLE = """
             version: 1
+            tags:
+              Equipment_MyEquipment:
+                label: My Equipment
+                description: This is my equipment
+                synonyms:
+                  - My Equipments
             things:
               binding:typeBridge:idBridge:
                 isBridge: true
@@ -288,6 +312,8 @@ public class FileFormatResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
+    private final SemanticTagRegistry semanticTagRegistry;
+    private final DefaultSemanticTagProvider defaultSemanticTagProvider;
     private final ItemBuilderFactory itemBuilderFactory;
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
@@ -299,6 +325,8 @@ public class FileFormatResource implements RESTResource {
     private final ConfigDescriptionRegistry configDescRegistry;
     private final SitemapFactory sitemapFactory;
     private final SitemapRegistry sitemapRegistry;
+    private final Map<String, SemanticTagSerializer> tagSerializers = new ConcurrentHashMap<>();
+    private final Map<String, SemanticTagParser> tagParsers = new ConcurrentHashMap<>();
     private final Map<String, ItemSerializer> itemSerializers = new ConcurrentHashMap<>();
     private final Map<String, ItemParser> itemParsers = new ConcurrentHashMap<>();
     private final Map<String, ThingSerializer> thingSerializers = new ConcurrentHashMap<>();
@@ -310,6 +338,8 @@ public class FileFormatResource implements RESTResource {
 
     @Activate
     public FileFormatResource(//
+            final @Reference SemanticTagRegistry semanticTagRegistry,
+            final @Reference DefaultSemanticTagProvider defaultSemanticTagProvider,
             final @Reference ItemBuilderFactory itemBuilderFactory, //
             final @Reference ItemRegistry itemRegistry, //
             final @Reference MetadataRegistry metadataRegistry,
@@ -321,6 +351,8 @@ public class FileFormatResource implements RESTResource {
             final @Reference ConfigDescriptionRegistry configDescRegistry, //
             final @Reference SitemapFactory sitemapFactory, //
             final @Reference SitemapRegistry sitemapRegistry) {
+        this.semanticTagRegistry = semanticTagRegistry;
+        this.defaultSemanticTagProvider = defaultSemanticTagProvider;
         this.itemBuilderFactory = itemBuilderFactory;
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
@@ -336,6 +368,24 @@ public class FileFormatResource implements RESTResource {
 
     @Deactivate
     void deactivate() {
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addSemanticTagSerializer(SemanticTagSerializer tagSerializer) {
+        tagSerializers.put(tagSerializer.getGeneratedFormat(), tagSerializer);
+    }
+
+    protected void removeSemanticTagSerializer(SemanticTagSerializer tagSerializer) {
+        tagSerializers.remove(tagSerializer.getGeneratedFormat());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addSemanticTagParser(SemanticTagParser tagParser) {
+        tagParsers.put(tagParser.getParserFormat(), tagParser);
+    }
+
+    protected void removeSemanticTagParser(SemanticTagParser tagParser) {
+        tagParsers.remove(tagParser.getParserFormat());
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
@@ -405,7 +455,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "One or more items not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForItems(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "if true, exclude the configuration parameters having the default value from the result.") boolean hideDefaultParameters,
             @Parameter(description = "Array of item names. If empty or omitted, return all Items.") @Nullable List<String> itemNames) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForItems: mediaType = {}, itemNames = {}", acceptHeader, itemNames);
@@ -456,7 +506,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "One or more things not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForThings(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "if true, exclude the configuration parameters having the default value from the result.") boolean hideDefaultParameters,
             @Parameter(description = "Array of Thing UIDs. If empty or omitted, return all Things from the Registry.") @Nullable List<String> thingUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForThings: mediaType = {}, thingUIDs = {}", acceptHeader, thingUIDs);
@@ -529,6 +579,53 @@ public class FileFormatResource implements RESTResource {
 
     @POST
     @RolesAllowed({ Role.ADMIN })
+    @Path("/tags")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/yaml")
+    @Operation(operationId = "createFileFormatForSemanticTags", summary = "Create file format for a list of semantic tags in registry.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_SEMANTIC_TAGS_EXAMPLE))),
+                    @ApiResponse(responseCode = "404", description = "One or more semantic tags not found in registry."),
+                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
+    public Response createFileFormatForSemanticTags(final @Context HttpHeaders httpHeaders,
+            @DefaultValue("true") @QueryParam("hideDefaultTags") @Parameter(description = "if true, exclude the default semantic tags from the result. This parameter is ignored when semantic tag UIDs are provided.") boolean hideDefaultTags,
+            @Parameter(description = "Array of semantic tag UIDs. If empty or omitted, return all custom semantic tags from the Registry.") @Nullable List<String> semanticTagUIDs) {
+        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
+        logger.debug("createFileFormatForSemanticTags: mediaType = {}, semanticTagUIDs = {}", acceptHeader,
+                semanticTagUIDs);
+        SemanticTagSerializer serializer = getSemanticTagSerializer(acceptHeader);
+        if (serializer == null) {
+            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                    .entity("Unsupported media type '" + acceptHeader + "'!").build();
+        }
+
+        List<SemanticTag> tags;
+        if (semanticTagUIDs == null || semanticTagUIDs.isEmpty()) {
+            Collection<SemanticTag> defaultTags = hideDefaultTags ? defaultSemanticTagProvider.getAll() : List.of();
+            tags = semanticTagRegistry.getAll().stream().filter(tag -> !defaultTags.contains(tag))
+                    .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+        } else {
+            tags = new ArrayList<>();
+            for (String uid : semanticTagUIDs) {
+                SemanticTag tag = semanticTagRegistry.get(uid);
+                if (tag == null) {
+                    return Response.status(Response.Status.NOT_FOUND)
+                            .entity("Semantic tag with UID '" + uid + "' not found in the semantic tag registry!")
+                            .build();
+                }
+                tags.add(tag);
+            }
+        }
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        String genId = newIdForSerialization();
+        serializer.setSemanticTagsToBeSerialized(genId, tags);
+        serializer.generateFormat(genId, outputStream);
+        return Response.ok(new String(outputStream.toByteArray())).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
     @Path("/create")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ "text/vnd.openhab.dsl.thing", "text/vnd.openhab.dsl.item", "text/vnd.openhab.dsl.sitemap",
@@ -536,30 +633,32 @@ public class FileFormatResource implements RESTResource {
     @Operation(operationId = "create", summary = "Create file format.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_FULL_EXAMPLE)),
                             @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
                             @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
-                            @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)),
-                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_FULL_EXAMPLE)) }),
+                            @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "400", description = "Invalid JSON data."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response create(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("false") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @DefaultValue("false") @QueryParam("hideDefaultChannels") @Parameter(description = "hide the non extensible channels having a default configuration") boolean hideDefaultChannels,
-            @DefaultValue("false") @QueryParam("hideChannelLinksAndMetadata") @Parameter(description = "hide the channel links and metadata for items") boolean hideChannelLinksAndMetadata,
+            @DefaultValue("false") @QueryParam("hideDefaultParameters") @Parameter(description = "if true, exclude the configuration parameters having the default value from the result.") boolean hideDefaultParameters,
+            @DefaultValue("false") @QueryParam("hideDefaultChannels") @Parameter(description = "if true, exclude the non extensible channels having a default configuration from the result.") boolean hideDefaultChannels,
+            @DefaultValue("false") @QueryParam("hideChannelLinksAndMetadata") @Parameter(description = "if true, exclude the channel links and metadata for items from the result.") boolean hideChannelLinksAndMetadata,
             @RequestBody(description = "JSON data", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FileFormatDTO.class))) FileFormatDTO data) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("create: mediaType = {}", acceptHeader);
 
+        List<SemanticTag> tags = new ArrayList<>();
         List<Thing> things = new ArrayList<>();
         List<Item> items = new ArrayList<>();
         List<Metadata> metadata = new ArrayList<>();
         Map<String, String> stateFormatters = new HashMap<>();
         List<Sitemap> sitemaps = new ArrayList<>();
         List<String> errors = new ArrayList<>();
-        if (!convertFromFileFormatDTO(data, things, items, metadata, stateFormatters, sitemaps, errors)) {
+        if (!convertFromFileFormatDTO(data, tags, things, items, metadata, stateFormatters, sitemaps, errors)) {
             return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
         }
 
+        SemanticTagSerializer tagSerializer = getSemanticTagSerializer(acceptHeader);
         ThingSerializer thingSerializer = getThingSerializer(acceptHeader);
         ItemSerializer itemSerializer = getItemSerializer(acceptHeader);
         SitemapSerializer sitemapSerializer = getSitemapSerializer(acceptHeader);
@@ -598,6 +697,9 @@ public class FileFormatResource implements RESTResource {
                 sitemapSerializer.generateFormat(genId, outputStream);
                 break;
             case "application/yaml":
+                if (tagSerializer != null) {
+                    tagSerializer.setSemanticTagsToBeSerialized(genId, tags);
+                }
                 if (thingSerializer != null) {
                     thingSerializer.setThingsToBeSerialized(genId, things, hideDefaultChannels, hideDefaultParameters);
                 }
@@ -608,7 +710,9 @@ public class FileFormatResource implements RESTResource {
                 if (sitemapSerializer != null) {
                     sitemapSerializer.setSitemapsToBeSerialized(genId, sitemaps);
                 }
-                if (thingSerializer != null) {
+                if (tagSerializer != null) {
+                    tagSerializer.generateFormat(genId, outputStream);
+                } else if (thingSerializer != null) {
                     thingSerializer.generateFormat(genId, outputStream);
                 } else if (itemSerializer != null) {
                     itemSerializer.generateFormat(genId, outputStream);
@@ -636,14 +740,15 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "415", description = "Unsupported content type.") })
     public Response parse(final @Context HttpHeaders httpHeaders,
             @RequestBody(description = "file format syntax", required = true, content = {
+                    @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_FULL_EXAMPLE)),
                     @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
                     @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
-                    @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)),
-                    @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_FULL_EXAMPLE)) }) String input) {
+                    @Content(mediaType = "text/vnd.openhab.dsl.sitemap", schema = @Schema(example = DSL_SITEMAPS_EXAMPLE)) }) String input) {
         String contentTypeHeader = httpHeaders.getHeaderString(HttpHeaders.CONTENT_TYPE);
         logger.debug("parse: contentType = {}", contentTypeHeader);
 
         // First parse the input
+        Collection<SemanticTag> tags = List.of();
         Collection<Thing> things = List.of();
         Collection<Item> items = List.of();
         Collection<Sitemap> sitemaps = List.of();
@@ -652,12 +757,14 @@ public class FileFormatResource implements RESTResource {
         Map<String, String> stateFormatters = Map.of();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
+        SemanticTagParser tagParser = getSemanticTagParser(contentTypeHeader);
         ThingParser thingParser = getThingParser(contentTypeHeader);
         ItemParser itemParser = getItemParser(contentTypeHeader);
         SitemapParser sitemapParser = getSitemapParser(contentTypeHeader);
         String modelName = null;
         String modelName2 = null;
         String modelName3 = null;
+        String modelName4 = null;
         switch (contentTypeHeader) {
             case "text/vnd.openhab.dsl.thing":
                 if (thingParser == null) {
@@ -747,13 +854,27 @@ public class FileFormatResource implements RESTResource {
                             : (modelName2 != null ? modelName2 : Objects.requireNonNull(modelName3));
                     sitemaps = sitemapParser.getParsedObjects(modelNameToUse);
                 }
+                if (tagParser != null) {
+                    // Avoid parsing the input a second time
+                    if (modelName == null && modelName2 == null && modelName3 == null) {
+                        modelName4 = tagParser.startParsingFormat(input, errors, warnings);
+                        if (modelName4 == null) {
+                            return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors))
+                                    .build();
+                        }
+                    }
+                    String modelNameToUse = modelName != null ? modelName
+                            : (modelName2 != null ? modelName2
+                                    : (modelName3 != null ? modelName3 : Objects.requireNonNull(modelName4)));
+                    tags = tagParser.getParsedObjects(modelNameToUse);
+                }
                 break;
             default:
                 return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                         .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
         }
-        ExtendedFileFormatDTO result = convertToFileFormatDTO(things, items, metadata, stateFormatters, channelLinks,
-                sitemaps, warnings);
+        ExtendedFileFormatDTO result = convertToFileFormatDTO(tags, things, items, metadata, stateFormatters,
+                channelLinks, sitemaps, warnings);
         if (modelName != null && thingParser != null) {
             thingParser.finishParsingFormat(modelName);
         }
@@ -762,6 +883,9 @@ public class FileFormatResource implements RESTResource {
         }
         if (modelName3 != null && sitemapParser != null) {
             sitemapParser.finishParsingFormat(modelName3);
+        }
+        if (modelName4 != null && tagParser != null) {
+            tagParser.finishParsingFormat(modelName4);
         }
         return Response.ok(result).build();
     }
@@ -914,6 +1038,13 @@ public class FileFormatResource implements RESTResource {
                 configDescRegistry);
     }
 
+    private @Nullable SemanticTagSerializer getSemanticTagSerializer(String mediaType) {
+        return switch (mediaType) {
+            case "application/yaml" -> tagSerializers.get("YAML");
+            default -> null;
+        };
+    }
+
     private @Nullable ItemSerializer getItemSerializer(String mediaType) {
         return switch (mediaType) {
             case "text/vnd.openhab.dsl.item" -> itemSerializers.get("DSL");
@@ -934,6 +1065,13 @@ public class FileFormatResource implements RESTResource {
         return switch (mediaType) {
             case "text/vnd.openhab.dsl.sitemap" -> sitemapSerializers.get("DSL");
             case "application/yaml" -> sitemapSerializers.get("YAML");
+            default -> null;
+        };
+    }
+
+    private @Nullable SemanticTagParser getSemanticTagParser(String contentType) {
+        return switch (contentType) {
+            case "application/yaml" -> tagParsers.get("YAML");
             default -> null;
         };
     }
@@ -984,8 +1122,9 @@ public class FileFormatResource implements RESTResource {
         }).toList();
     }
 
-    private boolean convertFromFileFormatDTO(FileFormatDTO data, List<Thing> things, List<Item> items,
-            List<Metadata> metadata, Map<String, String> stateFormatters, List<Sitemap> sitemaps, List<String> errors) {
+    private boolean convertFromFileFormatDTO(FileFormatDTO data, List<SemanticTag> tags, List<Thing> things,
+            List<Item> items, List<Metadata> metadata, Map<String, String> stateFormatters, List<Sitemap> sitemaps,
+            List<String> errors) {
         boolean ok = true;
         if (data.things != null) {
             for (ThingDTO thingData : data.things) {
@@ -1078,15 +1217,33 @@ public class FileFormatResource implements RESTResource {
                     errors.add("Invalid sitemap data" + (name != null ? " for sitemap '" + name + "'" : "") + ": "
                             + e.getMessage());
                     ok = false;
-                    continue;
+                }
+            }
+        }
+        if (data.tags != null) {
+            for (SemanticTagDTO tagData : data.tags) {
+                String uid = tagData.uid;
+                try {
+                    SemanticTag tag = SemanticTagDTOMapper.map(tagData);
+                    if (tag != null) {
+                        tags.add(tag);
+                    } else {
+                        errors.add(
+                                "Invalid semantic tag data" + (uid != null ? " for semantic tag '" + uid + "'" : ""));
+                        ok = false;
+                    }
+                } catch (IllegalArgumentException e) {
+                    errors.add("Invalid semantic tag data" + (uid != null ? " for semantic tag '" + uid + "'" : "")
+                            + ": " + e.getMessage());
+                    ok = false;
                 }
             }
         }
         return ok;
     }
 
-    private ExtendedFileFormatDTO convertToFileFormatDTO(Collection<Thing> things, Collection<Item> items,
-            Collection<Metadata> metadata, Map<String, String> stateFormatters,
+    private ExtendedFileFormatDTO convertToFileFormatDTO(Collection<SemanticTag> tags, Collection<Thing> things,
+            Collection<Item> items, Collection<Metadata> metadata, Map<String, String> stateFormatters,
             Collection<ItemChannelLink> channelLinks, Collection<Sitemap> sitemaps, List<String> warnings) {
         ExtendedFileFormatDTO dto = new ExtendedFileFormatDTO();
         dto.warnings = warnings.isEmpty() ? null : warnings;
@@ -1138,6 +1295,12 @@ public class FileFormatResource implements RESTResource {
             dto.sitemaps = new ArrayList<>();
             sitemaps.forEach(sitemap -> {
                 dto.sitemaps.add(SitemapDTOMapper.map(sitemap));
+            });
+        }
+        if (!tags.isEmpty()) {
+            dto.tags = new ArrayList<>();
+            tags.forEach(tag -> {
+                dto.tags.add(SemanticTagDTOMapper.map(tag));
             });
         }
         return dto;

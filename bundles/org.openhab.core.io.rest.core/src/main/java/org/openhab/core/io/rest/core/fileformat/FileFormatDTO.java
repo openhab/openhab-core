@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.core.fileformat;
 
 import java.util.List;
 
+import org.openhab.core.semantics.dto.SemanticTagDTO;
 import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
 import org.openhab.core.thing.dto.ThingDTO;
 
@@ -25,10 +26,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * @author Laurent Garnier - Initial contribution
  * @author Mark Herwege - Add sitemaps
+ * @author Laurent Garnier - Add semantic tags
  */
 @Schema(name = "FileFormat")
 public class FileFormatDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    public List<SemanticTagDTO> tags;
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public List<FileFormatItemDTO> items;
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
