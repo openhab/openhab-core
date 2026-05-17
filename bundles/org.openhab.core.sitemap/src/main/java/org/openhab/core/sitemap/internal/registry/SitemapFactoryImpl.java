@@ -33,6 +33,7 @@ import org.openhab.core.sitemap.internal.ImageImpl;
 import org.openhab.core.sitemap.internal.InputImpl;
 import org.openhab.core.sitemap.internal.MappingImpl;
 import org.openhab.core.sitemap.internal.MapviewImpl;
+import org.openhab.core.sitemap.internal.NestedSitemapImpl;
 import org.openhab.core.sitemap.internal.RuleImpl;
 import org.openhab.core.sitemap.internal.SelectionImpl;
 import org.openhab.core.sitemap.internal.SetpointImpl;
@@ -49,33 +50,15 @@ import org.osgi.service.component.annotations.Component;
  * The {@link SitemapFactoryImpl} implements the {@link SitemapFactory}
  *
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(service = SitemapFactory.class, immediate = true)
 public class SitemapFactoryImpl implements SitemapFactory {
 
-    // Sitemap widget types
-    public static final String BUTTON = "Button";
-    public static final String BUTTON_GRID = "Buttongrid";
-    public static final String CHART = "Chart";
-    public static final String COLOR_PICKER = "Colorpicker";
-    public static final String COLOR_TEMPERATURE_PICKER = "Colortemperaturepicker";
-    public static final String DEFAULT = "Default";
-    public static final String FRAME = "Frame";
-    public static final String GROUP = "Group";
-    public static final String IMAGE = "Image";
-    public static final String INPUT = "Input";
-    public static final String MAPVIEW = "Mapview";
-    public static final String SELECTION = "Selection";
-    public static final String SETPOINT = "Setpoint";
-    public static final String SLIDER = "Slider";
-    public static final String SWITCH = "Switch";
-    public static final String TEXT = "Text";
-    public static final String VIDEO = "Video";
-    public static final String WEBVIEW = "Webview";
-
     private static final String[] WIDGET_TYPES = { BUTTON, BUTTON_GRID, CHART, COLOR_PICKER, COLOR_TEMPERATURE_PICKER,
-            DEFAULT, FRAME, GROUP, IMAGE, INPUT, MAPVIEW, SELECTION, SETPOINT, SLIDER, SWITCH, TEXT, VIDEO, WEBVIEW };
+            DEFAULT, FRAME, GROUP, IMAGE, INPUT, MAPVIEW, SELECTION, SETPOINT, SLIDER, SWITCH, TEXT, VIDEO, WEBVIEW,
+            SITEMAP };
 
     @Override
     public Sitemap createSitemap(String sitemapName) {
@@ -103,6 +86,7 @@ public class SitemapFactoryImpl implements SitemapFactory {
             case TEXT -> new TextImpl();
             case VIDEO -> new VideoImpl();
             case WEBVIEW -> new WebviewImpl();
+            case SITEMAP -> new NestedSitemapImpl();
             default -> null;
         };
     }
@@ -128,6 +112,7 @@ public class SitemapFactoryImpl implements SitemapFactory {
             case TEXT -> new TextImpl(parent);
             case VIDEO -> new VideoImpl(parent);
             case WEBVIEW -> new WebviewImpl(parent);
+            case SITEMAP -> new NestedSitemapImpl(parent);
             default -> null;
         };
     }

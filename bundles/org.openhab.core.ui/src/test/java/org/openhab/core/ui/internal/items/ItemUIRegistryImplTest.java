@@ -23,6 +23,7 @@ import java.text.DecimalFormatSymbols;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import javax.measure.quantity.Temperature;
@@ -72,6 +73,8 @@ import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.Image;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
+import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
 import org.openhab.core.sitemap.Setpoint;
@@ -81,7 +84,9 @@ import org.openhab.core.sitemap.Switch;
 import org.openhab.core.sitemap.Text;
 import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
+import org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl;
 import org.openhab.core.sitemap.registry.SitemapFactory;
+import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
@@ -117,6 +122,7 @@ public class ItemUIRegistryImplTest {
 
     private @Mock @NonNullByDefault({}) ItemRegistry registryMock;
     private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactoryMock;
+    private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistryMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) Sitemap sitemapMock;
     private @Mock @NonNullByDefault({}) Widget widgetMock;
@@ -149,11 +155,13 @@ public class ItemUIRegistryImplTest {
     private @Mock @NonNullByDefault({}) Buttongrid buttongridMock;
     private @Mock @NonNullByDefault({}) Button buttonMock;
     private @Mock @NonNullByDefault({}) Mapping mappingMock;
+    private @Mock @NonNullByDefault({}) NestedSitemap nestedSitemapMock;
 
     @BeforeEach
     @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registryMock, sitemapFactoryMock, timeZoneProviderMock);
+        uiRegistry = new ItemUIRegistryImpl(registryMock, sitemapFactoryMock, sitemapRegistryMock,
+                timeZoneProviderMock);
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
@@ -173,6 +181,7 @@ public class ItemUIRegistryImplTest {
         when(sitemapFactoryMock.createWidget("Slider")).thenReturn(sliderMock);
         when(sitemapFactoryMock.createWidget("Switch")).thenReturn(switchMock);
         when(sitemapFactoryMock.createWidget("Selection")).thenReturn(selectionMock);
+        when(sitemapFactoryMock.createWidget("Sitemap")).thenReturn(nestedSitemapMock);
 
         when(sitemapFactoryMock.createMapping()).thenReturn(mappingMock);
     }
@@ -1457,8 +1466,9 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getWidgetId() throws ItemNotFoundException {
         when(sitemapMock.getWidgets()).thenReturn(List.of(frameMock));
-        when(frameMock.getWidgets()).thenReturn(List.of(switchMock, sliderMock, groupMock, colorpickerMock, imageMock,
-                mapviewMock, selectionMock, setpointMock, chartMock, webviewMock, textMock, buttongridMock));
+        when(frameMock.getWidgets()).thenReturn(
+                List.of(switchMock, sliderMock, groupMock, colorpickerMock, imageMock, mapviewMock, selectionMock,
+                        setpointMock, chartMock, webviewMock, textMock, buttongridMock, nestedSitemapMock));
         when(buttongridMock.getWidgets()).thenReturn(List.of(buttonMock));
         when(frameMock.getParent()).thenReturn(sitemapMock);
         when(switchMock.getParent()).thenReturn(frameMock);
@@ -1474,6 +1484,7 @@ public class ItemUIRegistryImplTest {
         when(textMock.getParent()).thenReturn(frameMock);
         when(buttongridMock.getParent()).thenReturn(frameMock);
         when(buttonMock.getParent()).thenReturn(buttongridMock);
+        when(nestedSitemapMock.getParent()).thenReturn(frameMock);
 
         assertEquals("1_0", uiRegistry.getWidgetId(frameMock));
         assertEquals("1_00", uiRegistry.getWidgetId(switchMock));
@@ -1489,6 +1500,7 @@ public class ItemUIRegistryImplTest {
         assertEquals("2_0010", uiRegistry.getWidgetId(textMock));
         assertEquals("2_0011", uiRegistry.getWidgetId(buttongridMock));
         assertEquals("2_001100", uiRegistry.getWidgetId(buttonMock));
+        assertEquals("2_0012", uiRegistry.getWidgetId(nestedSitemapMock));
     }
 
     @Test
@@ -1528,5 +1540,233 @@ public class ItemUIRegistryImplTest {
         assertNull(uiRegistry.getWidget(sitemapMock, "01"));
         assertNull(uiRegistry.getWidget(sitemapMock, "0002"));
         assertNull(uiRegistry.getWidget(sitemapMock, "000101"));
+    }
+
+    @Test
+    public void nestedSitemapDefinedByName() throws ItemNotFoundException {
+        // Use a real SitemapFactoryImpl to create real widget instances for the target sitemap, so that parent/child
+        // relationships work as expected
+        SitemapFactoryImpl sitemapFactory = new SitemapFactoryImpl();
+
+        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
+
+        // prepare a target sitemap that will be returned by the sitemap registry
+        Sitemap targetSitemap = mock(Sitemap.class);
+        when(targetSitemap.getLabel()).thenReturn("TargetSitemapLabel");
+        when(targetSitemap.getIcon()).thenReturn("targetIcon");
+
+        // create a concrete child widget inside the target sitemap (real impl via factory impl)
+        Widget sourceChild = sitemapFactory.createWidget(SitemapFactory.SWITCH, targetSitemap);
+        assertNotNull(sourceChild);
+        sourceChild.setLabel("childLabel");
+        List<Widget> sourceChildren = List.of(sourceChild);
+        when(targetSitemap.getWidgets()).thenReturn(sourceChildren);
+
+        when(sitemapRegistryMock.get("target")).thenReturn(targetSitemap);
+        when(nestedSitemapMock.getName()).thenReturn("target");
+        // place nestedSitemap inside a frame, and frame inside the top-level sitemap
+        when(frameMock.getWidgets()).thenReturn(List.of(nestedSitemapMock));
+        when(sitemapMock.getWidgets()).thenReturn(List.of(frameMock));
+        when(sitemapMock.getName()).thenReturn(SITEMAP_NAME);
+        when(frameMock.getParent()).thenReturn(sitemapMock);
+        when(nestedSitemapMock.getParent()).thenReturn(frameMock);
+
+        // ensure the factory creates real Widget instances
+        doAnswer(invocation -> {
+            String type = invocation.getArgument(0);
+            return sitemapFactory.createWidget(type);
+        }).when(sitemapFactoryMock).createWidget(anyString());
+
+        // call getChildren on the frame: this will resolve the nested sitemap into a Text
+        List<Widget> frameChildren = uiRegistry.getChildren(frameMock);
+        // we expect exactly one child (the nested Text)
+        assertThat(frameChildren, hasSize(1));
+        Widget resolvedNested = frameChildren.get(0);
+        assertThat(resolvedNested, is(instanceOf(org.openhab.core.sitemap.Text.class)));
+
+        // The resolved nested Text should have used the target sitemap label/icon when its own label/icon is null
+        // (nested widget mock returns null for getLabel/getIcon unless stubbed)
+        assertEquals("TargetSitemapLabel", resolvedNested.getLabel());
+        assertEquals("targetIcon", resolvedNested.getIcon());
+
+        // Its children should be copies of the target sitemap's widgets and must be retrievable
+        List<Widget> nestedChildren = uiRegistry.getChildren((Parent) resolvedNested);
+        assertThat(nestedChildren, hasSize(sourceChildren.size()));
+
+        // For each nested child we can compute its widget id and then retrieve the same widget via
+        // uiRegistry.getWidget(topSitemap, id)
+        Widget nestedChild = nestedChildren.get(0);
+        String childId = uiRegistry.getWidgetId(nestedChild);
+        assertNotNull(childId);
+
+        // retrieving via top-level sitemap with the child's id must return the same widget object
+        Widget retrieved = uiRegistry.getWidget(sitemapMock, childId);
+        assertSame(nestedChild, retrieved);
+    }
+
+    @Test
+    public void nestedSitemapDefinedByItem() throws ItemNotFoundException {
+        // Use a real SitemapFactoryImpl to create real widget instances for the target sitemap, so that parent/child
+        // relationships work as expected
+        SitemapFactoryImpl sitemapFactory = new SitemapFactoryImpl();
+
+        // target sitemap to be returned
+        Sitemap targetSitemap = mock(Sitemap.class);
+        when(targetSitemap.getLabel()).thenReturn("ItemBasedSitemapLabel");
+        when(targetSitemap.getIcon()).thenReturn("itemIcon");
+
+        // create source widget inside target sitemap
+        Widget sourceChild = sitemapFactory.createWidget(SitemapFactory.SWITCH, targetSitemap);
+        assertNotNull(sourceChild);
+        when(targetSitemap.getWidgets()).thenReturn(List.of(sourceChild));
+
+        // prepare a backing item whose state holds the sitemap name
+        Item sitemapSelectorItem = mock(Item.class);
+        when(sitemapSelectorItem.getState()).thenReturn(new StringType("itemTarget"));
+        when(registryMock.getItem("sitemapSelector")).thenReturn(sitemapSelectorItem);
+        when(registryMock.get("sitemapSelector")).thenReturn(sitemapSelectorItem);
+
+        // sitemapRegistry should return the sitemap whose name is equal to the item state
+        when(sitemapRegistryMock.get("itemTarget")).thenReturn(targetSitemap);
+
+        // nested sitemap widget is defined by item
+        when(nestedSitemapMock.getItem()).thenReturn("sitemapSelector");
+
+        // place nestedSitemap inside a frame and the frame in the top-level sitemap
+        when(frameMock.getWidgets()).thenReturn(List.of(nestedSitemapMock));
+        when(sitemapMock.getWidgets()).thenReturn(List.of(frameMock));
+        when(sitemapMock.getName()).thenReturn(SITEMAP_NAME);
+        when(frameMock.getParent()).thenReturn(sitemapMock);
+        when(nestedSitemapMock.getParent()).thenReturn(frameMock);
+
+        // ensure the factory creates real Widget instances
+        doAnswer(invocation -> {
+            String type = invocation.getArgument(0);
+            return sitemapFactory.createWidget(type);
+        }).when(sitemapFactoryMock).createWidget(anyString());
+
+        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
+
+        // resolve nested sitemap by calling getChildren on the frame
+        List<Widget> frameChildren = uiRegistry.getChildren(frameMock);
+        assertThat(frameChildren, hasSize(1));
+        Widget resolvedNested = frameChildren.get(0);
+
+        // label/icon should default to sitemap's label/icon
+        assertEquals("ItemBasedSitemapLabel", resolvedNested.getLabel());
+        assertEquals("itemIcon", resolvedNested.getIcon());
+
+        // nested children must be available and retrievable by id
+        List<Widget> nestedChildren = uiRegistry.getChildren((Parent) resolvedNested);
+        assertThat(nestedChildren, hasSize(1));
+        Widget nestedChild = nestedChildren.get(0);
+        String childId = uiRegistry.getWidgetId(nestedChild);
+        assertNotNull(childId);
+        Widget fetched = uiRegistry.getWidget(sitemapMock, childId);
+        assertSame(nestedChild, fetched);
+    }
+
+    @Test
+    public void testRemovingNestedSitemapRecreatesWidgetAndId() throws Exception {
+        // Use a real SitemapFactoryImpl to create real widget instances for the target sitemap, so that parent/child
+        // relationships work as expected
+        SitemapFactoryImpl sitemapFactory = new SitemapFactoryImpl();
+
+        // Create root sitemap
+        String rootSitemapName = "root";
+        Sitemap root = sitemapFactory.createSitemap(rootSitemapName);
+
+        // Create sitemap nested1 (the nested sitemap) with some child widgets
+        String nestedSitemap1Name = "nested1";
+        Sitemap nestedSitemap1 = sitemapFactory.createSitemap(nestedSitemap1Name);
+        Switch nestedSwitch = Objects
+                .requireNonNull((Switch) sitemapFactory.createWidget(SitemapFactory.SWITCH, nestedSitemap1));
+        Slider nestedSlider = Objects
+                .requireNonNull((Slider) sitemapFactory.createWidget(SitemapFactory.SLIDER, nestedSitemap1));
+        nestedSitemap1.setWidgets(new ArrayList<>(List.of(nestedSwitch, nestedSlider)));
+
+        // Create sitemap nested2 (the nested sitemap) with some child widgets
+        String nestedSitemap2Name = "nested2";
+        Sitemap nestedSitemap2 = sitemapFactory.createSitemap(nestedSitemap2Name);
+        Image nestedImage = Objects
+                .requireNonNull((Image) sitemapFactory.createWidget(SitemapFactory.IMAGE, nestedSitemap2));
+        nestedSitemap2.setWidgets(new ArrayList<>(List.of(nestedImage)));
+
+        // Create nested sitemap widgets in the root that reference "nested1" and "nested2"
+        NestedSitemap nested1 = (NestedSitemap) sitemapFactory.createWidget(SitemapFactory.SITEMAP, root);
+        assertNotNull(nested1);
+        nested1.setName(nestedSitemap1Name);
+        NestedSitemap nested2 = (NestedSitemap) sitemapFactory.createWidget(SitemapFactory.SITEMAP, root);
+        assertNotNull(nested2);
+        nested2.setName(nestedSitemap2Name);
+        root.setWidgets(new ArrayList<>(List.of(nested1, nested2)));
+
+        // ensure the factory creates real Widget instances
+        doAnswer(invocation -> {
+            String type = invocation.getArgument(0);
+            return sitemapFactory.createWidget(type);
+        }).when(sitemapFactoryMock).createWidget(anyString());
+
+        when(sitemapRegistryMock.get(rootSitemapName)).thenReturn(root);
+        when(sitemapRegistryMock.get(nestedSitemap1Name)).thenReturn(nestedSitemap1);
+        when(sitemapRegistryMock.get(nestedSitemap2Name)).thenReturn(nestedSitemap2);
+        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
+
+        // Compute the widget id for the nested widget in the root sitemap
+        String id = uiRegistry.getWidgetId(nested1);
+        assertEquals("1_0", id);
+        Widget cachedNestedSitemap = uiRegistry.getWidget(root, "1_0");
+        assertThat(cachedNestedSitemap, is(instanceOf(Text.class)));
+
+        id = uiRegistry.getWidgetId(nestedSwitch);
+        assertEquals("1_0", id); // This is the id in the nested sitemap, not the id in the root sitemap
+        Widget nestedSwitchFromNestedSitemap = uiRegistry.getWidget(nestedSitemap1, "1_0");
+        assertNotNull(nestedSwitchFromNestedSitemap);
+        assertThat(nestedSwitchFromNestedSitemap, is(instanceOf(Switch.class)));
+        assertEquals(nestedSwitch, nestedSwitchFromNestedSitemap);
+
+        Widget cachedNestedSwitchWidget = uiRegistry.getWidget(root, "1_00"); // This is the id of the nested widget in
+                                                                              // the root sitemap, which should be
+                                                                              // cached now
+        assertNotNull(cachedNestedSwitchWidget);
+        assertThat(cachedNestedSwitchWidget, is(instanceOf(Switch.class)));
+        assertThat(cachedNestedSwitchWidget.getParent(), is(sameInstance(cachedNestedSitemap)));
+        id = uiRegistry.getWidgetId(cachedNestedSwitchWidget);
+        assertEquals("1_00", id);
+        Widget cachedNestedSliderWidget = uiRegistry.getWidget(root, "1_01");
+        assertNotNull(cachedNestedSliderWidget);
+        assertThat(cachedNestedSliderWidget, is(instanceOf(Slider.class)));
+        assertThat(cachedNestedSliderWidget.getParent(), is(sameInstance(cachedNestedSitemap)));
+        id = uiRegistry.getWidgetId(cachedNestedSliderWidget);
+        assertEquals("1_01", id);
+        assertTrue(uiRegistry.getDefaultNestedSitemapWidgetsCache().isEmpty());
+        assertThat(uiRegistry.getNestedSitemapWidgetsCache().keySet().size(), is(2));
+
+        // Now simulate removal of nested sitemap -> cache invalidation should happen
+        when(sitemapRegistryMock.get(nestedSitemap1Name)).thenReturn(null);
+        uiRegistry.removed(nestedSitemap1);
+        assertNull(sitemapRegistryMock.get(nestedSitemap1Name));
+        assertTrue(uiRegistry.getDefaultNestedSitemapWidgetsCache().isEmpty());
+        assertThat(uiRegistry.getNestedSitemapWidgetsCache().keySet().size(), is(1));
+
+        // On next access, the resolved nested sitemap should be gone from the cache, and a new empty Text placeholder
+        // should be created (since the sitemap cannot be resolved anymore)
+        Widget cachedNestedSitemapAfter = uiRegistry.getWidget(root, "1_0");
+        assertNotNull(cachedNestedSitemapAfter);
+        assertThat(cachedNestedSitemapAfter, is(instanceOf(Text.class)));
+        assertNotEquals(cachedNestedSitemap, cachedNestedSitemapAfter);
+        Text textAfter = (Text) cachedNestedSitemapAfter;
+        // There should only be a single child widget (empty Text placeholder, Switch and Slider should be gone)
+        assertThat(textAfter.getWidgets().size(), is(1));
+        assertThat(textAfter.getWidgets().getFirst(), is(instanceOf(Text.class)));
+        assertThat(uiRegistry.getDefaultNestedSitemapWidgetsCache().keySet().size(), is(1));
+        assertThat(uiRegistry.getNestedSitemapWidgetsCache().keySet().size(), is(1));
+
+        // Finally, simulate removal of the root sitemap and ensure the cache is cleared for all nested widgets as well
+        when(sitemapRegistryMock.get(rootSitemapName)).thenReturn(null);
+        uiRegistry.removed(root);
+        assertNull(sitemapRegistryMock.get(rootSitemapName));
+        assertTrue(uiRegistry.getNestedSitemapWidgetsCache().isEmpty());
+        assertTrue(uiRegistry.getDefaultNestedSitemapWidgetsCache().isEmpty());
     }
 }

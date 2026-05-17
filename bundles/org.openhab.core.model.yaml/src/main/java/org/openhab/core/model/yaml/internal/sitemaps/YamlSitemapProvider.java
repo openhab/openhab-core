@@ -38,6 +38,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
@@ -64,6 +65,7 @@ import org.slf4j.LoggerFactory;
  * These sitemaps are automatically exposed to the {@link SitemapRegistry}.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapProvider.class, YamlSitemapProvider.class, YamlModelListener.class })
@@ -298,6 +300,9 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
                 case Default defaultWidget:
                     defaultWidget.setHeight(widgetDTO.height);
                     break;
+                case NestedSitemap nestedSitemapWidget:
+                    nestedSitemapWidget.setName(widgetDTO.name);
+                    break;
                 default:
                     break;
             }
@@ -387,12 +392,11 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     @Override
-    public @Nullable Sitemap getSitemap(String sitemapName) {
+    public @Nullable Sitemap getSitemap(String name) {
         Sitemap sitemap = sitemapsMap.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
-                .flatMap(e -> e.getValue().stream()).filter(s -> sitemapName.equals(s.getName())).findAny()
-                .orElse(null);
+                .flatMap(e -> e.getValue().stream()).filter(s -> name.equals(s.getName())).findAny().orElse(null);
         if (sitemap == null) {
-            logger.trace("Sitemap {} cannot be found", sitemapName);
+            logger.trace("Sitemap {} cannot be found", name);
         }
         return sitemap;
     }

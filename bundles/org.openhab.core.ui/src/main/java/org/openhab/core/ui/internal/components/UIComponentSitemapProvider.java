@@ -41,6 +41,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
@@ -80,6 +81,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Implement sitemap registry
  * @author Mark Herwege - Make provider managed and add support for adding/updating/removing sitemaps via the provider
  *         interface
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(service = { SitemapProvider.class, ManagedSitemapProvider.class }, immediate = true)
@@ -211,6 +213,9 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             case Default defaultWidget:
                 setWidgetPropertyFromComponentConfig(defaultWidget, component, "height");
                 break;
+            case NestedSitemap nestedSitemapWidget:
+                setWidgetPropertyFromComponentConfig(nestedSitemapWidget, component, "sitemapName");
+                break;
             default:
                 break;
         }
@@ -337,8 +342,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
                         String label = stripQuotes(splitted2[1].trim());
                         String icon = splitted2.length < 3 ? null : stripQuotes(splitted2[2].trim());
                         Button button = (Button) Objects.requireNonNull(sitemapFactory.createWidget(
-                                org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.BUTTON,
-                                buttongridWidget));
+                                org.openhab.core.sitemap.registry.SitemapFactory.BUTTON, buttongridWidget));
                         if (component.getConfig().get("item") instanceof String item) {
                             button.setItem(item);
                         }

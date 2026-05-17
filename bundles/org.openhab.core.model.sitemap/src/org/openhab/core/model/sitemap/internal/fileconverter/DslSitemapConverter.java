@@ -43,6 +43,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelLinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.ModelMapping;
 import org.openhab.core.model.sitemap.sitemap.ModelMappingList;
 import org.openhab.core.model.sitemap.sitemap.ModelMapview;
+import org.openhab.core.model.sitemap.sitemap.ModelNestedSitemap;
 import org.openhab.core.model.sitemap.sitemap.ModelSelection;
 import org.openhab.core.model.sitemap.sitemap.ModelSetpoint;
 import org.openhab.core.model.sitemap.sitemap.ModelSitemap;
@@ -70,6 +71,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
 import org.openhab.core.sitemap.Setpoint;
@@ -93,6 +95,7 @@ import org.slf4j.LoggerFactory;
  * with the capabilities of parsing and generating file.
  *
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapSerializer.class, SitemapParser.class })
@@ -261,6 +264,11 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                 modelChart.setYAxisDecimalPattern(chartWidget.getYAxisDecimalPattern());
                 modelChart.setInterpolation(chartWidget.getInterpolation());
                 modelWidget = modelChart;
+            }
+            case NestedSitemap nestedSitemapWidget -> {
+                ModelNestedSitemap modelNestedSitemap = SitemapFactory.eINSTANCE.createModelNestedSitemap();
+                modelNestedSitemap.setSitemapName(nestedSitemapWidget.getName());
+                modelWidget = modelNestedSitemap;
             }
             default -> {
                 ModelDefault modelDefault = SitemapFactory.eINSTANCE.createModelDefault();

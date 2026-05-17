@@ -7,21 +7,30 @@ SitemapModel:
     {SitemapModel} (sitemaps += ModelSitemap)*;
 
 ModelSitemap:
-    'sitemap' name=ID ('label=' label=STRING)? ('icon=' icon=STRING)? '{'
+    'sitemap' name=ID ('label=' label=STRING)? ('icon=' icon=Icon)? '{'
     (children+=ModelWidget)*
     '}';
 
 ModelWidget:
-    (ModelLinkableWidget | ModelNonLinkableWidget);
+    ModelLinkableWidget | ModelNonLinkableWidget;
 
 ModelNonLinkableWidget:
-    ModelSwitch | ModelSelection | ModelSlider | ModelSetpoint | ModelVideo | ModelChart | ModelWebview | ModelColorpicker | ModelColortemperaturepicker | ModelMapview | ModelInput | ModelButton | ModelDefault;
+    ModelSwitch | ModelSelection | ModelSlider | ModelSetpoint | ModelVideo | ModelChart | ModelWebview | ModelColorpicker | ModelColortemperaturepicker | ModelMapview | ModelInput | ModelButton | ModelNestedSitemap | ModelDefault;
 
 ModelLinkableWidget:
     (ModelText | ModelGroup | ModelImage | ModelFrame | ModelButtongrid)
     ('{'
     (children+=ModelWidget)+
     '}')?;
+
+ModelNestedSitemap:
+    {ModelNestedSitemap} 'Sitemap' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
+    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('name=' sitemapName=ID) | 
+    ('labelcolor=' labelColor=ModelColorArrayList) |
+    ('valuecolor=' valueColor=ModelColorArrayList) |
+    ('iconcolor=' iconColor=ModelColorArrayList) |
+    ('visibility=' visibility=ModelVisibilityRuleList))*;
 
 ModelFrame:
     {ModelFrame} 'Frame' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
