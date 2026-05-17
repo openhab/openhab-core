@@ -454,11 +454,10 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                     int level = num.intValue();
                     if (level == 40) {
                         return factory.createSystemOnStartupTrigger();
-                    } else {
-                        SystemStartlevelTrigger result = factory.createSystemStartlevelTrigger();
-                        result.setLevel(level);
-                        return result;
                     }
+                    SystemStartlevelTrigger result = factory.createSystemStartlevelTrigger();
+                    result.setLevel(level);
+                    return result;
                 }
                 throw new SerializationException("Invalid trigger: " + trigger);
             case ItemCommandTriggerHandler.MODULE_TYPE_ID:
