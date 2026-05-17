@@ -28,22 +28,20 @@ import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
+import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.actions.BusEvent;
 import org.openhab.core.model.script.actions.CoreUtil;
 import org.openhab.core.model.script.actions.Exec;
 import org.openhab.core.model.script.actions.HTTP;
-import org.openhab.core.model.script.actions.ItemExtensions;
-import org.openhab.core.model.script.actions.Items;
 import org.openhab.core.model.script.actions.Log;
 import org.openhab.core.model.script.actions.Ping;
-import org.openhab.core.model.script.actions.Registries;
-import org.openhab.core.model.script.actions.RuleExtensions;
-import org.openhab.core.model.script.actions.Rules;
 import org.openhab.core.model.script.actions.ScriptExecution;
 import org.openhab.core.model.script.actions.Transformation;
 import org.openhab.core.model.script.engine.IActionServiceProvider;
 import org.openhab.core.model.script.engine.IThingActionsProvider;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.model.script.helper.ItemExtensions;
+import org.openhab.core.model.script.helper.RuleExtensions;
 import org.openhab.core.model.script.lib.NumberExtensions;
 import org.openhab.core.thing.binding.ThingActions;
 
@@ -99,9 +97,7 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(Ping.class);
         result.add(Transformation.class);
         result.add(ScriptExecution.class);
-        result.add(Items.class);
-        result.add(Registries.class);
-        result.add(Rules.class);
+        result.add(ScriptServiceUtil.class);
         result.add(URLEncoder.class);
         result.add(CoreUtil.class);
 

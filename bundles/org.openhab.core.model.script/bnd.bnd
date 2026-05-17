@@ -5,6 +5,7 @@ Export-Package: org.openhab.core.model.script,\
  org.openhab.core.model.script.engine.action,\
  org.openhab.core.model.script.extension,\
  org.openhab.core.model.script.formatting,\
+ org.openhab.core.model.script.helper,\
  org.openhab.core.model.script.interpreter,\
  org.openhab.core.model.script.jvmmodel,\
  org.openhab.core.model.script.lib,\
@@ -42,6 +43,7 @@ Import-Package: \
  org.openhab.core.thing,\
  org.openhab.core.thing.binding,\
  org.openhab.core.thing.events,\
+ org.openhab.core.thing.link,\
  org.openhab.core.transform,\
  org.openhab.core.transform.actions,\
  org.openhab.core.types,\
