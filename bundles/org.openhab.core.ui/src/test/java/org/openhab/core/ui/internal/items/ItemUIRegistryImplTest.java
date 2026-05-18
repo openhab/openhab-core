@@ -1610,6 +1610,8 @@ public class ItemUIRegistryImplTest {
         // relationships work as expected
         SitemapFactoryImpl sitemapFactory = new SitemapFactoryImpl();
 
+        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
+
         // target sitemap to be returned
         Sitemap targetSitemap = mock(Sitemap.class);
         when(targetSitemap.getLabel()).thenReturn("ItemBasedSitemapLabel");
@@ -1623,7 +1625,6 @@ public class ItemUIRegistryImplTest {
         // prepare a backing item whose state holds the sitemap name
         Item sitemapSelectorItem = mock(Item.class);
         when(sitemapSelectorItem.getState()).thenReturn(new StringType("itemTarget"));
-        when(registryMock.getItem("sitemapSelector")).thenReturn(sitemapSelectorItem);
         when(registryMock.get("sitemapSelector")).thenReturn(sitemapSelectorItem);
 
         // sitemapRegistry should return the sitemap whose name is equal to the item state
@@ -1644,8 +1645,6 @@ public class ItemUIRegistryImplTest {
             String type = invocation.getArgument(0);
             return sitemapFactory.createWidget(type);
         }).when(sitemapFactoryMock).createWidget(anyString());
-
-        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
 
         // resolve nested sitemap by calling getChildren on the frame
         List<Widget> frameChildren = uiRegistry.getChildren(frameMock);
@@ -1671,6 +1670,8 @@ public class ItemUIRegistryImplTest {
         // Use a real SitemapFactoryImpl to create real widget instances for the target sitemap, so that parent/child
         // relationships work as expected
         SitemapFactoryImpl sitemapFactory = new SitemapFactoryImpl();
+
+        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
 
         // Create root sitemap
         String rootSitemapName = "root";
@@ -1710,7 +1711,6 @@ public class ItemUIRegistryImplTest {
         when(sitemapRegistryMock.get(rootSitemapName)).thenReturn(root);
         when(sitemapRegistryMock.get(nestedSitemap1Name)).thenReturn(nestedSitemap1);
         when(sitemapRegistryMock.get(nestedSitemap2Name)).thenReturn(nestedSitemap2);
-        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
 
         // Compute the widget id for the nested widget in the root sitemap
         String id = uiRegistry.getWidgetId(nested1);

@@ -48,7 +48,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         "item=", "label=", "icon=", "staticIcon=", "labelcolor=", "valuecolor=", "iconcolor=", "visibility=",
         "url=", "encoding=", "service=", "refresh=", "period=", "legend=", "forceasitem=", "yAxisDecimalPattern=",
         "interpolation=", "mappings=", "height=", "switchSupport", "releaseOnly", "minValue=", "maxValue=", "step=",
-        "inputHint=", "buttons=", "row=", "column=", "stateless", "click=", "release=", "sitemapname="
+        "inputHint=", "buttons=", "row=", "column=", "stateless", "click=", "release=", "name="
     }
     val ALLOWED_HINTS = #{"text", "number", "date", "time", "datetime"}
     val ALLOWED_INTERPOLATION = #{"linear", "step"}
@@ -387,7 +387,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (w.item === null && w.sitemapName === null) {
             val node = NodeModelUtils.getNode(w)
             val line = node.startLine
-            error(errorString("Sitemap widget doesn't have item or sitemapname defined", line),
+            error(errorString("Sitemap widget doesn't have item or name defined", line),
                 SitemapPackage.Literals.MODEL_NESTED_SITEMAP.getEStructuralFeature(SitemapPackage.MODEL_NESTED_SITEMAP__SITEMAP_NAME))
         }
     }
