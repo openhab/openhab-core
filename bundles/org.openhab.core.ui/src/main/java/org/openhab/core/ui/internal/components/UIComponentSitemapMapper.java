@@ -167,7 +167,7 @@ public class UIComponentSitemapMapper {
                 }
             }
             case NestedSitemap nestedSitemapWidget -> {
-                addConfig(widgetComponent, "sitemapName", nestedSitemapWidget.getName());
+                addConfig(widgetComponent, "name", nestedSitemapWidget.getName());
             }
             default -> {
                 // nothing to do
