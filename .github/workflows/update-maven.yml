@@ -78,7 +78,7 @@ jobs:
         with:
           commit-message: "Update maven wrapper to ${{ steps.maven.outputs.version }}"
           title: "Update Maven Wrapper to ${{ steps.maven.outputs.version }}"
-          body: "PR created by workflow run (update-maven.yml)\n\nCI is disabled per default for PRs created by workflow runs. After reviewing the changes, use Close and Repoen to run the CI."
+          body: "PR created by workflow run (update-maven.yml)\n\nCI is disabled per default for PRs created by workflow runs. After reviewing the changes, use Close and Reopen to run the CI."
           branch: gha/update-maven-wrapper
           author: openhab-bot <bot@openhab.org>
           committer: openhab-bot <bot@openhab.org>
