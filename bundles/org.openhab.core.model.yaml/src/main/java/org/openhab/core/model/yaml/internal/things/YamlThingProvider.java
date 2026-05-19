@@ -101,7 +101,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     private final Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap<>();
 
-    protected final List<QueueContent> queue = new CopyOnWriteArrayList<>();
+    private final List<QueueContent> queue = new CopyOnWriteArrayList<>();
     private final Object queueLock = new Object();
 
     private final Runnable lazyRetryRunnable = new Runnable() {
@@ -567,6 +567,10 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         synchronized (queueLock) {
             queue.removeIf(qc -> thingUID.equals(qc.thingUID));
         }
+    }
+
+    public int getRetryQueueSize() {
+        return queue.size();
     }
 
     private Configuration processThingConfiguration(ThingTypeUID thingTypeUID, ThingUID thingUID,

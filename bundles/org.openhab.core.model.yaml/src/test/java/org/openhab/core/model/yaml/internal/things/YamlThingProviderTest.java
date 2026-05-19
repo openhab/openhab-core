@@ -309,7 +309,7 @@ public class YamlThingProviderTest {
                 channel.getConfiguration().get("other"));
 
         assertNull(thingProvider.lazyRetryThread);
-        assertThat(thingProvider.queue, hasSize(0));
+        assertEquals(0, thingProvider.getRetryQueueSize());
     }
 
     @Test
@@ -375,7 +375,7 @@ public class YamlThingProviderTest {
         assertEquals(DEFAULT_DATE_TIME_FORMAT, channel.getConfiguration().get("DateTimeFormat"));
 
         assertNull(thingProvider.lazyRetryThread);
-        assertThat(thingProvider.queue, hasSize(0));
+        assertEquals(0, thingProvider.getRetryQueueSize());
     }
 
     @Test
@@ -447,7 +447,7 @@ public class YamlThingProviderTest {
                     channel.getConfiguration().get("other"));
 
             assertNull(thingProvider.lazyRetryThread);
-            assertThat(thingProvider.queue, hasSize(0));
+            assertEquals(0, thingProvider.getRetryQueueSize());
         }
     }
 
@@ -508,7 +508,7 @@ public class YamlThingProviderTest {
             assertThat(channel.getConfiguration().keySet(), hasSize(0));
 
             assertNull(thingProvider.lazyRetryThread);
-            assertThat(thingProvider.queue, hasSize(0));
+            assertEquals(0, thingProvider.getRetryQueueSize());
         }
     }
 
@@ -549,17 +549,19 @@ public class YamlThingProviderTest {
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
-        assertThat(thingProvider.queue, hasSize(1));
+        assertEquals(1, thingProvider.getRetryQueueSize());
         assertNotNull(thingProvider.lazyRetryThread);
         assertTrue(thingProvider.lazyRetryThread.isAlive());
 
         try {
             Thread.sleep(2500);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("Test interrupted while waiting for retry job to complete", e);
         }
 
         assertEquals(3, thingHandlerFactory.getNbCallsToCreateThing());
-        assertThat(thingProvider.queue, hasSize(0));
+        assertEquals(0, thingProvider.getRetryQueueSize());
         assertNotNull(thingProvider.lazyRetryThread);
         assertFalse(thingProvider.lazyRetryThread.isAlive());
 
@@ -593,7 +595,7 @@ public class YamlThingProviderTest {
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
-        assertThat(thingProvider.queue, hasSize(1));
+        assertEquals(1, thingProvider.getRetryQueueSize());
         assertNotNull(thingProvider.lazyRetryThread);
         assertTrue(thingProvider.lazyRetryThread.isAlive());
 
@@ -602,12 +604,14 @@ public class YamlThingProviderTest {
         modelRepository.processWatchEvent(WatchService.Kind.MODIFY, fullModelPath);
 
         assertEquals(2, thingHandlerFactory.getNbCallsToCreateThing());
-        assertThat(thingProvider.queue, hasSize(0));
+        assertEquals(0, thingProvider.getRetryQueueSize());
 
         // Wait to be sure the job is terminated (it sleeps 1s)
         try {
             Thread.sleep(1200);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("Test interrupted while waiting for retry job to complete", e);
         }
 
         assertEquals(2, thingHandlerFactory.getNbCallsToCreateThing());
@@ -644,7 +648,7 @@ public class YamlThingProviderTest {
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
-        assertThat(thingProvider.queue, hasSize(1));
+        assertEquals(1, thingProvider.getRetryQueueSize());
         assertNotNull(thingProvider.lazyRetryThread);
         assertTrue(thingProvider.lazyRetryThread.isAlive());
 
@@ -652,12 +656,14 @@ public class YamlThingProviderTest {
         modelRepository.processWatchEvent(WatchService.Kind.DELETE, fullModelPath);
 
         assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
-        assertThat(thingProvider.queue, hasSize(0));
+        assertEquals(0, thingProvider.getRetryQueueSize());
 
         // Wait to be sure the job is terminated (it sleeps 1s)
         try {
             Thread.sleep(1200);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("Test interrupted while waiting for retry job to complete", e);
         }
 
         assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
@@ -700,13 +706,13 @@ public class YamlThingProviderTest {
             assertThat(thing.getConfiguration().keySet(), hasSize(0));
 
             assertNull(thingProvider.lazyRetryThread);
-            assertThat(thingProvider.queue, hasSize(0));
+            assertEquals(0, thingProvider.getRetryQueueSize());
         }
     }
 
     private class NtpThingHandlerFactory implements ThingHandlerFactory {
         private int nbCallsBeforeSucceededCreatingThing;
-        private int nbCallsToCreateThing = 0;;
+        private int nbCallsToCreateThing = 0;
 
         public NtpThingHandlerFactory(int nbCallsBeforeSucceededCreatingThing) {
             this.nbCallsBeforeSucceededCreatingThing = nbCallsBeforeSucceededCreatingThing;
