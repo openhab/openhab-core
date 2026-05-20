@@ -40,10 +40,8 @@ public class ItemExtensions {
      * @param item the {@link Item}.
      * @param namespace the metadata namespace.
      * @param value the metadata value.
-     * @param configProperties the pairs of {@link String}s and {@link Object}s that constitutes the configuration.
      * @throws IllegalArgumentException If {@code namespace} or {@code value} is {@code null}, if {@code namespace} is
-     *             invalid, or if there is an odd number of {@code configProperties}, or if any of the keys aren't
-     *             {@link String}s.
+     *             invalid.
      * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
      *             not a {@link ManagedProvider}.
      * @throws IllegalStateException If no {@code ManagedProvider} is available.
@@ -66,8 +64,8 @@ public class ItemExtensions {
      *             not a {@link ManagedProvider}.
      * @throws IllegalStateException If no {@code ManagedProvider} is available.
      */
-    public static void addMetadata(Item item, String namespace, String value, Object... configuration) {
-        Items.addMetadata(item.getName(), namespace, value, configuration);
+    public static void addMetadata(Item item, String namespace, String value, Object... configProperties) {
+        Items.addMetadata(item.getName(), namespace, value, configProperties);
     }
 
     /**
