@@ -15,12 +15,12 @@ package org.openhab.core.model.script.helper;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataProvider;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -34,67 +34,133 @@ import org.openhab.core.thing.link.ItemChannelLink;
 @NonNullByDefault
 public class ItemExtensions {
 
-    @NonNullByDefault({})
+    /**
+     * Add metadata to an item.
+     *
+     * @param item the {@link Item}.
+     * @param namespace the metadata namespace.
+     * @param value the metadata value.
+     * @param configProperties the pairs of {@link String}s and {@link Object}s that constitutes the configuration.
+     * @throws IllegalArgumentException If {@code namespace} or {@code value} is {@code null}, if {@code namespace} is
+     *             invalid, or if there is an odd number of {@code configProperties}, or if any of the keys aren't
+     *             {@link String}s.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no {@code ManagedProvider} is available.
+     */
     public static void addMetadata(Item item, String namespace, String value) {
-        if (item == null) {
-            throw new IllegalArgumentException("item cannot be null");
-        }
         Items.addMetadata(item.getName(), namespace, value, (String) null);
     }
 
-    @NonNullByDefault({})
+    /**
+     * Add metadata to an item.
+     *
+     * @param item the {@link Item}.
+     * @param namespace the metadata namespace.
+     * @param value the metadata value.
+     * @param configProperties the pairs of {@link String}s and {@link Object}s that constitutes the configuration.
+     * @throws IllegalArgumentException If {@code namespace} or {@code value} is {@code null}, if {@code namespace} is
+     *             invalid, or if there is an odd number of {@code configProperties}, or if any of the keys aren't
+     *             {@link String}s.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no {@code ManagedProvider} is available.
+     */
     public static void addMetadata(Item item, String namespace, String value, Object... configuration) {
-        if (item == null) {
-            throw new IllegalArgumentException("item cannot be null");
-        }
         Items.addMetadata(item.getName(), namespace, value, configuration);
     }
 
-    @NonNullByDefault({})
+    /**
+     * Add metadata to an item.
+     *
+     * @param item the {@link Item}.
+     * @param namespace the metadata namespace.
+     * @param value the metadata value.
+     * @param configuration the {@link Map} of configuration properties that make up the configuration.
+     * @throws IllegalArgumentException If {@code namespace} or {@code value} is {@code null}, or if {@code namespace}
+     *             is invalid.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no {@code ManagedProvider} is available.
+     */
     public static void addMetadata(Item item, String namespace, String value,
-            @Nullable Map<@NonNull String, @NonNull Object> configuration) {
-        if (item == null) {
-            throw new IllegalArgumentException("item cannot be null");
-        }
+            @Nullable Map<String, Object> configuration) {
         Items.addMetadata(item.getName(), namespace, value, configuration);
     }
 
-    @NonNullByDefault({})
+    /**
+     * Get item metadata for the specified namespace.
+     *
+     * @param item the {@link Item}.
+     * @param namespace the metadata namespace.
+     * @return The matching {@link Metadata} or {@code null}.
+     */
     public static @Nullable Metadata getMetadata(Item item, String namespace) {
-        if (item == null) {
-            throw new IllegalArgumentException("item cannot be null");
-        }
         return Items.getMetadata(item.getName(), namespace);
     }
 
-    @NonNullByDefault({})
+    /**
+     * Remove metadata from an item for the specified namespace.
+     *
+     * @param item the {@link Item}.
+     * @param namespace the metadata namespace.
+     * @return The removed {@link Metadata} or {@code null} if no such metadata existed.
+     */
     public static @Nullable Metadata removeMetadata(Item item, String namespace) {
-        if (item == null) {
-            throw new IllegalArgumentException("item cannot be null");
-        }
         return Items.removeMetadata(item.getName(), namespace);
     }
 
-    @NonNullByDefault({})
+    /**
+     * Update item metadata for the specified namespace.
+     *
+     * @param item the {@link Item}.
+     * @param namespace the metadata namespace.
+     * @param value the new metadata value.
+     * @return The old {@link Metadata} or {@code null} if no previous metadata existed.
+     * @throws IllegalArgumentException If {@code namespace} or {@code value} is {@code null}, or if {@code namespace}
+     *             is invalid.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no {@code ManagedProvider} is available.
+     */
     public static @Nullable Metadata updateMetadata(Item item, String namespace, String value) {
-        if (item == null) {
-            throw new IllegalArgumentException("item cannot be null");
-        }
         return Items.updateMetadata(item.getName(), namespace, value);
     }
 
-    @NonNullByDefault({})
+    /**
+     * Update item metadata for the specified namespace.
+     *
+     * @param item the {@link Item}.
+     * @param namespace the metadata namespace.
+     * @param value the new metadata value.
+     * @return The old {@link Metadata} or {@code null} if no previous metadata existed.
+     * @throws IllegalArgumentException If {@code namespace} or {@code value} is {@code null}, or is {@code namespace}
+     *             is invalid.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no {@code ManagedProvider} is available.
+     */
     public static @Nullable Metadata updateMetadata(Item item, String namespace, String value,
             Object... configuration) {
         return Items.updateMetadata(item.getName(), namespace, value, configuration);
     }
 
-    @NonNullByDefault({})
+    /**
+     * Update item metadata for the specified namespace.
+     *
+     * @param item the {@link Item}.
+     * @param namespace the metadata namespace.
+     * @param value the new metadata value.
+     * @param configuration the {@link Map} of configuration properties that make up the configuration.
+     * @return The old {@link Metadata} or {@code null} if no previous metadata existed.
+     * @throws IllegalArgumentException If {@code namespace} or {@code value} is {@code null}, or if {@code namespace}
+     *             is invalid.
+     * @throws UnsupportedOperationException If the metadata namespace has a reserved {@link MetadataProvider} that is
+     *             not a {@link ManagedProvider}.
+     * @throws IllegalStateException If no {@code ManagedProvider} is available.
+     */
     public static @Nullable Metadata updateMetadata(Item item, String namespace, String value,
-            @Nullable Map<@NonNull String, @NonNull Object> configuration) {
-        if (item == null) {
-            throw new IllegalArgumentException("item cannot be null");
-        }
+            @Nullable Map<String, Object> configuration) {
         return Items.updateMetadata(item.getName(), namespace, value, configuration);
     }
 
