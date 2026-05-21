@@ -68,6 +68,10 @@ public class YamlWidgetProvider extends AbstractProvider<RootUIComponent>
                 .map(name -> widgetsMap.getOrDefault(name, List.of())).flatMap(Collection::stream).toList();
     }
 
+    public Collection<RootUIComponent> getAllFromModel(String modelName) {
+        return widgetsMap.getOrDefault(modelName, List.of());
+    }
+
     @Override
     public Class<YamlWidgetDTO> getElementClass() {
         return YamlWidgetDTO.class;

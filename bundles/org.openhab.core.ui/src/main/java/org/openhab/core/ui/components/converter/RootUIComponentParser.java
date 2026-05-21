@@ -1,0 +1,38 @@
+/*
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.ui.components.converter;
+
+import java.util.Collection;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.ui.components.RootUIComponent;
+import org.openhab.core.ui.components.UIComponent;
+
+/**
+ * {@link RootUIComponentParser} is the interface to implement by any format parser for {@link RootUIComponentParser}
+ * objects.
+ *
+ * @author Ravi Nadahar - Initial contribution
+ */
+@NonNullByDefault
+public interface RootUIComponentParser extends UIComponentParser {
+
+    /**
+     * Get the {@link RootUIComponent} objects that were found when parsing the format.
+     *
+     * @param modelName the model name used when parsing.
+     * @return The {@link Collection} of {@link UIComponent}s.
+     */
+    @Override
+    Collection<? extends RootUIComponent> getParsedObjects(String modelName);
+}
