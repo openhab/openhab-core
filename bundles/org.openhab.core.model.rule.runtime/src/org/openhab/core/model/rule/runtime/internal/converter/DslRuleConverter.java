@@ -123,6 +123,7 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
     private static final Pattern CONTEXT_COMMENT_PATTERN = Pattern.compile("^// context:.*$\\R", Pattern.MULTILINE);
     private static final Pattern INDENTATION_PATTERN = Pattern.compile("^(?=.)", Pattern.MULTILINE);
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
+    private static final Pattern TIME_PATTERN = Pattern.compile("^([012]?\\d):([0-6]\\d)$");
     private static final Pattern INDEX_PATTERN = Pattern.compile("-(?<idx>\\d+)$");
     private final Set<String> enumStates;
     private final Set<String> enumCommands;
@@ -558,12 +559,14 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                 value = trigger.getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME);
                 if (value instanceof String str) {
                     TimerTrigger result = factory.createTimerTrigger();
-                    if ("12:00".equals(str)) {
+                    Matcher m = TIME_PATTERN.matcher(str);
+                    String time = m.find() && m.groupCount() > 1 && m.group(1).length() < 2 ? '0' + str : str;
+                    if ("12:00".equals(time)) {
                         result.setTime("noon");
-                    } else if ("00:00".equals(str)) {
+                    } else if ("00:00".equals(time)) {
                         result.setTime("midnight");
                     } else {
-                        result.setTime(str);
+                        result.setTime(time);
                     }
                     return result;
                 }
@@ -643,11 +646,15 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                 TimeOfDayCondition todCond = factory.createTimeOfDayCondition();
                 value = condition.getConfiguration().get(TimeOfDayConditionHandler.CFG_START_TIME);
                 if (value instanceof String start) {
-                    todCond.setStart(start);
+                    Matcher m = TIME_PATTERN.matcher(start);
+                    String time = m.find() && m.groupCount() > 1 && m.group(1).length() < 2 ? '0' + start : start;
+                    todCond.setStart(time);
                 }
                 value = condition.getConfiguration().get(TimeOfDayConditionHandler.CFG_END_TIME);
                 if (value instanceof String end) {
-                    todCond.setEnd(end);
+                    Matcher m = TIME_PATTERN.matcher(end);
+                    String time = m.find() && m.groupCount() > 1 && m.group(1).length() < 2 ? '0' + end : end;
+                    todCond.setEnd(time);
                 }
                 return todCond;
             case DayOfWeekConditionHandler.MODULE_TYPE_ID:
