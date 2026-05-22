@@ -134,7 +134,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     @Override
     public void removedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
-        Collection<SemanticTag> modelTags = tagsMap.getOrDefault(modelName, List.of());
+        Collection<SemanticTag> modelTags = tagsMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(elt -> elt.uid).sorted(Comparator.reverseOrder()).forEach(uid -> {
             modelTags.stream().filter(tag -> tag.getUID().equals(uid)).findFirst().ifPresentOrElse(oldTag -> {
                 modelTags.remove(oldTag);

@@ -123,7 +123,7 @@ public class YamlWidgetProvider extends AbstractProvider<RootUIComponent>
 
     @Override
     public void removedModel(String modelName, Collection<YamlWidgetDTO> elements) {
-        Collection<RootUIComponent> modelWidgets = widgetsMap.getOrDefault(modelName, List.of());
+        Collection<RootUIComponent> modelWidgets = widgetsMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(YamlWidgetDTO::getId).forEach(uid -> {
             modelWidgets.stream().filter(w -> w.getUID().equals(uid)).findFirst().ifPresentOrElse(oldWidget -> {
                 modelWidgets.remove(oldWidget);

@@ -134,7 +134,7 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
     @Override
     public void removedModel(String modelName, Collection<YamlRuleDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
-        Collection<Rule> modelRules = rulesMap.getOrDefault(modelName, List.of());
+        Collection<Rule> modelRules = rulesMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(element -> element.uid).forEach(uid -> {
             modelRules.stream().filter(rule -> rule.getUID().equals(uid)).findFirst().ifPresentOrElse(oldRule -> {
                 modelRules.remove(oldRule);

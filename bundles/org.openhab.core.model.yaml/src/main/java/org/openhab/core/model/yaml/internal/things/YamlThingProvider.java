@@ -220,7 +220,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     @Override
     public void removedModel(String modelName, Collection<YamlThingDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
-        Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, List.of());
+        Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
             modelThings.stream().filter(th -> th.getUID().equals(uid)).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);

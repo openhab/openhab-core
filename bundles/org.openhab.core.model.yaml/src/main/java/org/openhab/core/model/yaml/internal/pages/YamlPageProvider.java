@@ -123,7 +123,7 @@ public class YamlPageProvider extends AbstractProvider<RootUIComponent>
 
     @Override
     public void removedModel(String modelName, Collection<YamlPageDTO> elements) {
-        Collection<RootUIComponent> modelPages = pagesMap.getOrDefault(modelName, List.of());
+        Collection<RootUIComponent> modelPages = pagesMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(YamlPageDTO::getId).forEach(uid -> {
             modelPages.stream().filter(p -> p.getUID().equals(uid)).findFirst().ifPresentOrElse(oldPage -> {
                 modelPages.remove(oldPage);

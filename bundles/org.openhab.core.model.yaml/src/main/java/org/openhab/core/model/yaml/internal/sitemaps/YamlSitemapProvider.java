@@ -169,7 +169,7 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
 
     @Override
     public void removedModel(String modelName, Collection<YamlSitemapDTO> elements) {
-        Collection<Sitemap> modelSitemaps = sitemapsMap.getOrDefault(modelName, List.of());
+        Collection<Sitemap> modelSitemaps = sitemapsMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(elt -> elt.name).forEach(name -> {
             modelSitemaps.stream().filter(s -> s.getName().equals(name)).findFirst().ifPresentOrElse(oldSitemap -> {
                 modelSitemaps.remove(oldSitemap);
