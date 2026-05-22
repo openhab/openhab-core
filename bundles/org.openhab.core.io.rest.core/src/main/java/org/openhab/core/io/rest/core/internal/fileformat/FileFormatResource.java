@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -52,6 +51,7 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.inbox.Inbox;
+import org.openhab.core.converter.ObjectParser;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.core.fileformat.ExtendedFileFormatDTO;
@@ -761,16 +761,15 @@ public class FileFormatResource implements RESTResource {
         ThingParser thingParser = getThingParser(contentTypeHeader);
         ItemParser itemParser = getItemParser(contentTypeHeader);
         SitemapParser sitemapParser = getSitemapParser(contentTypeHeader);
+        ObjectParser<?> parserStartingParsing = null;
         String modelName = null;
-        String modelName2 = null;
-        String modelName3 = null;
-        String modelName4 = null;
         switch (contentTypeHeader) {
             case "text/vnd.openhab.dsl.thing":
                 if (thingParser == null) {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                             .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
                 }
+                parserStartingParsing = thingParser;
                 modelName = thingParser.startParsingFormat(input, errors, warnings);
                 if (modelName == null) {
                     return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
@@ -786,21 +785,22 @@ public class FileFormatResource implements RESTResource {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                             .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
                 }
-                modelName2 = itemParser.startParsingFormat(input, errors, warnings);
-                if (modelName2 == null) {
+                parserStartingParsing = itemParser;
+                modelName = itemParser.startParsingFormat(input, errors, warnings);
+                if (modelName == null) {
                     return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
                 }
-                items = itemParser.getParsedObjects(modelName2);
+                items = itemParser.getParsedObjects(modelName);
                 if (items.isEmpty()) {
-                    itemParser.finishParsingFormat(modelName2);
+                    itemParser.finishParsingFormat(modelName);
                     return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
                 }
-                metadata = itemParser.getParsedMetadata(modelName2);
-                stateFormatters = itemParser.getParsedStateFormatters(modelName2);
+                metadata = itemParser.getParsedMetadata(modelName);
+                stateFormatters = itemParser.getParsedStateFormatters(modelName);
                 // We need to go through the thing parser to retrieve the items channel links
                 // But there is no need to parse again the input
                 if (thingParser != null) {
-                    channelLinks = thingParser.getParsedChannelLinks(modelName2);
+                    channelLinks = thingParser.getParsedChannelLinks(modelName);
                 }
                 break;
             case "text/vnd.openhab.dsl.sitemap":
@@ -808,18 +808,20 @@ public class FileFormatResource implements RESTResource {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                             .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
                 }
-                modelName3 = sitemapParser.startParsingFormat(input, errors, warnings);
-                if (modelName3 == null) {
+                parserStartingParsing = sitemapParser;
+                modelName = sitemapParser.startParsingFormat(input, errors, warnings);
+                if (modelName == null) {
                     return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
                 }
-                sitemaps = sitemapParser.getParsedObjects(modelName3);
+                sitemaps = sitemapParser.getParsedObjects(modelName);
                 if (sitemaps.isEmpty()) {
-                    sitemapParser.finishParsingFormat(modelName3);
+                    sitemapParser.finishParsingFormat(modelName);
                     return Response.status(Response.Status.BAD_REQUEST).entity("No sitemap loaded from input").build();
                 }
                 break;
             case "application/yaml":
                 if (thingParser != null) {
+                    parserStartingParsing = thingParser;
                     modelName = thingParser.startParsingFormat(input, errors, warnings);
                     if (modelName == null) {
                         return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
@@ -830,43 +832,40 @@ public class FileFormatResource implements RESTResource {
                 if (itemParser != null) {
                     // Avoid parsing the input a second time
                     if (modelName == null) {
-                        modelName2 = itemParser.startParsingFormat(input, errors, warnings);
-                        if (modelName2 == null) {
+                        parserStartingParsing = itemParser;
+                        modelName = itemParser.startParsingFormat(input, errors, warnings);
+                        if (modelName == null) {
                             return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors))
                                     .build();
                         }
                     }
-                    String modelNameToUse = modelName != null ? modelName : Objects.requireNonNull(modelName2);
-                    items = itemParser.getParsedObjects(modelNameToUse);
-                    metadata = itemParser.getParsedMetadata(modelNameToUse);
-                    stateFormatters = itemParser.getParsedStateFormatters(modelNameToUse);
+                    items = itemParser.getParsedObjects(modelName);
+                    metadata = itemParser.getParsedMetadata(modelName);
+                    stateFormatters = itemParser.getParsedStateFormatters(modelName);
                 }
                 if (sitemapParser != null) {
                     // Avoid parsing the input a second time
-                    if (modelName == null && modelName2 == null) {
-                        modelName3 = sitemapParser.startParsingFormat(input, errors, warnings);
-                        if (modelName3 == null) {
+                    if (modelName == null) {
+                        parserStartingParsing = sitemapParser;
+                        modelName = sitemapParser.startParsingFormat(input, errors, warnings);
+                        if (modelName == null) {
                             return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors))
                                     .build();
                         }
                     }
-                    String modelNameToUse = modelName != null ? modelName
-                            : (modelName2 != null ? modelName2 : Objects.requireNonNull(modelName3));
-                    sitemaps = sitemapParser.getParsedObjects(modelNameToUse);
+                    sitemaps = sitemapParser.getParsedObjects(modelName);
                 }
                 if (tagParser != null) {
                     // Avoid parsing the input a second time
-                    if (modelName == null && modelName2 == null && modelName3 == null) {
-                        modelName4 = tagParser.startParsingFormat(input, errors, warnings);
-                        if (modelName4 == null) {
+                    if (modelName == null) {
+                        parserStartingParsing = tagParser;
+                        modelName = tagParser.startParsingFormat(input, errors, warnings);
+                        if (modelName == null) {
                             return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors))
                                     .build();
                         }
                     }
-                    String modelNameToUse = modelName != null ? modelName
-                            : (modelName2 != null ? modelName2
-                                    : (modelName3 != null ? modelName3 : Objects.requireNonNull(modelName4)));
-                    tags = tagParser.getParsedObjects(modelNameToUse);
+                    tags = tagParser.getParsedObjects(modelName);
                 }
                 break;
             default:
@@ -875,17 +874,8 @@ public class FileFormatResource implements RESTResource {
         }
         ExtendedFileFormatDTO result = convertToFileFormatDTO(tags, things, items, metadata, stateFormatters,
                 channelLinks, sitemaps, warnings);
-        if (modelName != null && thingParser != null) {
-            thingParser.finishParsingFormat(modelName);
-        }
-        if (modelName2 != null && itemParser != null) {
-            itemParser.finishParsingFormat(modelName2);
-        }
-        if (modelName3 != null && sitemapParser != null) {
-            sitemapParser.finishParsingFormat(modelName3);
-        }
-        if (modelName4 != null && tagParser != null) {
-            tagParser.finishParsingFormat(modelName4);
+        if (modelName != null && parserStartingParsing != null) {
+            parserStartingParsing.finishParsingFormat(modelName);
         }
         return Response.ok(result).build();
     }
