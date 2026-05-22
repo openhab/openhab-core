@@ -589,7 +589,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "One or more semantic tags not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForSemanticTags(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultTags") @Parameter(description = "if true, exclude the default semantic tags from the result. This parameter is ignored when semantic tag UIDs are provided.") boolean hideDefaultTags,
+            @DefaultValue("false") @QueryParam("hideDefaultTags") @Parameter(description = "if true, exclude the default semantic tags from the result. This parameter is ignored when semantic tag UIDs are provided.") boolean hideDefaultTags,
             @Parameter(description = "Array of semantic tag UIDs. If empty or omitted, return all custom semantic tags from the Registry.") @Nullable List<String> semanticTagUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForSemanticTags: mediaType = {}, semanticTagUIDs = {}", acceptHeader,
