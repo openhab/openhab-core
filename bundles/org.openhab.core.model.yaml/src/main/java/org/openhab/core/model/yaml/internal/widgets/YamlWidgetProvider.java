@@ -49,7 +49,7 @@ public class YamlWidgetProvider extends AbstractProvider<RootUIComponent>
 
     private final Logger logger = LoggerFactory.getLogger(YamlWidgetProvider.class);
 
-    private final Map<String, Collection<RootUIComponent>> widgetsMap = new ConcurrentHashMap<>();
+    private final Map<String, List<RootUIComponent>> widgetsMap = new ConcurrentHashMap<>();
 
     @Deactivate
     public void deactivate() {
@@ -69,7 +69,7 @@ public class YamlWidgetProvider extends AbstractProvider<RootUIComponent>
     }
 
     public Collection<RootUIComponent> getAllFromModel(String modelName) {
-        return widgetsMap.getOrDefault(modelName, List.of());
+        return List.copyOf(widgetsMap.getOrDefault(modelName, List.of()));
     }
 
     @Override

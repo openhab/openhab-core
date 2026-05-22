@@ -28,10 +28,13 @@ import org.openhab.core.ui.components.UIComponent;
 public interface RootUIComponentParser extends UIComponentParser {
 
     /**
-     * Get the {@link RootUIComponent} objects that were found when parsing the format.
+     * Get a copy of the collection of {@link RootUIComponent} objects that were found when parsing the format.
      *
      * @param modelName the model name used when parsing.
      * @return The {@link Collection} of {@link UIComponent}s.
+     *
+     * @implNote It's important that a copy of the {@link Collection} is returned, so that invoking
+     *           {@link #finishParsingFormat(String)} doesn't modify the returned result.
      */
     @Override
     Collection<? extends RootUIComponent> getParsedObjects(String modelName);

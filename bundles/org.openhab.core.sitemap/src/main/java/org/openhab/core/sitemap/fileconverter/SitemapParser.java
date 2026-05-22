@@ -41,10 +41,13 @@ public interface SitemapParser extends ObjectParser<Sitemap> {
     String startParsingFormat(String syntax, List<String> errors, List<String> warnings);
 
     /**
-     * Get the {@link Sitemap} objects found when parsing the format.
+     * Get a copy of the collection of {@link Sitemap} objects that were found when parsing the format.
      *
      * @param modelName the model name used when parsing.
      * @return The {@link Collection} of {@link Sitemap}s.
+     *
+     * @implNote It's important that a copy of the {@link Collection} is returned, so that invoking
+     *           {@link #finishParsingFormat(String)} doesn't modify the returned result.
      */
     @Override
     Collection<Sitemap> getParsedObjects(String modelName);
