@@ -71,7 +71,8 @@ public class YamlRuleTemplateProvider extends AbstractYamlRuleProvider<RuleTempl
     }
 
     public Collection<RuleTemplate> getAllFromModel(String modelName) {
-        return ruleTemplatesMap.getOrDefault(modelName, List.of());
+        Collection<RuleTemplate> templates = ruleTemplatesMap.get(modelName);
+        return templates == null ? List.of() : List.copyOf(templates);
     }
 
     @Override

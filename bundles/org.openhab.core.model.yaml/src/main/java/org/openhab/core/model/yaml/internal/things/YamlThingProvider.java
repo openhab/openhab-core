@@ -159,7 +159,8 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     public Collection<Thing> getAllFromModel(String modelName) {
-        return thingsMap.getOrDefault(modelName, List.of());
+        Collection<Thing> things = thingsMap.get(modelName);
+        return things == null ? List.of() : List.copyOf(things);
     }
 
     @Override

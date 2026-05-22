@@ -73,7 +73,8 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     public Collection<SemanticTag> getAllFromModel(String modelName) {
         // Tags are returned not sorted but rather in their original order in the file
-        return tagsMap.getOrDefault(modelName, List.of());
+        Collection<SemanticTag> tags = tagsMap.get(modelName);
+        return tags == null ? List.of() : List.copyOf(tags);
     }
 
     @Override

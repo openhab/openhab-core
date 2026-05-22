@@ -94,7 +94,8 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     public Collection<Sitemap> getAllFromModel(String modelName) {
-        return sitemapsMap.getOrDefault(modelName, List.of());
+        Collection<Sitemap> sitemaps = sitemapsMap.get(modelName);
+        return sitemaps == null ? List.of() : List.copyOf(sitemaps);
     }
 
     @Override
