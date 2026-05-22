@@ -58,6 +58,15 @@ public class Rules {
         return ruleManager.runNow(ruleUid);
     }
 
+    /**
+     * Run the rule with the specified UID while optionally taking conditions into account.
+     *
+     * @param ruleUid the UID of the rule to run.
+     * @param considerConditions {@code true} to not run the rule if its conditions don't qualify.
+     * @return A copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
     public static Map<String, Object> runRule(String ruleUid, boolean considerConditions) {
         RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
         if (ruleManager == null) {
@@ -123,7 +132,8 @@ public class Rules {
      * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
      */
-    public static Map<String, Object> runRule(String ruleUid, boolean considerConditions, Map<String, Object> context) {
+    public static Map<String, Object> runRule(String ruleUid, boolean considerConditions,
+            @Nullable Map<String, Object> context) {
         RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
         if (ruleManager == null) {
             throw new IllegalStateException("RuleManager doesn't exist");
