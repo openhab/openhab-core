@@ -156,7 +156,7 @@ public class YamlWidgetProvider extends AbstractProvider<RootUIComponent>
             widget.addTags(dto.tags);
         }
         if (dto.props != null) {
-            widget.setProps(dto.props);
+            widget.setProps(dto.props.toConfigDescriptionDTO());
         }
         Date timestamp = dto.timestamp;
         if (timestamp != null) {
