@@ -17,6 +17,7 @@ import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUI
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -490,7 +491,7 @@ public class FileFormatResource implements RESTResource {
         });
         serializer.setItemsToBeSerialized(genId, items, getMetadata(items), stateFormatters, hideDefaultParameters);
         serializer.generateFormat(genId, outputStream);
-        return Response.ok(new String(outputStream.toByteArray())).build();
+        return Response.ok(outputStream.toString(StandardCharsets.UTF_8)).build();
     }
 
     @POST
@@ -529,7 +530,7 @@ public class FileFormatResource implements RESTResource {
         String genId = newIdForSerialization();
         serializer.setThingsToBeSerialized(genId, things, true, hideDefaultParameters);
         serializer.generateFormat(genId, outputStream);
-        return Response.ok(new String(outputStream.toByteArray())).build();
+        return Response.ok(outputStream.toString(StandardCharsets.UTF_8)).build();
     }
 
     @POST
@@ -574,7 +575,7 @@ public class FileFormatResource implements RESTResource {
         String genId = newIdForSerialization();
         serializer.setSitemapsToBeSerialized(genId, sitemaps);
         serializer.generateFormat(genId, outputStream);
-        return Response.ok(new String(outputStream.toByteArray())).build();
+        return Response.ok(outputStream.toString(StandardCharsets.UTF_8)).build();
     }
 
     @POST
@@ -621,7 +622,7 @@ public class FileFormatResource implements RESTResource {
         String genId = newIdForSerialization();
         serializer.setSemanticTagsToBeSerialized(genId, tags);
         serializer.generateFormat(genId, outputStream);
-        return Response.ok(new String(outputStream.toByteArray())).build();
+        return Response.ok(outputStream.toString(StandardCharsets.UTF_8)).build();
     }
 
     @POST
@@ -724,7 +725,7 @@ public class FileFormatResource implements RESTResource {
                 return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                         .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
-        return Response.ok(new String(outputStream.toByteArray())).build();
+        return Response.ok(outputStream.toString(StandardCharsets.UTF_8)).build();
     }
 
     @POST
