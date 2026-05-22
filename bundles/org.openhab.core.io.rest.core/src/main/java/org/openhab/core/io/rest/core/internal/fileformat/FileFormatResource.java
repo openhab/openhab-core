@@ -68,6 +68,7 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemParser;
 import org.openhab.core.items.fileconverter.ItemSerializer;
+import org.openhab.core.semantics.ManagedSemanticTagProvider;
 import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.dto.SemanticTagDTO;
@@ -315,6 +316,7 @@ public class FileFormatResource implements RESTResource {
 
     private final SemanticTagRegistry semanticTagRegistry;
     private final DefaultSemanticTagProvider defaultSemanticTagProvider;
+    private final ManagedSemanticTagProvider managedSemanticTagProvider;
     private final ItemBuilderFactory itemBuilderFactory;
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
@@ -341,6 +343,7 @@ public class FileFormatResource implements RESTResource {
     public FileFormatResource(//
             final @Reference SemanticTagRegistry semanticTagRegistry,
             final @Reference DefaultSemanticTagProvider defaultSemanticTagProvider,
+            final @Reference ManagedSemanticTagProvider managedSemanticTagProvider,
             final @Reference ItemBuilderFactory itemBuilderFactory, //
             final @Reference ItemRegistry itemRegistry, //
             final @Reference MetadataRegistry metadataRegistry,
@@ -354,6 +357,7 @@ public class FileFormatResource implements RESTResource {
             final @Reference SitemapRegistry sitemapRegistry) {
         this.semanticTagRegistry = semanticTagRegistry;
         this.defaultSemanticTagProvider = defaultSemanticTagProvider;
+        this.managedSemanticTagProvider = managedSemanticTagProvider;
         this.itemBuilderFactory = itemBuilderFactory;
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
@@ -589,6 +593,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "One or more semantic tags not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForSemanticTags(final @Context HttpHeaders httpHeaders,
+            @DefaultValue("false") @QueryParam("hideNonEditableTags") @Parameter(description = "if true, exclude the non editable semantic tags from the result. This parameter is ignored when semantic tag UIDs are provided.") boolean hideNonEditableTags,
             @DefaultValue("false") @QueryParam("hideDefaultTags") @Parameter(description = "if true, exclude the default semantic tags from the result. This parameter is ignored when semantic tag UIDs are provided.") boolean hideDefaultTags,
             @Parameter(description = "Array of semantic tag UIDs. If empty or omitted, return all custom semantic tags from the Registry.") @Nullable List<String> semanticTagUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
@@ -602,9 +607,17 @@ public class FileFormatResource implements RESTResource {
 
         List<SemanticTag> tags;
         if (semanticTagUIDs == null || semanticTagUIDs.isEmpty()) {
-            Collection<SemanticTag> defaultTags = hideDefaultTags ? defaultSemanticTagProvider.getAll() : List.of();
-            tags = semanticTagRegistry.getAll().stream().filter(tag -> !defaultTags.contains(tag))
-                    .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+            if (hideNonEditableTags) {
+                tags = semanticTagRegistry.getAll().stream()
+                        .filter(tag -> managedSemanticTagProvider.get(tag.getUID()) != null)
+                        .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+            } else if (hideDefaultTags) {
+                Collection<SemanticTag> defaultTags = defaultSemanticTagProvider.getAll();
+                tags = semanticTagRegistry.getAll().stream().filter(tag -> !defaultTags.contains(tag))
+                        .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+            } else {
+                tags = semanticTagRegistry.getAll().stream().sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+            }
         } else {
             tags = new ArrayList<>();
             for (String uid : semanticTagUIDs) {
