@@ -107,6 +107,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     private final Runnable lazyRetryRunnable = new Runnable() {
         @Override
         public void run() {
+            threadStopping = false;
             logger.debug("Starting lazy retry thread");
             boolean stop = false;
             do {
@@ -116,12 +117,14 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     stop = true;
+                    threadStopping = true;
                 }
                 if (!stop) {
                     synchronized (queueLock) {
                         queue.removeIf(qc -> retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration,
                                 qc.thingUID, qc.bridgeUID));
                         stop = queue.isEmpty();
+                        threadStopping = stop == true;
                     }
                 }
             } while (!stop);
@@ -130,6 +133,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     };
 
     protected @Nullable Thread lazyRetryThread;
+    private boolean threadStopping;
 
     private record QueueContent(ThingHandlerFactory thingHandlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
@@ -556,6 +560,17 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             queue.add(new QueueContent(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID));
         }
         Thread thread = lazyRetryThread;
+        boolean stopping = threadStopping;
+        if (thread != null && thread.isAlive() && stopping) {
+            // Wait for the thread to terminate
+            while (thread.isAlive()) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
         if (thread == null || !thread.isAlive()) {
             thread = new Thread(lazyRetryRunnable);
             lazyRetryThread = thread;
