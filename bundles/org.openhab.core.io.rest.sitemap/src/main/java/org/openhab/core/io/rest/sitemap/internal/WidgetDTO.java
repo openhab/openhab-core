@@ -53,12 +53,13 @@ public class WidgetDTO extends AbstractWidgetDTO {
     public EnrichedItemDTO item;
     public PageDTO linkedPage;
 
-    // only for frames and button grids, other linkable widgets link to a page
-    public final List<WidgetDTO> widgets = new ArrayList<>();
-
-    // Kept for backward compatibility with legacy sitemap clients (specifically legacy iOS app)
-    public String name; // Not used
-    public final List<MappingDTO> mappings = new ArrayList<>(); // Legacy clients may expect field to be non-null
+    // Kept for backward compatibility with legacy sitemap clients (specifically legacy iOS app).
+    // Legacy sitemap clients expect a non-empty widgets and mappings array, even if the widget has no child widgets and
+    // no mappings. This should be considered a workaround and should be removed in the future when legacy sitemap
+    // clients are no longer supported.
+    public final List<WidgetDTO> widgets = new ArrayList<>(); // only for frames and button grids, other linkable
+                                                              // widgets link to a page
+    public final List<MappingDTO> mappings = new ArrayList<>();
 
     public WidgetDTO() {
     }
