@@ -109,21 +109,13 @@ public class RulesValidator extends AbstractRulesValidator {
         }
     }
 
-    private static String buildMsgWithLineNb(String msg, EObject object, @Nullable EAttribute attribute) {
+    private static String buildMsgWithLineNb(String msg, EObject object, EAttribute attribute) {
+        List<INode> nodes = NodeModelUtils.findNodesForFeature(object, attribute);
+        if (nodes != null && nodes.size() >= 1) {
+            return buildMsgWithLineNb(msg, nodes.getFirst());
+        }
         ICompositeNode node = NodeModelUtils.getNode(object);
-        INode nodeAttr = null;
-        if (attribute != null) {
-            List<INode> nodes = NodeModelUtils.findNodesForFeature(object, attribute);
-            if (nodes != null && nodes.size() >= 1) {
-                nodeAttr = nodes.getFirst();
-            }
-        }
-        if (nodeAttr != null) {
-            return buildMsgWithLineNb(msg, nodeAttr);
-        } else if (node != null) {
-            return buildMsgWithLineNb(msg, node);
-        }
-        return msg;
+        return node != null ? buildMsgWithLineNb(msg, node) : msg;
     }
 
     private static String buildMsgWithLineNb(String msg, INode node) {
