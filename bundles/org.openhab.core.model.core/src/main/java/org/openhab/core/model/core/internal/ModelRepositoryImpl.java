@@ -353,7 +353,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                             case "rules":
                                 if (d instanceof AbstractValidationDiagnostic vd
                                         && d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
-                                        && "uid".equals(vd.getIssueCode())) {
+                                        && ("uid".equals(vd.getIssueCode()) || "time".equals(vd.getIssueCode()))) {
                                     errors.add(d.getMessage());
                                 } else {
                                     warnings.add(d.getMessage());
