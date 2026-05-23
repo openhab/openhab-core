@@ -66,7 +66,7 @@ public class RulesValidator extends AbstractRulesValidator {
         }
         if (!isValidTime(time)) {
             error(buildMsgWithLineNb("time '" + time
-                    + "' in trigger is invalid. It msut comply with HH:MM or H:M format with a range of 0 to 23 for the hour and a range of 0 to 59 for the minute.",
+                    + "' in trigger is invalid. It must comply with (H)H:MM format with a range of 0 to 23 for the hour and a range of 0 to 59 for the minute.",
                     timeTrigger, RulesPackage.Literals.TIMER_TRIGGER__TIME),
                     RulesPackage.Literals.TIMER_TRIGGER.getEStructuralFeature(RulesPackage.TIMER_TRIGGER__TIME),
                     "time");
@@ -82,7 +82,7 @@ public class RulesValidator extends AbstractRulesValidator {
         }
         if (!isValidTime(start)) {
             error(buildMsgWithLineNb("start time '" + start
-                    + "' in condition is invalid. It msut comply with HH:MM or H:M format with a range of 0 to 23 for the hour and a range of 0 to 59 for the minute.",
+                    + "' in condition is invalid. It must comply with (H)H:MM format with a range of 0 to 23 for the hour and a range of 0 to 59 for the minute.",
                     timeOfDayCondition, RulesPackage.Literals.TIME_OF_DAY_CONDITION__START),
                     RulesPackage.Literals.TIME_OF_DAY_CONDITION
                             .getEStructuralFeature(RulesPackage.TIME_OF_DAY_CONDITION__START),
@@ -90,7 +90,7 @@ public class RulesValidator extends AbstractRulesValidator {
         }
         if (!isValidTime(end)) {
             error(buildMsgWithLineNb("end time '" + end
-                    + "' in condition is invalid. It msut comply with HH:MM or H:M format with a range of 0 to 23 for the hour and a range of 0 to 59 for the minute.",
+                    + "' in condition is invalid. It must comply with (H)H:MM format with a range of 0 to 23 for the hour and a range of 0 to 59 for the minute.",
                     timeOfDayCondition, RulesPackage.Literals.TIME_OF_DAY_CONDITION__END),
                     RulesPackage.Literals.TIME_OF_DAY_CONDITION
                             .getEStructuralFeature(RulesPackage.TIME_OF_DAY_CONDITION__END),

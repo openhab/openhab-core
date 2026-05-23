@@ -194,7 +194,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
                 "   System started or\n" + //
                 "   Time is noon or\n" + //
                 "   Time is midnight or\n" + //
-                "   Time is 20:0 or\n" + //
+                "   Time is 8:57 or\n" + //
                 "   Time cron \"0 0/1 * * * ?\" or\n" + //
                 "   Item X received command ON or\n" + //
                 "   Item Y received update \"A\" or\n" + //
@@ -233,7 +233,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(rule.getTriggers().get(2).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("00:00"));
 
         assertThat(rule.getTriggers().get(3).getTypeUID(), is(TimeOfDayTriggerHandler.MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(3).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("20:00"));
+        assertThat(rule.getTriggers().get(3).getConfiguration().get(TimeOfDayTriggerHandler.CFG_TIME), is("08:57"));
 
         assertThat(rule.getTriggers().get(4).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
         assertThat(rule.getTriggers().get(4).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
@@ -298,7 +298,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
                 "when\n" + //
                 "   Item X received command ON\n" + //
                 "but only if\n" + //
-                "   Time is between 9:5 and 22:10 and\n" + //
+                "   Time is between 7:20 and 22:10 and\n" + //
                 "   Day is Thursday, Tuesday, Sunday and\n" + //
                 "   Day is weekday and\n" + //
                 "   Day is weekend and\n" + //
@@ -332,7 +332,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(rule.getConditions().getFirst().getTypeUID(), is(TimeOfDayConditionHandler.MODULE_TYPE_ID));
         assertThat(rule.getConditions().getFirst().getConfiguration().get(TimeOfDayConditionHandler.CFG_START_TIME),
-                is("09:05"));
+                is("07:20"));
         assertThat(rule.getConditions().getFirst().getConfiguration().get(TimeOfDayConditionHandler.CFG_END_TIME),
                 is("22:10"));
 
