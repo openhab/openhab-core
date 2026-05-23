@@ -13,7 +13,6 @@
 package org.openhab.core.sitemap.dto;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * This is a data transfer object that is used to serialize widgets.
@@ -41,7 +40,6 @@ public abstract class AbstractWidgetDTO {
     public Boolean staticIcon;
 
     // widget-specific attributes
-    public List<MappingDTO> mappings;
     public Boolean switchSupport;
     public Boolean releaseOnly;
     public Integer refresh;

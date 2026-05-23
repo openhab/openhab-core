@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
 import org.openhab.core.sitemap.dto.AbstractWidgetDTO;
+import org.openhab.core.sitemap.dto.MappingDTO;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -54,6 +55,10 @@ public class WidgetDTO extends AbstractWidgetDTO {
 
     // only for frames and button grids, other linkable widgets link to a page
     public final List<WidgetDTO> widgets = new ArrayList<>();
+
+    // Kept for backward compatibility with legacy sitemap clients (specifically legacy iOS app)
+    public String name; // Not used
+    public final List<MappingDTO> mappings = new ArrayList<>(); // Legacy clients may expect field to be non-null
 
     public WidgetDTO() {
     }
