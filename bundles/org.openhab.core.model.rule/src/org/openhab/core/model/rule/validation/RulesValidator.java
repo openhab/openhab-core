@@ -39,7 +39,7 @@ import org.openhab.core.model.rule.rules.TimerTrigger;
 @NonNullByDefault
 public class RulesValidator extends AbstractRulesValidator {
 
-    private static Set<String> ALLOWED_TIME_NAMES = Set.of("midnight", "noon");
+    private static final Set<String> ALLOWED_TIME_NAMES = Set.of("midnight", "noon");
 
     @Check
     public void checkRuleUID(@Nullable Rule rule) {
@@ -65,8 +65,9 @@ public class RulesValidator extends AbstractRulesValidator {
             return;
         }
         if (!isValidTime(time)) {
-            error(buildMsgWithLineNb("time '" + time + "' in trigger is invalid", timeTrigger,
-                    RulesPackage.Literals.TIMER_TRIGGER__TIME),
+            error(buildMsgWithLineNb("time '" + time
+                    + "' in trigger is invalid. It msut comply with HH:MM or H:M format with a range of 0 to 23 for the hour and a range of 0 to 59 for the minute.",
+                    timeTrigger, RulesPackage.Literals.TIMER_TRIGGER__TIME),
                     RulesPackage.Literals.TIMER_TRIGGER.getEStructuralFeature(RulesPackage.TIMER_TRIGGER__TIME),
                     "time");
         }
@@ -80,15 +81,17 @@ public class RulesValidator extends AbstractRulesValidator {
             return;
         }
         if (!isValidTime(start)) {
-            error(buildMsgWithLineNb("start time '" + start + "' in condition is invalid", timeOfDayCondition,
-                    RulesPackage.Literals.TIME_OF_DAY_CONDITION__START),
+            error(buildMsgWithLineNb("start time '" + start
+                    + "' in condition is invalid. It msut comply with HH:MM or H:M format with a range of 0 to 23 for the hour and a range of 0 to 59 for the minute.",
+                    timeOfDayCondition, RulesPackage.Literals.TIME_OF_DAY_CONDITION__START),
                     RulesPackage.Literals.TIME_OF_DAY_CONDITION
                             .getEStructuralFeature(RulesPackage.TIME_OF_DAY_CONDITION__START),
                     "time");
         }
         if (!isValidTime(end)) {
-            error(buildMsgWithLineNb("end time '" + end + "' in condition is invalid", timeOfDayCondition,
-                    RulesPackage.Literals.TIME_OF_DAY_CONDITION__END),
+            error(buildMsgWithLineNb("end time '" + end
+                    + "' in condition is invalid. It msut comply with HH:MM or H:M format with a range of 0 to 23 for the hour and a range of 0 to 59 for the minute.",
+                    timeOfDayCondition, RulesPackage.Literals.TIME_OF_DAY_CONDITION__END),
                     RulesPackage.Literals.TIME_OF_DAY_CONDITION
                             .getEStructuralFeature(RulesPackage.TIME_OF_DAY_CONDITION__END),
                     "time");
