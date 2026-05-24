@@ -179,6 +179,7 @@ public class DSLRuleProvider
         List<Rule> oldRules;
         List<Rule> newRules = new ArrayList<>();
         if ("rules".equalsIgnoreCase(ruleModelType)) {
+            logger.debug("modelChanged {} {}", type, modelFileName);
             boolean isolated = isIsolatedModel(modelFileName);
             String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
             switch (type) {
@@ -231,6 +232,7 @@ public class DSLRuleProvider
                     logger.debug("Unknown event type.");
             }
         } else if ("script".equals(ruleModelType)) {
+            logger.debug("modelChanged {} {}", type, modelFileName);
             switch (type) {
                 case ADDED:
                 case MODIFIED:
@@ -605,7 +607,20 @@ public class DSLRuleProvider
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
+        for (String modelFileName : modelRepository.getAllModelNamesOfType("script")) {
+            logger.debug("onReadyMarkerAdded handle script {}", modelFileName);
+            EObject model = modelRepository.getModel(modelFileName);
+            if (model instanceof Script script) {
+                boolean isolated = isIsolatedModel(modelFileName);
+                List<Rule> newRules = List.of(toRule(modelFileName, script));
+                List<Rule> oldRules = rulesMap.put(modelFileName, newRules);
+                if (!isolated) {
+                    notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, newRules));
+                }
+            }
+        }
         for (String modelFileName : modelRepository.getAllModelNamesOfType("rules")) {
+            logger.debug("onReadyMarkerAdded handle rule {}", modelFileName);
             EObject model = modelRepository.getModel(modelFileName);
             if (model instanceof RuleModel ruleModel) {
                 boolean isolated = isIsolatedModel(modelFileName);

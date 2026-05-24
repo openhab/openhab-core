@@ -227,6 +227,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public void reloadAllModelsOfType(final String modelType) {
+        logger.debug("reloadAllModelsOfType {}", modelType);
         synchronized (resourceSet) {
             // Make a copy to avoid ConcurrentModificationException
             List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
