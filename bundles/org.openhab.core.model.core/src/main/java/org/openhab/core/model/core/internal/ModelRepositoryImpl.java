@@ -115,8 +115,12 @@ public class ModelRepositoryImpl implements ModelRepository {
             @Nullable List<String> warnings) {
         if (isIsolatedModel(name)) {
             logger.debug("Loading DSL model '{}'", name);
-        } else {
+        } else if (!name.endsWith(".script")) {
             logger.info("Loading DSL model '{}'", name);
+        } else {
+            logger.warn(
+                    "Loading DSL model '{}' (deprecated - prefer a rule without a trigger and your script as action in that rule)",
+                    name);
         }
         Resource resource = null;
         byte[] bytes;
