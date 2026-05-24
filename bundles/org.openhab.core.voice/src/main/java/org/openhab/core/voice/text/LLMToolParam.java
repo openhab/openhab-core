@@ -17,7 +17,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link LLMToolParam} class describe each of the parameters of a {@link LLMTool} .
+ * The {@link LLMToolParam} class describe each of the parameters of a {@link LLMTool}.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
@@ -29,9 +29,6 @@ public final class LLMToolParam {
     private final List<String> options;
     private final boolean required;
 
-    /**
-     *
-     */
     public LLMToolParam(String name, LLMToolParamType type, String description, List<String> options,
             boolean required) {
         this.name = name;

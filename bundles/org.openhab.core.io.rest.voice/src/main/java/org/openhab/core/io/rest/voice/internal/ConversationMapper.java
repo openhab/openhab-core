@@ -31,15 +31,12 @@ public class ConversationMapper {
      * @return the corresponding DTO
      */
     public static ConversationDTO map(Conversation conversation) {
-        ConversationDTO dto = new ConversationDTO();
-        dto.id = conversation.getId();
-        dto.messages = conversation.getMessages().stream().map(m -> {
-            ConversationDTO.MessageDTO messageDTO = new ConversationDTO.MessageDTO();
-            messageDTO.uid = m.getUID();
-            messageDTO.rol = m.getRole().name();
-            messageDTO.content = m.getContent();
-            return messageDTO;
-        }).toList();
-        return dto;
+        return new ConversationDTO(
+                conversation.getId(),
+                conversation.getMessages()
+                        .stream()
+                        .map(m -> new ConversationDTO.MessageDTO(m.getUID(), m.getRole().name(), m.getContent()))
+                        .toList()
+        );
     }
 }

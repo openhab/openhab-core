@@ -17,7 +17,7 @@ import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * General purpose conversation exception
+ * General purpose conversation exception.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */

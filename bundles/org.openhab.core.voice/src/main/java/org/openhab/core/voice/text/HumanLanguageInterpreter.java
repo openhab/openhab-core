@@ -67,7 +67,7 @@ public interface HumanLanguageInterpreter {
     }
 
     /**
-     * Continues the conversation provided in the {@link InterpreterContext} argument given a {@link Locale}
+     * Continues the conversation provided in the {@link InterpreterContext} argument given a {@link Locale}.
      * 
      * You can also provide {@link LLMTool} and a location item id to it.
      *

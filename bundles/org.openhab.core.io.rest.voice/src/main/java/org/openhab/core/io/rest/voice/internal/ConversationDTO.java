@@ -15,20 +15,35 @@ package org.openhab.core.io.rest.voice.internal;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.voice.text.Conversation;
 
 /**
- * A DTO that is used on the REST API to provide infos about {@link org.openhab.core.voice.text.Conversation} to UIs.
+ * A DTO for serialising {@link org.openhab.core.voice.text.Conversation}s on the REST API.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @Schema(name = "Conversation")
+@NonNullByDefault
 public class ConversationDTO {
     public String id;
     public List<MessageDTO> messages;
 
+    public ConversationDTO(String id, List<MessageDTO> messages) {
+        this.id = id;
+        this.messages = messages;
+    }
+
+
     public static class MessageDTO {
         public String uid;
-        public String rol;
+        public String role;
         public String content;
+
+        public MessageDTO(String uid, String role, String content) {
+            this.uid = uid;
+            this.role = role;
+            this.content = content;
+        }
     }
 }

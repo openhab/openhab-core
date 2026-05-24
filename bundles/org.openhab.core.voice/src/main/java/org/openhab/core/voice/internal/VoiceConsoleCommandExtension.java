@@ -107,7 +107,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 SUBCMD_TRANSCRIBE + " [--source <source>]|[--file <file>] [--stt <stt>] [--locale <locale>]",
                 "transcribe audio from default source, optionally specify a different source/file, speech-to-text service or locale"),
                 buildCommandUsage(SUBCMD_INTERPRET
-                        + " [--hli <comma,separated,interpreterIds>] [--conversation <conversationId>] [--llm-tools <comma,separated,llmToolId>] [--location <locationId>] <command>",
+                        + " [--hli <comma,separated,interpreterIds>] [--conversation <conversationId>] [--llm-tools <comma,separated,llmToolIds>] [--location <locationId>] <command>",
                         "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
                 buildCommandUsage(SUBCMD_DIALOGS, "lists the running dialog and their audio/voice services"),
@@ -328,10 +328,10 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
         String msg = sb.toString();
         var interpretationArgs = new InterpretationArguments( //
-                hliIdList != null ? hliIdList : "", //
-                conversationId != null ? conversationId : "", //
-                llmToolIdList != null ? llmToolIdList : "", //
-                locationItem != null ? locationItem : ""//
+                Objects.requireNonNullElse(hliIdList, ""), //
+                Objects.requireNonNullElse(conversationId, ""), //
+                Objects.requireNonNullElse(llmToolIdList, ""), //
+                Objects.requireNonNullElse(locationItem, "") //
         );
         try {
             String result = voiceManager.interpret(msg, interpretationArgs);

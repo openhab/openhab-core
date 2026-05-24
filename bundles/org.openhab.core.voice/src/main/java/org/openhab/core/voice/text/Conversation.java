@@ -13,18 +13,16 @@
 package org.openhab.core.voice.text;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.voice.internal.text.ConversationEventFactory;
+import org.openhab.core.voice.internal.text.events.ConversationEventFactory;
 
 /**
- * The {@link Conversation} class contains a list of messages in between the users and a LanguageInterpreter
+ * The {@link Conversation} class contains a list of messages in between the users and a LanguageInterpreter.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
@@ -50,12 +48,12 @@ public class Conversation {
     }
 
     /**
-     * Get the unmodifiable list of messages
+     * Get a copy of the list of messages
      *
-     * @return unmodifiable list of messages
+     * @return list of messages
      */
     public List<Message> getMessages() {
-        return Collections.unmodifiableList(messages);
+        return List.copyOf(messages);
     }
 
     /**
@@ -63,12 +61,11 @@ public class Conversation {
      *
      * @return nullable last message
      */
-    public @Nullable Message getLastMessage() {
-        try {
-            return messages.getLast();
-        } catch (NoSuchElementException e) {
+    public synchronized @Nullable Message getLastMessage() {
+        if (messages.isEmpty()) {
             return null;
         }
+        return messages.getLast();
     }
 
     public String addMessage(ConversationRole role, String content) throws ConversationException {
@@ -107,7 +104,7 @@ public class Conversation {
         return uid;
     }
 
-    public void addToMessage(String uid, String content) throws ConversationException {
+    public synchronized void addToMessage(String uid, String content) throws ConversationException {
         var message = getLastMessage();
         if (message == null || !message.getUID().equals(uid)) {
             throw new ConversationException("Message is not last message in conversation");
@@ -122,7 +119,7 @@ public class Conversation {
         }
     }
 
-    public boolean removeSinceMessage(String uid) {
+    public synchronized boolean removeSinceMessage(String uid) {
         var messageOptional = messages.stream().filter(m -> m.getUID().equals(uid)).findFirst();
         if (messageOptional.isPresent()) {
             int index = messages.indexOf(messageOptional.get());
@@ -132,7 +129,7 @@ public class Conversation {
         return false;
     }
 
-    public void removeMessages() {
+    public synchronized void removeMessages() {
         messages.clear();
     }
 
@@ -143,7 +140,7 @@ public class Conversation {
     public static final class Message {
         private final String uid;
         private final ConversationRole role;
-        private String content;
+        private volatile String content;
 
         public Message(String uid, ConversationRole role, String content) {
             this.uid = uid;
@@ -151,7 +148,7 @@ public class Conversation {
             this.content = content;
         }
 
-        private void addContent(String text) {
+        private synchronized void addContent(String text) {
             content += text;
         }
 
