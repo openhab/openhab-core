@@ -19,7 +19,9 @@ import org.openhab.core.voice.text.Conversation;
 import org.openhab.core.voice.text.ConversationRole;
 
 /**
- * The {@link MessageDTO} class contains a list of messages in between the users and a LanguageInterpreter
+ * The {@link MessageDTO} class represents a message in between the users and a LanguageInterpreter.
+ * It is used to store {@link org.openhab.core.voice.text.Conversation}s using a
+ * {@link org.openhab.core.storage.StorageService}.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */

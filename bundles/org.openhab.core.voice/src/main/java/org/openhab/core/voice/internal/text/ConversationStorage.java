@@ -13,8 +13,8 @@
 package org.openhab.core.voice.internal.text;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.events.EventPublisher;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class ConversationStorage {
     private final Storage<ConversationDTO> conversationStorageService;
-    private final Map<String, Conversation> activeConversations = new HashMap<>();
+    private final Map<String, Conversation> activeConversations = new ConcurrentHashMap<>();
     private final EventPublisher eventPublisher;
     private final Logger logger = LoggerFactory.getLogger(ConversationStorage.class);
 
@@ -44,23 +44,25 @@ public class ConversationStorage {
         this.eventPublisher = eventPublisher;
     }
 
-    public synchronized Conversation getConversation(String id) {
+    public Conversation getConversation(String id) {
         Conversation conversation = activeConversations.get(id);
         if (conversation != null) {
             // return same reference when possible
             return conversation;
         }
-        ConversationDTO conversationDTO = conversationStorageService.get(id);
-        if (conversationDTO != null) {
-            logger.debug("Conversation '{}' found", id);
-            conversation = new Conversation(id, eventPublisher,
-                    new ArrayList<>(conversationDTO.messageDTOs.stream().map(MessageDTO::toMessage).toList()));
-        } else {
-            logger.debug("Creating new conversation '{}'", id);
-            conversation = new Conversation(id, eventPublisher);
+        synchronized (this) {
+            ConversationDTO conversationDTO = conversationStorageService.get(id);
+            if (conversationDTO != null) {
+                logger.debug("Conversation '{}' found", id);
+                conversation = new Conversation(id, eventPublisher,
+                        new ArrayList<>(conversationDTO.messageDTOs.stream().map(MessageDTO::toMessage).toList()));
+            } else {
+                logger.debug("Creating new conversation '{}'", id);
+                conversation = new Conversation(id, eventPublisher);
+            }
+            activeConversations.put(conversation.getId(), conversation);
+            return conversation;
         }
-        activeConversations.put(conversation.getId(), conversation);
-        return conversation;
     }
 
     public synchronized void storeConversation(Conversation conversation) {

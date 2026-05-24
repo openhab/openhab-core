@@ -29,7 +29,7 @@ import org.eclipse.jdt.annotation.Nullable;
 public interface LLMTool {
 
     /**
-     * Returns a simple string that uniquely identifies this service
+     * Returns a simple string that uniquely identifies this service.
      *
      * @return an id that identifies this service
      */
@@ -61,7 +61,7 @@ public interface LLMTool {
 
     /**
      * Returns a localized {@link LLMToolParam} list with
-     * human-readable descriptions of the tool parameters
+     * human-readable descriptions of the tool parameters.
      *
      * @param locale the locale to provide the label for
      * @return localized descriptions of the tool params.
@@ -69,9 +69,10 @@ public interface LLMTool {
     List<LLMToolParam> getParamDescriptions(@Nullable Locale locale);
 
     /**
-     * Invoke the tool implementation .
+     * Invoke the tool implementation.
      *
-     * @param params Map of param names and values
+     * @param params Map of param names and values.
+     * @return the tool result.
      */
-    LLMToolResult call(Map<String, String> params, @Nullable Locale locale) throws LLMToolException;
+    String call(Map<String, Object> params, @Nullable Locale locale) throws LLMToolException;
 }

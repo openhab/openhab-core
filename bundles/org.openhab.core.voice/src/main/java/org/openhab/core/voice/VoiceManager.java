@@ -333,8 +333,8 @@ public interface VoiceManager {
     Collection<KSService> getKSs();
 
     /**
-     * Retrieves a HumanLanguageInterpreter collection.
-     * If no services are available returns an empty list.
+     * Retrieves a {@link LLMTool} collection.
+     * If no services match the provided ids returns an empty list.
      * 
      * @param ids Comma separated list of LLM tool ids to use
      * @return a list of {@link LLMTool} or an empty list if none of them is available

@@ -883,7 +883,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     protected void removeLLMTool(LLMTool llmTool) {
-        this.humanLanguageInterpreters.remove(llmTool.getId());
+        this.llmTools.remove(llmTool.getId());
         stopDialogs(dialog -> dialog.dialogContext.llmTools().stream()
                 .anyMatch(tool -> tool.getId().equals(llmTool.getId())));
     }
@@ -1000,11 +1000,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     public List<LLMTool> getLLMToolsByIds(List<String> ids) {
         List<LLMTool> tools = new ArrayList<>();
         for (String id : ids) {
-            LLMTool hli = llmTools.get(id);
-            if (hli == null) {
+            LLMTool tool = llmTools.get(id);
+            if (tool == null) {
                 logger.warn("LLMTool '{}' not available!", id);
             } else {
-                tools.add(hli);
+                tools.add(tool);
             }
         }
         return tools;
