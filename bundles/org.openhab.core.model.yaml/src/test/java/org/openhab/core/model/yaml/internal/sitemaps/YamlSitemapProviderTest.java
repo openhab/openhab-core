@@ -43,6 +43,7 @@ import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.model.yaml.YamlModelUtils;
 import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.sitemap.Button;
 import org.openhab.core.sitemap.Buttongrid;
@@ -105,6 +106,7 @@ public class YamlSitemapProviderTest {
     private static final Path MODEL_PATH = Path.of(MODEL_NAME);
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
     private @TempDir @NonNullByDefault({}) Path watchPath;
     private @NonNullByDefault({}) Path fullModelPath;
 
@@ -198,7 +200,7 @@ public class YamlSitemapProviderTest {
         sitemapListener = new TestSitemapChangeListener();
         sitemapProvider.addProviderChangeListener(sitemapListener);
 
-        modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(sitemapProvider);
     }
 

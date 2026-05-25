@@ -52,6 +52,7 @@ import org.openhab.core.config.core.FilterCriteria;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.model.yaml.YamlModelUtils;
 import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
 
 /**
@@ -68,6 +69,7 @@ public class YamlRuleTemplateProviderTest {
     private static final Path TEMPLATES_PATH = Path.of(TEMPLATES_NAME);
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
     private @TempDir @NonNullByDefault({}) Path watchPath;
     private @NonNullByDefault({}) Path templatesPath;
 
@@ -80,7 +82,7 @@ public class YamlRuleTemplateProviderTest {
     @Test
     public void yamlModelListenerTest() throws IOException {
         Files.copy(SOURCE_PATH.resolve("BasicRuleTemplate.yaml"), templatesPath);
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         YamlRuleTemplateProvider templateProvider = new YamlRuleTemplateProvider();
         TestRuleTemplateChangeListener templateListener = new TestRuleTemplateChangeListener();
         templateProvider.addProviderChangeListener(templateListener);
@@ -104,7 +106,7 @@ public class YamlRuleTemplateProviderTest {
     @Test
     public void basicRuleTemplateTest() throws IOException {
         Files.copy(SOURCE_PATH.resolve("BasicRuleTemplate.yaml"), templatesPath);
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         YamlRuleTemplateProvider ruleTemplateProvider = new YamlRuleTemplateProvider();
         TestRuleTemplateChangeListener templateListener = new TestRuleTemplateChangeListener();
         ruleTemplateProvider.addProviderChangeListener(templateListener);
@@ -202,7 +204,7 @@ public class YamlRuleTemplateProviderTest {
     @Test
     public void fullRuleTemplateTest() throws IOException {
         Files.copy(SOURCE_PATH.resolve("FullRuleTemplate.yaml"), templatesPath);
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         YamlRuleTemplateProvider ruleTemplateProvider = new YamlRuleTemplateProvider();
         TestRuleTemplateChangeListener templateListener = new TestRuleTemplateChangeListener();
         ruleTemplateProvider.addProviderChangeListener(templateListener);
@@ -389,7 +391,7 @@ public class YamlRuleTemplateProviderTest {
     @Test
     public void createIsolatedModelWithRuleTemplateTest() throws IOException {
         Files.copy(SOURCE_PATH.resolve("BasicRuleTemplate.yaml"), templatesPath);
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         YamlRuleTemplateProvider templateProvider = new YamlRuleTemplateProvider();
         TestRuleTemplateChangeListener templateListener = new TestRuleTemplateChangeListener();
         templateProvider.addProviderChangeListener(templateListener);
