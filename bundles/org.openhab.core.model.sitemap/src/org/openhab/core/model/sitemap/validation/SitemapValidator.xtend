@@ -368,7 +368,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkNestedSitemapParameters(ModelNestedSitemap w) {
         if (w.item === null && w.sitemapName === null) {
-            error(buildMsgWithLineNb("Sitemap widget doesn't have item or name defined", w, SitemapPackage.Literals.MODEL_NESTED_SITEMAP__SITEMAP_NAME, SitemapPackage.Literals.MODEL_NESTED_SITEMAP__ITEM),
+            error(buildMsgWithLineNb("Sitemap widget doesn't have item or name defined", w, SitemapPackage.Literals.MODEL_NESTED_SITEMAP__SITEMAP_NAME, SitemapPackage.Literals.MODEL_WIDGET__ITEM),
                 SitemapPackage.Literals.MODEL_NESTED_SITEMAP.getEStructuralFeature(SitemapPackage.MODEL_NESTED_SITEMAP__SITEMAP_NAME))
         }
     }
