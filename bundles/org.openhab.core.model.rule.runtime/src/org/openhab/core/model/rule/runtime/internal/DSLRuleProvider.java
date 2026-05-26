@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
@@ -320,7 +321,8 @@ public class DSLRuleProvider
     }
 
     private Rule toRule(String modelName, Script script) {
-        String scriptText = NodeModelUtils.findActualNodeFor(script).getText();
+        ICompositeNode scriptNode = NodeModelUtils.findActualNodeFor(script);
+        String scriptText = scriptNode == null ? "" : scriptNode.getText();
 
         Configuration cfg = new Configuration();
         cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT, removeIndentation(scriptText));
@@ -350,7 +352,8 @@ public class DSLRuleProvider
         // Create Action
         String context = DSLScriptContextProvider.CONTEXT_IDENTIFIER + modelName + "-" + index + "\n";
         XExpression expression = rule.getScript();
-        String script = NodeModelUtils.findActualNodeFor(expression).getText();
+        ICompositeNode expressionNode = NodeModelUtils.findActualNodeFor(expression);
+        String script = expressionNode == null ? "" : expressionNode.getText();
         Configuration cfg = new Configuration();
         cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT, context + removeIndentation(script));
         cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE, MIMETYPE_OPENHAB_DSL_RULE);
