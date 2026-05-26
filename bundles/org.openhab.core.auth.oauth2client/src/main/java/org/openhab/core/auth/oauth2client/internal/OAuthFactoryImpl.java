@@ -103,7 +103,6 @@ public class OAuthFactoryImpl implements OAuthFactory {
         return clientImpl;
     }
 
-    @SuppressWarnings("null")
     @Override
     public void ungetOAuthService(String handle) {
         OAuthClientService clientImpl = oauthClientServiceCache.get(handle);

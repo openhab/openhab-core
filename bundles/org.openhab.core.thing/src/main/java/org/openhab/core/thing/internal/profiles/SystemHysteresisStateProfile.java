@@ -43,8 +43,9 @@ import tech.units.indriya.AbstractUnit;
 public class SystemHysteresisStateProfile implements StateProfile {
 
     static final String LOWER_PARAM = "lower";
-    private static final String UPPER_PARAM = "upper";
-    private static final String INVERTED_PARAM = "inverted";
+    static final String UPPER_PARAM = "upper";
+    static final String INVERTED_PARAM = "inverted";
+    static final String EXCLUDE_ITEM_STATE_PARAM = "excludeItemState";
 
     private final Logger logger = LoggerFactory.getLogger(SystemHysteresisStateProfile.class);
 
@@ -54,6 +55,7 @@ public class SystemHysteresisStateProfile implements StateProfile {
     private final QuantityType<?> upper;
     private final OnOffType low;
     private final OnOffType high;
+    private final boolean excludeItemState;
 
     private Type previousType = UnDefType.UNDEF;
 
@@ -75,10 +77,15 @@ public class SystemHysteresisStateProfile implements StateProfile {
         }
         this.upper = convertedUpperParam;
 
-        final Object paramValue = context.getConfiguration().get(INVERTED_PARAM);
-        final boolean inverted = paramValue != null && Boolean.parseBoolean(paramValue.toString());
+        final Object invertedParamValue = context.getConfiguration().get(INVERTED_PARAM);
+        final boolean inverted = invertedParamValue != null && Boolean.parseBoolean(invertedParamValue.toString());
         this.low = OnOffType.from(inverted);
         this.high = OnOffType.from(!inverted);
+
+        final Object excludeItemStateParamValue = context.getConfiguration().get(EXCLUDE_ITEM_STATE_PARAM);
+        this.excludeItemState = excludeItemStateParamValue != null
+                && Boolean.parseBoolean(excludeItemStateParamValue.toString());
+        ;
     }
 
     private @Nullable QuantityType<?> getParam(ProfileContext context, String param) {
@@ -161,10 +168,18 @@ public class SystemHysteresisStateProfile implements StateProfile {
     }
 
     private Type mapValue(double lower, double upper, double value) {
-        if (value <= lower) {
-            return low;
-        } else if (value >= upper) {
-            return high;
+        if (excludeItemState) {
+            if (value < lower) {
+                return low;
+            } else if (value >= upper) {
+                return high;
+            }
+        } else {
+            if (value <= lower) {
+                return low;
+            } else if (value > upper) {
+                return high;
+            }
         }
         return previousType;
     }

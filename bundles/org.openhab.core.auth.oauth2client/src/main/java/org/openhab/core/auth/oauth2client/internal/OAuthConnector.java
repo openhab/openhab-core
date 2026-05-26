@@ -349,8 +349,9 @@ public class OAuthConnector {
             }
         }
 
-        if (extraFields != null) {
-            for (Fields.Field extra : extraFields) {
+        Fields tmpExtraFields = extraFields;
+        if (tmpExtraFields != null) {
+            for (Fields.Field extra : tmpExtraFields) {
                 logger.debug("Oauth request (extra) parameter {}, value {}", extra.getName(), extra.getValue());
                 fields.put(extra);
             }

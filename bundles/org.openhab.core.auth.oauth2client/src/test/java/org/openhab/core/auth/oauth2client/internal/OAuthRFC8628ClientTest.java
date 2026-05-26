@@ -48,6 +48,7 @@ import com.google.gson.JsonSerializer;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
+@SuppressWarnings("null") // Mockito APIs are not null-annotated; this avoids false positives in tests.
 class OAuthRFC8628ClientTest {
 
     private final Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)

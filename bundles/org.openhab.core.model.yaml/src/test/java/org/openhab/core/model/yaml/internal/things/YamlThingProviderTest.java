@@ -60,6 +60,7 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.model.yaml.YamlModelUtils;
 import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
@@ -129,6 +130,7 @@ public class YamlThingProviderTest {
     private static final ThingUID NTP_THING_UID = new ThingUID(NTP_THING_TYPE_UID, "local");
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
     private @TempDir @NonNullByDefault({}) Path watchPath;
     private @NonNullByDefault({}) Path fullModelPath;
 
@@ -236,7 +238,7 @@ public class YamlThingProviderTest {
         thingListener = new TestThingChangeListener();
         thingProvider.addProviderChangeListener(thingListener);
 
-        modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(thingProvider);
     }
 

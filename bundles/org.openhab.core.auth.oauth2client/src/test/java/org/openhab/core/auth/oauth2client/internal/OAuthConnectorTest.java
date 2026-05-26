@@ -38,6 +38,7 @@ import org.openhab.core.io.net.http.HttpClientFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
+@SuppressWarnings("null") // Mockito APIs are not null-annotated; this avoids false positives in tests.
 class OAuthConnectorTest {
 
     private static void setupHttpMocks(HttpClientFactory httpClientFactory, HttpClient httpClient, Request request,

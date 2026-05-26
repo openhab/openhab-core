@@ -2,8 +2,8 @@
 	"triggers": [
 		{
 			"uid": "core.GenericEventTrigger",
-			"label": "Basic Event Trigger",
-			"description": "Triggers Rules on Events",
+			"label": "Generic Event Trigger",
+			"description": "Triggers rules on matching events",
 			"visibility": "HIDDEN",
 			"configDescriptions": [
 				{
@@ -11,7 +11,7 @@
 					"type": "TEXT",
 					"label": "Topic",
 					"description": "the topic, as a file-system style glob (*, ** and {} operators). will match all events if empty",
-					"required": true,
+					"required": false,
 					"default": ""
 				},
 				{
@@ -19,7 +19,7 @@
 					"type": "TEXT",
 					"label": "Source",
 					"description": "the source of the event (e.g. org.openhab.core.expire, etc.). will match all events if empty",
-					"required": true,
+					"required": false,
 					"default": ""
 				},
 				{
@@ -27,7 +27,7 @@
 					"type": "TEXT",
 					"label": "Event Type",
 					"description": "the event type the trigger should listen to. multiple types can be specified comma-separated. will match all events if empty",
-					"required": true,
+					"required": false,
 					"default": ""
 				},
 				{
@@ -35,7 +35,7 @@
 					"type": "TEXT",
 					"label": "Event Payload",
 					"description": "A regex to match the event's serialized payload. will match all events if empty",
-					"required": true,
+					"required": false,
 					"default": ""
 				}
 			],

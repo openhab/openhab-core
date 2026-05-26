@@ -580,10 +580,7 @@ public abstract class GenericItem implements ActiveItem {
 
     protected @Nullable CommandDescription getCommandOptions(@Nullable Locale locale) {
         if (commandDescriptionService instanceof CommandDescriptionService service) {
-            CommandDescription commandDescription = service.getCommandDescription(this.name, locale);
-            if (commandDescription != null) {
-                return commandDescription;
-            }
+            return service.getCommandDescription(this.name, locale);
         }
 
         return null;

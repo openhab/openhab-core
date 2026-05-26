@@ -14,11 +14,13 @@ package org.openhab.core.sitemap.internal.registry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.registry.SitemapProvider;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * The {@link SitemapRegistryImpl} implements the {@link SitemapRegistry}
@@ -32,5 +34,16 @@ public class SitemapRegistryImpl extends AbstractRegistry<Sitemap, String, Sitem
     @Activate
     public SitemapRegistryImpl() {
         super(SitemapProvider.class);
+    }
+
+    @Override
+    @Reference
+    protected void setReadyService(ReadyService readyService) {
+        super.setReadyService(readyService);
+    }
+
+    @Override
+    protected void unsetReadyService(ReadyService readyService) {
+        super.unsetReadyService(readyService);
     }
 }

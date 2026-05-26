@@ -52,6 +52,8 @@ import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
 import org.openhab.core.model.yaml.internal.sitemaps.YamlSitemapDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
 import org.openhab.core.model.yaml.internal.widgets.YamlWidgetDTO;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.service.component.annotations.Activate;
@@ -119,6 +121,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private final WatchService watchService;
     private final Path mainWatchPath;
     private final ObjectMapper objectMapper;
+    private final ReadyService readyService;
 
     private final Map<String, List<YamlModelListener<?>>> elementListeners = new ConcurrentHashMap<>();
     // all model nodes, ordered by model name (full path as string) and type
@@ -126,10 +129,12 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private final Map<String, List<YamlElement>> elementsToGenerate = new ConcurrentHashMap<>();
 
+    private boolean allFilesVisited;
     private int counter;
 
     @Activate
-    public YamlModelRepositoryImpl(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
+    public YamlModelRepositoryImpl(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService,
+            final @Reference ReadyService readyService) {
         YAMLFactory yamlFactory = YAMLFactory.builder() //
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER) // omit "---" at file start
                 .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
@@ -143,11 +148,13 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         objectMapper.findAndRegisterModules();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
+        objectMapper.setDefaultPropertyInclusion(Include.NON_NULL);
         objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
 
         this.watchService = watchService;
         this.mainWatchPath = watchService.getWatchPath();
+        this.readyService = readyService;
+        this.allFilesVisited = false;
 
         watchService.registerListener(this, WATCHED_PATHS);
 
@@ -188,6 +195,14 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             } catch (IOException e) {
                 logger.warn("Could not list YAML files in '{}', models might be missing: {}", watchPath,
                         e.getMessage());
+            }
+        });
+
+        this.allFilesVisited = true;
+
+        KNOWN_ELEMENTS.forEach(elementName -> {
+            if (!getElementListeners(elementName).isEmpty()) {
+                markReady(elementName);
             }
         });
     }
@@ -415,6 +430,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 logger.info("YAML model {}: {}", modelName, warning);
             });
         });
+
+        if (allFilesVisited) {
+            markReady(elementName);
+        }
     }
 
     public void removeYamlModelListener(YamlModelListener<? extends YamlElement> listener) {
@@ -423,6 +442,12 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             v.remove(listener);
             return v.isEmpty() ? null : v;
         });
+    }
+
+    private void markReady(String elementName) {
+        ReadyMarker marker = new ReadyMarker("yaml", elementName.toLowerCase());
+        logger.debug("Create ready marker {}", marker);
+        readyService.markReady(marker);
     }
 
     private void checkElementNames(String modelName, YamlModelWrapper model, List<String> warnings) {

@@ -144,7 +144,6 @@ public final class ConfigParser {
     private static <T> @Nullable T constructRecord(Map<String, @Nullable Object> properties,
             Class<T> configurationClass)
             throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-
         Constructor<?> constructor = getCanonicalRecordConstructor(configurationClass);
 
         RecordComponent[] components = configurationClass.getRecordComponents();
@@ -180,7 +179,6 @@ public final class ConfigParser {
     }
 
     private static <T> Constructor<T> getCanonicalRecordConstructor(Class<T> clazz) throws NoSuchMethodException {
-
         Class<?>[] parameterTypes = Arrays.stream(clazz.getRecordComponents()).map(RecordComponent::getType)
                 .toArray(Class<?>[]::new);
         Constructor<T> constructor = clazz.getDeclaredConstructor(parameterTypes);

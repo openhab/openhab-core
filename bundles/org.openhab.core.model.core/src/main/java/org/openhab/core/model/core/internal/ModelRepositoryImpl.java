@@ -227,6 +227,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public void reloadAllModelsOfType(final String modelType) {
+        logger.debug("reloadAllModelsOfType {}", modelType);
         synchronized (resourceSet) {
             // Make a copy to avoid ConcurrentModificationException
             List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
@@ -353,7 +354,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                             case "rules":
                                 if (d instanceof AbstractValidationDiagnostic vd
                                         && d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
-                                        && "uid".equals(vd.getIssueCode())) {
+                                        && ("uid".equals(vd.getIssueCode()) || "time".equals(vd.getIssueCode()))) {
                                     errors.add(d.getMessage());
                                 } else {
                                     warnings.add(d.getMessage());

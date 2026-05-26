@@ -136,13 +136,10 @@ class ScriptInterpreter extends XbaseInterpreter {
     }
 
     override protected doEvaluate(XExpression expression, IEvaluationContext context, CancelIndicator indicator) {
-        if (expression === null) {
-            return null
-        } else if (expression instanceof QuantityLiteral) {
+        if (expression instanceof QuantityLiteral) {
             return doEvaluate(expression, context, indicator)
-        } else {
-            return super.doEvaluate(expression, context, indicator)
         }
+        return super.doEvaluate(expression, context, indicator)
     }
 
     def  protected  Object doEvaluate(QuantityLiteral literal, IEvaluationContext context, CancelIndicator indicator) {

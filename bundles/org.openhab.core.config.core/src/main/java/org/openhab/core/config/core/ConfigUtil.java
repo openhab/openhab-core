@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -48,11 +49,28 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Höfer - Minor changes for type normalization based on config description
+ * @author Florian Hotze - Add support for environment variable substitution in config values
  */
 @NonNullByDefault
 public class ConfigUtil {
 
     private static final Pattern DEFAULT_LIST_SPLITTER = Pattern.compile("(?<!\\\\),");
+    private static final Pattern ENV_PATTERN = Pattern.compile("\\$\\{ENV:([^}]+)}");
+
+    private static EnvProvider envProvider = System::getenv;
+
+    /**
+     * Setter for envProvider to allow overwriting it in tests.
+     *
+     * <p>
+     * This <strong>MUST NOT</strong> be called in production environments as it can break environment variable
+     * resolving.
+     * 
+     * @param provider the env provider to use for resolving environment variables
+     */
+    protected static void setEnvProvider(EnvProvider provider) {
+        envProvider = Objects.requireNonNull(provider, "provider must not be null");
+    }
 
     /**
      * Maps the provided (default) value of the given {@link ConfigDescriptionParameter} to the corresponding Java type.
@@ -285,5 +303,133 @@ public class ConfigUtil {
     private static boolean isOSGiConfigParameter(String name) {
         return Constants.OBJECTCLASS.equals(name) || ComponentConstants.COMPONENT_NAME.equals(name)
                 || ComponentConstants.COMPONENT_ID.equals(name);
+    }
+
+    /**
+     * Checks a string value for the variable patterns and resolves referenced variables.
+     *
+     * <p>
+     * Note: At the moment, only environment variables are supported.
+     * If no variable is referenced, the string value is returned as-is.
+     * If a referenced variable fails to resolve, a {@link IllegalArgumentException} is thrown.
+     *
+     * @param value the value to resolve
+     * @return the resolved value
+     * @throws IllegalArgumentException if a variable fails to resolve
+     */
+    private static String resolveVariables(String value) throws IllegalArgumentException {
+        final Matcher matcher = ENV_PATTERN.matcher(value);
+
+        return matcher.replaceAll(matchResult -> {
+            final String envVarName = matchResult.group(1);
+            final @Nullable String envVarValue = envProvider.get(envVarName);
+
+            if (envVarValue == null) {
+                throw new IllegalArgumentException(
+                        "Could not resolve environment variable '%s'!".formatted(envVarName));
+            }
+
+            // Safely escape the replacement string so '$' and '\' are treated as literals
+            return Matcher.quoteReplacement(envVarValue);
+        });
+    }
+
+    /**
+     * Resolves variables in the given value by replacing the variable patterns through the variable values.
+     *
+     * <p>
+     * The following rules are applied:
+     * <ol>
+     * <li>If the given value is a string, it is checked for variable patterns and referenced variables are
+     * resolved.</li>
+     * <li>If a variable fails to resolve, a {@link IllegalArgumentException} is thrown.</li>
+     * <li>If the value is a collection, this method is called for each element.</li>
+     * <li>If the value is neither a string nor a collection, it is returned as-is.</li>
+     * </ol>
+     *
+     * @param value the value to resolve
+     * @return the resolved value
+     * @throws IllegalArgumentException if a variable fails to resolve
+     */
+    public static Object resolveVariables(Object value) throws IllegalArgumentException {
+        if (value instanceof String stringValue) {
+            return resolveVariables(stringValue);
+        } else if (value instanceof Collection<?> collectionValue) {
+            final List<Object> entry = new ArrayList<>(collectionValue.size());
+            for (final Object it : collectionValue) {
+                final Object resolved = resolveVariables(it);
+                entry.add(resolved);
+            }
+            return entry;
+        }
+        return value;
+    }
+
+    /**
+     * Resolve variables in the given configuration.
+     *
+     * <p>
+     * Note that when substituting variables in non-TEXT values such as BOOLEAN, DECIMAL, etc., the config needs to be
+     * normalized.
+     *
+     * @param configuration the configuration to resolve variables in
+     * @return the resolved configuration
+     * @throws IllegalArgumentException if a variable fails to resolve
+     */
+    public static Map<String, @Nullable Object> resolveVariables(Map<String, @Nullable Object> configuration)
+            throws IllegalArgumentException {
+        final Map<String, @Nullable Object> resolvedProperties = new HashMap<>();
+        for (final Entry<String, @Nullable Object> entry : configuration.entrySet()) {
+            final @Nullable Object value = entry.getValue();
+            if (value != null) {
+                final Object resolved = resolveVariables(value);
+                resolvedProperties.put(entry.getKey(), resolved);
+            } else {
+                resolvedProperties.put(entry.getKey(), null);
+            }
+        }
+        return resolvedProperties;
+    }
+
+    /**
+     * Resolve variables in the given {@link Configuration}.
+     *
+     * <p>
+     * Note that when substituting variables in non-TEXT values such as BOOLEAN, DECIMAL, etc., the config needs to be
+     * normalized.
+     *
+     * @param configuration the configuration to resolve variables in
+     * @return the resolved configuration
+     * @throws IllegalArgumentException if a variable fails to resolve
+     */
+    public static Configuration resolveVariables(Configuration configuration) throws IllegalArgumentException {
+        return new Configuration(resolveVariables(configuration.getProperties()));
+    }
+
+    /**
+     * Resolve variables and normalize the results in the given {@link Configuration}.
+     *
+     * <p>
+     * Normalizing after the resolve step allows to use variable substitution for non-TEXT values such as BOOLEAN,
+     * DECIMAL, etc.
+     *
+     * @param configuration the configuration to resolve variables in and normalize afterward
+     * @param configDescriptions the configuration descriptions that should be applied (must not be empty).
+     * @return the normalized configuration
+     * @throws IllegalArgumentException if a variable fails to refresh or the given config description is null
+     */
+    public static Configuration resolveVariablesAndNormalizeTypes(Configuration configuration,
+            List<ConfigDescription> configDescriptions) throws IllegalArgumentException {
+        final Map<String, @Nullable Object> resolvedConfiguration = resolveVariables(configuration.getProperties());
+        return new Configuration(normalizeTypes(resolvedConfiguration, configDescriptions));
+    }
+
+    /**
+     * A provider for environment variables.
+     */
+    @FunctionalInterface
+    protected interface EnvProvider {
+        @Nullable
+        String get(String name);
     }
 }

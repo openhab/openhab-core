@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
@@ -179,6 +180,7 @@ public class DSLRuleProvider
         List<Rule> oldRules;
         List<Rule> newRules = new ArrayList<>();
         if ("rules".equalsIgnoreCase(ruleModelType)) {
+            logger.debug("modelChanged {} {}", type, modelFileName);
             boolean isolated = isIsolatedModel(modelFileName);
             String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
             switch (type) {
@@ -231,6 +233,7 @@ public class DSLRuleProvider
                     logger.debug("Unknown event type.");
             }
         } else if ("script".equals(ruleModelType)) {
+            logger.debug("modelChanged {} {}", type, modelFileName);
             switch (type) {
                 case ADDED:
                 case MODIFIED:
@@ -318,7 +321,8 @@ public class DSLRuleProvider
     }
 
     private Rule toRule(String modelName, Script script) {
-        String scriptText = NodeModelUtils.findActualNodeFor(script).getText();
+        ICompositeNode scriptNode = NodeModelUtils.findActualNodeFor(script);
+        String scriptText = scriptNode == null ? "" : scriptNode.getText();
 
         Configuration cfg = new Configuration();
         cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT, removeIndentation(scriptText));
@@ -348,7 +352,8 @@ public class DSLRuleProvider
         // Create Action
         String context = DSLScriptContextProvider.CONTEXT_IDENTIFIER + modelName + "-" + index + "\n";
         XExpression expression = rule.getScript();
-        String script = NodeModelUtils.findActualNodeFor(expression).getText();
+        ICompositeNode expressionNode = NodeModelUtils.findActualNodeFor(expression);
+        String script = expressionNode == null ? "" : expressionNode.getText();
         Configuration cfg = new Configuration();
         cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT, context + removeIndentation(script));
         cfg.put(AbstractScriptModuleHandler.CONFIG_SCRIPT_TYPE, MIMETYPE_OPENHAB_DSL_RULE);
@@ -457,7 +462,7 @@ public class DSLRuleProvider
                 } else if ("midnight".equals(id)) {
                     cfg.put(TimeOfDayTriggerHandler.CFG_TIME, "00:00");
                 } else {
-                    cfg.put(TimeOfDayTriggerHandler.CFG_TIME, id);
+                    cfg.put(TimeOfDayTriggerHandler.CFG_TIME, formatTime(id));
                 }
                 yield TriggerBuilder.create().withId(Integer.toString(triggerId++))
                         .withTypeUID(TimeOfDayTriggerHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
@@ -505,8 +510,8 @@ public class DSLRuleProvider
         Configuration cfg = new Configuration();
         return switch (condition) {
             case TimeOfDayCondition todCond -> {
-                cfg.put(TimeOfDayConditionHandler.CFG_START_TIME, todCond.getStart());
-                cfg.put(TimeOfDayConditionHandler.CFG_END_TIME, todCond.getEnd());
+                cfg.put(TimeOfDayConditionHandler.CFG_START_TIME, formatTime(todCond.getStart()));
+                cfg.put(TimeOfDayConditionHandler.CFG_END_TIME, formatTime(todCond.getEnd()));
                 yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
                         .withTypeUID(TimeOfDayConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
@@ -588,9 +593,37 @@ public class DSLRuleProvider
         };
     }
 
+    /**
+     * Format a time to have hour and minute on two characters with leading 0.
+     * "8:5" => "08:05"
+     * "10:25" => "10:25"
+     *
+     * @param time a valid time with hour and minute having the format "<int>:<int>"
+     * @return the time "<hour>:<minute>" with <hour> and <minute> on two characters with leading 0
+     */
+    private String formatTime(String time) {
+        String[] splittedTime = time.split(":", 2);
+        int hour = Integer.parseInt(splittedTime[0]);
+        int minute = Integer.parseInt(splittedTime[1]);
+        return "%02d:%02d".formatted(hour, minute);
+    }
+
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
+        for (String modelFileName : modelRepository.getAllModelNamesOfType("script")) {
+            logger.debug("onReadyMarkerAdded handle script {}", modelFileName);
+            EObject model = modelRepository.getModel(modelFileName);
+            if (model instanceof Script script) {
+                boolean isolated = isIsolatedModel(modelFileName);
+                List<Rule> newRules = List.of(toRule(modelFileName, script));
+                List<Rule> oldRules = rulesMap.put(modelFileName, newRules);
+                if (!isolated) {
+                    notifyProviderChangeListeners(calcChanges(modelFileName, oldRules, newRules));
+                }
+            }
+        }
         for (String modelFileName : modelRepository.getAllModelNamesOfType("rules")) {
+            logger.debug("onReadyMarkerAdded handle rule {}", modelFileName);
             EObject model = modelRepository.getModel(modelFileName);
             if (model instanceof RuleModel ruleModel) {
                 boolean isolated = isIsolatedModel(modelFileName);

@@ -40,6 +40,7 @@ import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.semantics.SemanticTag;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
 
 /**
@@ -56,6 +57,7 @@ public class YamlSemanticTagProviderTest {
     private static final Path MODEL_PATH = Path.of(MODEL_NAME);
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
     private @NonNullByDefault({}) YamlModelRepositoryImpl modelRepository;
     private @NonNullByDefault({}) YamlSemanticTagProvider semanticTagProvider;
@@ -75,7 +77,7 @@ public class YamlSemanticTagProviderTest {
         semanticTagProvider = new YamlSemanticTagProvider();
         semanticTagProvider.addProviderChangeListener(semanticTagListener);
 
-        modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(semanticTagProvider);
     }
 

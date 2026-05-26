@@ -185,11 +185,31 @@ public class SystemHysteresisStateProfileTest {
 
     @Test
     public void testInvertedParameter() {
-        final StateProfile profile = initProfile(BigDecimal.TEN, null, true);
+        final StateProfile profile = initProfile(BigDecimal.TEN, null, true, false);
         verifySendCommand(profile, PercentType.HUNDRED, OnOffType.OFF);
+        verifySendCommand(profile, PERCENT_TYPE_TEN, OnOffType.ON);
         verifySendCommand(profile, PercentType.ZERO, OnOffType.ON);
         verifySendUpdate(profile, PercentType.HUNDRED, OnOffType.OFF);
+        verifySendUpdate(profile, PERCENT_TYPE_TEN, OnOffType.ON);
         verifySendUpdate(profile, PercentType.ZERO, OnOffType.ON);
+    }
+
+    @Test
+    public void testInvertedParameterExcludeItemState() {
+        final StateProfile profile = initProfile(BigDecimal.TEN, null, true, true);
+        verifySendCommand(profile, PercentType.HUNDRED, OnOffType.OFF);
+        verifySendCommand(profile, PERCENT_TYPE_TEN, OnOffType.OFF);
+        verifySendCommand(profile, PercentType.ZERO, OnOffType.ON);
+        verifySendUpdate(profile, PercentType.HUNDRED, OnOffType.OFF);
+        verifySendUpdate(profile, PERCENT_TYPE_TEN, OnOffType.OFF);
+        verifySendUpdate(profile, PercentType.ZERO, OnOffType.ON);
+    }
+
+    @Test
+    public void testExcludeItemStateParameter() {
+        final StateProfile profile = initProfile(BigDecimal.TEN, null, false, true);
+        verifySendCommand(profile, PERCENT_TYPE_TEN, OnOffType.ON);
+        verifySendUpdate(profile, PERCENT_TYPE_TEN, OnOffType.ON);
     }
 
     @ParameterizedTest
@@ -211,14 +231,16 @@ public class SystemHysteresisStateProfileTest {
     }
 
     private StateProfile initProfile(@Nullable Object lower, @Nullable Object upper) {
-        return initProfile(lower, upper, false);
+        return initProfile(lower, upper, false, false);
     }
 
-    private StateProfile initProfile(@Nullable Object lower, @Nullable Object upper, boolean inverted) {
+    private StateProfile initProfile(@Nullable Object lower, @Nullable Object upper, boolean inverted,
+            boolean excludeItemState) {
         final Map<String, @Nullable Object> properties = new HashMap<>(2);
-        properties.put("lower", lower);
-        properties.put("upper", upper);
-        properties.put("inverted", inverted);
+        properties.put(SystemHysteresisStateProfile.LOWER_PARAM, lower);
+        properties.put(SystemHysteresisStateProfile.UPPER_PARAM, upper);
+        properties.put(SystemHysteresisStateProfile.INVERTED_PARAM, inverted);
+        properties.put(SystemHysteresisStateProfile.EXCLUDE_ITEM_STATE_PARAM, excludeItemState);
         when(mockContext.getConfiguration()).thenReturn(new Configuration(properties));
         return new SystemHysteresisStateProfile(mockCallback, mockContext);
     }

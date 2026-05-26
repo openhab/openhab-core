@@ -430,6 +430,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                 if (thingHandler != null) {
                     if (ThingHandlerHelper.isHandlerInitialized(newThing)
                             || newThing.getStatus() == ThingStatus.INITIALIZING) {
+                        logger.debug("Notify handler about updated thing '{}'", newThing.getUID());
                         oldThing.setHandler(null);
                         newThing.setHandler(thingHandler);
 
@@ -453,26 +454,32 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                     } else {
                         logger.debug(
                                 "Cannot notify handler about updated thing '{}', because handler is not initialized (thing must be in status UNKNOWN, ONLINE or OFFLINE).",
-                                newThing.getThingTypeUID());
+                                newThing.getUID());
                         if (thingHandler.getThing() == newThing) {
-                            logger.debug("Initializing handler of thing '{}'", newThing.getThingTypeUID());
+                            logger.debug("Initializing handler of thing '{}'", newThing.getUID());
                             oldThing.setHandler(null);
                             newThing.setHandler(thingHandler);
                             initializeHandler(newThing);
                         } else {
-                            logger.debug("Replacing uninitialized handler for updated thing '{}'",
-                                    newThing.getThingTypeUID());
+                            logger.debug("Replacing uninitialized handler for updated thing '{}'", newThing.getUID());
                             ThingHandlerFactory thingHandlerFactory = getThingHandlerFactory(newThing);
                             if (thingHandlerFactory != null) {
-                                unregisterHandler(thingHandler.getThing(), thingHandlerFactory);
+                                logger.debug("unregisterAndDisposeHandler called from thingUpdated for thing {}",
+                                        thingHandler.getThing().getUID());
+                                unregisterAndDisposeHandler(thingHandlerFactory, thingHandler.getThing(), thingHandler);
                             } else {
-                                logger.debug("No ThingHandlerFactory available that can handle {}",
-                                        newThing.getThingTypeUID());
+                                logger.debug("No ThingHandlerFactory available that can handle {}", newThing.getUID());
                             }
+                            logger.debug(
+                                    "registerAndInitializeHandler called from thingUpdated for thing {} when thing handler is defined",
+                                    newThing.getUID());
                             registerAndInitializeHandler(newThing, thingHandlerFactory);
                         }
                     }
                 } else {
+                    logger.debug(
+                            "registerAndInitializeHandler called from thingUpdated for thing {} when thing handler is not defined",
+                            newThing.getUID());
                     registerAndInitializeHandler(newThing, getThingHandlerFactory(newThing));
                 }
             } finally {
@@ -1122,6 +1129,9 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                     Thing thing = things.get(prerequisites.thingUID);
                     if (thing != null) {
                         if (!isHandlerRegistered(thing)) {
+                            logger.debug(
+                                    "registerAndInitializeHandler called from checkMissingPrerequisites for thing {}",
+                                    prerequisites.thingUID);
                             registerAndInitializeHandler(thing, getThingHandlerFactory(thing));
                         } else {
                             logger.warn(
