@@ -31,6 +31,8 @@ public class WidgetDefinitionDTO extends AbstractWidgetDTO {
     // widget containing the sitemap definition as child widgets.
     public String name;
 
+    public List<MappingDTO> mappings;
+
     public List<RuleDTO> visibilityRules;
     public List<RuleDTO> iconRules;
     public List<RuleDTO> labelColorRules;
