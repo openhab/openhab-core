@@ -746,22 +746,22 @@ public class SitemapResource
             }
         }
         if (widget instanceof Switch switchWidget) {
-            bean.mappings = switchWidget.getMappings().stream().map(mapping -> {
+            bean.mappings.addAll(switchWidget.getMappings().stream().map(mapping -> {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.releaseCommand = mapping.getReleaseCmd();
                 mappingBean.label = mapping.getLabel();
                 mappingBean.icon = mapping.getIcon();
                 return mappingBean;
-            }).toList();
+            }).toList());
         }
         if (widget instanceof Selection selectionWidget) {
-            bean.mappings = selectionWidget.getMappings().stream().map(mapping -> {
+            bean.mappings.addAll(selectionWidget.getMappings().stream().map(mapping -> {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.label = mapping.getLabel();
                 return mappingBean;
-            }).toList();
+            }).toList());
         }
         if (widget instanceof Input inputWidget) {
             bean.inputHint = inputWidget.getInputHint();

@@ -26,6 +26,8 @@ public class WidgetDefinitionDTO extends AbstractWidgetDTO {
 
     public String item;
 
+    public List<MappingDTO> mappings;
+
     public List<RuleDTO> visibilityRules;
     public List<RuleDTO> iconRules;
     public List<RuleDTO> labelColorRules;
