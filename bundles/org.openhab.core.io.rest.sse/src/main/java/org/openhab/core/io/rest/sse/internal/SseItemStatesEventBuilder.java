@@ -17,8 +17,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.measure.Unit;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.TimeZoneProvider;

@@ -170,9 +170,15 @@
 	</feature>
 
 	<feature name="openhab.tp-jaxb" description="JAXB bundles" version="${project.version}">
-		<capability>openhab.tp;feature=jaxb;version=3.0.2</capability>
-		<bundle start-level="10">mvn:jakarta.xml.bind/jakarta.xml.bind-api/3.0.0</bundle>
-		<bundle start-level="20">mvn:com.sun.xml.bind/jaxb-osgi/3.0.2</bundle>
+		<capability>openhab.tp;feature=jaxb;version=4.0.9</capability>
+		<!-- JAXB 3.0 API kept for third-party bundles compiled against JAXB 3.0 (e.g. swagger-core-jakarta) -->
+		<bundle start-level="10" dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/3.0.0</bundle>
+		<!-- JAXB 4.0 API + implementation (aligned with Karaf 4.5) -->
+		<bundle start-level="10">mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.5</bundle>
+		<bundle start-level="15" dependency="true">mvn:com.sun.istack/istack-commons-runtime/4.1.2</bundle>
+		<bundle start-level="15" dependency="true">mvn:org.openhab.core.bundles/org.openhab.core.jaxb4.txw2/${project.version}</bundle>
+		<bundle start-level="20">mvn:org.glassfish.jaxb/jaxb-core/4.0.9</bundle>
+		<bundle start-level="30">mvn:org.glassfish.jaxb/jaxb-runtime/4.0.9</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jaxws" description="JAX-WS (SOAP) bundles" version="${project.version}">
@@ -283,7 +289,7 @@
 		<capability>openhab.tp;feature=swagger-jaxrs;version=2.2.49</capability>
 		<feature dependency="true">openhab.tp-jax-rs-whiteboard</feature>
 		<feature dependency="true">openhab.tp-jackson</feature>
-		<bundle dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/3.0.0</bundle>
+		<feature dependency="true">openhab.tp-jaxb</feature>
 		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-annotations-jakarta/2.2.49</bundle>
 		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-core-jakarta/2.2.49</bundle>
 		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-integration-jakarta/2.2.49</bundle>
