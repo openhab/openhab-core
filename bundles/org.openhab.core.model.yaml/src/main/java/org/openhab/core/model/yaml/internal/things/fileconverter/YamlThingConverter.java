@@ -14,6 +14,7 @@ package org.openhab.core.model.yaml.internal.things.fileconverter;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -171,7 +172,7 @@ public class YamlThingConverter extends AbstractThingSerializer implements Thing
 
     @Override
     public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes(StandardCharsets.UTF_8));
         return modelRepository.createIsolatedModel(inputStream, errors, warnings);
     }
 

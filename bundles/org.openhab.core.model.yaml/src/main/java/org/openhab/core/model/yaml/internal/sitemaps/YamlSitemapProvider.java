@@ -94,7 +94,8 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     public Collection<Sitemap> getAllFromModel(String modelName) {
-        return sitemapsMap.getOrDefault(modelName, List.of());
+        Collection<Sitemap> sitemaps = sitemapsMap.get(modelName);
+        return sitemaps == null ? List.of() : List.copyOf(sitemaps);
     }
 
     @Override
@@ -168,7 +169,7 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
 
     @Override
     public void removedModel(String modelName, Collection<YamlSitemapDTO> elements) {
-        Collection<Sitemap> modelSitemaps = sitemapsMap.getOrDefault(modelName, List.of());
+        Collection<Sitemap> modelSitemaps = sitemapsMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(elt -> elt.name).forEach(name -> {
             modelSitemaps.stream().filter(s -> s.getName().equals(name)).findFirst().ifPresentOrElse(oldSitemap -> {
                 modelSitemaps.remove(oldSitemap);

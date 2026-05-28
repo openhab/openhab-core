@@ -1,4 +1,5 @@
 version: 1
 
 tags:
-  Tag_uid: TagLabel
+  Tag_Uid_SubUid: Label for SubUid
+  Tag_Uid: Label for Uid

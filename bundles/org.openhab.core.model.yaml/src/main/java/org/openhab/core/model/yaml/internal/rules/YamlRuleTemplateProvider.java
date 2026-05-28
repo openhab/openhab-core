@@ -71,7 +71,8 @@ public class YamlRuleTemplateProvider extends AbstractYamlRuleProvider<RuleTempl
     }
 
     public Collection<RuleTemplate> getAllFromModel(String modelName) {
-        return ruleTemplatesMap.getOrDefault(modelName, List.of());
+        Collection<RuleTemplate> templates = ruleTemplatesMap.get(modelName);
+        return templates == null ? List.of() : List.copyOf(templates);
     }
 
     @Override
@@ -147,7 +148,7 @@ public class YamlRuleTemplateProvider extends AbstractYamlRuleProvider<RuleTempl
     @Override
     public void removedModel(String modelName, Collection<YamlRuleTemplateDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
-        Collection<RuleTemplate> modelRuleTemplates = ruleTemplatesMap.getOrDefault(modelName, List.of());
+        Collection<RuleTemplate> modelRuleTemplates = ruleTemplatesMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(element -> element.uid).forEach(uid -> {
             modelRuleTemplates.stream().filter(template -> template.getUID().equals(uid)).findFirst()
                     .ifPresentOrElse(oldTemplate -> {
