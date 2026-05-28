@@ -170,17 +170,22 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- JAX-B 3.0 API -->
+    <!-- JAX-B 4.0 API -->
     <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>3.0.0</version>
+      <version>4.0.5</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-osgi</artifactId>
-      <version>3.0.2</version>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-core</artifactId>
+      <version>4.0.9</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>4.0.9</version>
     </dependency>
 
     <!-- Annotation API -->

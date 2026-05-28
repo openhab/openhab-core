@@ -15,8 +15,6 @@ package org.openhab.core.karaf.internal;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import jakarta.annotation.security.RolesAllowed;
-
 import org.apache.karaf.log.core.Level;
 import org.apache.karaf.log.core.LogService;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,6 +38,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;

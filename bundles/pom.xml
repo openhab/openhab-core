@@ -17,6 +17,7 @@
   <name>openHAB Core :: Bundles</name>
 
   <modules>
+    <module>org.openhab.core.jaxb4.txw2</module>
     <module>org.openhab.core.addon</module>
     <module>org.openhab.core.addon.eclipse</module>
     <module>org.openhab.core.addon.marketplace</module>
@@ -208,7 +209,7 @@
           <plugin>
             <groupId>org.jvnet.jaxb</groupId>
             <artifactId>jaxb-maven-plugin</artifactId>
-            <version>3.0.2</version>
+            <version>4.0.0</version>
             <configuration>
               <schemaDirectory>schema</schemaDirectory>
               <bindingDirectory>schema/binding</bindingDirectory>

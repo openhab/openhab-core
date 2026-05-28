@@ -156,7 +156,8 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 
         mdnsDiscoveryService.serviceAdded(mockServiceEvent);
 
-        verify(testListener, timeout(2000).atLeastOnce()).thingDiscovered(eq(mdnsDiscoveryService), eq(discoveryResult));
+        verify(testListener, timeout(2000).atLeastOnce()).thingDiscovered(eq(mdnsDiscoveryService),
+                eq(discoveryResult));
     }
 
     @Test
@@ -179,7 +180,8 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
             mdnsDiscoveryService.serviceResolved(mockServiceEvent);
         }
 
-        verify(testListener, timeout(2000).atLeastOnce()).thingDiscovered(eq(mdnsDiscoveryService), eq(discoveryResult));
+        verify(testListener, timeout(2000).atLeastOnce()).thingDiscovered(eq(mdnsDiscoveryService),
+                eq(discoveryResult));
     }
 
     /**
