@@ -135,7 +135,8 @@ public class TagResource implements RESTResource {
 
         Stream<EnrichedSemanticTagDTO> tagsStream = semanticTagRegistry.getAll().stream()
                 .sorted(Comparator.comparing(SemanticTag::getUID))
-                .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t)));
+                .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t),
+                        semanticTagRegistry.isDefault(t)));
         return Response.ok(new Stream2JSONInputStream(tagsStream)).lastModified(lastModified)
                 .cacheControl(RESTConstants.CACHE_CONTROL).build();
     }
@@ -167,7 +168,8 @@ public class TagResource implements RESTResource {
         if (tag != null) {
             Stream<EnrichedSemanticTagDTO> tagsStream = semanticTagRegistry.getSubTree(tag).stream()
                     .sorted(Comparator.comparing(SemanticTag::getUID))
-                    .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t)));
+                    .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t),
+                            semanticTagRegistry.isDefault(t)));
             return Response.ok(new Stream2JSONInputStream(tagsStream)).lastModified(lastModified)
                     .cacheControl(RESTConstants.CACHE_CONTROL).build();
         } else {
@@ -201,8 +203,9 @@ public class TagResource implements RESTResource {
         SemanticTag tag = semanticTagRegistry.get(uid);
         if (tag != null) {
             // report a conflict
-            return JSONResponse.createResponse(Status.CONFLICT,
-                    new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag)),
+            return JSONResponse.createResponse(
+                    Status.CONFLICT, new EnrichedSemanticTagDTO(tag.localized(locale),
+                            semanticTagRegistry.isEditable(tag), semanticTagRegistry.isDefault(tag)),
                     "Tag " + uid + " already exists!");
         }
 
@@ -216,7 +219,7 @@ public class TagResource implements RESTResource {
         managedSemanticTagProvider.add(tag);
 
         return JSONResponse.createResponse(Status.CREATED,
-                new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag)), null);
+                new EnrichedSemanticTagDTO(tag.localized(locale), true, false), null);
     }
 
     @DELETE
@@ -281,7 +284,7 @@ public class TagResource implements RESTResource {
                 data.synonyms != null ? data.synonyms : tag.getSynonyms());
         managedSemanticTagProvider.update(tag);
 
-        return JSONResponse.createResponse(Status.OK,
-                new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag)), null);
+        return JSONResponse.createResponse(Status.OK, new EnrichedSemanticTagDTO(tag.localized(locale), true, false),
+                null);
     }
 }
