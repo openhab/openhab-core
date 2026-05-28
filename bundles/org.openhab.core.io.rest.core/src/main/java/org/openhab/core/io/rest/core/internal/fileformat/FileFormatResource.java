@@ -68,14 +68,12 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemParser;
 import org.openhab.core.items.fileconverter.ItemSerializer;
-import org.openhab.core.semantics.ManagedSemanticTagProvider;
 import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.dto.SemanticTagDTO;
 import org.openhab.core.semantics.dto.SemanticTagDTOMapper;
 import org.openhab.core.semantics.fileconverter.SemanticTagParser;
 import org.openhab.core.semantics.fileconverter.SemanticTagSerializer;
-import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.dto.SitemapDTOMapper;
 import org.openhab.core.sitemap.dto.SitemapDefinitionDTO;
@@ -315,8 +313,6 @@ public class FileFormatResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
     private final SemanticTagRegistry semanticTagRegistry;
-    private final DefaultSemanticTagProvider defaultSemanticTagProvider;
-    private final ManagedSemanticTagProvider managedSemanticTagProvider;
     private final ItemBuilderFactory itemBuilderFactory;
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
@@ -342,8 +338,6 @@ public class FileFormatResource implements RESTResource {
     @Activate
     public FileFormatResource(//
             final @Reference SemanticTagRegistry semanticTagRegistry,
-            final @Reference DefaultSemanticTagProvider defaultSemanticTagProvider,
-            final @Reference ManagedSemanticTagProvider managedSemanticTagProvider,
             final @Reference ItemBuilderFactory itemBuilderFactory, //
             final @Reference ItemRegistry itemRegistry, //
             final @Reference MetadataRegistry metadataRegistry,
@@ -356,8 +350,6 @@ public class FileFormatResource implements RESTResource {
             final @Reference SitemapFactory sitemapFactory, //
             final @Reference SitemapRegistry sitemapRegistry) {
         this.semanticTagRegistry = semanticTagRegistry;
-        this.defaultSemanticTagProvider = defaultSemanticTagProvider;
-        this.managedSemanticTagProvider = managedSemanticTagProvider;
         this.itemBuilderFactory = itemBuilderFactory;
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
@@ -621,11 +613,10 @@ public class FileFormatResource implements RESTResource {
             }
         }
         if (hideNonEditableTags) {
-            tags = tags.stream().filter(tag -> managedSemanticTagProvider.get(tag.getUID()) != null)
+            tags = tags.stream().filter(tag -> semanticTagRegistry.isEditable(tag))
                     .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
         } else if (hideDefaultTags) {
-            Collection<SemanticTag> defaultTags = defaultSemanticTagProvider.getAll();
-            tags = tags.stream().filter(tag -> !defaultTags.contains(tag))
+            tags = tags.stream().filter(tag -> !semanticTagRegistry.isDefault(tag))
                     .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
         } else {
             tags = tags.stream().sorted(Comparator.comparing(SemanticTag::getUID)).toList();
