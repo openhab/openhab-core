@@ -102,30 +102,38 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     private final Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap<>();
 
     private final List<QueueContent> queue = new CopyOnWriteArrayList<>();
+    private final Object queueLock = new Object();
 
     private final Runnable lazyRetryRunnable = new Runnable() {
         @Override
         public void run() {
+            threadStopping = false;
             logger.debug("Starting lazy retry thread");
-            while (!queue.isEmpty()) {
-                for (QueueContent qc : queue) {
-                    if (retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration, qc.thingUID,
-                            qc.bridgeUID)) {
-                        queue.remove(qc);
+            boolean stop = false;
+            do {
+                // Wait 1s before retrying
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    stop = true;
+                    threadStopping = true;
+                }
+                if (!stop) {
+                    synchronized (queueLock) {
+                        queue.removeIf(qc -> retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration,
+                                qc.thingUID, qc.bridgeUID));
+                        stop = queue.isEmpty();
+                        threadStopping = stop == true;
                     }
                 }
-                if (!queue.isEmpty()) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
+            } while (!stop);
             logger.debug("Lazy retry thread ran out of work. Good bye.");
         }
     };
 
-    private @Nullable Thread lazyRetryThread;
+    protected @Nullable Thread lazyRetryThread;
+    private boolean threadStopping;
 
     private record QueueContent(ThingHandlerFactory thingHandlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
@@ -146,7 +154,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Deactivate
     public void deactivate() {
-        queue.clear();
+        synchronized (queueLock) {
+            queue.clear();
+        }
         thingsMap.clear();
         loadedXmlThingTypes.clear();
     }
@@ -196,6 +206,11 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     @Override
     public void updatedModel(String modelName, Collection<YamlThingDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
+        if (!isolated) {
+            elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
+                removeFromRetryQueue(uid);
+            });
+        }
         List<Thing> updated = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = Objects
                 .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
@@ -222,6 +237,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         boolean isolated = isIsolatedModel(modelName);
         Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
+            if (!isolated) {
+                removeFromRetryQueue(uid);
+            }
             modelThings.stream().filter(th -> th.getUID().equals(uid)).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
                 logger.debug("model {} removed thing {}", modelName, uid);
@@ -539,13 +557,36 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     private void queueRetryThingCreation(ThingHandlerFactory handlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
-        queue.add(new QueueContent(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID));
+        synchronized (queueLock) {
+            queue.add(new QueueContent(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID));
+        }
         Thread thread = lazyRetryThread;
+        boolean stopping = threadStopping;
+        if (thread != null && thread.isAlive() && stopping) {
+            // Wait for the thread to terminate
+            while (thread.isAlive()) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
         if (thread == null || !thread.isAlive()) {
             thread = new Thread(lazyRetryRunnable);
             lazyRetryThread = thread;
             thread.start();
         }
+    }
+
+    private void removeFromRetryQueue(ThingUID thingUID) {
+        synchronized (queueLock) {
+            queue.removeIf(qc -> thingUID.equals(qc.thingUID));
+        }
+    }
+
+    public int getRetryQueueSize() {
+        return queue.size();
     }
 
     private Configuration processThingConfiguration(ThingTypeUID thingTypeUID, ThingUID thingUID,
