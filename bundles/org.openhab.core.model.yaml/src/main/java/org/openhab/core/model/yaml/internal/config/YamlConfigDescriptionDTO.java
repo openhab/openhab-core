@@ -56,7 +56,7 @@ public class YamlConfigDescriptionDTO {
     }
 
     /**
-     * Creates a new instance based on the specified {@link ConfiConfigDescriptiongDescriptionParameterGroup}.
+     * Creates a new instance based on the specified {@link ConfigDescription}.
      *
      * @param configDescription the {@link ConfigDescription}.
      */
