@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = { ModelParser.class, RuleRuntimeActivator.class })
+@Component(immediate = true)
 public class RuleRuntimeActivator implements ModelParser {
 
     private final Logger logger = LoggerFactory.getLogger(RuleRuntimeActivator.class);
