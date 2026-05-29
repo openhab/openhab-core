@@ -154,7 +154,7 @@ public class YamlPageProvider extends AbstractProvider<RootUIComponent>
             page.addTags(dto.tags);
         }
         if (dto.props != null) {
-            page.setProps(dto.props);
+            page.setProps(dto.props.toConfigDescriptionDTO());
         }
         Date timestamp = dto.timestamp;
         if (timestamp != null) {

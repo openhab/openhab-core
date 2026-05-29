@@ -49,7 +49,7 @@ public class YamlWidgetProvider extends AbstractProvider<RootUIComponent>
 
     private final Logger logger = LoggerFactory.getLogger(YamlWidgetProvider.class);
 
-    private final Map<String, Collection<RootUIComponent>> widgetsMap = new ConcurrentHashMap<>();
+    private final Map<String, List<RootUIComponent>> widgetsMap = new ConcurrentHashMap<>();
 
     @Deactivate
     public void deactivate() {
@@ -66,6 +66,10 @@ public class YamlWidgetProvider extends AbstractProvider<RootUIComponent>
         // Ignore isolated models
         return widgetsMap.keySet().stream().filter(name -> !isIsolatedModel(name))
                 .map(name -> widgetsMap.getOrDefault(name, List.of())).flatMap(Collection::stream).toList();
+    }
+
+    public Collection<RootUIComponent> getAllFromModel(String modelName) {
+        return List.copyOf(widgetsMap.getOrDefault(modelName, List.of()));
     }
 
     @Override
@@ -156,7 +160,7 @@ public class YamlWidgetProvider extends AbstractProvider<RootUIComponent>
             widget.addTags(dto.tags);
         }
         if (dto.props != null) {
-            widget.setProps(dto.props);
+            widget.setProps(dto.props.toConfigDescriptionDTO());
         }
         Date timestamp = dto.timestamp;
         if (timestamp != null) {

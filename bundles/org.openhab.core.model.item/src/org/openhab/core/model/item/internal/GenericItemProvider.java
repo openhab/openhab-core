@@ -173,7 +173,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     }
 
     public Collection<Item> getAllFromModel(String modelName) {
-        return itemsMap.getOrDefault(modelName, List.of());
+        return List.copyOf(itemsMap.getOrDefault(modelName, List.of()));
     }
 
     public Map<String, String> getStateFormattersFromModel(String modelName) {

@@ -89,7 +89,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
 
     BundleResolver bundleResolver;
 
-    Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap
+    Map<String, List<Thing>> thingsMap = new ConcurrentHashMap
 
     List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<ThingHandlerFactory>()
 
@@ -122,7 +122,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     }
 
     def Collection<Thing> getAllFromModel(String modelName) {
-        thingsMap.getOrDefault(modelName, List.of())
+        List.copyOf(thingsMap.getOrDefault(modelName, List.of()))
     }
 
     def private void createThingsFromModel(String modelName) {

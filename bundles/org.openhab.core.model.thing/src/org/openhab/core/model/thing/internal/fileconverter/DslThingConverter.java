@@ -125,7 +125,7 @@ public class DslThingConverter extends AbstractThingSerializer implements ThingP
             String syntax = new String(outputStream.toByteArray()).replaceAll(":\"([a-zA-Z0-9_][a-zA-Z0-9_-]*)\"",
                     ":$1");
             try {
-                out.write(syntax.getBytes());
+                out.write(syntax.getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
                 logger.warn("Exception when writing the generated syntax {}", e.getMessage());
             }

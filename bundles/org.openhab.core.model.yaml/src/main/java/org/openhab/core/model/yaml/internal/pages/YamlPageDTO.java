@@ -20,9 +20,9 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
+import org.openhab.core.model.yaml.internal.config.YamlConfigDescriptionDTO;
 import org.openhab.core.model.yaml.internal.util.FlexibleDateDeserializer;
 import org.openhab.core.ui.components.UIComponent;
 
@@ -42,7 +42,7 @@ public class YamlPageDTO implements YamlElement, Cloneable {
     public Map<String, Object> config;
     public Map<String, List<UIComponent>> slots;
     public Set<String> tags;
-    public ConfigDescriptionDTO props;
+    public YamlConfigDescriptionDTO props;
     @JsonDeserialize(using = FlexibleDateDeserializer.class)
     public @Nullable Date timestamp;
 

@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.model.yaml.internal.widgets.converter;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.model.yaml.YamlModelRepository;
+import org.openhab.core.model.yaml.internal.widgets.YamlWidgetProvider;
+import org.openhab.core.ui.components.RootUIComponent;
+import org.openhab.core.ui.components.converter.RootUIComponentParser;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+/**
+ * {@link YamlWidgetParser} is the YAML parser for UI Widget objects.
+ *
+ * @author Ravi Nadahar - Initial contribution
+ */
+@NonNullByDefault
+@Component(immediate = true, service = { RootUIComponentParser.class })
+public class YamlWidgetParser implements RootUIComponentParser {
+
+    private final YamlModelRepository modelRepository;
+    private final YamlWidgetProvider widgetProvider;
+
+    @Activate
+    public YamlWidgetParser(@Reference YamlModelRepository modelRepository,
+            @Reference YamlWidgetProvider widgetProvider) {
+        this.modelRepository = modelRepository;
+        this.widgetProvider = widgetProvider;
+    }
+
+    @Override
+    public String getParserFormat() {
+        return "YAML";
+    }
+
+    @Override
+    public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes(StandardCharsets.UTF_8));
+        return modelRepository.createIsolatedModel(inputStream, errors, warnings);
+    }
+
+    @Override
+    public Collection<RootUIComponent> getParsedObjects(String modelName) {
+        return widgetProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public void finishParsingFormat(String modelName) {
+        modelRepository.removeIsolatedModel(modelName);
+    }
+}

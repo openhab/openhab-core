@@ -10,57 +10,45 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.converter;
+package org.openhab.core.ui.components.converter;
 
 import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.converter.ObjectParser;
+import org.openhab.core.ui.components.UIComponent;
 
 /**
- * A generic interface for parsers that parse strings into specific object types like Things, Items, Rules etc.
- *
- * @param <T> The object type.
+ * {@link UIComponentParser} is the interface to implement by any format parser for {@link UIComponent} objects.
  *
  * @author Ravi Nadahar - Initial contribution
  */
 @NonNullByDefault
-public interface ObjectParser<T> {
+public interface UIComponentParser extends ObjectParser<UIComponent> {
 
     /**
-     * Get the name of the format.
-     *
-     * @return The format name.
-     */
-    String getParserFormat();
-
-    /**
-     * Parse the provided syntax in format without impacting any object registries.
+     * Parse the provided {@code syntax} string without impacting the model.
      *
      * @param syntax the syntax in format.
      * @param errors the {@link List} to use to report errors.
      * @param warnings the {@link List} to be used to report warnings.
      * @return The model name used for parsing if the parsing succeeded without errors; {@code null} otherwise.
      */
+    @Override
     @Nullable
     String startParsingFormat(String syntax, List<String> errors, List<String> warnings);
 
     /**
-     * Get a copy of the collection of objects that were found when parsing the format.
+     * Get a copy of the collection of {@link UIComponent} objects that were found when parsing the format.
      *
-     * @param modelName the model name whose objects to get.
-     * @return The {@link Collection} of objects.
+     * @param modelName the model name used when parsing.
+     * @return The {@link Collection} of {@link UIComponent}s.
      *
      * @implNote It's important that a copy of the {@link Collection} is returned, so that invoking
      *           {@link #finishParsingFormat(String)} doesn't modify the returned result.
      */
-    Collection<? extends T> getParsedObjects(String modelName);
-
-    /**
-     * Release the resources from a previously started format parsing.
-     *
-     * @param modelName the model name whose resources to release.
-     */
-    void finishParsingFormat(String modelName);
+    @Override
+    Collection<? extends UIComponent> getParsedObjects(String modelName);
 }

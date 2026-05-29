@@ -25,6 +25,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.FilterCriteria;
 import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.FilterCriteriaDTO;
 import org.openhab.core.config.core.dto.ParameterOptionDTO;
 
@@ -32,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This is a data transfer object used to serialize a parameter of a configuration description in a YAML configuration.
+ * This is a data transfer object used to (de)serialize a {@link ConfigDescriptionParameter} in a YAML configuration.
  *
  * @author Ravi Nadahar - Initial contribution
  */
@@ -211,6 +212,71 @@ public class YamlConfigDescriptionParameterDTO {
     }
 
     /**
+     * Create a new {@link ConfigDescriptionParameter} from this {@link YamlConfigDescriptionParameterDTO} using the
+     * specified name.
+     *
+     * @param name the name to use.
+     * @return The new {@link ConfigDescriptionParameter}.
+     */
+    public @NonNull ConfigDescriptionParameter map(@NonNull String name) {
+        ConfigDescriptionParameterBuilder builder = ConfigDescriptionParameterBuilder.create(name, type)
+                .withAdvanced(advanced).withContext(context).withDefault(defaultValue).withDescription(description)
+                .withGroupName(groupName).withLabel(label).withLimitToOptions(limitToOptions).withMaximum(max)
+                .withMinimum(min).withMultiple(multiple).withMultipleLimit(multipleLimit).withPattern(pattern)
+                .withReadOnly(readOnly).withRequired(required).withStepSize(step).withUnit(unit)
+                .withUnitLabel(unitLabel).withVerify(verify);
+        if (filterCriteria != null) {
+            List<FilterCriteria> parameterfilterCriteria = new ArrayList<>(filterCriteria.size());
+            for (FilterCriteriaDTO filterCriterionDto : filterCriteria) {
+                parameterfilterCriteria.add(new FilterCriteria(filterCriterionDto.name, filterCriterionDto.value));
+            }
+            builder.withFilterCriteria(parameterfilterCriteria);
+        }
+        if (options != null) {
+            List<ParameterOption> parameterOptions = new ArrayList<>(options.size());
+            for (ParameterOptionDTO optionDto : options) {
+                parameterOptions.add(new ParameterOption(optionDto.value, optionDto.label));
+            }
+            builder.withOptions(parameterOptions);
+        }
+        return builder.build();
+    }
+
+    /**
+     * Create a new {@link ConfigDescriptionParameterDTO} from this {@link YamlConfigDescriptionParameterDTO} using the
+     * specified name.
+     *
+     * @param name the name to use.
+     * @return The new {@link ConfigDescriptionParameterDTO}.
+     */
+    public @NonNull ConfigDescriptionParameterDTO toConfigDescriptionParameterDTO(@NonNull String name) {
+        ConfigDescriptionParameterDTO result = new ConfigDescriptionParameterDTO();
+        result.name = name;
+        result.type = type;
+        result.context = context;
+        result.defaultValue = defaultValue;
+        result.description = description;
+        result.label = label;
+        result.required = required;
+        result.min = min;
+        result.max = max;
+        result.stepsize = step;
+        result.pattern = pattern;
+        result.readOnly = readOnly;
+        result.multiple = multiple;
+        result.multipleLimit = multipleLimit;
+        result.groupName = groupName;
+        result.advanced = advanced;
+        result.verify = verify;
+        result.limitToOptions = limitToOptions;
+        result.unit = unit;
+        result.unitLabel = unitLabel;
+        result.options = options;
+        result.filterCriteria = filterCriteria;
+        return result;
+    }
+
+    /**
      * Creates a {@link List} of {@link ConfigDescriptionParameter}s from a {@link Map} of parameter names and
      * {@link YamlConfigDescriptionParameterDTO}s, to be used during deserialization.
      *
@@ -221,42 +287,78 @@ public class YamlConfigDescriptionParameterDTO {
     public static @NonNull List<@NonNull ConfigDescriptionParameter> mapConfigDescriptions(
             @NonNull Map<@NonNull String, @NonNull YamlConfigDescriptionParameterDTO> configDescriptionDtos) {
         List<ConfigDescriptionParameter> result = new ArrayList<>(configDescriptionDtos.size());
-        List<FilterCriteriaDTO> filterCriteriaDtos;
-        List<FilterCriteria> filterCriterias;
-        List<ParameterOptionDTO> parameterOptionDtos;
-        List<ParameterOption> parameterOptions;
-        ConfigDescriptionParameterBuilder builder;
-        YamlConfigDescriptionParameterDTO parameterDto;
-        for (Entry<String, YamlConfigDescriptionParameterDTO> parameterEntry : configDescriptionDtos.entrySet()) {
-            parameterDto = parameterEntry.getValue();
-            builder = ConfigDescriptionParameterBuilder.create(parameterEntry.getKey(), parameterDto.type)
-                    .withAdvanced(parameterDto.advanced).withContext(parameterDto.context)
-                    .withDefault(parameterDto.defaultValue).withDescription(parameterDto.description)
-                    .withGroupName(parameterDto.groupName).withLabel(parameterDto.label)
-                    .withLimitToOptions(parameterDto.limitToOptions).withMaximum(parameterDto.max)
-                    .withMinimum(parameterDto.min).withMultiple(parameterDto.multiple)
-                    .withMultipleLimit(parameterDto.multipleLimit).withPattern(parameterDto.pattern)
-                    .withReadOnly(parameterDto.readOnly).withRequired(parameterDto.required)
-                    .withStepSize(parameterDto.step).withUnit(parameterDto.unit).withUnitLabel(parameterDto.unitLabel)
-                    .withVerify(parameterDto.verify);
-            filterCriteriaDtos = parameterDto.filterCriteria;
-            if (filterCriteriaDtos != null) {
-                filterCriterias = new ArrayList<>(filterCriteriaDtos.size());
-                for (FilterCriteriaDTO filterCriteriaDto : filterCriteriaDtos) {
-                    filterCriterias.add(new FilterCriteria(filterCriteriaDto.name, filterCriteriaDto.value));
-                }
-                builder.withFilterCriteria(filterCriterias);
-            }
-            parameterOptionDtos = parameterDto.options;
-            if (parameterOptionDtos != null) {
-                parameterOptions = new ArrayList<>(parameterOptionDtos.size());
-                for (ParameterOptionDTO optionDto : parameterOptionDtos) {
-                    parameterOptions.add(new ParameterOption(optionDto.value, optionDto.label));
-                }
-                builder.withOptions(parameterOptions);
-            }
-            result.add(builder.build());
+        for (@NonNull
+        Entry<@NonNull String, @NonNull YamlConfigDescriptionParameterDTO> parameterEntry : configDescriptionDtos
+                .entrySet()) {
+            result.add(parameterEntry.getValue().map(parameterEntry.getKey()));
         }
         return result;
+    }
+
+    /**
+     * A variant of {@link YamlConfigDescriptionParameterDTO} where it is specified as a array/list element instead of a
+     * map value.
+     */
+    public static class YamlConfigDescriptionParameterListEntryDTO {
+
+        public String name;
+        public String context;
+        @JsonProperty("default")
+        @JsonAlias("defaultValue")
+        public String defaultValue;
+        public String description;
+        public String label;
+        public boolean required;
+        public Type type;
+        public BigDecimal min;
+        public BigDecimal max;
+        @JsonAlias({ "stepsize" })
+        public BigDecimal step;
+        public String pattern;
+        public Boolean readOnly;
+        public Boolean multiple;
+        public Integer multipleLimit;
+        public String groupName;
+        public Boolean advanced;
+        public Boolean verify;
+        public Boolean limitToOptions;
+        public String unit;
+        public String unitLabel;
+
+        public List<ParameterOptionDTO> options;
+        public List<FilterCriteriaDTO> filterCriteria;
+
+        /**
+         * Convert this {@link YamlConfigDescriptionParameterListEntryDTO} to a corresponding
+         * {@link YamlConfigDescriptionParameterDTO), where the name is missing. The name must be handled/kept
+         * independently.
+         *
+         * @return The resulting {@link YamlConfigDescriptionParameterDTO}.
+         */
+        public YamlConfigDescriptionParameterDTO toYamlConfigDescriptionParameterDTO() {
+            YamlConfigDescriptionParameterDTO result = new YamlConfigDescriptionParameterDTO();
+            result.context = context;
+            result.defaultValue = defaultValue;
+            result.description = description;
+            result.label = label;
+            result.required = required;
+            result.type = type;
+            result.min = min;
+            result.max = max;
+            result.step = step;
+            result.pattern = pattern;
+            result.readOnly = readOnly;
+            result.multiple = multiple;
+            result.multipleLimit = multipleLimit;
+            result.groupName = groupName;
+            result.advanced = advanced;
+            result.verify = verify;
+            result.limitToOptions = limitToOptions;
+            result.unit = unit;
+            result.unitLabel = unitLabel;
+            result.options = options;
+            result.filterCriteria = filterCriteria;
+            return result;
+        }
     }
 }
