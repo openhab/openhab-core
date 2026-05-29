@@ -14,6 +14,7 @@ package org.openhab.core.model.sitemap.internal.fileconverter;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -389,7 +390,7 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
 
     @Override
     public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes(StandardCharsets.UTF_8));
         return modelRepository.createIsolatedModel("sitemaps", inputStream, errors, warnings);
     }
 

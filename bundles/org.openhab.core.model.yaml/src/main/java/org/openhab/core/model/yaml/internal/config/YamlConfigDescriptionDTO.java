@@ -118,7 +118,7 @@ public class YamlConfigDescriptionDTO {
      * Create a new {@link ConfigDescription} from this {@link YamlConfigDescriptionDTO}.
      *
      * @return The new {@link ConfigDescription} instance.
-     * @throws UnsupportedOperationException If {@code url} is {@code null} or invalid.
+     * @throws UnsupportedOperationException If {@code uri} is {@code null} or invalid.
      */
     public @NonNull ConfigDescription map() {
         if (uri == null) {
