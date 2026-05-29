@@ -17,11 +17,9 @@ import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.rule.RulesStandaloneSetup;
 import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.engine.ScriptEngine;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -33,20 +31,11 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class RuleRuntimeActivator implements ModelParser {
 
-    private final Logger logger = LoggerFactory.getLogger(RuleRuntimeActivator.class);
-    private final ScriptServiceUtil scriptServiceUtil;
-    private final ScriptEngine scriptEngine;
-
     @Activate
     public RuleRuntimeActivator(final @Reference ScriptEngine scriptEngine,
             final @Reference ScriptServiceUtil scriptServiceUtil) {
-        this.scriptEngine = scriptEngine;
-        this.scriptServiceUtil = scriptServiceUtil;
-    }
-
-    public void activate(BundleContext bc) throws Exception {
         RulesStandaloneSetup.doSetup(scriptServiceUtil, scriptEngine);
-        logger.debug("Registered 'rule' configuration parser");
+        LoggerFactory.getLogger(RuleRuntimeActivator.class).debug("Registered 'rule' configuration parser");
     }
 
     public void deactivate() throws Exception {
