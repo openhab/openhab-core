@@ -463,9 +463,13 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         }
         elementsAdded.forEach(this::notifyListenersAboutAddedElement);
 
-        if (provider instanceof ManagedProvider && providerClazz instanceof Class clazz
+        if (provider.equals(managedProvider) && providerClazz instanceof Class clazz
                 && readyService instanceof ReadyService rs) {
-            rs.markReady(new ReadyMarker("managed", clazz.getSimpleName().replace("Provider", "").toLowerCase()));
+            ReadyMarker marker = new ReadyMarker("managed",
+                    clazz.getSimpleName().replace("Provider", "").toLowerCase());
+            logger.debug("Create ready marker \"{}\" for provider \"{}\" ({} elements added)", marker,
+                    provider.getClass().getSimpleName(), elementsAdded.size());
+            rs.markReady(marker);
         }
         logger.debug("Provider \"{}\" has been added.", provider.getClass().getName());
     }

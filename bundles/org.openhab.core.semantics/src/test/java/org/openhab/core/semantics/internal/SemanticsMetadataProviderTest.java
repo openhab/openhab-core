@@ -41,6 +41,7 @@ import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.semantics.ManagedSemanticTagProvider;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.test.java.JavaTest;
 
 /**
@@ -58,6 +59,7 @@ public class SemanticsMetadataProviderTest extends JavaTest {
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull Metadata> changeListener;
     private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
     private @NonNullByDefault({}) SemanticsMetadataProvider semanticsMetadataProvider;
 
@@ -67,7 +69,7 @@ public class SemanticsMetadataProviderTest extends JavaTest {
 
         when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of());
         SemanticTagRegistry semanticTagRegistry = new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(),
-                managedSemanticTagProviderMock);
+                managedSemanticTagProviderMock, readyServiceMock);
 
         semanticsMetadataProvider = new SemanticsMetadataProvider(itemRegistry, semanticTagRegistry) {
             {

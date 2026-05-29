@@ -13,8 +13,7 @@
 package org.openhab.core.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +30,7 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.semantics.internal.SemanticTagRegistryImpl;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.service.ReadyService;
 
 /**
  * These are tests for {@link SemanticsPredicates}.
@@ -42,6 +42,7 @@ import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 public class SemanticsPredicatesTest {
 
     private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
     private @NonNullByDefault({}) GroupItem locationItem;
     private @NonNullByDefault({}) GroupItem equipmentItem;
@@ -62,7 +63,7 @@ public class SemanticsPredicatesTest {
         pointItem.addTag("Temperature");
 
         when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of());
-        new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(), managedSemanticTagProviderMock);
+        new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(), managedSemanticTagProviderMock, readyServiceMock);
     }
 
     @Test

@@ -26,6 +26,7 @@ import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistryChangeListener;
+import org.openhab.core.service.ReadyService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -140,6 +141,17 @@ public class PersistenceServiceConfigurationRegistryImpl
     @Override
     public void removeRegistryChangeListener(PersistenceServiceConfigurationRegistryChangeListener listener) {
         registryChangeListeners.remove(listener);
+    }
+
+    @Override
+    @Reference
+    protected void setReadyService(ReadyService readyService) {
+        super.setReadyService(readyService);
+    }
+
+    @Override
+    protected void unsetReadyService(ReadyService readyService) {
+        super.unsetReadyService(readyService);
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)

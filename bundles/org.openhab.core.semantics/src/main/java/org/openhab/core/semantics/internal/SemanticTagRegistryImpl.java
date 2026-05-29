@@ -35,6 +35,7 @@ import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.semantics.Tag;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.service.ReadyService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -63,15 +64,16 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
 
     @Activate
     public SemanticTagRegistryImpl(@Reference DefaultSemanticTagProvider defaultSemanticTagProvider,
-            @Reference ManagedSemanticTagProvider managedProvider) {
+            @Reference ManagedSemanticTagProvider managedProvider, @Reference ReadyService readyService) {
         super(SemanticTagProvider.class);
         this.defaultSemanticTagProvider = defaultSemanticTagProvider;
         this.managedProvider = managedProvider;
         this.defaultTags = defaultSemanticTagProvider.getAll();
         // Add the default semantic tags provider first, before all others
         super.addProvider(defaultSemanticTagProvider);
-        super.addProvider(managedProvider);
+        super.setReadyService(readyService);
         setManagedProvider(managedProvider);
+        super.addProvider(managedProvider);
     }
 
     @Override

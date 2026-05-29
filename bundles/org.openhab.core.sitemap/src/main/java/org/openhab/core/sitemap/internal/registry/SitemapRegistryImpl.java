@@ -16,11 +16,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.sitemap.Sitemap;
+import org.openhab.core.sitemap.registry.ManagedSitemapProvider;
 import org.openhab.core.sitemap.registry.SitemapProvider;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * The {@link SitemapRegistryImpl} implements the {@link SitemapRegistry}
@@ -32,18 +35,17 @@ import org.osgi.service.component.annotations.Reference;
 public class SitemapRegistryImpl extends AbstractRegistry<Sitemap, String, SitemapProvider> implements SitemapRegistry {
 
     @Activate
-    public SitemapRegistryImpl() {
+    public SitemapRegistryImpl(final @Reference ReadyService readyService) {
         super(SitemapProvider.class);
-    }
-
-    @Override
-    @Reference
-    protected void setReadyService(ReadyService readyService) {
         super.setReadyService(readyService);
     }
 
-    @Override
-    protected void unsetReadyService(ReadyService readyService) {
-        super.unsetReadyService(readyService);
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    protected void setManagedProvider(ManagedSitemapProvider provider) {
+        super.setManagedProvider(provider);
+    }
+
+    protected void unsetManagedProvider(ManagedSitemapProvider provider) {
+        super.unsetManagedProvider(provider);
     }
 }

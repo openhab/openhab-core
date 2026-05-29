@@ -47,6 +47,7 @@ import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.semantics.Tag;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.service.ReadyService;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -60,6 +61,7 @@ public class SemanticsServiceImplTest {
     private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
     private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
     private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
     private @NonNullByDefault({}) GroupItem locationItem;
     private @NonNullByDefault({}) GroupItem equipmentItem;
@@ -94,7 +96,7 @@ public class SemanticsServiceImplTest {
                 " Synonym1, Synonym2 , Synonym With Space ");
         when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of(userLocationTag));
         SemanticTagRegistry semanticTagRegistry = new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(),
-                managedSemanticTagProviderMock);
+                managedSemanticTagProviderMock, readyServiceMock);
 
         roomTagClass = semanticTagRegistry.getTagClassById("Location_Indoor_Room");
         bathroomTagClass = semanticTagRegistry.getTagClassById("Location_Indoor_Room_Bathroom");
