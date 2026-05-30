@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
+import org.openhab.core.sitemap.registry.SitemapFactory;
 
 /**
  * @author Mark Herwege - Initial contribution
@@ -44,6 +45,6 @@ public class NestedSitemapImpl extends NonLinkableWidgetImpl implements NestedSi
 
     @Override
     public String getWidgetType() {
-        return "Sitemap";
+        return SitemapFactory.SITEMAP;
     }
 }
