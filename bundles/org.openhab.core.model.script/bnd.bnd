@@ -26,6 +26,7 @@ Import-Package: \
  org.openhab.core.common.registry,\
  org.openhab.core.ephemeris,\
  org.openhab.core.events,\
+ org.openhab.core.i18n,\
  org.openhab.core.io.console,\
  org.openhab.core.io.console.extensions,\
  org.openhab.core.io.net.exec,\

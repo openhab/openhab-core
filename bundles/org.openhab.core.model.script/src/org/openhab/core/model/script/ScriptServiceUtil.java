@@ -12,7 +12,10 @@
  */
 package org.openhab.core.model.script;
 
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,6 +23,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.model.core.ModelRepository;
@@ -63,6 +68,8 @@ public class ScriptServiceUtil {
     private final MetadataRegistry metadataRegistry;
     private final RuleRegistry ruleRegistry;
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final TimeZoneProvider timeZoneProvider;
+    private final LocaleProvider localeProvider;
     private volatile @Nullable RuleManager ruleManager;
     private final Scheduler scheduler;
 
@@ -74,7 +81,9 @@ public class ScriptServiceUtil {
     public ScriptServiceUtil(final @Reference ItemRegistry itemRegistry, final @Reference ThingRegistry thingRegistry,
             final @Reference EventPublisher eventPublisher, final @Reference ModelRepository modelRepository,
             final @Reference MetadataRegistry metadataRegistry, final @Reference RuleRegistry ruleRegistry,
-            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry, final @Reference Scheduler scheduler) {
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
+            final @Reference TimeZoneProvider timeZoneProvider, final @Reference LocaleProvider localeProvider,
+            final @Reference Scheduler scheduler) {
         this.itemRegistry = itemRegistry;
         this.thingRegistry = thingRegistry;
         this.eventPublisher = eventPublisher;
@@ -82,6 +91,8 @@ public class ScriptServiceUtil {
         this.metadataRegistry = metadataRegistry;
         this.ruleRegistry = ruleRegistry;
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.timeZoneProvider = timeZoneProvider;
+        this.localeProvider = localeProvider;
         this.scheduler = scheduler;
 
         if (instance != null) {
@@ -181,6 +192,49 @@ public class ScriptServiceUtil {
 
     public ItemChannelLinkRegistry getItemChannelLinkRegistryInstance() {
         return itemChannelLinkRegistry;
+    }
+
+    /**
+     * @return The currently openHAB configured {@link TimeZone}.
+     */
+    public static TimeZone getTimeZone() {
+        return TimeZone.getTimeZone(getInstance().timeZoneProvider.getTimeZone());
+    }
+
+    /**
+     * @return The currently openHAB configured {@link ZoneId}.
+     */
+    public static ZoneId getZoneId() {
+        return getInstance().timeZoneProvider.getTimeZone();
+    }
+
+    /**
+     * @return The {@link TimeZoneProvider} instance.
+     */
+    public static TimeZoneProvider getTimeZoneProvider() {
+        return getInstance().timeZoneProvider;
+    }
+
+    public TimeZoneProvider getTimeZoneProviderInstance() {
+        return timeZoneProvider;
+    }
+
+    /**
+     * @return The currently openHAB configured {@link Locale}.
+     */
+    public static Locale getLocale() {
+        return getInstance().localeProvider.getLocale();
+    }
+
+    /**
+     * @return The {@link LocaleProvider} instance.
+     */
+    public static LocaleProvider getLocaleProvide() {
+        return getInstance().localeProvider;
+    }
+
+    public LocaleProvider getLocaleProviderInstance() {
+        return localeProvider;
     }
 
     /**
