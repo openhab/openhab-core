@@ -10,40 +10,31 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.internal.text.events;
+package org.openhab.core.voice.text.events;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.events.AbstractEvent;
-import org.openhab.core.events.Event;
 import org.openhab.core.voice.text.ConversationRole;
 
 /**
- * The {@link ConversationEvent} defines a {@link Event} implementation that emits conversation changes.
+ * The {@link ConversationMessageEvent} defines a {@link org.openhab.core.events.Event} implementation that emits
+ * conversation changes.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public class ConversationEvent extends AbstractEvent {
+public class ConversationMessageEvent extends ConversationEvent {
     /**
-     * The extension event type.
+     * The conversation message event type.
      */
-    public static final String TYPE = ConversationEvent.class.getSimpleName();
-    private final String uid;
+    public static final String TYPE = ConversationMessageEvent.class.getSimpleName();
+
     private final ConversationRole role;
     private final String text;
 
-    /**
-     * Must be called in subclass constructor to create a new event.
-     *
-     * @param topic the topic
-     * @param payload the payload
-     * @param source the source
-     */
-    protected ConversationEvent(String topic, String payload, @Nullable String source, String uid,
+    public ConversationMessageEvent(String topic, String payload, @Nullable String source, String uid,
             ConversationRole role, String text) {
-        super(topic, payload, source);
-        this.uid = uid;
+        super(topic, payload, source, uid);
         this.role = role;
         this.text = text;
     }
@@ -51,10 +42,6 @@ public class ConversationEvent extends AbstractEvent {
     @Override
     public String getType() {
         return TYPE;
-    }
-
-    public String getUid() {
-        return uid;
     }
 
     public ConversationRole getRole() {
@@ -65,14 +52,12 @@ public class ConversationEvent extends AbstractEvent {
         return text;
     }
 
-    public static class ConversationMessageDTO {
-        public String uid = "";
+    public static class ConversationMessageDTO extends ConversationEvent.ConversationDTO {
         public ConversationRole role = ConversationRole.USER;
         public String text = "";
 
         public ConversationMessageDTO withUID(String uid) {
-            this.uid = uid;
-            return this;
+            return (ConversationMessageDTO) super.withUID(uid);
         }
 
         public ConversationMessageDTO withParticipant(ConversationRole role) {
