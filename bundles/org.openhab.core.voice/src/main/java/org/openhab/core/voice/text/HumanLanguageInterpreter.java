@@ -73,8 +73,9 @@ public interface HumanLanguageInterpreter {
      *
      * @param locale language of the text (given by a {@link Locale})
      * @param interpreterContext the context for the interpretation
+     * @return a human language response
      */
-    default void interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
+    default String interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
         Conversation.Message message = interpreterContext.conversation().getLastMessage();
         if (message == null || message.getRole() != ConversationRole.USER) {
             throw new InterpretationException("Last conversation message is not an user message");
@@ -86,6 +87,7 @@ public interface HumanLanguageInterpreter {
             String errMsg = e.getMessage();
             throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
         }
+        return response;
     }
 
     /**

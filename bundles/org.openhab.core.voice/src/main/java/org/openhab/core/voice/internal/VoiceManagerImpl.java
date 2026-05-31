@@ -992,11 +992,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public List<LLMTool> getLLMToolsByIds(@Nullable String ids) {
-        return ids == null || ids.isBlank() ? List.of() : getLLMToolsByIds(Arrays.asList(ids.split(",")));
-    }
-
-    @Override
     public List<LLMTool> getLLMToolsByIds(List<String> ids) {
         List<LLMTool> tools = new ArrayList<>();
         for (String id : ids) {

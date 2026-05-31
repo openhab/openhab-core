@@ -51,6 +51,13 @@ public class ConversationStorage {
             return conversation;
         }
         synchronized (this) {
+            // re-check whether conversation became active since last check
+            conversation = activeConversations.get(id);
+            if (conversation != null) {
+                // return same reference when possible
+                return conversation;
+            }
+            // load conversation from storage or create a new one
             ConversationDTO conversationDTO = conversationStorageService.get(id);
             if (conversationDTO != null) {
                 logger.debug("Conversation '{}' found", id);

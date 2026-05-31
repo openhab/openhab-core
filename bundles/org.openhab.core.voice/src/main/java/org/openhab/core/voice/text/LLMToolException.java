@@ -17,7 +17,7 @@ import java.io.Serial;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * General purpose LLMTool exception
+ * General purpose {@link LLMTool} exception.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */

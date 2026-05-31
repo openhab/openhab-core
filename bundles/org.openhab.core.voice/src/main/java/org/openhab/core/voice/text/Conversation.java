@@ -53,7 +53,9 @@ public class Conversation {
      * @return list of messages
      */
     public List<Message> getMessages() {
-        return List.copyOf(messages);
+        synchronized (messages) {
+            return List.copyOf(messages);
+        }
     }
 
     /**
@@ -61,7 +63,11 @@ public class Conversation {
      *
      * @return nullable last message
      */
-    public synchronized @Nullable Message getLastMessage() {
+    public @Nullable Message getLastMessage() {
+        List<Message> messages;
+        synchronized (this.messages) {
+            messages = this.messages;
+        }
         if (messages.isEmpty()) {
             return null;
         }
@@ -72,7 +78,7 @@ public class Conversation {
         return addMessage(role, content, null);
     }
 
-    public synchronized String addMessage(ConversationRole role, String content, @Nullable String prevMessageUID)
+    public String addMessage(ConversationRole role, String content, @Nullable String prevMessageUID)
             throws ConversationException {
         Message lastMessage = getLastMessage();
         if (lastMessage != null) {
@@ -89,11 +95,13 @@ public class Conversation {
         } else if (!role.equals(ConversationRole.USER)) {
             throw new ConversationException("First message should be an user message");
         }
-        if (messages.size() > MAX_MESSAGES) {
-            messages.removeFirst();
-        }
         String uid = UUID.randomUUID().toString();
-        messages.add(new Message(uid, role, content));
+        synchronized (messages) {
+            if (messages.size() > MAX_MESSAGES) {
+                messages.removeFirst();
+            }
+            messages.add(new Message(uid, role, content));
+        }
         if (eventPublisher != null) {
             eventPublisher.post(ConversationEventFactory.createConversationEvent(getId(), //
                     uid, //
@@ -104,7 +112,7 @@ public class Conversation {
         return uid;
     }
 
-    public synchronized void addToMessage(String uid, String content) throws ConversationException {
+    public void addToMessage(String uid, String content) throws ConversationException {
         var message = getLastMessage();
         if (message == null || !message.getUID().equals(uid)) {
             throw new ConversationException("Message is not last message in conversation");
@@ -119,18 +127,22 @@ public class Conversation {
         }
     }
 
-    public synchronized boolean removeSinceMessage(String uid) {
-        var messageOptional = messages.stream().filter(m -> m.getUID().equals(uid)).findFirst();
-        if (messageOptional.isPresent()) {
-            int index = messages.indexOf(messageOptional.get());
-            messages.subList(index, messages.size()).clear();
-            return true;
+    public boolean removeSinceMessage(String uid) {
+        synchronized (messages) {
+            var messageOptional = messages.stream().filter(m -> m.getUID().equals(uid)).findFirst();
+            if (messageOptional.isPresent()) {
+                int index = messages.indexOf(messageOptional.get());
+                messages.subList(index, messages.size()).clear();
+                return true;
+            }
         }
         return false;
     }
 
-    public synchronized void removeMessages() {
-        messages.clear();
+    public void removeMessages() {
+        synchronized (messages) {
+            messages.clear();
+        }
     }
 
     public String getId() {

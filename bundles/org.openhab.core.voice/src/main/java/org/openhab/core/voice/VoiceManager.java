@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -339,10 +340,12 @@ public interface VoiceManager {
      * @param ids Comma separated list of LLM tool ids to use
      * @return a list of {@link LLMTool} or an empty list if none of them is available
      */
-    List<LLMTool> getLLMToolsByIds(@Nullable String ids);
+    default List<LLMTool> getLLMToolsByIds(@Nullable String ids) {
+        return ids == null || ids.isBlank() ? List.of() : getLLMToolsByIds(Arrays.asList(ids.split(",")));
+    }
 
     /**
-     * Retrieves a HumanLanguageInterpreter collection.
+     * Retrieves a {@link LLMTool} collection.
      * If no services are available returns an empty list.
      * 
      * @param ids List of LLM tool ids to use

@@ -47,7 +47,7 @@ public interface LLMTool {
      * Returns a short localized human-readable description of the tool.
      *
      * @param locale the locale to provide the label for
-     * @return a localized string that shorty describes the tool purpose.
+     * @return a localized string that shorty describes the tool purpose
      */
     String getShortDescription(@Nullable Locale locale);
 
@@ -64,7 +64,7 @@ public interface LLMTool {
      * human-readable descriptions of the tool parameters.
      *
      * @param locale the locale to provide the label for
-     * @return localized descriptions of the tool params.
+     * @return localized descriptions of the tool params
      */
     List<LLMToolParam> getParamDescriptions(@Nullable Locale locale);
 
