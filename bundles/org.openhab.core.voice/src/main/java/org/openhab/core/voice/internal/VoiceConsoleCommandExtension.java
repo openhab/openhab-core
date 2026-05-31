@@ -41,16 +41,18 @@ import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.DialogRegistration;
-import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationManager;
+import org.openhab.core.voice.text.interpreter.llm.LLMTool;
+import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -83,6 +85,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_KEYWORD_SPOTTERS = "keywordspotters";
     private static final String SUBCMD_STT_SERVICES = "sttservices";
     private static final String SUBCMD_TTS_SERVICES = "ttsservices";
+    private static final String SUBCMD_LLM_TOOLS = "llmtools";
     private static final String SUBCMD_CONVERSATION = "conversation";
     private static final String SUBCMD_CONVERSATION_REMOVE = "conversationremove";
 
@@ -91,17 +94,20 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private final VoiceManager voiceManager;
     private final AudioManager audioManager;
     private final LocaleProvider localeProvider;
+    private final LLMToolRegistry llmToolRegistry;
 
     @Activate
     public VoiceConsoleCommandExtension(final @Reference ConversationManager conversationManager,
             final @Reference VoiceManager voiceManager, final @Reference AudioManager audioManager,
-            final @Reference LocaleProvider localeProvider, final @Reference ItemRegistry itemRegistry) {
+            final @Reference LocaleProvider localeProvider, final @Reference ItemRegistry itemRegistry,
+            final @Reference LLMToolRegistry llmToolRegistry) {
         super("voice", "Commands around voice enablement features.");
         this.conversationManager = conversationManager;
         this.voiceManager = voiceManager;
         this.audioManager = audioManager;
         this.localeProvider = localeProvider;
         this.itemRegistry = itemRegistry;
+        this.llmToolRegistry = llmToolRegistry;
     }
 
     @Override
@@ -133,6 +139,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_KEYWORD_SPOTTERS, "lists the keyword spotters"),
                 buildCommandUsage(SUBCMD_STT_SERVICES, "lists the Speech-to-Text services"),
                 buildCommandUsage(SUBCMD_TTS_SERVICES, "lists the Text-to-Speech services"),
+                buildCommandUsage(SUBCMD_LLM_TOOLS, "lists the LLM tools"),
                 buildCommandUsage(SUBCMD_CONVERSATION + " [--uid true] <conversationId>",
                         "Displays conversation messages"),
                 buildCommandUsage(SUBCMD_CONVERSATION_REMOVE + " [--uid <message-uid>] <conversationId>",
@@ -275,6 +282,10 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     listTTSs(console);
                     return;
                 }
+                case SUBCMD_LLM_TOOLS -> {
+                    listLLMTools(console);
+                    return;
+                }
                 case SUBCMD_CONVERSATION -> {
                     printConversationMessages(Arrays.copyOfRange(args, 1, args.length), console);
                     return;
@@ -316,7 +327,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         @Nullable
         String conversationId = parameters.remove("conversation");
         @Nullable
-        String llmToolIdList = parameters.remove("llm-tool");
+        String llmToolIdList = parameters.remove("llm-tools");
         @Nullable
         String locationItem = parameters.remove("location");
 
@@ -508,6 +519,18 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
     }
 
+    private void listLLMTools(Console console) {
+        Collection<LLMTool> tools = llmToolRegistry.getLLMTools();
+        if (!tools.isEmpty()) {
+            Locale locale = localeProvider.getLocale();
+            tools.stream().sorted(comparing(s -> s.getLabel(locale))).forEach(tool -> {
+                console.println(String.format("  %s (%s)", tool.getLabel(locale), tool.getId()));
+            });
+        } else {
+            console.println("No LLM tools found.");
+        }
+    }
+
     private void printConversationMessages(String[] args, Console console) {
         HashMap<String, String> parameters;
         try {
@@ -635,7 +658,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 .withLocationItem(parameters.remove("location-item")) //
                 .withDialogGroup(parameters.remove("dialog-group")) //
                 .withConversationId(parameters.remove("conversation")) //
-                .withLLMTools(voiceManager.getLLMToolsByIds(parameters.remove("llm-tools"))) //
+                .withLLMTools(llmToolRegistry.getLLMToolsByIds(parameters.remove("llm-tools"))) //
                 .withKeyword(parameters.remove("keyword"));
         if (!parameters.isEmpty()) {
             throw new IllegalStateException(

@@ -54,6 +54,7 @@ import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
+import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -100,17 +101,20 @@ public class VoiceResource implements RESTResource {
     private final AudioManager audioManager;
     private final VoiceManager voiceManager;
     private final ConversationManager conversationManager;
+    private final LLMToolRegistry llmToolRegistry;
 
     @Activate
     public VoiceResource( //
             final @Reference LocaleService localeService, //
             final @Reference AudioManager audioManager, //
             final @Reference VoiceManager voiceManager, //
-            final @Reference ConversationManager conversationManager) {
+            final @Reference ConversationManager conversationManager, //
+            final @Reference LLMToolRegistry llmToolRegistry) {
         this.localeService = localeService;
         this.audioManager = audioManager;
         this.voiceManager = voiceManager;
         this.conversationManager = conversationManager;
+        this.llmToolRegistry = llmToolRegistry;
     }
 
     @GET
@@ -202,7 +206,7 @@ public class VoiceResource implements RESTResource {
         if (hlis.isEmpty()) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
         }
-        List<LLMTool> llmTools = voiceManager.getLLMToolsByIds(llmToolIds);
+        List<LLMTool> llmTools = llmToolRegistry.getLLMToolsByIds(llmToolIds);
         Conversation conversation = conversationManager.getConversation(conversationId);
         InterpreterContext interpreterContext = new InterpreterContext(conversation, llmTools, locationItem);
         String answer = "";

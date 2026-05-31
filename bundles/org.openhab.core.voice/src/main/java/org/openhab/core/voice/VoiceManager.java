@@ -12,7 +12,6 @@
  */
 package org.openhab.core.voice;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -26,7 +25,6 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
-import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 
 /**
  * This service provides functionality around voice services and is the central service to be used directly by others.
@@ -332,26 +330,6 @@ public interface VoiceManager {
      * @return a collection of KS services
      */
     Collection<KSService> getKSs();
-
-    /**
-     * Retrieves a {@link LLMTool} collection.
-     * If no services match the provided ids returns an empty list.
-     * 
-     * @param ids Comma separated list of LLM tool ids to use
-     * @return a list of {@link LLMTool} or an empty list if none of them is available
-     */
-    default List<LLMTool> getLLMToolsByIds(@Nullable String ids) {
-        return ids == null || ids.isBlank() ? List.of() : getLLMToolsByIds(Arrays.asList(ids.split(",")));
-    }
-
-    /**
-     * Retrieves a {@link LLMTool} collection.
-     * If no services are available returns an empty list.
-     * 
-     * @param ids List of LLM tool ids to use
-     * @return a list of {@link LLMTool} or an empty list if none of them is available
-     */
-    List<LLMTool> getLLMToolsByIds(List<String> ids);
 
     /**
      * Retrieves a HumanLanguageInterpreter collection.
