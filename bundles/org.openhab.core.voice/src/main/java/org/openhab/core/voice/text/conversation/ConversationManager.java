@@ -28,7 +28,7 @@ public interface ConversationManager {
      * Gets a conversation by its identifier.
      *
      * <p>
-     * If id is null or blank, return a conversation with blank id that can not be stored.
+     * If id is blank, return a conversation with blank id that can not be stored.
      * If no conversation with that id exists, create a new conversation.
      *
      * @param id the conversation identifier
@@ -60,4 +60,11 @@ public interface ConversationManager {
      * @return a collection of all conversations
      */
     Collection<Conversation> getConversations();
+
+    /**
+     * Sets the maximum number of messages to keep in a conversation history.
+     *
+     * @param limit the maximum number of messages
+     */
+    void setHistoryLimit(int limit);
 }

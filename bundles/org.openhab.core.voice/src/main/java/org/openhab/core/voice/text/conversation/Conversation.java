@@ -29,11 +29,12 @@ import org.openhab.core.voice.text.conversation.events.ConversationEventFactory;
 @NonNullByDefault
 public class Conversation {
 
-    private static final int MAX_MESSAGES = 50;
+    public static final int DEFAULT_MAX_MESSAGES = 50;
 
     private final List<Message> messages;
     private final String id;
     private final @Nullable EventPublisher eventPublisher;
+    private int maxMessages = DEFAULT_MAX_MESSAGES;
 
     public Conversation(String id, @Nullable EventPublisher eventPublisher) {
         this.id = id;
@@ -45,6 +46,20 @@ public class Conversation {
         this.id = id;
         this.eventPublisher = eventPublisher;
         this.messages = messages;
+    }
+
+    /**
+     * Set the maximum number of messages to keep in history
+     *
+     * @param maxMessages the maximum number of messages
+     */
+    public void setMaxMessages(int maxMessages) {
+        this.maxMessages = maxMessages;
+        synchronized (messages) {
+            while (messages.size() > maxMessages) {
+                messages.removeFirst();
+            }
+        }
     }
 
     /**
@@ -64,14 +79,12 @@ public class Conversation {
      * @return nullable last message
      */
     public @Nullable Message getLastMessage() {
-        List<Message> messages;
-        synchronized (this.messages) {
-            messages = this.messages;
+        synchronized (messages) {
+            if (messages.isEmpty()) {
+                return null;
+            }
+            return messages.getLast();
         }
-        if (messages.isEmpty()) {
-            return null;
-        }
-        return messages.getLast();
     }
 
     public String addMessage(ConversationRole role, String content) throws ConversationException {
@@ -97,7 +110,7 @@ public class Conversation {
         }
         String uid = UUID.randomUUID().toString();
         synchronized (messages) {
-            if (messages.size() > MAX_MESSAGES) {
+            while (messages.size() >= maxMessages) {
                 messages.removeFirst();
             }
             messages.add(new Message(uid, role, content));

@@ -43,6 +43,7 @@ public class ConversationManagerImpl implements ConversationManager {
     private final Map<String, Conversation> activeConversations = new ConcurrentHashMap<>();
     private final EventPublisher eventPublisher;
     private final Logger logger = LoggerFactory.getLogger(ConversationManagerImpl.class);
+    private int historyLimit = Conversation.DEFAULT_MAX_MESSAGES;
 
     @Activate
     public ConversationManagerImpl(final @Reference StorageService storageService,
@@ -56,6 +57,7 @@ public class ConversationManagerImpl implements ConversationManager {
     public Conversation getConversation(String id) {
         Conversation conversation = activeConversations.get(id);
         if (conversation != null) {
+            conversation.setMaxMessages(historyLimit);
             // return same reference when possible
             return conversation;
         }
@@ -63,6 +65,7 @@ public class ConversationManagerImpl implements ConversationManager {
             // re-check whether conversation became active since last check
             conversation = activeConversations.get(id);
             if (conversation != null) {
+                conversation.setMaxMessages(historyLimit);
                 // return same reference when possible
                 return conversation;
             }
@@ -77,6 +80,7 @@ public class ConversationManagerImpl implements ConversationManager {
                 conversation = new Conversation(id, eventPublisher);
                 eventPublisher.post(ConversationEventFactory.createConversationAddedEvent(id, null));
             }
+            conversation.setMaxMessages(historyLimit);
             activeConversations.put(conversation.getId(), conversation);
             return conversation;
         }
@@ -115,5 +119,11 @@ public class ConversationManagerImpl implements ConversationManager {
             }
         }
         return activeConversations.values();
+    }
+
+    @Override
+    public void setHistoryLimit(int limit) {
+        this.historyLimit = limit;
+        activeConversations.values().forEach(c -> c.setMaxMessages(limit));
     }
 }
