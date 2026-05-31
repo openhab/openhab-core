@@ -16,10 +16,10 @@ import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.text.Conversation;
+import org.openhab.core.voice.text.conversation.Conversation;
 
 /**
- * A DTO for serialising {@link org.openhab.core.voice.text.Conversation}s on the REST API.
+ * A DTO for serialising {@link Conversation}s on the REST API.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */

@@ -24,8 +24,9 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
-import org.openhab.core.voice.text.LLMTool;
+import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 
 /**
  * This service provides functionality around voice services and is the central service to be used directly by others.

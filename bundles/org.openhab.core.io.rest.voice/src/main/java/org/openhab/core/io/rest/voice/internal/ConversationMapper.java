@@ -13,10 +13,10 @@
 package org.openhab.core.io.rest.voice.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.text.Conversation;
+import org.openhab.core.voice.text.conversation.Conversation;
 
 /**
- * Mapper class that maps {@link org.openhab.core.voice.text.Conversation} instanced to their respective DTOs.
+ * Mapper class that maps {@link Conversation} instanced to their respective DTOs.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */

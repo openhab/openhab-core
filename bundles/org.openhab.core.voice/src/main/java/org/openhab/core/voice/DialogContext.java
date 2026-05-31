@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
-import org.openhab.core.voice.text.LLMTool;
+import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 
 /**
  * Describes dialog configured services and options.

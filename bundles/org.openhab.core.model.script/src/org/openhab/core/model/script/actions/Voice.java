@@ -25,7 +25,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.engine.action.ParamDoc;
 import org.openhab.core.model.script.internal.engine.action.VoiceActionService;
-import org.openhab.core.voice.InterpretationArguments;
+import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
