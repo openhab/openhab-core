@@ -49,6 +49,7 @@ import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.Conversation;
+import org.openhab.core.voice.text.ConversationManager;
 import org.openhab.core.voice.text.ConversationRole;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
@@ -98,15 +99,18 @@ public class VoiceResource implements RESTResource {
     private final LocaleService localeService;
     private final AudioManager audioManager;
     private final VoiceManager voiceManager;
+    private final ConversationManager conversationManager;
 
     @Activate
     public VoiceResource( //
             final @Reference LocaleService localeService, //
             final @Reference AudioManager audioManager, //
-            final @Reference VoiceManager voiceManager) {
+            final @Reference VoiceManager voiceManager, //
+            final @Reference ConversationManager conversationManager) {
         this.localeService = localeService;
         this.audioManager = audioManager;
         this.voiceManager = voiceManager;
+        this.conversationManager = conversationManager;
     }
 
     @GET
@@ -116,7 +120,7 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConversationDTO.class))),
             @ApiResponse(responseCode = "404", description = "Conversation not found") })
     public Response getConversation(@PathParam("id") @Parameter(description = "conversation id") String id) {
-        Conversation conversation = voiceManager.getConversation(id);
+        Conversation conversation = conversationManager.getConversation(id);
         if (conversation.getMessages().isEmpty()) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No conversation found");
         }
@@ -131,7 +135,7 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "404", description = "Conversation or message not found") })
     public Response deleteConversation(@PathParam("id") @Parameter(description = "conversation id") String id,
             @Parameter(description = "Optional message UID") @Nullable String messageUID) {
-        Conversation conversation = voiceManager.getConversation(id);
+        Conversation conversation = conversationManager.getConversation(id);
         if (conversation.getMessages().isEmpty()) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Conversation not found");
         }
@@ -139,10 +143,10 @@ public class VoiceResource implements RESTResource {
             if (!conversation.removeSinceMessage(messageUID)) {
                 return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Message not found");
             }
+            conversationManager.storeConversation(conversation);
         } else {
-            conversation.removeMessages();
+            conversationManager.removeConversation(id);
         }
-        voiceManager.persistConversation(conversation);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
@@ -199,7 +203,7 @@ public class VoiceResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
         }
         List<LLMTool> llmTools = voiceManager.getLLMToolsByIds(llmToolIds);
-        Conversation conversation = voiceManager.getConversation(conversationId);
+        Conversation conversation = conversationManager.getConversation(conversationId);
         InterpreterContext interpreterContext = new InterpreterContext(conversation, llmTools, locationItem);
         String answer = "";
         String error = null;
@@ -212,7 +216,7 @@ public class VoiceResource implements RESTResource {
                 }
                 error = null;
                 logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
-                voiceManager.persistConversation(conversation);
+                conversationManager.storeConversation(conversation);
                 break;
             } catch (InterpretationException e) {
                 logger.debug("Interpretation exception: {}", e.getMessage());

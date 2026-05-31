@@ -58,9 +58,9 @@ import org.openhab.core.voice.SpeechRecognitionErrorEvent;
 import org.openhab.core.voice.SpeechRecognitionEvent;
 import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.Voice;
-import org.openhab.core.voice.internal.text.ConversationStorage;
 import org.openhab.core.voice.text.Conversation;
 import org.openhab.core.voice.text.ConversationException;
+import org.openhab.core.voice.text.ConversationManager;
 import org.openhab.core.voice.text.ConversationRole;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
@@ -89,7 +89,7 @@ public class DialogProcessor implements KSListener, STTListener {
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
     private final WeakHashMap<String, DialogContext> activeDialogGroups;
     public final DialogContext dialogContext;
-    private final ConversationStorage conversationStorage;
+    private final ConversationManager conversationManager;
     private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
@@ -119,12 +119,12 @@ public class DialogProcessor implements KSListener, STTListener {
 
     public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
             WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider,
-            ConversationStorage conversationStorage, Bundle bundle) {
+            ConversationManager conversationManager, Bundle bundle) {
         this.dialogContext = context;
         this.eventListener = eventListener;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
-        this.conversationStorage = conversationStorage;
+        this.conversationManager = conversationManager;
         this.activeDialogGroups = activeDialogGroups;
         this.bundle = bundle;
         var dt = context.dt();
@@ -369,7 +369,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 eventListener.onBeforeDialogInterpretation(dialogContext);
                 @Nullable
                 String conversationId = dialogContext.conversationId();
-                Conversation conversation = conversationId != null ? conversationStorage.getConversation(conversationId)
+                Conversation conversation = conversationId != null ? conversationManager.getConversation(conversationId)
                         : new Conversation("", null);
                 try {
                     conversation.addMessage(ConversationRole.USER, question);
@@ -392,7 +392,7 @@ public class DialogProcessor implements KSListener, STTListener {
                         error = null;
                         logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
                         if (conversationId != null) {
-                            conversationStorage.storeConversation(conversation);
+                            conversationManager.storeConversation(conversation);
                         }
                         break;
                     } catch (InterpretationException e) {

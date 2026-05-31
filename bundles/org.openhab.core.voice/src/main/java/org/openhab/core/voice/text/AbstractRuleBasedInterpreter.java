@@ -185,7 +185,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     @Override
-    public void interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
+    public String interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
         Conversation.Message message = interpreterContext.conversation().getLastMessage();
         if (message == null || message.getRole() != ConversationRole.USER) {
             throw new InterpretationException("Last conversation message is not an user message");
@@ -198,6 +198,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             throw new InterpretationException(
                     errMsg != null ? errMsg : "Unknown exception adding response to conversation");
         }
+        return response;
     }
 
     private String interpret(Locale locale, String text, @Nullable String locationItem) throws InterpretationException {

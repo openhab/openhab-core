@@ -48,6 +48,7 @@ import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.Conversation;
+import org.openhab.core.voice.text.ConversationManager;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.osgi.service.component.annotations.Activate;
@@ -86,15 +87,17 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_CONVERSATION_REMOVE = "conversationremove";
 
     private final ItemRegistry itemRegistry;
+    private final ConversationManager conversationManager;
     private final VoiceManager voiceManager;
     private final AudioManager audioManager;
     private final LocaleProvider localeProvider;
 
     @Activate
-    public VoiceConsoleCommandExtension(final @Reference VoiceManager voiceManager,
-            final @Reference AudioManager audioManager, final @Reference LocaleProvider localeProvider,
-            final @Reference ItemRegistry itemRegistry) {
+    public VoiceConsoleCommandExtension(final @Reference ConversationManager conversationManager,
+            final @Reference VoiceManager voiceManager, final @Reference AudioManager audioManager,
+            final @Reference LocaleProvider localeProvider, final @Reference ItemRegistry itemRegistry) {
         super("voice", "Commands around voice enablement features.");
+        this.conversationManager = conversationManager;
         this.voiceManager = voiceManager;
         this.audioManager = audioManager;
         this.localeProvider = localeProvider;
@@ -523,7 +526,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             throw new IllegalStateException(
                     "Argument" + parameters.keySet().stream().findAny().orElse("") + "is not supported");
         }
-        Conversation conversation = voiceManager.getConversation(arguments[0]);
+        Conversation conversation = conversationManager.getConversation(arguments[0]);
         if (conversation.getMessages().isEmpty()) {
             console.println("Empty conversation");
             return;
@@ -556,7 +559,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             throw new IllegalStateException(
                     "Argument" + parameters.keySet().stream().findAny().orElse("") + "is not supported");
         }
-        Conversation conversation = voiceManager.getConversation(arguments[0]);
+        Conversation conversation = conversationManager.getConversation(arguments[0]);
         if (conversation.getMessages().isEmpty()) {
             console.println("Empty conversation");
             return;
@@ -570,7 +573,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         } else {
             conversation.removeMessages();
         }
-        voiceManager.persistConversation(conversation);
+        conversationManager.storeConversation(conversation);
     }
 
     private @Nullable Voice getVoice(@Nullable String id) {

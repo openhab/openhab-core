@@ -74,9 +74,9 @@ import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
-import org.openhab.core.voice.internal.text.ConversationStorage;
 import org.openhab.core.voice.text.Conversation;
 import org.openhab.core.voice.text.ConversationException;
+import org.openhab.core.voice.text.ConversationManager;
 import org.openhab.core.voice.text.ConversationRole;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
@@ -114,6 +114,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     public static final String CONFIGURATION_PID = "org.openhab.voice";
 
+    private static final String EVENT_SOURCE = "org.openhab.core.voice";
+
     // the default keyword to use if no other is configured
     private static final String DEFAULT_KEYWORD = "Wakeup";
 
@@ -146,7 +148,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
     private final Storage<DialogRegistration> dialogRegistrationStorage;
-    private final ConversationStorage conversationStorage;
+    private final ConversationManager conversationManager;
 
     private @Nullable Bundle bundle;
 
@@ -170,14 +172,14 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
             final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
-            final @Reference StorageService storageService) {
+            final @Reference StorageService storageService, final @Reference ConversationManager conversationManager) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
         this.dialogRegistrationStorage = storageService.getStorage(DialogRegistration.class.getName(),
                 this.getClass().getClassLoader());
-        this.conversationStorage = new ConversationStorage(storageService, eventPublisher);
+        this.conversationManager = conversationManager;
     }
 
     @Activate
@@ -424,7 +426,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
         if (!interpreters.isEmpty()) {
             Locale locale = localeProvider.getLocale();
-            Conversation conversation = getConversation(args.conversationId());
+            Conversation conversation = conversationManager.getConversation(args.conversationId());
             try {
                 conversation.addMessage(ConversationRole.USER, text);
             } catch (ConversationException e) {
@@ -445,7 +447,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                         answer = message.getContent();
                     }
                     logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
-                    persistConversation(conversation);
+                    conversationManager.storeConversation(conversation);
                     return answer;
                 } catch (InterpretationException e) {
                     logger.debug("Interpretation exception from interpreter '{}': {}", interpreter.getId(),
@@ -681,7 +683,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
                         context.source().getId());
                 processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                        this.i18nProvider, this.conversationStorage, b);
+                        this.i18nProvider, this.conversationManager, b);
                 dialogProcessors.put(context.source().getId(), processor);
                 return processor.start();
             } else {
@@ -738,7 +740,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
             var processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                    this.i18nProvider, this.conversationStorage, b);
+                    this.i18nProvider, this.conversationManager, b);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
@@ -1003,24 +1005,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             }
         }
         return tools;
-    }
-
-    @Override
-    public Conversation getConversation(@Nullable String id) {
-        return id != null && !id.isBlank() ? conversationStorage.getConversation(id) : new Conversation("", null);
-    }
-
-    @Override
-    public boolean persistConversation(Conversation conversation) {
-        if (!conversation.getId().isBlank()) {
-            if (conversation.getMessages().isEmpty()) {
-                conversationStorage.removeConversation(conversation);
-            } else {
-                conversationStorage.storeConversation(conversation);
-            }
-            return true;
-        }
-        return false;
     }
 
     @Override

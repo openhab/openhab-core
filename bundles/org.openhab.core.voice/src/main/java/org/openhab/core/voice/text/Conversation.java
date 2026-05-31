@@ -19,7 +19,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.voice.internal.text.events.ConversationEventFactory;
+import org.openhab.core.voice.text.events.ConversationEventFactory;
 
 /**
  * The {@link Conversation} class contains a list of messages in between the users and a LanguageInterpreter.
@@ -103,28 +103,10 @@ public class Conversation {
             messages.add(new Message(uid, role, content));
         }
         if (eventPublisher != null) {
-            eventPublisher.post(ConversationEventFactory.createConversationEvent(getId(), //
-                    uid, //
-                    role, //
-                    content //
-            ));
+            eventPublisher
+                    .post(ConversationEventFactory.createConversationMessageEvent(getId(), uid, role, content, null));
         }
         return uid;
-    }
-
-    public void addToMessage(String uid, String content) throws ConversationException {
-        var message = getLastMessage();
-        if (message == null || !message.getUID().equals(uid)) {
-            throw new ConversationException("Message is not last message in conversation");
-        }
-        message.addContent(content);
-        if (eventPublisher != null) {
-            eventPublisher.post(ConversationEventFactory.createConversationEvent(getId(), //
-                    uid, //
-                    message.getRole(), //
-                    content //
-            ));
-        }
     }
 
     public boolean removeSinceMessage(String uid) {
@@ -152,16 +134,12 @@ public class Conversation {
     public static final class Message {
         private final String uid;
         private final ConversationRole role;
-        private volatile String content;
+        private final String content;
 
         public Message(String uid, ConversationRole role, String content) {
             this.uid = uid;
             this.role = role;
             this.content = content;
-        }
-
-        private synchronized void addContent(String text) {
-            content += text;
         }
 
         public String getContent() {

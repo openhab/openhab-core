@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.library.types.PercentType;
-import org.openhab.core.voice.text.Conversation;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.LLMTool;
@@ -420,22 +419,4 @@ public interface VoiceManager {
      */
     @Nullable
     Voice getDefaultVoice();
-
-    /**
-     * Returns a Conversation.
-     * If id is null or blank returns a conversation with black id that can not be stored.
-     * If no conversation with that id exists it creates a new one.
-     *
-     * @param id the conversation id or none to get a non-persistent conversation
-     * @return a new {@link Conversation} or an already existing one from the storage
-     */
-    Conversation getConversation(@Nullable String id);
-
-    /**
-     * Persist a conversation, if a conversation has no messages it gets removed from the storage.
-     *
-     * @param conversation the conversation to store or delete.
-     * @return true if the conversation was saved or deleted.
-     */
-    boolean persistConversation(Conversation conversation);
 }
