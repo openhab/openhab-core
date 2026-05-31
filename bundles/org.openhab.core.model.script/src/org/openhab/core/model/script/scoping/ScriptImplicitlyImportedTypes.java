@@ -40,9 +40,9 @@ import org.openhab.core.model.script.actions.Transformation;
 import org.openhab.core.model.script.engine.IActionServiceProvider;
 import org.openhab.core.model.script.engine.IThingActionsProvider;
 import org.openhab.core.model.script.engine.action.ActionService;
-import org.openhab.core.model.script.helper.ItemExtensions;
-import org.openhab.core.model.script.helper.RuleExtensions;
+import org.openhab.core.model.script.lib.ItemExtensions;
 import org.openhab.core.model.script.lib.NumberExtensions;
+import org.openhab.core.model.script.lib.RuleExtensions;
 import org.openhab.core.thing.binding.ThingActions;
 
 import com.google.inject.Inject;

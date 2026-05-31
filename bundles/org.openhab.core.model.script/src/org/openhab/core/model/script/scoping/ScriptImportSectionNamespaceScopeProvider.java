@@ -51,11 +51,11 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
     public static final QualifiedName UTIL_TIMEZONE_CLASS = QualifiedName.create("java", "util", "TimeZone");
     public static final QualifiedName QUANTITY_PACKAGE = QualifiedName.create("javax", "measure", "quantity");
     public static final QualifiedName CHANNELS_CLASS = QualifiedName.create("org", "openhab", "core", "model", "script",
-            "helper", "Channels");
+            "lib", "Channels");
     public static final QualifiedName ITEMS_CLASS = QualifiedName.create("org", "openhab", "core", "model", "script",
-            "helper", "Items");
+            "lib", "Items");
     public static final QualifiedName RULES_CLASS = QualifiedName.create("org", "openhab", "core", "model", "script",
-            "helper", "Rules");
+            "lib", "Rules");
 
     @Override
     protected List<ImportNormalizer> getImplicitImports(boolean ignoreCase) {

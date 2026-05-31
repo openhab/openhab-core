@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.script.helper;
+package org.openhab.core.model.script.lib;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
