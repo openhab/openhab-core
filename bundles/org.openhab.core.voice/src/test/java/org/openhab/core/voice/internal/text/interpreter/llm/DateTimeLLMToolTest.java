@@ -20,6 +20,7 @@ import java.time.ZoneId;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.i18n.TimeZoneProvider;
@@ -30,6 +31,7 @@ import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
  *
  * @author Florian Hotze - Initial contribution
  */
+@NonNullByDefault
 public class DateTimeLLMToolTest {
     private final TimeZoneProvider timeZoneProvider = mock(TimeZoneProvider.class);
 

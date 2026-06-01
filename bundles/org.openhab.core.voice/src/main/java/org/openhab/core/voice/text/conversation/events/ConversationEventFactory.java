@@ -72,7 +72,7 @@ public class ConversationEventFactory extends AbstractEventFactory {
         return new ConversationRemovedEvent(topic, payload, source, removedDTO.uid);
     }
 
-    public static ConversationEvent createConversationMessageEvent(String conversationId, String messageId,
+    public static ConversationMessageEvent createConversationMessageEvent(String conversationId, String messageId,
             ConversationRole role, String text, @Nullable String source) {
         String payload = serializePayload(new ConversationMessageEvent.ConversationMessageDTO().withUID(messageId)
                 .withParticipant(role).withText(text));
@@ -80,13 +80,13 @@ public class ConversationEventFactory extends AbstractEventFactory {
                 messageId, role, text);
     }
 
-    public static ConversationEvent createConversationAddedEvent(String conversationId, @Nullable String source) {
+    public static ConversationAddedEvent createConversationAddedEvent(String conversationId, @Nullable String source) {
         String payload = serializePayload(new ConversationEvent.ConversationDTO().withUID(conversationId));
         return new ConversationAddedEvent(buildTopic(CONVERSATION_ADDED_TOPIC, conversationId), payload, source,
                 conversationId);
     }
 
-    public static ConversationEvent createConversationRemovedEvent(String conversationId, @Nullable String source) {
+    public static ConversationRemovedEvent createConversationRemovedEvent(String conversationId, @Nullable String source) {
         String payload = serializePayload(new ConversationEvent.ConversationDTO().withUID(conversationId));
         return new ConversationRemovedEvent(buildTopic(CONVERSATION_REMOVED_TOPIC, conversationId), payload, source,
                 conversationId);
