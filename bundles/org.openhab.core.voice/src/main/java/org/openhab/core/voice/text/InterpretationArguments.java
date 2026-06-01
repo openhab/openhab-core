@@ -12,7 +12,10 @@
  */
 package org.openhab.core.voice.text;
 
+import java.util.Locale;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * This service provides functionality around voice services and is the central service to be used directly by others.
@@ -20,5 +23,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public record InterpretationArguments(String hliIdList, String conversationId, String toolIdList, String locationItem) {
+public record InterpretationArguments(String hliIdList, String conversationId, String toolIdList,
+        @Nullable String locationItem, @Nullable Locale locale) {
 }

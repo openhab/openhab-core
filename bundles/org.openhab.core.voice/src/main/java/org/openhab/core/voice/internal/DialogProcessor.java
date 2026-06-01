@@ -369,8 +369,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 eventListener.onBeforeDialogInterpretation(dialogContext);
                 @Nullable
                 String conversationId = dialogContext.conversationId();
-                Conversation conversation = conversationId != null ? conversationManager.getConversation(conversationId)
-                        : new Conversation("", null);
+                Conversation conversation = conversationManager.getConversation(Objects.requireNonNullElse(conversationId, ""));
                 try {
                     conversation.addMessage(ConversationRole.USER, question);
                 } catch (ConversationException e) {

@@ -42,6 +42,7 @@ import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.DialogRegistration;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
@@ -153,16 +154,16 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     public void interpretSomethingWithGivenHliIdWhenTheHliIsARegisteredService() throws InterpretationException {
         hliStub = new HumanLanguageInterpreterStub();
         registerService(hliStub);
-
-        String result = voiceManager.interpret("something", hliStub.getId());
+        String result = voiceManager.interpret("something",
+                new InterpretationArguments(hliStub.getId(), "", "", "", null));
         assertThat(result, is("Interpreted text"));
     }
 
     @Test
     public void interpretSomethingWithGivenHliIdEhenTheHliIsNotARegisteredService() throws InterpretationException {
         hliStub = new HumanLanguageInterpreterStub();
-
-        assertThrows(InterpretationException.class, () -> voiceManager.interpret("something", hliStub.getId()));
+        assertThrows(InterpretationException.class, () -> voiceManager.interpret("something",
+                new InterpretationArguments(hliStub.getId(), "", "", "", null)));
     }
 
     @Test
@@ -190,8 +191,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         hliStub.setExceptionExpected(true);
         var anotherHLIStub = new HumanLanguageInterpreterStub();
         registerService(anotherHLIStub);
-        String result = voiceManager.interpret("something",
-                String.join(",", List.of(hliStub.getId(), anotherHLIStub.getId())));
+        String result = voiceManager.interpret("something", new InterpretationArguments(
+                String.join(",", List.of(hliStub.getId(), anotherHLIStub.getId())), "", "", "", null));
         assertThat(result, is("Interpreted text"));
     }
 

@@ -116,8 +116,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     public static final String CONFIGURATION_PID = "org.openhab.voice";
 
-    private static final String EVENT_SOURCE = "org.openhab.core.voice";
-
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
@@ -366,14 +364,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public String interpret(String text, @Nullable String hliIdList) throws InterpretationException {
-        return interpret(text, hliIdList == null ? (InterpretationArguments) null
-                : new InterpretationArguments(hliIdList, "", "", ""));
+        return interpret(text, hliIdList == null ? null : new InterpretationArguments(hliIdList, "", "", "", null));
     }
 
     @Override
     public String interpret(String text, @Nullable InterpretationArguments args) throws InterpretationException {
         if (args == null) {
-            args = new InterpretationArguments("", "", "", "");
+            args = new InterpretationArguments("", "", "", "", null);
         }
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
         if (args.hliIdList().isEmpty()) {
@@ -386,7 +383,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         }
 
         if (!interpreters.isEmpty()) {
-            Locale locale = localeProvider.getLocale();
+            Locale locale = args.locale();
+            if (locale == null) {
+                locale = localeProvider.getLocale();
+            }
             Conversation conversation = conversationManager.getConversation(args.conversationId());
             try {
                 conversation.addMessage(ConversationRole.USER, text);
@@ -396,19 +396,22 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                         errMsg != null ? errMsg : "Unknown exception adding user message to conversation");
             }
             List<LLMTool> tools = llmToolRegistry.getByIds(args.toolIdList());
-            String locationItem = !args.locationItem().isBlank() ? args.locationItem() : null;
+            String locationItem = args.locationItem();
+            if (locationItem != null && locationItem.isBlank()) {
+                locationItem = null;
+            }
             InterpreterContext context = new InterpreterContext(conversation, tools, locationItem);
             InterpretationException exception = null;
-            String answer = "";
             for (var interpreter : interpreters) {
                 try {
+                    String answer = "";
                     interpreter.interpret(locale, context);
                     Conversation.Message message = context.conversation().getLastMessage();
                     if (message != null && message.getRole() == ConversationRole.OPENHAB) {
                         answer = message.getContent();
                     }
                     logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
-                    conversationManager.storeConversation(conversation);
+                    conversationManager.storeConversation(context.conversation());
                     return answer;
                 } catch (InterpretationException e) {
                     logger.debug("Interpretation exception from interpreter '{}': {}", interpreter.getId(),
@@ -416,15 +419,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                     exception = e;
                 }
             }
-            if (exception != null) { // this should always be the case here
+            if (exception != null) {
                 try {
                     String errMsg = exception.getMessage();
-                    conversation.addMessage(ConversationRole.OPENHAB,
+                    context.conversation().addMessage(ConversationRole.OPENHAB,
                             errMsg != null ? errMsg : "Unknown interpreter error");
                 } catch (ConversationException e) {
-                    String errMsg = e.getMessage();
-                    throw new InterpretationException(
-                            errMsg != null ? errMsg : "Unknown exception adding user message to conversation");
+                    logger.error("Error adding error message to conversation: {}", e.getMessage());
                 }
                 throw exception;
             }

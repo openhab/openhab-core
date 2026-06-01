@@ -345,7 +345,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 Objects.requireNonNullElse(hliIdList, ""), //
                 Objects.requireNonNullElse(conversationId, ""), //
                 Objects.requireNonNullElse(llmToolIdList, ""), //
-                Objects.requireNonNullElse(locationItem, "") //
+                Objects.requireNonNullElse(locationItem, ""), null //
         );
         try {
             String result = voiceManager.interpret(msg, interpretationArgs);
@@ -524,7 +524,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         if (!tools.isEmpty()) {
             Locale locale = localeProvider.getLocale();
             tools.stream().sorted(comparing(s -> s.getLabel(locale))).forEach(tool -> {
-                console.println(String.format("  %s (%s)", tool.getLabel(locale), tool.getId()));
+                console.println(String.format("  %s (%s)", tool.getLabel(locale), tool.getUID()));
             });
         } else {
             console.println("No LLM tools found.");

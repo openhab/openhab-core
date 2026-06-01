@@ -25,11 +25,11 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.engine.action.ParamDoc;
 import org.openhab.core.model.script.internal.engine.action.VoiceActionService;
-import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,7 +192,7 @@ public class Voice {
             response = VoiceActionService.voiceManager.interpret(text.toString(),
                     new InterpretationArguments(Objects.requireNonNullElse(interpreters, ""),
                             Objects.requireNonNullElse(conversation, ""), Objects.requireNonNullElse(llmTools, ""),
-                            Objects.requireNonNullElse(location, "")));
+                            Objects.requireNonNullElse(location, ""), null));
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             say(message);
@@ -218,7 +218,7 @@ public class Voice {
         String response;
         try {
             response = VoiceActionService.voiceManager.interpret(text.toString(),
-                    new InterpretationArguments(interpreters != null ? interpreters : "", "", "", ""));
+                    new InterpretationArguments(interpreters != null ? interpreters : "", "", "", "", null));
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             if (sink != null) {
