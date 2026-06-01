@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.Identifiable;
 
 /**
  * The {@link LLMTool} interface represents a programmatic tool
@@ -26,14 +27,15 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public interface LLMTool {
+public interface LLMTool extends Identifiable<String> {
 
     /**
      * Returns a simple string that uniquely identifies this service.
      *
      * @return an id that identifies this service
      */
-    String getId();
+    @Override
+    String getUID();
 
     /**
      * Returns a localized human-readable label that can be used within UIs.

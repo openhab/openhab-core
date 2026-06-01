@@ -47,6 +47,7 @@ import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
@@ -81,7 +82,6 @@ import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
-import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistryListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -111,8 +111,8 @@ import org.slf4j.LoggerFactory;
         property = Constants.SERVICE_PID + "=org.openhab.voice")
 @ConfigurableService(category = "system", label = "Voice", description_uri = VoiceConfiguration.CONFIG_URI)
 @NonNullByDefault
-public class VoiceManagerImpl
-        implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener, LLMToolRegistryListener {
+public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener,
+        RegistryChangeListener<LLMTool> {
 
     public static final String CONFIGURATION_PID = "org.openhab.voice";
 
@@ -163,13 +163,13 @@ public class VoiceManagerImpl
     @Activate
     protected void activate(BundleContext bundleContext, Map<String, Object> config) {
         this.bundle = bundleContext.getBundle();
-        llmToolRegistry.addLLMToolRegistryListener(this);
+        llmToolRegistry.addRegistryChangeListener(this);
         modified(config);
     }
 
     @Deactivate
     protected void deactivate() {
-        llmToolRegistry.removeLLMToolRegistryListener(this);
+        llmToolRegistry.removeRegistryChangeListener(this);
         dialogProcessors.values().forEach(DialogProcessor::stop);
         dialogProcessors.clear();
         ScheduledFuture<?> dialogRegistrationFuture = this.dialogRegistrationFuture;
@@ -395,7 +395,7 @@ public class VoiceManagerImpl
                 throw new InterpretationException(
                         errMsg != null ? errMsg : "Unknown exception adding user message to conversation");
             }
-            List<LLMTool> tools = llmToolRegistry.getLLMToolsByIds(args.toolIdList());
+            List<LLMTool> tools = llmToolRegistry.getByIds(args.toolIdList());
             String locationItem = !args.locationItem().isBlank() ? args.locationItem() : null;
             InterpreterContext context = new InterpreterContext(conversation, tools, locationItem);
             InterpretationException exception = null;
@@ -840,13 +840,18 @@ public class VoiceManagerImpl
     }
 
     @Override
-    public void onLLMToolAdded(LLMTool tool) {
+    public void added(LLMTool tool) {
         scheduleDialogRegistrations();
     }
 
     @Override
-    public void onLLMToolRemoved(LLMTool tool) {
-        stopDialogs(dialog -> dialog.dialogContext.llmTools().stream().anyMatch(t -> t.getId().equals(tool.getId())));
+    public void removed(LLMTool tool) {
+        stopDialogs(dialog -> dialog.dialogContext.llmTools().stream().anyMatch(t -> t.getUID().equals(tool.getUID())));
+    }
+
+    @Override
+    public void updated(LLMTool oldElement, LLMTool element) {
+        // do nothing
     }
 
     @Override
@@ -1095,7 +1100,7 @@ public class VoiceManagerImpl
                                 .withTTS(getTTS(dr.ttsId)) //
                                 .withVoice(getVoice(dr.voiceId)) //
                                 .withHLIs(getHLIsByIds(dr.hliIds)) //
-                                .withLLMTools(llmToolRegistry.getLLMToolsByIds(dr.llmToolIds)) //
+                                .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
                                 .withLocale(dr.locale) //
                                 .withDialogGroup(dr.dialogGroup) //
                                 .withLocationItem(dr.locationItem) //

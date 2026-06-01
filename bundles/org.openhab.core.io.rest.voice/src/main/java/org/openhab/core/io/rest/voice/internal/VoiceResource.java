@@ -206,7 +206,7 @@ public class VoiceResource implements RESTResource {
         if (hlis.isEmpty()) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
         }
-        List<LLMTool> llmTools = llmToolRegistry.getLLMToolsByIds(llmToolIds);
+        List<LLMTool> llmTools = llmToolRegistry.getByIds(llmToolIds);
         Conversation conversation = conversationManager.getConversation(conversationId);
         InterpreterContext interpreterContext = new InterpreterContext(conversation, llmTools, locationItem);
         String answer = "";

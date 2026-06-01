@@ -520,7 +520,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     }
 
     private void listLLMTools(Console console) {
-        Collection<LLMTool> tools = llmToolRegistry.getLLMTools();
+        Collection<LLMTool> tools = llmToolRegistry.getAll();
         if (!tools.isEmpty()) {
             Locale locale = localeProvider.getLocale();
             tools.stream().sorted(comparing(s -> s.getLabel(locale))).forEach(tool -> {
@@ -658,7 +658,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 .withLocationItem(parameters.remove("location-item")) //
                 .withDialogGroup(parameters.remove("dialog-group")) //
                 .withConversationId(parameters.remove("conversation")) //
-                .withLLMTools(llmToolRegistry.getLLMToolsByIds(parameters.remove("llm-tools"))) //
+                .withLLMTools(llmToolRegistry.getByIds(parameters.remove("llm-tools"))) //
                 .withKeyword(parameters.remove("keyword"));
         if (!parameters.isEmpty()) {
             throw new IllegalStateException(

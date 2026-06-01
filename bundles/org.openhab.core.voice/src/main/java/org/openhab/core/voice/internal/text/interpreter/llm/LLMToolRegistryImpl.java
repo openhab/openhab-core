@@ -14,18 +14,19 @@ package org.openhab.core.voice.internal.text.interpreter.llm;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
-import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistryListener;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -45,21 +46,21 @@ public class LLMToolRegistryImpl implements LLMToolRegistry {
     private final Logger logger = LoggerFactory.getLogger(LLMToolRegistryImpl.class);
 
     private final Map<String, LLMTool> llmTools = new ConcurrentHashMap<>();
-    private final Set<LLMToolRegistryListener> listeners = new CopyOnWriteArraySet<>();
+    private final Set<RegistryChangeListener<LLMTool>> listeners = new CopyOnWriteArraySet<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addLLMTool(LLMTool llmTool) {
-        this.llmTools.put(llmTool.getId(), llmTool);
-        listeners.forEach(l -> l.onLLMToolAdded(llmTool));
+        this.llmTools.put(llmTool.getUID(), llmTool);
+        listeners.forEach(l -> l.added(llmTool));
     }
 
     protected void removeLLMTool(LLMTool llmTool) {
-        this.llmTools.remove(llmTool.getId());
-        listeners.forEach(l -> l.onLLMToolRemoved(llmTool));
+        this.llmTools.remove(llmTool.getUID());
+        listeners.forEach(l -> l.removed(llmTool));
     }
 
     @Override
-    public List<LLMTool> getLLMToolsByIds(List<String> ids) {
+    public List<LLMTool> getByIds(List<String> ids) {
         List<LLMTool> tools = new ArrayList<>();
         for (String id : ids) {
             LLMTool tool = llmTools.get(id);
@@ -73,22 +74,42 @@ public class LLMToolRegistryImpl implements LLMToolRegistry {
     }
 
     @Override
-    public Collection<LLMTool> getLLMTools() {
-        return Collections.unmodifiableCollection(llmTools.values());
+    public Collection<LLMTool> getAll() {
+        return new HashSet<>(llmTools.values());
     }
 
     @Override
-    public @Nullable LLMTool getLLMTool(String id) {
+    public Stream<LLMTool> stream() {
+        return getAll().stream();
+    }
+
+    @Override
+    public @Nullable LLMTool get(String id) {
         return llmTools.get(id);
     }
 
     @Override
-    public void addLLMToolRegistryListener(LLMToolRegistryListener listener) {
+    public void addRegistryChangeListener(RegistryChangeListener<LLMTool> listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeLLMToolRegistryListener(LLMToolRegistryListener listener) {
+    public void removeRegistryChangeListener(RegistryChangeListener<LLMTool> listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public LLMTool add(LLMTool element) {
+        throw new UnsupportedOperationException("LLMToolRegistry does not support adding elements manually.");
+    }
+
+    @Override
+    public @Nullable LLMTool update(LLMTool element) {
+        throw new UnsupportedOperationException("LLMToolRegistry does not support updating elements manually.");
+    }
+
+    @Override
+    public @Nullable LLMTool remove(String key) {
+        throw new UnsupportedOperationException("LLMToolRegistry does not support removing elements manually.");
     }
 }
