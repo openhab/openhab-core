@@ -81,7 +81,9 @@ public class ConversationManagerImpl implements ConversationManager {
                 eventPublisher.post(ConversationEventFactory.createConversationAddedEvent(id, null));
             }
             conversation.setMaxMessages(historyLimit);
-            activeConversations.put(conversation.getId(), conversation);
+            if (!id.isBlank()) {
+                activeConversations.put(conversation.getId(), conversation);
+            }
             return conversation;
         }
     }
