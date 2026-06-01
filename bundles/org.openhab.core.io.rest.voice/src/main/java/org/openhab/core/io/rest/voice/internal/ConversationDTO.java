@@ -14,9 +14,10 @@ package org.openhab.core.io.rest.voice.internal;
 
 import java.util.List;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.voice.text.conversation.Conversation;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A DTO for serialising {@link Conversation}s on the REST API.
@@ -33,7 +34,6 @@ public class ConversationDTO {
         this.id = id;
         this.messages = messages;
     }
-
 
     public static class MessageDTO {
         public String uid;

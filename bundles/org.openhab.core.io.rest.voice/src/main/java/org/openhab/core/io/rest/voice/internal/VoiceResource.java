@@ -42,19 +42,16 @@ import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.library.types.PercentType;
-import org.openhab.core.voice.text.InterpreterContext;
 import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationArguments;
+import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationManager;
-import org.openhab.core.voice.text.conversation.ConversationRole;
-import org.openhab.core.voice.text.HumanLanguageInterpreter;
-import org.openhab.core.voice.text.InterpretationException;
-import org.openhab.core.voice.text.interpreter.llm.LLMTool;
-import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -63,8 +60,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -96,25 +91,21 @@ public class VoiceResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_VOICE = "voice";
 
-    private final Logger logger = LoggerFactory.getLogger(VoiceResource.class);
     private final LocaleService localeService;
     private final AudioManager audioManager;
     private final VoiceManager voiceManager;
     private final ConversationManager conversationManager;
-    private final LLMToolRegistry llmToolRegistry;
 
     @Activate
     public VoiceResource( //
             final @Reference LocaleService localeService, //
             final @Reference AudioManager audioManager, //
             final @Reference VoiceManager voiceManager, //
-            final @Reference ConversationManager conversationManager, //
-            final @Reference LLMToolRegistry llmToolRegistry) {
+            final @Reference ConversationManager conversationManager) {
         this.localeService = localeService;
         this.audioManager = audioManager;
         this.voiceManager = voiceManager;
         this.conversationManager = conversationManager;
-        this.llmToolRegistry = llmToolRegistry;
     }
 
     @GET
@@ -196,41 +187,20 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
     public Response interpret(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @QueryParam("conversation") @Parameter(description = "Conversation id") String conversationId,
-            @QueryParam("llmTools") @Parameter(description = "Comma separated list of llm-tool ids") List<String> llmToolIds,
+            @QueryParam("conversation") @Parameter(description = "Conversation id") @Nullable String conversationId,
+            @QueryParam("llmTools") @Parameter(description = "Comma separated list of llm-tool ids") @Nullable List<String> llmToolIds,
             @QueryParam("locationItem") @Parameter(description = "Location item id to contextualize the command") @Nullable String locationItem,
             @Parameter(description = "text to interpret", required = true) String text,
             @PathParam("ids") @Parameter(description = "comma separated list of interpreter ids") List<String> ids) {
         final Locale locale = localeService.getLocale(language);
-        List<HumanLanguageInterpreter> hlis = voiceManager.getHLIsByIds(ids);
-        if (hlis.isEmpty()) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
-        }
-        List<LLMTool> llmTools = llmToolRegistry.getByIds(llmToolIds);
-        Conversation conversation = conversationManager.getConversation(conversationId);
-        InterpreterContext interpreterContext = new InterpreterContext(conversation, llmTools, locationItem);
-        String answer = "";
-        String error = null;
-        for (HumanLanguageInterpreter interpreter : hlis) {
-            try {
-                interpreter.interpret(locale, interpreterContext);
-                Conversation.Message message = interpreterContext.conversation().getLastMessage();
-                if (message != null && message.getRole() == ConversationRole.OPENHAB) {
-                    answer = message.getContent();
-                }
-                error = null;
-                logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
-                conversationManager.storeConversation(conversation);
-                break;
-            } catch (InterpretationException e) {
-                logger.debug("Interpretation exception: {}", e.getMessage());
-                error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
-            }
-        }
-        if (error != null) {
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, error);
-        } else {
+        InterpretationArguments args = new InterpretationArguments(String.join(",", ids),
+                Objects.requireNonNullElse(conversationId, ""), llmToolIds == null ? "" : String.join(",", llmToolIds),
+                locationItem, locale);
+        try {
+            String answer = voiceManager.interpret(text, args);
             return Response.ok(answer, MediaType.TEXT_PLAIN).build();
+        } catch (InterpretationException e) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -244,6 +214,9 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
     public Response interpret(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("conversation") @Parameter(description = "Conversation id") @Nullable String conversationId,
+            @QueryParam("llmTools") @Parameter(description = "Comma separated list of llm-tool ids") @Nullable List<String> llmToolIds,
+            @QueryParam("locationItem") @Parameter(description = "Location item id to contextualize the command") @Nullable String locationItem,
             @Parameter(description = "text to interpret", required = true) String text) {
         final Locale locale = localeService.getLocale(language);
         HumanLanguageInterpreter hli = voiceManager.getHLI();
@@ -251,8 +224,10 @@ public class VoiceResource implements RESTResource {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
         }
 
+        InterpretationArguments args = new InterpretationArguments("", Objects.requireNonNullElse(conversationId, ""),
+                llmToolIds == null ? "" : String.join(",", llmToolIds), locationItem, locale);
         try {
-            String answer = hli.interpret(locale, text);
+            String answer = voiceManager.interpret(text, args);
             return Response.ok(answer, MediaType.TEXT_PLAIN).build();
         } catch (InterpretationException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
