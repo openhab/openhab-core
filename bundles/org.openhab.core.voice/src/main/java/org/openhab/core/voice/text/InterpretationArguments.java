@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * This service provides functionality around voice services and is the central service to be used directly by others.
+ * Arguments for {@link org.openhab.core.voice.VoiceManager} interpretation.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */

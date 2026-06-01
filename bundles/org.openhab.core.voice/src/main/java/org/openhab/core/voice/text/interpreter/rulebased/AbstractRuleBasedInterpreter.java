@@ -190,23 +190,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return interpret(locale, text, (String) null);
     }
 
-    @Override
-    public String interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
-        Conversation.Message message = interpreterContext.conversation().getLastMessage();
-        if (message == null || message.getRole() != ConversationRole.USER) {
-            throw new InterpretationException("Last conversation message is not an user message");
-        }
-        String response = interpret(locale, message.getContent(), interpreterContext.locationItem());
-        try {
-            interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
-        } catch (ConversationException e) {
-            String errMsg = e.getMessage();
-            throw new InterpretationException(
-                    errMsg != null ? errMsg : "Unknown exception adding response to conversation");
-        }
-        return response;
-    }
-
     private String interpret(Locale locale, String text, @Nullable String locationItem) throws InterpretationException {
         ResourceBundle language = ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale);
         Rule[] rules = getRules(locale);
