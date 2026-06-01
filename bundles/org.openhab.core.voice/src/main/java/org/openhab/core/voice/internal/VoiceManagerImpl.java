@@ -420,7 +420,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 try {
                     String errMsg = exception.getMessage();
                     conversation.addMessage(ConversationRole.OPENHAB,
-                            errMsg != null ? errMsg : "Unknow interpreter error");
+                            errMsg != null ? errMsg : "Unknown interpreter error");
                 } catch (ConversationException e) {
                     String errMsg = e.getMessage();
                     throw new InterpretationException(
