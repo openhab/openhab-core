@@ -44,6 +44,7 @@ import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -194,6 +195,51 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         String result = voiceManager.interpret("something", new InterpretationArguments(
                 String.join(",", List.of(hliStub.getId(), anotherHLIStub.getId())), "", "", "", null));
         assertThat(result, is("Interpreted text"));
+    }
+
+    @Test
+    public void interpretWithConversation() throws InterpretationException {
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(hliStub);
+        String convId = "conv-1";
+
+        String result = voiceManager.interpret("hello",
+                new InterpretationArguments(hliStub.getId(), convId, "", "", null));
+        assertThat(result, is("Interpreted text"));
+
+        // Verify conversation was updated
+        var conversationManager = getService(org.openhab.core.voice.text.conversation.ConversationManager.class);
+        assertNotNull(conversationManager, "ConversationManager service should be available");
+        var conversation = conversationManager.getConversation(convId);
+        assertThat(conversation.getMessages().size(), is(2));
+        assertThat(conversation.getMessages().get(0).getRole(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(0).getContent(), is("hello"));
+        assertThat(conversation.getMessages().get(1).getRole(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).getContent(), is("Interpreted text"));
+    }
+
+    @Test
+    public void testMultiTurnConversation() throws InterpretationException {
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(hliStub);
+        String convId = "multi-turn";
+
+        voiceManager.interpret("turn on light", new InterpretationArguments(hliStub.getId(), convId, "", "", null));
+        voiceManager.interpret("and close shutters",
+                new InterpretationArguments(hliStub.getId(), convId, "", "", null));
+
+        var conversationManager = getService(org.openhab.core.voice.text.conversation.ConversationManager.class);
+        assertNotNull(conversationManager, "ConversationManager service should be available");
+        var conversation = conversationManager.getConversation(convId);
+        assertThat(conversation.getMessages().size(), is(4));
+        assertThat(conversation.getMessages().get(0).getRole(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(0).getContent(), is("turn on light"));
+        assertThat(conversation.getMessages().get(1).getRole(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).getContent(), is("Interpreted text"));
+        assertThat(conversation.getMessages().get(2).getRole(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(2).getContent(), is("and close shutters"));
+        assertThat(conversation.getMessages().get(1).getRole(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).getContent(), is("Interpreted text"));
     }
 
     @Test

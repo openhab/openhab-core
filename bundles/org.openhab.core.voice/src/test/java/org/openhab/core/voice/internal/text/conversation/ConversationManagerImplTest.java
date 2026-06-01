@@ -128,7 +128,6 @@ public class ConversationManagerImplTest {
         verify(eventPublisher).post(any(ConversationRemovedEvent.class));
     }
 
-
     @Test
     public void getConversationsReturnsAllFromStorage() {
         when(storage.getKeys()).thenReturn(Set.of("conv1", "conv2"));

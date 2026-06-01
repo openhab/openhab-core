@@ -49,10 +49,6 @@ import org.openhab.core.types.TypeParser;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpretationResult;
-import org.openhab.core.voice.text.InterpreterContext;
-import org.openhab.core.voice.text.conversation.Conversation;
-import org.openhab.core.voice.text.conversation.ConversationException;
-import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

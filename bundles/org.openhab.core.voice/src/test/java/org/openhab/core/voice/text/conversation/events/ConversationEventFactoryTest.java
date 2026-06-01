@@ -30,8 +30,8 @@ public class ConversationEventFactoryTest {
     @Test
     public void createConversationAddedEvent() {
         String id = "conv-1";
-        ConversationAddedEvent event = (ConversationAddedEvent) ConversationEventFactory.createConversationAddedEvent(id,
-                null);
+        ConversationAddedEvent event = (ConversationAddedEvent) ConversationEventFactory
+                .createConversationAddedEvent(id, null);
 
         assertEquals(ConversationAddedEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/added", event.getTopic());
@@ -54,7 +54,8 @@ public class ConversationEventFactoryTest {
         String convId = "conv-1";
         String msgId = "msg-1";
         String text = "Hello";
-        ConversationMessageEvent event = ConversationEventFactory.createConversationMessageEvent(convId, msgId, ConversationRole.USER, text, null);
+        ConversationMessageEvent event = ConversationEventFactory.createConversationMessageEvent(convId, msgId,
+                ConversationRole.USER, text, null);
 
         assertEquals(ConversationMessageEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/message", event.getTopic());

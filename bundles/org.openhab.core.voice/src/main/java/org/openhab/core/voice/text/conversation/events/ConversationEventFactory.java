@@ -86,7 +86,8 @@ public class ConversationEventFactory extends AbstractEventFactory {
                 conversationId);
     }
 
-    public static ConversationRemovedEvent createConversationRemovedEvent(String conversationId, @Nullable String source) {
+    public static ConversationRemovedEvent createConversationRemovedEvent(String conversationId,
+            @Nullable String source) {
         String payload = serializePayload(new ConversationEvent.ConversationDTO().withUID(conversationId));
         return new ConversationRemovedEvent(buildTopic(CONVERSATION_REMOVED_TOPIC, conversationId), payload, source,
                 conversationId);
