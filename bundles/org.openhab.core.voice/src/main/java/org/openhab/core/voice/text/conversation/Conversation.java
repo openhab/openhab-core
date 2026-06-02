@@ -128,7 +128,7 @@ public class Conversation {
      * <p>
      * The following conditions are enforced:
      * <ul>
-     * <li>If <code>prevMessageUID< is provided: The last message has the expected UID, so the conversation hasn't
+     * <li>If <code>prevMessageUID</code> is provided: The last message has the expected UID, so the conversation hasn't
      * changed unexpectedly./code></li>
      * <li>A tool return message must come after a tool call message.</li>
      * <li>The first message is expected to be a user message.</li>
