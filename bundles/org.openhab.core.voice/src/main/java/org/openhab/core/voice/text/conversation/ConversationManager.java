@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The {@link ConversationManager} is responsible for managing the lifecycle and persistence of {@link Conversation}s.
+ * It automatically persists a persistable {@link Conversation} whenever a message is added.
  *
  * @author Florian Hotze - Initial contribution
  */
@@ -28,8 +29,8 @@ public interface ConversationManager {
      * Gets a conversation by its identifier.
      *
      * <p>
-     * If id is blank, return a conversation with blank id that can not be stored.
-     * If no conversation with that id exists, create a new conversation.
+     * If <code>id</code> is blank, return a conversation with a blank ID that can not be stored.
+     * If no conversation with that ID exists, create a new conversation.
      *
      * @param id the conversation identifier
      * @return the conversation
@@ -37,18 +38,7 @@ public interface ConversationManager {
     Conversation getConversation(String id);
 
     /**
-     * Persists the conversation state to storage.
-     *
-     * <p>
-     * If the conversation is empty (no messages), it should be removed from storage.
-     * If the id is blank, it should not be persisted to storage.
-     *
-     * @param conversation the conversation to save
-     */
-    void storeConversation(Conversation conversation);
-
-    /**
-     * Explicitly removes a conversation from memory and storage.
+     * Explicitly removes a conversation storage.
      *
      * @param id the conversation identifier
      */

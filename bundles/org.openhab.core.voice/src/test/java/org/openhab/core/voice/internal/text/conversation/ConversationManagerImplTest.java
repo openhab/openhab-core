@@ -30,7 +30,7 @@ import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
-import org.openhab.core.voice.text.conversation.events.ConversationAddedEvent;
+import org.openhab.core.voice.text.conversation.events.ConversationCreatedEvent;
 import org.openhab.core.voice.text.conversation.events.ConversationMessageEvent;
 import org.openhab.core.voice.text.conversation.events.ConversationRemovedEvent;
 
@@ -79,13 +79,13 @@ public class ConversationManagerImplTest {
 
         conversationManager.getConversation(id);
 
-        verify(eventPublisher).post(any(ConversationAddedEvent.class));
+        verify(eventPublisher).post(any(ConversationCreatedEvent.class));
     }
 
     @Test
     public void getConversationLoadsConversationFromStorage() {
         String id = "stored-conv";
-        MessageDTO messageDTO = new MessageDTO("msg-1", ConversationRole.USER, "Hello");
+        MessageDTO messageDTO = new MessageDTO(1, ConversationRole.USER, "Hello");
         ArrayList<MessageDTO> messages = new ArrayList<>(List.of(messageDTO));
         ConversationDTO conversationDTO = new ConversationDTO(messages);
         when(storage.get(id)).thenReturn(conversationDTO);
@@ -95,21 +95,10 @@ public class ConversationManagerImplTest {
         assertNotNull(conversation);
         assertEquals(id, conversation.getId());
         assertEquals(1, conversation.getMessages().size());
-        assertEquals("Hello", conversation.getMessages().getFirst().getContent());
+        assertEquals("Hello", conversation.getMessages().getFirst().content());
 
         // Verify it was put into active conversations map by checking that subsequent call returns the same instance
         assertSame(conversation, conversationManager.getConversation(id));
-    }
-
-    @Test
-    public void storeConversationPersistsToStorage() throws ConversationException {
-        String id = "to-store";
-        Conversation conversation = new Conversation(id);
-        conversation.addMessage(ConversationRole.USER, "Store me");
-
-        conversationManager.storeConversation(conversation);
-
-        verify(storage).put(eq(id), any(ConversationDTO.class));
     }
 
     @Test
@@ -150,8 +139,8 @@ public class ConversationManagerImplTest {
         conversation.addMessage(ConversationRole.USER, "3");
 
         assertEquals(2, conversation.getMessages().size());
-        assertEquals("2", conversation.getMessages().get(0).getContent());
-        assertEquals("3", conversation.getMessages().get(1).getContent());
+        assertEquals("2", conversation.getMessages().get(0).content());
+        assertEquals("3", conversation.getMessages().get(1).content());
     }
 
     @Test
@@ -163,5 +152,16 @@ public class ConversationManagerImplTest {
         conversation.addMessage(ConversationRole.USER, "Hello");
 
         verify(eventPublisher).post(any(ConversationMessageEvent.class));
+    }
+
+    @Test
+    public void addMessageToAConversationPersistsToStorage() throws ConversationException {
+        String id = "event-test";
+        Conversation conversation = conversationManager.getConversation(id);
+        clearInvocations(eventPublisher); // clear events from creating conversation
+
+        conversation.addMessage(ConversationRole.USER, "Hello");
+
+        verify(storage).put(eq(id), any(ConversationDTO.class));
     }
 }

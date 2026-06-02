@@ -37,7 +37,7 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 @Component(service = LLMTool.class, immediate = true)
 public class DateTimeLLMTool implements LLMTool {
-    private static final String ID = "get-date-time";
+    public static final String ID = "get-date-time";
 
     private final TimeZoneProvider timeZoneProvider;
 

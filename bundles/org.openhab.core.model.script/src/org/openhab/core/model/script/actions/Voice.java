@@ -170,7 +170,7 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by the default human language interpreter", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text) {
-        return interpret(text, null, null, null, null);
+        return interpret(text, null, null, null);
     }
 
     /**
@@ -183,16 +183,31 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by given human language interpreter(s)", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
+            @ParamDoc(name = "interpreters") @Nullable String interpreters) {
+        return interpret(text, interpreters, null, null);
+    }
+
+    /**
+     * Interprets the given text with a given Human Language Interpreter.
+     *
+     * In case of interpretation error, the error message is played using the default audio sink.
+     *
+     * @param text The text to interpret
+     * @param interpreters Comma separated list of human language text interpreters to use
+     * @param conversationId The id of the conversation to use
+     * @param llmTools Comma separated list of LLM tools to use
+     */
+    @ActionDoc(text = "interprets a given text by given human language interpreter(s)", returns = "human language response")
+    public static String interpret(@ParamDoc(name = "text") Object text,
             @ParamDoc(name = "interpreters") @Nullable String interpreters,
-            @ParamDoc(name = "conversation") @Nullable String conversation,
-            @ParamDoc(name = "llm-tools") @Nullable String llmTools,
-            @ParamDoc(name = "location") @Nullable String location) {
+            @ParamDoc(name = "conversationId") @Nullable String conversationId,
+            @ParamDoc(name = "llm-tools") @Nullable String llmTools) {
         String response;
         try {
             response = VoiceActionService.voiceManager.interpret(text.toString(),
                     new InterpretationArguments(Objects.requireNonNullElse(interpreters, ""),
-                            Objects.requireNonNullElse(conversation, ""), Objects.requireNonNullElse(llmTools, ""),
-                            Objects.requireNonNullElse(location, ""), null));
+                            Objects.requireNonNullElse(conversationId, ""), Objects.requireNonNullElse(llmTools, ""),
+                            null, null));
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             say(message);
@@ -218,7 +233,7 @@ public class Voice {
         String response;
         try {
             response = VoiceActionService.voiceManager.interpret(text.toString(),
-                    new InterpretationArguments(interpreters != null ? interpreters : "", "", "", "", null));
+                    new InterpretationArguments(interpreters != null ? interpreters : "", "", "", null, null));
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             if (sink != null) {

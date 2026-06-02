@@ -12,8 +12,6 @@
  */
 package org.openhab.core.voice.internal.text.conversation;
 
-import java.util.Objects;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationRole;
@@ -26,32 +24,12 @@ import org.openhab.core.voice.text.conversation.ConversationRole;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public class MessageDTO {
-    public String uid;
-    public ConversationRole r;
-    public String c;
-
-    public MessageDTO(String uid, ConversationRole r, String c) {
-        this.uid = uid;
-        this.r = r;
-        this.c = c;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(uid, r, c);
-    }
-
-    @Override
-    public String toString() {
-        return "MessageRecord[" + "uid=" + uid + ", " + "r=" + r + ", " + "c=" + c + ']';
-    }
-
+public record MessageDTO(Integer id, ConversationRole role, String content) {
     public Conversation.Message toMessage() {
-        return new Conversation.Message(uid, r, c);
+        return new Conversation.Message(id, role, content);
     }
 
     public static MessageDTO fromMessage(Conversation.Message messageRecord) {
-        return new MessageDTO(messageRecord.getUID(), messageRecord.getRole(), messageRecord.getContent());
+        return new MessageDTO(messageRecord.id(), messageRecord.role(), messageRecord.content());
     }
 }

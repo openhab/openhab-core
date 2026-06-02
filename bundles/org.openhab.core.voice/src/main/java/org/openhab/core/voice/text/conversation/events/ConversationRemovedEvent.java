@@ -28,8 +28,8 @@ public class ConversationRemovedEvent extends ConversationEvent {
      */
     public static final String TYPE = ConversationRemovedEvent.class.getSimpleName();
 
-    public ConversationRemovedEvent(String topic, String payload, @Nullable String source, String uid) {
-        super(topic, payload, source, uid);
+    public ConversationRemovedEvent(String topic, String payload, @Nullable String source, String conversationUID) {
+        super(topic, payload, source, conversationUID);
     }
 
     @Override

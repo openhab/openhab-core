@@ -62,8 +62,7 @@ public interface LLMTool extends Identifiable<String> {
     String getDescription(@Nullable Locale locale);
 
     /**
-     * Returns a localized {@link LLMToolParam} list with
-     * human-readable descriptions of the tool parameters.
+     * Returns a localized {@link LLMToolParam} list with human-readable descriptions of the tool parameters.
      *
      * @param locale the locale to provide the label for
      * @return localized descriptions of the tool params
@@ -73,8 +72,9 @@ public interface LLMTool extends Identifiable<String> {
     /**
      * Invoke the tool implementation.
      *
-     * @param params Map of param names and values.
-     * @return the tool result.
+     * @param params a map of parameter names and values
+     * @return the tool result
+     * @throws LLMToolException when invocation of the tool implementation failed
      */
     String call(Map<String, Object> params, @Nullable Locale locale) throws LLMToolException;
 }

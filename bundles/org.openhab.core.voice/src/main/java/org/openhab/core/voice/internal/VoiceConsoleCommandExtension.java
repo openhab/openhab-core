@@ -556,9 +556,9 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
         for (var message : conversation.getMessages()) {
             if (printUID) {
-                console.printf("%s - %s|> %s\n", message.getUID(), message.getRole(), message.getContent());
+                console.printf("%s - %s|> %s\n", message.id(), message.role(), message.content());
             } else {
-                console.printf("%s|> %s\n", message.getRole(), message.getContent());
+                console.printf("%s|> %s\n", message.role(), message.content());
             }
         }
     }
@@ -577,7 +577,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             return;
         }
         @Nullable
-        String messageUID = parameters.remove("message");
+        String rawMessageID = parameters.remove("message");
         if (!parameters.isEmpty()) {
             throw new IllegalStateException(
                     "Argument" + parameters.keySet().stream().findAny().orElse("") + "is not supported");
@@ -587,16 +587,21 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             console.println("Empty conversation");
             return;
         }
-        if (messageUID != null) {
-            if (!conversation.removeSinceMessage(messageUID)) {
+        if (rawMessageID != null) {
+            Integer messageID;
+            try {
+                messageID = Integer.parseInt(rawMessageID);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid message ID, must be a number: " + rawMessageID);
+            }
+            if (!conversation.removeSinceMessage(messageID)) {
                 console.println("No messages were removed");
                 return;
             }
-            console.println("Messages since " + messageUID + " were removed");
+            console.println("Messages since " + rawMessageID + " were removed");
         } else {
             conversation.removeMessages();
         }
-        conversationManager.storeConversation(conversation);
     }
 
     private @Nullable Voice getVoice(@Nullable String id) {

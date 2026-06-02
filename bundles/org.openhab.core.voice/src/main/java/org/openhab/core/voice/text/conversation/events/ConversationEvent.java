@@ -45,10 +45,10 @@ public abstract class ConversationEvent extends AbstractEvent {
     }
 
     public static class ConversationDTO {
-        public String uid = "";
+        public String conversationUID = "";
 
-        public ConversationDTO withUID(String uid) {
-            this.uid = uid;
+        public ConversationDTO withConversationUID(String uid) {
+            this.conversationUID = uid;
             return this;
         }
     }

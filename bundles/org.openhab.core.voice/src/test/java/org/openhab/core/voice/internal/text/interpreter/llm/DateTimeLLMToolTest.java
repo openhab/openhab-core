@@ -46,7 +46,7 @@ public class DateTimeLLMToolTest {
 
     @Test
     public void testGetUID() {
-        assertNotNull(tool.getUID());
+        assertEquals(DateTimeLLMTool.ID, tool.getUID());
     }
 
     @Test

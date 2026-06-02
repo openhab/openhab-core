@@ -384,16 +384,9 @@ public class DialogProcessor implements KSListener, STTListener {
                 String error = null;
                 for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
                     try {
-                        interpreter.interpret(dialogContext.locale(), interpreterContext);
-                        Conversation.Message message = interpreterContext.conversation().getLastMessage();
-                        if (message != null && message.getRole() == ConversationRole.OPENHAB) {
-                            answer = message.getContent();
-                        }
+                        answer = interpreter.interpret(dialogContext.locale(), interpreterContext);
                         error = null;
                         logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
-                        if (conversationId != null) {
-                            conversationManager.storeConversation(conversation);
-                        }
                         break;
                     } catch (InterpretationException e) {
                         logger.debug("Interpretation exception: {}", e.getMessage());

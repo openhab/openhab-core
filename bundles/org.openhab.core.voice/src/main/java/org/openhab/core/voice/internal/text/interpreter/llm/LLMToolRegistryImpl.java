@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 @Component(service = LLMToolRegistry.class, immediate = true)
 @NonNullByDefault
 public class LLMToolRegistryImpl implements LLMToolRegistry {
-
     private final Logger logger = LoggerFactory.getLogger(LLMToolRegistryImpl.class);
 
     private final Map<String, LLMTool> llmTools = new ConcurrentHashMap<>();

@@ -404,14 +404,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             InterpretationException exception = null;
             for (var interpreter : interpreters) {
                 try {
-                    String answer = "";
-                    interpreter.interpret(locale, context);
-                    Conversation.Message message = context.conversation().getLastMessage();
-                    if (message != null && message.getRole() == ConversationRole.OPENHAB) {
-                        answer = message.getContent();
-                    }
+                    String answer = interpreter.interpret(locale, context);
                     logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
-                    conversationManager.storeConversation(context.conversation());
                     return answer;
                 } catch (InterpretationException e) {
                     logger.debug("Interpretation exception from interpreter '{}': {}", interpreter.getId(),

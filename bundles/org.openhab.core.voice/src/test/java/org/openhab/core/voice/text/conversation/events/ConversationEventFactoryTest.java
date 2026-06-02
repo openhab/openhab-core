@@ -28,12 +28,11 @@ import org.openhab.core.voice.text.conversation.ConversationRole;
 public class ConversationEventFactoryTest {
 
     @Test
-    public void createConversationAddedEvent() {
+    public void createConversationCreatedEvent() {
         String id = "conv-1";
-        ConversationAddedEvent event = (ConversationAddedEvent) ConversationEventFactory
-                .createConversationAddedEvent(id, null);
+        ConversationCreatedEvent event = ConversationEventFactory.createConversationCreatedEvent(id, null);
 
-        assertEquals(ConversationAddedEvent.TYPE, event.getType());
+        assertEquals(ConversationCreatedEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/added", event.getTopic());
         assertTrue(event.getPayload().contains(id));
     }
@@ -41,8 +40,7 @@ public class ConversationEventFactoryTest {
     @Test
     public void createConversationRemovedEvent() {
         String id = "conv-1";
-        ConversationRemovedEvent event = (ConversationRemovedEvent) ConversationEventFactory
-                .createConversationRemovedEvent(id, null);
+        ConversationRemovedEvent event = ConversationEventFactory.createConversationRemovedEvent(id, null);
 
         assertEquals(ConversationRemovedEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/removed", event.getTopic());
@@ -52,14 +50,14 @@ public class ConversationEventFactoryTest {
     @Test
     public void createConversationMessageEvent() {
         String convId = "conv-1";
-        String msgId = "msg-1";
+        int msgId = 1;
         String text = "Hello";
         ConversationMessageEvent event = ConversationEventFactory.createConversationMessageEvent(convId, msgId,
                 ConversationRole.USER, text, null);
 
         assertEquals(ConversationMessageEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/message", event.getTopic());
-        assertTrue(event.getPayload().contains(msgId));
+        assertTrue(event.getPayload().contains(String.valueOf(msgId)));
         assertTrue(event.getPayload().contains(text));
         assertTrue(event.getPayload().contains(ConversationRole.USER.name()));
     }

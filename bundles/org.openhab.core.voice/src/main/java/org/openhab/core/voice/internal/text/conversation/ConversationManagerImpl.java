@@ -56,7 +56,15 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
 
     @Override
     public Conversation getConversation(String id) {
-        Conversation conversation = activeConversations.get(id);
+        Conversation conversation;
+        if (id.isBlank()) {
+            conversation = new Conversation("");
+            conversation.addListener(this);
+            conversation.setMaxMessages(historyLimit);
+            return conversation;
+        }
+
+        conversation = activeConversations.get(id);
         if (conversation != null) {
             conversation.setMaxMessages(historyLimit);
             // return same reference when possible
@@ -75,23 +83,29 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
             if (conversationDTO != null) {
                 logger.debug("Conversation '{}' found", id);
                 conversation = new Conversation(id,
-                        new ArrayList<>(conversationDTO.messageDTOs.stream().map(MessageDTO::toMessage).toList()));
+                        new ArrayList<>(conversationDTO.messages().stream().map(MessageDTO::toMessage).toList()));
             } else {
                 logger.debug("Creating new conversation '{}'", id);
                 conversation = new Conversation(id);
-                eventPublisher.post(ConversationEventFactory.createConversationAddedEvent(id, null));
+                eventPublisher.post(ConversationEventFactory.createConversationCreatedEvent(id, null));
             }
             conversation.addListener(this);
             conversation.setMaxMessages(historyLimit);
-            if (!id.isBlank()) {
-                activeConversations.put(conversation.getId(), conversation);
-            }
+            activeConversations.put(conversation.getId(), conversation);
             return conversation;
         }
     }
 
-    @Override
-    public void storeConversation(Conversation conversation) {
+    /**
+     * Persists the conversation state to storage.
+     *
+     * <p>
+     * If the conversation is empty (no messages), it should be removed from storage.
+     * If the ID is blank, it should not be persisted to storage.
+     *
+     * @param conversation the conversation to save
+     */
+    private void storeConversation(Conversation conversation) {
         String id = conversation.getId();
         if (id.isBlank()) {
             return;
@@ -136,12 +150,15 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
 
     @Override
     public void onMessageAdded(Conversation conversation, Conversation.Message message) {
-        eventPublisher.post(ConversationEventFactory.createConversationMessageEvent(conversation.getId(),
-                message.getUID(), message.getRole(), message.getContent(), null));
+        eventPublisher.post(ConversationEventFactory.createConversationMessageEvent(conversation.getId(), message.id(),
+                message.role(), message.content(), null));
+        storeConversation(conversation);
     }
 
     @Override
     public void onMessagesRemoved(Conversation conversation) {
-        // not needed
+        if (conversation.getMessages().isEmpty()) {
+            removeConversation(conversation.getId());
+        }
     }
 }

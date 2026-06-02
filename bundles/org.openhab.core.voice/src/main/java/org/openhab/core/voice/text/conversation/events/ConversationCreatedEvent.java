@@ -16,20 +16,20 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * The {@link ConversationAddedEvent} defines a {@link org.openhab.core.events.Event} that notifies about a new
+ * The {@link ConversationCreatedEvent} defines a {@link org.openhab.core.events.Event} that notifies about a new
  * conversation.
  *
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public class ConversationAddedEvent extends ConversationEvent {
+public class ConversationCreatedEvent extends ConversationEvent {
     /**
      * The conversation added event type.
      */
-    public static final String TYPE = ConversationAddedEvent.class.getSimpleName();
+    public static final String TYPE = ConversationCreatedEvent.class.getSimpleName();
 
-    public ConversationAddedEvent(String topic, String payload, @Nullable String source, String uid) {
-        super(topic, payload, source, uid);
+    public ConversationCreatedEvent(String topic, String payload, @Nullable String source, String conversationUID) {
+        super(topic, payload, source, conversationUID);
     }
 
     @Override

@@ -36,12 +36,12 @@ public class ConversationDTO {
     }
 
     public static class MessageDTO {
-        public String uid;
+        public int id;
         public String role;
         public String content;
 
-        public MessageDTO(String uid, String role, String content) {
-            this.uid = uid;
+        public MessageDTO(int id, String role, String content) {
+            this.id = id;
             this.role = role;
             this.content = content;
         }

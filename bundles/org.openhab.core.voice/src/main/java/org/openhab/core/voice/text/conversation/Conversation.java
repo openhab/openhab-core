@@ -14,7 +14,6 @@ package org.openhab.core.voice.text.conversation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -27,7 +26,6 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class Conversation {
-
     public static final int DEFAULT_MAX_MESSAGES = 50;
 
     private final List<Message> messages;
@@ -74,7 +72,7 @@ public class Conversation {
     }
 
     /**
-     * Set the maximum number of messages to keep in history
+     * Set the maximum number of messages to keep in history.
      *
      * @param maxMessages the maximum number of messages
      */
@@ -88,7 +86,7 @@ public class Conversation {
     }
 
     /**
-     * Get a copy of the list of messages
+     * Get a copy of the list of messages.
      *
      * @return list of messages
      */
@@ -99,9 +97,9 @@ public class Conversation {
     }
 
     /**
-     * Get last message or null
+     * Get the last message (if any).
      *
-     * @return nullable last message
+     * @return the last message or null
      */
     public @Nullable Message getLastMessage() {
         synchronized (messages) {
@@ -112,29 +110,54 @@ public class Conversation {
         }
     }
 
-    public String addMessage(ConversationRole role, String content) throws ConversationException {
+    /**
+     * Adds a new message to the end of the conversation.
+     *
+     * @param role the role that authored this message
+     * @param content the content of the message
+     * @return the UID of the newly added message
+     * @throws ConversationException see {@link #addMessage(ConversationRole, String, Integer)}
+     */
+    public int addMessage(ConversationRole role, String content) throws ConversationException {
         return addMessage(role, content, null);
     }
 
-    public String addMessage(ConversationRole role, String content, @Nullable String prevMessageUID)
+    /**
+     * Adds a new message to the end of the conversation.
+     *
+     * <p>
+     * The following conditions are enforced:
+     * <ul>
+     * <li>If <code>prevMessageUID< is provided: The last message has the expected UID, so the conversation hasn't
+     * changed unexpectedly./code></li>
+     * <li>A tool return message must come after a tool call message.</li>
+     * <li>The first message is expected to be a user message.</li>
+     * </ul>
+     *
+     * @param role the role that authored this message
+     * @param content the content of the message
+     * @param prevMessageID the ID of the (assumed) previous message
+     * @return the UID of the newly added message
+     * @throws ConversationException when any of the above conditions is violated
+     */
+    public int addMessage(ConversationRole role, String content, @Nullable Integer prevMessageID)
             throws ConversationException {
+        @Nullable
         Message lastMessage = getLastMessage();
         if (lastMessage != null) {
-            if (prevMessageUID != null && !prevMessageUID.equals(lastMessage.getUID())) {
+            if (prevMessageID != null && prevMessageID != lastMessage.id()) {
                 throw new ConversationException("Conversation has changed");
             }
-            switch (role) {
-                case TOOL_RETURN -> {
-                    if (lastMessage.getRole() != ConversationRole.TOOL_CALL) {
-                        throw new ConversationException("Tool result should be after tool call");
-                    }
+            if (role == ConversationRole.TOOL_RETURN) {
+                if (lastMessage.role() != ConversationRole.TOOL_CALL) {
+                    throw new ConversationException("Tool result should be after tool call");
                 }
             }
         } else if (!role.equals(ConversationRole.USER)) {
             throw new ConversationException("First message should be an user message");
         }
-        String uid = UUID.randomUUID().toString();
-        Message message = new Message(uid, role, content);
+        int id = lastMessage != null ? lastMessage.id() + 1 : 0;
+        Message message = new Message(id, role, content);
         synchronized (messages) {
             while (messages.size() >= maxMessages) {
                 messages.removeFirst();
@@ -142,13 +165,19 @@ public class Conversation {
             messages.add(message);
         }
         notifyMessageAdded(message);
-        return uid;
+        return id;
     }
 
-    public boolean removeSinceMessage(String uid) {
+    /**
+     * Removes a specific messages and all subsequent messages from the conversation.
+     * 
+     * @param id the ID of the message and its successors to remove
+     * @return whether an actual removal happened
+     */
+    public boolean removeSinceMessage(int id) {
         boolean removed = false;
         synchronized (messages) {
-            var messageOptional = messages.stream().filter(m -> m.getUID().equals(uid)).findFirst();
+            var messageOptional = messages.stream().filter(m -> m.id() == id).findFirst();
             if (messageOptional.isPresent()) {
                 int index = messages.indexOf(messageOptional.get());
                 messages.subList(index, messages.size()).clear();
@@ -161,6 +190,9 @@ public class Conversation {
         return removed;
     }
 
+    /**
+     * Remove all messages from the conversation.
+     */
     public void removeMessages() {
         boolean removed = false;
         synchronized (messages) {
@@ -178,27 +210,13 @@ public class Conversation {
         return id;
     }
 
-    public static final class Message {
-        private final String uid;
-        private final ConversationRole role;
-        private final String content;
-
-        public Message(String uid, ConversationRole role, String content) {
-            this.uid = uid;
-            this.role = role;
-            this.content = content;
-        }
-
-        public String getContent() {
-            return content;
-        }
-
-        public ConversationRole getRole() {
-            return role;
-        }
-
-        public String getUID() {
-            return uid;
-        }
+    /**
+     * A message.
+     * 
+     * @param id the ID of the message
+     * @param role the role that authored the message
+     * @param content the content of the message
+     */
+    public record Message(int id, ConversationRole role, String content) {
     }
 }

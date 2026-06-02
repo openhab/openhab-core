@@ -212,10 +212,10 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertNotNull(conversationManager, "ConversationManager service should be available");
         var conversation = conversationManager.getConversation(convId);
         assertThat(conversation.getMessages().size(), is(2));
-        assertThat(conversation.getMessages().get(0).getRole(), is(ConversationRole.USER));
-        assertThat(conversation.getMessages().get(0).getContent(), is("hello"));
-        assertThat(conversation.getMessages().get(1).getRole(), is(ConversationRole.OPENHAB));
-        assertThat(conversation.getMessages().get(1).getContent(), is("Interpreted text"));
+        assertThat(conversation.getMessages().get(0).role(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(0).content(), is("hello"));
+        assertThat(conversation.getMessages().get(1).role(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).content(), is("Interpreted text"));
     }
 
     @Test
@@ -232,14 +232,14 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertNotNull(conversationManager, "ConversationManager service should be available");
         var conversation = conversationManager.getConversation(convId);
         assertThat(conversation.getMessages().size(), is(4));
-        assertThat(conversation.getMessages().get(0).getRole(), is(ConversationRole.USER));
-        assertThat(conversation.getMessages().get(0).getContent(), is("turn on light"));
-        assertThat(conversation.getMessages().get(1).getRole(), is(ConversationRole.OPENHAB));
-        assertThat(conversation.getMessages().get(1).getContent(), is("Interpreted text"));
-        assertThat(conversation.getMessages().get(2).getRole(), is(ConversationRole.USER));
-        assertThat(conversation.getMessages().get(2).getContent(), is("and close shutters"));
-        assertThat(conversation.getMessages().get(1).getRole(), is(ConversationRole.OPENHAB));
-        assertThat(conversation.getMessages().get(1).getContent(), is("Interpreted text"));
+        assertThat(conversation.getMessages().get(0).role(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(0).content(), is("turn on light"));
+        assertThat(conversation.getMessages().get(1).role(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).content(), is("Interpreted text"));
+        assertThat(conversation.getMessages().get(2).role(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(2).content(), is("and close shutters"));
+        assertThat(conversation.getMessages().get(1).role(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).content(), is("Interpreted text"));
     }
 
     @Test

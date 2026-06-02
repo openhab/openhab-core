@@ -12,7 +12,7 @@
  */
 package org.openhab.core.voice.internal.text.conversation;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.voice.text.conversation.Conversation;
@@ -25,10 +25,5 @@ import org.openhab.core.voice.text.conversation.Conversation;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public class ConversationDTO {
-    public ArrayList<MessageDTO> messageDTOs;
-
-    public ConversationDTO(ArrayList<MessageDTO> messageDTOs) {
-        this.messageDTOs = messageDTOs;
-    }
+public record ConversationDTO(List<MessageDTO> messages) {
 }

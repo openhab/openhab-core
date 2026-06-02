@@ -39,15 +39,15 @@ public class ConversationEventFactory extends AbstractEventFactory {
      * Constructs a new ConversationEventFactory.
      */
     public ConversationEventFactory() {
-        super(Set.of(ConversationMessageEvent.TYPE, ConversationAddedEvent.TYPE, ConversationRemovedEvent.TYPE));
+        super(Set.of(ConversationMessageEvent.TYPE, ConversationCreatedEvent.TYPE, ConversationRemovedEvent.TYPE));
     }
 
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, @Nullable String source) {
         if (ConversationMessageEvent.TYPE.equals(eventType)) {
             return createConversationMessageEvent(topic, payload, source);
-        } else if (ConversationAddedEvent.TYPE.equals(eventType)) {
-            return createConversationAddedEvent(topic, payload, source);
+        } else if (ConversationCreatedEvent.TYPE.equals(eventType)) {
+            return createConversationCreatedEvent(topic, payload, source);
         } else if (ConversationRemovedEvent.TYPE.equals(eventType)) {
             return createConversationRemovedEvent(topic, payload, source);
         }
@@ -57,38 +57,40 @@ public class ConversationEventFactory extends AbstractEventFactory {
     private Event createConversationMessageEvent(String topic, String payload, @Nullable String source) {
         ConversationMessageEvent.ConversationMessageDTO messageDTO = deserializePayload(payload,
                 ConversationMessageEvent.ConversationMessageDTO.class);
-        return new ConversationMessageEvent(topic, payload, source, messageDTO.uid, messageDTO.role, messageDTO.text);
+        return new ConversationMessageEvent(topic, payload, source, messageDTO.conversationUID, messageDTO.id,
+                messageDTO.role, messageDTO.text);
     }
 
-    private Event createConversationAddedEvent(String topic, String payload, @Nullable String source) {
+    private Event createConversationCreatedEvent(String topic, String payload, @Nullable String source) {
         ConversationEvent.ConversationDTO addedDTO = deserializePayload(payload,
                 ConversationEvent.ConversationDTO.class);
-        return new ConversationAddedEvent(topic, payload, source, addedDTO.uid);
+        return new ConversationCreatedEvent(topic, payload, source, addedDTO.conversationUID);
     }
 
     private Event createConversationRemovedEvent(String topic, String payload, @Nullable String source) {
         ConversationEvent.ConversationDTO removedDTO = deserializePayload(payload,
                 ConversationEvent.ConversationDTO.class);
-        return new ConversationRemovedEvent(topic, payload, source, removedDTO.uid);
+        return new ConversationRemovedEvent(topic, payload, source, removedDTO.conversationUID);
     }
 
-    public static ConversationMessageEvent createConversationMessageEvent(String conversationId, String messageId,
+    public static ConversationMessageEvent createConversationMessageEvent(String conversationId, int messageId,
             ConversationRole role, String text, @Nullable String source) {
-        String payload = serializePayload(new ConversationMessageEvent.ConversationMessageDTO().withUID(messageId)
+        String payload = serializePayload(new ConversationMessageEvent.ConversationMessageDTO().withMessageId(messageId)
                 .withParticipant(role).withText(text));
         return new ConversationMessageEvent(buildTopic(CONVERSATION_MESSAGE_TOPIC, conversationId), payload, source,
-                messageId, role, text);
+                conversationId, messageId, role, text);
     }
 
-    public static ConversationAddedEvent createConversationAddedEvent(String conversationId, @Nullable String source) {
-        String payload = serializePayload(new ConversationEvent.ConversationDTO().withUID(conversationId));
-        return new ConversationAddedEvent(buildTopic(CONVERSATION_ADDED_TOPIC, conversationId), payload, source,
+    public static ConversationCreatedEvent createConversationCreatedEvent(String conversationId,
+            @Nullable String source) {
+        String payload = serializePayload(new ConversationEvent.ConversationDTO().withConversationUID(conversationId));
+        return new ConversationCreatedEvent(buildTopic(CONVERSATION_ADDED_TOPIC, conversationId), payload, source,
                 conversationId);
     }
 
     public static ConversationRemovedEvent createConversationRemovedEvent(String conversationId,
             @Nullable String source) {
-        String payload = serializePayload(new ConversationEvent.ConversationDTO().withUID(conversationId));
+        String payload = serializePayload(new ConversationEvent.ConversationDTO().withConversationUID(conversationId));
         return new ConversationRemovedEvent(buildTopic(CONVERSATION_REMOVED_TOPIC, conversationId), payload, source,
                 conversationId);
     }

@@ -49,6 +49,10 @@ import org.openhab.core.types.TypeParser;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpretationResult;
+import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationException;
+import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,6 +188,22 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     @Override
     public String interpret(Locale locale, String text) throws InterpretationException {
         return interpret(locale, text, (String) null);
+    }
+
+    @Override
+    public String interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
+        Conversation.Message message = interpreterContext.conversation().getLastMessage();
+        if (message == null || message.role() != ConversationRole.USER) {
+            throw new InterpretationException("Last conversation message is not an user message");
+        }
+        String response = interpret(locale, message.content(), interpreterContext.locationItem());
+        try {
+            interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
+        } catch (ConversationException e) {
+            String errMsg = e.getMessage();
+            throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+        }
+        return response;
     }
 
     private String interpret(Locale locale, String text, @Nullable String locationItem) throws InterpretationException {

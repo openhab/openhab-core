@@ -20,47 +20,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * The {@link LLMToolParam} class describe each of the parameters of a {@link LLMTool}.
  *
  * @author Miguel Álvarez Díez - Initial contribution
+ *
+ * @param name unique name of the parameter
+ * @param type type of the parameter
+ * @param description parameter description
+ * @param options if not empty, defines a list of allowed values for the parameter
+ * @param required whether the parameter is required
  */
 @NonNullByDefault
-public final class LLMToolParam {
-    private final String name;
-    private final LLMToolParamType type;
-    private final String description;
-    private final List<String> options;
-    private final boolean required;
-
-    public LLMToolParam(String name, LLMToolParamType type, String description, List<String> options,
-            boolean required) {
-        this.name = name;
-        this.type = type;
-        this.description = description;
-        this.options = options;
-        this.required = required;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    public LLMToolParamType type() {
-        return type;
-    }
-
-    public String description() {
-        return description;
-    }
-
-    public List<String> options() {
-        return options;
-    }
-
-    public boolean required() {
-        return required;
-    }
-
-    @Override
-    public String toString() {
-        return "LLMToolParam[" + "name=" + name + ", " + "type=" + type + ", " + "description=" + description + ", "
-                + "options=" + options + ", " + "required=" + required + ']';
-    }
+public record LLMToolParam(String name, LLMToolParamType type, String description, List<String> options,
+        boolean required) {
 }

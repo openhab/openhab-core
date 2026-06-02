@@ -18,7 +18,7 @@ import org.openhab.core.voice.text.conversation.ConversationRole;
 
 /**
  * The {@link ConversationMessageEvent} defines a {@link org.openhab.core.events.Event} implementation that emits
- * conversation changes.
+ * messages of a conversation.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
@@ -29,12 +29,14 @@ public class ConversationMessageEvent extends ConversationEvent {
      */
     public static final String TYPE = ConversationMessageEvent.class.getSimpleName();
 
+    private final int messageId;
     private final ConversationRole role;
     private final String text;
 
-    public ConversationMessageEvent(String topic, String payload, @Nullable String source, String uid,
-            ConversationRole role, String text) {
-        super(topic, payload, source, uid);
+    public ConversationMessageEvent(String topic, String payload, @Nullable String source, String conversationUID,
+            int messageId, ConversationRole role, String text) {
+        super(topic, payload, source, conversationUID);
+        this.messageId = messageId;
         this.role = role;
         this.text = text;
     }
@@ -42,6 +44,10 @@ public class ConversationMessageEvent extends ConversationEvent {
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    public int getMessageId() {
+        return messageId;
     }
 
     public ConversationRole getRole() {
@@ -53,11 +59,18 @@ public class ConversationMessageEvent extends ConversationEvent {
     }
 
     public static class ConversationMessageDTO extends ConversationEvent.ConversationDTO {
+        public int id = 0;
         public ConversationRole role = ConversationRole.USER;
         public String text = "";
 
-        public ConversationMessageDTO withUID(String uid) {
-            return (ConversationMessageDTO) super.withUID(uid);
+        @Override
+        public ConversationMessageDTO withConversationUID(String uid) {
+            return (ConversationMessageDTO) super.withConversationUID(uid);
+        }
+
+        public ConversationMessageDTO withMessageId(int id) {
+            this.id = id;
+            return this;
         }
 
         public ConversationMessageDTO withParticipant(ConversationRole role) {
