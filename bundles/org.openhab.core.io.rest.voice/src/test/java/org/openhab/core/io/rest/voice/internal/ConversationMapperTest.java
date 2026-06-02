@@ -30,7 +30,7 @@ public class ConversationMapperTest {
     @Test
     public void testMap() throws ConversationException {
         String id = "test-conversation";
-        Conversation conversation = new Conversation(id, null);
+        Conversation conversation = new Conversation(id);
         conversation.addMessage(ConversationRole.USER, "Hello");
         conversation.addMessage(ConversationRole.OPENHAB, "Hi there!");
 

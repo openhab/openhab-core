@@ -15,14 +15,13 @@ package org.openhab.core.voice.text.conversation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.events.EventPublisher;
-import org.openhab.core.voice.text.conversation.events.ConversationEventFactory;
 
 /**
- * The {@link Conversation} class contains a list of messages in between the users and a LanguageInterpreter.
+ * The {@link Conversation} class contains a list of messages in between the user and a LanguageInterpreter.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
@@ -33,19 +32,45 @@ public class Conversation {
 
     private final List<Message> messages;
     private final String id;
-    private final @Nullable EventPublisher eventPublisher;
+    private final List<ConversationListener> listeners = new CopyOnWriteArrayList<>();
     private int maxMessages = DEFAULT_MAX_MESSAGES;
 
-    public Conversation(String id, @Nullable EventPublisher eventPublisher) {
+    public Conversation(String id) {
         this.id = id;
-        this.eventPublisher = eventPublisher;
         this.messages = new ArrayList<>();
     }
 
-    public Conversation(String id, @Nullable EventPublisher eventPublisher, List<Message> messages) {
+    public Conversation(String id, List<Message> messages) {
         this.id = id;
-        this.eventPublisher = eventPublisher;
         this.messages = messages;
+    }
+
+    /**
+     * Adds a {@link ConversationListener}.
+     *
+     * @param listener the listener
+     */
+    public void addListener(ConversationListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+        }
+    }
+
+    /**
+     * Removes a {@link ConversationListener}.
+     *
+     * @param listener the listener
+     */
+    public void removeListener(ConversationListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void notifyMessageAdded(Message message) {
+        listeners.forEach(l -> l.onMessageAdded(this, message));
+    }
+
+    private void notifyMessagesRemoved() {
+        listeners.forEach(l -> l.onMessagesRemoved(this));
     }
 
     /**
@@ -109,34 +134,43 @@ public class Conversation {
             throw new ConversationException("First message should be an user message");
         }
         String uid = UUID.randomUUID().toString();
+        Message message = new Message(uid, role, content);
         synchronized (messages) {
             while (messages.size() >= maxMessages) {
                 messages.removeFirst();
             }
-            messages.add(new Message(uid, role, content));
+            messages.add(message);
         }
-        if (eventPublisher != null) {
-            eventPublisher
-                    .post(ConversationEventFactory.createConversationMessageEvent(getId(), uid, role, content, null));
-        }
+        notifyMessageAdded(message);
         return uid;
     }
 
     public boolean removeSinceMessage(String uid) {
+        boolean removed = false;
         synchronized (messages) {
             var messageOptional = messages.stream().filter(m -> m.getUID().equals(uid)).findFirst();
             if (messageOptional.isPresent()) {
                 int index = messages.indexOf(messageOptional.get());
                 messages.subList(index, messages.size()).clear();
-                return true;
+                removed = true;
             }
         }
-        return false;
+        if (removed) {
+            notifyMessagesRemoved();
+        }
+        return removed;
     }
 
     public void removeMessages() {
+        boolean removed = false;
         synchronized (messages) {
-            messages.clear();
+            if (!messages.isEmpty()) {
+                messages.clear();
+                removed = true;
+            }
+        }
+        if (removed) {
+            notifyMessagesRemoved();
         }
     }
 

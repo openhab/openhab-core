@@ -32,10 +32,10 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 @NonNullByDefault
 public class LLMToolRegistryImplTest {
 
-    private final LLMTool tool1 = mock(LLMTool.class);
-    private final LLMTool tool2 = mock(LLMTool.class);
+    private LLMTool tool1 = mock(LLMTool.class);
+    private LLMTool tool2 = mock(LLMTool.class);
 
-    private LLMToolRegistryImpl registry;
+    private @NonNullByDefault({}) LLMToolRegistryImpl registry;
 
     @BeforeEach
     public void setUp() {

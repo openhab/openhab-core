@@ -31,6 +31,7 @@ import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.text.conversation.events.ConversationAddedEvent;
+import org.openhab.core.voice.text.conversation.events.ConversationMessageEvent;
 import org.openhab.core.voice.text.conversation.events.ConversationRemovedEvent;
 
 /**
@@ -46,7 +47,7 @@ public class ConversationManagerImplTest {
     @SuppressWarnings("unchecked")
     private final Storage<ConversationDTO> storage = mock(Storage.class);
 
-    private ConversationManagerImpl conversationManager;
+    private @NonNullByDefault({}) ConversationManagerImpl conversationManager;
 
     @BeforeEach
     public void setUp() {
@@ -103,7 +104,7 @@ public class ConversationManagerImplTest {
     @Test
     public void storeConversationPersistsToStorage() throws ConversationException {
         String id = "to-store";
-        Conversation conversation = new Conversation(id, eventPublisher);
+        Conversation conversation = new Conversation(id);
         conversation.addMessage(ConversationRole.USER, "Store me");
 
         conversationManager.storeConversation(conversation);
@@ -151,5 +152,16 @@ public class ConversationManagerImplTest {
         assertEquals(2, conversation.getMessages().size());
         assertEquals("2", conversation.getMessages().get(0).getContent());
         assertEquals("3", conversation.getMessages().get(1).getContent());
+    }
+
+    @Test
+    public void addMessageToAConversationEmitsEvent() throws ConversationException {
+        String id = "event-test";
+        Conversation conversation = conversationManager.getConversation(id);
+        clearInvocations(eventPublisher); // clear events from creating conversation
+
+        conversation.addMessage(ConversationRole.USER, "Hello");
+
+        verify(eventPublisher).post(any(ConversationMessageEvent.class));
     }
 }

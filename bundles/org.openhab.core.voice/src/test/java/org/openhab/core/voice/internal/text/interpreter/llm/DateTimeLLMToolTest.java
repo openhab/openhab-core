@@ -35,7 +35,7 @@ import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
 public class DateTimeLLMToolTest {
     private final TimeZoneProvider timeZoneProvider = mock(TimeZoneProvider.class);
 
-    private DateTimeLLMTool tool;
+    private @NonNullByDefault({}) DateTimeLLMTool tool;
 
     @BeforeEach
     public void setUp() {

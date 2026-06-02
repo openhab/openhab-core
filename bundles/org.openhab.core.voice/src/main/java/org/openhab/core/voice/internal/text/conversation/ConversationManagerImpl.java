@@ -22,6 +22,7 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationListener;
 import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.conversation.events.ConversationEventFactory;
 import org.osgi.service.component.annotations.Activate;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(service = ConversationManager.class)
 @NonNullByDefault
-public class ConversationManagerImpl implements ConversationManager {
+public class ConversationManagerImpl implements ConversationManager, ConversationListener {
     private final Storage<ConversationDTO> conversationStorage;
     private final Map<String, Conversation> activeConversations = new ConcurrentHashMap<>();
     private final EventPublisher eventPublisher;
@@ -73,13 +74,14 @@ public class ConversationManagerImpl implements ConversationManager {
             ConversationDTO conversationDTO = conversationStorage.get(id);
             if (conversationDTO != null) {
                 logger.debug("Conversation '{}' found", id);
-                conversation = new Conversation(id, eventPublisher,
+                conversation = new Conversation(id,
                         new ArrayList<>(conversationDTO.messageDTOs.stream().map(MessageDTO::toMessage).toList()));
             } else {
                 logger.debug("Creating new conversation '{}'", id);
-                conversation = new Conversation(id, eventPublisher);
+                conversation = new Conversation(id);
                 eventPublisher.post(ConversationEventFactory.createConversationAddedEvent(id, null));
             }
+            conversation.addListener(this);
             conversation.setMaxMessages(historyLimit);
             if (!id.isBlank()) {
                 activeConversations.put(conversation.getId(), conversation);
@@ -107,7 +109,10 @@ public class ConversationManagerImpl implements ConversationManager {
     @Override
     public void removeConversation(String id) {
         logger.debug("Removing conversation '{}'", id);
-        activeConversations.remove(id);
+        Conversation conversation = activeConversations.remove(id);
+        if (conversation != null) {
+            conversation.removeListener(this);
+        }
         conversationStorage.remove(id);
         eventPublisher.post(ConversationEventFactory.createConversationRemovedEvent(id, null));
     }
@@ -127,5 +132,16 @@ public class ConversationManagerImpl implements ConversationManager {
     public void setHistoryLimit(int limit) {
         this.historyLimit = limit;
         activeConversations.values().forEach(c -> c.setMaxMessages(limit));
+    }
+
+    @Override
+    public void onMessageAdded(Conversation conversation, Conversation.Message message) {
+        eventPublisher.post(ConversationEventFactory.createConversationMessageEvent(conversation.getId(),
+                message.getUID(), message.getRole(), message.getContent(), null));
+    }
+
+    @Override
+    public void onMessagesRemoved(Conversation conversation) {
+        // not needed
     }
 }
