@@ -15,7 +15,6 @@ package org.openhab.core.net;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -99,8 +98,15 @@ public class MacResolver {
          * Creates a new expiring MAC entry.
          */
         public ExpiringMac(String mac) {
+            this(mac, Instant.now().plus(CACHE_VALIDITY_DURATION));
+        }
+
+        /**
+         * For Unit tests only: Creates a new expiring MAC entry with a given explicit expires time.
+         */
+        ExpiringMac(String mac, Instant expires) {
             this.mac = mac;
-            this.expires = Instant.now().plus(CACHE_VALIDITY_DURATION);
+            this.expires = expires;
         }
 
         /**
@@ -254,7 +260,7 @@ public class MacResolver {
     /**
      * Checks if there are no more pending resolution futures and stops the back end task schedule.
      * 
-     * @param return true if pendingFutures is empty, false otherwise
+     * @return true if pendingFutures is empty, false otherwise
      */
     private boolean ifPendingFutureMacsEmpty() {
         if (pendingFutureMacs.isEmpty()) {
@@ -489,7 +495,10 @@ public class MacResolver {
                     parseLine(line);
                 }
             }
-            process.waitFor(ARP_LOAD_PROCESS_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+            if (!process.waitFor(ARP_LOAD_PROCESS_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
+                logger.debug("Time out running command: {}", String.join(" ", command));
+                process.destroyForcibly();
+            }
         } catch (Exception e) {
             logger.debug("Failed to execute command: {}", String.join(" ", command), e);
         }
@@ -497,26 +506,21 @@ public class MacResolver {
 
     // ================ TEST HOOKS (package private, not exported in OSGi) ================
 
-    protected void testClearCache() {
+    void testClearCache() {
         arpCache.clear();
     }
 
-    protected @Nullable String testGetCached(String ip) {
+    @Nullable
+    String testGetCached(String ip) {
         return cacheGet(ip);
     }
 
-    protected boolean testCacheIsEmpty() {
+    boolean testCacheIsEmpty() {
         return arpCache.isEmpty();
     }
 
-    protected void testPutCached(String ip, String mac, Instant expires) {
-        ExpiringMac entry = new ExpiringMac(mac);
-        try {
-            Field f = ExpiringMac.class.getDeclaredField("expires");
-            f.setAccessible(true);
-            f.set(entry, expires);
-        } catch (Exception ignored) {
-        }
+    void testPutCached(String ip, String mac, Instant expires) {
+        ExpiringMac entry = new ExpiringMac(mac, expires);
         arpCache.put(ip, entry);
     }
 }

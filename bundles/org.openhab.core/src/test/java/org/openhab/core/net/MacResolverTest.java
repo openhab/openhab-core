@@ -231,8 +231,8 @@ class MacResolverTest {
         assertNotSame(futureMac1, futureMac2, "resolveMac must return two different CompletableFutures");
 
         // Assert: pendingFutures contains exactly ONE entry for this IP
-        assertEquals(1, pendingFutureMacs.size(), "pendingFutureMacss must contain exactly one shared entry");
-        assertTrue(pendingFutureMacs.containsKey(ip), "pendingFutureMacss must contain the IP key");
+        assertEquals(1, pendingFutureMacs.size(), "pendingFutureMacs must contain exactly one shared entry");
+        assertTrue(pendingFutureMacs.containsKey(ip), "pendingFutureMacs must contain the IP key");
 
         // Assert: both returned futures wrap the SAME underlying pending future
         CompletableFuture<String> sharedFutureMac = pendingFutureMacs.get(ip);
@@ -241,7 +241,7 @@ class MacResolverTest {
         assertFalse(futureMac1.isDone(), "futureMac1 should not be completed yet");
         assertFalse(futureMac2.isDone(), "futureMac2 should not be completed yet");
 
-        // f1 and f2 should both complete when shared completes
+        // futureMac1 and futureMac2 should both complete when shared completes
         sharedFutureMac.complete("AA:BB:CC:DD:EE:FF");
 
         assertEquals("AA:BB:CC:DD:EE:FF", futureMac1.get(1, TimeUnit.SECONDS));
