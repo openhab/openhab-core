@@ -56,8 +56,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
 
-    private List<Class<?>> actionClasses = null;
-
     @Inject
     IActionServiceProvider actionServiceProvider;
 
@@ -114,23 +112,22 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
     }
 
     protected List<Class<?>> getActionClasses() {
-        List<Class<?>> localActionClasses = new ArrayList<>();
+        List<Class<?>> actionClasses = new ArrayList<>();
 
         List<ActionService> services = actionServiceProvider.get();
         if (services != null) {
             for (ActionService actionService : services) {
-                localActionClasses.add(actionService.getActionClass());
+                actionClasses.add(actionService.getActionClass());
             }
         }
 
         List<ThingActions> actions = thingActionsProvider.get();
         if (actions != null) {
             for (ThingActions thingActions : actions) {
-                localActionClasses.add(thingActions.getClass());
+                actionClasses.add(thingActions.getClass());
             }
         }
 
-        actionClasses = localActionClasses;
         return actionClasses;
     }
 }
