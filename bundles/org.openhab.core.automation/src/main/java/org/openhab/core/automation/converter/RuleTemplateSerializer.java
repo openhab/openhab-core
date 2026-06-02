@@ -18,7 +18,6 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.converter.RuleSerializer.RuleSerializationOption;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.converter.ObjectSerializer;
@@ -26,7 +25,7 @@ import org.openhab.core.converter.SerializabilityResult;
 import org.openhab.core.io.dto.SerializationException;
 
 /**
- * {@link RuleTemplateSerializer} is the interface to implement by any file generator for {@link Rule} object.
+ * {@link RuleTemplateSerializer} is the interface to implement by any file generator for {@link RuleTemplate} object.
  *
  * @author Ravi Nadahar - Initial contribution
  */

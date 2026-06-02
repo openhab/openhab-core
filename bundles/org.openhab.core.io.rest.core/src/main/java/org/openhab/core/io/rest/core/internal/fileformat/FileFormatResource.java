@@ -847,7 +847,7 @@ public class FileFormatResource implements RESTResource {
             return JSONResponse.createErrorResponse(UNPROCESSABLE_ENTITY, e.getMessage());
         }
         serializer.generateFormat(genId, outputStream);
-        return Response.ok(new String(outputStream.toByteArray(), StandardCharsets.UTF_8)).build();
+        return Response.ok(outputStream.toString(StandardCharsets.UTF_8)).build();
     }
 
     @POST
@@ -924,7 +924,7 @@ public class FileFormatResource implements RESTResource {
             @DefaultValue("Normal") @QueryParam("serializationOption") @Parameter(description = "Decides what to include in serialized rule templates") RuleTemplateSerializationOption option,
             @Parameter(description = "Array of rule template UIDs. If empty or omitted, return all rule templates.") @Nullable List<String> templateUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        logger.debug("createFileFormatForRules: mediaType = {}, ruleUIDs = {}", acceptHeader, templateUIDs);
+        logger.debug("createFileFormatForRuleTemplates: mediaType = {}, templateUIDs = {}", acceptHeader, templateUIDs);
         RuleTemplateSerializer serializer = getRuleTemplateSerializer(acceptHeader);
         if (serializer == null) {
             return JSONResponse.createErrorResponse(Response.Status.UNSUPPORTED_MEDIA_TYPE,
@@ -957,7 +957,7 @@ public class FileFormatResource implements RESTResource {
             return JSONResponse.createErrorResponse(UNPROCESSABLE_ENTITY, e.getMessage());
         }
         serializer.generateFormat(genId, outputStream);
-        return Response.ok(new String(outputStream.toByteArray(), StandardCharsets.UTF_8)).build();
+        return Response.ok(outputStream.toString(StandardCharsets.UTF_8)).build();
     }
 
     @POST
