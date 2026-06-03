@@ -30,9 +30,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test cases for the {@link MacResolver} class.
- * <p>
- * NOTE: intentionally without {@code @NonNullByDefault} since compiler WARN is better than a compiler ERROR
- * <p>
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
