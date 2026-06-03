@@ -132,6 +132,6 @@ public class VoiceConfiguration {
     }
 
     public Map<String, String> getDefaultVoices() {
-        return defaultVoices;
+        return Map.copyOf(defaultVoices);
     }
 }

@@ -371,26 +371,29 @@ public class DialogProcessor implements KSListener, STTListener {
                 String conversationId = dialogContext.conversationId();
                 Conversation conversation = conversationManager
                         .getConversation(Objects.requireNonNullElse(conversationId, ""));
+                String error = null;
+                String answer = "";
                 try {
                     conversation.addMessage(ConversationRole.USER, question);
                 } catch (ConversationException e) {
-                    logger.error("Unable to add message to conversation: {}", e.getMessage(), e);
-                    return;
+                    logger.debug("Unable to add message to conversation: {}", e.getMessage(), e);
+                    error = "Unable to add message to conversation: " + e.getMessage();
                 }
-                List<LLMTool> tools = dialogContext.llmTools();
-                InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
-                        dialogContext.locationItem());
-                String answer = "";
-                String error = null;
-                for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
-                    try {
-                        answer = interpreter.interpret(dialogContext.locale(), interpreterContext);
-                        error = null;
-                        logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
-                        break;
-                    } catch (InterpretationException e) {
-                        logger.debug("Interpretation exception: {}", e.getMessage());
-                        error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
+                if (error == null) {
+                    List<LLMTool> tools = dialogContext.llmTools();
+                    InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
+                            dialogContext.locationItem());
+                    for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
+                        try {
+                            answer = interpreter.interpret(dialogContext.locale(), interpreterContext);
+                            error = null;
+                            logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(),
+                                    answer);
+                            break;
+                        } catch (InterpretationException e) {
+                            logger.debug("Interpretation exception: {}", e.getMessage());
+                            error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
+                        }
                     }
                 }
                 say(error != null ? error : answer);
