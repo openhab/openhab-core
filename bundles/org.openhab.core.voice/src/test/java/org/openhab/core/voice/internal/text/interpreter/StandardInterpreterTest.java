@@ -138,6 +138,30 @@ public class StandardInterpreterTest {
     }
 
     @Test
+    public void resolveCollisionByCommandType() throws InterpretationException {
+        // Both items have the same label "lamp"
+        var switchItem = new SwitchItem("switch_lamp");
+        switchItem.setLabel("lamp");
+        var rollershutterItem = new RollershutterItem("rollershutter_lamp");
+        rollershutterItem.setLabel("lamp");
+
+        List<Item> items = List.of(switchItem, rollershutterItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+
+        // "turn on" should only match the SwitchItem
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn on the lamp"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(switchItem.getName(), OnOffType.ON));
+
+        reset(eventPublisherMock);
+
+        // "open" should only match the RollershutterItem
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "open the lamp"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(rollershutterItem.getName(), UpDownType.UP));
+    }
+
+    @Test
     public void allowUseItemSynonyms() throws InterpretationException {
         var computerItem = new SwitchItem("computer");
         computerItem.setLabel("Computer");
