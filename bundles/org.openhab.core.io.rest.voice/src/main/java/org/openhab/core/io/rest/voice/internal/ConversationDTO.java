@@ -26,24 +26,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(name = "Conversation")
 @NonNullByDefault
-public class ConversationDTO {
-    public String id;
-    public List<MessageDTO> messages;
-
-    public ConversationDTO(String id, List<MessageDTO> messages) {
-        this.id = id;
-        this.messages = messages;
-    }
-
-    public static class MessageDTO {
-        public int id;
-        public String role;
-        public String content;
-
-        public MessageDTO(int id, String role, String content) {
-            this.id = id;
-            this.role = role;
-            this.content = content;
-        }
+public record ConversationDTO(String id, List<MessageDTO> messages) {
+    @Schema(name = "Message")
+    public record MessageDTO(int id, String role, String content) {
     }
 }

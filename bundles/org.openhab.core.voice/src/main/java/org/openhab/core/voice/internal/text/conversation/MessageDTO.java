@@ -24,7 +24,7 @@ import org.openhab.core.voice.text.conversation.ConversationRole;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public record MessageDTO(Integer id, ConversationRole role, String content) {
+public record MessageDTO(int id, ConversationRole role, String content) {
     public Conversation.Message toMessage() {
         return new Conversation.Message(id, role, content);
     }
