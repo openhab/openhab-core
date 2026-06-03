@@ -128,7 +128,7 @@ public class ConversationEventFactoryTest {
         assertEquals(ConversationMessagesRemovedEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/messagesremoved", event.getTopic());
         assertEquals(convId, event.getConversationId());
-        assertEquals(removedSinceMessagesId, event.getremovedSinceMessagesId());
+        assertEquals(removedSinceMessagesId, event.getRemovedSinceMessagesId());
     }
 
     @Test
@@ -147,6 +147,6 @@ public class ConversationEventFactoryTest {
         assertEquals(event.getSource(), deserialized.getSource());
         assertEquals(convId, ((ConversationMessagesRemovedEvent) deserialized).getConversationId());
         assertEquals(removedSinceMessagesId,
-                ((ConversationMessagesRemovedEvent) deserialized).getremovedSinceMessagesId());
+                ((ConversationMessagesRemovedEvent) deserialized).getRemovedSinceMessagesId());
     }
 }

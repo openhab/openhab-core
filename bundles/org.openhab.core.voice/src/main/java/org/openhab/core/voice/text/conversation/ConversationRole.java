@@ -15,8 +15,7 @@ package org.openhab.core.voice.text.conversation;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link ConversationRole} class contains a list of messages in between the users and a
- * LanguageInterpreter
+ * The {@link ConversationRole} class defines the role/author of a message in a {@link Conversation}.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */

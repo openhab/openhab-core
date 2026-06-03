@@ -39,7 +39,7 @@ public class ConversationMessagesRemovedEvent extends ConversationEvent {
         return TYPE;
     }
 
-    public int getremovedSinceMessagesId() {
+    public int getRemovedSinceMessagesId() {
         return removedSinceMessagesId;
     }
 

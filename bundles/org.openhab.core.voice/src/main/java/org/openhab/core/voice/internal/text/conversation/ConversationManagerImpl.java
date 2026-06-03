@@ -82,7 +82,7 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
             if (conversationDTO != null) {
                 logger.debug("Conversation '{}' found", id);
                 conversation = new Conversation(id,
-                        new ArrayList<>(conversationDTO.messages().stream().map(MessageDTO::toMessage).toList()));
+                        conversationDTO.messages().stream().map(MessageDTO::toMessage).toList());
             } else if (createIfMissing) {
                 logger.debug("Creating new conversation '{}'", id);
                 conversation = new Conversation(id);

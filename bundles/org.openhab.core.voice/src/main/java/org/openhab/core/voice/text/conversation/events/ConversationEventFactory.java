@@ -26,7 +26,7 @@ import org.osgi.service.component.annotations.Component;
  * The {@link ConversationEventFactory} defines a {@link Event} implementation that emits conversation changes.
  *
  * @author Miguel Álvarez Díez - Initial contribution
- * @author Florian Hotze - Differ between created, removed, message added and messages removed events
+ * @author Florian Hotze - Differentiate between created, removed, message added and messages removed events
  */
 @Component(immediate = true, service = EventFactory.class)
 @NonNullByDefault

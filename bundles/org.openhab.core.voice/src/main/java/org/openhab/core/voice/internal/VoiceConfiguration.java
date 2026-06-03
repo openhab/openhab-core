@@ -81,6 +81,8 @@ public class VoiceConfiguration {
                         Conversation.DEFAULT_MAX_MESSAGES, e);
                 this.conversationHistoryLimit = Conversation.DEFAULT_MAX_MESSAGES;
             }
+        } else {
+            this.conversationHistoryLimit = Conversation.DEFAULT_MAX_MESSAGES;
         }
 
         defaultVoices.clear();

@@ -40,7 +40,7 @@ public class Conversation {
 
     public Conversation(String id, List<Message> messages) {
         this.id = id;
-        this.messages = messages;
+        this.messages = new ArrayList<>(messages);
     }
 
     /**
