@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -48,7 +49,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class for resolving MAC addresses from IP addresses via the operating system's ARP cache. The main method
  * {@link #resolveMac(String)} provides an asynchronous API to get the MAC address for a given IP address. If the MAC
- * address is cached and valid, it returns immediately. Otherwise, it starts a front end process that involves pinging
+ * address is cached and valid, it returns immediately. Otherwise, it starts a front end process that involves probing
  * the IP address to trigger the OS to populate its ARP table, plus a back end process that bulk loads the OS ARP cache
  * into the in-memory cache and completes the pending future when the MAC address becomes available. The implementation
  * includes optimizations to avoid unnecessary ARP cache loads for non-local or unreachable IP addresses, and to share
@@ -64,11 +65,13 @@ import org.slf4j.LoggerFactory;
 @Component(service = MacResolver.class)
 public class MacResolver {
 
-    private static final Duration IP_ADDRESS_PING_TIMEOUT = Duration.ofMillis(400);
-    private static final Duration RESOLVE_MAC_TIMEOUT = Duration.ofSeconds(4);
+    private static final Duration PING_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration ARP_LOAD_PROCESS_TIMEOUT = Duration.ofMillis(1500);
     private static final Duration CACHE_VALIDITY_DURATION = Duration.ofMinutes(7);
-    private static final Duration BACKEND_TASK_RUN_INTERVAL = Duration.ofMillis(1200);
+    private static final Duration SAFETY_MARGIN = Duration.ofMillis(300);
+    private static final Duration BACKEND_TASK_RUN_INTERVAL = PING_TIMEOUT.plus(SAFETY_MARGIN);
+    private static final Duration RESOLVE_MAC_TIMEOUT = PING_TIMEOUT.plus(BACKEND_TASK_RUN_INTERVAL)
+            .plus(ARP_LOAD_PROCESS_TIMEOUT).plus(SAFETY_MARGIN);
 
     private static final Pattern MAC_PATTERN = Pattern.compile("([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}");
     private static final Pattern IP_PATTERN = Pattern
@@ -85,6 +88,31 @@ public class MacResolver {
     private @NonNullByDefault({}) ExecutorService frontEndExecutor;
     private @NonNullByDefault({}) ScheduledExecutorService backEndScheduler;
     private @Nullable ScheduledFuture<?> backEndTaskSchedule;
+
+    // operating system type
+    private enum OSType {
+        LINUX,
+        MAC_OS,
+        WINDOWS,
+        UNKNOWN;
+
+        static OSType from(String osName) {
+            String name = osName.toLowerCase(Locale.ROOT);
+            if (name.contains("linux")) {
+                return LINUX;
+            }
+            if (name.contains("mac") || name.contains("darwin")) {
+                return MAC_OS;
+            }
+            if (name.contains("win")) {
+                return WINDOWS;
+            }
+            return UNKNOWN;
+        }
+    }
+
+    private static final String OS_NAME = Objects.requireNonNull(System.getProperty("os.name", ""));
+    private static final OSType OS_TYPE = OSType.from(OS_NAME);
 
     /**
      * Simple wrapper class to hold a MAC address with its expiration time-stamp.
@@ -128,6 +156,9 @@ public class MacResolver {
     protected void activate() {
         frontEndExecutor = ThreadPoolManager.getPool("OH-MacResolver-FrontEnd");
         backEndScheduler = ThreadPoolManager.getScheduledPool("OH-MacResolver-BackEnd");
+        if (OS_TYPE == OSType.UNKNOWN) {
+            logger.warn("Unknown OS '{}' MacResolver may not work.", OS_NAME);
+        }
     }
 
     @Deactivate
@@ -168,7 +199,7 @@ public class MacResolver {
     /**
      * Resolves the MAC address for a given IP address. If the MAC address is cached and valid, it is returned
      * immediately. Otherwise, an asynchronous resolution process is started that involves a front end process that
-     * pings the IP to trigger the OS to populate the ARP table, and a back end process that bulk loads the ARP table
+     * probes the IP to trigger the OS to populate its ARP table, and a back end process that bulk loads the ARP table
      * and completes the future when the MAC address becomes available. Concurrent requests for the same IP share the
      * same resolution process to avoid redundant work, and the future completes with {@code null} if resolution fails
      * or takes too long. The method also includes optimizations to avoid unnecessary ARP cache loads for invalid,
@@ -208,51 +239,117 @@ public class MacResolver {
          */
         return Objects.requireNonNull(pendingFutureMacs //
                 .computeIfAbsent(ip, targetIp -> {
-                    CompletableFuture<@Nullable String> baseFutureMac = new CompletableFuture<>();
+                    CompletableFuture<@Nullable String> commonBaseFutureMac = new CompletableFuture<>();
                     startBackEndTaskSchedule();
-                    frontEndExecutor.submit(() -> resolveMacAsync(targetIp, baseFutureMac));
-                    return baseFutureMac;
+                    frontEndExecutor.submit(() -> triggerARPTableUpdate(targetIp));
+                    return commonBaseFutureMac;
                 })) //
                 .completeOnTimeout(null, RESOLVE_MAC_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
-                .whenComplete((mac, ex) -> {
+                .whenComplete((mac, ignore) -> {
                     pendingFutureMacs.remove(ip);
                     ifPendingFutureMacsEmpty();
                 });
     }
 
     /**
-     * Checks if the given IP address is on the same local sub-net as any of the host's network interfaces. This
-     * avoids ARP cache loads for IP addresses that are not local which therefore cannot be resolved to a MAC address
-     * via the OS ARP table.
+     * Triggers the operating system to update its ARP table for the given IP address by performing a probe. The probe
+     * method is chosen based on the operating system and may involve an interface-scoped ARP ping or a system ping.
+     * The method waits for the probe to complete to allow time for the OS to populate its ARP table before the back
+     * end task starts to load it into the in-memory cache.
+     * 
+     * @param ip the target IP address to trigger ARP resolution for
+     */
+    private void triggerARPTableUpdate(String ip) {
+        CompletableFuture<Boolean> probe;
+        switch (OS_TYPE) {
+            case LINUX:
+                CompletableFuture<Boolean> interFaceArp = doInterfaceArpPing(PING_TIMEOUT, ip);
+                CompletableFuture<Boolean> fallbackIcmp = doSystemPing(PING_TIMEOUT, ip);
+                // we don't care about success, it is enough to trigger OS ARP resolution anyway
+                probe = CompletableFuture.anyOf(interFaceArp, fallbackIcmp).thenApply(r -> true);
+                break;
+            default:
+                probe = doSystemPing(PING_TIMEOUT, ip);
+        }
+        // wait for probe completion to trigger OS ARP resolution and allow time for it to complete
+        probe.join();
+    }
+
+    /**
+     * Checks if the given IP address is on the same local sub-net as any of the host's network interfaces. This avoids
+     * ARP cache loads for IP addresses that are not local which therefore cannot be resolved to a MAC address via the
+     * OS ARP table.
      */
     private boolean isOnLocalSubnet(String ip) {
         try {
             InetAddress target = InetAddress.getByName(ip);
             for (NetworkInterface nif : Collections.list(NetworkInterface.getNetworkInterfaces())) {
-                for (InterfaceAddress ia : nif.getInterfaceAddresses()) {
-                    InetAddress addr = ia.getAddress();
-                    int prefix = ia.getNetworkPrefixLength();
-                    if (prefix <= 0 || prefix >= 32) {
-                        continue;
-                    }
+                if (interfaceMatchesSubnet(nif, target)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            logger.debug("Sub-net check failed for {}", ip, e);
+        }
+        return false;
+    }
 
-                    byte[] a = addr.getAddress();
-                    byte[] t = target.getAddress();
-                    if (a.length != 4 || t.length != 4) {
-                        continue; // IPv4 only
-                    }
+    /**
+     * Gets a list of network interfaces that are up, non-loopback, and on the same sub-net as the given IP address.
+     * This is used for interface-scoped ARP pings to trigger ARP resolution on the correct interface when there are
+     * multiple interfaces or sub-nets.
+     */
+    private List<NetworkInterface> getCandidateInterfaces(String ip) {
+        try {
+            InetAddress target = InetAddress.getByName(ip);
+            return Collections.list(NetworkInterface.getNetworkInterfaces()).stream().filter(nif -> {
+                try {
+                    return nif.isUp() && !nif.isLoopback() && interfaceMatchesSubnet(nif, target);
+                } catch (Exception ignored) {
+                    return false;
+                }
+            }).toList();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
 
-                    int mask = ~((1 << (32 - prefix)) - 1);
-                    int ai = ByteBuffer.wrap(a).getInt();
-                    int ti = ByteBuffer.wrap(t).getInt();
+    /**
+     * Returns true if the given interface has any IPv4 address on the same sub-net as the target IPv4 address.
+     * 
+     * @param nif the network interface to check
+     * @param ipv4 the target IP address to compare against the interface's addresses
+     * 
+     * @return true if the interface has any IPv4 address on the same sub-net as the target, false otherwise
+     */
+    private boolean interfaceMatchesSubnet(NetworkInterface nif, InetAddress ipv4) {
+        try {
+            byte[] t = ipv4.getAddress();
+            if (t.length != 4) {
+                return false; // IPv4 only
+            }
+            int ti = ByteBuffer.wrap(t).getInt();
 
-                    if ((ai & mask) == (ti & mask)) {
-                        return true;
-                    }
+            for (InterfaceAddress ia : nif.getInterfaceAddresses()) {
+                InetAddress addr = ia.getAddress();
+                byte[] a = addr.getAddress();
+                if (a.length != 4) {
+                    continue; // skip IPv6
+                }
+
+                int prefix = ia.getNetworkPrefixLength();
+                if (prefix <= 0 || prefix > 32) {
+                    continue; // allow /32
+                }
+
+                int mask = ~((1 << (32 - prefix)) - 1);
+                int ai = ByteBuffer.wrap(a).getInt();
+
+                if ((ai & mask) == (ti & mask)) {
+                    return true;
                 }
             }
         } catch (Exception ignored) {
-            logger.debug("Sub-net check failed for {}", ip, ignored);
         }
         return false;
     }
@@ -271,44 +368,55 @@ public class MacResolver {
     }
 
     /**
-     * Front end asynchronous resolution process for a given IP address. The caller has already checked if the IP is on
-     * the local sub-net, and this method further checks if the IP is reachable via ping to avoid unnecessary ARP cache
-     * loads for unreachable or non-local addresses. The ping triggers the OS to resolve the IP to a MAC address in its
-     * OS ARP table. And after that it relies on the back end periodic scheduler task to load the ARP table into cache
-     * and completes the future when the MAC address becomes available. If the IP is not reachable, it completes the
-     * future with {@code null}.
+     * Performs an interface-scoped ARP probe using the {@code arping} command on all candidate interfaces that are on
+     * the same sub-net as the target IP. This is only implemented for Linux where {@code arping} is available. This
+     * more reliably triggers OS ARP resolution where perhaps a system ping probe might not work. The {@code arping}
+     * command is executed for each candidate interface until one succeeds. The method returns true if any of the
+     * {@code arping} commands succeeds (exit code 0), false otherwise. Albeit the success of the probe is not critical
+     * for OS ARP resolution as long as it has triggered the OS to populate its ARP table.
      * 
-     * @param ip the IP address to resolve
-     * @param futureMac the future to complete with the resolved MAC address or {@code null}
+     * @param timeout the duration to wait for the probe to complete
+     * @param ip the target IP address to be probed
+     * 
+     * @return a future that completes with true if any of the {@code arping} commands succeeds, false otherwise
      */
-    private void resolveMacAsync(String ip, CompletableFuture<@Nullable String> futureMac) {
-        boolean reachable = false;
-        try {
-            // ping the IP to 1) check if the IP exists, and thus 2) trigger OS ARP MAC table resolution
-            reachable = InetAddress.getByName(ip).isReachable((int) IP_ADDRESS_PING_TIMEOUT.toMillis());
-        } catch (Exception e) {
-            logger.debug("{} ping failed", ip, e);
-            completeWithNull(ip, futureMac);
-            return;
-        }
-        if (!reachable) {
-            logger.debug("{} not reachable", ip);
-            completeWithNull(ip, futureMac);
-        }
+    private CompletableFuture<Boolean> doInterfaceArpPing(Duration timeout, String ip) {
+        return CompletableFuture.supplyAsync(() -> switch (OS_TYPE) {
+            case LINUX -> {
+                List<NetworkInterface> interfaces = getCandidateInterfaces(ip);
+                if (interfaces.isEmpty()) {
+                    yield false;
+                }
+                String seconds = String.valueOf(timeout.toSeconds());
+                for (NetworkInterface nif : interfaces) {
+                    if (runCommand(timeout, "arping", "-I", nif.getName(), "-c", "1", "-w", seconds, ip)) {
+                        yield true;
+                    }
+                }
+                yield false;
+            }
+            default -> false;
+        }, frontEndExecutor);
     }
 
     /**
-     * Helper that completes the given future with {@code null} if it is still pending, and removes it from the pending
-     * futures map. This is used to clean up pending resolution tasks that have failed or timed out.
+     * Performs a system {@code ping} probe. This triggers OS ARP resolution for devices that are known by the OS to
+     * respond to ICMP echo requests. The command and arguments are chosen based on the operating system. The method
+     * returns true if the probe succeeds (exit code 0), false otherwise. Albeit the success of the ping is not critical
+     * for ARP resolution as long as has triggered the OS to populate its ARP table.
      * 
-     * @param ip the IP address associated with the future
-     * @param futureMac the future to complete with {@code null}
+     * @param timeout the duration to wait for the probe to complete
+     * @param ip the target IP address to be probed
+     * 
+     * @return a future that completes with true if the {@code ping} command succeeds, false otherwise
      */
-    private void completeWithNull(String ip, CompletableFuture<@Nullable String> futureMac) {
-        if (pendingFutureMacs.remove(ip, futureMac)) {
-            futureMac.complete(null);
-        }
-        ifPendingFutureMacsEmpty();
+    private CompletableFuture<Boolean> doSystemPing(Duration timeout, String ip) {
+        return CompletableFuture.supplyAsync(() -> switch (OS_TYPE) {
+            case WINDOWS -> runCommand(timeout, "ping", "-n", "1", "-w", String.valueOf(timeout.toMillis()), ip);
+            case MAC_OS -> runCommand(timeout, "ping", "-c", "1", "-W", String.valueOf(timeout.toMillis()), ip);
+            case LINUX -> runCommand(timeout, "ping", "-c", "1", "-W", String.valueOf(timeout.toSeconds()), ip);
+            default -> false;
+        }, frontEndExecutor);
     }
 
     /**
@@ -343,23 +451,16 @@ public class MacResolver {
     }
 
     /**
-     * Executes a bulk load of the operating system's ARP cache into the in-memory cache. Each platform specific loader
-     * handles its own exceptions.
+     * Executes a bulk load of the operating system's ARP cache into the in-memory cache.
      */
     private void arpCacheLoad() {
-        String os = System.getProperty("os.name", "");
-        if (os == null) {
-            os = "";
-        }
-        os = os.toLowerCase(Locale.ROOT);
-        if (os.contains("linux")) {
-            linuxArpCacheLoad();
-        } else if (os.contains("mac") || os.contains("darwin")) {
-            macOsArpCacheLoad();
-        } else if (os.contains("win")) {
-            windowsArpCacheLoad();
-        } else {
-            logger.warn("OS '{}' does not support ARP cache load", os);
+        switch (OS_TYPE) {
+            case LINUX -> linuxArpCacheLoad();
+            case MAC_OS -> runCommandAndParse(ARP_LOAD_PROCESS_TIMEOUT, "/usr/sbin/arp", "-n");
+            case WINDOWS -> runCommandAndParse(ARP_LOAD_PROCESS_TIMEOUT, "arp", "-a");
+            default -> {
+                return;
+            }
         }
     }
 
@@ -381,20 +482,6 @@ public class MacResolver {
         } catch (Exception e) {
             logger.debug("Error reading /proc/net/arp", e);
         }
-    }
-
-    /**
-     * Loads ARP entries by executing {@code arp -n} on macOS.
-     */
-    private void macOsArpCacheLoad() {
-        runCommandAndParse("/usr/sbin/arp", "-n");
-    }
-
-    /**
-     * Loads ARP entries by executing {@code arp -a} on Windows.
-     */
-    private void windowsArpCacheLoad() {
-        runCommandAndParse("arp", "-a");
     }
 
     /**
@@ -458,6 +545,10 @@ public class MacResolver {
     /**
      * Convert an IP address to the standard format. For example {@code 192.168.1.1:8080} converts to
      * {@code 192.168.1.1}
+     * 
+     * @param ip the IP address to normalize
+     * 
+     * @return the normalized IP address, or the original string if it cannot be normalized
      */
     private String normalizeIp(String ip) {
         Matcher m = IP_PATTERN.matcher(ip);
@@ -466,6 +557,8 @@ public class MacResolver {
 
     /**
      * Parses a single line from ARP output, extracts the IP MAC mapping if present, and caches it.
+     * 
+     * @param line the line to parse
      */
     private void parseLine(String line) {
         if (line.isBlank()) {
@@ -483,28 +576,64 @@ public class MacResolver {
     }
 
     /**
-     * Executes an OS command and parses its output line by line using {@link #parseLine(String)}.
-     * Note: redirects error stream to standard output.
+     * Runs an OS process with the given timeout and command (String... args). Returns the finished Process, or null
+     * if the process timed out or failed. Timeout is enforced.
+     * 
+     * @param timeout the duration to wait for the process to finish
+     * @param command the command and its arguments to execute
+     * 
+     * @return the finished Process, or null if timed out or failed
      */
-    private void runCommandAndParse(String... command) {
+    private @Nullable Process runProcess(Duration timeout, String... command) {
         try {
             Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    parseLine(line);
-                }
-            }
-            if (!process.waitFor(ARP_LOAD_PROCESS_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
-                logger.debug("Time out running command: {}", String.join(" ", command));
+            if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 process.destroyForcibly();
+                logger.debug("Time out executing command: {}", String.join(" ", command));
+                return null;
             }
+            return process;
         } catch (Exception e) {
             logger.debug("Failed to execute command: {}", String.join(" ", command), e);
+            return null;
         }
     }
 
-    // ================ TEST HOOKS (package private, not exported in OSGi) ================
+    /**
+     * Executes an OS process with the given timeout and command (String... args) and returns true if the exit code
+     * is 0. Timeout is enforced.
+     * 
+     * @param timeout the duration to wait for the process to finish
+     * @param command the command and its arguments to execute
+     */
+    private boolean runCommand(Duration timeout, String... command) {
+        Process process = runProcess(timeout, command);
+        return process != null && process.exitValue() == 0;
+    }
+
+    /**
+     * Executes an OS process with the given timeout and command (String... args) and parses its output line by line
+     * using {@link #parseLine(String)}. Timeout is enforced.
+     * 
+     * @param timeout the duration to wait for the process to finish
+     * @param command the command and its arguments to execute
+     */
+    private void runCommandAndParse(Duration timeout, String... command) {
+        Process process = runProcess(timeout, command);
+        if (process == null) {
+            return;
+        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                parseLine(line);
+            }
+        } catch (Exception e) {
+            logger.debug("Error reading result of command: {}", String.join(" ", command), e);
+        }
+    }
+
+    // ================ TEST HOOKS (package private, unit tests only) ================
 
     void testClearCache() {
         arpCache.clear();

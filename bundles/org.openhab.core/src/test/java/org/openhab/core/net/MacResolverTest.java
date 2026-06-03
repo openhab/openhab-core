@@ -16,12 +16,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +36,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
+@NonNullByDefault
 class MacResolverTest {
 
     final MacResolver macResolver = new MacResolver();
@@ -152,16 +156,16 @@ class MacResolverTest {
         assertNotNull(prop);
 
         if (prop.toLowerCase().contains("win")) {
-            runCommand("cmd", "/c", "echo " + fakeLine);
+            runCommand(Duration.ofSeconds(1), "cmd", "/c", "echo " + fakeLine);
         } else {
-            runCommand("echo", fakeLine);
+            runCommand(Duration.ofSeconds(1), "echo", fakeLine);
         }
 
         assertEquals("AA:BB:CC:DD:EE:FF", macResolver.testGetCached("192.168.1.77"));
     }
 
     @Test
-    void testListenerIsNotifiedOnMacResolution() throws Exception {
+    void testResolveMacCompletesImmediatelyWhenCached() throws Exception {
         macResolver.testClearCache();
 
         String ip = "127.0.0.1";
@@ -172,14 +176,14 @@ class MacResolverTest {
         invokePrivate("parseLine", String.class, arpLine);
 
         // Now resolveMac should return a completed future
-        CompletableFuture<String> future = macResolver.resolveMac(ip);
+        CompletableFuture<@Nullable String> future = macResolver.resolveMac(ip);
 
         assertTrue(future.isDone(), "Future should be completed immediately");
         assertEquals(mac, future.get(1, TimeUnit.SECONDS));
     }
 
     @Test
-    void testListenerNotNotifiedTwiceForSameIp() throws Exception {
+    void testResolveMacCompletionStageRunsOnceWhenAlreadyCached() throws Exception {
         macResolver.testClearCache();
 
         String ip = "127.0.0.1";
@@ -188,14 +192,14 @@ class MacResolverTest {
         // First ARP line
         invokePrivate("parseLine", String.class, ip + " " + mac);
 
-        CompletableFuture<String> future = macResolver.resolveMac(ip);
+        CompletableFuture<@Nullable String> future = macResolver.resolveMac(ip);
         assertEquals(mac, future.get(1, TimeUnit.SECONDS));
 
         // Reset detection state
         AtomicInteger counter = new AtomicInteger(0);
 
         // Wrap resolveMac to count completions
-        CompletableFuture<String> f2 = macResolver.resolveMac(ip).thenApply(m -> {
+        CompletableFuture<@Nullable String> futureMac = macResolver.resolveMac(ip).thenApply(m -> {
             counter.incrementAndGet();
             return m;
         });
@@ -204,7 +208,7 @@ class MacResolverTest {
         invokePrivate("parseLine", String.class, ip + " " + mac);
 
         // Future should still complete only once
-        assertEquals(mac, f2.get(1, TimeUnit.SECONDS));
+        assertEquals(mac, futureMac.get(1, TimeUnit.SECONDS));
         assertEquals(1, counter.get(), "MAC resolution should only complete once");
     }
 
@@ -224,8 +228,8 @@ class MacResolverTest {
         assertNotNull(pendingFutureMacs, "pendingFutureMacs map should not be null");
 
         // Trigger two parallel resolveMac calls
-        CompletableFuture<String> futureMac1 = macResolver.resolveMac(ip);
-        CompletableFuture<String> futureMac2 = macResolver.resolveMac(ip);
+        CompletableFuture<@Nullable String> futureMac1 = macResolver.resolveMac(ip);
+        CompletableFuture<@Nullable String> futureMac2 = macResolver.resolveMac(ip);
 
         // Assert: two distinct CompletableFuture objects returned
         assertNotSame(futureMac1, futureMac2, "resolveMac must return two different CompletableFutures");
@@ -252,7 +256,7 @@ class MacResolverTest {
     // Reflection helpers to call private methods
     // -------------------------------------------------------
 
-    private Object invokePrivate(String method, Class<?> paramType, Object arg) throws Exception {
+    private @Nullable Object invokePrivate(String method, Class<?> paramType, Object arg) throws Exception {
         Method m = MacResolver.class.getDeclaredMethod(method, paramType);
         m.setAccessible(true);
         return m.invoke(macResolver, arg);
@@ -263,24 +267,32 @@ class MacResolverTest {
     }
 
     private String normalizeMac(String mac) throws Exception {
-        return (String) invokePrivate("normalizeMac", String.class, mac);
+        Object result = invokePrivate("normalizeMac", String.class, mac);
+        assertNotNull(result, "normalizeMac returned null");
+        return (String) result;
     }
 
     private String normalizeIp(String ip) throws Exception {
-        return (String) invokePrivate("normalizeIp", String.class, ip);
+        Object result = invokePrivate("normalizeIp", String.class, ip);
+        assertNotNull(result, "normalizeIp returned null");
+        return (String) result;
     }
 
     private boolean isValidMac(String mac) throws Exception {
-        return (boolean) invokePrivate("isValidMac", String.class, mac);
+        Object result = invokePrivate("isValidMac", String.class, mac);
+        assertNotNull(result, "isValidMac returned null");
+        return (Boolean) result;
     }
 
     private boolean isValidIp(String ip) throws Exception {
-        return (boolean) invokePrivate("isValidIp", String.class, ip);
+        Object result = invokePrivate("isValidIp", String.class, ip);
+        assertNotNull(result, "isValidIp returned null");
+        return (Boolean) result;
     }
 
-    private void runCommand(String... cmd) throws Exception {
-        Method m = MacResolver.class.getDeclaredMethod("runCommandAndParse", String[].class);
+    private void runCommand(Duration timeout, String... cmd) throws Exception {
+        Method m = MacResolver.class.getDeclaredMethod("runCommandAndParse", Duration.class, String[].class);
         m.setAccessible(true);
-        m.invoke(macResolver, (Object) cmd);
+        m.invoke(macResolver, timeout, (Object) cmd);
     }
 }
