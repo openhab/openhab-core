@@ -128,8 +128,10 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
         if (conversation != null) {
             conversation.removeListener(this);
         }
-        conversationStorage.remove(id);
-        eventPublisher.post(ConversationEventFactory.createConversationRemovedEvent(id, null));
+        if (!id.isBlank()) {
+            conversationStorage.remove(id);
+            eventPublisher.post(ConversationEventFactory.createConversationRemovedEvent(id, null));
+        }
     }
 
     @Override
@@ -161,9 +163,9 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
         if (conversation.getMessages().isEmpty()) {
             removeConversation(conversation.getId());
         } else {
+            eventPublisher.post(ConversationEventFactory.createConversationMessagesRemovedEvent(conversation.getId(),
+                    sinceRemovedMessagesId, null));
             storeConversation(conversation);
         }
-        eventPublisher.post(ConversationEventFactory.createConversationMessagesRemovedEvent(conversation.getId(),
-                sinceRemovedMessagesId, null));
     }
 }

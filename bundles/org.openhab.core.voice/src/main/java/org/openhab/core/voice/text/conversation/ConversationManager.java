@@ -27,7 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * <li>Automatically persist a persistable {@link Conversation} whenever a message is added or messages are
  * removed.</li>
  * <li>Emit {@link org.openhab.core.voice.text.conversation.events.ConversationEvent} implementations accordingly.</li>
- * <li>If a conversation has a blank ID, no emits will be emitted.</li>
+ * <li>If a conversation has a blank ID, no events will be emitted.</li>
  * </ul>
  *
  * @author Florian Hotze - Initial contribution

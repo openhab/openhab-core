@@ -189,9 +189,11 @@ public class ConversationManagerImplTest {
         conversation.addMessage(ConversationRole.USER, "2");
         clearInvocations(eventPublisher); // clear events from creating conversation
 
-        conversation.removeSinceMessage(0);
-
+        conversation.removeSinceMessage(1);
         verify(eventPublisher).post(any(ConversationMessagesRemovedEvent.class));
+
+        conversation.removeSinceMessage(0);
+        verify(eventPublisher).post(any(ConversationRemovedEvent.class));
     }
 
     @Test

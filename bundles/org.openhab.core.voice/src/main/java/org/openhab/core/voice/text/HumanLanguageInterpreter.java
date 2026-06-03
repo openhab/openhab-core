@@ -81,7 +81,7 @@ public interface HumanLanguageInterpreter {
     default String interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
         Conversation.Message message = interpreterContext.conversation().getLastMessage();
         if (message == null || message.role() != ConversationRole.USER) {
-            throw new InterpretationException("Last conversation message is not an user message");
+            throw new InterpretationException("Last conversation message is not a user message");
         }
         String response = interpret(locale, message.content());
         try {

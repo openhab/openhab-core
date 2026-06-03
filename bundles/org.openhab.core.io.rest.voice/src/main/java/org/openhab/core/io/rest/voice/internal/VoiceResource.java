@@ -130,8 +130,8 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "404", description = "Conversation or message not found") })
     public Response deleteConversation(@PathParam("id") @Parameter(description = "conversation id") String id,
             @QueryParam("messageId") @Parameter(description = "Optional message ID") @Nullable Integer messageID) {
-        Conversation conversation = conversationManager.getConversation(id);
-        if (conversation.getMessages().isEmpty()) {
+        Conversation conversation = conversationManager.getConversation(id, false);
+        if (conversation == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Conversation not found");
         }
         if (messageID != null) {
