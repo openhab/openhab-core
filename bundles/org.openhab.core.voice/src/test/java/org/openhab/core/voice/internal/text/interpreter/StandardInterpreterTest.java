@@ -46,11 +46,13 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.DimmerItem;
+import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
@@ -392,5 +394,32 @@ public class StandardInterpreterTest {
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(virtualItem.getName(), new StringType("KEY_4")));
         reset(eventPublisherMock);
+    }
+
+    @Test
+    public void openCloseBlindsTest() throws InterpretationException {
+        var blindsItem = new RollershutterItem("blinds");
+        blindsItem.setLabel("blinds");
+        List<Item> items = List.of(blindsItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "open blinds"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.UP));
+
+        reset(eventPublisherMock);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "open the blinds"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.UP));
+
+        reset(eventPublisherMock);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "close blinds"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.DOWN));
+
+        reset(eventPublisherMock);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "close the blinds"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.DOWN));
     }
 }
