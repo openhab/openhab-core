@@ -26,12 +26,12 @@ public class ConversationMessagesRemovedEvent extends ConversationEvent {
      */
     public static final String TYPE = ConversationMessagesRemovedEvent.class.getSimpleName();
 
-    private final int removedSinceMessagedId;
+    private final int removedSinceMessagesId;
 
     public ConversationMessagesRemovedEvent(String topic, String payload, @Nullable String source,
-            String conversationId, int removedSinceMessagedId) {
+            String conversationId, int removedSinceMessagesId) {
         super(topic, payload, source, conversationId);
-        this.removedSinceMessagedId = removedSinceMessagedId;
+        this.removedSinceMessagesId = removedSinceMessagesId;
     }
 
     @Override
@@ -39,8 +39,8 @@ public class ConversationMessagesRemovedEvent extends ConversationEvent {
         return TYPE;
     }
 
-    public int getRemovedSinceMessagedId() {
-        return removedSinceMessagedId;
+    public int getremovedSinceMessagesId() {
+        return removedSinceMessagesId;
     }
 
     public static class ConversationMessagesRemovedDTO extends ConversationEvent.ConversationDTO {

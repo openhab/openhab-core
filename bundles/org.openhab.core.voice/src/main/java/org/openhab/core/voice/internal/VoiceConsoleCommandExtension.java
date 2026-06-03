@@ -634,7 +634,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     private DialogContext.Builder parseDialogContext(String[] args) {
         var dialogContextBuilder = voiceManager.getDialogContextBuilder();
-        if (args.length < 2) {
+        if (args.length < 1) {
             return dialogContextBuilder;
         }
         var parameters = parseNamedParameters(args, false);

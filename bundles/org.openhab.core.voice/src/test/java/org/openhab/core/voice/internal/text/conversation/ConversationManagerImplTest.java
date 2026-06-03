@@ -214,12 +214,16 @@ public class ConversationManagerImplTest {
 
     @Test
     public void removeMessagesFromAConversationWithBlankIdDoesNotPersistToStorage() throws ConversationException {
-        String id = "event-test";
+        String id = "";
         Conversation conversation = conversationManager.getConversation(id);
         conversation.addMessage(ConversationRole.USER, "1");
         conversation.addMessage(ConversationRole.USER, "2");
+        conversation.addMessage(ConversationRole.USER, "3");
+        conversation.addMessage(ConversationRole.USER, "4");
+        conversation.addMessage(ConversationRole.USER, "5");
         clearInvocations(storage, storageService); // clear stores from setting up conversation
 
+        conversation.removeSinceMessage(3);
         conversation.removeSinceMessage(0);
         verify(storage, never()).put(eq(id), any(ConversationDTO.class));
     }

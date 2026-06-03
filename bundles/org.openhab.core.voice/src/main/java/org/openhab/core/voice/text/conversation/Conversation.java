@@ -30,7 +30,7 @@ public class Conversation {
 
     private final List<Message> messages;
     private final String id;
-    private final List<ConversationListener> listeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<ConversationListener> listeners = new CopyOnWriteArrayList<>();
     private int maxMessages = DEFAULT_MAX_MESSAGES;
 
     public Conversation(String id) {
@@ -49,9 +49,7 @@ public class Conversation {
      * @param listener the listener
      */
     public void addListener(ConversationListener listener) {
-        if (!listeners.contains(listener)) {
-            listeners.add(listener);
-        }
+        listeners.addIfAbsent(listener);
     }
 
     /**

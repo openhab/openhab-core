@@ -68,8 +68,6 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
         if (conversation != null) {
             // return same reference when possible
             return conversation;
-        } else if (!createIfMissing) {
-            return null;
         }
         synchronized (this) {
             // re-check whether conversation became active since last check
@@ -85,10 +83,12 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
                 logger.debug("Conversation '{}' found", id);
                 conversation = new Conversation(id,
                         new ArrayList<>(conversationDTO.messages().stream().map(MessageDTO::toMessage).toList()));
-            } else {
+            } else if (createIfMissing) {
                 logger.debug("Creating new conversation '{}'", id);
                 conversation = new Conversation(id);
                 eventPublisher.post(ConversationEventFactory.createConversationCreatedEvent(id, null));
+            } else {
+                return null;
             }
             conversation.addListener(this);
             conversation.setMaxMessages(historyLimit);

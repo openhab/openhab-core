@@ -190,6 +190,10 @@ public class VoiceResource implements RESTResource {
             @QueryParam("locationItem") @Parameter(description = "Location item id to contextualize the command") @Nullable String locationItem,
             @Parameter(description = "text to interpret", required = true) String text,
             @PathParam("ids") @Parameter(description = "comma separated list of interpreter ids") List<String> ids) {
+        if (voiceManager.getHLIsByIds(ids).isEmpty()) {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
+        }
+
         final Locale locale = localeService.getLocale(language);
         InterpretationArguments args = new InterpretationArguments(String.join(",", ids),
                 Objects.requireNonNullElse(conversationId, ""), llmToolIds == null ? "" : String.join(",", llmToolIds),
