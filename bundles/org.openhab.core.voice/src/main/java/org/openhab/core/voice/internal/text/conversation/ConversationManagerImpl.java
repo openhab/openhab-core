@@ -150,15 +150,19 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
 
     @Override
     public void onMessageAdded(Conversation conversation, Conversation.Message message) {
-        eventPublisher.post(ConversationEventFactory.createConversationMessageEvent(conversation.getId(), message.id(),
-                message.role(), message.content(), null));
+        eventPublisher.post(ConversationEventFactory.createConversationMessageAddedEvent(conversation.getId(),
+                message.id(), message.role(), message.content(), null));
         storeConversation(conversation);
     }
 
     @Override
-    public void onMessagesRemoved(Conversation conversation) {
+    public void onMessagesRemoved(Conversation conversation, int sinceRemovedMessagesId) {
         if (conversation.getMessages().isEmpty()) {
             removeConversation(conversation.getId());
+        } else {
+            storeConversation(conversation);
         }
+        eventPublisher.post(ConversationEventFactory.createConversationMessagesRemovedEvent(conversation.getId(),
+                sinceRemovedMessagesId, null));
     }
 }

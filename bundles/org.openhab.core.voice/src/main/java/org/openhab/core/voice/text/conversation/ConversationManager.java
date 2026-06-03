@@ -18,7 +18,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The {@link ConversationManager} is responsible for managing the lifecycle and persistence of {@link Conversation}s.
- * It automatically persists a persistable {@link Conversation} whenever a message is added.
+ *
+ * <p>
+ * Implementations should:
+ * <ul>
+ * <li>Automatically persist a persistable {@link Conversation} whenever a message is added or messages are
+ * removed.</li>
+ * <li>Emit {@link org.openhab.core.voice.text.conversation.events.ConversationEvent} implementations accordingly.</li>
+ * </ul>
  *
  * @author Florian Hotze - Initial contribution
  */

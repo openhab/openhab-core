@@ -26,76 +26,96 @@ import org.osgi.service.component.annotations.Component;
  * The {@link ConversationEventFactory} defines a {@link Event} implementation that emits conversation changes.
  *
  * @author Miguel Álvarez Díez - Initial contribution
- * @author Florian Hotze - Differ between created, removed, message events
+ * @author Florian Hotze - Differ between created, removed, message added and messages removed events
  */
 @Component(immediate = true, service = EventFactory.class)
 @NonNullByDefault
 public class ConversationEventFactory extends AbstractEventFactory {
     private static final String CONVERSATION_ADDED_TOPIC = "openhab/conversations/{id}/added";
     private static final String CONVERSATION_REMOVED_TOPIC = "openhab/conversations/{id}/removed";
-    private static final String CONVERSATION_MESSAGE_TOPIC = "openhab/conversations/{id}/message";
+    private static final String CONVERSATION_MESSAGE_ADDED_TOPIC = "openhab/conversations/{id}/messageadded";
+    private static final String CONVERSATION_MESSAGES_REMOVED_TOPIC = "openhab/conversations/{id}/messagesremoved";
 
     /**
      * Constructs a new ConversationEventFactory.
      */
     public ConversationEventFactory() {
-        super(Set.of(ConversationMessageEvent.TYPE, ConversationCreatedEvent.TYPE, ConversationRemovedEvent.TYPE));
+        super(Set.of(ConversationCreatedEvent.TYPE, ConversationRemovedEvent.TYPE, ConversationMessageAddedEvent.TYPE,
+                ConversationMessagesRemovedEvent.TYPE));
     }
 
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, @Nullable String source) {
-        if (ConversationMessageEvent.TYPE.equals(eventType)) {
-            return createConversationMessageEvent(topic, payload, source);
-        } else if (ConversationCreatedEvent.TYPE.equals(eventType)) {
+        if (ConversationCreatedEvent.TYPE.equals(eventType)) {
             return createConversationCreatedEvent(topic, payload, source);
         } else if (ConversationRemovedEvent.TYPE.equals(eventType)) {
             return createConversationRemovedEvent(topic, payload, source);
+        } else if (ConversationMessageAddedEvent.TYPE.equals(eventType)) {
+            return createConversationMessageAddedEvent(topic, payload, source);
+        } else if (ConversationMessagesRemovedEvent.TYPE.equals(eventType)) {
+            return createConversationMessagesRemovedEvent(topic, payload, source);
         }
+
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
     }
 
-    private Event createConversationMessageEvent(String topic, String payload, @Nullable String source) {
-        ConversationMessageEvent.ConversationMessageDTO messageDTO = deserializePayload(payload,
-                ConversationMessageEvent.ConversationMessageDTO.class);
-        return new ConversationMessageEvent(topic, payload, source, messageDTO.conversationUID, messageDTO.id,
-                messageDTO.role, messageDTO.text);
-    }
-
     private Event createConversationCreatedEvent(String topic, String payload, @Nullable String source) {
-        ConversationEvent.ConversationDTO addedDTO = deserializePayload(payload,
+        ConversationEvent.ConversationDTO conversationDTO = deserializePayload(payload,
                 ConversationEvent.ConversationDTO.class);
-        return new ConversationCreatedEvent(topic, payload, source, addedDTO.conversationUID);
+        return new ConversationCreatedEvent(topic, payload, source, conversationDTO.conversationId);
     }
 
     private Event createConversationRemovedEvent(String topic, String payload, @Nullable String source) {
-        ConversationEvent.ConversationDTO removedDTO = deserializePayload(payload,
+        ConversationEvent.ConversationDTO conversationDTO = deserializePayload(payload,
                 ConversationEvent.ConversationDTO.class);
-        return new ConversationRemovedEvent(topic, payload, source, removedDTO.conversationUID);
+        return new ConversationRemovedEvent(topic, payload, source, conversationDTO.conversationId);
     }
 
-    public static ConversationMessageEvent createConversationMessageEvent(String conversationId, int messageId,
-            ConversationRole role, String text, @Nullable String source) {
-        String payload = serializePayload(new ConversationMessageEvent.ConversationMessageDTO().withMessageId(messageId)
-                .withParticipant(role).withText(text));
-        return new ConversationMessageEvent(buildTopic(CONVERSATION_MESSAGE_TOPIC, conversationId), payload, source,
-                conversationId, messageId, role, text);
+    private Event createConversationMessageAddedEvent(String topic, String payload, @Nullable String source) {
+        ConversationMessageAddedEvent.ConversationMessageAddedDTO messageDTO = deserializePayload(payload,
+                ConversationMessageAddedEvent.ConversationMessageAddedDTO.class);
+        return new ConversationMessageAddedEvent(topic, payload, source, messageDTO.conversationId,
+                messageDTO.messageId, messageDTO.role, messageDTO.text);
+    }
+
+    private Event createConversationMessagesRemovedEvent(String topic, String payload, @Nullable String source) {
+        ConversationMessagesRemovedEvent.ConversationMessagesRemovedDTO messageDTO = deserializePayload(payload,
+                ConversationMessagesRemovedEvent.ConversationMessagesRemovedDTO.class);
+        return new ConversationMessagesRemovedEvent(topic, payload, source, messageDTO.conversationId,
+                messageDTO.removedSinceMessagesId);
+    }
+
+    private static String buildTopic(String template, String id) {
+        return template.replace("{id}", id);
     }
 
     public static ConversationCreatedEvent createConversationCreatedEvent(String conversationId,
             @Nullable String source) {
-        String payload = serializePayload(new ConversationEvent.ConversationDTO().withConversationUID(conversationId));
+        String payload = serializePayload(new ConversationEvent.ConversationDTO().withConversationId(conversationId));
         return new ConversationCreatedEvent(buildTopic(CONVERSATION_ADDED_TOPIC, conversationId), payload, source,
                 conversationId);
     }
 
     public static ConversationRemovedEvent createConversationRemovedEvent(String conversationId,
             @Nullable String source) {
-        String payload = serializePayload(new ConversationEvent.ConversationDTO().withConversationUID(conversationId));
+        String payload = serializePayload(new ConversationEvent.ConversationDTO().withConversationId(conversationId));
         return new ConversationRemovedEvent(buildTopic(CONVERSATION_REMOVED_TOPIC, conversationId), payload, source,
                 conversationId);
     }
 
-    static String buildTopic(String template, String id) {
-        return template.replace("{id}", id);
+    public static ConversationMessageAddedEvent createConversationMessageAddedEvent(String conversationId,
+            int messageId, ConversationRole role, String text, @Nullable String source) {
+        String payload = serializePayload(new ConversationMessageAddedEvent.ConversationMessageAddedDTO()
+                .withConversationId(conversationId).withId(messageId).withParticipant(role).withText(text));
+        return new ConversationMessageAddedEvent(buildTopic(CONVERSATION_MESSAGE_ADDED_TOPIC, conversationId), payload,
+                source, conversationId, messageId, role, text);
+    }
+
+    public static ConversationMessagesRemovedEvent createConversationMessagesRemovedEvent(String conversationId,
+            int removedSinceMessagesId, @Nullable String source) {
+        String payload = serializePayload(new ConversationMessagesRemovedEvent.ConversationMessagesRemovedDTO()
+                .withConversationId(conversationId).withRemovedSinceMessagesId(removedSinceMessagesId));
+        return new ConversationMessagesRemovedEvent(buildTopic(CONVERSATION_MESSAGES_REMOVED_TOPIC, conversationId),
+                payload, source, conversationId, removedSinceMessagesId);
     }
 }

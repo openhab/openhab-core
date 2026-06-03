@@ -17,25 +17,25 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 
 /**
- * The {@link ConversationMessageEvent} defines a {@link org.openhab.core.events.Event} implementation that emits
- * messages of a conversation.
+ * The {@link ConversationMessageAddedEvent} defines a {@link org.openhab.core.events.Event} implementation that emits
+ * on addition of a message to a conversation.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public class ConversationMessageEvent extends ConversationEvent {
+public class ConversationMessageAddedEvent extends ConversationEvent {
     /**
-     * The conversation message event type.
+     * The conversation message added event type.
      */
-    public static final String TYPE = ConversationMessageEvent.class.getSimpleName();
+    public static final String TYPE = ConversationMessageAddedEvent.class.getSimpleName();
 
     private final int messageId;
     private final ConversationRole role;
     private final String text;
 
-    public ConversationMessageEvent(String topic, String payload, @Nullable String source, String conversationUID,
+    public ConversationMessageAddedEvent(String topic, String payload, @Nullable String source, String conversationId,
             int messageId, ConversationRole role, String text) {
-        super(topic, payload, source, conversationUID);
+        super(topic, payload, source, conversationId);
         this.messageId = messageId;
         this.role = role;
         this.text = text;
@@ -58,27 +58,27 @@ public class ConversationMessageEvent extends ConversationEvent {
         return text;
     }
 
-    public static class ConversationMessageDTO extends ConversationEvent.ConversationDTO {
-        public int id = 0;
+    public static class ConversationMessageAddedDTO extends ConversationEvent.ConversationDTO {
+        public int messageId = 0;
         public ConversationRole role = ConversationRole.USER;
         public String text = "";
 
         @Override
-        public ConversationMessageDTO withConversationUID(String uid) {
-            return (ConversationMessageDTO) super.withConversationUID(uid);
+        public ConversationMessageAddedDTO withConversationId(String conversationId) {
+            return (ConversationMessageAddedDTO) super.withConversationId(conversationId);
         }
 
-        public ConversationMessageDTO withMessageId(int id) {
-            this.id = id;
+        public ConversationMessageAddedDTO withId(int id) {
+            this.messageId = id;
             return this;
         }
 
-        public ConversationMessageDTO withParticipant(ConversationRole role) {
+        public ConversationMessageAddedDTO withParticipant(ConversationRole role) {
             this.role = role;
             return this;
         }
 
-        public ConversationMessageDTO withText(String text) {
+        public ConversationMessageAddedDTO withText(String text) {
             this.text = text;
             return this;
         }

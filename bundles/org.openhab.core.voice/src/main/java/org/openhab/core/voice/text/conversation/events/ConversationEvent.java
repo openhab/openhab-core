@@ -23,7 +23,7 @@ import org.openhab.core.events.AbstractEvent;
  */
 @NonNullByDefault
 public abstract class ConversationEvent extends AbstractEvent {
-    private final String uid;
+    private final String conversationId;
 
     /**
      * Must be called in subclass constructor to create a new event.
@@ -31,24 +31,25 @@ public abstract class ConversationEvent extends AbstractEvent {
      * @param topic the topic
      * @param payload the payload
      * @param source the source
+     * @param conversationId the unique ID of the conversation
      */
-    protected ConversationEvent(String topic, String payload, @Nullable String source, String uid) {
+    protected ConversationEvent(String topic, String payload, @Nullable String source, String conversationId) {
         super(topic, payload, source);
-        this.uid = uid;
+        this.conversationId = conversationId;
     }
 
     @Override
     abstract public String getType();
 
-    public String getUid() {
-        return uid;
+    public String getConversationId() {
+        return conversationId;
     }
 
     public static class ConversationDTO {
-        public String conversationUID = "";
+        public String conversationId = "";
 
-        public ConversationDTO withConversationUID(String uid) {
-            this.conversationUID = uid;
+        public ConversationDTO withConversationId(String conversationId) {
+            this.conversationId = conversationId;
             return this;
         }
     }

@@ -34,6 +34,7 @@ public interface ConversationListener {
      * Called when messages are removed from the conversation.
      *
      * @param conversation the conversation
+     * @param removedSinceMessagesId the id of the message that messages have been removed since
      */
-    void onMessagesRemoved(Conversation conversation);
+    void onMessagesRemoved(Conversation conversation, int removedSinceMessagesId);
 }

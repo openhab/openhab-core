@@ -67,8 +67,8 @@ public class Conversation {
         listeners.forEach(l -> l.onMessageAdded(this, message));
     }
 
-    private void notifyMessagesRemoved() {
-        listeners.forEach(l -> l.onMessagesRemoved(this));
+    private void notifyMessagesRemoved(int removedSinceMessagesId) {
+        listeners.forEach(l -> l.onMessagesRemoved(this, removedSinceMessagesId));
     }
 
     /**
@@ -185,7 +185,7 @@ public class Conversation {
             }
         }
         if (removed) {
-            notifyMessagesRemoved();
+            notifyMessagesRemoved(id);
         }
         return removed;
     }
@@ -202,7 +202,7 @@ public class Conversation {
             }
         }
         if (removed) {
-            notifyMessagesRemoved();
+            notifyMessagesRemoved(0);
         }
     }
 

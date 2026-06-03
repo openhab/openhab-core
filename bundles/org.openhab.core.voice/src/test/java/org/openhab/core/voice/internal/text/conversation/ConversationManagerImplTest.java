@@ -31,7 +31,8 @@ import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.text.conversation.events.ConversationCreatedEvent;
-import org.openhab.core.voice.text.conversation.events.ConversationMessageEvent;
+import org.openhab.core.voice.text.conversation.events.ConversationMessageAddedEvent;
+import org.openhab.core.voice.text.conversation.events.ConversationMessagesRemovedEvent;
 import org.openhab.core.voice.text.conversation.events.ConversationRemovedEvent;
 
 /**
@@ -151,17 +152,45 @@ public class ConversationManagerImplTest {
 
         conversation.addMessage(ConversationRole.USER, "Hello");
 
-        verify(eventPublisher).post(any(ConversationMessageEvent.class));
+        verify(eventPublisher).post(any(ConversationMessageAddedEvent.class));
     }
 
     @Test
     public void addMessageToAConversationPersistsToStorage() throws ConversationException {
         String id = "event-test";
         Conversation conversation = conversationManager.getConversation(id);
-        clearInvocations(eventPublisher); // clear events from creating conversation
 
         conversation.addMessage(ConversationRole.USER, "Hello");
 
         verify(storage).put(eq(id), any(ConversationDTO.class));
+    }
+
+    @Test
+    public void removeMessagesFromAConversationEmitsEvent() throws ConversationException {
+        String id = "event-test";
+        Conversation conversation = conversationManager.getConversation(id);
+        conversation.addMessage(ConversationRole.USER, "1");
+        conversation.addMessage(ConversationRole.USER, "2");
+        clearInvocations(eventPublisher); // clear events from creating conversation
+
+        conversation.removeSinceMessage(0);
+
+        verify(eventPublisher).post(any(ConversationMessagesRemovedEvent.class));
+    }
+
+    @Test
+    public void removeMessagesFromAConversationPersistsToStorage() throws ConversationException {
+        String id = "event-test";
+        Conversation conversation = conversationManager.getConversation(id);
+        conversation.addMessage(ConversationRole.USER, "1");
+        conversation.addMessage(ConversationRole.USER, "2");
+        clearInvocations(storage, storageService); // clear stores from setting up conversation
+
+        conversation.removeSinceMessage(1);
+        verify(storage).put(eq(id), any(ConversationDTO.class));
+        clearInvocations(storage, storageService);
+
+        conversation.removeSinceMessage(0);
+        verify(storage).remove(eq(id));
     }
 }

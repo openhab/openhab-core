@@ -13,10 +13,11 @@
 package org.openhab.core.voice.text.conversation.events;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.events.Event;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 
 /**
@@ -26,6 +27,7 @@ import org.openhab.core.voice.text.conversation.ConversationRole;
  */
 @NonNullByDefault
 public class ConversationEventFactoryTest {
+    ConversationEventFactory factory = new ConversationEventFactory();
 
     @Test
     public void createConversationCreatedEvent() {
@@ -34,7 +36,22 @@ public class ConversationEventFactoryTest {
 
         assertEquals(ConversationCreatedEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/added", event.getTopic());
-        assertTrue(event.getPayload().contains(id));
+        assertEquals(id, event.getConversationId());
+    }
+
+    @Test
+    public void serializeDeserializeConversationCreatedEvent() {
+        String id = "conv-1";
+        ConversationCreatedEvent event = ConversationEventFactory.createConversationCreatedEvent(id, null);
+
+        Event deserialized = factory.createEventByType(event.getType(), event.getTopic(), event.getPayload(),
+                event.getSource());
+        assertInstanceOf(ConversationCreatedEvent.class, deserialized);
+        assertEquals(ConversationCreatedEvent.TYPE, deserialized.getType());
+        assertEquals(event.getTopic(), deserialized.getTopic());
+        assertEquals(event.getPayload(), deserialized.getPayload());
+        assertEquals(event.getSource(), deserialized.getSource());
+        assertEquals(id, ((ConversationCreatedEvent) deserialized).getConversationId());
     }
 
     @Test
@@ -44,21 +61,92 @@ public class ConversationEventFactoryTest {
 
         assertEquals(ConversationRemovedEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/removed", event.getTopic());
-        assertTrue(event.getPayload().contains(id));
+        assertEquals(id, event.getConversationId());
     }
 
     @Test
-    public void createConversationMessageEvent() {
+    public void serializeDeserializeConversationRemovedEvent() {
+        String id = "conv-1";
+        ConversationRemovedEvent event = ConversationEventFactory.createConversationRemovedEvent(id, null);
+
+        Event deserialized = factory.createEventByType(event.getType(), event.getTopic(), event.getPayload(),
+                event.getSource());
+        assertInstanceOf(ConversationRemovedEvent.class, deserialized);
+        assertEquals(ConversationRemovedEvent.TYPE, deserialized.getType());
+        assertEquals(event.getTopic(), deserialized.getTopic());
+        assertEquals(event.getPayload(), deserialized.getPayload());
+        assertEquals(event.getSource(), deserialized.getSource());
+        assertEquals(id, ((ConversationRemovedEvent) deserialized).getConversationId());
+    }
+
+    @Test
+    public void createConversationMessageAddedEvent() {
         String convId = "conv-1";
         int msgId = 1;
+        ConversationRole role = ConversationRole.USER;
         String text = "Hello";
-        ConversationMessageEvent event = ConversationEventFactory.createConversationMessageEvent(convId, msgId,
-                ConversationRole.USER, text, null);
+        ConversationMessageAddedEvent event = ConversationEventFactory.createConversationMessageAddedEvent(convId,
+                msgId, role, text, null);
 
-        assertEquals(ConversationMessageEvent.TYPE, event.getType());
-        assertEquals("openhab/conversations/conv-1/message", event.getTopic());
-        assertTrue(event.getPayload().contains(String.valueOf(msgId)));
-        assertTrue(event.getPayload().contains(text));
-        assertTrue(event.getPayload().contains(ConversationRole.USER.name()));
+        assertEquals(ConversationMessageAddedEvent.TYPE, event.getType());
+        assertEquals("openhab/conversations/conv-1/messageadded", event.getTopic());
+        assertEquals(convId, event.getConversationId());
+        assertEquals(msgId, event.getMessageId());
+        assertEquals(role, event.getRole());
+        assertEquals(text, event.getText());
+    }
+
+    @Test
+    public void serializeDeserializeConversationMessageAddedEvent() {
+        String convId = "conv-1";
+        int msgId = 1;
+        ConversationRole role = ConversationRole.USER;
+        String text = "Hello";
+        ConversationMessageAddedEvent event = ConversationEventFactory.createConversationMessageAddedEvent(convId,
+                msgId, role, text, null);
+
+        Event deserialized = factory.createEventByType(event.getType(), event.getTopic(), event.getPayload(),
+                event.getSource());
+        assertInstanceOf(ConversationMessageAddedEvent.class, deserialized);
+        assertEquals(ConversationMessageAddedEvent.TYPE, deserialized.getType());
+        assertEquals(event.getTopic(), deserialized.getTopic());
+        assertEquals(event.getPayload(), deserialized.getPayload());
+        assertEquals(event.getSource(), deserialized.getSource());
+        assertEquals(convId, ((ConversationMessageAddedEvent) deserialized).getConversationId());
+        assertEquals(msgId, ((ConversationMessageAddedEvent) deserialized).getMessageId());
+        assertEquals(role, ((ConversationMessageAddedEvent) deserialized).getRole());
+        assertEquals(text, ((ConversationMessageAddedEvent) deserialized).getText());
+    }
+
+    @Test
+    public void createConversationMessagesRemovedEvent() {
+        String convId = "conv-1";
+        int removedSinceMessagesId = 1;
+        ConversationMessagesRemovedEvent event = ConversationEventFactory.createConversationMessagesRemovedEvent(convId,
+                removedSinceMessagesId, null);
+
+        assertEquals(ConversationMessagesRemovedEvent.TYPE, event.getType());
+        assertEquals("openhab/conversations/conv-1/messagesremoved", event.getTopic());
+        assertEquals(convId, event.getConversationId());
+        assertEquals(removedSinceMessagesId, event.getRemovedSinceMessagedId());
+    }
+
+    @Test
+    public void serializeDeserializeConversationMessagesRemovedEvent() {
+        String convId = "conv-1";
+        int removedSinceMessagesId = 1;
+        ConversationMessagesRemovedEvent event = ConversationEventFactory.createConversationMessagesRemovedEvent(convId,
+                removedSinceMessagesId, null);
+
+        Event deserialized = factory.createEventByType(event.getType(), event.getTopic(), event.getPayload(),
+                event.getSource());
+        assertInstanceOf(ConversationMessagesRemovedEvent.class, deserialized);
+        assertEquals(ConversationMessagesRemovedEvent.TYPE, deserialized.getType());
+        assertEquals(event.getTopic(), deserialized.getTopic());
+        assertEquals(event.getPayload(), deserialized.getPayload());
+        assertEquals(event.getSource(), deserialized.getSource());
+        assertEquals(convId, ((ConversationMessagesRemovedEvent) deserialized).getConversationId());
+        assertEquals(removedSinceMessagesId,
+                ((ConversationMessagesRemovedEvent) deserialized).getRemovedSinceMessagedId());
     }
 }
