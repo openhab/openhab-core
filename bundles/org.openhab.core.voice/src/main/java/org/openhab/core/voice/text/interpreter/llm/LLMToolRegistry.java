@@ -35,7 +35,8 @@ public interface LLMToolRegistry extends Registry<LLMTool, String> {
      * @return a list of {@link LLMTool} or an empty list if none of them is available
      */
     default List<LLMTool> getByIds(@Nullable String ids) {
-        return ids == null || ids.isBlank() ? List.of() : getByIds(Arrays.asList(ids.split(",")));
+        return ids == null || ids.isBlank() ? List.of()
+                : getByIds(Arrays.stream(ids.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
     }
 
     /**

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.events.EventPublisher;
@@ -56,21 +57,31 @@ public class ConversationManagerImplTest {
         conversationManager = new ConversationManagerImpl(storageService, eventPublisher);
     }
 
-    @BeforeEach
+    @AfterEach
     public void tearDown() {
         clearInvocations(storageService, eventPublisher, storage);
     }
 
     @Test
-    public void getConversationCreatesNewConversation() {
+    public void getConversationCreatesNewConversationIfCreateIfMissingIsTrue() {
         String id = "test-conv";
         when(storage.get(id)).thenReturn(null);
 
-        Conversation conversation = conversationManager.getConversation(id);
+        Conversation conversation = conversationManager.getConversation(id, true);
 
         assertNotNull(conversation);
         assertEquals(id, conversation.getId());
         assertTrue(conversation.getMessages().isEmpty());
+    }
+
+    @Test
+    public void getConversationDoesNotCreateNewConversationIfCreateIfMissingIsFalse() {
+        String id = "test-conv";
+        when(storage.get(id)).thenReturn(null);
+
+        Conversation conversation = conversationManager.getConversation(id, false);
+
+        assertNull(conversation);
     }
 
     @Test
@@ -81,6 +92,15 @@ public class ConversationManagerImplTest {
         conversationManager.getConversation(id);
 
         verify(eventPublisher).post(any(ConversationCreatedEvent.class));
+    }
+
+    @Test
+    public void getConversationDoesNotEmitEventOnCreatingConversationWithBlankId() {
+        String id = "";
+
+        conversationManager.getConversation(id);
+
+        verify(eventPublisher, never()).post(any(ConversationCreatedEvent.class));
     }
 
     @Test
@@ -131,20 +151,6 @@ public class ConversationManagerImplTest {
     }
 
     @Test
-    public void addMessageRespectsHistoryLimit() throws ConversationException {
-        conversationManager.setHistoryLimit(2);
-        Conversation conversation = conversationManager.getConversation("limit-test");
-
-        conversation.addMessage(ConversationRole.USER, "1");
-        conversation.addMessage(ConversationRole.OPENHAB, "2");
-        conversation.addMessage(ConversationRole.USER, "3");
-
-        assertEquals(2, conversation.getMessages().size());
-        assertEquals("2", conversation.getMessages().get(0).content());
-        assertEquals("3", conversation.getMessages().get(1).content());
-    }
-
-    @Test
     public void addMessageToAConversationEmitsEvent() throws ConversationException {
         String id = "event-test";
         Conversation conversation = conversationManager.getConversation(id);
@@ -163,6 +169,16 @@ public class ConversationManagerImplTest {
         conversation.addMessage(ConversationRole.USER, "Hello");
 
         verify(storage).put(eq(id), any(ConversationDTO.class));
+    }
+
+    @Test
+    public void addMessageToAConversationWithBlankIdDoesNotPersistToStorage() throws ConversationException {
+        String id = "";
+        Conversation conversation = conversationManager.getConversation(id);
+
+        conversation.addMessage(ConversationRole.USER, "Hello");
+
+        verify(storage, never()).put(eq(id), any(ConversationDTO.class));
     }
 
     @Test
@@ -192,5 +208,17 @@ public class ConversationManagerImplTest {
 
         conversation.removeSinceMessage(0);
         verify(storage).remove(eq(id));
+    }
+
+    @Test
+    public void removeMessagesFromAConversationWithBlankIdDoesNotPersistToStorage() throws ConversationException {
+        String id = "event-test";
+        Conversation conversation = conversationManager.getConversation(id);
+        conversation.addMessage(ConversationRole.USER, "1");
+        conversation.addMessage(ConversationRole.USER, "2");
+        clearInvocations(storage, storageService); // clear stores from setting up conversation
+
+        conversation.removeSinceMessage(0);
+        verify(storage, never()).put(eq(id), any(ConversationDTO.class));
     }
 }

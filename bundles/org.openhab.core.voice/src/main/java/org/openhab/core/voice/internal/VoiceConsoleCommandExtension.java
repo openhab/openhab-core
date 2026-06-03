@@ -142,7 +142,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_LLM_TOOLS, "lists the LLM tools"),
                 buildCommandUsage(SUBCMD_CONVERSATION + " [--uid true] <conversationId>",
                         "Displays conversation messages"),
-                buildCommandUsage(SUBCMD_CONVERSATION_REMOVE + " [--uid <message-uid>] <conversationId>",
+                buildCommandUsage(SUBCMD_CONVERSATION_REMOVE + " [--message-id <message-id>] <conversationId>",
                         "Remove Conversation"));
     }
 
@@ -546,8 +546,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
         boolean printUID = "true".equals(parameters.remove("uid"));
         if (!parameters.isEmpty()) {
-            throw new IllegalStateException(
-                    "Argument" + parameters.keySet().stream().findAny().orElse("") + "is not supported");
+            console.println("Argument " + parameters.keySet().stream().findAny().orElse("") + " is not supported");
+            return;
         }
         Conversation conversation = conversationManager.getConversation(arguments[0]);
         if (conversation.getMessages().isEmpty()) {
@@ -577,10 +577,10 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             return;
         }
         @Nullable
-        String rawMessageID = parameters.remove("message");
+        String rawMessageID = parameters.remove("message-id");
         if (!parameters.isEmpty()) {
-            throw new IllegalStateException(
-                    "Argument" + parameters.keySet().stream().findAny().orElse("") + "is not supported");
+            console.println("Argument " + parameters.keySet().stream().findAny().orElse("") + " is not supported");
+            return;
         }
         Conversation conversation = conversationManager.getConversation(arguments[0]);
         if (conversation.getMessages().isEmpty()) {

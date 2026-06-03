@@ -109,27 +109,27 @@ public class VoiceResource implements RESTResource {
     }
 
     @GET
-    @Path("/conversations/{id: [a-zA-Z_0-9]+}")
+    @Path("/conversations/{id: [a-zA-Z_0-9-]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getConversationById", summary = "Get a conversation.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConversationDTO.class))),
             @ApiResponse(responseCode = "404", description = "Conversation not found") })
     public Response getConversation(@PathParam("id") @Parameter(description = "conversation id") String id) {
-        Conversation conversation = conversationManager.getConversation(id);
-        if (conversation.getMessages().isEmpty()) {
+        Conversation conversation = conversationManager.getConversation(id, false);
+        if (conversation == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No conversation found");
         }
         return Response.ok(ConversationMapper.map(conversation)).build();
     }
 
     @DELETE
-    @Path("/conversations/{id: [a-zA-Z_0-9]+}")
+    @Path("/conversations/{id: [a-zA-Z_0-9-]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "deleteConversationById", summary = "Deletes a conversation.", responses = {
+    @Operation(operationId = "deleteConversationById", summary = "Deletes a full conversation or its messages since a given message id.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Conversation or message not found") })
     public Response deleteConversation(@PathParam("id") @Parameter(description = "conversation id") String id,
-            @Parameter(description = "Optional message ID") @Nullable Integer messageID) {
+            @QueryParam("messageId") @Parameter(description = "Optional message ID") @Nullable Integer messageID) {
         Conversation conversation = conversationManager.getConversation(id);
         if (conversation.getMessages().isEmpty()) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Conversation not found");

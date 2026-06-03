@@ -73,13 +73,14 @@ public class Conversation {
 
     /**
      * Set the maximum number of messages to keep in history.
+     * At least 5 messages must be kept in the history.
      *
      * @param maxMessages the maximum number of messages
      */
     public void setMaxMessages(int maxMessages) {
-        this.maxMessages = maxMessages;
+        this.maxMessages = Math.max(5, maxMessages);
         synchronized (messages) {
-            while (messages.size() > maxMessages) {
+            while (messages.size() > this.maxMessages) {
                 messages.removeFirst();
             }
         }

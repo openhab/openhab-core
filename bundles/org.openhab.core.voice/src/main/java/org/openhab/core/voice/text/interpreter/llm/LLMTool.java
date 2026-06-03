@@ -49,7 +49,7 @@ public interface LLMTool extends Identifiable<String> {
      * Returns a short localized human-readable description of the tool.
      *
      * @param locale the locale to provide the label for
-     * @return a localized string that shorty describes the tool purpose
+     * @return a localized string that shortly describes the tool purpose
      */
     String getShortDescription(@Nullable Locale locale);
 

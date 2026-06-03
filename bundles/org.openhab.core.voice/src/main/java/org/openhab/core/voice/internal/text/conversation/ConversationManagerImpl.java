@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
@@ -55,20 +56,20 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
     }
 
     @Override
-    public Conversation getConversation(String id) {
+    public @Nullable Conversation getConversation(String id, boolean createIfMissing) {
         Conversation conversation;
         if (id.isBlank()) {
             conversation = new Conversation("");
-            conversation.addListener(this);
             conversation.setMaxMessages(historyLimit);
             return conversation;
         }
 
         conversation = activeConversations.get(id);
         if (conversation != null) {
-            conversation.setMaxMessages(historyLimit);
             // return same reference when possible
             return conversation;
+        } else if (!createIfMissing) {
+            return null;
         }
         synchronized (this) {
             // re-check whether conversation became active since last check

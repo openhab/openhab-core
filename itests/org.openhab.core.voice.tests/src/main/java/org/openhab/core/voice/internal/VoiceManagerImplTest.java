@@ -238,8 +238,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertThat(conversation.getMessages().get(1).content(), is("Interpreted text"));
         assertThat(conversation.getMessages().get(2).role(), is(ConversationRole.USER));
         assertThat(conversation.getMessages().get(2).content(), is("and close shutters"));
-        assertThat(conversation.getMessages().get(1).role(), is(ConversationRole.OPENHAB));
-        assertThat(conversation.getMessages().get(1).content(), is("Interpreted text"));
+        assertThat(conversation.getMessages().get(3).role(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(3).content(), is("Interpreted text"));
     }
 
     @Test
