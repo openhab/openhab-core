@@ -592,7 +592,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             try {
                 messageID = Integer.parseInt(rawMessageID);
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid message ID, must be a number: " + rawMessageID);
+                console.print("Invalid message ID, must be a number: " + rawMessageID);
+                return;
             }
             if (!conversation.removeSinceMessage(messageID)) {
                 console.println("No messages were removed");

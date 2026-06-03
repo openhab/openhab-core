@@ -155,7 +155,7 @@ public class Conversation {
                 }
             }
         } else if (!role.equals(ConversationRole.USER)) {
-            throw new ConversationException("First message should be an user message");
+            throw new ConversationException("First message should be a user message");
         }
         int id = lastMessage != null ? lastMessage.id() + 1 : 0;
         Message message = new Message(id, role, content);

@@ -124,7 +124,6 @@ public class VoiceResource implements RESTResource {
 
     @DELETE
     @Path("/conversations/{id: [a-zA-Z_0-9-]+}")
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "deleteConversationById", summary = "Deletes a full conversation or its messages since a given message id.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Conversation or message not found") })
@@ -141,7 +140,7 @@ public class VoiceResource implements RESTResource {
         } else {
             conversationManager.removeConversation(id);
         }
-        return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        return Response.ok().build();
     }
 
     @GET

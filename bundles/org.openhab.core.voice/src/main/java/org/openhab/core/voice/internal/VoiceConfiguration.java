@@ -19,6 +19,8 @@ import java.util.Map.Entry;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.voice.text.conversation.Conversation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link VoiceConfiguration} class holds the configuration for the {@link VoiceManagerImpl}.
@@ -27,7 +29,6 @@ import org.openhab.core.voice.text.conversation.Conversation;
  */
 @NonNullByDefault
 public class VoiceConfiguration {
-
     // the default keyword to use if no other is configured
     public static final String DEFAULT_KEYWORD = "Wakeup";
 
@@ -43,6 +44,8 @@ public class VoiceConfiguration {
     public static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
     public static final String CONFIG_PREFIX_DEFAULT_VOICE = "defaultVoice.";
     public static final String CONFIG_CONVERSATION_HISTORY_LIMIT = "conversationHistoryLimit";
+
+    private final Logger logger = LoggerFactory.getLogger(VoiceConfiguration.class);
 
     private String keyword = DEFAULT_KEYWORD;
     private @Nullable String listeningItem;
@@ -74,7 +77,9 @@ public class VoiceConfiguration {
                 this.conversationHistoryLimit = Integer
                         .parseInt(config.get(CONFIG_CONVERSATION_HISTORY_LIMIT).toString());
             } catch (NumberFormatException e) {
-                // ignore
+                logger.warn("Failed to parse {}, setting to default ({}):", CONFIG_CONVERSATION_HISTORY_LIMIT,
+                        Conversation.DEFAULT_MAX_MESSAGES, e);
+                this.conversationHistoryLimit = Conversation.DEFAULT_MAX_MESSAGES;
             }
         }
 
