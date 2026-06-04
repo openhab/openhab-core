@@ -38,6 +38,9 @@ updates:
     # to generate this list: bash
     # mvn dependency:tree |grep -v "from "|grep -e "[a-zA-Z\0-9-]\+\:[a-zA-Z\-]\+"|grep -v "dependency:.*:tree"|sed "s/\[[A-Z]*\][|\ +-]*//g"|sed "s/\[INFO\]//"|sed "s/:jar:.*//"|grep -v "The POM"|sort -u|grep -v openhab.core.|grep -v ecj|sed "s/^/      - dependency-name: \"/"|sed "s/$/\"/" >> .github/dependabot.yml
     #
+    # Reminder: do not exclude
+    # - org.apache.maven:maven-artifact
+    #
       - dependency-name: "aopalliance:aopalliance"
       - dependency-name: "biz.aQute.bnd:biz.aQute.tester.junit-platform"
       - dependency-name: "ch.qos.logback.contrib:logback-jackson"
@@ -206,7 +209,6 @@ updates:
       - dependency-name: "org.apache.maven.resolver:maven-resolver-named-locks"
       - dependency-name: "org.apache.maven.resolver:maven-resolver-spi"
       - dependency-name: "org.apache.maven.resolver:maven-resolver-util"
-      - dependency-name: "org.apache.maven:maven-artifact"
       - dependency-name: "org.apache.maven:maven-model"
       - dependency-name: "org.apache.mina:mina-core"
       - dependency-name: "org.apache.pdfbox:fontbox"
