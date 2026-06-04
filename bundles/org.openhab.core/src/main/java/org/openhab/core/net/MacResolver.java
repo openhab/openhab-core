@@ -603,4 +603,8 @@ public class MacResolver {
         ExpiringMac entry = new ExpiringMac(mac, expires);
         arpCache.put(ip, entry);
     }
+
+    Map<String, CompletableFuture<@Nullable String>> testGetPendingFutureMacs() {
+        return pendingFutureMacs;
+    }
 }

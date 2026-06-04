@@ -14,7 +14,6 @@ package org.openhab.core.net;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.Instant;
@@ -217,11 +216,7 @@ class MacResolverTest {
         String ip = "127.0.0.1";
 
         // Access private pendingFutures map
-        Field f = MacResolver.class.getDeclaredField("pendingFutureMacs");
-        f.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        Map<String, CompletableFuture<String>> pendingFutureMacs = (Map<String, CompletableFuture<String>>) f
-                .get(macResolver);
+        Map<String, CompletableFuture<@Nullable String>> pendingFutureMacs = macResolver.testGetPendingFutureMacs();
         assertNotNull(pendingFutureMacs, "pendingFutureMacs map should not be null");
 
         // Trigger two parallel resolveMac calls
@@ -236,7 +231,7 @@ class MacResolverTest {
         assertTrue(pendingFutureMacs.containsKey(ip), "pendingFutureMacs must contain the IP key");
 
         // Assert: both returned futures wrap the SAME underlying pending future
-        CompletableFuture<String> sharedFutureMac = pendingFutureMacs.get(ip);
+        CompletableFuture<@Nullable String> sharedFutureMac = pendingFutureMacs.get(ip);
         assertNotNull(sharedFutureMac, "pendingFutureMacs entry must not be null");
 
         assertFalse(futureMac1.isDone(), "futureMac1 should not be completed yet");
