@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.internal.text;
+package org.openhab.core.voice.internal.text.interpreter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openhab.core.voice.internal.text.StandardInterpreter.VOICE_SYSTEM_NAMESPACE;
-import static org.openhab.core.voice.text.AbstractRuleBasedInterpreter.IS_FORCED_CONFIGURATION;
-import static org.openhab.core.voice.text.AbstractRuleBasedInterpreter.IS_SILENT_CONFIGURATION;
-import static org.openhab.core.voice.text.AbstractRuleBasedInterpreter.IS_TEMPLATE_CONFIGURATION;
+import static org.openhab.core.voice.internal.text.interpreter.StandardInterpreter.VOICE_SYSTEM_NAMESPACE;
+import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter.IS_FORCED_CONFIGURATION;
+import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter.IS_SILENT_CONFIGURATION;
+import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter.IS_TEMPLATE_CONFIGURATION;
 
 import java.util.HashMap;
 import java.util.List;
@@ -127,7 +127,7 @@ public class StandardInterpreterTest {
         computerItem2.setLabel("Computer");
         when(locationItem.getMembers()).thenReturn(Set.of(computerItem));
         var dialogContext = new DialogContext(null, null, sttService, ttsService, null, List.of(), audioSource,
-                audioSink, Locale.ENGLISH, "", locationItem.getName(), null, null);
+                audioSink, Locale.ENGLISH, "", locationItem.getName(), null, null, null, List.of());
         List<Item> items = List.of(computerItem2, locationItem, computerItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer", dialogContext));

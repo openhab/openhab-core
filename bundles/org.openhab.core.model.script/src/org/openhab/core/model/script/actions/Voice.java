@@ -29,6 +29,7 @@ import org.openhab.core.voice.KSService;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,7 +170,7 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by the default human language interpreter", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text) {
-        return interpret(text, null);
+        return interpret(text, null, null, null);
     }
 
     /**
@@ -183,9 +184,30 @@ public class Voice {
     @ActionDoc(text = "interprets a given text by given human language interpreter(s)", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
             @ParamDoc(name = "interpreters") @Nullable String interpreters) {
+        return interpret(text, interpreters, null, null);
+    }
+
+    /**
+     * Interprets the given text with a given Human Language Interpreter.
+     *
+     * In case of interpretation error, the error message is played using the default audio sink.
+     *
+     * @param text The text to interpret
+     * @param interpreters Comma separated list of human language text interpreters to use
+     * @param conversationId The id of the conversation to use
+     * @param llmTools Comma separated list of LLM tools to use
+     */
+    @ActionDoc(text = "interprets a given text by given human language interpreter(s)", returns = "human language response")
+    public static String interpret(@ParamDoc(name = "text") Object text,
+            @ParamDoc(name = "interpreters") @Nullable String interpreters,
+            @ParamDoc(name = "conversationId") @Nullable String conversationId,
+            @ParamDoc(name = "llm-tools") @Nullable String llmTools) {
         String response;
         try {
-            response = VoiceActionService.voiceManager.interpret(text.toString(), interpreters);
+            response = VoiceActionService.voiceManager.interpret(text.toString(),
+                    new InterpretationArguments(Objects.requireNonNullElse(interpreters, ""),
+                            Objects.requireNonNullElse(conversationId, ""), Objects.requireNonNullElse(llmTools, ""),
+                            null, null));
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             say(message);
@@ -206,10 +228,12 @@ public class Voice {
      */
     @ActionDoc(text = "interprets a given text by given human language interpreter(s) and using the given sink", returns = "human language response")
     public static String interpret(@ParamDoc(name = "text") Object text,
-            @ParamDoc(name = "interpreters") String interpreters, @ParamDoc(name = "sink") @Nullable String sink) {
+            @ParamDoc(name = "interpreters") @Nullable String interpreters,
+            @ParamDoc(name = "sink") @Nullable String sink) {
         String response;
         try {
-            response = VoiceActionService.voiceManager.interpret(text.toString(), interpreters);
+            response = VoiceActionService.voiceManager.interpret(text.toString(),
+                    new InterpretationArguments(interpreters != null ? interpreters : "", "", "", null, null));
         } catch (InterpretationException e) {
             String message = Objects.requireNonNullElse(e.getMessage(), "");
             if (sink != null) {

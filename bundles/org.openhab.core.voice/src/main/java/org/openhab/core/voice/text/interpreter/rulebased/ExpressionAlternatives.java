@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.text;
+package org.openhab.core.voice.text.interpreter.rulebased;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,43 +18,37 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
- * Expression that successfully parses, if a sequence of given expressions is matching. This class is immutable.
+ * Expression that successfully parses, if one of the given alternative expressions matches. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
  */
-public final class ExpressionSequence extends Expression {
+final class ExpressionAlternatives extends Expression {
 
     private List<Expression> subExpressions;
 
     /**
      * Constructs a new instance.
      *
-     * @param subExpressions the sub expressions that are parsed in the given order
+     * @param subExpressions the sub expressions that are tried/parsed as alternatives in the given order
      */
-    public ExpressionSequence(Expression... subExpressions) {
+    public ExpressionAlternatives(Expression... subExpressions) {
         this.subExpressions = List.of(Arrays.copyOf(subExpressions, subExpressions.length));
     }
 
     @Override
-    ASTNode parse(ResourceBundle language, TokenList tokenList) {
-        TokenList list = tokenList;
-        int l = subExpressions.size();
+    ASTNode parse(ResourceBundle language, TokenList list) {
         ASTNode node = new ASTNode(), cr;
-        ASTNode[] children = new ASTNode[l];
-        Object[] values = new Object[l];
-        for (int i = 0; i < l; i++) {
-            cr = children[i] = subExpressions.get(i).parse(language, list);
-            if (!cr.isSuccess()) {
+        for (Expression subExpression : subExpressions) {
+            cr = subExpression.parse(language, list);
+            if (cr.isSuccess()) {
+                node.setChildren(new ASTNode[] { cr });
+                node.setRemainingTokens(cr.getRemainingTokens());
+                node.setSuccess(true);
+                node.setValue(cr.getValue());
+                generateValue(node);
                 return node;
             }
-            values[i] = cr.getValue();
-            list = cr.getRemainingTokens();
         }
-        node.setChildren(children);
-        node.setRemainingTokens(list);
-        node.setSuccess(true);
-        node.setValue(values);
-        generateValue(node);
         return node;
     }
 
@@ -65,14 +59,10 @@ public final class ExpressionSequence extends Expression {
 
     @Override
     boolean collectFirsts(ResourceBundle language, Set<String> firsts) {
-        boolean blocking = false;
+        boolean blocking = true;
         for (Expression e : subExpressions) {
-            blocking = e.collectFirsts(language, firsts);
-            if (blocking) {
-                break;
-            }
+            blocking = blocking && e.collectFirsts(language, firsts);
         }
-
         return blocking;
     }
 
@@ -82,6 +72,6 @@ public final class ExpressionSequence extends Expression {
         for (Expression e : subExpressions) {
             s = s == null ? e.toString() : (s + ", " + e.toString());
         }
-        return "seq(" + s + ")";
+        return "alt(" + s + ")";
     }
 }

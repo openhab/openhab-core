@@ -23,6 +23,7 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 
 /**
@@ -120,7 +121,7 @@ public interface VoiceManager {
      * Interprets the passed string using the default services for HLI and locale.
      *
      * @param text The text to interpret
-     * @throws InterpretationException
+     * @throws InterpretationException when unable to succeed.
      * @return a human language response
      */
     String interpret(String text) throws InterpretationException;
@@ -133,7 +134,18 @@ public interface VoiceManager {
      * @throws InterpretationException
      * @return a human language response
      */
+    @Deprecated
     String interpret(String text, @Nullable String hliIdList) throws InterpretationException;
+
+    /**
+     * Interprets the passed string using a particular HLI service and the default locale.
+     *
+     * @param text The text to interpret
+     * @param args instance of {@link InterpretationArguments} with the options for this execution.
+     * @throws InterpretationException when unable to succeed.
+     * @return a human language response
+     */
+    String interpret(String text, @Nullable InterpretationArguments args) throws InterpretationException;
 
     /**
      * Determines the preferred voice for the currently set locale
@@ -332,7 +344,7 @@ public interface VoiceManager {
      * Retrieves a HumanLanguageInterpreter collection.
      * If no services are available returns an empty list.
      *
-     * @param ids List of HLI service ids to use or null
+     * @param ids List of HLI service ids to use
      * @return a List<HumanLanguageInterpreter> or empty, if none of the services is available
      */
     List<HumanLanguageInterpreter> getHLIsByIds(List<String> ids);

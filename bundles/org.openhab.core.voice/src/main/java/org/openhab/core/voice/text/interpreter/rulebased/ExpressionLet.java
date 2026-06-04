@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.text;
+package org.openhab.core.voice.text.interpreter.rulebased;
 
 import java.util.List;
 import java.util.ResourceBundle;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.text;
+package org.openhab.core.voice.text.interpreter.rulebased;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -46,7 +46,13 @@ import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
-import org.openhab.core.voice.DialogContext;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.InterpretationResult;
+import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationException;
+import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,12 +187,26 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     @Override
     public String interpret(Locale locale, String text) throws InterpretationException {
-        return interpret(locale, text, null);
+        return interpret(locale, text, (String) null);
     }
 
     @Override
-    public String interpret(Locale locale, String text, @Nullable DialogContext dialogContext)
-            throws InterpretationException {
+    public String interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
+        Conversation.Message message = interpreterContext.conversation().getLastMessage();
+        if (message == null || message.role() != ConversationRole.USER) {
+            throw new InterpretationException("Last conversation message is not an user message");
+        }
+        String response = interpret(locale, message.content(), interpreterContext.locationItem());
+        try {
+            interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
+        } catch (ConversationException e) {
+            String errMsg = e.getMessage();
+            throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+        }
+        return response;
+    }
+
+    private String interpret(Locale locale, String text, @Nullable String locationItem) throws InterpretationException {
         ResourceBundle language = ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale);
         Rule[] rules = getRules(locale);
         if (rules.length == 0) {
@@ -200,7 +220,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         InterpretationResult result;
 
         InterpretationResult lastResult = null;
-        String locationItem = dialogContext != null ? dialogContext.locationItem() : null;
         for (Rule rule : rules) {
             if ((result = rule.execute(language, tokens, locationItem)).isSuccess()) {
                 return result.getResponse();
