@@ -281,8 +281,8 @@ public class MacResolver {
                         } catch (Exception ignore) {
                             // don't care if send fails; all that matters is the prior ARP resolution
                         }
+                        break; // only need to send one packet per interface even if there are multiple addresses
                     }
-                    break; // only need to send one packet per interface even if there are multiple addresses
                 }
             }
         } catch (UnknownHostException ignore) {

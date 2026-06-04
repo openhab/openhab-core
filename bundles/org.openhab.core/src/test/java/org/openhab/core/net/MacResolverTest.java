@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +42,11 @@ class MacResolverTest {
     void setup() throws Exception {
         macResolver.activate();
         macResolver.testClearCache();
+    }
+
+    @AfterEach
+    void teardown() throws Exception {
+        macResolver.deactivate();
     }
 
     // -----------------------------
