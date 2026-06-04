@@ -42,7 +42,9 @@ import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.DialogRegistration;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -153,16 +155,16 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     public void interpretSomethingWithGivenHliIdWhenTheHliIsARegisteredService() throws InterpretationException {
         hliStub = new HumanLanguageInterpreterStub();
         registerService(hliStub);
-
-        String result = voiceManager.interpret("something", hliStub.getId());
+        String result = voiceManager.interpret("something",
+                new InterpretationArguments(hliStub.getId(), "", "", "", null));
         assertThat(result, is("Interpreted text"));
     }
 
     @Test
     public void interpretSomethingWithGivenHliIdEhenTheHliIsNotARegisteredService() throws InterpretationException {
         hliStub = new HumanLanguageInterpreterStub();
-
-        assertThrows(InterpretationException.class, () -> voiceManager.interpret("something", hliStub.getId()));
+        assertThrows(InterpretationException.class, () -> voiceManager.interpret("something",
+                new InterpretationArguments(hliStub.getId(), "", "", "", null)));
     }
 
     @Test
@@ -179,7 +181,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         // Wait some time to be sure that the configuration will be updated
         Thread.sleep(2000);
 
-        String result = voiceManager.interpret("something", null);
+        String result = voiceManager.interpret("something");
         assertThat(result, is("Interpreted text"));
     }
 
@@ -190,9 +192,54 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         hliStub.setExceptionExpected(true);
         var anotherHLIStub = new HumanLanguageInterpreterStub();
         registerService(anotherHLIStub);
-        String result = voiceManager.interpret("something",
-                String.join(",", List.of(hliStub.getId(), anotherHLIStub.getId())));
+        String result = voiceManager.interpret("something", new InterpretationArguments(
+                String.join(",", List.of(hliStub.getId(), anotherHLIStub.getId())), "", "", "", null));
         assertThat(result, is("Interpreted text"));
+    }
+
+    @Test
+    public void interpretWithConversation() throws InterpretationException {
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(hliStub);
+        String convId = "conv-1";
+
+        String result = voiceManager.interpret("hello",
+                new InterpretationArguments(hliStub.getId(), convId, "", "", null));
+        assertThat(result, is("Interpreted text"));
+
+        // Verify conversation was updated
+        var conversationManager = getService(org.openhab.core.voice.text.conversation.ConversationManager.class);
+        assertNotNull(conversationManager, "ConversationManager service should be available");
+        var conversation = conversationManager.getConversation(convId);
+        assertThat(conversation.getMessages().size(), is(2));
+        assertThat(conversation.getMessages().get(0).role(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(0).content(), is("hello"));
+        assertThat(conversation.getMessages().get(1).role(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).content(), is("Interpreted text"));
+    }
+
+    @Test
+    public void testMultiTurnConversation() throws InterpretationException {
+        hliStub = new HumanLanguageInterpreterStub();
+        registerService(hliStub);
+        String convId = "multi-turn";
+
+        voiceManager.interpret("turn on light", new InterpretationArguments(hliStub.getId(), convId, "", "", null));
+        voiceManager.interpret("and close shutters",
+                new InterpretationArguments(hliStub.getId(), convId, "", "", null));
+
+        var conversationManager = getService(org.openhab.core.voice.text.conversation.ConversationManager.class);
+        assertNotNull(conversationManager, "ConversationManager service should be available");
+        var conversation = conversationManager.getConversation(convId);
+        assertThat(conversation.getMessages().size(), is(4));
+        assertThat(conversation.getMessages().get(0).role(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(0).content(), is("turn on light"));
+        assertThat(conversation.getMessages().get(1).role(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).content(), is("Interpreted text"));
+        assertThat(conversation.getMessages().get(2).role(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(2).content(), is("and close shutters"));
+        assertThat(conversation.getMessages().get(3).role(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(3).content(), is("Interpreted text"));
     }
 
     @Test
@@ -627,6 +674,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         Thread.sleep(2000);
         // Add a dialog registration
         var dialogRegistration = new DialogRegistration(source.getId(), sink.getId());
+        dialogRegistration.conversationId = "registered-dialog-conversation";
         voiceManager.registerDialog(dialogRegistration);
         // Wait some time to be sure dialog build has been fired and check dialog has been started
         Thread.sleep(6000);
@@ -641,6 +689,14 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertThat(hliStub.getAnswer(), is("Interpreted text"));
         assertThat(ttsService.getSynthesized(), is("Interpreted text"));
         assertTrue(sink.getIsStreamProcessed());
+        var conversationManager = getService(org.openhab.core.voice.text.conversation.ConversationManager.class);
+        assertNotNull(conversationManager, "ConversationManager service should be available");
+        var conversation = conversationManager.getConversation("registered-dialog-conversation");
+        assertThat(conversation.getMessages().size(), is(2));
+        assertThat(conversation.getMessages().get(0).role(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(0).content(), is("Recognized text"));
+        assertThat(conversation.getMessages().get(1).role(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).content(), is("Interpreted text"));
         // Remove the dialog registration
         voiceManager.unregisterDialog(dialogRegistration);
         // Assert dialog has been stopped

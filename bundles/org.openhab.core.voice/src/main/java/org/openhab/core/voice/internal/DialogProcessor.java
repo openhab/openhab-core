@@ -59,6 +59,12 @@ import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationException;
+import org.openhab.core.voice.text.conversation.ConversationManager;
+import org.openhab.core.voice.text.conversation.ConversationRole;
+import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +89,7 @@ public class DialogProcessor implements KSListener, STTListener {
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
     private final WeakHashMap<String, DialogContext> activeDialogGroups;
     public final DialogContext dialogContext;
+    private final ConversationManager conversationManager;
     private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
@@ -111,11 +118,13 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable ToneSynthesizer toneSynthesizer;
 
     public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
-            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider, Bundle bundle) {
+            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider,
+            ConversationManager conversationManager, Bundle bundle) {
         this.dialogContext = context;
         this.eventListener = eventListener;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
+        this.conversationManager = conversationManager;
         this.activeDialogGroups = activeDialogGroups;
         this.bundle = bundle;
         var dt = context.dt();
@@ -358,17 +367,33 @@ public class DialogProcessor implements KSListener, STTListener {
                 logger.debug("Text recognized: {}", question);
                 toggleProcessing(false);
                 eventListener.onBeforeDialogInterpretation(dialogContext);
-                String answer = "";
+                @Nullable
+                String conversationId = dialogContext.conversationId();
+                Conversation conversation = conversationManager
+                        .getConversation(Objects.requireNonNullElse(conversationId, ""));
                 String error = null;
-                for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
-                    try {
-                        answer = interpreter.interpret(dialogContext.locale(), question, dialogContext);
-                        logger.debug("Interpretation result: {}", answer);
-                        error = null;
-                        break;
-                    } catch (InterpretationException e) {
-                        logger.debug("Interpretation exception: {}", e.getMessage());
-                        error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
+                String answer = "";
+                try {
+                    conversation.addMessage(ConversationRole.USER, question);
+                } catch (ConversationException e) {
+                    logger.debug("Unable to add message to conversation: {}", e.getMessage(), e);
+                    error = "Unable to add message to conversation: " + e.getMessage();
+                }
+                if (error == null) {
+                    List<LLMTool> tools = dialogContext.llmTools();
+                    InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
+                            dialogContext.locationItem());
+                    for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
+                        try {
+                            answer = interpreter.interpret(dialogContext.locale(), interpreterContext);
+                            error = null;
+                            logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(),
+                                    answer);
+                            break;
+                        } catch (InterpretationException e) {
+                            logger.debug("Interpretation exception: {}", e.getMessage());
+                            error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
+                        }
                     }
                 }
                 say(error != null ? error : answer);

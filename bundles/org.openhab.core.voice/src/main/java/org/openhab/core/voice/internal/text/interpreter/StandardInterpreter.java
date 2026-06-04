@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.internal.text;
+package org.openhab.core.voice.internal.text.interpreter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,10 +41,10 @@ import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.TypeParser;
-import org.openhab.core.voice.text.AbstractRuleBasedInterpreter;
-import org.openhab.core.voice.text.Expression;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
-import org.openhab.core.voice.text.Rule;
+import org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter;
+import org.openhab.core.voice.text.interpreter.rulebased.Expression;
+import org.openhab.core.voice.text.interpreter.rulebased.Rule;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

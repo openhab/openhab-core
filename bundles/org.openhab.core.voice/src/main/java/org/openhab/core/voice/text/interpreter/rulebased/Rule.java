@@ -10,12 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.text;
+package org.openhab.core.voice.text.interpreter.rulebased;
 
 import java.util.ResourceBundle;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.voice.text.InterpretationResult;
 
 /**
  * Represents an expression plus action code that will be executed after successful parsing. This class is immutable and

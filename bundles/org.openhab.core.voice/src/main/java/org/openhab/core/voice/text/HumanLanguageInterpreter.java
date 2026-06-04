@@ -18,6 +18,9 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.voice.DialogContext;
+import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationException;
+import org.openhab.core.voice.text.conversation.ConversationRole;
 
 /**
  * This is the interface that a human language text interpreter has to implement.
@@ -59,9 +62,35 @@ public interface HumanLanguageInterpreter {
      * @param text the text to interpret
      * @return a human language response
      */
+    @Deprecated
     default String interpret(Locale locale, String text, @Nullable DialogContext dialogContext)
             throws InterpretationException {
         return interpret(locale, text);
+    }
+
+    /**
+     * Continues the conversation provided in the {@link InterpreterContext} argument given a {@link Locale}.
+     *
+     * @implNote Implementations must add the response to the {@link Conversation} provided in the
+     *           {@link InterpreterContext} before returning it.
+     *
+     * @param locale language of the text (given by a {@link Locale})
+     * @param interpreterContext the context for the interpretation
+     * @return a human language response
+     */
+    default String interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
+        Conversation.Message message = interpreterContext.conversation().getLastMessage();
+        if (message == null || message.role() != ConversationRole.USER) {
+            throw new InterpretationException("Last conversation message is not a user message");
+        }
+        String response = interpret(locale, message.content());
+        try {
+            interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
+        } catch (ConversationException e) {
+            String errMsg = e.getMessage();
+            throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+        }
+        return response;
     }
 
     /**

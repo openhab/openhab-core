@@ -65,6 +65,11 @@
 				the TTS without storing it. 0 for no limit.</description>
 			<default>150</default>
 		</parameter>
+		<parameter name="conversationHistoryLimit" type="integer" min="5" step="5">
+			<label>Conversation History Limit</label>
+			<description>The maximum number of messages to keep in a conversation history.</description>
+			<default>50</default>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>
