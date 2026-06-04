@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -36,6 +37,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -70,8 +72,9 @@ public class MacResolver {
     private static final Duration CACHE_VALIDITY_DURATION = Duration.ofMinutes(7);
     private static final Duration SAFETY_MARGIN = Duration.ofMillis(300);
     private static final Duration BACKEND_TASK_RUN_INTERVAL = PING_TIMEOUT.plus(SAFETY_MARGIN);
-    private static final Duration RESOLVE_MAC_TIMEOUT = PING_TIMEOUT.plus(BACKEND_TASK_RUN_INTERVAL)
-            .plus(ARP_LOAD_PROCESS_TIMEOUT).plus(SAFETY_MARGIN);
+
+    private static final Duration RESOLVE_MAC_TIMEOUT = //
+            BACKEND_TASK_RUN_INTERVAL.plus(ARP_LOAD_PROCESS_TIMEOUT).plus(SAFETY_MARGIN);
 
     private static final Pattern MAC_PATTERN = Pattern.compile("([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}");
     private static final Pattern IP_PATTERN = Pattern
@@ -241,7 +244,7 @@ public class MacResolver {
                 .computeIfAbsent(ip, targetIp -> {
                     CompletableFuture<@Nullable String> commonBaseFutureMac = new CompletableFuture<>();
                     startBackEndTaskSchedule();
-                    frontEndExecutor.submit(() -> triggerARPTableUpdate(targetIp));
+                    triggerArpTableUpdate(targetIp);
                     return commonBaseFutureMac;
                 })) //
                 .completeOnTimeout(null, RESOLVE_MAC_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
@@ -252,27 +255,23 @@ public class MacResolver {
     }
 
     /**
-     * Triggers the operating system to update its ARP table for the given IP address by performing a probe. The probe
-     * method is chosen based on the operating system and may involve an interface-scoped ARP ping or a system ping.
-     * The method waits for the probe to complete to allow time for the OS to populate its ARP table before the back
-     * end task starts to load it into the in-memory cache.
+     * Triggers the operating system to update its ARP table for the given IP address by performing probes. The probe
+     * method(s) are chosen based on the operating system and may involve interface scoped ARP pings or system pings.
      * 
      * @param ip the target IP address to trigger ARP resolution for
      */
-    private void triggerARPTableUpdate(String ip) {
-        CompletableFuture<Boolean> probe;
+    private void triggerArpTableUpdate(String ip) {
         switch (OS_TYPE) {
             case LINUX:
-                CompletableFuture<Boolean> interFaceArp = doInterfaceArpPing(PING_TIMEOUT, ip);
-                CompletableFuture<Boolean> fallbackIcmp = doSystemPing(PING_TIMEOUT, ip);
-                // we don't care about success, it is enough to trigger OS ARP resolution anyway
-                probe = CompletableFuture.anyOf(interFaceArp, fallbackIcmp).thenApply(r -> true);
-                break;
+                // one 'arping' per network interface
+                for (NetworkInterface networkInterface : getCandidateInterfaces(ip)) {
+                    frontEndExecutor.submit(() -> doInterfaceArpPing(PING_TIMEOUT, networkInterface, ip));
+                }
+                // fall through i.e. also do one global 'ping'
+            case MAC_OS, WINDOWS:
+                frontEndExecutor.submit(() -> doSystemPing(PING_TIMEOUT, ip));
             default:
-                probe = doSystemPing(PING_TIMEOUT, ip);
         }
-        // wait for probe completion to trigger OS ARP resolution and allow time for it to complete
-        probe.join();
     }
 
     /**
@@ -282,16 +281,13 @@ public class MacResolver {
      */
     private boolean isOnLocalSubnet(String ip) {
         try {
-            InetAddress target = InetAddress.getByName(ip);
-            for (NetworkInterface nif : Collections.list(NetworkInterface.getNetworkInterfaces())) {
-                if (interfaceMatchesSubnet(nif, target)) {
-                    return true;
-                }
-            }
+            InetAddress ipv4 = InetAddress.getByName(ip);
+            return Optional.ofNullable(NetworkInterface.getNetworkInterfaces()).map(en -> Collections.list(en).stream())
+                    .orElseGet(Stream::empty).anyMatch(nif -> interfaceMatchesSubnet(nif, ipv4));
         } catch (Exception e) {
             logger.debug("Sub-net check failed for {}", ip, e);
+            return false;
         }
-        return false;
     }
 
     /**
@@ -301,16 +297,18 @@ public class MacResolver {
      */
     private List<NetworkInterface> getCandidateInterfaces(String ip) {
         try {
-            InetAddress target = InetAddress.getByName(ip);
-            return Collections.list(NetworkInterface.getNetworkInterfaces()).stream().filter(nif -> {
-                try {
-                    return nif.isUp() && !nif.isLoopback() && interfaceMatchesSubnet(nif, target);
-                } catch (Exception ignored) {
-                    return false;
-                }
-            }).toList();
+            InetAddress ipv4 = InetAddress.getByName(ip);
+            return Optional.ofNullable(NetworkInterface.getNetworkInterfaces()).map(en -> Collections.list(en).stream())
+                    .orElseGet(Stream::empty).filter(nif -> {
+                        try {
+                            return nif.isUp() && !nif.isLoopback() && interfaceMatchesSubnet(nif, ipv4);
+                        } catch (Exception ignored) {
+                            return false;
+                        }
+                    }).toList();
         } catch (Exception e) {
-            return Collections.emptyList();
+            logger.debug("Candidate interface check failed for {}", ip, e);
+            return List.of();
         }
     }
 
@@ -368,35 +366,22 @@ public class MacResolver {
     }
 
     /**
-     * Performs an interface-scoped ARP probe using the {@code arping} command on all candidate interfaces that are on
-     * the same sub-net as the target IP. This is only implemented for Linux where {@code arping} is available. This
-     * more reliably triggers OS ARP resolution where perhaps a system ping probe might not work. The {@code arping}
-     * command is executed for each candidate interface until one succeeds. The method returns true if any of the
-     * {@code arping} commands succeeds (exit code 0), false otherwise. Albeit the success of the probe is not critical
-     * for OS ARP resolution as long as it has triggered the OS to populate its ARP table.
+     * Performs an interface-scoped ARP probe using the {@code arping} command on the given interface. This is only
+     * implemented for Linux where {@code arping} is available. This more reliably triggers OS ARP resolution where
+     * perhaps a system ping probe might not work. The {@code arping} command is executed for each candidate interface
+     * until one succeeds. The method returns true if any of the {@code arping} commands succeeds (exit code 0), false
+     * otherwise. Albeit the success of the probe is not critical for OS ARP resolution as long as it has triggered the
+     * OS to populate its ARP table.
      * 
      * @param timeout the duration to wait for the probe to complete
+     * @param networkInterface the network interface to use for the ARP ping
      * @param ip the target IP address to be probed
      * 
-     * @return a future that completes with true if any of the {@code arping} commands succeeds, false otherwise
+     * @return true if the ARP ping succeeds, false otherwise
      */
-    private CompletableFuture<Boolean> doInterfaceArpPing(Duration timeout, String ip) {
-        return CompletableFuture.supplyAsync(() -> switch (OS_TYPE) {
-            case LINUX -> {
-                List<NetworkInterface> interfaces = getCandidateInterfaces(ip);
-                if (interfaces.isEmpty()) {
-                    yield false;
-                }
-                String seconds = String.valueOf(timeout.toSeconds());
-                for (NetworkInterface nif : interfaces) {
-                    if (runCommand(timeout, "arping", "-I", nif.getName(), "-c", "1", "-w", seconds, ip)) {
-                        yield true;
-                    }
-                }
-                yield false;
-            }
-            default -> false;
-        }, frontEndExecutor);
+    private boolean doInterfaceArpPing(Duration timeout, NetworkInterface networkInterface, String ip) {
+        String name = networkInterface.getName();
+        return runCommand(timeout, "arping", "-I", name, "-c", "1", "-w", String.valueOf(timeout.toSeconds()), ip);
     }
 
     /**
@@ -408,15 +393,15 @@ public class MacResolver {
      * @param timeout the duration to wait for the probe to complete
      * @param ip the target IP address to be probed
      * 
-     * @return a future that completes with true if the {@code ping} command succeeds, false otherwise
+     * @return true if the ARP ping succeeds, false otherwise
      */
-    private CompletableFuture<Boolean> doSystemPing(Duration timeout, String ip) {
-        return CompletableFuture.supplyAsync(() -> switch (OS_TYPE) {
+    private boolean doSystemPing(Duration timeout, String ip) {
+        return switch (OS_TYPE) {
             case WINDOWS -> runCommand(timeout, "ping", "-n", "1", "-w", String.valueOf(timeout.toMillis()), ip);
             case MAC_OS -> runCommand(timeout, "ping", "-c", "1", "-W", String.valueOf(timeout.toMillis()), ip);
             case LINUX -> runCommand(timeout, "ping", "-c", "1", "-W", String.valueOf(timeout.toSeconds()), ip);
             default -> false;
-        }, frontEndExecutor);
+        };
     }
 
     /**
@@ -623,7 +608,8 @@ public class MacResolver {
         if (process == null) {
             return;
         }
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 parseLine(line);
