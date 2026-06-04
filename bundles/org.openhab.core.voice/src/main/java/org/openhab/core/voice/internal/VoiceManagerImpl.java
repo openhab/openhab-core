@@ -1098,6 +1098,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                                 .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
                                 .withLocale(dr.locale) //
                                 .withDialogGroup(dr.dialogGroup) //
+                                .withConversationId(dr.conversationId) //
                                 .withLocationItem(dr.locationItem) //
                                 .withListeningItem(dr.listeningItem) //
                                 .withMelody(dr.listeningMelody) //

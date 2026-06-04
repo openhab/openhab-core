@@ -13,6 +13,13 @@
 package org.openhab.core.voice.text.conversation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -40,5 +47,49 @@ public class ConversationTest {
         assertEquals(5, conversation.getMessages().size());
         assertEquals("3", conversation.getMessages().get(0).content());
         assertEquals("4", conversation.getMessages().get(1).content());
+    }
+
+    @Test
+    public void concurrentAddsWithSamePreviousMessageIdAllowOnlyOneAppend() throws Exception {
+        Conversation conversation = new Conversation("conversation");
+        int previousMessageId = conversation.addMessage(ConversationRole.USER, "question");
+        int attempts = 20;
+        CountDownLatch ready = new CountDownLatch(attempts);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(attempts);
+        AtomicInteger successes = new AtomicInteger();
+        ExecutorService executor = Executors.newFixedThreadPool(attempts);
+
+        try {
+            for (int i = 0; i < attempts; i++) {
+                executor.submit(() -> {
+                    ready.countDown();
+                    try {
+                        if (start.await(5, TimeUnit.SECONDS)) {
+                            try {
+                                conversation.addMessage(ConversationRole.OPENHAB, "answer", previousMessageId);
+                                successes.incrementAndGet();
+                            } catch (ConversationException ignored) {
+                                // Expected for stale concurrent appends.
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        done.countDown();
+                    }
+                });
+            }
+
+            assertTrue(ready.await(5, TimeUnit.SECONDS));
+            start.countDown();
+            assertTrue(done.await(5, TimeUnit.SECONDS));
+        } finally {
+            executor.shutdownNow();
+        }
+
+        assertEquals(1, successes.get());
+        assertEquals(2, conversation.getMessages().size());
+        assertEquals(1, conversation.getMessages().get(1).id());
     }
 }

@@ -141,35 +141,36 @@ public class Conversation {
      */
     public int addMessage(ConversationRole role, String content, @Nullable Integer prevMessageID)
             throws ConversationException {
-        @Nullable
-        Message lastMessage = getLastMessage();
-        if (lastMessage != null) {
-            if (prevMessageID != null && prevMessageID != lastMessage.id()) {
-                throw new ConversationException("Conversation has changed");
-            }
-            if (role == ConversationRole.TOOL_RETURN) {
-                if (lastMessage.role() != ConversationRole.TOOL_CALL) {
-                    throw new ConversationException("Tool result should be after tool call");
-                }
-            }
-        } else if (!role.equals(ConversationRole.USER)) {
-            throw new ConversationException("First message should be a user message");
-        }
-        int id = lastMessage != null ? lastMessage.id() + 1 : 0;
-        Message message = new Message(id, role, content);
+        Message message;
         synchronized (messages) {
+            @Nullable
+            Message lastMessage = messages.isEmpty() ? null : messages.getLast();
+            if (lastMessage != null) {
+                if (prevMessageID != null && prevMessageID != lastMessage.id()) {
+                    throw new ConversationException("Conversation has changed");
+                }
+                if (role == ConversationRole.TOOL_RETURN) {
+                    if (lastMessage.role() != ConversationRole.TOOL_CALL) {
+                        throw new ConversationException("Tool result should be after tool call");
+                    }
+                }
+            } else if (!role.equals(ConversationRole.USER)) {
+                throw new ConversationException("First message should be a user message");
+            }
+            int id = lastMessage != null ? lastMessage.id() + 1 : 0;
+            message = new Message(id, role, content);
             while (messages.size() >= maxMessages) {
                 messages.removeFirst();
             }
             messages.add(message);
         }
         notifyMessageAdded(message);
-        return id;
+        return message.id();
     }
 
     /**
      * Removes a specific messages and all subsequent messages from the conversation.
-     * 
+     *
      * @param id the ID of the message and its successors to remove
      * @return whether an actual removal happened
      */
@@ -211,7 +212,7 @@ public class Conversation {
 
     /**
      * A message.
-     * 
+     *
      * @param id the ID of the message
      * @param role the role that authored the message
      * @param content the content of the message

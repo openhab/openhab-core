@@ -674,6 +674,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         Thread.sleep(2000);
         // Add a dialog registration
         var dialogRegistration = new DialogRegistration(source.getId(), sink.getId());
+        dialogRegistration.conversationId = "registered-dialog-conversation";
         voiceManager.registerDialog(dialogRegistration);
         // Wait some time to be sure dialog build has been fired and check dialog has been started
         Thread.sleep(6000);
@@ -688,6 +689,14 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertThat(hliStub.getAnswer(), is("Interpreted text"));
         assertThat(ttsService.getSynthesized(), is("Interpreted text"));
         assertTrue(sink.getIsStreamProcessed());
+        var conversationManager = getService(org.openhab.core.voice.text.conversation.ConversationManager.class);
+        assertNotNull(conversationManager, "ConversationManager service should be available");
+        var conversation = conversationManager.getConversation("registered-dialog-conversation");
+        assertThat(conversation.getMessages().size(), is(2));
+        assertThat(conversation.getMessages().get(0).role(), is(ConversationRole.USER));
+        assertThat(conversation.getMessages().get(0).content(), is("Recognized text"));
+        assertThat(conversation.getMessages().get(1).role(), is(ConversationRole.OPENHAB));
+        assertThat(conversation.getMessages().get(1).content(), is("Interpreted text"));
         // Remove the dialog registration
         voiceManager.unregisterDialog(dialogRegistration);
         // Assert dialog has been stopped
