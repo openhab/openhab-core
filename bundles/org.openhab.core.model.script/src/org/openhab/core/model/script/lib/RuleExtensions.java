@@ -20,7 +20,7 @@ import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleManager;
 
 /**
- * {@link ItemExtensions} provides DSL {@link Rule} extensions.
+ * {@link RuleExtensions} provides DSL {@link Rule} extensions.
  *
  * @author Ravi Nadahar - Initial contribution
  */

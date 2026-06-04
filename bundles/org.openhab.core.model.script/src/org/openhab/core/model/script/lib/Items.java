@@ -141,7 +141,7 @@ public class Items {
      * @throws IllegalStateException If no {@code ManagedProvider} is available.
      */
     public static void addMetadata(String itemName, String namespace, String value) {
-        addMetadata(itemName, namespace, value, (String) null);
+        addMetadata(itemName, namespace, value, (Map<String, Object>) null);
     }
 
     /**

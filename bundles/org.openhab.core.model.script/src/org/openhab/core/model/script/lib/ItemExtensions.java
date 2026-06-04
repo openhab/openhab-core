@@ -47,7 +47,7 @@ public class ItemExtensions {
      * @throws IllegalStateException If no {@code ManagedProvider} is available.
      */
     public static void addMetadata(Item item, String namespace, String value) {
-        Items.addMetadata(item.getName(), namespace, value, (String) null);
+        Items.addMetadata(item.getName(), namespace, value);
     }
 
     /**

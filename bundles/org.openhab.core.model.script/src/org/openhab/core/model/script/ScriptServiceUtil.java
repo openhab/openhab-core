@@ -229,7 +229,7 @@ public class ScriptServiceUtil {
     /**
      * @return The {@link LocaleProvider} instance.
      */
-    public static LocaleProvider getLocaleProvide() {
+    public static LocaleProvider getLocaleProvider() {
         return getInstance().localeProvider;
     }
 
