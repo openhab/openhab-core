@@ -171,7 +171,7 @@ public class CompositeTriggerHandler
     }
 
     @Override
-    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context) {
+    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, @Nullable Object> context) {
         callback.runNow(uid, considerConditions, context);
     }
 }

@@ -35,7 +35,7 @@ public class RuleExtensions {
      * @throws IllegalArgumentException If the specified rule isn't registered.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
      */
-    public static Map<String, Object> run(Rule rule) {
+    public static Map<String, @Nullable Object> run(Rule rule) {
         return Rules.runRule(rule.getUID());
     }
 
@@ -48,7 +48,7 @@ public class RuleExtensions {
      * @throws IllegalArgumentException If the specified rule isn't registered.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
      */
-    public static Map<String, Object> run(Rule rule, boolean considerConditions) {
+    public static Map<String, @Nullable Object> run(Rule rule, boolean considerConditions) {
         return Rules.runRule(rule.getUID(), considerConditions);
     }
 
@@ -61,7 +61,7 @@ public class RuleExtensions {
      * @throws IllegalArgumentException If the specified rule isn't registered.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
      */
-    public static Map<String, Object> run(Rule rule, Map<String, Object> context) {
+    public static Map<String, @Nullable Object> run(Rule rule, Map<String, @Nullable Object> context) {
         return Rules.runRule(rule.getUID(), context);
     }
 
@@ -76,7 +76,7 @@ public class RuleExtensions {
      * @throws IllegalArgumentException If the specified rule isn't registered.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
      */
-    public static Map<String, Object> run(Rule rule, boolean considerConditions, Object... context) {
+    public static Map<String, @Nullable Object> run(Rule rule, boolean considerConditions, Object... context) {
         return Rules.runRule(rule.getUID(), considerConditions, context);
     }
 
@@ -90,8 +90,8 @@ public class RuleExtensions {
      * @throws IllegalArgumentException If the specified rule isn't registered.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
      */
-    public static Map<String, Object> run(Rule rule, boolean considerConditions,
-            @Nullable Map<String, Object> context) {
+    public static Map<String, @Nullable Object> run(Rule rule, boolean considerConditions,
+            @Nullable Map<String, @Nullable Object> context) {
         return Rules.runRule(rule.getUID(), considerConditions, context);
     }
 

@@ -293,7 +293,7 @@ public class ItemExtensions {
      * @throws IllegalStateException If a {@link ManagedProvider} isn't available.
      */
     public static ItemChannelLink addChannelLink(Item item, String channelUid,
-            @Nullable Map<@Nullable String, @Nullable Object> configProperties) {
+            @Nullable Map<String, @Nullable Object> configProperties) {
         return Channels.addItemChannelLink(item, channelUid, configProperties);
     }
 
@@ -338,7 +338,7 @@ public class ItemExtensions {
      * @throws IllegalStateException If a {@link ManagedProvider} isn't available.
      */
     public static @Nullable ItemChannelLink replaceChannelLink(Item item, String channelUid,
-            @Nullable Map<@Nullable String, @Nullable Object> configProperties) {
+            @Nullable Map<String, @Nullable Object> configProperties) {
         return Channels.replaceItemChannelLink(item, channelUid, configProperties);
     }
 

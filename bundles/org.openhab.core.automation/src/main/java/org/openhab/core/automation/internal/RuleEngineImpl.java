@@ -259,7 +259,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         }
 
         @Override
-        public void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context) {
+        public void runNow(String uid, boolean considerConditions, @Nullable Map<String, @Nullable Object> context) {
             RuleEngineImpl.this.runNow(uid, considerConditions, context);
         }
     };
@@ -1141,7 +1141,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     @Override
     public Map<String, @Nullable Object> runNow(String ruleUID, boolean considerConditions,
-            @Nullable Map<String, Object> context) {
+            @Nullable Map<String, @Nullable Object> context) {
         final WrappedRule rule = getManagedRule(ruleUID);
         if (rule == null) {
             logger.warn("Failed to execute rule '{}': Invalid Rule UID", ruleUID);
@@ -1706,7 +1706,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         }
     }
 
-    private void updateDisabledRulesCleanupDelay(Map<String, Object> configuration) {
+    private void updateDisabledRulesCleanupDelay(@Nullable Map<String, Object> configuration) {
         if (configuration == null) {
             disabledRulesCleanupDelayMinutes = 30L;
             return;

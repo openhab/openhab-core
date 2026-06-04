@@ -91,5 +91,5 @@ public interface ModuleHandlerCallback {
      * @param considerConditions if {@code true} the conditions of the rule will be checked.
      * @param context the context that is passed to the conditions and the actions of the rule.
      */
-    void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context);
+    void runNow(String uid, boolean considerConditions, @Nullable Map<String, @Nullable Object> context);
 }

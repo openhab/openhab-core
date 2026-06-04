@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.script.lib;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,6 +22,7 @@ import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.Item;
 import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.internal.util.Utils;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -376,7 +376,7 @@ public class Channels {
      * @throws IllegalStateException If a {@link ManagedProvider} isn't available.
      */
     public static ItemChannelLink addItemChannelLink(Item item, String channelUid, Object... configProperties) {
-        Map<@Nullable String, @Nullable Object> props = Map.copyOf(parseObjectArray(configProperties));
+        Map<String, @Nullable Object> props = Utils.parseObjectArrayNullableValues(configProperties);
         return addItemChannelLink(item, channelUid, props);
     }
 
@@ -393,7 +393,7 @@ public class Channels {
      */
     @NonNullByDefault({})
     public static ItemChannelLink addItemChannelLink(Item item, String channelUid,
-            @Nullable Map<@Nullable String, @Nullable Object> configProperties) {
+            @Nullable Map<@NonNull String, @Nullable Object> configProperties) {
         if (item == null) {
             throw new IllegalArgumentException("item cannot be null");
         }
@@ -433,7 +433,7 @@ public class Channels {
      */
     public static @Nullable ItemChannelLink replaceItemChannelLink(Item item, String channelUid,
             Object... configProperties) {
-        Map<@Nullable String, @Nullable Object> props = Map.copyOf(parseObjectArray(configProperties));
+        Map<String, @Nullable Object> props = Utils.parseObjectArrayNullableValues(configProperties);
         return replaceItemChannelLink(item, channelUid, props);
     }
 
@@ -449,7 +449,7 @@ public class Channels {
      */
     @NonNullByDefault({})
     public static @Nullable ItemChannelLink replaceItemChannelLink(Item item, String channelUid,
-            @Nullable Map<@Nullable String, @Nullable Object> configProperties) {
+            @Nullable Map<@NonNull String, @Nullable Object> configProperties) {
         if (item == null) {
             throw new IllegalArgumentException("item cannot be null");
         }
@@ -540,37 +540,10 @@ public class Channels {
 
     /**
      * Remove all orphaned (item or channel missing) managed links.
-     * 
+     *
      * @return The number of removed links.
      */
     public static int removeOrphanedItemChannelLinks() {
         return ScriptServiceUtil.getItemChannelLinkRegistry().purge();
-    }
-
-    /**
-     * Transforms pairs of {@link Object}s into a {@link Map}. The former of each pair (the key) must be a
-     * {@link String}.
-     *
-     * @param objects the array of {@link Object}s to transform.
-     * @return The resulting {@link Map}.
-     * @throws IllegalArgumentException If there is an odd number of objects, or if any of the keys aren't
-     *             {@link String}s.
-     */
-    private static Map<String, Object> parseObjectArray(Object @Nullable [] objects) throws IllegalArgumentException {
-        if (objects == null || objects.length == 0) {
-            return Map.of();
-        }
-        if ((objects.length % 2) != 0) {
-            throw new IllegalArgumentException("There must be an even number of objects (" + objects.length + ')');
-        }
-        Map<String, Object> result = new LinkedHashMap<>();
-        for (int i = 0; i < objects.length; i += 2) {
-            if (objects[i] instanceof String key) {
-                result.put(key, objects[i + 1]);
-            } else {
-                throw new IllegalArgumentException("Keys must be strings: " + objects[i]);
-            }
-        }
-        return result;
     }
 }

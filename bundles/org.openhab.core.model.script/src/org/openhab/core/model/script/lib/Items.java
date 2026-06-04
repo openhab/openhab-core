@@ -13,7 +13,6 @@
 package org.openhab.core.model.script.lib;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -25,6 +24,7 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataProvider;
 import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.internal.util.Utils;
 
 /**
  * {@link Items} provides DSL access to item and metadata manipulation.
@@ -159,7 +159,7 @@ public class Items {
      * @throws IllegalStateException If no {@code ManagedProvider} is available.
      */
     public static void addMetadata(String itemName, String namespace, String value, Object... configProperties) {
-        addMetadata(itemName, namespace, value, parseObjectArray(configProperties));
+        addMetadata(itemName, namespace, value, Utils.parseObjectArray(configProperties));
     }
 
     /**
@@ -243,7 +243,7 @@ public class Items {
      */
     public static @Nullable Metadata updateMetadata(String itemName, String namespace, String value,
             Object... configProperties) {
-        return updateMetadata(itemName, namespace, value, parseObjectArray(configProperties));
+        return updateMetadata(itemName, namespace, value, Utils.parseObjectArray(configProperties));
     }
 
     /**
@@ -274,32 +274,5 @@ public class Items {
         }
         return ScriptServiceUtil.getMetadataRegistry()
                 .update(new Metadata(new MetadataKey(namespace, itemName), value, configuration));
-    }
-
-    /**
-     * Transforms pairs of {@link Object}s into a {@link Map}. The former of each pair (the key) must be a
-     * {@link String}.
-     *
-     * @param objects the array of {@link Object}s to transform.
-     * @return The resulting {@link Map}.
-     * @throws IllegalArgumentException If there is an odd number of objects, or if any of the keys aren't
-     *             {@link String}s.
-     */
-    private static Map<String, Object> parseObjectArray(Object @Nullable [] objects) throws IllegalArgumentException {
-        if (objects == null || objects.length == 0) {
-            return Map.of();
-        }
-        if ((objects.length % 2) != 0) {
-            throw new IllegalArgumentException("There must be an even number of objects (" + objects.length + ')');
-        }
-        Map<String, Object> result = new LinkedHashMap<>();
-        for (int i = 0; i < objects.length; i += 2) {
-            if (objects[i] instanceof String key) {
-                result.put(key, objects[i + 1]);
-            } else {
-                throw new IllegalArgumentException("Keys must be strings: " + objects[i]);
-            }
-        }
-        return result;
     }
 }

@@ -119,7 +119,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     @Override
-    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context) {
+    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, @Nullable Object> context) {
         re.runNow(uid, considerConditions, context);
     }
 
