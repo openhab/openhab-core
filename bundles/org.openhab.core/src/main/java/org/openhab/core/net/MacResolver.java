@@ -15,9 +15,14 @@ package org.openhab.core.net;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -67,14 +72,10 @@ import org.slf4j.LoggerFactory;
 @Component(service = MacResolver.class)
 public class MacResolver {
 
-    private static final Duration PING_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration ARP_LOAD_PROCESS_TIMEOUT = Duration.ofMillis(1500);
     private static final Duration CACHE_VALIDITY_DURATION = Duration.ofMinutes(7);
-    private static final Duration SAFETY_MARGIN = Duration.ofMillis(300);
-    private static final Duration BACKEND_TASK_RUN_INTERVAL = PING_TIMEOUT.plus(SAFETY_MARGIN);
-
-    private static final Duration RESOLVE_MAC_TIMEOUT = //
-            BACKEND_TASK_RUN_INTERVAL.plus(ARP_LOAD_PROCESS_TIMEOUT).plus(SAFETY_MARGIN);
+    private static final Duration BACKEND_TASK_RUN_INTERVAL = Duration.ofMillis(1200);
+    private static final Duration RESOLVE_MAC_TIMEOUT = Duration.ofSeconds(4);
 
     private static final Pattern MAC_PATTERN = Pattern.compile("([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}");
     private static final Pattern IP_PATTERN = Pattern
@@ -116,6 +117,10 @@ public class MacResolver {
 
     private static final String OS_NAME = Objects.requireNonNull(System.getProperty("os.name", ""));
     private static final OSType OS_TYPE = OSType.from(OS_NAME);
+
+    private static final byte[] ARP_TRIGGER_BUF = new byte[0];
+    private static final int ARP_TRIGGER_BUF_SIZE = ARP_TRIGGER_BUF.length;
+    private static final int DISCARD_PORT = 9;
 
     /**
      * Simple wrapper class to hold a MAC address with its expiration time-stamp.
@@ -244,7 +249,7 @@ public class MacResolver {
                 .computeIfAbsent(ip, targetIp -> {
                     CompletableFuture<@Nullable String> commonBaseFutureMac = new CompletableFuture<>();
                     startBackEndTaskSchedule();
-                    triggerArpTableUpdate(targetIp);
+                    frontEndExecutor.submit(() -> triggerArpTableUpdate(targetIp));
                     return commonBaseFutureMac;
                 })) //
                 .completeOnTimeout(null, RESOLVE_MAC_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
@@ -255,22 +260,33 @@ public class MacResolver {
     }
 
     /**
-     * Triggers the operating system to update its ARP table for the given IP address by performing probes. The probe
-     * method(s) are chosen based on the operating system and may involve interface scoped ARP pings or system pings.
+     * Triggers the operating system to update its ARP table for the given IP address by performing probes on all valid
+     * network interfaces. The method sends a single UDP data-gram to the discard port 9 to do the probe. However before
+     * the OS can actually try to send the data-gram, it first has to check if it has the target MAC address. And if not
+     * it must send an ARP request packet to resolve the MAC. In other words, by doing the probe we immediately trigger
+     * the ARP resolution process, and for our purposes it does not matter how or if the target device responds. Each
+     * probe is scoped to the candidate interfaces that are up, non-loopback, and on the same sub-net as the target IP.
      * 
      * @param ip the target IP address to trigger ARP resolution for
      */
     private void triggerArpTableUpdate(String ip) {
-        switch (OS_TYPE) {
-            case LINUX:
-                // one 'arping' per network interface
-                for (NetworkInterface networkInterface : getCandidateInterfaces(ip)) {
-                    frontEndExecutor.submit(() -> doInterfaceArpPing(PING_TIMEOUT, networkInterface, ip));
+        try {
+            InetAddress target = InetAddress.getByName(ip);
+            DatagramPacket packet = new DatagramPacket(ARP_TRIGGER_BUF, ARP_TRIGGER_BUF_SIZE, target, DISCARD_PORT);
+            for (NetworkInterface netIntf : getCandidateInterfaces(ip)) {
+                for (InterfaceAddress intfAddr : netIntf.getInterfaceAddresses()) {
+                    if (intfAddr.getAddress() instanceof Inet4Address source) {
+                        try (DatagramSocket socket = new DatagramSocket(new InetSocketAddress(source, 0))) {
+                            socket.send(packet);
+                        } catch (Exception ignore) {
+                            // don't care if send fails; all that matters is the prior ARP resolution
+                        }
+                    }
+                    break; // only need to send one packet per interface even if there are multiple addresses
                 }
-                // fall through i.e. also do one global 'ping'
-            case MAC_OS, WINDOWS:
-                frontEndExecutor.submit(() -> doSystemPing(PING_TIMEOUT, ip));
-            default:
+            }
+        } catch (UnknownHostException ignore) {
+            // ip is already validated so this can't occur
         }
     }
 
@@ -292,7 +308,7 @@ public class MacResolver {
 
     /**
      * Gets a list of network interfaces that are up, non-loopback, and on the same sub-net as the given IP address.
-     * This is used for interface-scoped ARP pings to trigger ARP resolution on the correct interface when there are
+     * This is used for interface-scoped probes to trigger ARP resolution on the correct interface when there are
      * multiple interfaces or sub-nets.
      */
     private List<NetworkInterface> getCandidateInterfaces(String ip) {
@@ -363,45 +379,6 @@ public class MacResolver {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Performs an interface-scoped ARP probe using the {@code arping} command on the given interface. This is only
-     * implemented for Linux where {@code arping} is available. This more reliably triggers OS ARP resolution where
-     * perhaps a system ping probe might not work. The {@code arping} command is executed for each candidate interface
-     * until one succeeds. The method returns true if any of the {@code arping} commands succeeds (exit code 0), false
-     * otherwise. Albeit the success of the probe is not critical for OS ARP resolution as long as it has triggered the
-     * OS to populate its ARP table.
-     * 
-     * @param timeout the duration to wait for the probe to complete
-     * @param networkInterface the network interface to use for the ARP ping
-     * @param ip the target IP address to be probed
-     * 
-     * @return true if the ARP ping succeeds, false otherwise
-     */
-    private boolean doInterfaceArpPing(Duration timeout, NetworkInterface networkInterface, String ip) {
-        String name = networkInterface.getName();
-        return runCommand(timeout, "arping", "-I", name, "-c", "1", "-w", String.valueOf(timeout.toSeconds()), ip);
-    }
-
-    /**
-     * Performs a system {@code ping} probe. This triggers OS ARP resolution for devices that are known by the OS to
-     * respond to ICMP echo requests. The command and arguments are chosen based on the operating system. The method
-     * returns true if the probe succeeds (exit code 0), false otherwise. Albeit the success of the ping is not critical
-     * for ARP resolution as long as has triggered the OS to populate its ARP table.
-     * 
-     * @param timeout the duration to wait for the probe to complete
-     * @param ip the target IP address to be probed
-     * 
-     * @return true if the ARP ping succeeds, false otherwise
-     */
-    private boolean doSystemPing(Duration timeout, String ip) {
-        return switch (OS_TYPE) {
-            case WINDOWS -> runCommand(timeout, "ping", "-n", "1", "-w", String.valueOf(timeout.toMillis()), ip);
-            case MAC_OS -> runCommand(timeout, "ping", "-c", "1", "-W", String.valueOf(timeout.toMillis()), ip);
-            case LINUX -> runCommand(timeout, "ping", "-c", "1", "-W", String.valueOf(timeout.toSeconds()), ip);
-            default -> false;
-        };
     }
 
     /**
@@ -582,18 +559,6 @@ public class MacResolver {
             logger.debug("Failed to execute command: {}", String.join(" ", command), e);
             return null;
         }
-    }
-
-    /**
-     * Executes an OS process with the given timeout and command (String... args) and returns true if the exit code
-     * is 0. Timeout is enforced.
-     * 
-     * @param timeout the duration to wait for the process to finish
-     * @param command the command and its arguments to execute
-     */
-    private boolean runCommand(Duration timeout, String... command) {
-        Process process = runProcess(timeout, command);
-        return process != null && process.exitValue() == 0;
     }
 
     /**
