@@ -64,5 +64,5 @@ Fragment-Host: org.openhab.core.addon
 	org.openhab.core.addon.tests;version='[5.2.0,5.2.1)',\
 	org.openhab.core.config.core;version='[5.2.0,5.2.1)',\
 	org.openhab.core.test;version='[5.2.0,5.2.1)',\
-	biz.aQute.tester.junit-platform;version='[7.2.3,7.2.4)',\
+	biz.aQute.tester.junit-platform;version='[7.3.0,7.3.1)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.3,2.3.4)'
