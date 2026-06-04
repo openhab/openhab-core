@@ -109,7 +109,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
                     itemRule(seq(turn, the), /* item */ onOff),
 
-                    itemRule(seq(turn, onOff) /* item */),
+                    itemRule(seq(turn, onOff, the) /* item */),
 
                     /* IncreaseDecreaseType */
 
@@ -130,6 +130,10 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
                     itemRule(seq(put, the), /* item */ cmd("up", UpDownType.UP)),
 
                     itemRule(seq(put, the), /* item */ cmd("down", UpDownType.DOWN)),
+
+                    itemRule(seq(cmd("open", UpDownType.UP), the) /* item */),
+
+                    itemRule(seq(cmd("close", UpDownType.DOWN), the) /* item */),
 
                     /* NextPreviousType */
 
@@ -175,11 +179,10 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
             Expression einAnAus = alt(cmd("ein", OnOffType.ON), cmd("an", OnOffType.ON), cmd("aus", OnOffType.OFF));
             Expression denDieDas = opt(alt("den", "die", "das"));
             Expression schalte = alt("schalt", "schalte", "mach");
-            Expression pause = alt("pause", "stoppe");
+            Expression pause = alt("pause", "stoppe", "pausiere");
             Expression mache = alt("mach", "mache", "fahre");
             Expression spiele = alt("spiele", "spiel", "starte");
             Expression zu = alt("zu", "zum", "zur");
-            Expression the = opt("the");
             Expression naechste = alt("nächste", "nächstes", "nächster");
             Expression vorherige = alt("vorherige", "vorheriges", "vorheriger");
             Expression farbe = alt(cmd("weiß", HSBType.WHITE), cmd("pink", HSBType.fromRGB(255, 96, 208)),
@@ -198,10 +201,10 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
                     itemRule(seq(cmd(alt("dimme"), IncreaseDecreaseType.DECREASE), denDieDas) /* item */),
 
                     itemRule(seq(schalte, denDieDas),
-                            /* item */ cmd(alt("dunkler", "weniger"), IncreaseDecreaseType.DECREASE)),
+                            /* item */ cmd(alt("dunkler", "weniger", "leiser"), IncreaseDecreaseType.DECREASE)),
 
                     itemRule(seq(schalte, denDieDas),
-                            /* item */ cmd(alt("heller", "mehr"), IncreaseDecreaseType.INCREASE)),
+                            /* item */ cmd(alt("heller", "mehr", "lauter"), IncreaseDecreaseType.INCREASE)),
 
                     /* ColorType */
 
@@ -213,6 +216,10 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
                     itemRule(seq(mache, denDieDas), /* item */ cmd("runter", UpDownType.DOWN)),
 
+                    itemRule(seq(cmd("öffne", UpDownType.UP), denDieDas /* item */)),
+
+                    itemRule(seq(cmd("schließe", UpDownType.DOWN), denDieDas /* item */)),
+
                     /* NextPreviousType */
 
                     itemRule("wechsle",
@@ -222,9 +229,9 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
                     /* PlayPauseType */
 
-                    itemRule(seq(cmd(spiele, PlayPauseType.PLAY), the) /* item */),
+                    itemRule(seq(cmd(spiele, PlayPauseType.PLAY), denDieDas) /* item */),
 
-                    itemRule(seq(cmd(pause, PlayPauseType.PAUSE), the) /* item */)
+                    itemRule(seq(cmd(pause, PlayPauseType.PAUSE), denDieDas) /* item */)
 
             );
 

@@ -46,11 +46,13 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.DimmerItem;
+import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
@@ -93,6 +95,8 @@ public class StandardInterpreterTest {
         computerScreenItem.setLabel("Computer Screen");
         List<Item> items = List.of(computerItem, computerScreenItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
+
+        // "computer" should only match computerItem, not computerScreenItem
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
@@ -100,18 +104,20 @@ public class StandardInterpreterTest {
 
     @Test
     public void noNameCollisionOnSingleExactMatchForGroups() throws InterpretationException {
-        var computerItem = Mockito.spy(new GroupItem("computer"));
-        computerItem.setLabel("Computer");
+        var computerGroup = Mockito.spy(new GroupItem("computer"));
+        computerGroup.setLabel("Computer");
         var computerSwitchItem = new SwitchItem("computer_power");
         computerSwitchItem.setLabel("Power");
-        var screenItem = Mockito.spy(new GroupItem("screen"));
-        screenItem.setLabel("Computer Screen");
+        var screenGroup = Mockito.spy(new GroupItem("screen"));
+        screenGroup.setLabel("Computer Screen");
         var screenSwitchItem = new SwitchItem("screen_power");
         screenSwitchItem.setLabel("Power");
-        when(computerItem.getMembers()).thenReturn(Set.of(computerSwitchItem));
-        when(screenItem.getMembers()).thenReturn(Set.of(screenSwitchItem));
-        List<Item> items = List.of(computerItem, computerSwitchItem, screenItem, screenSwitchItem);
+        when(computerGroup.getMembers()).thenReturn(Set.of(computerSwitchItem));
+        when(screenGroup.getMembers()).thenReturn(Set.of(screenSwitchItem));
+        List<Item> items = List.of(computerGroup, computerSwitchItem, screenGroup, screenSwitchItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
+
+        // "computer" should only match the computerSwitchItem member of computerGroup
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(computerSwitchItem.getName(), OnOffType.OFF));
@@ -119,20 +125,46 @@ public class StandardInterpreterTest {
 
     @Test
     public void noNameCollisionWhenDialogContext() throws InterpretationException {
-        var locationItem = Mockito.spy(new GroupItem("livingroom"));
-        locationItem.setLabel("Living room");
+        var locationGroup = Mockito.spy(new GroupItem("livingroom"));
+        locationGroup.setLabel("Living room");
         var computerItem = new SwitchItem("computer");
         computerItem.setLabel("Computer");
         var computerItem2 = new SwitchItem("computer2");
         computerItem2.setLabel("Computer");
-        when(locationItem.getMembers()).thenReturn(Set.of(computerItem));
+        when(locationGroup.getMembers()).thenReturn(Set.of(computerItem));
         var dialogContext = new DialogContext(null, null, sttService, ttsService, null, List.of(), audioSource,
-                audioSink, Locale.ENGLISH, "", locationItem.getName(), null, null, null, List.of());
-        List<Item> items = List.of(computerItem2, locationItem, computerItem);
+                audioSink, Locale.ENGLISH, "", locationGroup.getName(), null, null, null, List.of());
+        List<Item> items = List.of(computerItem2, locationGroup, computerItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
+
+        // "computer" should only match the computerItem in the locationGroup
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer", dialogContext));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
+    }
+
+    @Test
+    public void noNameCollisionOnSingleCommandTypeMatch() throws InterpretationException {
+        // Both items have the same label "lamp"
+        var switchItem = new SwitchItem("switch_lamp");
+        switchItem.setLabel("lamp");
+        var rollershutterItem = new RollershutterItem("rollershutter_lamp");
+        rollershutterItem.setLabel("lamp");
+
+        List<Item> items = List.of(switchItem, rollershutterItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+
+        // "turn on" should only match the SwitchItem
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn on the lamp"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(switchItem.getName(), OnOffType.ON));
+
+        reset(eventPublisherMock);
+
+        // "open" should only match the RollershutterItem
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "open the lamp"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(rollershutterItem.getName(), UpDownType.UP));
     }
 
     @Test
@@ -392,5 +424,32 @@ public class StandardInterpreterTest {
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(virtualItem.getName(), new StringType("KEY_4")));
         reset(eventPublisherMock);
+    }
+
+    @Test
+    public void openCloseBlindsTest() throws InterpretationException {
+        var blindsItem = new RollershutterItem("blinds");
+        blindsItem.setLabel("blinds");
+        List<Item> items = List.of(blindsItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "open blinds"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.UP));
+
+        reset(eventPublisherMock);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "open the blinds"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.UP));
+
+        reset(eventPublisherMock);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "close blinds"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.DOWN));
+
+        reset(eventPublisherMock);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "close the blinds"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.DOWN));
     }
 }
