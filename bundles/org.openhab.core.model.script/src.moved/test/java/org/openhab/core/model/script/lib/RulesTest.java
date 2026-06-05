@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,14 +93,20 @@ public class RulesTest {
                 .thenReturn(Map.of("result", "OneArgSuccess"));
         when(ruleManager.runNow(EXISTING_RULE_UID, false, Map.of("arg1", "yes", "arg2", Boolean.FALSE)))
                 .thenReturn(Map.of("result", "TwoArgSuccess"));
+        when(ruleManager.runNow(EXISTING_RULE_UID, true, Map.of())).thenReturn(Map.of("result", "ZeroArgSuccess"));
+
         threeArgMap = new HashMap<>(Map.of("arg1", "yes", "arg2", Boolean.FALSE));
         threeArgMap.put("arg3", null);
         when(ruleManager.runNow(EXISTING_RULE_UID, false, threeArgMap)).thenReturn(Map.of("result", "ThreeArgSuccess"));
 
-        nullScriptServiceUtilInstance();
         serviceUtil = new ScriptServiceUtil(itemRegistry, thingRegistry, eventPublisher, modelRepository,
                 metadataRegistry, ruleRegistry, itemChannelLinkRegistry, timeZoneProvider, localeProvider, scheduler);
         setRuleManagerField(serviceUtil, ruleManager);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        nullScriptServiceUtilInstance();
     }
 
     @Test
@@ -133,7 +140,12 @@ public class RulesTest {
         assertThat(result.get("result"), is("TwoArgSuccess"));
         result = Rules.runRule(EXISTING_RULE_UID, false, "arg1", "yes", "arg2", Boolean.FALSE, "arg3", null);
         assertThat(result.get("result"), is("ThreeArgSuccess"));
+        result = Rules.runRule(EXISTING_RULE_UID, true, new Object[0]);
+        assertThat(result.get("result"), is("ZeroArgSuccess"));
         assertThrows(IllegalArgumentException.class, () -> Rules.runRule(UNKNOWN_RULE_UID, false, "arg1", "yes"));
+        assertThrows(IllegalArgumentException.class,
+                () -> Rules.runRule(EXISTING_RULE_UID, false, Boolean.FALSE, "yes"));
+        assertThrows(IllegalArgumentException.class, () -> Rules.runRule(EXISTING_RULE_UID, false, "no"));
 
         result = Rules.runRule(EXISTING_RULE_UID, false, Map.of("arg1", "yes"));
         assertThat(result.get("result"), is("OneArgSuccess"));
