@@ -58,7 +58,8 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
     @Override
     public @Nullable Conversation getConversation(String id, boolean createIfMissing) {
         Conversation conversation;
-        if (id.isBlank()) {
+        if (id.isBlank() && createIfMissing) {
+            logger.debug("Creating new unpersisted conversation");
             conversation = new Conversation("");
             conversation.setMaxMessages(historyLimit);
             return conversation;
