@@ -34,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -86,8 +87,7 @@ public class MacResolver {
     // cache of IP / MAC mappings with expiration time stamps; prevents hitting the OS ARP cache too often
     private final Map<String, ExpiringMac> arpCache = new ConcurrentHashMap<>();
 
-    // pending MAC resolution futures for IP addresses that are currently being resolved asynchronously
-    private final Map<String, CompletableFuture<@Nullable String>> pendingFutureMacs = new ConcurrentHashMap<>();
+    private final Map<String, Set<CompletableFuture<@Nullable String>>> pendingFutureMacs = new ConcurrentHashMap<>();
 
     private @NonNullByDefault({}) ExecutorService frontEndExecutor;
     private @NonNullByDefault({}) ScheduledExecutorService backEndScheduler;
@@ -118,7 +118,7 @@ public class MacResolver {
     private static final String OS_NAME = Objects.requireNonNull(System.getProperty("os.name", ""));
     private static final OSType OS_TYPE = OSType.from(OS_NAME);
 
-    private static final byte[] ARP_TRIGGER_BUF = new byte[0];
+    private static final byte[] ARP_TRIGGER_BUF = new byte[1];
     private static final int ARP_TRIGGER_BUF_SIZE = ARP_TRIGGER_BUF.length;
     private static final int DISCARD_PORT = 9;
 
@@ -172,7 +172,10 @@ public class MacResolver {
     @Deactivate
     protected void deactivate() {
         stopBackEndTaskSchedule();
-        pendingFutureMacs.values().forEach(futureMac -> futureMac.complete(null));
+        pendingFutureMacs.values().forEach(futureMacs -> {
+            futureMacs.forEach(futureMac -> futureMac.complete(null));
+            futureMacs.clear();
+        });
         pendingFutureMacs.clear();
     }
 
@@ -208,11 +211,10 @@ public class MacResolver {
      * Resolves the MAC address for a given IP address. If the MAC address is cached and valid, it is returned
      * immediately. Otherwise, an asynchronous resolution process is started that involves a front end process that
      * probes the IP to trigger the OS to populate its ARP table, and a back end process that bulk loads the ARP table
-     * and completes the future when the MAC address becomes available. Concurrent requests for the same IP share the
-     * same resolution process to avoid redundant work, and the future completes with {@code null} if resolution fails
-     * or takes too long. The method also includes optimizations to avoid unnecessary ARP cache loads for invalid,
-     * non-local, or unreachable IP addresses by checking these conditions before scheduling the asynchronous
-     * resolution.
+     * and completes the future when the MAC address becomes available. The future completes with {@code null} if
+     * resolution fails or takes too long. The method also includes optimizations to avoid unnecessary ARP cache loads
+     * for invalid, non-local, or unreachable IP addresses by checking these conditions before scheduling the
+     * asynchronous resolution.
      * <p>
      * The returned future will complete with the resolved MAC address or {@code null} if resolution fails or times out.
      * 
@@ -239,24 +241,44 @@ public class MacResolver {
             return CompletableFuture.completedFuture(cachedMac);
         }
 
-        /*
-         * schedule asynchronous resolution
-         * concurrent requests for the same IP share the same future
-         * the future completes with null if resolution takes too long
-         * clean up pending futures when done
-         */
-        return Objects.requireNonNull(pendingFutureMacs //
-                .computeIfAbsent(ip, targetIp -> {
-                    CompletableFuture<@Nullable String> commonBaseFutureMac = new CompletableFuture<>();
-                    startBackEndTaskSchedule();
-                    frontEndExecutor.submit(() -> triggerArpTableUpdate(targetIp));
-                    return commonBaseFutureMac;
-                })) //
-                .completeOnTimeout(null, RESOLVE_MAC_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
-                .whenComplete((mac, ignore) -> {
-                    pendingFutureMacs.remove(ip);
-                    ifPendingFutureMacsEmpty();
-                });
+        // create this call's independent future
+        CompletableFuture<@Nullable String> futureMac = new CompletableFuture<@Nullable String>()
+                .completeOnTimeout(null, RESOLVE_MAC_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+        futureMac.whenComplete((mac, ex) -> handleFutureCompletion(ip, futureMac));
+
+        // create, or get existing, set of pending futures for this IP, and add the new future to that set
+        Set<CompletableFuture<@Nullable String>> futureMacs = pendingFutureMacs.computeIfAbsent(ip,
+                key -> ConcurrentHashMap.newKeySet());
+        futureMacs.add(futureMac);
+
+        // start back-end schedule if not already running, and trigger OS to update its ARP table
+        startBackEndTaskSchedule();
+        frontEndExecutor.submit(() -> triggerArpTableUpdate(ip));
+
+        return futureMac;
+    }
+
+    /**
+     * Handles the completion of a MAC resolution future by removing it from the pending set for the given IP, and
+     * stopping the back end schedule if there are no more pending futures. This is called when a future completes
+     * either with a resolved MAC address or with {@code null} due to failure or timeout.
+     * 
+     * @param ip the IP address associated with the completed future
+     * @param futureMac the future that has completed
+     */
+    private void handleFutureCompletion(String ip, CompletableFuture<@Nullable String> futureMac) {
+        Set<CompletableFuture<@Nullable String>> futureMacs = pendingFutureMacs.get(ip);
+        if (futureMacs == null) {
+            return;
+        }
+        futureMacs.remove(futureMac);
+        if (futureMacs.isEmpty()) {
+            if (pendingFutureMacs.remove(ip) != null) {
+                if (pendingFutureMacs.isEmpty()) {
+                    stopBackEndTaskSchedule();
+                }
+            }
+        }
     }
 
     /**
@@ -369,47 +391,17 @@ public class MacResolver {
     }
 
     /**
-     * Checks if there are no more pending resolution futures and stops the back end task schedule.
-     * 
-     * @return true if pendingFutures is empty, false otherwise
-     */
-    private boolean ifPendingFutureMacsEmpty() {
-        if (pendingFutureMacs.isEmpty()) {
-            stopBackEndTaskSchedule();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Periodic task that is run by a back end scheduler that loads the ARP cache from the operating system and
-     * completes any pending futures for IP addresses that have been resolved. If there are no more pending futures
-     * after processing, the back end scheduler is stopped to avoid unnecessary resource usage.
+     * Periodic task that is run by a back end scheduler that loads the ARP cache from the operating system. If
+     * there are no more pending futures, the back end scheduler is stopped to avoid unnecessary resource usage.
      */
     private void backEndTask() {
         // if there are no pending futures, skip loading and stop the scheduler
-        if (ifPendingFutureMacsEmpty()) {
+        if (pendingFutureMacs.isEmpty()) {
+            stopBackEndTaskSchedule();
             return;
         }
-
         // load ARP cache from the operating system into the in-memory cache
         arpCacheLoad();
-
-        // complete pending futures for IPs that have been resolved; remove completed futures from the map
-        pendingFutureMacs.entrySet().removeIf(entry -> {
-            String ip = entry.getKey();
-            CompletableFuture<@Nullable String> futureMac = entry.getValue();
-            String mac = cacheGet(ip);
-            if (mac != null && !futureMac.isDone()) {
-                logger.trace("{} -> {} (deferred)", ip, mac);
-                futureMac.complete(mac);
-                return true;
-            }
-            return false;
-        });
-
-        // again, if there are no pending futures, stop the scheduler
-        ifPendingFutureMacsEmpty();
     }
 
     /**
@@ -472,14 +464,13 @@ public class MacResolver {
      * Stores an IP => MAC mapping in the cache with expiration and if possible eagerly resolves any pending MAC
      * future(s).
      */
-    private void cachePut(String ip, String mac) {
+    void cachePut(String ip, String mac) {
         arpCache.put(ip, new ExpiringMac(mac));
         // eager execution: check if a running future can be completed early
-        CompletableFuture<@Nullable String> futureMac = pendingFutureMacs.get(ip);
-        if (futureMac != null && !futureMac.isDone()) {
-            logger.trace("{} -> {} (eager)", ip, mac);
-            futureMac.complete(mac);
-            pendingFutureMacs.remove(ip, futureMac);
+        Set<CompletableFuture<@Nullable String>> futureMacs = pendingFutureMacs.remove(ip);
+        if (futureMacs != null && !futureMacs.isEmpty()) {
+            logger.trace("{} -> {} (eager for {} futures)", ip, mac, futureMacs.size());
+            futureMacs.forEach(futureMac -> futureMac.complete(mac));
         }
     }
 
@@ -604,7 +595,7 @@ public class MacResolver {
         arpCache.put(ip, entry);
     }
 
-    Map<String, CompletableFuture<@Nullable String>> testGetPendingFutureMacs() {
+    Map<String, Set<CompletableFuture<@Nullable String>>> testGetPendingFutureMacs() {
         return pendingFutureMacs;
     }
 }

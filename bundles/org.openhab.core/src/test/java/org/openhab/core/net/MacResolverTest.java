@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -222,7 +223,8 @@ class MacResolverTest {
         String ip = "127.0.0.1";
 
         // Access private pendingFutures map
-        Map<String, CompletableFuture<@Nullable String>> pendingFutureMacs = macResolver.testGetPendingFutureMacs();
+        Map<String, Set<CompletableFuture<@Nullable String>>> pendingFutureMacs = macResolver
+                .testGetPendingFutureMacs();
         assertNotNull(pendingFutureMacs, "pendingFutureMacs map should not be null");
 
         // Trigger two parallel resolveMac calls
@@ -236,15 +238,19 @@ class MacResolverTest {
         assertEquals(1, pendingFutureMacs.size(), "pendingFutureMacs must contain exactly one shared entry");
         assertTrue(pendingFutureMacs.containsKey(ip), "pendingFutureMacs must contain the IP key");
 
-        // Assert: both returned futures wrap the SAME underlying pending future
-        CompletableFuture<@Nullable String> sharedFutureMac = pendingFutureMacs.get(ip);
-        assertNotNull(sharedFutureMac, "pendingFutureMacs entry must not be null");
+        // Assert: the map entry value set contains two CompletableFutures
+        Set<CompletableFuture<@Nullable String>> futureMacs = pendingFutureMacs.get(ip);
+        assertNotNull(futureMacs, "pendingFutureMacs entry must not be null");
+        assertEquals(2, futureMacs.size(), "pendingFutureMacs entry must contain two CompletableFutures");
+
+        assertTrue(futureMacs.contains(futureMac1), "pendingFutureMacs entry must contain futureMac1");
+        assertTrue(futureMacs.contains(futureMac2), "pendingFutureMacs entry must contain futureMac2");
 
         assertFalse(futureMac1.isDone(), "futureMac1 should not be completed yet");
         assertFalse(futureMac2.isDone(), "futureMac2 should not be completed yet");
 
-        // futureMac1 and futureMac2 should both complete when shared completes
-        sharedFutureMac.complete("AA:BB:CC:DD:EE:FF");
+        // futureMac1 and futureMac2 should both complete when mac is resolved
+        macResolver.cachePut(ip, "AA:BB:CC:DD:EE:FF");
 
         assertEquals("AA:BB:CC:DD:EE:FF", futureMac1.get(1, TimeUnit.SECONDS));
         assertEquals("AA:BB:CC:DD:EE:FF", futureMac2.get(1, TimeUnit.SECONDS));
