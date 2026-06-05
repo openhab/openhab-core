@@ -17,19 +17,19 @@ import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 
 /**
- * The {@link MessageDTO} class represents a message in between the users and a LanguageInterpreter.
+ * The {@link PersistedMessageDTO} class represents a message in between the users and a LanguageInterpreter.
  * It is used to store {@link Conversation}s using a
  * {@link org.openhab.core.storage.StorageService}.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public record MessageDTO(int id, ConversationRole role, String content) {
+public record PersistedMessageDTO(int id, ConversationRole role, String content) {
     public Conversation.Message toMessage() {
         return new Conversation.Message(id, role, content);
     }
 
-    public static MessageDTO fromMessage(Conversation.Message messageRecord) {
-        return new MessageDTO(messageRecord.id(), messageRecord.role(), messageRecord.content());
+    public static PersistedMessageDTO fromMessage(Conversation.Message messageRecord) {
+        return new PersistedMessageDTO(messageRecord.id(), messageRecord.role(), messageRecord.content());
     }
 }

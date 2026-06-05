@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationRole;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -28,6 +29,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NonNullByDefault
 public record ConversationDTO(String id, List<MessageDTO> messages) {
     @Schema(name = "Message")
-    public record MessageDTO(int id, String role, String content) {
+    public record MessageDTO(int id, ConversationRole role, String content) {
     }
 }

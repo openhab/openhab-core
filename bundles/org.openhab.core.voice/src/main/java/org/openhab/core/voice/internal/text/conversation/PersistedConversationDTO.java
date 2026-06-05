@@ -17,12 +17,13 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link ConversationDTO} class contains a list of messages in between the users and a LanguageInterpreter.
+ * The {@link PersistedConversationDTO} class contains a list of messages in between the users and a
+ * LanguageInterpreter.
  * It is used to store {@link org.openhab.core.voice.text.conversation.Conversation}s using a
  * {@link org.openhab.core.storage.StorageService}.
  * 
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public record ConversationDTO(List<MessageDTO> messages) {
+public record PersistedConversationDTO(String id, List<PersistedMessageDTO> messages) {
 }

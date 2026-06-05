@@ -39,7 +39,7 @@ public abstract class ConversationEvent extends AbstractEvent {
     }
 
     @Override
-    abstract public String getType();
+    public abstract String getType();
 
     public String getConversationId() {
         return conversationId;
