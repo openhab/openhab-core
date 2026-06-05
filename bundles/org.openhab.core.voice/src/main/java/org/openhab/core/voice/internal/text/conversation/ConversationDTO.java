@@ -15,11 +15,10 @@ package org.openhab.core.voice.internal.text.conversation;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.text.conversation.Conversation;
 
 /**
  * The {@link ConversationDTO} class contains a list of messages in between the users and a LanguageInterpreter.
- * It is used to store {@link Conversation}s using a
+ * It is used to store {@link org.openhab.core.voice.text.conversation.Conversation}s using a
  * {@link org.openhab.core.storage.StorageService}.
  * 
  * @author Miguel Álvarez Díez - Initial contribution

@@ -18,9 +18,8 @@ import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.voice.text.conversation.Conversation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link VoiceConfiguration} class holds the configuration for the {@link VoiceManagerImpl}.
@@ -45,8 +44,6 @@ public class VoiceConfiguration {
     public static final String CONFIG_PREFIX_DEFAULT_VOICE = "defaultVoice.";
     public static final String CONFIG_CONVERSATION_HISTORY_LIMIT = "conversationHistoryLimit";
 
-    private final Logger logger = LoggerFactory.getLogger(VoiceConfiguration.class);
-
     private String keyword = DEFAULT_KEYWORD;
     private @Nullable String listeningItem;
     private @Nullable String listeningMelody;
@@ -59,31 +56,16 @@ public class VoiceConfiguration {
     private final Map<String, String> defaultVoices = new HashMap<>();
 
     public void update(Map<String, Object> config) {
-        this.keyword = config.containsKey(CONFIG_KEYWORD) ? config.get(CONFIG_KEYWORD).toString() : DEFAULT_KEYWORD;
-        this.listeningItem = config.containsKey(CONFIG_LISTENING_ITEM) ? config.get(CONFIG_LISTENING_ITEM).toString()
-                : null;
-        this.listeningMelody = config.containsKey(CONFIG_LISTENING_MELODY)
-                ? config.get(CONFIG_LISTENING_MELODY).toString()
-                : null;
-        this.defaultTTS = config.containsKey(CONFIG_DEFAULT_TTS) ? config.get(CONFIG_DEFAULT_TTS).toString() : null;
-        this.defaultSTT = config.containsKey(CONFIG_DEFAULT_STT) ? config.get(CONFIG_DEFAULT_STT).toString() : null;
-        this.defaultKS = config.containsKey(CONFIG_DEFAULT_KS) ? config.get(CONFIG_DEFAULT_KS).toString() : null;
-        this.defaultHLI = config.containsKey(CONFIG_DEFAULT_HLI) ? config.get(CONFIG_DEFAULT_HLI).toString() : null;
-        this.defaultVoice = config.containsKey(CONFIG_DEFAULT_VOICE) ? config.get(CONFIG_DEFAULT_VOICE).toString()
-                : null;
-
-        if (config.containsKey(CONFIG_CONVERSATION_HISTORY_LIMIT)) {
-            try {
-                this.conversationHistoryLimit = Integer
-                        .parseInt(config.get(CONFIG_CONVERSATION_HISTORY_LIMIT).toString());
-            } catch (NumberFormatException e) {
-                logger.warn("Failed to parse {}, setting to default ({}):", CONFIG_CONVERSATION_HISTORY_LIMIT,
-                        Conversation.DEFAULT_MAX_MESSAGES, e);
-                this.conversationHistoryLimit = Conversation.DEFAULT_MAX_MESSAGES;
-            }
-        } else {
-            this.conversationHistoryLimit = Conversation.DEFAULT_MAX_MESSAGES;
-        }
+        this.keyword = ConfigParser.valueAsOrElse(config.get(CONFIG_KEYWORD), String.class, DEFAULT_KEYWORD);
+        this.listeningItem = ConfigParser.valueAs(config.get(CONFIG_LISTENING_ITEM), String.class);
+        this.listeningMelody = ConfigParser.valueAs(CONFIG_LISTENING_MELODY, String.class);
+        this.defaultTTS = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_TTS), String.class);
+        this.defaultSTT = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_STT), String.class);
+        this.defaultKS = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_KS), String.class);
+        this.defaultHLI = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_HLI), String.class);
+        this.defaultVoice = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_VOICE), String.class);
+        this.conversationHistoryLimit = ConfigParser.valueAsOrElse(config.get(CONFIG_CONVERSATION_HISTORY_LIMIT),
+                Integer.class, Conversation.DEFAULT_MAX_MESSAGES);
 
         defaultVoices.clear();
         for (Entry<String, Object> entry : config.entrySet()) {

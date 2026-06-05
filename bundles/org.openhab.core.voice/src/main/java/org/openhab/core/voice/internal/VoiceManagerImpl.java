@@ -349,7 +349,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             logger.warn("InterruptedException waiting for transcription: {}", e.getMessage());
             sttServiceHandle.abort();
         } catch (ExecutionException e) {
-            logger.warn("ExecutionException running transcription: {}", e.getCause().getMessage());
+            var cause = e.getCause();
+            logger.warn("ExecutionException running transcription: {}",
+                    cause != null ? cause.getMessage() : e.getMessage());
         } catch (TimeoutException e) {
             logger.warn("TimeoutException waiting for transcription");
             sttServiceHandle.abort();

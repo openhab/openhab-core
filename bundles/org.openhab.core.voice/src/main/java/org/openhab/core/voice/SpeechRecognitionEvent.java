@@ -42,7 +42,7 @@ public class SpeechRecognitionEvent implements STTEvent {
      * @param confidence The confidence of the transcript
      */
     public SpeechRecognitionEvent(String transcript, float confidence) {
-        if ((null == transcript) || (transcript.isEmpty())) {
+        if (transcript.isEmpty()) {
             throw new IllegalArgumentException("The passed transcript is null or empty");
         }
         if ((confidence < 0.0) || (1.0 < confidence)) {
