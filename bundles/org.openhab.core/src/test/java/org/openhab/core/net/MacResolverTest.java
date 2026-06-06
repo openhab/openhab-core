@@ -46,7 +46,12 @@ class MacResolverTest {
 
         @Override
         protected void triggerArpTableUpdate(String ip) {
-            // prevent the background resolution logic from interfering with our tests
+            // no-op to prevent background resolution logic from interfering with our tests
+        }
+
+        @Override
+        protected void backEndTask() {
+            // no-op to prevent background resolution logic from interfering with our tests
         }
     }
 

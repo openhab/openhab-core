@@ -80,7 +80,7 @@ public class MacResolver {
 
     private static final Pattern MAC_PATTERN = Pattern.compile("([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}");
     private static final Pattern IP_PATTERN = Pattern
-            .compile("\\b((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}" + "(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\b");
+            .compile("\\b((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\b");
 
     private final Logger logger = LoggerFactory.getLogger(MacResolver.class);
 
@@ -342,8 +342,17 @@ public class MacResolver {
     protected boolean isOnLocalSubnet(String ip) {
         try {
             InetAddress ipv4 = InetAddress.getByName(ip);
-            return Optional.ofNullable(NetworkInterface.getNetworkInterfaces()).map(en -> Collections.list(en).stream())
-                    .orElseGet(Stream::empty).anyMatch(nif -> interfaceMatchesSubnet(nif, ipv4));
+            return Optional.ofNullable(NetworkInterface.getNetworkInterfaces()) //
+                    .map(en -> Collections.list(en).stream()) //
+                    .orElseGet(Stream::empty) //
+                    .filter(nif -> {
+                        try {
+                            return nif.isUp() && !nif.isLoopback();
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    }) //
+                    .anyMatch(nif -> interfaceMatchesSubnet(nif, ipv4));
         } catch (Exception e) {
             logger.debug("Sub-net check failed for {}", ip, e);
             return false;
@@ -416,7 +425,7 @@ public class MacResolver {
      * Periodic task that is run by a back end scheduler that loads the ARP cache from the operating system. If
      * there are no more pending futures, the back end scheduler is stopped to avoid unnecessary resource usage.
      */
-    private void backEndTask() {
+    protected void backEndTask() {
         // if there are no pending futures, skip loading and stop the scheduler
         if (pendingFutureMacs.isEmpty()) {
             stopBackEndTaskSchedule();
@@ -474,7 +483,14 @@ public class MacResolver {
      */
     protected @Nullable String cacheGet(String ip) {
         ExpiringMac entry = arpCache.get(ip);
-        return entry != null ? entry.getMac() : null;
+        if (entry == null) {
+            return null;
+        }
+        if (entry.isExpired()) {
+            arpCache.remove(ip, entry); // remove only if same instance
+            return null;
+        }
+        return entry.getMac();
     }
 
     /**
@@ -498,10 +514,13 @@ public class MacResolver {
     }
 
     /**
-     * Checks if a standard format MAC address is valid.
+     * /**
+     * Checks whether the given MAC address matches typical OS-supported formats, such as {@code AA:BB:CC:DD:EE:FF},
+     * {@code AA-BB-CC-DD-EE-FF}, or {@code aa-bb-cc-dd-ee-ff}. Mixed separators are also accepted. The method
+     * additionally rejects the all-zero MAC {@code 00:00:00:00:00:00}.
      */
     protected static boolean isValidMac(String mac) {
-        return MAC_PATTERN.matcher(mac).matches() && !"00:00:00:00:00:00".equalsIgnoreCase(mac);
+        return MAC_PATTERN.matcher(mac).matches() && !"00:00:00:00:00:00".equalsIgnoreCase(normalizeMac(mac));
     }
 
     /**
