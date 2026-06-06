@@ -557,6 +557,34 @@ public class StandardInterpreterTest {
         assertEquals(noObjectsMessage(Locale.ENGLISH), exception.getMessage());
     }
 
+    @Test
+    public void allowAccessToItemViaMetadataWhenParentGroupIsDenied() throws InterpretationException {
+        var group = new GroupItem("allLights");
+        group.setLabel("all lights");
+        var lightItem = new SwitchItem("light");
+        lightItem.setLabel("Light");
+        lightItem.addGroupName("allLights");
+        group.addMember(lightItem);
+
+        lenient().when(itemRegistryMock.getAll()).thenReturn(List.of(group, lightItem));
+        lenient().when(itemRegistryMock.get("allLights")).thenReturn(group);
+
+        // Deny access to group
+        MetadataKey groupKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, group.getName());
+        HashMap<String, Object> groupConfig = new HashMap<>();
+        groupConfig.put(PERMISSION_PROPERTY, ItemPermission.NO_ACCESS.name());
+        lenient().when(metadataRegistryMock.get(groupKey)).thenReturn(new Metadata(groupKey, "", groupConfig));
+
+        // Allow access to item explicitly
+        MetadataKey itemKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, lightItem.getName());
+        HashMap<String, Object> itemConfig = new HashMap<>();
+        itemConfig.put(PERMISSION_PROPERTY, ItemPermission.READ_WRITE.name());
+        lenient().when(metadataRegistryMock.get(itemKey)).thenReturn(new Metadata(itemKey, "", itemConfig));
+
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn on light"));
+        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light", OnOffType.ON));
+    }
+
     private String noObjectsMessage(Locale locale) {
         return ResourceBundle.getBundle("LanguageSupport", locale).getString("no_objects");
     }

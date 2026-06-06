@@ -50,7 +50,7 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
     private final ConcurrentHashMap<String, ItemPermission> cache = new ConcurrentHashMap<>();
     private final Set<Runnable> listeners = ConcurrentHashMap.newKeySet();
 
-    private ItemPermission implicitPermission = ItemPermission.READ_WRITE;
+    private volatile ItemPermission implicitPermission = ItemPermission.READ_WRITE;
 
     private final RegistryChangeListener<Item> itemRegistryChangeListener = new RegistryChangeListener<>() {
         @Override

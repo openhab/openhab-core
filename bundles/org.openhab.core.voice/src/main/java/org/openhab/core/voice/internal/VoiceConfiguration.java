@@ -74,12 +74,12 @@ public class VoiceConfiguration {
         this.defaultVoice = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_VOICE), String.class);
         this.conversationHistoryLimit = ConfigParser.valueAsOrElse(config.get(CONFIG_CONVERSATION_HISTORY_LIMIT),
                 Integer.class, Conversation.DEFAULT_MAX_MESSAGES);
-        String implicitItemAccessStr = ConfigParser.valueAsOrElse(config.get(CONFIG_IMPLICIT_ITEM_PERMISSION),
+        String implicitItemPermissionStr = ConfigParser.valueAsOrElse(config.get(CONFIG_IMPLICIT_ITEM_PERMISSION),
                 String.class, DEFAULT_IMPLICIT_ITEM_ACCESS.name());
         try {
-            this.implicitItemPermission = ItemPermission.valueOf(implicitItemAccessStr);
+            this.implicitItemPermission = ItemPermission.valueOf(implicitItemPermissionStr);
         } catch (IllegalArgumentException e) {
-            logger.warn("Invalid implicitItemAccess value '{}', using {}", implicitItemAccessStr,
+            logger.warn("Invalid implicitItemPermission value '{}', using {}", implicitItemPermissionStr,
                     DEFAULT_IMPLICIT_ITEM_ACCESS);
             this.implicitItemPermission = DEFAULT_IMPLICIT_ITEM_ACCESS;
         }

@@ -273,11 +273,10 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         Set<String> localeTokens = allItemTokens.get(locale);
         if (localeTokens == null) {
             allItemTokens.put(locale, localeTokens = new HashSet<>());
-            for (Item item : itemRegistry.getAll()) {
-                if (isAccessible(item)) {
-                    localeTokens.addAll(tokenize(locale, item.getLabel()));
-                    for (String synonym : getItemSynonyms(item)) {
-                        localeTokens.addAll(tokenize(locale, synonym));
+            for (ItemInterpretationMetadata metadata : getItemTokens(locale).values()) {
+                for (List<List<String>> path : metadata.pathToItem) {
+                    for (List<String> tokens : path) {
+                        localeTokens.addAll(tokens);
                     }
                 }
             }
@@ -300,7 +299,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (localeTokens == null) {
             itemTokens.put(locale, localeTokens = new HashMap<>());
             for (Item item : itemRegistry.getAll()) {
-                if (item.getGroupNames().isEmpty() && isAccessible(item)) {
+                if (item.getGroupNames().isEmpty()) {
                     addItem(locale, localeTokens, new ArrayList<>(), item, new ArrayList<>());
                 }
             }
@@ -326,17 +325,19 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             Item item, @Nullable String itemLabel, ArrayList<String> locationParentNames) {
         List<List<String>> nt = new ArrayList<>(tokens);
         nt.add(tokenize(locale, itemLabel));
-        ItemInterpretationMetadata metadata = target.computeIfAbsent(item, k -> new ItemInterpretationMetadata());
-        metadata.pathToItem.add(nt);
-        metadata.locationParentNames.addAll(locationParentNames);
+        if (isAccessible(item)) {
+            ItemInterpretationMetadata metadata = target.computeIfAbsent(item, k -> new ItemInterpretationMetadata());
+            metadata.pathToItem.add(nt);
+            metadata.locationParentNames.addAll(locationParentNames);
+        }
         if (item instanceof GroupItem groupItem) {
+            ArrayList<String> childLocationParentNames = locationParentNames;
             if (item.hasTag(CoreItemFactory.LOCATION)) {
-                locationParentNames.add(item.getName());
+                childLocationParentNames = new ArrayList<>(locationParentNames);
+                childLocationParentNames.add(item.getName());
             }
             for (Item member : groupItem.getMembers()) {
-                if (isAccessible(member)) {
-                    addItem(locale, target, nt, member, locationParentNames);
-                }
+                addItem(locale, target, nt, member, childLocationParentNames);
             }
         }
     }
