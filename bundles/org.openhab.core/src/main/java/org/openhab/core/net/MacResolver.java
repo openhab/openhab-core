@@ -75,6 +75,7 @@ public class MacResolver {
 
     private static final Duration ARP_LOAD_PROCESS_TIMEOUT = Duration.ofMillis(1500);
     private static final Duration CACHE_VALIDITY_DURATION = Duration.ofMinutes(7);
+    private static final Duration BACKEND_TASK_RUN_INITIAL_DELAY = Duration.ofMillis(20);
     private static final Duration BACKEND_TASK_RUN_INTERVAL = Duration.ofMillis(1200);
     private static final Duration RESOLVE_MAC_TIMEOUT = Duration.ofSeconds(4);
 
@@ -202,7 +203,7 @@ public class MacResolver {
         }
         logger.trace("Starting back end");
         backEndTaskSchedule = backEndScheduler.scheduleWithFixedDelay(this::backEndTask,
-                BACKEND_TASK_RUN_INTERVAL.toMillis(), BACKEND_TASK_RUN_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
+                BACKEND_TASK_RUN_INITIAL_DELAY.toMillis(), BACKEND_TASK_RUN_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -514,7 +515,6 @@ public class MacResolver {
     }
 
     /**
-     * /**
      * Checks whether the given MAC address matches typical OS-supported formats, such as {@code AA:BB:CC:DD:EE:FF},
      * {@code AA-BB-CC-DD-EE-FF}, or {@code aa-bb-cc-dd-ee-ff}. Mixed separators are also accepted. The method
      * additionally rejects the all-zero MAC {@code 00:00:00:00:00:00}.
@@ -531,7 +531,7 @@ public class MacResolver {
     }
 
     /**
-     * Checks if a the text begins with a standard format and valid IP address. e.g. {@code 192.168.1.1} and
+     * Checks if the text begins with a standard format and valid IP address. e.g. {@code 192.168.1.1} and
      * {@code 192.168.1.1:1234} are valid whereas {@code 999.999.999.999} or {@code foo 192.168.1.1} are not.
      * 
      * @param ip the IP address to check
