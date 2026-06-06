@@ -59,7 +59,6 @@ class MacResolverTest {
 
     @BeforeEach
     void setup() throws Exception {
-        macResolver.activate();
         macResolver.arpCache.clear();
     }
 

@@ -128,8 +128,6 @@ public class MacResolver {
 
     private String windowsArp = "arp";
 
-    private volatile boolean activated = false;
-
     /**
      * Simple wrapper class to hold a MAC address with its expiration time-stamp.
      */
@@ -168,15 +166,8 @@ public class MacResolver {
         }
     }
 
-    /**
-     * Protected constructor to prevent direct instantiation. This class is designed
-     * to be activated as an OSGi component, and should not be instantiated directly by clients.
-     */
-    protected MacResolver() {
-    }
-
     @Activate
-    protected void activate() {
+    public MacResolver() {
         frontEndExecutor = ThreadPoolManager.getPool("OH-MacResolver-FrontEnd");
         backEndScheduler = ThreadPoolManager.getScheduledPool("OH-MacResolver-BackEnd");
         if (OS_TYPE == OSType.UNKNOWN) {
@@ -191,7 +182,6 @@ public class MacResolver {
                 }
             }
         }
-        activated = true;
     }
 
     @Deactivate
@@ -202,7 +192,6 @@ public class MacResolver {
             futureMacs.clear();
         });
         pendingFutureMacs.clear();
-        activated = false;
     }
 
     /**
@@ -241,17 +230,12 @@ public class MacResolver {
      * resolution fails or takes too long. The method also includes optimizations to avoid unnecessary ARP cache loads
      * for invalid, non-local, or unreachable IP addresses by checking these conditions before scheduling the
      * asynchronous resolution.
-     * <p>
-     * The method throws an {@link IllegalStateException} if called when the activated field has not been set.
      * 
      * @param ipAddress the IP address to resolve e.g. "192.168.1.1" or "192.168.1.1:port"
      * @return a future that completes with the resolved MAC address or {@code null} if resolution fails
      *         or times out
      */
     public CompletableFuture<@Nullable String> resolveMac(String ipAddress) {
-        if (!activated) {
-            throw new IllegalStateException("MacResolver is not activated");
-        }
         if (!beginsWithValidIp(ipAddress)) {
             logger.debug("{} invalid", ipAddress);
             return CompletableFuture.completedFuture(null);
