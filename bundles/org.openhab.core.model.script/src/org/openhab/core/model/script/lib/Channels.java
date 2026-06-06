@@ -358,6 +358,9 @@ public class Channels {
         if (item == null) {
             throw new IllegalArgumentException("item cannot be null");
         }
+        if (channelUid == null) {
+            throw new IllegalArgumentException("channelUid cannot be null");
+        }
         return ScriptServiceUtil.getItemChannelLinkRegistry()
                 .add(new ItemChannelLink(item.getName(), new ChannelUID(channelUid)));
     }
@@ -397,6 +400,9 @@ public class Channels {
         if (item == null) {
             throw new IllegalArgumentException("item cannot be null");
         }
+        if (channelUid == null) {
+            throw new IllegalArgumentException("channelUid cannot be null");
+        }
         return ScriptServiceUtil.getItemChannelLinkRegistry().add(
                 new ItemChannelLink(item.getName(), new ChannelUID(channelUid), new Configuration(configProperties)));
     }
@@ -414,6 +420,9 @@ public class Channels {
     public static @Nullable ItemChannelLink replaceItemChannelLink(Item item, String channelUid) {
         if (item == null) {
             throw new IllegalArgumentException("item cannot be null");
+        }
+        if (channelUid == null) {
+            throw new IllegalArgumentException("channelUid cannot be null");
         }
         return ScriptServiceUtil.getItemChannelLinkRegistry()
                 .update(new ItemChannelLink(item.getName(), new ChannelUID(channelUid)));
@@ -452,6 +461,9 @@ public class Channels {
             @Nullable Map<@NonNull String, @Nullable Object> configProperties) {
         if (item == null) {
             throw new IllegalArgumentException("item cannot be null");
+        }
+        if (channelUid == null) {
+            throw new IllegalArgumentException("channelUid cannot be null");
         }
         return ScriptServiceUtil.getItemChannelLinkRegistry().update(
                 new ItemChannelLink(item.getName(), new ChannelUID(channelUid), new Configuration(configProperties)));
