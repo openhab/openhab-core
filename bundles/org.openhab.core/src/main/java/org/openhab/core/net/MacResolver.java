@@ -83,6 +83,8 @@ public class MacResolver {
     private static final Pattern IP_PATTERN = Pattern
             .compile("\\b((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\b");
 
+    private static final String BROADCAST_IP = "255.255.255.255";
+
     private final Logger logger = LoggerFactory.getLogger(MacResolver.class);
 
     // cache of IP / MAC mappings with expiration time stamps; prevents hitting the OS ARP cache too often
@@ -126,6 +128,8 @@ public class MacResolver {
 
     private String windowsArp = "arp";
 
+    private volatile boolean activated = false;
+
     /**
      * Simple wrapper class to hold a MAC address with its expiration time-stamp.
      */
@@ -164,6 +168,13 @@ public class MacResolver {
         }
     }
 
+    /**
+     * Protected constructor to prevent direct instantiation. This class is designed
+     * to be activated as an OSGi component, and should not be instantiated directly by clients.
+     */
+    protected MacResolver() {
+    }
+
     @Activate
     protected void activate() {
         frontEndExecutor = ThreadPoolManager.getPool("OH-MacResolver-FrontEnd");
@@ -180,6 +191,7 @@ public class MacResolver {
                 }
             }
         }
+        activated = true;
     }
 
     @Deactivate
@@ -190,6 +202,7 @@ public class MacResolver {
             futureMacs.clear();
         });
         pendingFutureMacs.clear();
+        activated = false;
     }
 
     /**
@@ -229,18 +242,43 @@ public class MacResolver {
      * for invalid, non-local, or unreachable IP addresses by checking these conditions before scheduling the
      * asynchronous resolution.
      * <p>
-     * The returned future will complete with the resolved MAC address or {@code null} if resolution fails or times out.
+     * The method throws an {@link IllegalStateException} if called when the activated field has not been set.
      * 
      * @param ipAddress the IP address to resolve e.g. "192.168.1.1" or "192.168.1.1:port"
      * @return a future that completes with the resolved MAC address or {@code null} if resolution fails
      *         or times out
      */
     public CompletableFuture<@Nullable String> resolveMac(String ipAddress) {
+        if (!activated) {
+            throw new IllegalStateException("MacResolver is not activated");
+        }
         if (!beginsWithValidIp(ipAddress)) {
             logger.debug("{} invalid", ipAddress);
             return CompletableFuture.completedFuture(null);
         }
         String ip = normalizeIp(ipAddress);
+
+        // FAST PATH: check cache before doing any async work, and complete immediately if present and valid
+        String cachedMac = cacheGet(ip);
+        if (cachedMac != null) {
+            logger.trace("{} -> {} (fast-path)", ip, cachedMac);
+
+            // complete and remove any existing pending futures for this IP
+            Set<CompletableFuture<@Nullable String>> pending = pendingFutureMacs.remove(ip);
+            if (pending != null && !pending.isEmpty()) {
+                pending.forEach(f -> f.complete(cachedMac));
+            }
+
+            // if no pending futures remain globally, stop the backend
+            if (pendingFutureMacs.isEmpty()) {
+                stopBackEndTaskSchedule();
+            }
+
+            // return a completed future for this call
+            return CompletableFuture.completedFuture(cachedMac);
+        }
+
+        // SLOW PATH: validate IP and schedule async resolution process
         InetAddress addr;
         try {
             addr = InetAddress.getByName(ip);
@@ -248,7 +286,7 @@ public class MacResolver {
             addr = null;
         }
         if (addr == null || addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isMulticastAddress()
-                || "255.255.255.255".equals(ip)) {
+                || BROADCAST_IP.equals(ip)) {
             logger.debug("{} is invalid, loopback, 'any', multicast, or broadcast", ip);
             return CompletableFuture.completedFuture(null);
         }
@@ -267,16 +305,9 @@ public class MacResolver {
                 .requireNonNull(pendingFutureMacs.computeIfAbsent(ip, key -> ConcurrentHashMap.newKeySet()));
         futureMacs.add(futureMac);
 
-        // check if the future can be fulfilled from cache
-        String cachedMac = cacheGet(ip);
-        if (cachedMac != null) {
-            logger.trace("{} -> {} (immediate)", ip, cachedMac);
-            futureMac.complete(cachedMac);
-        } else {
-            // start back-end schedule if not already running, and trigger OS to update its ARP table
-            startBackEndTaskSchedule();
-            frontEndExecutor.submit(() -> triggerArpTableUpdate(ip));
-        }
+        // start back-end schedule if not already running, and trigger OS to update its ARP table
+        startBackEndTaskSchedule();
+        frontEndExecutor.submit(() -> triggerArpTableUpdate(ip));
 
         return futureMac;
     }
