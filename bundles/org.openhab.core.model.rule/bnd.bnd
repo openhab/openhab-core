@@ -35,7 +35,6 @@ Import-Package: \
  org.openhab.core.thing.binding,\
  org.openhab.core.thing.events,\
  org.openhab.core.types,\
- org.openhab.core.types.util,\
  com.google.common.base;version="14",\
  javax.measure,\
  javax.measure.quantity,\
