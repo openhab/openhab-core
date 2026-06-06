@@ -58,7 +58,7 @@ public class VoiceConfiguration {
     public void update(Map<String, Object> config) {
         this.keyword = ConfigParser.valueAsOrElse(config.get(CONFIG_KEYWORD), String.class, DEFAULT_KEYWORD);
         this.listeningItem = ConfigParser.valueAs(config.get(CONFIG_LISTENING_ITEM), String.class);
-        this.listeningMelody = ConfigParser.valueAs(CONFIG_LISTENING_MELODY, String.class);
+        this.listeningMelody = ConfigParser.valueAs(config.get(CONFIG_LISTENING_MELODY), String.class);
         this.defaultTTS = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_TTS), String.class);
         this.defaultSTT = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_STT), String.class);
         this.defaultKS = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_KS), String.class);

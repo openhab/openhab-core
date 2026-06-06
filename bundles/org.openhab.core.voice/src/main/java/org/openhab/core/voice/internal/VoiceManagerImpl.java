@@ -595,7 +595,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         return new DialogContext.Builder(configuration.getKeyword(), localeProvider.getLocale()) //
                 .withSink(audioManager.getSink()) //
                 .withSource(audioManager.getSource()) //
-                .withConversation(new Conversation("")) //
+                .withConversation(conversationManager.getConversation("")) //
                 .withKS(this.getKS()) //
                 .withSTT(this.getSTT()) //
                 .withTTS(this.getTTS()) //
@@ -699,7 +699,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
             var processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                    this.i18nProvider, b);
+                    this.i18nProvidern, b);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
