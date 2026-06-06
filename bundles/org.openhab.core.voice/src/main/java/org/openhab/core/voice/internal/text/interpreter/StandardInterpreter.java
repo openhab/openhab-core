@@ -49,8 +49,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A human language command interpretation service.
@@ -65,7 +63,6 @@ import org.slf4j.LoggerFactory;
 @Component(service = HumanLanguageInterpreter.class)
 public class StandardInterpreter extends AbstractRuleBasedInterpreter {
     public static final String VOICE_SYSTEM_NAMESPACE = "voiceSystem";
-    private Logger logger = LoggerFactory.getLogger(StandardInterpreter.class);
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
 

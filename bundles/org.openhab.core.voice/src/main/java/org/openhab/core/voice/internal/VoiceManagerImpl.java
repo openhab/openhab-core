@@ -349,7 +349,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             logger.warn("InterruptedException waiting for transcription: {}", e.getMessage());
             sttServiceHandle.abort();
         } catch (ExecutionException e) {
-            logger.warn("ExecutionException running transcription: {}", e.getCause().getMessage());
+            var cause = e.getCause();
+            logger.warn("ExecutionException running transcription: {}",
+                    cause != null ? cause.getMessage() : e.getMessage());
         } catch (TimeoutException e) {
             logger.warn("TimeoutException waiting for transcription");
             sttServiceHandle.abort();
@@ -593,6 +595,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         return new DialogContext.Builder(configuration.getKeyword(), localeProvider.getLocale()) //
                 .withSink(audioManager.getSink()) //
                 .withSource(audioManager.getSource()) //
+                .withConversation(conversationManager.getConversation("")) //
                 .withKS(this.getKS()) //
                 .withSTT(this.getSTT()) //
                 .withTTS(this.getTTS()) //
@@ -639,7 +642,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
                         context.source().getId());
                 processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                        this.i18nProvider, this.conversationManager, b);
+                        this.i18nProvider, b);
                 dialogProcessors.put(context.source().getId(), processor);
                 return processor.start();
             } else {
@@ -696,7 +699,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
             var processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                    this.i18nProvider, this.conversationManager, b);
+                    this.i18nProvider, b);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
@@ -1086,6 +1089,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             dialogRegistrationStorage.getValues().forEach(dr -> {
                 if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
                     try {
+                        Conversation conversation = conversationManager
+                                .getConversation(Objects.requireNonNullElse(dr.conversationId, ""));
                         startDialog(getDialogContextBuilder() //
                                 .withSink(audioManager.getSink(dr.sinkId)) //
                                 .withSource(audioManager.getSource(dr.sourceId)) //
@@ -1098,7 +1103,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                                 .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
                                 .withLocale(dr.locale) //
                                 .withDialogGroup(dr.dialogGroup) //
-                                .withConversationId(dr.conversationId) //
+                                .withConversation(conversation) //
                                 .withLocationItem(dr.locationItem) //
                                 .withListeningItem(dr.listeningItem) //
                                 .withMelody(dr.listeningMelody) //

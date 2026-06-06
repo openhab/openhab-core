@@ -62,7 +62,6 @@ import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpreterContext;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
-import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.conversation.ConversationRole;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.osgi.framework.Bundle;
@@ -89,7 +88,6 @@ public class DialogProcessor implements KSListener, STTListener {
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
     private final WeakHashMap<String, DialogContext> activeDialogGroups;
     public final DialogContext dialogContext;
-    private final ConversationManager conversationManager;
     private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
@@ -118,13 +116,11 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable ToneSynthesizer toneSynthesizer;
 
     public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
-            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider,
-            ConversationManager conversationManager, Bundle bundle) {
+            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider, Bundle bundle) {
         this.dialogContext = context;
         this.eventListener = eventListener;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
-        this.conversationManager = conversationManager;
         this.activeDialogGroups = activeDialogGroups;
         this.bundle = bundle;
         var dt = context.dt();
@@ -367,10 +363,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 logger.debug("Text recognized: {}", question);
                 toggleProcessing(false);
                 eventListener.onBeforeDialogInterpretation(dialogContext);
-                @Nullable
-                String conversationId = dialogContext.conversationId();
-                Conversation conversation = conversationManager
-                        .getConversation(Objects.requireNonNullElse(conversationId, ""));
+                Conversation conversation = dialogContext.conversation();
                 String error = null;
                 String answer = "";
                 try {

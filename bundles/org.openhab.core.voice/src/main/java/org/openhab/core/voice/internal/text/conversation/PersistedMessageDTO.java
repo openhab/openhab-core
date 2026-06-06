@@ -12,18 +12,24 @@
  */
 package org.openhab.core.voice.internal.text.conversation;
 
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationRole;
 
 /**
- * The {@link ConversationDTO} class contains a list of messages in between the users and a LanguageInterpreter.
+ * The {@link PersistedMessageDTO} class represents a message in between the users and a LanguageInterpreter.
  * It is used to store {@link Conversation}s using a
  * {@link org.openhab.core.storage.StorageService}.
- * 
+ *
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public record ConversationDTO(List<MessageDTO> messages) {
+public record PersistedMessageDTO(int id, ConversationRole role, String content) {
+    public Conversation.Message toMessage() {
+        return new Conversation.Message(id, role, content);
+    }
+
+    public static PersistedMessageDTO fromMessage(Conversation.Message messageRecord) {
+        return new PersistedMessageDTO(messageRecord.id(), messageRecord.role(), messageRecord.content());
+    }
 }

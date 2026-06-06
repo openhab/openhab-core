@@ -32,6 +32,6 @@ public class ConversationMapper {
      */
     public static ConversationDTO map(Conversation conversation) {
         return new ConversationDTO(conversation.getId(), conversation.getMessages().stream()
-                .map(m -> new ConversationDTO.MessageDTO(m.id(), m.role().name(), m.content())).toList());
+                .map(m -> new ConversationDTO.MessageDTO(m.id(), m.role(), m.content())).toList());
     }
 }

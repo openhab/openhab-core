@@ -47,7 +47,7 @@ public class ConversationManagerImplTest {
     private final StorageService storageService = mock(StorageService.class);
     private final EventPublisher eventPublisher = mock(EventPublisher.class);
     @SuppressWarnings("unchecked")
-    private final Storage<ConversationDTO> storage = mock(Storage.class);
+    private final Storage<PersistedConversationDTO> storage = mock(Storage.class);
 
     private @NonNullByDefault({}) ConversationManagerImpl conversationManager;
 
@@ -106,10 +106,10 @@ public class ConversationManagerImplTest {
     @Test
     public void getConversationLoadsConversationFromStorage() {
         String id = "stored-conv";
-        MessageDTO messageDTO = new MessageDTO(1, ConversationRole.USER, "Hello");
-        ArrayList<MessageDTO> messages = new ArrayList<>(List.of(messageDTO));
-        ConversationDTO conversationDTO = new ConversationDTO(messages);
-        when(storage.get(id)).thenReturn(conversationDTO);
+        PersistedMessageDTO persistedMessageDTO = new PersistedMessageDTO(1, ConversationRole.USER, "Hello");
+        ArrayList<PersistedMessageDTO> messages = new ArrayList<>(List.of(persistedMessageDTO));
+        PersistedConversationDTO persistedConversationDTO = new PersistedConversationDTO(id, messages);
+        when(storage.get(id)).thenReturn(persistedConversationDTO);
 
         Conversation conversation = conversationManager.getConversation(id);
 
@@ -142,8 +142,8 @@ public class ConversationManagerImplTest {
     @Test
     public void getConversationsReturnsAllFromStorage() {
         when(storage.getKeys()).thenReturn(Set.of("conv1", "conv2"));
-        when(storage.get("conv1")).thenReturn(new ConversationDTO(new ArrayList<>()));
-        when(storage.get("conv2")).thenReturn(new ConversationDTO(new ArrayList<>()));
+        when(storage.get("conv1")).thenReturn(new PersistedConversationDTO("conv1", new ArrayList<>()));
+        when(storage.get("conv2")).thenReturn(new PersistedConversationDTO("conv2", new ArrayList<>()));
 
         Collection<Conversation> conversations = conversationManager.getConversations();
 
@@ -168,7 +168,7 @@ public class ConversationManagerImplTest {
 
         conversation.addMessage(ConversationRole.USER, "Hello");
 
-        verify(storage).put(eq(id), any(ConversationDTO.class));
+        verify(storage).put(eq(id), any(PersistedConversationDTO.class));
     }
 
     @Test
@@ -178,7 +178,7 @@ public class ConversationManagerImplTest {
 
         conversation.addMessage(ConversationRole.USER, "Hello");
 
-        verify(storage, never()).put(eq(id), any(ConversationDTO.class));
+        verify(storage, never()).put(eq(id), any(PersistedConversationDTO.class));
     }
 
     @Test
@@ -205,7 +205,7 @@ public class ConversationManagerImplTest {
         clearInvocations(storage, storageService); // clear stores from setting up conversation
 
         conversation.removeSinceMessage(1);
-        verify(storage).put(eq(id), any(ConversationDTO.class));
+        verify(storage).put(eq(id), any(PersistedConversationDTO.class));
         clearInvocations(storage, storageService);
 
         conversation.removeSinceMessage(0);
@@ -225,6 +225,6 @@ public class ConversationManagerImplTest {
 
         conversation.removeSinceMessage(3);
         conversation.removeSinceMessage(0);
-        verify(storage, never()).put(eq(id), any(ConversationDTO.class));
+        verify(storage, never()).put(eq(id), any(PersistedConversationDTO.class));
     }
 }

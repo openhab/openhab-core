@@ -10,25 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.voice.internal;
+package org.openhab.core.voice.internal.text.conversation;
 
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.text.conversation.Conversation;
-import org.openhab.core.voice.text.conversation.ConversationRole;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A DTO for serialising {@link Conversation}s on the REST API.
- *
+ * The {@link PersistedConversationDTO} class contains a list of messages in between the users and a
+ * LanguageInterpreter.
+ * It is used to store {@link org.openhab.core.voice.text.conversation.Conversation}s using a
+ * {@link org.openhab.core.storage.StorageService}.
+ * 
  * @author Miguel Álvarez Díez - Initial contribution
  */
-@Schema(name = "Conversation")
 @NonNullByDefault
-public record ConversationDTO(String id, List<MessageDTO> messages) {
-    @Schema(name = "Message")
-    public record MessageDTO(int id, ConversationRole role, String content) {
-    }
+public record PersistedConversationDTO(String id, List<PersistedMessageDTO> messages) {
 }
