@@ -365,10 +365,10 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
         ActionBuilder aBuilder;
         LinkedHashMap<String, @Nullable Object> props;
         Set<String> usedUids = new HashSet<>();
-        String strippedModelName = modelName.replace(".rules", "");
+        String fileNamePrefix = modelName.replace(".rules", "") + '-';
         String uid;
         for (Rule rule : ruleProvider.getAllFromModel(modelName)) {
-            if ((uid = rule.getUID()).startsWith(strippedModelName) || usedUids.contains(uid)) {
+            if ((uid = rule.getUID()).startsWith(fileNamePrefix) || usedUids.contains(uid)) {
                 builder = RuleBuilder.create(generateUid(rule, usedUids), rule);
             } else {
                 usedUids.add(uid);
