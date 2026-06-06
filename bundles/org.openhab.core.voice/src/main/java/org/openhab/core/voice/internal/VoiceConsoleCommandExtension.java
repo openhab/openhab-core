@@ -16,6 +16,7 @@ import static java.util.Comparator.comparing;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
@@ -86,6 +88,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_STT_SERVICES = "sttservices";
     private static final String SUBCMD_TTS_SERVICES = "ttsservices";
     private static final String SUBCMD_LLM_TOOLS = "llmtools";
+    private static final String SUBCMD_ITEMS = "items";
     private static final String SUBCMD_CONVERSATION = "conversation";
     private static final String SUBCMD_CONVERSATION_REMOVE = "conversationremove";
 
@@ -95,12 +98,14 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private final AudioManager audioManager;
     private final LocaleProvider localeProvider;
     private final LLMToolRegistry llmToolRegistry;
+    private final ItemPermissionResolver itemPermissionResolver;
 
     @Activate
     public VoiceConsoleCommandExtension(final @Reference ConversationManager conversationManager,
             final @Reference VoiceManager voiceManager, final @Reference AudioManager audioManager,
             final @Reference LocaleProvider localeProvider, final @Reference ItemRegistry itemRegistry,
-            final @Reference LLMToolRegistry llmToolRegistry) {
+            final @Reference LLMToolRegistry llmToolRegistry,
+            final @Reference ItemPermissionResolver itemPermissionResolver) {
         super("voice", "Commands around voice enablement features.");
         this.conversationManager = conversationManager;
         this.voiceManager = voiceManager;
@@ -108,6 +113,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         this.localeProvider = localeProvider;
         this.itemRegistry = itemRegistry;
         this.llmToolRegistry = llmToolRegistry;
+        this.itemPermissionResolver = itemPermissionResolver;
     }
 
     @Override
@@ -140,8 +146,9 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_STT_SERVICES, "lists the Speech-to-Text services"),
                 buildCommandUsage(SUBCMD_TTS_SERVICES, "lists the Text-to-Speech services"),
                 buildCommandUsage(SUBCMD_LLM_TOOLS, "lists the LLM tools"),
-                buildCommandUsage(SUBCMD_CONVERSATION + " [--uid true] <conversationId>",
-                        "Displays conversation messages"),
+                buildCommandUsage(SUBCMD_ITEMS + " [--all]",
+                        "lists the Items that the voice system has access to, optionally list all Items"),
+                buildCommandUsage(SUBCMD_CONVERSATION + " [--uid] <conversationId>", "Displays conversation messages"),
                 buildCommandUsage(SUBCMD_CONVERSATION_REMOVE + " [--message-id <message-id>] <conversationId>",
                         "Remove Conversation"));
     }
@@ -284,6 +291,10 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 }
                 case SUBCMD_LLM_TOOLS -> {
                     listLLMTools(console);
+                    return;
+                }
+                case SUBCMD_ITEMS -> {
+                    listItems(Arrays.copyOfRange(args, 1, args.length), console);
                     return;
                 }
                 case SUBCMD_CONVERSATION -> {
@@ -530,31 +541,62 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
     }
 
+    private void listItems(String[] args, Console console) {
+        boolean all = Arrays.asList(args).contains("--all");
+
+        Collection<Item> items = all ? itemRegistry.getAll()
+                : itemRegistry.getAll().stream() //
+                        .filter(itemPermissionResolver::isAccessible) //
+                        .toList();
+        List<Item> sortedItems = items.stream().sorted(comparing(Item::getName)).toList();
+
+        if (sortedItems.isEmpty()) {
+            console.println("No Items found.");
+            return;
+        }
+
+        record Row(String permission, String itemName, String source) {
+        }
+
+        List<Row> rows = sortedItems.stream().map(item -> {
+            ItemPermissionResolver.ItemPermissionDetails access = itemPermissionResolver.getItemPermissionDetails(item);
+            String permission = switch (access.permission()) {
+                case NO_ACCESS -> "Hidden";
+                case READ_ONLY -> "Read-Only";
+                case READ_WRITE -> "Read-Write";
+            };
+            return new Row(permission, item.getName(), Objects.requireNonNullElse(access.source(), ""));
+        }).toList();
+
+        int itemNameWidth = Math.max(rows.stream().mapToInt(r -> r.itemName.length()).max().orElse(0), 4);
+        int permissionWidth = Math.max(rows.stream().mapToInt(r -> r.permission.length()).max().orElse(0), 10);
+        int sourceWidth = Math.max(rows.stream().mapToInt(r -> r.source.length()).max().orElse(0), 6);
+
+        String format = " %-" + itemNameWidth + "s | %-" + permissionWidth + "s | %-" + sourceWidth + "s";
+        console.println(String.format(format, "Item", "Permission", "Source"));
+        console.println(String.format("-%s-+-%s-+-%s", "-".repeat(itemNameWidth), "-".repeat(permissionWidth),
+                "-".repeat(sourceWidth)));
+        for (Row row : rows) {
+            console.println(String.format(format, row.itemName, row.permission, row.source));
+        }
+    }
+
     private void printConversationMessages(String[] args, Console console) {
-        HashMap<String, String> parameters;
-        try {
-            parameters = parseNamedParameters(args, true);
-        } catch (IllegalStateException e) {
-            console.println(Objects.requireNonNullElse(e.getMessage(), "An error parsing positional parameters"));
+        List<String> argList = new ArrayList<>(Arrays.asList(args));
+        boolean uid = argList.remove("--uid");
+        if (argList.isEmpty()) {
+            console.println("Missing conversation ID.");
             return;
         }
-        String[] arguments = Arrays.copyOfRange(args, parameters.size() * 2, args.length);
-        if (arguments.length != 1) {
-            console.println("Incorrect number of arguments");
-            return;
-        }
-        boolean printUID = "true".equals(parameters.remove("uid"));
-        if (!parameters.isEmpty()) {
-            console.println("Argument " + parameters.keySet().stream().findAny().orElse("") + " is not supported");
-            return;
-        }
-        Conversation conversation = conversationManager.getConversation(arguments[0]);
+        String conversationId = argList.getFirst();
+
+        Conversation conversation = conversationManager.getConversation(conversationId);
         if (conversation.getMessages().isEmpty()) {
             console.println("Empty conversation");
             return;
         }
         for (var message : conversation.getMessages()) {
-            if (printUID) {
+            if (uid) {
                 console.printf("%s - %s|> %s\n", message.id(), message.role(), message.content());
             } else {
                 console.printf("%s|> %s\n", message.role(), message.content());

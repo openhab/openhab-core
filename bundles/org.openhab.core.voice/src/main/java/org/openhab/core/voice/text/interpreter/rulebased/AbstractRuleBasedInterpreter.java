@@ -46,6 +46,7 @@ import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
+import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpretationResult;
@@ -63,6 +64,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Improved error handling
  * @author Miguel Álvarez - Reduce collisions on exact match and use item synonyms
  * @author Miguel Álvarez - Reduce collisions using dialog location
+ * @author Florian Hotze - Implemented configurable Item access
  */
 @NonNullByDefault
 public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInterpreter {
@@ -127,6 +129,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     private final ItemRegistry itemRegistry;
     private final EventPublisher eventPublisher;
+    private final ItemPermissionResolver itemPermissionResolver;
+    private final Runnable itemAccessChangeListener = this::invalidate;
 
     private final RegistryChangeListener<Item> registryChangeListener = new RegistryChangeListener<>() {
         @Override
@@ -144,40 +148,55 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             invalidate();
         }
     };
-    private final RegistryChangeListener<Metadata> synonymsChangeListener = new RegistryChangeListener<>() {
+    private final RegistryChangeListener<Metadata> metadataChangeListener = new RegistryChangeListener<>() {
         @Override
         public void added(Metadata element) {
-            invalidateIfSynonymsMetadata(element);
+            invalidateIfRelevantMetadata(element);
         }
 
         @Override
         public void removed(Metadata element) {
-            invalidateIfSynonymsMetadata(element);
+            invalidateIfRelevantMetadata(element);
         }
 
         @Override
         public void updated(Metadata oldElement, Metadata element) {
-            invalidateIfSynonymsMetadata(element);
+            invalidateIfRelevantMetadata(element);
         }
 
-        private void invalidateIfSynonymsMetadata(Metadata metadata) {
-            if (metadata.getUID().getNamespace().equals(SYNONYMS_NAMESPACE)) {
+        private void invalidateIfRelevantMetadata(Metadata metadata) {
+            String namespace = metadata.getUID().getNamespace();
+            if (namespace.equals(SYNONYMS_NAMESPACE) || namespace.equals(SEMANTICS_NAMESPACE)) {
                 invalidate();
             }
         }
     };
 
     protected AbstractRuleBasedInterpreter(final EventPublisher eventPublisher, final ItemRegistry itemRegistry,
-            final MetadataRegistry metadataRegistry) {
+            final MetadataRegistry metadataRegistry, final ItemPermissionResolver itemPermissionResolver) {
         this.eventPublisher = eventPublisher;
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
+        this.itemPermissionResolver = itemPermissionResolver;
         itemRegistry.addRegistryChangeListener(registryChangeListener);
-        metadataRegistry.addRegistryChangeListener(synonymsChangeListener);
+        metadataRegistry.addRegistryChangeListener(metadataChangeListener);
+        itemPermissionResolver.addItemAccessChangeListener(itemAccessChangeListener);
     }
 
     protected void deactivate() {
         itemRegistry.removeRegistryChangeListener(registryChangeListener);
+        metadataRegistry.removeRegistryChangeListener(metadataChangeListener);
+        itemPermissionResolver.removeItemAccessChangeListener(itemAccessChangeListener);
+    }
+
+    /**
+     * Returns true if the Item is accessible for Human Language Interpreters.
+     *
+     * @param item the Item to check
+     * @return true if the Item is accessible, false otherwise
+     */
+    protected boolean isAccessible(Item item) {
+        return itemPermissionResolver.isAccessible(item);
     }
 
     /**
@@ -255,9 +274,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (localeTokens == null) {
             allItemTokens.put(locale, localeTokens = new HashSet<>());
             for (Item item : itemRegistry.getAll()) {
-                localeTokens.addAll(tokenize(locale, item.getLabel()));
-                for (String synonym : getItemSynonyms(item)) {
-                    localeTokens.addAll(tokenize(locale, synonym));
+                if (isAccessible(item)) {
+                    localeTokens.addAll(tokenize(locale, item.getLabel()));
+                    for (String synonym : getItemSynonyms(item)) {
+                        localeTokens.addAll(tokenize(locale, synonym));
+                    }
                 }
             }
         }
@@ -278,8 +299,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         Map<Item, ItemInterpretationMetadata> localeTokens = itemTokens.get(locale);
         if (localeTokens == null) {
             itemTokens.put(locale, localeTokens = new HashMap<>());
-            for (Item item : itemRegistry.getItems()) {
-                if (item.getGroupNames().isEmpty()) {
+            for (Item item : itemRegistry.getAll()) {
+                if (item.getGroupNames().isEmpty() && isAccessible(item)) {
                     addItem(locale, localeTokens, new ArrayList<>(), item, new ArrayList<>());
                 }
             }
@@ -288,7 +309,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     private String[] getItemSynonyms(Item item) {
-        MetadataKey key = new MetadataKey("synonyms", item.getName());
+        MetadataKey key = new MetadataKey(SYNONYMS_NAMESPACE, item.getName());
         Metadata synonymsMetadata = metadataRegistry.get(key);
         return (synonymsMetadata != null) ? synonymsMetadata.getValue().split(",") : new String[] {};
     }
@@ -313,7 +334,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 locationParentNames.add(item.getName());
             }
             for (Item member : groupItem.getMembers()) {
-                addItem(locale, target, nt, member, locationParentNames);
+                if (isAccessible(member)) {
+                    addItem(locale, target, nt, member, locationParentNames);
+                }
             }
         }
     }

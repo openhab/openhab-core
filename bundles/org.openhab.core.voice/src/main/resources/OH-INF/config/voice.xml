@@ -70,6 +70,17 @@
 			<description>The maximum number of messages to keep in a conversation history.</description>
 			<default>50</default>
 		</parameter>
+		<parameter name="implicitItemPermission" type="text">
+			<label>Implicit Item Access</label>
+			<description>The default permission for Items. If NO_ACCESS, items are only accessible if explicitly granted in the
+				Item's metadata.</description>
+			<default>READ_WRITE</default>
+			<options>
+				<option value="NO_ACCESS">No Access</option>
+				<option value="READ_ONLY">Read Only</option>
+				<option value="READ_WRITE">Read &amp; Write</option>
+			</options>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>
