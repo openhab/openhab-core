@@ -561,9 +561,9 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         List<Row> rows = sortedItems.stream().map(item -> {
             ItemPermissionResolver.ItemPermissionDetails access = itemPermissionResolver.getItemPermissionDetails(item);
             String permission = switch (access.permission()) {
-                case NO_ACCESS -> "Hidden";
+                case NO_ACCESS -> "No Access";
                 case READ_ONLY -> "Read-Only";
-                case READ_WRITE -> "Read-Write";
+                case READ_WRITE -> "Read & Write";
             };
             return new Row(permission, item.getName(), Objects.requireNonNullElse(access.source(), ""));
         }).toList();
