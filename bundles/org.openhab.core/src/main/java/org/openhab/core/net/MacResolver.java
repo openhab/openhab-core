@@ -85,9 +85,10 @@ public class MacResolver {
     private final Logger logger = LoggerFactory.getLogger(MacResolver.class);
 
     // cache of IP / MAC mappings with expiration time stamps; prevents hitting the OS ARP cache too often
-    private final Map<String, ExpiringMac> arpCache = new ConcurrentHashMap<>();
+    protected final Map<String, ExpiringMac> arpCache = new ConcurrentHashMap<>();
 
-    private final Map<String, Set<CompletableFuture<@Nullable String>>> pendingFutureMacs = new ConcurrentHashMap<>();
+    // map of pending MAC resolution futures for each IP; allows sharing of pending resolutions for the same IP
+    protected final Map<String, Set<CompletableFuture<@Nullable String>>> pendingFutureMacs = new ConcurrentHashMap<>();
 
     private @NonNullByDefault({}) ExecutorService frontEndExecutor;
     private @NonNullByDefault({}) ScheduledExecutorService backEndScheduler;
@@ -125,7 +126,7 @@ public class MacResolver {
     /**
      * Simple wrapper class to hold a MAC address with its expiration time-stamp.
      */
-    private static class ExpiringMac {
+    protected static class ExpiringMac {
 
         private final String mac;
         private final Instant expires;
@@ -228,17 +229,21 @@ public class MacResolver {
             logger.debug("{} invalid", ipAddress);
             return CompletableFuture.completedFuture(null);
         }
+        InetAddress addr;
+        try {
+            addr = InetAddress.getByName(ip);
+        } catch (UnknownHostException e) {
+            // this should never be reached after isValidIp() test above
+            addr = null;
+        }
+        if (addr == null || addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isMulticastAddress()
+                || "255.255.255.255".equals(ip)) {
+            logger.debug("{} invalid, loopback, any, multicast, or broadcast", ip);
+            return CompletableFuture.completedFuture(null);
+        }
         if (!isOnLocalSubnet(ip)) {
             logger.debug("{} not on local sub-net", ip);
             return CompletableFuture.completedFuture(null);
-        }
-
-        // check for direct cache hit before scheduling asynchronous tasks
-        cacheFlush();
-        String cachedMac = cacheGet(ip);
-        if (cachedMac != null) {
-            logger.trace("{} -> {} (immediate)", ip, cachedMac);
-            return CompletableFuture.completedFuture(cachedMac);
         }
 
         // create this call's independent future
@@ -247,13 +252,21 @@ public class MacResolver {
         futureMac.whenComplete((mac, ex) -> handleFutureCompletion(ip, futureMac));
 
         // create, or get existing, set of pending futures for this IP, and add the new future to that set
-        Set<CompletableFuture<@Nullable String>> futureMacs = pendingFutureMacs.computeIfAbsent(ip,
-                key -> ConcurrentHashMap.newKeySet());
+        Set<CompletableFuture<@Nullable String>> futureMacs = Objects
+                .requireNonNull(pendingFutureMacs.computeIfAbsent(ip, key -> ConcurrentHashMap.newKeySet()));
         futureMacs.add(futureMac);
 
-        // start back-end schedule if not already running, and trigger OS to update its ARP table
-        startBackEndTaskSchedule();
-        frontEndExecutor.submit(() -> triggerArpTableUpdate(ip));
+        // flush expired cache entries, and check if the future can be fulfilled from cache
+        cacheFlush();
+        String cachedMac = cacheGet(ip);
+        if (cachedMac != null) {
+            logger.trace("{} -> {} (immediate)", ip, cachedMac);
+            futureMac.complete(cachedMac);
+        } else {
+            // start back-end schedule if not already running, and trigger OS to update its ARP table
+            startBackEndTaskSchedule();
+            frontEndExecutor.submit(() -> triggerArpTableUpdate(ip));
+        }
 
         return futureMac;
     }
@@ -317,7 +330,7 @@ public class MacResolver {
      * ARP cache loads for IP addresses that are not local which therefore cannot be resolved to a MAC address via the
      * OS ARP table.
      */
-    private boolean isOnLocalSubnet(String ip) {
+    protected boolean isOnLocalSubnet(String ip) {
         try {
             InetAddress ipv4 = InetAddress.getByName(ip);
             return Optional.ofNullable(NetworkInterface.getNetworkInterfaces()).map(en -> Collections.list(en).stream())
@@ -448,7 +461,7 @@ public class MacResolver {
     /**
      * Retrieves a MAC address from the in-memory cache, if present and not expired.
      */
-    private @Nullable String cacheGet(String ip) {
+    protected @Nullable String cacheGet(String ip) {
         ExpiringMac entry = arpCache.get(ip);
         if (entry == null) {
             return null;
@@ -464,34 +477,40 @@ public class MacResolver {
      * Stores an IP => MAC mapping in the cache with expiration and if possible eagerly resolves any pending MAC
      * future(s).
      */
-    void cachePut(String ip, String mac) {
+    protected void cachePut(String ip, String mac) {
         arpCache.put(ip, new ExpiringMac(mac));
+
         // eager execution: check if a running future can be completed early
         Set<CompletableFuture<@Nullable String>> futureMacs = pendingFutureMacs.remove(ip);
         if (futureMacs != null && !futureMacs.isEmpty()) {
             logger.trace("{} -> {} (eager for {} futures)", ip, mac, futureMacs.size());
             futureMacs.forEach(futureMac -> futureMac.complete(mac));
         }
+
+        // if no pending futures remain globally, stop scheduler immediately
+        if (pendingFutureMacs.isEmpty()) {
+            stopBackEndTaskSchedule();
+        }
     }
 
     /**
      * Checks if a standard format MAC address is valid.
      */
-    private boolean isValidMac(String mac) {
+    protected static boolean isValidMac(String mac) {
         return MAC_PATTERN.matcher(mac).matches() && !"00:00:00:00:00:00".equalsIgnoreCase(mac);
     }
 
     /**
      * Converts a MAC address to the standard format {@code XX:XX:XX:XX:XX:XX}.
      */
-    private String normalizeMac(String mac) {
+    protected static String normalizeMac(String mac) {
         return mac.toUpperCase().replaceAll("[^A-F0-9]", "").replaceAll("(.{2})(?=.)", "$1:");
     }
 
     /**
      * Checks if a standard format IP address is valid.
      */
-    private boolean isValidIp(String ip) {
+    protected static boolean isValidIp(String ip) {
         return IP_PATTERN.matcher(ip).matches();
     }
 
@@ -503,7 +522,7 @@ public class MacResolver {
      * 
      * @return the normalized IP address, or the original string if it cannot be normalized
      */
-    private String normalizeIp(String ip) {
+    protected static String normalizeIp(String ip) {
         Matcher m = IP_PATTERN.matcher(ip);
         return m.find() ? m.group() : ip; // fallback: return original
     }
@@ -513,7 +532,7 @@ public class MacResolver {
      * 
      * @param line the line to parse
      */
-    private void parseLine(String line) {
+    protected void parseLine(String line) {
         if (line.isBlank()) {
             return;
         }
@@ -540,9 +559,16 @@ public class MacResolver {
     private @Nullable Process runProcess(Duration timeout, String... command) {
         try {
             Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
-            if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-                process.destroyForcibly();
-                logger.debug("Time out executing command: {}", String.join(" ", command));
+            try {
+                if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                    process.destroyForcibly();
+                    logger.debug("Time out executing command: {}", String.join(" ", command));
+                    return null;
+                }
+            } catch (InterruptedException ie) {
+                // restore interrupt status
+                Thread.currentThread().interrupt();
+                logger.debug("Interrupted while waiting for command: {}", String.join(" ", command));
                 return null;
             }
             return process;
@@ -573,29 +599,5 @@ public class MacResolver {
         } catch (Exception e) {
             logger.debug("Error reading result of command: {}", String.join(" ", command), e);
         }
-    }
-
-    // ================ TEST HOOKS (package private, unit tests only) ================
-
-    void testClearCache() {
-        arpCache.clear();
-    }
-
-    @Nullable
-    String testGetCached(String ip) {
-        return cacheGet(ip);
-    }
-
-    boolean testCacheIsEmpty() {
-        return arpCache.isEmpty();
-    }
-
-    void testPutCached(String ip, String mac, Instant expires) {
-        ExpiringMac entry = new ExpiringMac(mac, expires);
-        arpCache.put(ip, entry);
-    }
-
-    Map<String, Set<CompletableFuture<@Nullable String>>> testGetPendingFutureMacs() {
-        return pendingFutureMacs;
     }
 }
