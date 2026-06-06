@@ -284,14 +284,26 @@ public class MacResolver {
                 .completeOnTimeout(null, RESOLVE_MAC_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
         futureMac.whenComplete((mac, ex) -> handleFutureCompletion(ip, futureMac));
 
-        // create, or get existing, set of pending futures for this IP, and add the new future to that set
-        Set<CompletableFuture<@Nullable String>> futureMacs = Objects
-                .requireNonNull(pendingFutureMacs.computeIfAbsent(ip, key -> ConcurrentHashMap.newKeySet()));
-        futureMacs.add(futureMac);
+        pendingFutureMacs.compute(ip, (key, existingSet) -> {
+            // if MAC is now already cached, complete immediately and do NOT register
+            String nowCached = cacheGet(ip);
+            if (nowCached != null) {
+                futureMac.complete(nowCached);
+                return existingSet; // no change to map
+            }
+            // otherwise, register this future
+            if (existingSet == null) {
+                existingSet = ConcurrentHashMap.newKeySet();
+            }
+            existingSet.add(futureMac);
+            return existingSet;
+        });
 
-        // start back-end schedule if not already running, and trigger OS to update its ARP table
-        startBackEndTaskSchedule();
-        frontEndExecutor.submit(() -> triggerArpTableUpdate(ip));
+        // continue the slow path if the future was not completed due to a concurrent cachePut, otherwise return it
+        if (!futureMac.isDone()) {
+            startBackEndTaskSchedule();
+            frontEndExecutor.submit(() -> triggerArpTableUpdate(ip));
+        }
 
         return futureMac;
     }
@@ -305,17 +317,15 @@ public class MacResolver {
      * @param futureMac the future that has completed
      */
     private void handleFutureCompletion(String ip, CompletableFuture<@Nullable String> futureMac) {
-        Set<CompletableFuture<@Nullable String>> futureMacs = pendingFutureMacs.get(ip);
-        if (futureMacs == null) {
-            return;
-        }
-        futureMacs.remove(futureMac);
-        if (futureMacs.isEmpty()) {
-            if (pendingFutureMacs.remove(ip) != null) {
-                if (pendingFutureMacs.isEmpty()) {
-                    stopBackEndTaskSchedule();
-                }
-            }
+        pendingFutureMacs.computeIfPresent(ip, (key, futureMacs) -> {
+            futureMacs.remove(futureMac);
+            // if still empty after removal, drop the entry
+            return futureMacs.isEmpty() ? null : futureMacs;
+        });
+
+        // if map is now empty, stop backend
+        if (pendingFutureMacs.isEmpty()) {
+            stopBackEndTaskSchedule();
         }
     }
 
@@ -600,16 +610,30 @@ public class MacResolver {
     private @Nullable Process runProcess(Duration timeout, String... command) {
         try {
             Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+            boolean finished;
             try {
-                if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-                    process.destroyForcibly();
-                    logger.debug("Time out executing command: {}", String.join(" ", command));
-                    return null;
-                }
+                finished = process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS);
             } catch (InterruptedException ie) {
-                // restore interrupt status
                 Thread.currentThread().interrupt();
                 logger.debug("Interrupted while waiting for command: {}", String.join(" ", command));
+                process.destroyForcibly();
+                // best-effort wait after interrupt
+                try {
+                    process.waitFor(200, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
+                return null;
+            }
+            if (!finished) {
+                process.destroyForcibly();
+                logger.debug("Time out executing command: {}", String.join(" ", command));
+                // optional short grace wait
+                try {
+                    process.waitFor(200, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
                 return null;
             }
             return process;
