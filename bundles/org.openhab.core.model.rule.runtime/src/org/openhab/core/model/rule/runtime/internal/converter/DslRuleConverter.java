@@ -305,7 +305,7 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                 org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE.validate(model);
                 if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
                     for (org.eclipse.emf.common.util.Diagnostic child : diagnostic.getChildren()) {
-                        logger.warn("Model Validation Error: {}", child.getMessage());
+                        logger.debug("Model Validation Error: {}", child.getMessage());
                     }
                 }
             }
@@ -352,7 +352,7 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
 
     @Override
     public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes(StandardCharsets.UTF_8));
         String result = modelRepository.createIsolatedModel("rules", inputStream, errors, warnings);
         return result;
     }
@@ -365,10 +365,10 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
         ActionBuilder aBuilder;
         LinkedHashMap<String, @Nullable Object> props;
         Set<String> usedUids = new HashSet<>();
-        String strippedModeName = modelName.replace(".rules", "");
+        String strippedModelName = modelName.replace(".rules", "");
         String uid;
         for (Rule rule : ruleProvider.getAllFromModel(modelName)) {
-            if ((uid = rule.getUID()).startsWith(strippedModeName) || usedUids.contains(uid)) {
+            if ((uid = rule.getUID()).startsWith(strippedModelName) || usedUids.contains(uid)) {
                 builder = RuleBuilder.create(generateUid(rule, usedUids), rule);
             } else {
                 usedUids.add(uid);
@@ -391,7 +391,6 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
     }
 
     private String generateUid(Rule rule, Set<String> usedUids) {
-
         String result = rule.getName();
         if (result == null || result.isBlank()) {
             result = "generated-1";

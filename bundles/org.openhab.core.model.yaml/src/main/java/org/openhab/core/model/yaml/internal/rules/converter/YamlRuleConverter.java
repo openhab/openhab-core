@@ -14,6 +14,7 @@ package org.openhab.core.model.yaml.internal.rules.converter;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -124,7 +125,6 @@ public class YamlRuleConverter implements RuleSerializer, RuleParser {
                     errors = new ArrayList<>();
                 }
                 errors.add("Rule '" + rule.getUID() + "': " + e.getMessage());
-
             }
         }
         if (errors != null) {
@@ -147,7 +147,7 @@ public class YamlRuleConverter implements RuleSerializer, RuleParser {
 
     @Override
     public @Nullable String startParsingFormat(String syntax, List<String> errors, List<String> warnings) {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes(StandardCharsets.UTF_8));
         return modelRepository.createIsolatedModel(inputStream, errors, warnings);
     }
 
