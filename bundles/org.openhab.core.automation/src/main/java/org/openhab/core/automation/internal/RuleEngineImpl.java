@@ -1706,7 +1706,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         }
     }
 
-    private void updateDisabledRulesCleanupDelay(@Nullable Map<String, Object> configuration) {
+    private void updateDisabledRulesCleanupDelay(Map<String, Object> configuration) {
         if (configuration == null) {
             disabledRulesCleanupDelayMinutes = 30L;
             return;
