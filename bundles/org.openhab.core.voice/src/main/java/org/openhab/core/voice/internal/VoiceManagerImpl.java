@@ -699,7 +699,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
             var processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
-                    this.i18nProvidern, b);
+                    this.i18nProvider, b);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
