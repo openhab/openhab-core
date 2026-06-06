@@ -88,7 +88,7 @@ public class MacResolver {
     protected final Map<String, ExpiringMac> arpCache = new ConcurrentHashMap<>();
 
     // map of pending MAC resolution futures for each IP; allows sharing of pending resolutions for the same IP
-    protected final Map<String, Set<CompletableFuture<@Nullable String>>> pendingFutureMacs = new ConcurrentHashMap<>();
+    private final Map<String, Set<CompletableFuture<@Nullable String>>> pendingFutureMacs = new ConcurrentHashMap<>();
 
     private @NonNullByDefault({}) ExecutorService frontEndExecutor;
     private @NonNullByDefault({}) ScheduledExecutorService backEndScheduler;
@@ -122,6 +122,8 @@ public class MacResolver {
     private static final byte[] ARP_TRIGGER_BUF = new byte[1];
     private static final int ARP_TRIGGER_BUF_SIZE = ARP_TRIGGER_BUF.length;
     private static final int DISCARD_PORT = 9;
+
+    private static final String WINDOWS_ARP = System.getenv("SystemRoot") + "\\System32\\arp.exe";
 
     /**
      * Simple wrapper class to hold a MAC address with its expiration time-stamp.
@@ -424,7 +426,7 @@ public class MacResolver {
         switch (OS_TYPE) {
             case LINUX -> linuxArpCacheLoad();
             case MAC_OS -> runCommandAndParse(ARP_LOAD_PROCESS_TIMEOUT, "/usr/sbin/arp", "-n");
-            case WINDOWS -> runCommandAndParse(ARP_LOAD_PROCESS_TIMEOUT, "arp", "-a");
+            case WINDOWS -> runCommandAndParse(ARP_LOAD_PROCESS_TIMEOUT, WINDOWS_ARP, "-a");
             default -> {
                 return;
             }
@@ -504,14 +506,14 @@ public class MacResolver {
      * Converts a MAC address to the standard format {@code XX:XX:XX:XX:XX:XX}.
      */
     protected static String normalizeMac(String mac) {
-        return mac.toUpperCase().replaceAll("[^A-F0-9]", "").replaceAll("(.{2})(?=.)", "$1:");
+        return mac.toUpperCase(Locale.ROOT).replaceAll("[^A-F0-9]", "").replaceAll("(.{2})(?=.)", "$1:");
     }
 
     /**
      * Checks if a standard format IP address is valid.
      */
     protected static boolean isValidIp(String ip) {
-        return IP_PATTERN.matcher(ip).matches();
+        return IP_PATTERN.matcher(ip).lookingAt();
     }
 
     /**
@@ -524,7 +526,7 @@ public class MacResolver {
      */
     protected static String normalizeIp(String ip) {
         Matcher m = IP_PATTERN.matcher(ip);
-        return m.find() ? m.group() : ip; // fallback: return original
+        return m.lookingAt() ? m.group() : ip; // fallback: return original
     }
 
     /**

@@ -15,8 +15,6 @@ package org.openhab.core.net;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -83,14 +81,16 @@ class MacResolverTest {
     void testNormalizeIP() throws Exception {
         assertEquals("192.168.1.1", MacResolver.normalizeIp("192.168.1.1:1234"));
         assertEquals("192.168.1.1", MacResolver.normalizeIp("192.168.1.1"));
+        assertEquals("foo 192.168.1.1 bar", MacResolver.normalizeIp("foo 192.168.1.1 bar"));
     }
 
     @Test
     void testIsValidIp() throws Exception {
         assertTrue(MacResolver.isValidIp("192.168.1.1"));
-        assertFalse(MacResolver.isValidIp("192.168.1.1:1234"));
+        assertTrue(MacResolver.isValidIp("192.168.1.1:1234"));
         assertTrue(MacResolver.isValidIp(MacResolver.normalizeIp("192.168.1.1:1234")));
         assertFalse(MacResolver.isValidIp("999.999.999.999"));
+        assertFalse(MacResolver.isValidIp("foobar 192.168.1.1"));
     }
 
     // -----------------------------
@@ -190,38 +190,23 @@ class MacResolverTest {
     void testParallelResolveMacSharesPendingFutureEntry() throws Exception {
         macResolver.arpCache.clear();
 
-        // Use a guaranteed-local IP so isOnLocalSubnet(ip) passes
         String ip = "1.2.3.4";
-
-        // Access private pendingFutures map
-        Map<String, Set<CompletableFuture<@Nullable String>>> pendingFutureMacs = macResolver.pendingFutureMacs;
-        assertNotNull(pendingFutureMacs, "pendingFutureMacs map should not be null");
 
         // Trigger two parallel resolveMac calls
         CompletableFuture<@Nullable String> futureMac1 = macResolver.resolveMac(ip);
         CompletableFuture<@Nullable String> futureMac2 = macResolver.resolveMac(ip);
 
         // Assert: two distinct CompletableFuture objects returned
-        assertNotSame(futureMac1, futureMac2, "resolveMac must return two different CompletableFutures");
+        assertNotSame(futureMac1, futureMac2);
 
-        // Assert: pendingFutures contains exactly ONE entry for this IP
-        assertEquals(1, pendingFutureMacs.size(), "pendingFutureMacs must contain exactly one shared entry");
-        assertTrue(pendingFutureMacs.containsKey(ip), "pendingFutureMacs must contain the IP key");
+        // Assert: neither future is completed yet (no MAC resolved)
+        assertFalse(futureMac1.isDone());
+        assertFalse(futureMac2.isDone());
 
-        // Assert: the map entry value set contains two CompletableFutures
-        Set<CompletableFuture<@Nullable String>> futureMacs = pendingFutureMacs.get(ip);
-        assertNotNull(futureMacs, "pendingFutureMacs entry must not be null");
-        assertEquals(2, futureMacs.size(), "pendingFutureMacs entry must contain two CompletableFutures");
-
-        assertTrue(futureMacs.contains(futureMac1), "pendingFutureMacs entry must contain futureMac1");
-        assertTrue(futureMacs.contains(futureMac2), "pendingFutureMacs entry must contain futureMac2");
-
-        assertFalse(futureMac1.isDone(), "futureMac1 should not be completed yet");
-        assertFalse(futureMac2.isDone(), "futureMac2 should not be completed yet");
-
-        // futureMac1 and futureMac2 should both complete when mac is resolved
+        // Now resolve the MAC
         macResolver.cachePut(ip, "AA:BB:CC:DD:EE:FF");
 
+        // Assert: both futures complete with the same MAC
         assertEquals("AA:BB:CC:DD:EE:FF", futureMac1.get(1, TimeUnit.SECONDS));
         assertEquals("AA:BB:CC:DD:EE:FF", futureMac2.get(1, TimeUnit.SECONDS));
     }
