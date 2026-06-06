@@ -22,6 +22,7 @@ import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBase
 import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter.IS_SILENT_CONFIGURATION;
 import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter.IS_TEMPLATE_CONFIGURATION;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -56,10 +57,13 @@ import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
-import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationException;
+import org.openhab.core.voice.text.conversation.ConversationRole;
 
 /**
  * Test the standard interpreter
@@ -124,7 +128,7 @@ public class StandardInterpreterTest {
     }
 
     @Test
-    public void noNameCollisionWhenDialogContext() throws InterpretationException {
+    public void noNameCollisionWhenLocationItem() throws InterpretationException, ConversationException {
         var locationGroup = Mockito.spy(new GroupItem("livingroom"));
         locationGroup.setLabel("Living room");
         var computerItem = new SwitchItem("computer");
@@ -132,13 +136,15 @@ public class StandardInterpreterTest {
         var computerItem2 = new SwitchItem("computer2");
         computerItem2.setLabel("Computer");
         when(locationGroup.getMembers()).thenReturn(Set.of(computerItem));
-        var dialogContext = new DialogContext(null, null, sttService, ttsService, null, List.of(), audioSource,
-                audioSink, Locale.ENGLISH, "", locationGroup.getName(), null, null, null, List.of());
         List<Item> items = List.of(computerItem2, locationGroup, computerItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
+        Conversation conversation = new Conversation("test-conversation");
+        conversation.addMessage(ConversationRole.USER, "turn off computer");
+        InterpreterContext interpreterContext = new InterpreterContext(conversation, Collections.emptyList(),
+                locationGroup.getName());
 
         // "computer" should only match the computerItem in the locationGroup
-        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer", dialogContext));
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, interpreterContext));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
     }

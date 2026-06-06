@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 
 /**
@@ -33,7 +34,7 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 public record DialogContext(@Nullable DTService dt, @Nullable String keyword, STTService stt, TTSService tts,
         @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink, Locale locale,
         String dialogGroup, @Nullable String locationItem, @Nullable String listeningItem,
-        @Nullable String listeningMelody, @Nullable String conversationId, List<LLMTool> llmTools) {
+        @Nullable String listeningMelody, Conversation conversation, List<LLMTool> llmTools) {
 
     /**
      * Builder for {@link DialogContext}
@@ -49,8 +50,9 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
         private @Nullable Voice voice;
         private List<HumanLanguageInterpreter> hlis = List.of();
         private List<LLMTool> llmTools = List.of();
+        // state
+        private Conversation conversation = new Conversation("");
         // options
-        private @Nullable String conversationId;
         private String dialogGroup = "default";
         private @Nullable String locationItem;
         private @Nullable String listeningItem;
@@ -133,9 +135,9 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
             return this;
         }
 
-        public Builder withConversationId(@Nullable String conversationId) {
-            if (conversationId != null) {
-                this.conversationId = conversationId;
+        public Builder withConversation(@Nullable Conversation conversation) {
+            if (conversation != null) {
+                this.conversation = conversation;
             }
             return this;
         }
@@ -216,7 +218,7 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
                 throw new IllegalStateException("Cannot build dialog context: " + String.join(", ", errors) + ".");
             } else {
                 return new DialogContext(dtService, keyword, sttService, ttsService, voice, hliServices, audioSource,
-                        audioSink, locale, dialogGroup, locationItem, listeningItem, listeningMelody, conversationId,
+                        audioSink, locale, dialogGroup, locationItem, listeningItem, listeningMelody, conversation,
                         llmTools);
             }
         }

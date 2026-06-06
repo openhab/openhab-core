@@ -28,8 +28,6 @@ import org.openhab.core.voice.VoiceManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Allows the audio bundle to register a dialog that can be triggered programmatically.
@@ -39,7 +37,6 @@ import org.slf4j.LoggerFactory;
 @Component(service = AudioDialogProvider.class)
 @NonNullByDefault
 public class AudioDialogProviderImpl implements AudioDialogProvider {
-    private final Logger logger = LoggerFactory.getLogger(AudioDialogProviderImpl.class);
     private final VoiceManager voiceManager;
 
     @Activate
@@ -106,8 +103,9 @@ public class AudioDialogProviderImpl implements AudioDialogProvider {
 
         @Override
         public void abort() {
-            if (this.abortCallback != null) {
-                this.abortCallback.run();
+            var abortCallback = this.abortCallback;
+            if (abortCallback != null) {
+                abortCallback.run();
                 this.abortCallback = null;
             }
         }

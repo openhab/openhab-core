@@ -229,8 +229,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 }
             }
         }
-        if (lastResult != null && lastResult.getException() != null) {
-            throw lastResult.getException();
+        if (lastResult != null) {
+            var lastException = lastResult.getException();
+            if (lastException != null) {
+                throw lastException;
+            }
         }
         throw new InterpretationException(language.getString(SORRY));
     }

@@ -27,7 +27,6 @@ import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.TTSCache;
 import org.openhab.core.voice.TTSException;
-import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.internal.VoiceManagerImpl;
 import org.osgi.service.component.annotations.Activate;
@@ -38,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Cache system to avoid requesting {@link TTSService} for the same utterances.
+ * Cache system to avoid requesting {@link org.openhab.core.voice.TTSService} for the same utterances.
  * This is a LRU cache (least recently used entry is evicted if the size
  * is exceeded)
  * Size is based on the size on disk (in bytes)

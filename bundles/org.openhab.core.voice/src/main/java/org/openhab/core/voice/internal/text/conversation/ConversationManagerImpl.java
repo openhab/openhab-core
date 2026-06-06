@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 @Component(service = ConversationManager.class)
 @NonNullByDefault
 public class ConversationManagerImpl implements ConversationManager, ConversationListener {
-    private final Storage<ConversationDTO> conversationStorage;
+    private final Storage<PersistedConversationDTO> conversationStorage;
     private final Map<String, Conversation> activeConversations = new ConcurrentHashMap<>();
     private final EventPublisher eventPublisher;
     private final Logger logger = LoggerFactory.getLogger(ConversationManagerImpl.class);
@@ -58,7 +58,8 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
     @Override
     public @Nullable Conversation getConversation(String id, boolean createIfMissing) {
         Conversation conversation;
-        if (id.isBlank()) {
+        if (id.isBlank() && createIfMissing) {
+            logger.debug("Creating new unpersisted conversation");
             conversation = new Conversation("");
             conversation.setMaxMessages(historyLimit);
             return conversation;
@@ -78,11 +79,11 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
                 return conversation;
             }
             // load conversation from storage or create a new one
-            ConversationDTO conversationDTO = conversationStorage.get(id);
-            if (conversationDTO != null) {
+            PersistedConversationDTO persistedConversationDTO = conversationStorage.get(id);
+            if (persistedConversationDTO != null) {
                 logger.debug("Conversation '{}' found", id);
                 conversation = new Conversation(id,
-                        conversationDTO.messages().stream().map(MessageDTO::toMessage).toList());
+                        persistedConversationDTO.messages().stream().map(PersistedMessageDTO::toMessage).toList());
             } else if (createIfMissing) {
                 logger.debug("Creating new conversation '{}'", id);
                 conversation = new Conversation(id);
@@ -115,8 +116,8 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
             removeConversation(id);
         } else {
             logger.debug("Storing conversation '{}' with {} messages...", id, conversation.getMessages().size());
-            conversationStorage.put(id, new ConversationDTO(
-                    new ArrayList<>(conversation.getMessages().stream().map(MessageDTO::fromMessage).toList())));
+            conversationStorage.put(id, new PersistedConversationDTO(id, new ArrayList<>(
+                    conversation.getMessages().stream().map(PersistedMessageDTO::fromMessage).toList())));
             activeConversations.put(id, conversation);
         }
     }

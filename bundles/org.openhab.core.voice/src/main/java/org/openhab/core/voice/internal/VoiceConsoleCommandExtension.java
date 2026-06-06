@@ -313,7 +313,6 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     }
 
     private void interpret(String[] args, Console console) {
-
         HashMap<String, String> parameters;
         try {
             parameters = parseNamedParameters(args, true);
@@ -654,6 +653,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             }
             dialogContextBuilder.withSink(sink);
         }
+        Conversation conversation = conversationManager
+                .getConversation(Objects.requireNonNullElse(parameters.remove("conversation"), ""));
         dialogContextBuilder //
                 .withSTT(voiceManager.getSTT(parameters.remove("stt"))) //
                 .withTTS(voiceManager.getTTS(parameters.remove("tts"))) //
@@ -663,7 +664,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 .withListeningItem(parameters.remove("listening-item")) //
                 .withLocationItem(parameters.remove("location-item")) //
                 .withDialogGroup(parameters.remove("dialog-group")) //
-                .withConversationId(parameters.remove("conversation")) //
+                .withConversation(conversation) //
                 .withLLMTools(llmToolRegistry.getByIds(parameters.remove("llm-tools"))) //
                 .withKeyword(parameters.remove("keyword"));
         if (!parameters.isEmpty()) {
