@@ -61,7 +61,6 @@ import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
-import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.internal.security.ItemPermissionResolverImpl;
