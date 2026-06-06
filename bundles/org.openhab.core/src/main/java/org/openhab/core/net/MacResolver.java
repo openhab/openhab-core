@@ -123,7 +123,7 @@ public class MacResolver {
     private static final int ARP_TRIGGER_BUF_SIZE = ARP_TRIGGER_BUF.length;
     private static final int DISCARD_PORT = 9;
 
-    private static final String WINDOWS_ARP = System.getenv("SystemRoot") + "\\System32\\arp.exe";
+    private String windowsArp = "arp";
 
     /**
      * Simple wrapper class to hold a MAC address with its expiration time-stamp.
@@ -169,6 +169,15 @@ public class MacResolver {
         backEndScheduler = ThreadPoolManager.getScheduledPool("OH-MacResolver-BackEnd");
         if (OS_TYPE == OSType.UNKNOWN) {
             logger.warn("Unknown OS '{}' MacResolver may not work.", OS_NAME);
+        }
+        if (OS_TYPE == OSType.WINDOWS) {
+            String path = System.getenv("SystemRoot");
+            if (path != null) {
+                path += "\\System32\\arp.exe";
+                if (new File(path).exists()) {
+                    windowsArp = path;
+                }
+            }
         }
     }
 
@@ -226,21 +235,20 @@ public class MacResolver {
      *         or times out
      */
     public CompletableFuture<@Nullable String> resolveMac(String ipAddress) {
-        String ip = normalizeIp(ipAddress);
-        if (!isValidIp(ip)) {
+        if (!beginsWithValidIp(ipAddress)) {
             logger.debug("{} invalid", ipAddress);
             return CompletableFuture.completedFuture(null);
         }
+        String ip = normalizeIp(ipAddress);
         InetAddress addr;
         try {
             addr = InetAddress.getByName(ip);
         } catch (UnknownHostException e) {
-            // this should never be reached after isValidIp() test above
             addr = null;
         }
         if (addr == null || addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isMulticastAddress()
                 || "255.255.255.255".equals(ip)) {
-            logger.debug("{} invalid, loopback, any, multicast, or broadcast", ip);
+            logger.debug("{} is invalid, loopback, 'any', multicast, or broadcast", ip);
             return CompletableFuture.completedFuture(null);
         }
         if (!isOnLocalSubnet(ip)) {
@@ -258,8 +266,7 @@ public class MacResolver {
                 .requireNonNull(pendingFutureMacs.computeIfAbsent(ip, key -> ConcurrentHashMap.newKeySet()));
         futureMacs.add(futureMac);
 
-        // flush expired cache entries, and check if the future can be fulfilled from cache
-        cacheFlush();
+        // check if the future can be fulfilled from cache
         String cachedMac = cacheGet(ip);
         if (cachedMac != null) {
             logger.trace("{} -> {} (immediate)", ip, cachedMac);
@@ -306,7 +313,7 @@ public class MacResolver {
      * 
      * @param ip the target IP address to trigger ARP resolution for
      */
-    private void triggerArpTableUpdate(String ip) {
+    protected void triggerArpTableUpdate(String ip) {
         try {
             InetAddress target = InetAddress.getByName(ip);
             DatagramPacket packet = new DatagramPacket(ARP_TRIGGER_BUF, ARP_TRIGGER_BUF_SIZE, target, DISCARD_PORT);
@@ -415,8 +422,10 @@ public class MacResolver {
             stopBackEndTaskSchedule();
             return;
         }
-        // load ARP cache from the operating system into the in-memory cache
+        // load new OS ARP table entries into the in-memory cache
         arpCacheLoad();
+        // remove any remaining expired in-memory cache entries
+        cacheFlush();
     }
 
     /**
@@ -426,7 +435,7 @@ public class MacResolver {
         switch (OS_TYPE) {
             case LINUX -> linuxArpCacheLoad();
             case MAC_OS -> runCommandAndParse(ARP_LOAD_PROCESS_TIMEOUT, "/usr/sbin/arp", "-n");
-            case WINDOWS -> runCommandAndParse(ARP_LOAD_PROCESS_TIMEOUT, WINDOWS_ARP, "-a");
+            case WINDOWS -> runCommandAndParse(ARP_LOAD_PROCESS_TIMEOUT, windowsArp, "-a");
             default -> {
                 return;
             }
@@ -465,14 +474,7 @@ public class MacResolver {
      */
     protected @Nullable String cacheGet(String ip) {
         ExpiringMac entry = arpCache.get(ip);
-        if (entry == null) {
-            return null;
-        }
-        String mac = entry.getMac();
-        if (mac == null) {
-            arpCache.remove(ip);
-        }
-        return mac;
+        return entry != null ? entry.getMac() : null;
     }
 
     /**
@@ -510,18 +512,21 @@ public class MacResolver {
     }
 
     /**
-     * Checks if a standard format IP address is valid.
+     * Checks if a the text begins with a standard format and valid IP address. e.g. {@code 192.168.1.1} and
+     * {@code 192.168.1.1:1234} are valid whereas {@code 999.999.999.999} or {@code foo 192.168.1.1} are not.
+     * 
+     * @param ip the IP address to check
+     * @return true if the text begins with a valid IP address, false otherwise
      */
-    protected static boolean isValidIp(String ip) {
+    protected static boolean beginsWithValidIp(String ip) {
         return IP_PATTERN.matcher(ip).lookingAt();
     }
 
     /**
-     * Convert an IP address to the standard format. For example {@code 192.168.1.1:8080} converts to
-     * {@code 192.168.1.1}
+     * Extracts IP part of a string. e.g. both {@code 192.168.1.1:8080} and {@code 192.168.1.1} produce the
+     * output {@code 192.168.1.1}
      * 
      * @param ip the IP address to normalize
-     * 
      * @return the normalized IP address, or the original string if it cannot be normalized
      */
     protected static String normalizeIp(String ip) {

@@ -43,6 +43,11 @@ class MacResolverTest {
             ExpiringMac entry = new ExpiringMac(mac, expires);
             arpCache.put(ip, entry);
         }
+
+        @Override
+        protected void triggerArpTableUpdate(String ip) {
+            // prevent the background resolution logic from interfering with our tests
+        }
     }
 
     final TestMacResolver macResolver = new TestMacResolver();
@@ -86,11 +91,11 @@ class MacResolverTest {
 
     @Test
     void testIsValidIp() throws Exception {
-        assertTrue(MacResolver.isValidIp("192.168.1.1"));
-        assertTrue(MacResolver.isValidIp("192.168.1.1:1234"));
-        assertTrue(MacResolver.isValidIp(MacResolver.normalizeIp("192.168.1.1:1234")));
-        assertFalse(MacResolver.isValidIp("999.999.999.999"));
-        assertFalse(MacResolver.isValidIp("foobar 192.168.1.1"));
+        assertTrue(MacResolver.beginsWithValidIp("192.168.1.1"));
+        assertTrue(MacResolver.beginsWithValidIp("192.168.1.1:1234"));
+        assertTrue(MacResolver.beginsWithValidIp(MacResolver.normalizeIp("192.168.1.1:1234")));
+        assertFalse(MacResolver.beginsWithValidIp("999.999.999.999"));
+        assertFalse(MacResolver.beginsWithValidIp("foobar 192.168.1.1"));
     }
 
     // -----------------------------
