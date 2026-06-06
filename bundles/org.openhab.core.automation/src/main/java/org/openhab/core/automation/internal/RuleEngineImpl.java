@@ -923,8 +923,13 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (started && slTriggers.stream()
                 .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
                         .intValue() <= startLevel)) {
-            runNow(rule.getUID(), true, Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES,
-                    "event", SystemEventFactory.createStartlevelEvent(startLevel)));
+            // Execute asynchronously so the thread that adds the rule is not blocked: runNow() waits for the
+            // execution to finish, and for file based scripts addRule() is called while the script engine lock is
+            // held. Running the rule synchronously here would deadlock (executing it needs that same lock) and would
+            // stall loading of any further script files.
+            getScheduledExecutor().submit(() -> runNow(ruleUID, true,
+                    Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",
+                            SystemEventFactory.createStartlevelEvent(startLevel))));
         }
 
         return true;
