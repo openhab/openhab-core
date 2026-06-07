@@ -21,6 +21,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public enum ItemPermission {
+    // Attention: Enum ordering MUST NOT be changed as it defines the priority of the permissions
+
     /**
      * No access to the item.
      */

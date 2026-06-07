@@ -47,8 +47,8 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
 
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
-    private final ConcurrentHashMap<String, ItemPermission> cache = new ConcurrentHashMap<>();
     private final Set<Runnable> listeners = ConcurrentHashMap.newKeySet();
+    private final ConcurrentHashMap<String, ItemPermission> cache = new ConcurrentHashMap<>();
 
     private volatile ItemPermission implicitPermission = ItemPermission.READ_WRITE;
 
@@ -105,11 +105,19 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
     public void dispose() {
         itemRegistry.removeRegistryChangeListener(itemRegistryChangeListener);
         metadataRegistry.removeRegistryChangeListener(voiceSystemMetadataChangeListener);
+        listeners.clear();
+        cache.clear();
     }
 
     private void invalidate() {
         cache.clear();
-        listeners.forEach(Runnable::run);
+        for (Runnable listener : listeners) {
+            try {
+                listener.run();
+            } catch (Throwable throwable) {
+                logger.error("Cannot inform the listener \"{}\": {}", listener, throwable.getMessage(), throwable);
+            }
+        }
     }
 
     @Override
@@ -131,7 +139,7 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
     @Override
     public ItemPermission getPermission(Item item) {
         return Objects.requireNonNull(
-                cache.computeIfAbsent(item.getUID(), (k) -> getItemPermissionDetails(item).permission()));
+                cache.computeIfAbsent(item.getName(), (k) -> getItemPermissionDetails(item).permission()));
     }
 
     @Override
@@ -143,7 +151,7 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
 
         Set<String> visitedGroups = new HashSet<>();
         if (item instanceof GroupItem) {
-            visitedGroups.add(item.getUID());
+            visitedGroups.add(item.getName());
         }
         ItemPermissionDetails inherited = resolveInheritedAccess(item, visitedGroups);
         return inherited != null ? inherited : new ItemPermissionDetails(implicitPermission, SYSTEM_DEFAULT_SOURCE);

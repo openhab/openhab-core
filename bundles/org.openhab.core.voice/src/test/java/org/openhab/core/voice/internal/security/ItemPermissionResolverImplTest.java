@@ -14,9 +14,9 @@ package org.openhab.core.voice.internal.security;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.openhab.core.voice.internal.security.ItemPermissionResolverImpl.PERMISSION_PROPERTY;
-import static org.openhab.core.voice.internal.security.ItemPermissionResolverImpl.VOICE_SYSTEM_NAMESPACE;
+import static org.openhab.core.voice.security.ItemPermissionResolver.PERMISSION_PROPERTY;
 import static org.openhab.core.voice.security.ItemPermissionResolver.SYSTEM_DEFAULT_SOURCE;
+import static org.openhab.core.voice.security.ItemPermissionResolver.VOICE_SYSTEM_NAMESPACE;
 
 import java.util.HashMap;
 import java.util.Map;

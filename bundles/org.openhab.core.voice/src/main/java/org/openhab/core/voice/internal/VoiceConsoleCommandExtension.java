@@ -588,7 +588,11 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             console.println("Missing conversation ID.");
             return;
         }
-        String conversationId = argList.getFirst();
+        String conversationId = argList.removeFirst();
+        if (!argList.isEmpty()) {
+            console.println("Incorrect number of arguments");
+            return;
+        }
 
         Conversation conversation = conversationManager.getConversation(conversationId);
         if (conversation.getMessages().isEmpty()) {
