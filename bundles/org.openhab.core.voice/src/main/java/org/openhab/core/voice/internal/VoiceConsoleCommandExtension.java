@@ -551,7 +551,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         List<Item> sortedItems = items.stream().sorted(comparing(Item::getName)).toList();
 
         if (sortedItems.isEmpty()) {
-            console.println("No Items found.");
+            console.println("No accessible Items found (try --all to list all Items).");
             return;
         }
 
