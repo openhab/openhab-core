@@ -24,7 +24,6 @@ import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBase
 import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter.IS_SILENT_CONFIGURATION;
 import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter.IS_TEMPLATE_CONFIGURATION;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -50,6 +49,7 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.StringItem;
@@ -147,24 +147,51 @@ public class StandardInterpreterTest {
 
     @Test
     public void noNameCollisionWhenLocationItem() throws InterpretationException, ConversationException {
-        var locationGroup = Mockito.spy(new GroupItem("livingroom"));
-        locationGroup.setLabel("Living room");
-        var computerItem = new SwitchItem("computer");
-        computerItem.setLabel("Computer");
-        var computerItem2 = new SwitchItem("computer2");
-        computerItem2.setLabel("Computer");
-        when(locationGroup.getMembers()).thenReturn(Set.of(computerItem));
-        List<Item> items = List.of(computerItem2, locationGroup, computerItem);
-        when(itemRegistryMock.getAll()).thenReturn(items);
-        Conversation conversation = new Conversation("test-conversation");
-        conversation.addMessage(ConversationRole.USER, "turn off computer");
-        InterpreterContext interpreterContext = new InterpreterContext(conversation, Collections.emptyList(),
-                locationGroup.getName());
+        var floor = new GroupItem("floor");
+        floor.setLabel("ground floor");
+        floor.addTag(CoreItemFactory.LOCATION);
 
-        // "computer" should only match the computerItem in the locationGroup
-        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, interpreterContext));
-        verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
+        var kitchen = new GroupItem("kitchen");
+        kitchen.setLabel("kitchen");
+        kitchen.addTag(CoreItemFactory.LOCATION);
+        kitchen.addGroupName("floor");
+        floor.addMember(kitchen);
+
+        var livingRoom = new GroupItem("livingRoom");
+        livingRoom.setLabel("living room");
+        livingRoom.addTag(CoreItemFactory.LOCATION);
+        livingRoom.addGroupName("floor");
+        floor.addMember(livingRoom);
+
+        var light1 = new SwitchItem("light1");
+        light1.setLabel("light");
+        light1.addGroupName("kitchen");
+        kitchen.addMember(light1);
+
+        var light2 = new SwitchItem("light2");
+        light2.setLabel("light");
+        light2.addGroupName("livingRoom");
+        livingRoom.addMember(light2);
+
+        lenient().when(itemRegistryMock.getAll()).thenReturn(List.of(floor, kitchen, livingRoom, light1, light2));
+        lenient().when(itemRegistryMock.get("floor")).thenReturn(floor);
+        lenient().when(itemRegistryMock.get("kitchen")).thenReturn(kitchen);
+        lenient().when(itemRegistryMock.get("livingRoom")).thenReturn(livingRoom);
+
+        // Match light1 by location context kitchen
+        Conversation conversation1 = new Conversation("c1");
+        conversation1.addMessage(ConversationRole.USER, "turn on light");
+        InterpreterContext context1 = new InterpreterContext(conversation1, List.of(), "kitchen");
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, context1));
+        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light1", OnOffType.ON));
+
+        reset(eventPublisherMock);
+        // Match light2 by location context livingRoom
+        Conversation conversation2 = new Conversation("c2");
+        conversation2.addMessage(ConversationRole.USER, "turn on light");
+        InterpreterContext context2 = new InterpreterContext(conversation2, List.of(), "livingRoom");
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, context2));
+        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light2", OnOffType.ON));
     }
 
     @Test
