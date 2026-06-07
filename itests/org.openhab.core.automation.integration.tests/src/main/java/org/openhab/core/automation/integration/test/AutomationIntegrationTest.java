@@ -102,8 +102,8 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     private @Nullable ThingRegistry thingRegistry;
     private @Nullable ItemRegistry itemRegistry;
     private @NonNullByDefault({}) StartLevelService startLevelService;
-    private @Nullable RuleRegistry ruleRegistry;
-    private @Nullable RuleManager ruleEngine;
+    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    private @NonNullByDefault({}) RuleManager ruleEngine;
     private @Nullable ManagedRuleProvider managedRuleProvider;
     private @Nullable ModuleTypeRegistry moduleTypeRegistry;
     private @Nullable TemplateRegistry<RuleTemplate> templateRegistry;
@@ -426,7 +426,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     }
 
     @Test
-    public void assertThatRuleNowMethodExecutesActionsOfTheRule() throws ItemNotFoundException {
+    public void assertThatRunNowMethodExecutesActionsOfTheRule() throws ItemNotFoundException {
         Configuration triggerConfig = new Configuration(Map.of("topic", "runNowEventTopic/*"));
         Map<String, Object> params = new HashMap<>();
         params.put("itemName", "myLampItem3");
@@ -478,6 +478,69 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         registerService(itemEventHandler);
 
         ruleEngine.runNow(rule.getUID());
+        waitForAssert(() -> {
+            assertThat(itemEvent, is(notNullValue()));
+        }, 3000, 100);
+        waitForAssert(() -> {
+            assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
+        }, 3000, 100);
+
+        ruleRegistry.remove(rule.getUID());
+    }
+
+    @Test
+    public void assertThatRunAsyncMethodExecutesActionsOfTheRule() throws ItemNotFoundException {
+        Configuration triggerConfig = new Configuration(Map.of("topic", "runNowEventTopic/*"));
+        Map<String, Object> params = new HashMap<>();
+        params.put("itemName", "myLampItem3");
+        params.put("command", "TOGGLE");
+        Configuration actionConfig = new Configuration(params);
+        params = new HashMap<>();
+        params.put("itemName", "myLampItem3");
+        params.put("command", "ON");
+        Configuration actionConfig2 = new Configuration(params);
+        params = new HashMap<>();
+        params.put("itemName", "myLampItem3");
+        params.put("command", "OFFF");
+        Configuration actionConfig3 = new Configuration(params);
+        List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("GenericEventTriggerId")
+                .withTypeUID("core.GenericEventTrigger").withConfiguration(triggerConfig).build());
+        List<Action> actions = List.of(
+                ModuleBuilder.createAction().withId("ItemPostCommandActionId").withTypeUID("core.ItemCommandAction")
+                        .withConfiguration(actionConfig).build(),
+                ModuleBuilder.createAction().withId("ItemPostCommandActionId2").withTypeUID("core.ItemCommandAction")
+                        .withConfiguration(actionConfig2).build(),
+                ModuleBuilder.createAction().withId("ItemPostCommandActionId3").withTypeUID("core.ItemCommandAction")
+                        .withConfiguration(actionConfig3).build());
+
+        Rule rule = RuleBuilder.create("runNowRule" + new Random().nextInt()).withTriggers(triggers)
+                .withActions(actions).build();
+        logger.info("Rule created: {}", rule.getUID());
+
+        ruleRegistry.add(rule);
+
+        // TEST RULE
+        waitForAssert(() -> {
+            assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.IDLE));
+        }, 3000, 100);
+
+        EventSubscriber itemEventHandler = new EventSubscriber() {
+            @Override
+            public Set<String> getSubscribedEventTypes() {
+                return Set.of(ItemCommandEvent.TYPE);
+            }
+
+            @Override
+            public void receive(Event e) {
+                logger.info("Event: {}", e.getTopic());
+                if (e.getTopic().contains("myLampItem3")) {
+                    itemEvent = e;
+                }
+            }
+        };
+        registerService(itemEventHandler);
+
+        ruleEngine.runAsync(rule.getUID());
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
         }, 3000, 100);
