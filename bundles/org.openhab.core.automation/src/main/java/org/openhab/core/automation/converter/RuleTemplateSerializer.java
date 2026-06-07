@@ -69,6 +69,11 @@ public interface RuleTemplateSerializer extends ObjectSerializer<RuleTemplate> {
             this.friendlyName = friendlyName;
         }
 
+        /**
+         * Converts this {@link RuleTemplateSerializationOption} to a corresponding {@link RuleSerializationOption}.
+         *
+         * @return The corresponding {@link RuleSerializationOption}.
+         */
         public RuleSerializationOption toRuleSerializationOption() {
             switch (this) {
                 case INCLUDE_ALL:
@@ -86,6 +91,12 @@ public interface RuleTemplateSerializer extends ObjectSerializer<RuleTemplate> {
             return friendlyName;
         }
 
+        /**
+         * Try to parse the specified string into a {@link RuleTemplateSerializationOption}.
+         *
+         * @param id The {@link String} to parse.
+         * @return The resulting {@link RuleTemplateSerializationOption} or {@code null}.
+         */
         public static @Nullable RuleTemplateSerializationOption fromString(@Nullable String id) {
             if (id == null || id.isBlank()) {
                 return null;

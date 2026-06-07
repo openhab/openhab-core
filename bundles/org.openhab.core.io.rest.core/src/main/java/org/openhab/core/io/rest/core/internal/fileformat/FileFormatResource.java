@@ -859,7 +859,8 @@ public class FileFormatResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SerializabilityResultsDTO.class))),
                     @ApiResponse(responseCode = "400", description = "No rule specified."),
-                    @ApiResponse(responseCode = "404", description = "One or more rules not found in the registry.") })
+                    @ApiResponse(responseCode = "404", description = "One or more rules not found in the registry."),
+                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response canSerializeRules(@Context HttpHeaders httpHeaders,
             @DefaultValue("application/yaml") @QueryParam("targetFormat") @Parameter(description = "Target format", schema = @Schema(type = "string", allowableValues = {
                     "application/vnd.openhab.dsl.rule", "application/yaml" })) String targetFormat,

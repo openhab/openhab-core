@@ -78,10 +78,8 @@ public class YamlRuleTemplateDTO
      * @param template the {@link RuleTemplate}.
      * @param option the {@link RuleTemplateSerializationOption} that decides how the to serialize the
      *            {@link RuleTemplate}.
-     * @throws IllegalArgumentException If the specified {@code option} isn't supported.
      */
-    public YamlRuleTemplateDTO(@NonNull RuleTemplate template, RuleTemplateSerializationOption option)
-            throws IllegalArgumentException {
+    public YamlRuleTemplateDTO(@NonNull RuleTemplate template, RuleTemplateSerializationOption option) {
         this.uid = template.getUID();
         this.label = template.getLabel();
         Set<@NonNull String> tags = template.getTags();
