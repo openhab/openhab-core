@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures;
+import org.openhab.core.library.types.*;
 import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
@@ -41,6 +42,7 @@ import org.openhab.core.model.script.engine.IThingActionsProvider;
 import org.openhab.core.model.script.engine.action.ActionService;
 import org.openhab.core.model.script.lib.NumberExtensions;
 import org.openhab.core.thing.binding.ThingActions;
+import org.openhab.core.types.*;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -108,6 +110,17 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(Month.class);
         result.add(ZoneId.class);
         result.add(ZonedDateTime.class);
+
+        result.add(IncreaseDecreaseType.class);
+        result.add(NextPreviousType.class);
+        result.add(OnOffType.class);
+        result.add(OpenClosedType.class);
+        result.add(PlayPauseType.class);
+        result.add(RefreshType.class);
+        result.add(RewindFastforwardType.class);
+        result.add(StopMoveType.class);
+        result.add(UnDefType.class);
+        result.add(UpDownType.class);
 
         result.addAll(getActionClasses());
         return result;

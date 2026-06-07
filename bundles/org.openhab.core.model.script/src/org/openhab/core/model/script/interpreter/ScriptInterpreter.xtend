@@ -13,7 +13,6 @@
 package org.openhab.core.model.script.interpreter;
 
 import com.google.inject.Inject
-import org.openhab.core.items.Item
 import org.openhab.core.items.ItemNotFoundException
 import org.openhab.core.items.ItemRegistry
 import org.openhab.core.library.types.QuantityType
@@ -21,7 +20,6 @@ import org.openhab.core.types.Type
 import org.openhab.core.model.script.engine.ScriptError
 import org.openhab.core.model.script.engine.ScriptExecutionException
 import org.openhab.core.model.script.lib.NumberExtensions
-import org.openhab.core.model.script.scoping.StateAndCommandProvider
 import org.openhab.core.model.script.script.QuantityLiteral
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmIdentifiableElement
@@ -63,13 +61,12 @@ class ScriptInterpreter extends XbaseInterpreter {
         // Check if the JvmField is inferred
         val sourceElement = jvmField.sourceElements.head
         if (sourceElement !== null) {
-            val value = context.getValue(QualifiedName.create(jvmField.simpleName))
-            value ?: {
-
-                // Looks like we have a state, command or item field
-                val fieldName = jvmField.simpleName
-                fieldName.stateOrCommand ?: fieldName.item
-            }
+            return context.getValue(QualifiedName.create(jvmField.simpleName))
+                ?: try {
+                       itemRegistry.getItem(jvmField.simpleName)
+                   } catch (ItemNotFoundException e) {
+                       null
+                   }
         } else {
             super._invokeFeature(jvmField, featureCall, receiver, context, indicator)
         }
@@ -94,22 +91,6 @@ class ScriptInterpreter extends XbaseInterpreter {
             }
         }
         super.invokeFeature(feature, featureCall, receiverObj, context, indicator)
-    }
-
-    def protected Type getStateOrCommand(String name) {
-        for (Type type : StateAndCommandProvider::allTypes) {
-            if (type.toString == name) {
-                return type
-            }
-        }
-    }
-
-    def protected Item getItem(String name) {
-        try {
-            return itemRegistry.getItem(name);
-        } catch (ItemNotFoundException e) {
-            return null;
-        }
     }
 
     override protected boolean eq(Object a, Object b) {
