@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
@@ -91,7 +92,7 @@ public class ItemStateLLMTool implements LLMTool {
             throw new LLMToolException("Item not found: " + itemName, e);
         }
 
-        if (!itemPermissionResolver.isAccessible(item)) {
+        if (itemPermissionResolver.getPermission(item) == ItemPermission.NO_ACCESS) {
             throw new LLMToolException("Item not found: " + itemName);
         }
 

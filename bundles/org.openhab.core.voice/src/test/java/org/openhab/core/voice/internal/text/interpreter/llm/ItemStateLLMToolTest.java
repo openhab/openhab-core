@@ -25,6 +25,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
 
@@ -76,7 +77,7 @@ public class ItemStateLLMToolTest {
 
     @Test
     public void callThrowsLTEOnNotAccessible() {
-        when(itemPermissionResolver.isAccessible(item)).thenReturn(false);
+        when(itemPermissionResolver.getPermission(item)).thenReturn(ItemPermission.NO_ACCESS);
         LLMToolException exception = assertThrows(LLMToolException.class,
                 () -> tool.call(Map.of("itemName", ITEM_NAME), Locale.ENGLISH));
         String message = exception.getMessage();
