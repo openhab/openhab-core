@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice.text.conversation;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,18 +29,24 @@ import org.eclipse.jdt.annotation.Nullable;
 public class Conversation {
     public static final int DEFAULT_MAX_MESSAGES = 50;
 
-    private final List<Message> messages;
     private final String id;
+    private final Instant created;
+    private Instant lastUpdated;
+    private final List<Message> messages;
     private final CopyOnWriteArrayList<ConversationListener> listeners = new CopyOnWriteArrayList<>();
     private int maxMessages = DEFAULT_MAX_MESSAGES;
 
     public Conversation(String id) {
         this.id = id;
+        this.created = Instant.now();
+        this.lastUpdated = created;
         this.messages = new ArrayList<>();
     }
 
-    public Conversation(String id, List<Message> messages) {
+    public Conversation(String id, Instant created, Instant lastUpdated, List<Message> messages) {
         this.id = id;
+        this.created = created;
+        this.lastUpdated = lastUpdated;
         this.messages = new ArrayList<>(messages);
     }
 
@@ -82,6 +89,18 @@ public class Conversation {
                 messages.removeFirst();
             }
         }
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Instant getCreated() {
+        return created;
+    }
+
+    public Instant getLastUpdated() {
+        return lastUpdated;
     }
 
     /**
@@ -163,6 +182,7 @@ public class Conversation {
                 messages.removeFirst();
             }
             messages.add(message);
+            lastUpdated = Instant.now();
         }
         notifyMessageAdded(message);
         return message.id();
@@ -181,6 +201,7 @@ public class Conversation {
             if (messageOptional.isPresent()) {
                 int index = messages.indexOf(messageOptional.get());
                 messages.subList(index, messages.size()).clear();
+                lastUpdated = Instant.now();
                 removed = true;
             }
         }
@@ -198,16 +219,13 @@ public class Conversation {
         synchronized (messages) {
             if (!messages.isEmpty()) {
                 messages.clear();
+                lastUpdated = Instant.now();
                 removed = true;
             }
         }
         if (removed) {
             notifyMessagesRemoved(0);
         }
-    }
-
-    public String getId() {
-        return id;
     }
 
     /**

@@ -82,7 +82,8 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
             PersistedConversationDTO persistedConversationDTO = conversationStorage.get(id);
             if (persistedConversationDTO != null) {
                 logger.debug("Conversation '{}' found", id);
-                conversation = new Conversation(id,
+                conversation = new Conversation(id, persistedConversationDTO.createdAt(),
+                        persistedConversationDTO.lastUpdated(),
                         persistedConversationDTO.messages().stream().map(PersistedMessageDTO::toMessage).toList());
             } else if (createIfMissing) {
                 logger.debug("Creating new conversation '{}'", id);
@@ -116,8 +117,9 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
             removeConversation(id);
         } else {
             logger.debug("Storing conversation '{}' with {} messages...", id, conversation.getMessages().size());
-            conversationStorage.put(id, new PersistedConversationDTO(id, new ArrayList<>(
-                    conversation.getMessages().stream().map(PersistedMessageDTO::fromMessage).toList())));
+            conversationStorage.put(id, new PersistedConversationDTO(id, conversation.getCreated(),
+                    conversation.getLastUpdated(), new ArrayList<>(
+                            conversation.getMessages().stream().map(PersistedMessageDTO::fromMessage).toList())));
             activeConversations.put(id, conversation);
         }
     }

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.voice.internal;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -27,7 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(name = "Conversation")
 @NonNullByDefault
-public record ConversationDTO(String id, List<MessageDTO> messages) {
+public record ConversationDTO(String id, Instant created, Instant lastUpdated, List<MessageDTO> messages) {
     @Schema(name = "Message")
     public record MessageDTO(int id, ConversationRole role, String content) {
     }

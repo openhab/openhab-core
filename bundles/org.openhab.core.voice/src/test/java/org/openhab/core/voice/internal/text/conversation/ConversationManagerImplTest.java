@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -106,15 +108,20 @@ public class ConversationManagerImplTest {
     @Test
     public void getConversationLoadsConversationFromStorage() {
         String id = "stored-conv";
+        Instant created = Instant.now().minus(5, ChronoUnit.MINUTES);
+        Instant lastUpdated = Instant.now();
         PersistedMessageDTO persistedMessageDTO = new PersistedMessageDTO(1, ConversationRole.USER, "Hello");
         ArrayList<PersistedMessageDTO> messages = new ArrayList<>(List.of(persistedMessageDTO));
-        PersistedConversationDTO persistedConversationDTO = new PersistedConversationDTO(id, messages);
+        PersistedConversationDTO persistedConversationDTO = new PersistedConversationDTO(id, created, lastUpdated,
+                messages);
         when(storage.get(id)).thenReturn(persistedConversationDTO);
 
         Conversation conversation = conversationManager.getConversation(id);
 
         assertNotNull(conversation);
         assertEquals(id, conversation.getId());
+        assertEquals(created, conversation.getCreated());
+        assertEquals(lastUpdated, conversation.getLastUpdated());
         assertEquals(1, conversation.getMessages().size());
         assertEquals("Hello", conversation.getMessages().getFirst().content());
 
@@ -141,9 +148,13 @@ public class ConversationManagerImplTest {
 
     @Test
     public void getConversationsReturnsAllFromStorage() {
+        Instant created = Instant.now().minus(5, ChronoUnit.MINUTES);
+        Instant lastUpdated = Instant.now();
         when(storage.getKeys()).thenReturn(Set.of("conv1", "conv2"));
-        when(storage.get("conv1")).thenReturn(new PersistedConversationDTO("conv1", new ArrayList<>()));
-        when(storage.get("conv2")).thenReturn(new PersistedConversationDTO("conv2", new ArrayList<>()));
+        when(storage.get("conv1"))
+                .thenReturn(new PersistedConversationDTO("conv1", created, lastUpdated, new ArrayList<>()));
+        when(storage.get("conv2"))
+                .thenReturn(new PersistedConversationDTO("conv2", created, lastUpdated, new ArrayList<>()));
 
         Collection<Conversation> conversations = conversationManager.getConversations();
 
@@ -163,12 +174,24 @@ public class ConversationManagerImplTest {
 
     @Test
     public void addMessageToAConversationPersistsToStorage() throws ConversationException {
-        String id = "event-test";
+        String id = "storage-test";
         Conversation conversation = conversationManager.getConversation(id);
 
         conversation.addMessage(ConversationRole.USER, "Hello");
 
         verify(storage).put(eq(id), any(PersistedConversationDTO.class));
+    }
+
+    @Test
+    void addMessageToAConversationUpdatesLastUpdated() throws ConversationException {
+        String id = "last-updated-test";
+        Conversation conversation = conversationManager.getConversation(id);
+        Instant oldLastUpdated = conversation.getLastUpdated();
+
+        conversation.addMessage(ConversationRole.USER, "Hello");
+
+        assertTrue(conversation.getLastUpdated().isAfter(conversation.getCreated()));
+        assertTrue(conversation.getLastUpdated().isAfter(oldLastUpdated));
     }
 
     @Test
