@@ -15,12 +15,9 @@ package org.openhab.core.voice.text.interpreter.llm;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * A DTO to store information about a tool call.
@@ -32,8 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @NonNullByDefault
 public record LLMToolCall(String tool, Map<String, Object> params) {
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
-    private static final Logger LOGGER = LoggerFactory.getLogger(LLMToolCall.class);
+    private static final Gson GSON = new Gson();
 
     public static LLMToolCall map(LLMTool tool, Map<String, Object> params) {
         return new LLMToolCall(tool.getUID(), params);
@@ -42,15 +38,10 @@ public record LLMToolCall(String tool, Map<String, Object> params) {
     /**
      * Serializes this instance to JSON.
      * 
-     * @return the JSON or null if serialization failed
+     * @return the JSON
      */
-    public @Nullable String toJson() {
-        try {
-            return JSON_MAPPER.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            LOGGER.warn("Failed to serialize tool call '{}: {}'", tool, params, e);
-        }
-        return null;
+    public String toJson() {
+        return GSON.toJson(this);
     }
 
     /**
@@ -58,16 +49,9 @@ public record LLMToolCall(String tool, Map<String, Object> params) {
      * 
      * @param json the JSON to deserialize
      * @return the deserialized tool call or null if deserialization failed
+     * @throws JsonSyntaxException if <code>json</code> is not a valid representation of {@link LLMToolCall}
      */
-    public static @Nullable LLMToolCall fromJson(@Nullable String json) {
-        if (json == null) {
-            return null;
-        }
-        try {
-            return JSON_MAPPER.readValue(json, LLMToolCall.class);
-        } catch (JsonProcessingException e) {
-            LOGGER.warn("Failed to deserialize tool call '{}'", json, e);
-        }
-        return null;
+    public static LLMToolCall fromJson(String json) throws JsonSyntaxException {
+        return GSON.fromJson(json, LLMToolCall.class);
     }
 }

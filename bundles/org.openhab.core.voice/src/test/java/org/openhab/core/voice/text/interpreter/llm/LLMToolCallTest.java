@@ -36,7 +36,6 @@ import com.google.gson.Gson;
  */
 @NonNullByDefault
 public class LLMToolCallTest {
-    private final Gson gson = new Gson();
 
     private final LLMTool tool = new LLMTool() {
         @Override
@@ -83,9 +82,7 @@ public class LLMToolCallTest {
         LLMToolCall call = LLMToolCall.map(tool, params);
         String serialized = call.toJson();
 
-        assertNotNull(serialized);
-        LLMToolCall roundTrip = gson.fromJson(serialized, LLMToolCall.class);
-        assertNotNull(roundTrip);
+        LLMToolCall roundTrip = LLMToolCall.fromJson(serialized);
         assertEquals(call, roundTrip);
     }
 
@@ -93,13 +90,10 @@ public class LLMToolCallTest {
     @MethodSource("provideToolCallScenarios")
     public void testDeserialization(String description, Map<String, Object> params) {
         LLMToolCall original = LLMToolCall.map(tool, params);
-        String json = gson.toJson(original);
+        String json = new Gson().toJson(original);
         assertNotNull(json);
 
         LLMToolCall deserialized = LLMToolCall.fromJson(json);
-
-        assertNotNull(deserialized);
-        assertEquals(original.tool(), deserialized.tool());
-        assertEquals(original.params(), deserialized.params());
+        assertEquals(original, deserialized);
     }
 }
