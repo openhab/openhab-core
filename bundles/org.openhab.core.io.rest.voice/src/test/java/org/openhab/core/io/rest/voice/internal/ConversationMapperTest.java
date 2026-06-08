@@ -38,6 +38,8 @@ public class ConversationMapperTest {
 
         assertNotNull(dto);
         assertEquals(id, dto.id());
+        assertEquals(conversation.getCreated(), dto.created());
+        assertEquals(conversation.getLastUpdated(), dto.lastUpdated());
         assertEquals(2, dto.messages().size());
         assertEquals(ConversationRole.USER, dto.messages().get(0).role());
         assertEquals("Hello", dto.messages().get(0).content());
