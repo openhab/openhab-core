@@ -48,7 +48,7 @@ public record LLMToolCall(String tool, Map<String, Object> params) {
         try {
             return JSON_MAPPER.writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            LOGGER.warn("Failed to serialize tool call '{}: {}': {}", tool, params, e.getMessage());
+            LOGGER.warn("Failed to serialize tool call '{}: {}'", tool, params, e);
         }
         return null;
     }
@@ -66,7 +66,7 @@ public record LLMToolCall(String tool, Map<String, Object> params) {
         try {
             return JSON_MAPPER.readValue(json, LLMToolCall.class);
         } catch (JsonProcessingException e) {
-            LOGGER.warn("Failed to deserialize tool call '{}': {}", json, e.getMessage());
+            LOGGER.warn("Failed to deserialize tool call '{}'", json, e);
         }
         return null;
     }

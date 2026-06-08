@@ -74,7 +74,7 @@ public class LLMToolCallTest {
     private static Stream<Arguments> provideToolCallScenarios() {
         return Stream.of(Arguments.of("No Parameters", Collections.emptyMap()),
                 Arguments.of("Single Parameter", Collections.singletonMap("param1", "value1")),
-                Arguments.of("Multiple Parameters", Map.of("p1", "v1", "p2", 42)));
+                Arguments.of("Multiple Parameters", Map.of("p1", "v1", "p2", 42.0)));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -84,7 +84,9 @@ public class LLMToolCallTest {
         String serialized = call.toJson();
 
         assertNotNull(serialized);
-        assertEquals(gson.toJson(call), serialized);
+        LLMToolCall roundTrip = gson.fromJson(serialized, LLMToolCall.class);
+        assertNotNull(roundTrip);
+        assertEquals(call, roundTrip);
     }
 
     @ParameterizedTest(name = "{0}")
