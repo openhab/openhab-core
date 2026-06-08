@@ -13,7 +13,9 @@
 package org.openhab.core.voice.internal.text.interpreter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -612,7 +614,29 @@ public class StandardInterpreterTest {
         verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light", OnOffType.ON));
     }
 
+    @Test
+    public void rejectCommandWhenReadOnly() throws InterpretationException {
+        itemPermissionResolver.setImplicitPermission(ItemPermission.READ_WRITE);
+
+        var lightItem = new SwitchItem("light");
+        lightItem.setLabel("Light");
+        List<Item> items = List.of(lightItem);
+        lenient().when(itemRegistryMock.getAll()).thenReturn(items);
+
+        MetadataKey key = new MetadataKey(VOICE_SYSTEM_NAMESPACE, lightItem.getName());
+        HashMap<String, Object> configuration = new HashMap<>();
+        configuration.put(PERMISSION_PROPERTY, ItemPermission.READ_ONLY.name());
+        lenient().when(metadataRegistryMock.get(key)).thenReturn(new Metadata(key, "", configuration));
+
+        assertEquals(readOnlyMessage(Locale.ENGLISH), standardInterpreter.interpret(Locale.ENGLISH, "turn on light"));
+        verify(eventPublisherMock, never()).post(any());
+    }
+
     private String noObjectsMessage(Locale locale) {
         return ResourceBundle.getBundle("LanguageSupport", locale).getString("no_objects");
+    }
+
+    private String readOnlyMessage(Locale locale) {
+        return ResourceBundle.getBundle("LanguageSupport", locale).getString("read_only");
     }
 }
