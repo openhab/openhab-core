@@ -14,6 +14,7 @@ package org.openhab.core.voice.text.interpreter.llm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,11 +24,13 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * Tests for {@link LLMToolCall}.
@@ -95,5 +98,10 @@ public class LLMToolCallTest {
 
         LLMToolCall deserialized = LLMToolCall.fromJson(json);
         assertEquals(original, deserialized);
+    }
+
+    @Test
+    public void testFromJsonWithNullString() {
+        assertThrows(JsonSyntaxException.class, () -> LLMToolCall.fromJson("null"));
     }
 }

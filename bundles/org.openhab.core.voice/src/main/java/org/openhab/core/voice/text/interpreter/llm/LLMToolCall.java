@@ -37,7 +37,7 @@ public record LLMToolCall(String tool, Map<String, Object> params) {
 
     /**
      * Serializes this instance to JSON.
-     * 
+     *
      * @return the JSON
      */
     public String toJson() {
@@ -46,12 +46,16 @@ public record LLMToolCall(String tool, Map<String, Object> params) {
 
     /**
      * Deserializes a tool call from JSON.
-     * 
+     *
      * @param json the JSON to deserialize
-     * @return the deserialized tool call or null if deserialization failed
+     * @return the deserialized tool call
      * @throws JsonSyntaxException if <code>json</code> is not a valid representation of {@link LLMToolCall}
      */
     public static LLMToolCall fromJson(String json) throws JsonSyntaxException {
-        return GSON.fromJson(json, LLMToolCall.class);
+        LLMToolCall call = GSON.fromJson(json, LLMToolCall.class);
+        if (call == null) {
+            throw new JsonSyntaxException("Deserialized LLMToolCall is null.");
+        }
+        return call;
     }
 }
