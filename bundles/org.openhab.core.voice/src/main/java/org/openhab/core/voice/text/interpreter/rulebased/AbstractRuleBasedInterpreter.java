@@ -46,6 +46,7 @@ import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
+import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
@@ -80,6 +81,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     private static final String STATE_ALREADY_SINGULAR = "state_already_singular";
     private static final String MULTIPLE_OBJECTS = "multiple_objects";
     private static final String NO_OBJECTS = "no_objects";
+    private static final String READ_ONLY = "read_only";
     private static final String COMMAND_NOT_ACCEPTED = "command_not_accepted";
 
     private static final String CMD = "cmd";
@@ -914,6 +916,10 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 logger.debug("Failed constructing response: {}", ex.getMessage());
                 return language.getString(ERROR);
             }
+        }
+        if (itemPermissionResolver.getPermission(item) != ItemPermission.READ_WRITE) {
+            logger.debug("Cannot send command to read-only item {}", item.getName());
+            return language.getString(READ_ONLY);
         }
         eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command));
         return !isSilent ? language.getString(OK) : "";
