@@ -19,23 +19,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.gson.Gson;
 
 /**
- * Tests for {@link LLMToolCallSerializer}.
+ * Tests for {@link LLMToolCall}.
  *
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public class LLMToolCallSerializerTest {
+public class LLMToolCallTest {
     private final Gson gson = new Gson();
 
-    private LLMTool tool = new LLMTool() {
+    private final LLMTool tool = new LLMTool() {
         @Override
         public String getUID() {
             return "sample-llm-tool";
@@ -68,23 +71,33 @@ public class LLMToolCallSerializerTest {
         }
     };
 
-    @Test
-    public void serializesWithoutParams() {
-        LLMToolCallSerializer.LLMToolCall expected = new LLMToolCallSerializer.LLMToolCall(tool.getUID(),
-                Collections.emptyMap());
-        String serialized = LLMToolCallSerializer.serialize(tool, Collections.emptyMap());
-
-        assertNotNull(serialized);
-        assertEquals(gson.toJson(expected), serialized);
+    private static Stream<Arguments> provideToolCallScenarios() {
+        return Stream.of(Arguments.of("No Parameters", Collections.emptyMap()),
+                Arguments.of("Single Parameter", Collections.singletonMap("param1", "value1")),
+                Arguments.of("Multiple Parameters", Map.of("p1", "v1", "p2", 42)));
     }
 
-    @Test
-    public void serializesWithParams() {
-        Map<String, Object> params = Collections.singletonMap("param1", "value1");
-        LLMToolCallSerializer.LLMToolCall expected = new LLMToolCallSerializer.LLMToolCall(tool.getUID(), params);
-        String serialized = LLMToolCallSerializer.serialize(tool, params);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideToolCallScenarios")
+    public void testSerialization(String description, Map<String, Object> params) {
+        LLMToolCall call = LLMToolCall.map(tool, params);
+        String serialized = call.toJson();
 
         assertNotNull(serialized);
-        assertEquals(gson.toJson(expected), serialized);
+        assertEquals(gson.toJson(call), serialized);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideToolCallScenarios")
+    public void testDeserialization(String description, Map<String, Object> params) {
+        LLMToolCall original = LLMToolCall.map(tool, params);
+        String json = gson.toJson(original);
+        assertNotNull(json);
+
+        LLMToolCall deserialized = LLMToolCall.fromJson(json);
+
+        assertNotNull(deserialized);
+        assertEquals(original.tool(), deserialized.tool());
+        assertEquals(original.params(), deserialized.params());
     }
 }

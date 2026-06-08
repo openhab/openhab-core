@@ -76,7 +76,7 @@ public interface HumanLanguageInterpreter {
      *           {@link Conversation} provided in the {@link InterpreterContext}:
      *           <ul>
      *           <li>Tool calls must be serialized with
-     *           {@link org.openhab.core.voice.text.interpreter.llm.LLMToolCallSerializer} and added as
+     *           {@link org.openhab.core.voice.text.interpreter.llm.LLMToolCall#toJson()} and added as
      *           {@link ConversationRole#TOOL_CALL} message.</li>
      *           <li>Tool call results must be added as {@link ConversationRole#TOOL_RETURN} message.</li>
      *           <li>Interpreter thinking must be added as {@link ConversationRole#THINKING} message.</li>
