@@ -19,7 +19,10 @@ import java.util.Map.Entry;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigParser;
+import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.text.conversation.Conversation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link VoiceConfiguration} class holds the configuration for the {@link VoiceManagerImpl}.
@@ -29,7 +32,8 @@ import org.openhab.core.voice.text.conversation.Conversation;
 @NonNullByDefault
 public class VoiceConfiguration {
     // the default keyword to use if no other is configured
-    public static final String DEFAULT_KEYWORD = "Wakeup";
+    private static final String DEFAULT_KEYWORD = "Wakeup";
+    private static final ItemPermission DEFAULT_IMPLICIT_ITEM_ACCESS = ItemPermission.READ_WRITE;
 
     // constants for the configuration properties
     public static final String CONFIG_URI = "system:voice";
@@ -43,6 +47,9 @@ public class VoiceConfiguration {
     public static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
     public static final String CONFIG_PREFIX_DEFAULT_VOICE = "defaultVoice.";
     public static final String CONFIG_CONVERSATION_HISTORY_LIMIT = "conversationHistoryLimit";
+    public static final String CONFIG_IMPLICIT_ITEM_PERMISSION = "implicitItemPermission";
+
+    private final Logger logger = LoggerFactory.getLogger(VoiceConfiguration.class);
 
     private String keyword = DEFAULT_KEYWORD;
     private @Nullable String listeningItem;
@@ -53,6 +60,7 @@ public class VoiceConfiguration {
     private @Nullable String defaultHLI;
     private @Nullable String defaultVoice;
     private int conversationHistoryLimit = Conversation.DEFAULT_MAX_MESSAGES;
+    private ItemPermission implicitItemPermission = DEFAULT_IMPLICIT_ITEM_ACCESS;
     private final Map<String, String> defaultVoices = new HashMap<>();
 
     public void update(Map<String, Object> config) {
@@ -66,6 +74,15 @@ public class VoiceConfiguration {
         this.defaultVoice = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_VOICE), String.class);
         this.conversationHistoryLimit = ConfigParser.valueAsOrElse(config.get(CONFIG_CONVERSATION_HISTORY_LIMIT),
                 Integer.class, Conversation.DEFAULT_MAX_MESSAGES);
+        String implicitItemPermissionStr = ConfigParser.valueAsOrElse(config.get(CONFIG_IMPLICIT_ITEM_PERMISSION),
+                String.class, DEFAULT_IMPLICIT_ITEM_ACCESS.name());
+        try {
+            this.implicitItemPermission = ItemPermission.valueOf(implicitItemPermissionStr);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid implicitItemPermission value '{}', using {}", implicitItemPermissionStr,
+                    DEFAULT_IMPLICIT_ITEM_ACCESS);
+            this.implicitItemPermission = DEFAULT_IMPLICIT_ITEM_ACCESS;
+        }
 
         defaultVoices.clear();
         for (Entry<String, Object> entry : config.entrySet()) {
@@ -111,6 +128,10 @@ public class VoiceConfiguration {
 
     public int getConversationHistoryLimit() {
         return conversationHistoryLimit;
+    }
+
+    public ItemPermission getImplicitItemPermission() {
+        return implicitItemPermission;
     }
 
     public Map<String, String> getDefaultVoices() {
