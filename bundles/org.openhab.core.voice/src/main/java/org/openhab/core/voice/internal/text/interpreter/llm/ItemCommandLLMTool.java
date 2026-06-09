@@ -12,6 +12,8 @@
  */
 package org.openhab.core.voice.internal.text.interpreter.llm;
 
+import static org.openhab.core.voice.internal.VoiceManagerImpl.VOICE_SOURCE;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -116,7 +118,7 @@ public class ItemCommandLLMTool implements LLMTool {
             throw new LLMToolException("Failed to parse command '" + commandString + "' for item '" + itemName + "'");
         }
 
-        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command));
+        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command, VOICE_SOURCE));
 
         return "Successfully sent command '" + commandString + "' to item '" + itemName + "'.";
     }
