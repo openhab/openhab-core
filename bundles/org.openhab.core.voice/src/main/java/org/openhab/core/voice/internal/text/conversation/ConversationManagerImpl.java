@@ -59,16 +59,18 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
                 this.getClass().getClassLoader());
         this.eventPublisher = eventPublisher;
 
+        processConfig(config);
+    }
+
+    private void processConfig(Map<String, Object> config) {
         historyLimit = ConfigParser.valueAsOrElse(
                 config.get(VoiceConfigurationConstants.CONFIG_CONVERSATION_HISTORY_LIMIT), Integer.class,
-                VoiceConfigurationConstants.DEFAULT_CONVERSATION_HISTORY_LIMIT);
+                Conversation.DEFAULT_MAX_MESSAGES);
     }
 
     @Modified
     public void modified(Map<String, Object> config) {
-        historyLimit = ConfigParser.valueAsOrElse(
-                config.get(VoiceConfigurationConstants.CONFIG_CONVERSATION_HISTORY_LIMIT), Integer.class,
-                Conversation.DEFAULT_MAX_MESSAGES);
+        processConfig(config);
         setHistoryLimit(historyLimit);
     }
 
