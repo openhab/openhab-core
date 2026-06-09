@@ -73,7 +73,6 @@ import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
-import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
@@ -109,14 +108,12 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Use dialog context
  * @author Miguel Álvarez - Add transcribe method
  */
-@Component(immediate = true, configurationPid = VoiceManagerImpl.CONFIGURATION_PID, //
+@Component(immediate = true, configurationPid = VoiceConfigurationConstants.CONFIGURATION_PID, //
         property = Constants.SERVICE_PID + "=org.openhab.voice")
-@ConfigurableService(category = "system", label = "Voice", description_uri = VoiceConfiguration.CONFIG_URI)
+@ConfigurableService(category = "system", label = "Voice", description_uri = VoiceConfigurationConstants.CONFIG_URI)
 @NonNullByDefault
 public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener,
         RegistryChangeListener<LLMTool> {
-
-    public static final String CONFIGURATION_PID = "org.openhab.voice";
 
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
@@ -136,7 +133,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
     private final Storage<DialogRegistration> dialogRegistrationStorage;
-    private final VoiceConfiguration configuration;
+    private final VoiceManagerConfiguration configuration;
 
     private @Nullable Bundle bundle;
 
@@ -159,7 +156,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 this.getClass().getClassLoader());
         this.conversationManager = conversationManager;
         this.llmToolRegistry = llmToolRegistry;
-        this.configuration = new VoiceConfiguration(configDescriptionRegistry);
+        this.configuration = new VoiceManagerConfiguration(configDescriptionRegistry);
     }
 
     @Activate
@@ -1027,25 +1024,25 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
             @Nullable Locale locale) {
-        if (VoiceConfiguration.CONFIG_URI.equals(uri.toString())) {
+        if (VoiceConfigurationConstants.CONFIG_URI.equals(uri.toString())) {
             switch (param) {
-                case VoiceConfiguration.CONFIG_DEFAULT_HLI:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_HLI:
                     return humanLanguageInterpreters.values().stream()
                             .sorted((hli1, hli2) -> hli1.getLabel(locale).compareToIgnoreCase(hli2.getLabel(locale)))
                             .map(hli -> new ParameterOption(hli.getId(), hli.getLabel(locale))).toList();
-                case VoiceConfiguration.CONFIG_DEFAULT_KS:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_KS:
                     return ksServices.values().stream()
                             .sorted((ks1, ks2) -> ks1.getLabel(locale).compareToIgnoreCase(ks2.getLabel(locale)))
                             .map(ks -> new ParameterOption(ks.getId(), ks.getLabel(locale))).toList();
-                case VoiceConfiguration.CONFIG_DEFAULT_STT:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_STT:
                     return sttServices.values().stream()
                             .sorted((stt1, stt2) -> stt1.getLabel(locale).compareToIgnoreCase(stt2.getLabel(locale)))
                             .map(stt -> new ParameterOption(stt.getId(), stt.getLabel(locale))).toList();
-                case VoiceConfiguration.CONFIG_DEFAULT_TTS:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_TTS:
                     return ttsServices.values().stream()
                             .sorted((tts1, tts2) -> tts1.getLabel(locale).compareToIgnoreCase(tts2.getLabel(locale)))
                             .map(tts -> new ParameterOption(tts.getId(), tts.getLabel(locale))).toList();
-                case VoiceConfiguration.CONFIG_DEFAULT_VOICE:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_VOICE:
                     Locale nullSafeLocale = locale != null ? locale : localeProvider.getLocale();
                     return getAllVoicesSorted(nullSafeLocale)
                             .stream().filter(v -> getTTS(v) != null).map(

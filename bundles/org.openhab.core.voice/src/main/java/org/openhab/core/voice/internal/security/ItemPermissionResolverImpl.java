@@ -12,7 +12,7 @@
  */
 package org.openhab.core.voice.internal.security;
 
-import static org.openhab.core.voice.internal.VoiceConfiguration.DEFAULT_IMPLICIT_ITEM_ACCESS;
+import static org.openhab.core.voice.internal.VoiceConfigurationConstants.DEFAULT_IMPLICIT_ITEM_ACCESS;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -30,7 +30,7 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
-import org.openhab.core.voice.internal.VoiceConfiguration;
+import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.osgi.service.component.annotations.Activate;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florian Hotze - Initial contribution
  */
-@Component(service = ItemPermissionResolver.class, configurationPid = VoiceConfiguration.CONFIGURATION_PID)
+@Component(service = ItemPermissionResolver.class, configurationPid = VoiceConfigurationConstants.CONFIGURATION_PID)
 @NonNullByDefault
 public class ItemPermissionResolverImpl implements ItemPermissionResolver {
     private final Logger logger = LoggerFactory.getLogger(ItemPermissionResolverImpl.class);
@@ -112,7 +112,7 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
 
     private void processConfig(Map<String, Object> config) {
         String implicitItemPermissionStr = ConfigParser.valueAsOrElse(
-                config.get(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION), String.class,
+                config.get(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION), String.class,
                 DEFAULT_IMPLICIT_ITEM_ACCESS.name());
         try {
             this.implicitPermission = ItemPermission.valueOf(implicitItemPermissionStr);
@@ -124,7 +124,7 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
     }
 
     @Modified
-    protected void modified(Map<String, Object> config) {
+    public void modified(Map<String, Object> config) {
         processConfig(config);
         invalidate();
     }

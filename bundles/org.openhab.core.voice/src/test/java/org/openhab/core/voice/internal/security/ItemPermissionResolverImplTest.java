@@ -36,7 +36,7 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.items.SwitchItem;
-import org.openhab.core.voice.internal.VoiceConfiguration;
+import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 
@@ -57,8 +57,8 @@ public class ItemPermissionResolverImplTest {
     @BeforeEach
     public void setUp() {
         itemAccessResolver = new ItemPermissionResolverImpl(itemRegistry, metadataRegistry,
-                Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION,
-                        VoiceConfiguration.DEFAULT_IMPLICIT_ITEM_ACCESS.name()));
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION,
+                        VoiceConfigurationConstants.DEFAULT_IMPLICIT_ITEM_ACCESS.name()));
         item = new SwitchItem("TestItem");
     }
 
@@ -184,8 +184,8 @@ public class ItemPermissionResolverImplTest {
         int[] notifications = new int[1];
         itemAccessResolver.addItemAccessChangeListener(() -> notifications[0]++);
 
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
 
         assertEquals(1, notifications[0]);
     }
@@ -207,8 +207,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testExplicitAllowOnItem() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
         stubMetadata(item.getName(), ItemPermission.READ_WRITE);
 
         assertTrue(itemAccessResolver.isAccessible(item));
@@ -218,8 +218,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testExplicitDenyOnItem() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
         stubMetadata(item.getName(), ItemPermission.NO_ACCESS);
 
         assertFalse(itemAccessResolver.isAccessible(item));
@@ -229,8 +229,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testInheritAllowFromParentGroup() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
         item.addGroupName("ParentGroup");
         GroupItem parentGroup = new GroupItem("ParentGroup");
         when(itemRegistry.get("ParentGroup")).thenReturn(parentGroup);
@@ -245,8 +245,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testInheritDenyFromParentGroup() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
         item.addGroupName("ParentGroup");
         GroupItem parentGroup = new GroupItem("ParentGroup");
         when(itemRegistry.get("ParentGroup")).thenReturn(parentGroup);
@@ -261,8 +261,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testMergingDenyHasPriorityOverAllow() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
 
         item.addGroupName("DenyGroup");
         item.addGroupName("AllowGroup");
@@ -284,8 +284,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testMergingReadOnlyPriority() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
 
         item.addGroupName("ReadOnlyGroup");
         item.addGroupName("ReadWriteGroup");
@@ -307,8 +307,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testMultiLevelInheritance() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
 
         item.addGroupName("ParentGroup");
         GroupItem parentGroup = new GroupItem("ParentGroup");
@@ -327,8 +327,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testFallbackToSystemDefaultTrue() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
 
         assertTrue(itemAccessResolver.isAccessible(item));
         assertEquals(SYSTEM_DEFAULT_SOURCE, itemAccessResolver.getItemPermissionDetails(item).source());
@@ -336,8 +336,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testFallbackToSystemDefaultFalse() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
 
         assertFalse(itemAccessResolver.isAccessible(item));
         assertEquals(SYSTEM_DEFAULT_SOURCE, itemAccessResolver.getItemPermissionDetails(item).source());
@@ -355,20 +355,20 @@ public class ItemPermissionResolverImplTest {
         lenient().when(itemRegistry.get("GroupB")).thenReturn(groupB);
 
         // No explicit allow/deny, should fallback to default
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
         assertTrue(itemAccessResolver.isAccessible(item));
         assertEquals(SYSTEM_DEFAULT_SOURCE, itemAccessResolver.getItemPermissionDetails(item).source());
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
         assertFalse(itemAccessResolver.isAccessible(item));
         assertEquals(SYSTEM_DEFAULT_SOURCE, itemAccessResolver.getItemPermissionDetails(item).source());
     }
 
     @Test
     public void testGrandparentAllowParentDeny() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
 
         item.addGroupName("ParentGroup");
         GroupItem parentGroup = new GroupItem("ParentGroup");
@@ -388,8 +388,8 @@ public class ItemPermissionResolverImplTest {
 
     @Test
     public void testGrandparentDenyParentAllow() {
-        itemAccessResolver
-                .modified(Map.of(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
+        itemAccessResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.READ_WRITE.name()));
 
         item.addGroupName("ParentGroup");
         GroupItem parentGroup = new GroupItem("ParentGroup");

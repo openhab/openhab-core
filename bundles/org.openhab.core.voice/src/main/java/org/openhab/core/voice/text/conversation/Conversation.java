@@ -19,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 
 /**
  * The {@link Conversation} class contains a list of messages in between the user and a LanguageInterpreter.
@@ -27,7 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class Conversation {
-    public static final int DEFAULT_MAX_MESSAGES = 50;
+    public static final int DEFAULT_MAX_MESSAGES = VoiceConfigurationConstants.DEFAULT_CONVERSATION_HISTORY_LIMIT;
 
     private final String id;
     private final Instant created;

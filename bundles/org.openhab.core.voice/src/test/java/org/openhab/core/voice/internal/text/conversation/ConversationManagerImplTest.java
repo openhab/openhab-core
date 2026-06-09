@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
-import org.openhab.core.voice.internal.VoiceConfiguration;
+import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
@@ -58,7 +58,7 @@ public class ConversationManagerImplTest {
     public void setUp() {
         doReturn(storageMock).when(storageServiceMock).getStorage(eq(Conversation.class.getName()), any());
         conversationManager = new ConversationManagerImpl(storageServiceMock, eventPublisherMock,
-                Map.of(VoiceConfiguration.CONFIG_CONVERSATION_HISTORY_LIMIT, "10"));
+                Map.of(VoiceConfigurationConstants.CONFIG_CONVERSATION_HISTORY_LIMIT, "10"));
     }
 
     @AfterEach

@@ -29,6 +29,7 @@ import static org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBase
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -65,6 +66,7 @@ import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.openhab.core.voice.internal.security.ItemPermissionResolverImpl;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.text.InterpretationException;
@@ -98,8 +100,9 @@ public class StandardInterpreterTest {
 
     @BeforeEach
     public void setUp() {
-        itemPermissionResolver = new ItemPermissionResolverImpl(itemRegistryMock, metadataRegistryMock);
-        itemPermissionResolver.setImplicitPermission(ItemPermission.READ_WRITE);
+        itemPermissionResolver = new ItemPermissionResolverImpl(itemRegistryMock, metadataRegistryMock,
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION,
+                        VoiceConfigurationConstants.DEFAULT_IMPLICIT_ITEM_ACCESS.name()));
         standardInterpreter = new StandardInterpreter(eventPublisherMock, itemRegistryMock, metadataRegistryMock,
                 itemPermissionResolver);
     }
@@ -528,7 +531,8 @@ public class StandardInterpreterTest {
 
     @Test
     public void allowAccessToItemViaMetadataWhenImplicitDenied() throws InterpretationException {
-        itemPermissionResolver.setImplicitPermission(ItemPermission.NO_ACCESS);
+        itemPermissionResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
 
         var lightItem = new SwitchItem("light");
         lightItem.setLabel("Light");
@@ -554,7 +558,8 @@ public class StandardInterpreterTest {
         verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light", OnOffType.ON));
 
         reset(eventPublisherMock);
-        itemPermissionResolver.setImplicitPermission(ItemPermission.NO_ACCESS);
+        itemPermissionResolver.modified(
+                Map.of(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION, ItemPermission.NO_ACCESS.name()));
 
         InterpretationException exception = org.junit.jupiter.api.Assertions.assertThrows(InterpretationException.class,
                 () -> {
@@ -616,8 +621,6 @@ public class StandardInterpreterTest {
 
     @Test
     public void rejectCommandWhenReadOnly() throws InterpretationException {
-        itemPermissionResolver.setImplicitPermission(ItemPermission.READ_WRITE);
-
         var lightItem = new SwitchItem("light");
         lightItem.setLabel("Light");
         List<Item> items = List.of(lightItem);
