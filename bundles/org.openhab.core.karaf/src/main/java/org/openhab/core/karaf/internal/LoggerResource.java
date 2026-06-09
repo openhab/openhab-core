@@ -80,7 +80,7 @@ public class LoggerResource implements RESTResource {
     }
 
     @GET
-    @Path("/")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getLogger", summary = "Get all loggers", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoggerBean.class))) })
