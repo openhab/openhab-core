@@ -50,7 +50,10 @@
                   <artifact>org.bouncycastle:*</artifact>
                   <excludes>
                     <!-- Exclude the JAR signing files -->
-                    <exclude>META-INF/BCKEY.*</exclude>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.EC</exclude>
                   </excludes>
                 </filter>
               </filters>
