@@ -114,14 +114,14 @@ public class VoiceManagerConfiguration {
     }
 
     public static class ConfigurationDTO {
-        public String defaultTTS = "";
-        public String defaultSTT = "";
-        public String defaultVoice = "";
-        public String defaultHLI = "";
-        public String defaultKS = "";
+        public @Nullable String defaultTTS;
+        public @Nullable String defaultSTT;
+        public @Nullable String defaultVoice;
+        public @Nullable String defaultHLI;
+        public @Nullable String defaultKS;
         public String keyword = "";
-        public String listeningItem = "";
-        public String listeningMelody = "";
+        public @Nullable String listeningItem;
+        public @Nullable String listeningMelody;
         public String systemPrompt = "";
     }
 }
