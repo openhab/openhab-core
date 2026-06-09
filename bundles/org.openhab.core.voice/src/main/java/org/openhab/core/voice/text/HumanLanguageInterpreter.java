@@ -71,8 +71,17 @@ public interface HumanLanguageInterpreter {
     /**
      * Continues the conversation provided in the {@link InterpreterContext} argument given a {@link Locale}.
      *
-     * @implNote Implementations must add the response to the {@link Conversation} provided in the
-     *           {@link InterpreterContext} before returning it.
+     * @implNote
+     *           Implementations must add any tool calls, tool call results, thinking and their interpretation response
+     *           to the {@link Conversation} provided in the {@link InterpreterContext}:
+     *           <ul>
+     *           <li>Tool calls must be serialized with
+     *           {@link org.openhab.core.voice.text.interpreter.llm.LLMToolCall#toJson()} and added as
+     *           {@link ConversationRole#TOOL_CALL} message.</li>
+     *           <li>Tool call results must be added as {@link ConversationRole#TOOL_RETURN} message.</li>
+     *           <li>Interpreter thinking must be added as {@link ConversationRole#THINKING} message.</li>
+     *           <li>Interpreter responses must be added as {@link ConversationRole#OPENHAB} message.</li>
+     *           </ul>
      *
      * @param locale language of the text (given by a {@link Locale})
      * @param interpreterContext the context for the interpretation
