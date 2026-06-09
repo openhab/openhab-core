@@ -28,6 +28,7 @@
 		<parameter name="keyword" type="text">
 			<label>Magic Word</label>
 			<description>The magic word to spot before initiating a dialog.</description>
+			<default>Wakeup</default>
 		</parameter>
 		<parameter name="listeningItem" type="text">
 			<context>item</context>
