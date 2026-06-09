@@ -71,9 +71,9 @@
 			<default>50</default>
 		</parameter>
 		<parameter name="implicitItemPermission" type="text">
-			<label>Implicit Item Access</label>
+			<label>Implicit Item Permission</label>
 			<description>The default permission for Items. If NO_ACCESS, items are only accessible if explicitly granted in the
-				Item's metadata.</description>
+				Item's or its parents' metadata.</description>
 			<default>READ_WRITE</default>
 			<options>
 				<option value="NO_ACCESS">No Access</option>
