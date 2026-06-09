@@ -19,9 +19,9 @@
     <californium.version>4.0.0-M2</californium.version>
     <jackson.annotations.version>2.21</jackson.annotations.version>
     <jackson.version>2.21.4</jackson.version>
-    <jetty.version>12.0.23</jetty.version>
+    <jetty.version>12.1.10</jetty.version>
     <pax.logging.version>2.3.4</pax.logging.version>
-    <pax.web.version>11.0.1</pax.web.version>
+    <pax.web.version>11.1.2</pax.web.version>
     <swagger.version>2.2.49</swagger.version>
   </properties>
 
@@ -50,7 +50,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
-      <version>3.24.100</version>
+      <version>3.24.200</version>
       <scope>compile</scope>
     </dependency>
 
@@ -1050,13 +1050,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.18.1</version>
+      <version>5.19.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.18.1</version>
+      <version>5.19.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

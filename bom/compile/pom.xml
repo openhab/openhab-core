@@ -18,8 +18,8 @@
 
   <properties>
     <californium.version>4.0.0-M2</californium.version>
-    <jetty.version>12.0.23</jetty.version>
-    <pax.web.version>11.0.1</pax.web.version>
+    <jetty.version>12.1.10</jetty.version>
+    <pax.web.version>11.1.2</pax.web.version>
     <swagger.version>2.2.49</swagger.version>
   </properties>
 
@@ -427,13 +427,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.18.1</version>
+      <version>5.19.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.18.1</version>
+      <version>5.19.0</version>
       <scope>compile</scope>
     </dependency>
     <!-- transitive dependency of junit, required by javadoc in compile bom! -->
