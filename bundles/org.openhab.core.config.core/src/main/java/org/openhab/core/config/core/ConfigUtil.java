@@ -152,7 +152,7 @@ public class ConfigUtil {
      * @param configDescription the {@link ConfigDescription} where the default values are located (may be null, but
      *            method won't have any effect then)
      */
-    public static void applyDefaultConfiguration(Map<String, Object> configuration,
+    public static void applyDefaultConfiguration(Map<String, @Nullable Object> configuration,
             @Nullable ConfigDescription configDescription) {
         if (configDescription != null) {
             for (ConfigDescriptionParameter parameter : configDescription.getParameters()) {
