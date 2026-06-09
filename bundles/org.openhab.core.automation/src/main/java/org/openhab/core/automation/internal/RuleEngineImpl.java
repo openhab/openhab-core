@@ -264,6 +264,17 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         public void runNow(String uid, boolean considerConditions, @Nullable Map<String, @Nullable Object> context) {
             RuleEngineImpl.this.runNow(uid, considerConditions, context);
         }
+
+        @Override
+        public Future<Map<String, @Nullable Object>> runAsync(String ruleUID) {
+            return RuleEngineImpl.this.runAsync(ruleUID);
+        }
+
+        @Override
+        public Future<Map<String, @Nullable Object>> runAsync(String ruleUID, boolean considerConditions,
+                @Nullable Map<String, @Nullable Object> context) {
+            return RuleEngineImpl.this.runAsync(ruleUID, considerConditions, context);
+        }
     };
 
     /**

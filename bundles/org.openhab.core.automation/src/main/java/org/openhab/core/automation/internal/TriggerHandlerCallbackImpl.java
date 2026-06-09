@@ -124,6 +124,17 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     @Override
+    public Future<Map<String, @Nullable Object>> runAsync(String ruleUID) {
+        return re.runAsync(ruleUID);
+    }
+
+    @Override
+    public Future<Map<String, @Nullable Object>> runAsync(String ruleUID, boolean considerConditions,
+            @Nullable Map<String, @Nullable Object> context) {
+        return re.runAsync(ruleUID, considerConditions, context);
+    }
+
+    @Override
     public ScheduledExecutorService getScheduler() {
         return executor;
     }

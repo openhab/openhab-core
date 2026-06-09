@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -173,5 +174,16 @@ public class CompositeTriggerHandler
     @Override
     public void runNow(String uid, boolean considerConditions, @Nullable Map<String, @Nullable Object> context) {
         callback.runNow(uid, considerConditions, context);
+    }
+
+    @Override
+    public Future<Map<String, @Nullable Object>> runAsync(String ruleUID) {
+        return callback.runAsync(ruleUID);
+    }
+
+    @Override
+    public Future<Map<String, @Nullable Object>> runAsync(String ruleUID, boolean considerConditions,
+            @Nullable Map<String, @Nullable Object> context) {
+        return callback.runAsync(ruleUID, considerConditions, context);
     }
 }
