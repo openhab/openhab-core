@@ -48,6 +48,7 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
@@ -126,6 +127,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final Map<String, TTSService> ttsServices = new HashMap<>();
     private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
     private final LLMToolRegistry llmToolRegistry;
+    private final ConversationManager conversationManager;
+    private final ItemPermissionResolver itemPermissionResolver;
 
     private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
 
@@ -134,9 +137,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
     private final Storage<DialogRegistration> dialogRegistrationStorage;
-    private final ConversationManager conversationManager;
-    private final ItemPermissionResolver itemPermissionResolver;
-    private final VoiceConfiguration configuration = new VoiceConfiguration();
+    private final VoiceConfiguration configuration;
 
     private @Nullable Bundle bundle;
 
@@ -148,9 +149,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
             final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
-            final @Reference StorageService storageService, final @Reference ConversationManager conversationManager,
+            final @Reference StorageService storageService, final @Reference LLMToolRegistry llmToolRegistry,
+            final @Reference ConversationManager conversationManager,
             final @Reference ItemPermissionResolver itemPermissionResolver,
-            final @Reference LLMToolRegistry llmToolRegistry) {
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.eventPublisher = eventPublisher;
@@ -160,6 +162,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         this.conversationManager = conversationManager;
         this.itemPermissionResolver = itemPermissionResolver;
         this.llmToolRegistry = llmToolRegistry;
+        this.configuration = new VoiceConfiguration(configDescriptionRegistry);
     }
 
     @Activate

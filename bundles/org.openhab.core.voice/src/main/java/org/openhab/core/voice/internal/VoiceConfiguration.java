@@ -12,13 +12,18 @@
  */
 package org.openhab.core.voice.internal;
 
+import static org.openhab.core.voice.internal.VoiceConfiguration.CONFIGURATION_PID;
+
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigParser;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.slf4j.Logger;
@@ -31,56 +36,53 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class VoiceConfiguration {
-    // the default keyword to use if no other is configured
-    private static final String DEFAULT_KEYWORD = "Wakeup";
-    private static final ItemPermission DEFAULT_IMPLICIT_ITEM_ACCESS = ItemPermission.READ_WRITE;
+    public static final String CONFIGURATION_PID = "org.openhab.voice";
 
     // constants for the configuration properties
     public static final String CONFIG_URI = "system:voice";
-    public static final String CONFIG_KEYWORD = "keyword";
-    public static final String CONFIG_LISTENING_ITEM = "listeningItem";
-    public static final String CONFIG_LISTENING_MELODY = "listeningMelody";
     public static final String CONFIG_DEFAULT_HLI = "defaultHLI";
     public static final String CONFIG_DEFAULT_KS = "defaultKS";
     public static final String CONFIG_DEFAULT_STT = "defaultSTT";
     public static final String CONFIG_DEFAULT_TTS = "defaultTTS";
     public static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
     public static final String CONFIG_PREFIX_DEFAULT_VOICE = "defaultVoice.";
-    public static final String CONFIG_CONVERSATION_HISTORY_LIMIT = "conversationHistoryLimit";
-    public static final String CONFIG_IMPLICIT_ITEM_PERMISSION = "implicitItemPermission";
+
+    // default configuration which type cannot be stored in config XML
+    private static final ItemPermission DEFAULT_IMPLICIT_ITEM_ACCESS = ItemPermission.READ_WRITE;
 
     private final Logger logger = LoggerFactory.getLogger(VoiceConfiguration.class);
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
 
-    private String keyword = DEFAULT_KEYWORD;
-    private @Nullable String listeningItem;
-    private @Nullable String listeningMelody;
-    private @Nullable String defaultTTS;
-    private @Nullable String defaultSTT;
-    private @Nullable String defaultKS;
-    private @Nullable String defaultHLI;
-    private @Nullable String defaultVoice;
-    private int conversationHistoryLimit = Conversation.DEFAULT_MAX_MESSAGES;
+    private ConfigurationDTO configurationDTO = new ConfigurationDTO();
     private ItemPermission implicitItemPermission = DEFAULT_IMPLICIT_ITEM_ACCESS;
     private final Map<String, String> defaultVoices = new HashMap<>();
 
+    public VoiceConfiguration(final ConfigDescriptionRegistry configDescriptionRegistry) {
+        this.configDescriptionRegistry = configDescriptionRegistry;
+    }
+
     public void update(Map<String, Object> config) {
-        this.keyword = ConfigParser.valueAsOrElse(config.get(CONFIG_KEYWORD), String.class, DEFAULT_KEYWORD);
-        this.listeningItem = ConfigParser.valueAs(config.get(CONFIG_LISTENING_ITEM), String.class);
-        this.listeningMelody = ConfigParser.valueAs(config.get(CONFIG_LISTENING_MELODY), String.class);
-        this.defaultTTS = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_TTS), String.class);
-        this.defaultSTT = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_STT), String.class);
-        this.defaultKS = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_KS), String.class);
-        this.defaultHLI = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_HLI), String.class);
-        this.defaultVoice = ConfigParser.valueAs(config.get(CONFIG_DEFAULT_VOICE), String.class);
-        this.conversationHistoryLimit = ConfigParser.valueAsOrElse(config.get(CONFIG_CONVERSATION_HISTORY_LIMIT),
-                Integer.class, Conversation.DEFAULT_MAX_MESSAGES);
-        String implicitItemPermissionStr = ConfigParser.valueAsOrElse(config.get(CONFIG_IMPLICIT_ITEM_PERMISSION),
-                String.class, DEFAULT_IMPLICIT_ITEM_ACCESS.name());
+        Map<String, @Nullable Object> properties = new HashMap<>(config);
+
+        var configDescription = configDescriptionRegistry.getConfigDescription(URI.create(CONFIG_URI));
+        if (configDescription == null) {
+            logger.warn("No configuration description found for {}, unable to apply defaults!", CONFIG_URI);
+        } else {
+            ConfigUtil.applyDefaultConfiguration(properties, configDescription);
+        }
+
+        ConfigurationDTO configDTO = ConfigParser.configurationAs(properties, ConfigurationDTO.class);
+        if (configDTO == null) {
+            logger.error("Unable to parse configuration for {}!", CONFIGURATION_PID);
+            return;
+        }
+        configurationDTO = configDTO;
+
         try {
-            this.implicitItemPermission = ItemPermission.valueOf(implicitItemPermissionStr);
+            this.implicitItemPermission = ItemPermission.valueOf(configDTO.implicitItemPermission.toUpperCase());
         } catch (IllegalArgumentException e) {
-            logger.warn("Invalid implicitItemPermission value '{}', using {}", implicitItemPermissionStr,
-                    DEFAULT_IMPLICIT_ITEM_ACCESS);
+            logger.warn("Invalid implicitItemPermission value '{}', using {}",
+                    configDTO.implicitItemPermission.toUpperCase(), DEFAULT_IMPLICIT_ITEM_ACCESS);
             this.implicitItemPermission = DEFAULT_IMPLICIT_ITEM_ACCESS;
         }
 
@@ -95,46 +97,67 @@ public class VoiceConfiguration {
     }
 
     public String getKeyword() {
-        return keyword;
+        return configurationDTO.keyword;
     }
 
     public @Nullable String getListeningItem() {
-        return listeningItem;
+        return configurationDTO.listeningItem;
     }
 
     public @Nullable String getListeningMelody() {
-        return listeningMelody;
+        return configurationDTO.listeningMelody;
     }
 
     public @Nullable String getDefaultTTS() {
-        return defaultTTS;
+        return configurationDTO.defaultTTS;
     }
 
     public @Nullable String getDefaultSTT() {
-        return defaultSTT;
+        return configurationDTO.defaultSTT;
     }
 
     public @Nullable String getDefaultKS() {
-        return defaultKS;
+        return configurationDTO.defaultKS;
     }
 
     public @Nullable String getDefaultHLI() {
-        return defaultHLI;
+        return configurationDTO.defaultHLI;
     }
 
     public @Nullable String getDefaultVoice() {
-        return defaultVoice;
+        return configurationDTO.defaultVoice;
     }
 
     public int getConversationHistoryLimit() {
-        return conversationHistoryLimit;
+        return configurationDTO.conversationHistoryLimit;
     }
 
     public ItemPermission getImplicitItemPermission() {
         return implicitItemPermission;
     }
 
+    public String getSystemPrompt() {
+        return configurationDTO.systemPrompt;
+    }
+
     public Map<String, String> getDefaultVoices() {
         return Map.copyOf(defaultVoices);
+    }
+
+    public static class ConfigurationDTO {
+        public String defaultTTS = "";
+        public String defaultSTT = "";
+        public String defaultVoice = "";
+        public String defaultHLI = "";
+        public String defaultKS = "";
+        public String keyword = "";
+        public String listeningItem = "";
+        public String listeningMelody = "";
+        public boolean enableCacheTTS = true;
+        public int cacheSizeTTS = 10240;
+        public int maxTextLengthCacheTTS = 150;
+        public int conversationHistoryLimit = Conversation.DEFAULT_MAX_MESSAGES;
+        public String implicitItemPermission = DEFAULT_IMPLICIT_ITEM_ACCESS.name();
+        public String systemPrompt = "";
     }
 }
