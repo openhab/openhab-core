@@ -128,7 +128,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
     private final LLMToolRegistry llmToolRegistry;
     private final ConversationManager conversationManager;
-    private final ItemPermissionResolver itemPermissionResolver;
 
     private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
 
@@ -151,7 +150,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
             final @Reference StorageService storageService, final @Reference LLMToolRegistry llmToolRegistry,
             final @Reference ConversationManager conversationManager,
-            final @Reference ItemPermissionResolver itemPermissionResolver,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
@@ -160,7 +158,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         this.dialogRegistrationStorage = storageService.getStorage(DialogRegistration.class.getName(),
                 this.getClass().getClassLoader());
         this.conversationManager = conversationManager;
-        this.itemPermissionResolver = itemPermissionResolver;
         this.llmToolRegistry = llmToolRegistry;
         this.configuration = new VoiceConfiguration(configDescriptionRegistry);
     }
@@ -189,8 +186,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     protected void modified(Map<String, Object> config) {
         if (config != null) {
             configuration.update(config);
-            conversationManager.setHistoryLimit(configuration.getConversationHistoryLimit());
-            itemPermissionResolver.setImplicitPermission(configuration.getImplicitItemPermission());
         }
     }
 

@@ -12,7 +12,10 @@
  */
 package org.openhab.core.voice.internal.security;
 
+import static org.openhab.core.voice.internal.VoiceConfiguration.DEFAULT_IMPLICIT_ITEM_ACCESS;
+
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,17 +23,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.voice.internal.VoiceConfiguration;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,13 +46,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Florian Hotze - Initial contribution
  */
-@Component(service = ItemPermissionResolver.class, immediate = true)
+@Component(service = ItemPermissionResolver.class, configurationPid = VoiceConfiguration.CONFIGURATION_PID)
 @NonNullByDefault
 public class ItemPermissionResolverImpl implements ItemPermissionResolver {
     private final Logger logger = LoggerFactory.getLogger(ItemPermissionResolverImpl.class);
 
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
+
     private final Set<Runnable> listeners = ConcurrentHashMap.newKeySet();
     private final ConcurrentHashMap<String, ItemPermission> cache = new ConcurrentHashMap<>();
 
@@ -94,11 +101,32 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
 
     @Activate
     public ItemPermissionResolverImpl(final @Reference ItemRegistry itemRegistry,
-            final @Reference MetadataRegistry metadataRegistry) {
+            final @Reference MetadataRegistry metadataRegistry, Map<String, Object> config) {
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
         this.itemRegistry.addRegistryChangeListener(itemRegistryChangeListener);
         this.metadataRegistry.addRegistryChangeListener(voiceSystemMetadataChangeListener);
+
+        processConfig(config);
+    }
+
+    private void processConfig(Map<String, Object> config) {
+        String implicitItemPermissionStr = ConfigParser.valueAsOrElse(
+                config.get(VoiceConfiguration.CONFIG_IMPLICIT_ITEM_PERMISSION), String.class,
+                DEFAULT_IMPLICIT_ITEM_ACCESS.name());
+        try {
+            this.implicitPermission = ItemPermission.valueOf(implicitItemPermissionStr);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid implicitItemPermission value '{}', using {}", implicitItemPermissionStr,
+                    DEFAULT_IMPLICIT_ITEM_ACCESS);
+            this.implicitPermission = DEFAULT_IMPLICIT_ITEM_ACCESS;
+        }
+    }
+
+    @Modified
+    protected void modified(Map<String, Object> config) {
+        processConfig(config);
+        invalidate();
     }
 
     @Deactivate
@@ -128,12 +156,6 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
     @Override
     public void removeItemAccessChangeListener(Runnable listener) {
         listeners.remove(listener);
-    }
-
-    @Override
-    public void setImplicitPermission(ItemPermission implicitPermission) {
-        this.implicitPermission = implicitPermission;
-        invalidate();
     }
 
     @Override

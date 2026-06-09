@@ -46,9 +46,11 @@ public class VoiceConfiguration {
     public static final String CONFIG_DEFAULT_TTS = "defaultTTS";
     public static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
     public static final String CONFIG_PREFIX_DEFAULT_VOICE = "defaultVoice.";
+    public static final String CONFIG_CONVERSATION_HISTORY_LIMIT = "conversationHistoryLimit";
+    public static final String CONFIG_IMPLICIT_ITEM_PERMISSION = "implicitItemPermission";
 
     // default configuration which type cannot be stored in config XML
-    private static final ItemPermission DEFAULT_IMPLICIT_ITEM_ACCESS = ItemPermission.READ_WRITE;
+    public static final ItemPermission DEFAULT_IMPLICIT_ITEM_ACCESS = ItemPermission.READ_WRITE;
 
     private final Logger logger = LoggerFactory.getLogger(VoiceConfiguration.class);
     private final ConfigDescriptionRegistry configDescriptionRegistry;

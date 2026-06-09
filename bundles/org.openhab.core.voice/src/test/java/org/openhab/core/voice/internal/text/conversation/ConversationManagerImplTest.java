@@ -21,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.voice.internal.VoiceConfiguration;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
@@ -45,29 +47,29 @@ import org.openhab.core.voice.text.conversation.events.ConversationRemovedEvent;
  */
 @NonNullByDefault
 public class ConversationManagerImplTest {
-
-    private final StorageService storageService = mock(StorageService.class);
-    private final EventPublisher eventPublisher = mock(EventPublisher.class);
+    private final StorageService storageServiceMock = mock(StorageService.class);
+    private final EventPublisher eventPublisherMock = mock(EventPublisher.class);
     @SuppressWarnings("unchecked")
-    private final Storage<PersistedConversationDTO> storage = mock(Storage.class);
+    private final Storage<PersistedConversationDTO> storageMock = mock(Storage.class);
 
     private @NonNullByDefault({}) ConversationManagerImpl conversationManager;
 
     @BeforeEach
     public void setUp() {
-        doReturn(storage).when(storageService).getStorage(eq(Conversation.class.getName()), any());
-        conversationManager = new ConversationManagerImpl(storageService, eventPublisher);
+        doReturn(storageMock).when(storageServiceMock).getStorage(eq(Conversation.class.getName()), any());
+        conversationManager = new ConversationManagerImpl(storageServiceMock, eventPublisherMock,
+                Map.of(VoiceConfiguration.CONFIG_CONVERSATION_HISTORY_LIMIT, "10"));
     }
 
     @AfterEach
     public void tearDown() {
-        clearInvocations(storageService, eventPublisher, storage);
+        clearInvocations(storageServiceMock, eventPublisherMock, storageMock);
     }
 
     @Test
     public void getConversationCreatesNewConversationIfCreateIfMissingIsTrue() {
         String id = "test-conv";
-        when(storage.get(id)).thenReturn(null);
+        when(storageMock.get(id)).thenReturn(null);
 
         Conversation conversation = conversationManager.getConversation(id, true);
 
@@ -79,7 +81,7 @@ public class ConversationManagerImplTest {
     @Test
     public void getConversationDoesNotCreateNewConversationIfCreateIfMissingIsFalse() {
         String id = "test-conv";
-        when(storage.get(id)).thenReturn(null);
+        when(storageMock.get(id)).thenReturn(null);
 
         Conversation conversation = conversationManager.getConversation(id, false);
 
@@ -89,11 +91,11 @@ public class ConversationManagerImplTest {
     @Test
     public void getConversationEmitsEventOnCreatingNewConversation() {
         String id = "test-conv";
-        when(storage.get(id)).thenReturn(null);
+        when(storageMock.get(id)).thenReturn(null);
 
         conversationManager.getConversation(id);
 
-        verify(eventPublisher).post(any(ConversationCreatedEvent.class));
+        verify(eventPublisherMock).post(any(ConversationCreatedEvent.class));
     }
 
     @Test
@@ -102,7 +104,7 @@ public class ConversationManagerImplTest {
 
         conversationManager.getConversation(id);
 
-        verify(eventPublisher, never()).post(any(ConversationCreatedEvent.class));
+        verify(eventPublisherMock, never()).post(any(ConversationCreatedEvent.class));
     }
 
     @Test
@@ -114,7 +116,7 @@ public class ConversationManagerImplTest {
         ArrayList<PersistedMessageDTO> messages = new ArrayList<>(List.of(persistedMessageDTO));
         PersistedConversationDTO persistedConversationDTO = new PersistedConversationDTO(id, created, lastUpdated,
                 messages);
-        when(storage.get(id)).thenReturn(persistedConversationDTO);
+        when(storageMock.get(id)).thenReturn(persistedConversationDTO);
 
         Conversation conversation = conversationManager.getConversation(id);
 
@@ -134,8 +136,8 @@ public class ConversationManagerImplTest {
         String id = "to-remove";
         conversationManager.removeConversation(id);
 
-        verify(storage).remove(id);
-        verify(eventPublisher).post(any(ConversationRemovedEvent.class));
+        verify(storageMock).remove(id);
+        verify(eventPublisherMock).post(any(ConversationRemovedEvent.class));
     }
 
     @Test
@@ -143,17 +145,17 @@ public class ConversationManagerImplTest {
         String id = "to-remove";
         conversationManager.removeConversation(id);
 
-        verify(eventPublisher).post(any(ConversationRemovedEvent.class));
+        verify(eventPublisherMock).post(any(ConversationRemovedEvent.class));
     }
 
     @Test
     public void getConversationsReturnsAllFromStorage() {
         Instant created = Instant.now().minus(5, ChronoUnit.MINUTES);
         Instant lastUpdated = Instant.now();
-        when(storage.getKeys()).thenReturn(Set.of("conv1", "conv2"));
-        when(storage.get("conv1"))
+        when(storageMock.getKeys()).thenReturn(Set.of("conv1", "conv2"));
+        when(storageMock.get("conv1"))
                 .thenReturn(new PersistedConversationDTO("conv1", created, lastUpdated, new ArrayList<>()));
-        when(storage.get("conv2"))
+        when(storageMock.get("conv2"))
                 .thenReturn(new PersistedConversationDTO("conv2", created, lastUpdated, new ArrayList<>()));
 
         Collection<Conversation> conversations = conversationManager.getConversations();
@@ -165,11 +167,11 @@ public class ConversationManagerImplTest {
     public void addMessageToAConversationEmitsEvent() throws ConversationException {
         String id = "event-test";
         Conversation conversation = conversationManager.getConversation(id);
-        clearInvocations(eventPublisher); // clear events from creating conversation
+        clearInvocations(eventPublisherMock); // clear events from creating conversation
 
         conversation.addMessage(ConversationRole.USER, "Hello");
 
-        verify(eventPublisher).post(any(ConversationMessageAddedEvent.class));
+        verify(eventPublisherMock).post(any(ConversationMessageAddedEvent.class));
     }
 
     @Test
@@ -179,7 +181,7 @@ public class ConversationManagerImplTest {
 
         conversation.addMessage(ConversationRole.USER, "Hello");
 
-        verify(storage).put(eq(id), any(PersistedConversationDTO.class));
+        verify(storageMock).put(eq(id), any(PersistedConversationDTO.class));
     }
 
     @Test
@@ -201,7 +203,7 @@ public class ConversationManagerImplTest {
 
         conversation.addMessage(ConversationRole.USER, "Hello");
 
-        verify(storage, never()).put(eq(id), any(PersistedConversationDTO.class));
+        verify(storageMock, never()).put(eq(id), any(PersistedConversationDTO.class));
     }
 
     @Test
@@ -210,13 +212,13 @@ public class ConversationManagerImplTest {
         Conversation conversation = conversationManager.getConversation(id);
         conversation.addMessage(ConversationRole.USER, "1");
         conversation.addMessage(ConversationRole.USER, "2");
-        clearInvocations(eventPublisher); // clear events from creating conversation
+        clearInvocations(eventPublisherMock); // clear events from creating conversation
 
         conversation.removeSinceMessage(1);
-        verify(eventPublisher).post(any(ConversationMessagesRemovedEvent.class));
+        verify(eventPublisherMock).post(any(ConversationMessagesRemovedEvent.class));
 
         conversation.removeSinceMessage(0);
-        verify(eventPublisher).post(any(ConversationRemovedEvent.class));
+        verify(eventPublisherMock).post(any(ConversationRemovedEvent.class));
     }
 
     @Test
@@ -225,14 +227,14 @@ public class ConversationManagerImplTest {
         Conversation conversation = conversationManager.getConversation(id);
         conversation.addMessage(ConversationRole.USER, "1");
         conversation.addMessage(ConversationRole.USER, "2");
-        clearInvocations(storage, storageService); // clear stores from setting up conversation
+        clearInvocations(storageMock, storageServiceMock); // clear stores from setting up conversation
 
         conversation.removeSinceMessage(1);
-        verify(storage).put(eq(id), any(PersistedConversationDTO.class));
-        clearInvocations(storage, storageService);
+        verify(storageMock).put(eq(id), any(PersistedConversationDTO.class));
+        clearInvocations(storageMock, storageServiceMock);
 
         conversation.removeSinceMessage(0);
-        verify(storage).remove(eq(id));
+        verify(storageMock).remove(eq(id));
     }
 
     @Test
@@ -244,10 +246,10 @@ public class ConversationManagerImplTest {
         conversation.addMessage(ConversationRole.USER, "3");
         conversation.addMessage(ConversationRole.USER, "4");
         conversation.addMessage(ConversationRole.USER, "5");
-        clearInvocations(storage, storageService); // clear stores from setting up conversation
+        clearInvocations(storageMock, storageServiceMock); // clear stores from setting up conversation
 
         conversation.removeSinceMessage(3);
         conversation.removeSinceMessage(0);
-        verify(storage, never()).put(eq(id), any(PersistedConversationDTO.class));
+        verify(storageMock, never()).put(eq(id), any(PersistedConversationDTO.class));
     }
 }
