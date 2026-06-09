@@ -157,7 +157,7 @@ public class ConfigUtil {
         if (configDescription != null) {
             for (ConfigDescriptionParameter parameter : configDescription.getParameters()) {
                 String defaultValue = parameter.getDefault();
-                if (defaultValue != null && configuration.get(parameter.getName()) == nul) {
+                if (defaultValue != null && configuration.get(parameter.getName()) == null) {
                     Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
                     if (value != null) {
                         configuration.put(parameter.getName(), value);
