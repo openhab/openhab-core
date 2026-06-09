@@ -33,4 +33,12 @@ import jakarta.ws.rs.core.Application;
 @JakartarsApplicationBase("rest")
 @NonNullByDefault
 public class RESTApplicationImpl extends Application {
+
+    @Override
+    @NonNullByDefault({})
+    public Map<String, Object> getProperties() {
+        // Silence "JAXBContext implementation could not be found. WADL feature is disabled." - WADL is superseded by
+        // OpenAPI
+        return Map.of("jersey.config.server.wadl.disableWadl", true);
+    }
 }
