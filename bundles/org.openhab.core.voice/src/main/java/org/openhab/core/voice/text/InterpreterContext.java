@@ -26,6 +26,7 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public record InterpreterContext(Conversation conversation, List<LLMTool> tools, @Nullable String locationItem) {
+public record InterpreterContext(Conversation conversation, List<LLMTool> tools, @Nullable String locationItem,
+        @Nullable String systemPrompt) {
 
 }

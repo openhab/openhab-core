@@ -375,7 +375,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 if (error == null) {
                     List<LLMTool> tools = dialogContext.llmTools();
                     InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
-                            dialogContext.locationItem());
+                            dialogContext.locationItem(), dialogContext.systemPrompt());
                     for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
                         try {
                             answer = interpreter.interpret(dialogContext.locale(), interpreterContext);

@@ -183,7 +183,7 @@ public class StandardInterpreterTest {
         // Match light1 by location context kitchen
         Conversation conversation1 = new Conversation("c1");
         conversation1.addMessage(ConversationRole.USER, "turn on light");
-        InterpreterContext context1 = new InterpreterContext(conversation1, List.of(), "kitchen");
+        InterpreterContext context1 = new InterpreterContext(conversation1, List.of(), "kitchen", null);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, context1));
         verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light1", OnOffType.ON));
 
@@ -191,7 +191,7 @@ public class StandardInterpreterTest {
         // Match light2 by location context livingRoom
         Conversation conversation2 = new Conversation("c2");
         conversation2.addMessage(ConversationRole.USER, "turn on light");
-        InterpreterContext context2 = new InterpreterContext(conversation2, List.of(), "livingRoom");
+        InterpreterContext context2 = new InterpreterContext(conversation2, List.of(), "livingRoom", null);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, context2));
         verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light2", OnOffType.ON));
     }

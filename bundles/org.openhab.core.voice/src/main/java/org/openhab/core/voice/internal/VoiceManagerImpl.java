@@ -407,7 +407,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             if (locationItem != null && locationItem.isBlank()) {
                 locationItem = null;
             }
-            InterpreterContext context = new InterpreterContext(conversation, tools, locationItem);
+            InterpreterContext context = new InterpreterContext(conversation, tools, locationItem,
+                    configuration.getSystemPrompt());
             InterpretationException exception = null;
             for (var interpreter : interpreters) {
                 try {
@@ -607,7 +608,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 .withHLI(this.getHLI()) //
                 .withVoice(this.getDefaultVoice()) //
                 .withMelody(configuration.getListeningMelody()) //
-                .withListeningItem(configuration.getListeningItem());
+                .withListeningItem(configuration.getListeningItem()) //
+                .withSystemPrompt(configuration.getSystemPrompt());
     }
 
     @Override
