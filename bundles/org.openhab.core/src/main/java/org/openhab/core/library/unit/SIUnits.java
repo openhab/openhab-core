@@ -50,7 +50,7 @@ public final class SIUnits extends CustomUnits {
     public static final Unit<Pressure> PASCAL = addUnit(Units.PASCAL);
 
     static {
-        // Override the default unit symbol ℃ to better support TTS and UIs
+        // Override the default unit symbol ℃ to better support TTS and UIs:
         SimpleUnitFormat.getInstance().label(CELSIUS, "°C");
 
         // Add the single character ℃ as an alias to improve support of East Asian languages
