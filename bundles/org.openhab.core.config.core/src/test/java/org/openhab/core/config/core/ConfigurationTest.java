@@ -138,9 +138,9 @@ public class ConfigurationTest {
         configuration.put("anotherField", null);
 
         // ensure conversions are null-tolerant and don't throw exceptions
-        Map<String, Object> props = configuration.getProperties();
+        Map<String, @Nullable Object> props = configuration.getProperties();
         Set<String> keys = configuration.keySet();
-        List<Object> values = new ArrayList<>(configuration.values());
+        List<@Nullable Object> values = new ArrayList<>(configuration.values());
 
         // ensure copies, not views
         configuration.put("stringField", "someValue");
@@ -154,13 +154,13 @@ public class ConfigurationTest {
 
     @Test
     public void assertPropertiesCanBeRemoved() {
-        Map<String, Object> orgProperties = new HashMap<>();
+        Map<String, @Nullable Object> orgProperties = new HashMap<>();
         orgProperties.put("intField", 1);
         orgProperties.put("booleanField", false);
         orgProperties.put("stringField", "test");
         orgProperties.put("notExisitingProperty", true);
 
-        Map<String, Object> newProperties = new HashMap<>();
+        Map<String, @Nullable Object> newProperties = new HashMap<>();
         newProperties.put("booleanField", false);
         newProperties.put("stringField", "test");
         newProperties.put("notExisitingProperty", true);
@@ -186,7 +186,7 @@ public class ConfigurationTest {
 
     @Test
     public void assertNormalizationInSetProperties() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, @Nullable Object> properties = new HashMap<>();
         properties.put("byteField", Byte.valueOf("1"));
         properties.put("shortField", Short.valueOf("1"));
         properties.put("intField", 1);

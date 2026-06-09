@@ -14,11 +14,8 @@ package org.openhab.core.config.core;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.openhab.core.config.core.ConfigDescriptionParameter.Type.*;
 
 import java.math.BigDecimal;
@@ -195,8 +192,8 @@ public class ConfigUtilTest {
         verifyValuesOfConfiguration(configuration.get("p2"), 3, List.of("first value", "second value", "third value"));
     }
 
-    private void verifyValuesOfConfiguration(Object subject, int expectedSize, List<?> expectedValues) {
-        assertThat(subject, is(notNullValue()));
+    private void verifyValuesOfConfiguration(@Nullable Object subject, int expectedSize, List<?> expectedValues) {
+        assertNotNull(subject);
         assertThat(subject, is(instanceOf(List.class)));
         assertThat(((List<?>) subject).size(), is(expectedSize));
         assertThat(((List<?>) subject), is(expectedValues));
@@ -246,6 +243,7 @@ public class ConfigUtilTest {
     @Test
     public void resolveVariablesResolvesList() {
         String hostname = mockEnv.get("HOSTNAME");
+        assertNotNull(hostname);
         List<Object> input = List.of("plain", "${ENV:HOSTNAME}", true, 42, 3.14159);
         List<Object> expected = List.of("plain", hostname, true, 42, 3.14159);
 
