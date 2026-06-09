@@ -50,7 +50,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 @NonNullByDefault
 public class LLMItemSerializer {
 
-    private static final Comparator<Item> itemComparator = Comparator.comparing(Item::getName);
+    private static final Comparator<Item> ITEM_COMPARATOR = Comparator.comparing(Item::getName);
     private static final ObjectMapper mapper;
 
     static {
@@ -96,19 +96,13 @@ public class LLMItemSerializer {
 
         Map<String, Item> itemMap = new HashMap<>();
         for (Item item : items) {
-            if (item != null) {
-                itemMap.put(item.getName(), item);
-            }
+            itemMap.put(item.getName(), item);
         }
 
         Map<String, List<Item>> parentToChildren = new HashMap<>();
         Set<String> childNames = new HashSet<>();
 
         for (Item child : items) {
-            if (child == null) {
-                continue;
-            }
-
             boolean isLocation = SemanticTags.getLocation(child) != null;
             boolean isEquipment = SemanticTags.getEquipment(child) != null;
             boolean isPoint = SemanticTags.getPoint(child) != null || SemanticTags.getProperty(child) != null;
@@ -118,19 +112,16 @@ public class LLMItemSerializer {
             }
 
             String parentName = null;
-            if (isLocation) {
-                for (String groupName : child.getGroupNames()) {
-                    Item parent = itemMap.get(groupName);
-                    if (parent != null && SemanticTags.getLocation(parent) != null) {
-                        parentName = groupName;
-                        break;
-                    }
-                }
-            } else if (isEquipment) {
-                String fallbackParent = null;
-                for (String groupName : child.getGroupNames()) {
-                    Item parent = itemMap.get(groupName);
-                    if (parent != null) {
+            String fallbackParent = null;
+            for (String groupName : child.getGroupNames()) {
+                Item parent = itemMap.get(groupName);
+                if (parent != null) {
+                    if (isLocation) {
+                        if (SemanticTags.getLocation(parent) != null) {
+                            parentName = groupName;
+                            break;
+                        }
+                    } else {
                         if (SemanticTags.getEquipment(parent) != null) {
                             parentName = groupName;
                             break;
@@ -139,25 +130,9 @@ public class LLMItemSerializer {
                         }
                     }
                 }
-                if (parentName == null) {
-                    parentName = fallbackParent;
-                }
-            } else {
-                String fallbackParent = null;
-                for (String groupName : child.getGroupNames()) {
-                    Item parent = itemMap.get(groupName);
-                    if (parent != null) {
-                        if (SemanticTags.getEquipment(parent) != null) {
-                            parentName = groupName;
-                            break;
-                        } else if (SemanticTags.getLocation(parent) != null && fallbackParent == null) {
-                            fallbackParent = groupName;
-                        }
-                    }
-                }
-                if (parentName == null) {
-                    parentName = fallbackParent;
-                }
+            }
+            if (parentName == null) {
+                parentName = fallbackParent;
             }
 
             if (parentName != null) {
@@ -172,10 +147,6 @@ public class LLMItemSerializer {
         List<Item> nonSemanticItems = new ArrayList<>();
 
         for (Item item : items) {
-            if (item == null) {
-                continue;
-            }
-
             boolean isLocation = SemanticTags.getLocation(item) != null;
             boolean isEquipment = SemanticTags.getEquipment(item) != null;
             boolean isPoint = SemanticTags.getPoint(item) != null || SemanticTags.getProperty(item) != null;
@@ -197,10 +168,10 @@ public class LLMItemSerializer {
             }
         }
 
-        rootLocations.sort(itemComparator);
-        rootEquipments.sort(itemComparator);
-        rootPoints.sort(itemComparator);
-        nonSemanticItems.sort(itemComparator);
+        rootLocations.sort(ITEM_COMPARATOR);
+        rootEquipments.sort(ITEM_COMPARATOR);
+        rootPoints.sort(ITEM_COMPARATOR);
+        nonSemanticItems.sort(ITEM_COMPARATOR);
 
         List<LocationNode> rootLocNodes = new ArrayList<>();
         List<EquipmentNode> rootEqNodes = new ArrayList<>();
