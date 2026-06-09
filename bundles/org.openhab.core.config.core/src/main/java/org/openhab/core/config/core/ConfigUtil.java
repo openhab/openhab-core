@@ -146,6 +146,28 @@ public class ConfigUtil {
     }
 
     /**
+     * Applies the default values from a give {@link ConfigDescription} to the given configuration {@link Map}.
+     * 
+     * @param configuration the configuration {@link Map} where the default values should be added (must not be null)
+     * @param configDescription the {@link ConfigDescription} where the default values are located (may be null, but
+     *            method won't have any effect then)
+     */
+    public static void applyDefaultConfiguration(Map<String, Object> configuration,
+            @Nullable ConfigDescription configDescription) {
+        if (configDescription != null) {
+            for (ConfigDescriptionParameter parameter : configDescription.getParameters()) {
+                String defaultValue = parameter.getDefault();
+                if (defaultValue != null && !configuration.containsKey(parameter.getName())) {
+                    Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
+                    if (value != null) {
+                        configuration.put(parameter.getName(), value);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Applies the default values from a give {@link ConfigDescription} to the given {@link Configuration}.
      *
      * @param configuration the {@link Configuration} where the default values should be added (must not be null)
@@ -154,17 +176,9 @@ public class ConfigUtil {
      */
     public static void applyDefaultConfiguration(Configuration configuration,
             @Nullable ConfigDescription configDescription) {
-        if (configDescription != null) {
-            for (ConfigDescriptionParameter parameter : configDescription.getParameters()) {
-                String defaultValue = parameter.getDefault();
-                if (defaultValue != null && configuration.get(parameter.getName()) == null) {
-                    Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
-                    if (value != null) {
-                        configuration.put(parameter.getName(), value);
-                    }
-                }
-            }
-        }
+        Map<String, Object> properties = new HashMap<>(configuration.getProperties());
+        applyDefaultConfiguration(properties, configDescription);
+        configuration.setProperties(properties);
     }
 
     /**
