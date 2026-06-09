@@ -176,7 +176,7 @@ public class ConfigUtil {
      */
     public static void applyDefaultConfiguration(Configuration configuration,
             @Nullable ConfigDescription configDescription) {
-        Map<String, Object> properties = new HashMap<>(configuration.getProperties());
+        Map<String, @Nullable Object> properties = new HashMap<>(configuration.getProperties());
         applyDefaultConfiguration(properties, configDescription);
         configuration.setProperties(properties);
     }
