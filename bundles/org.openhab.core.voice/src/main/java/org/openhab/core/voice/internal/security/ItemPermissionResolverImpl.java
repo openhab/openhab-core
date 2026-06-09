@@ -12,8 +12,6 @@
  */
 package org.openhab.core.voice.internal.security;
 
-import static org.openhab.core.voice.internal.VoiceConfigurationConstants.DEFAULT_IMPLICIT_ITEM_ACCESS;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -113,13 +111,13 @@ public class ItemPermissionResolverImpl implements ItemPermissionResolver {
     private void processConfig(Map<String, Object> config) {
         String implicitItemPermissionStr = ConfigParser.valueAsOrElse(
                 config.get(VoiceConfigurationConstants.CONFIG_IMPLICIT_ITEM_PERMISSION), String.class,
-                DEFAULT_IMPLICIT_ITEM_ACCESS.name());
+                VoiceConfigurationConstants.DEFAULT_IMPLICIT_ITEM_ACCESS.name());
         try {
             this.implicitPermission = ItemPermission.valueOf(implicitItemPermissionStr);
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid implicitItemPermission value '{}', using {}", implicitItemPermissionStr,
-                    DEFAULT_IMPLICIT_ITEM_ACCESS);
-            this.implicitPermission = DEFAULT_IMPLICIT_ITEM_ACCESS;
+                    VoiceConfigurationConstants.DEFAULT_IMPLICIT_ITEM_ACCESS);
+            this.implicitPermission = VoiceConfigurationConstants.DEFAULT_IMPLICIT_ITEM_ACCESS;
         }
     }
 
