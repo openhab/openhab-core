@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest.internal;
 
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
