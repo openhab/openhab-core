@@ -96,8 +96,7 @@ public class ConversationEventFactoryTest {
         assertEquals(msgId, event.getMessageId());
         assertEquals(role, event.getRole());
         assertEquals(text, event.getText());
-        assertEquals("Message '1' of role 'USER' with text 'Hello' has been added to conversation 'conv-1'.",
-                event.toString());
+        assertEquals("Message '1' of role 'USER' has been added to conversation 'conv-1'.", event.toString());
     }
 
     @Test

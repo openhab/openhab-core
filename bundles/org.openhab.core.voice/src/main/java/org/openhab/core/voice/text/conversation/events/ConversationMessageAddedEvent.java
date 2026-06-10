@@ -48,8 +48,8 @@ public class ConversationMessageAddedEvent extends ConversationEvent {
 
     @Override
     public String toString() {
-        return "Message '" + messageId + "' of role '" + role + "' with text '" + text
-                + "' has been added to conversation '" + getConversationId() + "'.";
+        return "Message '" + messageId + "' of role '" + role + "' has been added to conversation '"
+                + getConversationId() + "'.";
     }
 
     public int getMessageId() {
