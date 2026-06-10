@@ -46,7 +46,7 @@ public class VoiceResourceTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testGetConversations() {
+    public void testListConversations() {
         Conversation conversation1 = mock(Conversation.class);
         when(conversation1.getId()).thenReturn("conv-1");
         when(conversation1.getCreated()).thenReturn(Instant.ofEpochMilli(1000));
@@ -59,7 +59,7 @@ public class VoiceResourceTest {
 
         when(conversationManager.getConversations()).thenReturn(List.of(conversation1, conversation2));
 
-        Response response = voiceResource.getConversations();
+        Response response = voiceResource.listConversations();
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         List<ConversationInfoDTO> entity = (List<ConversationInfoDTO>) response.getEntity();
