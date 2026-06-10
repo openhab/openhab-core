@@ -91,6 +91,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_ITEMS = "items";
     private static final String SUBCMD_CONVERSATION = "conversation";
     private static final String SUBCMD_CONVERSATION_REMOVE = "conversationremove";
+    private static final String SUBCMD_CONVERSATIONS = "conversations";
 
     private final ItemRegistry itemRegistry;
     private final ConversationManager conversationManager;
@@ -148,6 +149,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_LLM_TOOLS, "lists the LLM tools"),
                 buildCommandUsage(SUBCMD_ITEMS + " [--all]",
                         "lists the Items that the voice system has access to, optionally list all Items"),
+                buildCommandUsage(SUBCMD_CONVERSATIONS, "lists all conversations"),
                 buildCommandUsage(SUBCMD_CONVERSATION + " [--uid] <conversationId>", "Displays conversation messages"),
                 buildCommandUsage(SUBCMD_CONVERSATION_REMOVE + " [--message-id <message-id>] <conversationId>",
                         "Remove Conversation"));
@@ -295,6 +297,10 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 }
                 case SUBCMD_ITEMS -> {
                     listItems(Arrays.copyOfRange(args, 1, args.length), console);
+                    return;
+                }
+                case SUBCMD_CONVERSATIONS -> {
+                    listConversations(console);
                     return;
                 }
                 case SUBCMD_CONVERSATION -> {
@@ -578,6 +584,18 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 "-".repeat(sourceWidth)));
         for (Row row : rows) {
             console.println(String.format(format, row.itemName, row.permission, row.source));
+        }
+    }
+
+    private void listConversations(Console console) {
+        Collection<Conversation> conversations = conversationManager.getConversations();
+        if (!conversations.isEmpty()) {
+            conversations.stream().sorted(comparing(Conversation::getId)).forEach(c -> {
+                console.println(String.format("  %s (Messages: %d, Created: %s, Last Updated: %s)", c.getId(),
+                        c.getMessages().size(), c.getCreated(), c.getLastUpdated()));
+            });
+        } else {
+            console.println("No conversations found.");
         }
     }
 
