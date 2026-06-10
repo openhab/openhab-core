@@ -109,6 +109,17 @@ public class VoiceResource implements RESTResource {
     }
 
     @GET
+    @Path("/conversations")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "listConversations", summary = "Get the metadata of all conversations.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConversationInfoDTO.class)))) })
+    public Response listConversations() {
+        List<ConversationInfoDTO> dtos = conversationManager.getConversations().stream()
+                .sorted(java.util.Comparator.comparing(Conversation::getId)).map(ConversationMapper::mapInfo).toList();
+        return Response.ok(dtos).build();
+    }
+
+    @GET
     @Path("/conversations/{id: [a-zA-Z_0-9-]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getConversationById", summary = "Get a conversation.", responses = {
