@@ -39,6 +39,12 @@ public class ConversationMessagesRemovedEvent extends ConversationEvent {
         return TYPE;
     }
 
+    @Override
+    public String toString() {
+        return "Messages since message ID " + removedSinceMessagesId + " have been removed from conversation '"
+                + getConversationId() + "'.";
+    }
+
     public int getRemovedSinceMessagesId() {
         return removedSinceMessagesId;
     }

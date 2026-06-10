@@ -37,6 +37,7 @@ public class ConversationEventFactoryTest {
         assertEquals(ConversationCreatedEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/added", event.getTopic());
         assertEquals(id, event.getConversationId());
+        assertEquals("Conversation 'conv-1' has been created.", event.toString());
     }
 
     @Test
@@ -62,6 +63,7 @@ public class ConversationEventFactoryTest {
         assertEquals(ConversationRemovedEvent.TYPE, event.getType());
         assertEquals("openhab/conversations/conv-1/removed", event.getTopic());
         assertEquals(id, event.getConversationId());
+        assertEquals("Conversation 'conv-1' has been removed.", event.toString());
     }
 
     @Test
@@ -94,6 +96,8 @@ public class ConversationEventFactoryTest {
         assertEquals(msgId, event.getMessageId());
         assertEquals(role, event.getRole());
         assertEquals(text, event.getText());
+        assertEquals("Message '1' of role 'USER' with text 'Hello' has been added to conversation 'conv-1'.",
+                event.toString());
     }
 
     @Test
@@ -129,6 +133,7 @@ public class ConversationEventFactoryTest {
         assertEquals("openhab/conversations/conv-1/messagesremoved", event.getTopic());
         assertEquals(convId, event.getConversationId());
         assertEquals(removedSinceMessagesId, event.getRemovedSinceMessagesId());
+        assertEquals("Messages since message ID 1 have been removed from conversation 'conv-1'.", event.toString());
     }
 
     @Test

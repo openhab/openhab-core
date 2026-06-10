@@ -36,4 +36,9 @@ public class ConversationRemovedEvent extends ConversationEvent {
     public String getType() {
         return TYPE;
     }
+
+    @Override
+    public String toString() {
+        return "Conversation '" + getConversationId() + "' has been removed.";
+    }
 }
