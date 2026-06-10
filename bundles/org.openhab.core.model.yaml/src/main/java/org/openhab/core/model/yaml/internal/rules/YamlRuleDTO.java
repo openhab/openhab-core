@@ -85,7 +85,12 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
         this.tags = rule.getTags();
         this.description = rule.getDescription();
         this.visibility = rule.getVisibility();
-        this.config = rule.getConfiguration().getProperties();
+        this.config = new LinkedHashMap<>();
+        rule.getConfiguration().getProperties().forEach((key, value) -> {
+            if (value != null) {
+                this.config.put(key, value);
+            }
+        });
         List<@NonNull ConfigDescriptionParameter> configDescriptions = rule.getConfigurationDescriptions();
         if (!configDescriptions.isEmpty()) {
             Map<String, YamlConfigDescriptionParameterDTO> configDescriptionDtos = new LinkedHashMap<>(

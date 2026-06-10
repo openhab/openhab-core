@@ -98,7 +98,7 @@ public interface ThingHandlerCallback {
      * @throws ConfigValidationException if one or more of the given configuration parameters do not match
      *             their declarations in the configuration description
      */
-    void validateConfigurationParameters(Thing thing, Map<String, Object> configurationParameters);
+    void validateConfigurationParameters(Thing thing, Map<String, @Nullable Object> configurationParameters);
 
     /**
      * Validates the given configuration parameters against the configuration description.
@@ -108,7 +108,7 @@ public interface ThingHandlerCallback {
      * @throws ConfigValidationException if one or more of the given configuration parameters do not match
      *             their declarations in the configuration description
      */
-    void validateConfigurationParameters(Channel channel, Map<String, Object> configurationParameters);
+    void validateConfigurationParameters(Channel channel, Map<String, @Nullable Object> configurationParameters);
 
     /**
      * Get the {@link ConfigDescription} for a {@link ChannelTypeUID}

@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -975,7 +976,8 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     private void updateConfig(int period, int delay, TimeUnit timeUnit) throws IOException {
-        Map<String, Object> properties = Map.ofEntries(entry(FirmwareUpdateServiceImpl.PERIOD_CONFIG_KEY, period),
+        Map<String, @Nullable Object> properties = Map.ofEntries(
+                entry(FirmwareUpdateServiceImpl.PERIOD_CONFIG_KEY, period),
                 entry(FirmwareUpdateServiceImpl.DELAY_CONFIG_KEY, delay),
                 entry(FirmwareUpdateServiceImpl.TIME_UNIT_CONFIG_KEY, timeUnit.name()));
         firmwareUpdateService.modified(properties);

@@ -381,7 +381,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
             ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID, localeProvider.getLocale());
             ThingUID bridgeUID = thingDto.bridge != null ? new ThingUID(thingDto.bridge) : null;
-            Configuration configuration = new Configuration(thingDto.config);
+            Configuration configuration = new Configuration(new HashMap<>(thingDto.config));
 
             ThingBuilder thingBuilder = thingDto.isBridge() ? BridgeBuilder.create(thingTypeUID, thingUID)
                     : ThingBuilder.create(thingTypeUID, thingUID);
@@ -403,8 +403,8 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     .filter(thf -> isThingHandlerFactoryReady(thf) && thf.supportsThingType(thingTypeUID)).findFirst()
                     .orElse(null);
             if (handlerFactory != null) {
-                thingFromHandler = handlerFactory.createThing(thingTypeUID, new Configuration(thingDto.config),
-                        thingUID, bridgeUID);
+                thingFromHandler = handlerFactory.createThing(thingTypeUID,
+                        new Configuration(new HashMap<>(thingDto.config)), thingUID, bridgeUID);
                 if (thingFromHandler != null) {
                     mergeThing(thingFromHandler, thing, isolatedModel);
                     logger.debug("Successfully loaded thing \'{}\'", thingUID);
@@ -434,7 +434,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     : new ChannelTypeUID(thingUID.getBindingId(), channelDto.type);
             Channel channel = createChannel(applyDefaultConfig, thingUID, channelId, channelTypeUID,
                     channelDto.getKind(), channelDto.getItemType(), channelDto.label, channelDto.description, null,
-                    new Configuration(channelDto.config), true);
+                    new Configuration(new HashMap<>(channelDto.config)), true);
             channels.add(channel);
             addedChannelIds.add(channelId);
         });
@@ -606,7 +606,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     private Configuration processConfiguration(UID uid, Configuration configuration, Set<String> stringParameters) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, @Nullable Object> params = new HashMap<>();
 
         configuration.keySet().forEach(name -> {
             Object valueIn = configuration.get(name);

@@ -245,7 +245,8 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
             }
             if (itemDTO.channels != null) {
                 itemDTO.channels.forEach((channelUID, config) -> {
-                    channelLinks.put(channelUID, new Configuration(config));
+                    Map<String, @Nullable Object> confMap = new HashMap<>(config);
+                    channelLinks.put(channelUID, new Configuration(confMap));
                 });
             }
         }

@@ -405,8 +405,13 @@ public class GenericItemProvider extends AbstractProvider<Item>
                             bindingType, item.getName(), e);
                 }
             } else {
-                genericMetaDataProvider.addMetadata(modelName, bindingType, item.getName(), config,
-                        configuration.getProperties());
+                Map<String, Object> properties = new HashMap<>();
+                configuration.getProperties().forEach((k, v) -> {
+                    if (v != null) {
+                        properties.put(k, v);
+                    }
+                });
+                genericMetaDataProvider.addMetadata(modelName, bindingType, item.getName(), config, properties);
             }
         }
     }

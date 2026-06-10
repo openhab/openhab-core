@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.core.fileformat;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,9 +74,14 @@ public class FileFormatItemDTOMapper {
         List<FileFormatChannelLinkDTO> channelLinksDTO = new ArrayList<>();
         channelLinks.forEach(link -> {
             if (item.getName().equals(link.getItemName())) {
+                Map<String, Object> config = new HashMap<>();
+                link.getConfiguration().getProperties().forEach((k, v) -> {
+                    if (v != null) {
+                        config.put(k, v);
+                    }
+                });
                 channelLinksDTO.add(new FileFormatChannelLinkDTO(link.getLinkedUID().getAsString(),
-                        link.getConfiguration().getProperties().isEmpty() ? null
-                                : link.getConfiguration().getProperties()));
+                        link.getConfiguration().getProperties().isEmpty() ? null : config));
             }
         });
         if (!channelLinksDTO.isEmpty()) {

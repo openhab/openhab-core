@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal.things;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,7 +49,7 @@ public class YamlChannelDTO {
         boolean ok = true;
         if (config != null) {
             try {
-                new Configuration(config);
+                new Configuration(new HashMap<>(config));
             } catch (IllegalArgumentException e) {
                 errors.add("invalid data in \"config\" field: %s".formatted(e.getMessage()));
                 ok = false;

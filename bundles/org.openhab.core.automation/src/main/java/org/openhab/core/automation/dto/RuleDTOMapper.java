@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.dto;
 
+import java.util.HashMap;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.Rule.TemplateState;
@@ -38,7 +40,7 @@ public class RuleDTOMapper {
         RuleBuilder builder = RuleBuilder.create(ruleDto.uid).withActions(ActionDTOMapper.mapDto(ruleDto.actions))
                 .withConditions(ConditionDTOMapper.mapDto(ruleDto.conditions))
                 .withTriggers(TriggerDTOMapper.mapDto(ruleDto.triggers))
-                .withConfiguration(new Configuration(ruleDto.configuration))
+                .withConfiguration(new Configuration(new HashMap<>(ruleDto.configuration)))
                 .withConfigurationDescriptions(ConfigDescriptionDTOMapper.map(ruleDto.configDescriptions))
                 .withTemplateUID(ruleDto.templateUID).withVisibility(ruleDto.visibility).withTags(ruleDto.tags)
                 .withName(ruleDto.name).withDescription(ruleDto.description);
@@ -54,7 +56,12 @@ public class RuleDTOMapper {
         to.triggers = TriggerDTOMapper.map(from.getTriggers());
         to.conditions = ConditionDTOMapper.map(from.getConditions());
         to.actions = ActionDTOMapper.map(from.getActions());
-        to.configuration = from.getConfiguration().getProperties();
+        to.configuration = new HashMap<>();
+        from.getConfiguration().getProperties().forEach((k, v) -> {
+            if (v != null) {
+                to.configuration.put(k, v);
+            }
+        });
         to.configDescriptions = ConfigDescriptionDTOMapper.mapParameters(from.getConfigurationDescriptions());
         to.templateUID = from.getTemplateUID();
         to.templateState = from.getTemplateState().toString();

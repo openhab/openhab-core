@@ -86,7 +86,7 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
      */
     @Override
     @SuppressWarnings({ "unchecked", "null" })
-    public void validate(Map<String, Object> configurationParameters, URI configDescriptionURI) {
+    public void validate(Map<String, @Nullable Object> configurationParameters, URI configDescriptionURI) {
         Objects.requireNonNull(configurationParameters, "Configuration parameters must not be null");
         Objects.requireNonNull(configDescriptionURI, "Config description URI must not be null");
 

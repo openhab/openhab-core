@@ -15,8 +15,7 @@ package org.openhab.core.automation.module.timer.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +27,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
@@ -196,7 +196,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("MyTimerTrigger")
                 .withTypeUID(GenericCronTriggerHandler.MODULE_TYPE_ID).withConfiguration(triggerConfig).build());
 
-        Map<String, Object> cfgEntries = new HashMap<>();
+        Map<String, @Nullable Object> cfgEntries = new HashMap<>();
         cfgEntries.put("itemName", testItemName);
         cfgEntries.put("command", "ON");
         Configuration actionConfig = new Configuration(cfgEntries);

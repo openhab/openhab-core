@@ -15,6 +15,7 @@ package org.openhab.core.magic.binding.handler;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -43,7 +44,7 @@ public class MagicConfigurableThingHandler extends BaseThingHandler {
     }
 
     @Override
-    public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
+    public void handleConfigurationUpdate(Map<String, @Nullable Object> configurationParameters) {
         super.handleConfigurationUpdate(configurationParameters);
     }
 }

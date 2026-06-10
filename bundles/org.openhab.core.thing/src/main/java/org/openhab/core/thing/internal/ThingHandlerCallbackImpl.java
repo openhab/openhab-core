@@ -157,7 +157,7 @@ class ThingHandlerCallbackImpl implements ThingHandlerCallback {
     }
 
     @Override
-    public void validateConfigurationParameters(Thing thing, Map<String, Object> configurationParameters) {
+    public void validateConfigurationParameters(Thing thing, Map<String, @Nullable Object> configurationParameters) {
         ThingType thingType = thingManager.thingTypeRegistry.getThingType(thing.getThingTypeUID());
         if (thingType != null) {
             URI configDescriptionURI = thingType.getConfigDescriptionURI();
@@ -168,7 +168,8 @@ class ThingHandlerCallbackImpl implements ThingHandlerCallback {
     }
 
     @Override
-    public void validateConfigurationParameters(Channel channel, Map<String, Object> configurationParameters) {
+    public void validateConfigurationParameters(Channel channel,
+            Map<String, @Nullable Object> configurationParameters) {
         ChannelType channelType = thingManager.channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
         if (channelType != null) {
             URI configDescriptionURI = channelType.getConfigDescriptionURI();

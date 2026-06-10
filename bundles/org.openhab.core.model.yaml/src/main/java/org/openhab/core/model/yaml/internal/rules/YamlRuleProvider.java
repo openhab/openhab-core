@@ -16,6 +16,7 @@ import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -152,7 +153,7 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
     private @Nullable Rule mapRule(YamlRuleDTO ruleDto) {
         RuleBuilder ruleBuilder = RuleBuilder.create(ruleDto.uid).withName(ruleDto.label)
                 .withDescription(ruleDto.description).withTags(ruleDto.tags).withVisibility(ruleDto.visibility)
-                .withTemplateUID(ruleDto.template).withConfiguration(new Configuration(ruleDto.config));
+                .withTemplateUID(ruleDto.template).withConfiguration(new Configuration(new HashMap<>(ruleDto.config)));
         if (ruleDto.templateState != null) {
             ruleBuilder.withTemplateState(ruleDto.templateState);
         }

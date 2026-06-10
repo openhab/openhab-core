@@ -43,7 +43,12 @@ public class YamlModuleDTO {
         this.label = module.getLabel();
         this.description = module.getDescription();
         this.type = ModuleTypeAliases.typeToAlias(module.getClass(), module.getTypeUID());
-        this.config = new LinkedHashMap<>(module.getConfiguration().getProperties());
+        this.config = new LinkedHashMap<>();
+        module.getConfiguration().getProperties().forEach((k, v) -> {
+            if (v != null) {
+                this.config.put(k, v);
+            }
+        });
         if (this.config.containsKey("script") && this.config.get("type") instanceof String type) {
             String typeAlias = MIMETypeAliases.mimeTypeToAlias(type);
             if (!type.equals(typeAlias)) {

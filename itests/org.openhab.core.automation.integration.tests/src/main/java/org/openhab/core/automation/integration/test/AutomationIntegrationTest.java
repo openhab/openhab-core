@@ -15,8 +15,7 @@ package org.openhab.core.automation.integration.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -269,7 +268,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     @Test
     public void assertThatARuleWithConnectionsIsExecuted() {
         logger.info("assert that a rule with connections is executed");
-        Map<String, Object> params = new HashMap<>();
+        Map<String, @Nullable Object> params = new HashMap<>();
         params.put("topic", "openhab/items/myMotionItem3/*");
         params.put("types", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(params);
@@ -330,7 +329,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     public void assertThatARuleWithNonExistingModuleTypeHandlerIsAddedToTheRuleRegistryInStateUNINITIALIZED() {
         logger.info(
                 "assert that a rule with non existing moduleTypeHandler is added to the ruleRegistry in state UNINITIALIZED");
-        Map<String, Object> params = new HashMap<>();
+        Map<String, @Nullable Object> params = new HashMap<>();
         params.put("eventSource", "myMotionItem");
         params.put("eventTopic", "openhab/*");
         params.put("eventTypes", "ItemStateEvent");
@@ -363,7 +362,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
     @Test
     public void assertThatARuleBasedOnACompositeModuleIsInitializedAndExecutedCorrectly() {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, @Nullable Object> params = new HashMap<>();
         params.put("itemName", "myMotionItem3");
         Configuration triggerConfig = new Configuration(params);
 
@@ -420,7 +419,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     @Test
     public void assertThatRuleNowMethodExecutesActionsOfTheRule() throws ItemNotFoundException {
         Configuration triggerConfig = new Configuration(Map.of("topic", "runNowEventTopic/*"));
-        Map<String, Object> params = new HashMap<>();
+        Map<String, @Nullable Object> params = new HashMap<>();
         params.put("itemName", "myLampItem3");
         params.put("command", "TOGGLE");
         Configuration actionConfig = new Configuration(params);
@@ -483,7 +482,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     @Test
     public void assertThatRuleCanBeUpdated() throws ItemNotFoundException {
         Configuration triggerConfig = new Configuration(Map.of("topic", "runNowEventTopic/*"));
-        Map<String, Object> params = new HashMap<>();
+        Map<String, @Nullable Object> params = new HashMap<>();
         params.put("itemName", "myLampItem3");
         params.put("command", "ON");
         Configuration actionConfig = new Configuration(params);
@@ -554,7 +553,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     @Test
     public void testChainOfCompositeModules() throws ItemNotFoundException {
         Configuration triggerConfig = new Configuration(Map.of("itemName", "myMotionItem4"));
-        Map<String, Object> params = new HashMap<>();
+        Map<String, @Nullable Object> params = new HashMap<>();
         params.put("itemName", "myLampItem4");
         params.put("command", "ON");
         Configuration actionConfig = new Configuration(params);
@@ -608,7 +607,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     public void assertARuleAddedByApiIsExecutedAsExpected() {
         logger.info("assert a rule added by api is executed as expected");
         // Creation of RULE
-        Map<String, Object> params = new HashMap<>();
+        Map<String, @Nullable Object> params = new HashMap<>();
         params.put("topic", "openhab/items/myMotionItem2/*");
         params.put("types", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(params);
@@ -676,7 +675,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             assertThat(template.getTags().size(), is(not(0)));
         });
 
-        Map<String, Object> configs = new HashMap<>();
+        Map<String, @Nullable Object> configs = new HashMap<>();
         configs.put("onItem", "templ_MotionItem");
         configs.put("ifState", "ON");
         configs.put("updateItem", "templ_LampItem");
@@ -724,7 +723,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             assertThat(template.getTags().size(), is(not(0)));
         });
 
-        Map<String, Object> configs = new HashMap<>();
+        Map<String, @Nullable Object> configs = new HashMap<>();
         configs.put("onItem", "xtempl_MotionItem");
         configs.put("ifState", ".*ON.*");
         configs.put("updateItem", "xtempl_LampItem");
@@ -867,7 +866,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         logger.info("createSimpleRule");
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = new HashMap<>();
+        Map<String, @Nullable Object> configs = new HashMap<>();
         configs.put("topic", "openhab/items/myMotionItem2/*");
         configs.put("types", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(configs);
@@ -892,7 +891,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         int random = new Random().nextInt(100000);
         logger.info("assert a rule with generic condition works");
         // Creation of RULE
-        Map<String, Object> configs = new HashMap<>();
+        Map<String, @Nullable Object> configs = new HashMap<>();
         configs.put("topic", "openhab/items/myMotionItem5/*");
         configs.put("types", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(configs);

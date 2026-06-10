@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -130,7 +131,7 @@ public class TimestampOffsetProfileTest {
 
     private TimestampOffsetProfile createProfile(ProfileCallback callback, String offset) {
         ProfileContext context = mock(ProfileContext.class);
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, @Nullable Object> properties = new HashMap<>();
         properties.put(TimestampOffsetProfile.OFFSET_PARAM, offset);
         when(context.getConfiguration()).thenReturn(new Configuration(properties));
         return new TimestampOffsetProfile(callback, context);

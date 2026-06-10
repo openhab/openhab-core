@@ -16,8 +16,7 @@ import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -230,7 +229,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
             updateStatus(ThingStatus.ONLINE);
             genericInits++;
             if (selfChanging) {
-                Map<String, Object> properties = Map.of("providedspecific", "there");
+                Map<String, @Nullable Object> properties = Map.of("providedspecific", "there");
                 changeThingType(THING_TYPE_SPECIFIC_UID, new Configuration(properties));
             }
         }
@@ -285,7 +284,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         }, 4000, 100);
 
         // Now do the actual migration
-        Map<String, Object> properties = new HashMap<>(1);
+        Map<String, @Nullable Object> properties = new HashMap<>(1);
         properties.put("providedspecific", "there");
         ((BaseThingHandler) thing.getHandler()).changeThingType(THING_TYPE_SPECIFIC_UID, new Configuration(properties));
 
@@ -329,7 +328,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         // println "[ChangeThingTypeOSGiTest] ======== assert loading specialized thing type works directly"
 
         StorageService storage = getService(StorageService.class);
-        Map<String, Object> properties = Map.of("providedspecific", "there");
+        Map<String, @Nullable Object> properties = Map.of("providedspecific", "there");
         Thing persistedThing = ThingFactory.createThing(thingTypeSpecific,
                 new ThingUID("testBinding", "persistedThing"), new Configuration(properties), null, null);
         persistedThing.setProperty("universal", "survives");

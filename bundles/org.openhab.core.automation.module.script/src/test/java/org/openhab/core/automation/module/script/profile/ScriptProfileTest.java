@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -363,7 +364,7 @@ public class ScriptProfileTest extends JavaTest {
     }
 
     private static class ProfileContextBuilder {
-        private final Map<String, Object> configuration = new HashMap<>();
+        private final Map<String, @Nullable Object> configuration = new HashMap<>();
         private List<Class<? extends State>> acceptedDataTypes = List.of();
         private List<Class<? extends Command>> acceptedCommandTypes = List.of();
         private List<Class<? extends Command>> handlerAcceptedCommandTypes = List.of();

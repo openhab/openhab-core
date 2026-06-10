@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.Configuration;
 
@@ -41,5 +42,5 @@ public interface ConfigDescriptionValidator {
      *             description having the given URI
      * @throws NullPointerException if given config description URI or configuration parameters are null
      */
-    void validate(Map<String, Object> configurationParameters, URI configDescriptionURI);
+    void validate(Map<String, @Nullable Object> configurationParameters, URI configDescriptionURI);
 }

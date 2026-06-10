@@ -14,6 +14,7 @@ package org.openhab.core.model.yaml.internal.rules;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -108,15 +109,15 @@ public abstract class AbstractYamlRuleProvider<@NonNull E> extends AbstractProvi
             try {
                 if (targetClazz.isAssignableFrom(Condition.class) && dto instanceof YamlConditionDTO cDto) {
                     modules.add((T) ModuleBuilder.createCondition().withId(dto.id).withTypeUID(dto.type)
-                            .withConfiguration(new Configuration(dto.config)).withInputs(cDto.inputs)
+                            .withConfiguration(new Configuration(new HashMap<>(dto.config))).withInputs(cDto.inputs)
                             .withLabel(dto.label).withDescription(dto.description).build());
                 } else if (targetClazz.isAssignableFrom(Action.class) && dto instanceof YamlActionDTO aDto) {
                     modules.add((T) ModuleBuilder.createAction().withId(dto.id).withTypeUID(dto.type)
-                            .withConfiguration(new Configuration(dto.config)).withInputs(aDto.inputs)
+                            .withConfiguration(new Configuration(new HashMap<>(dto.config))).withInputs(aDto.inputs)
                             .withLabel(dto.label).withDescription(dto.description).build());
                 } else if (targetClazz.isAssignableFrom(Trigger.class)) {
                     modules.add((T) ModuleBuilder.createTrigger().withId(dto.id).withTypeUID(dto.type)
-                            .withConfiguration(new Configuration(dto.config)).withLabel(dto.label)
+                            .withConfiguration(new Configuration(new HashMap<>(dto.config))).withLabel(dto.label)
                             .withDescription(dto.description).build());
                 } else {
                     throw new IllegalArgumentException("Invalid combination of target and dto classes: "
