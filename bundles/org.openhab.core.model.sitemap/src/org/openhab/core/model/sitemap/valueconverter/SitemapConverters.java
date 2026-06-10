@@ -24,26 +24,126 @@ import org.eclipse.xtext.nodemodel.INode;
 public class SitemapConverters extends DefaultTerminalConverters {
 
     private static final Pattern ID_PATTERN = Pattern.compile("\\p{Alpha}\\w*");
+    private static final Pattern ID_EXT_PATTERN = Pattern.compile("\\^?\\p{Alpha}\\w*"); // allow for ^ prefix when
+                                                                                         // parsing DSL to escape
+                                                                                         // reserved names
+    private static final Pattern INT_PATTERN = Pattern.compile("[0-9]+");
 
     @ValueConverter(rule = "Icon")
     public IValueConverter<String> Icon() {
 
-        return new IValueConverter<>() {
-
+        return new AbstractNullSafeConverter<>() {
             @Override
-            public String toValue(String string, INode node) throws ValueConverterException {
-                if (string != null && string.startsWith("\"")) {
-                    return string.substring(1, string.length() - 1);
+            public String internalToValue(String string, INode node) throws ValueConverterException {
+                if ((string.startsWith("'") && string.endsWith("'"))
+                        || (string.startsWith("\"") && string.endsWith("\""))) {
+                    return STRING().toValue(string, node);
                 }
-                return string;
+                String[] parts = string.split(":");
+                if (parts.length > 3) {
+                    throw new ValueConverterException("Icon name cannot contain more than 3 parts separated by ':'",
+                            node, null);
+                }
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < parts.length - 1; i++) {
+                    if (!ID_EXT_PATTERN.matcher(parts[i]).matches()) {
+                        throw new ValueConverterException("Icon name part '" + parts[i] + "' is not a valid identifier",
+                                node, null);
+                    }
+                    sb.append(ID().toValue(parts[i], node)).append(":");
+                }
+                String[] lastParts = parts[parts.length - 1].split("-");
+                for (int i = 0; i < lastParts.length; i++) {
+                    if (i != 0) {
+                        sb.append("-");
+                    }
+                    if (!ID_EXT_PATTERN.matcher(lastParts[i]).matches()) {
+                        throw new ValueConverterException(
+                                "Icon name part '" + parts[parts.length - 1] + "' is not a valid identifier", node,
+                                null);
+                    }
+                    sb.append(ID().toValue(parts[i], node));
+                }
+                return sb.toString();
             }
 
             @Override
-            public String toString(String value) throws ValueConverterException {
+            public String internalToString(String value) throws ValueConverterException {
                 if (containsWhiteSpace(value)) {
-                    return "\"" + value + "\"";
+                    return STRING().toString(value);
                 }
-                return value;
+                String[] parts = value.split(":");
+                if (parts.length > 3) {
+                    return STRING().toString(value);
+                }
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < parts.length - 1; i++) {
+                    if (!ID_PATTERN.matcher(parts[i]).matches()) {
+                        return STRING().toString(value);
+                    }
+                    sb.append(ID().toString(parts[i])).append(":");
+                }
+                String[] lastParts = parts[parts.length - 1].split("-");
+                for (int i = 0; i < lastParts.length; i++) {
+                    if (i != 0) {
+                        sb.append("-");
+                    }
+                    if (!ID_PATTERN.matcher(lastParts[i]).matches()) {
+                        return STRING().toString(value);
+                    }
+                    sb.append(ID().toString(lastParts[i]));
+                }
+
+                return sb.toString();
+            }
+        };
+    }
+
+    @ValueConverter(rule = "XState")
+    public IValueConverter<String> XState() {
+
+        return new AbstractNullSafeConverter<>() {
+            @Override
+            protected String internalToValue(String string, INode node) throws ValueConverterException {
+                if ((string.startsWith("'") && string.endsWith("'"))
+                        || (string.startsWith("\"") && string.endsWith("\""))) {
+                    return STRING().toValue(string, node);
+                }
+                if (ID_EXT_PATTERN.matcher(string).matches()) {
+                    return ID().toValue(string, node);
+                }
+                String[] parts = string.split("\\.");
+                if (parts.length > 2) {
+                    throw new ValueConverterException("State invalid number format", node, null);
+                }
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < parts.length; i++) {
+                    if (i != 0) {
+                        sb.append(".");
+                    }
+                    if (!INT_PATTERN.matcher(parts[i]).matches()) {
+                        throw new ValueConverterException("State invalid number format", node, null);
+                    }
+                    sb.append(INT().toValue(parts[i], node));
+                }
+                return sb.toString();
+            }
+
+            @Override
+            protected String internalToString(String value) throws ValueConverterException {
+                if (ID_PATTERN.matcher(value).matches()) {
+                    return ID().toString(value);
+                }
+                String[] parts = value.split("\\.");
+                if (parts.length <= 2) {
+                    for (int i = 0; i < parts.length; i++) {
+                        if (!INT_PATTERN.matcher(parts[i]).matches()) {
+                            return STRING().toString(value);
+                        }
+                    }
+                    return value;
+                }
+                return STRING().toString(value);
             }
         };
     }
@@ -52,7 +152,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
     public IValueConverter<String> Command() {
         return new AbstractNullSafeConverter<>() {
             @Override
-            protected String internalToValue(String string, INode node) {
+            protected String internalToValue(String string, INode node) throws ValueConverterException {
                 if ((string.startsWith("'") && string.endsWith("'"))
                         || (string.startsWith("\"") && string.endsWith("\""))) {
                     return STRING().toValue(string, node);
@@ -61,7 +161,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
             }
 
             @Override
-            protected String internalToString(String value) {
+            protected String internalToString(String value) throws ValueConverterException {
                 if (ID_PATTERN.matcher(value).matches()) {
                     return ID().toString(value);
                 } else {
