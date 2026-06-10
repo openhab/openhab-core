@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A DTO for listing {@link Conversation}s on the REST API.
+ * A DTO for listing {@link org.openhab.core.voice.text.conversation.Conversation}s on the REST API.
  *
  * @author Florian Hotze - Initial contribution
  */

@@ -115,7 +115,7 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConversationInfoDTO.class)))) })
     public Response listConversations() {
         List<ConversationInfoDTO> dtos = conversationManager.getConversations().stream()
-                .map(ConversationMapper::mapInfo).toList();
+                .sorted(java.util.Comparator.comparing(Conversation::getId)).map(ConversationMapper::mapInfo).toList();
         return Response.ok(dtos).build();
     }
 
