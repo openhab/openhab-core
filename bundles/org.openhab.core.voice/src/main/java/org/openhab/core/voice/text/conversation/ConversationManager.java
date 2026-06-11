@@ -70,11 +70,4 @@ public interface ConversationManager {
      * @return a collection of all conversations
      */
     Collection<Conversation> getConversations();
-
-    /**
-     * Sets the maximum number of messages to keep in a conversation history.
-     *
-     * @param limit the maximum number of messages
-     */
-    void setHistoryLimit(int limit);
 }

@@ -28,7 +28,7 @@ import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.TTSCache;
 import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.Voice;
-import org.openhab.core.voice.internal.VoiceManagerImpl;
+import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Gwendal Roulleau - Initial contribution
  */
-@Component(configurationPid = VoiceManagerImpl.CONFIGURATION_PID)
+@Component(configurationPid = VoiceConfigurationConstants.CONFIGURATION_PID)
 @NonNullByDefault
 public class TTSLRUCacheImpl implements TTSCache {
 

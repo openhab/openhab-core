@@ -120,7 +120,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
         Dictionary<String, Object> voiceConfig = new Hashtable<>();
         voiceConfig.put(CONFIG_DEFAULT_TTS, ttsService.getId());
-        configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
+        configuration = configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID);
         configuration.update(voiceConfig);
     }
 
@@ -175,7 +175,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         Dictionary<String, Object> voiceConfig = new Hashtable<>();
         voiceConfig.put("defaultHLI", hliStub.getId());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
+        Configuration configuration = configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID);
         configuration.update(voiceConfig);
 
         // Wait some time to be sure that the configuration will be updated
@@ -459,7 +459,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
 
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
+        Configuration configuration = configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID);
         configuration.update(config);
 
         // Wait some time to be sure that the configuration will be updated
@@ -668,7 +668,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
         config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
+        Configuration configuration = configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID);
         configuration.update(config);
         // Wait some time to be sure that the configuration will be updated
         Thread.sleep(2000);

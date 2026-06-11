@@ -81,13 +81,6 @@ public interface ItemPermissionResolver {
      */
     ItemPermissionDetails getItemPermissionDetails(Item item);
 
-    /**
-     * Sets the implicit item permission.
-     * 
-     * @param implicitPermission the implicit item permission
-     */
-    void setImplicitPermission(ItemPermission implicitPermission);
-
     record ItemPermissionDetails(ItemPermission permission, @Nullable String source) {
     }
 }
