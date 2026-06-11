@@ -185,7 +185,7 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
         Map<String, Object> ctx = new LinkedHashMap<>();
         Event eventObject = null;
-        Map<String, Map<String, Object>> modulesInputs = new HashMap<>();
+        Map<String, Map<String, Object>> inputs = new HashMap<>();
         Object ctxObject = context.getAttribute("ctx");
         if (ctxObject instanceof Map<?, ?> untypedCtx) {
             String stem;
@@ -196,7 +196,7 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
                 if (entry.getKey() instanceof String key && (value = entry.getValue()) != null) {
                     if (key.indexOf('.') >= 0 && (m = KEY_SPLITTER.matcher(key)).matches()) {
                         map = Objects.requireNonNull(
-                                modulesInputs.compute(m.group("prefix"), (k, v) -> v == null ? new HashMap<>() : v));
+                                inputs.compute(m.group("prefix"), (k, v) -> v == null ? new HashMap<>() : v));
                         map.put(stem = m.group("stem"), value);
                         if ("event".equals(stem) && value instanceof Event ev) {
                             eventObject = ev;
@@ -210,7 +210,7 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
         }
         evalContext.newValue(QualifiedName.create("ctx"), ctx);
         evalContext.newValue(QualifiedName.create("eventObject"), eventObject);
-        evalContext.newValue(QualifiedName.create("modulesInputs"), modulesInputs);
+        evalContext.newValue(QualifiedName.create("inputs"), inputs);
 
         Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache",
                 (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
