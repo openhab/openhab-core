@@ -375,7 +375,8 @@ public class DialogProcessor implements KSListener, STTListener {
                 if (error == null) {
                     List<LLMTool> tools = dialogContext.llmTools();
                     InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
-                            dialogContext.locationItem(), dialogContext.systemPrompt());
+                            dialogContext.locationItem(),
+                            eventListener.enrichSystemPrompt(dialogContext.systemPrompt()));
                     for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
                         try {
                             answer = interpreter.interpret(dialogContext.locale(), interpreterContext);
@@ -530,5 +531,13 @@ public class DialogProcessor implements KSListener, STTListener {
          * @param context used by the dialog processor
          */
         void onDialogStopped(DialogContext context);
+
+        /**
+         * Enriches the system prompt with additional context, e.g., available items.
+         *
+         * @param baseSystemPrompt the base system prompt
+         * @return the system prompt with the additional context
+         */
+        String enrichSystemPrompt(@Nullable String baseSystemPrompt);
     }
 }
