@@ -23,10 +23,11 @@ import org.eclipse.xtext.nodemodel.INode;
 
 public class SitemapConverters extends DefaultTerminalConverters {
 
-    private static final Pattern ID_PATTERN = Pattern.compile("\\p{Alpha}\\w*");
-    private static final Pattern ID_EXT_PATTERN = Pattern.compile("\\^?\\p{Alpha}\\w*"); // allow for ^ prefix when
-                                                                                         // parsing DSL to escape
-                                                                                         // reserved names
+    private static final Pattern ID_PATTERN = Pattern
+            .compile("(?:[A-Za-z_][A-Za-z_0-9]*|[0-9]+[A-Za-z_][A-Za-z_0-9]*)");
+    // allow for ^ prefix when parsing DSL to escape reserved names
+    private static final Pattern ID_EXT_PATTERN = Pattern
+            .compile("(?:\\^?[A-Za-z_][A-Za-z_0-9]*|[0-9]+[A-Za-z_][A-Za-z_0-9]*)");
     private static final Pattern INT_PATTERN = Pattern.compile("[0-9]+");
 
     @ValueConverter(rule = "Icon")
@@ -62,7 +63,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
                                 "Icon name part '" + parts[parts.length - 1] + "' is not a valid identifier", node,
                                 null);
                     }
-                    sb.append(ID().toValue(parts[i], node));
+                    sb.append(ID().toValue(lastParts[i], node));
                 }
                 return sb.toString();
             }
