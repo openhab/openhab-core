@@ -126,7 +126,7 @@ public class StandardInterpreterTest {
         // "computer" should only match computerItem, not computerScreenItem
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
+                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF, any()));
     }
 
     @Test
@@ -147,7 +147,7 @@ public class StandardInterpreterTest {
         // "computer" should only match the computerSwitchItem member of computerGroup
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(computerSwitchItem.getName(), OnOffType.OFF));
+                .post(ItemEventFactory.createCommandEvent(computerSwitchItem.getName(), OnOffType.OFF, any()));
     }
 
     @Test
@@ -188,7 +188,7 @@ public class StandardInterpreterTest {
         conversation1.addMessage(ConversationRole.USER, "turn on light");
         InterpreterContext context1 = new InterpreterContext(conversation1, List.of(), "kitchen", null);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, context1));
-        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light1", OnOffType.ON));
+        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light1", OnOffType.ON, any()));
 
         reset(eventPublisherMock);
         // Match light2 by location context livingRoom
@@ -196,7 +196,7 @@ public class StandardInterpreterTest {
         conversation2.addMessage(ConversationRole.USER, "turn on light");
         InterpreterContext context2 = new InterpreterContext(conversation2, List.of(), "livingRoom", null);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, context2));
-        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light2", OnOffType.ON));
+        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light2", OnOffType.ON, any()));
     }
 
     @Test
@@ -213,14 +213,14 @@ public class StandardInterpreterTest {
         // "turn on" should only match the SwitchItem
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn on the lamp"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(switchItem.getName(), OnOffType.ON));
+                .post(ItemEventFactory.createCommandEvent(switchItem.getName(), OnOffType.ON, any()));
 
         reset(eventPublisherMock);
 
         // "open" should only match the RollershutterItem
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "open the lamp"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(rollershutterItem.getName(), UpDownType.UP));
+                .post(ItemEventFactory.createCommandEvent(rollershutterItem.getName(), UpDownType.UP, any()));
     }
 
     @Test
@@ -236,15 +236,15 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
+                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF, any()));
         reset(eventPublisherMock);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off pc"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
+                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF, any()));
         reset(eventPublisherMock);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off bedroom pc"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
+                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF, any()));
     }
 
     @Test
@@ -266,19 +266,19 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "set the brightness to low"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(brightness.getName(), new PercentType(10)));
+                .post(ItemEventFactory.createCommandEvent(brightness.getName(), new PercentType(10), any()));
         reset(eventPublisherMock);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "set brightness to medium"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(brightness.getName(), new PercentType(50)));
+                .post(ItemEventFactory.createCommandEvent(brightness.getName(), new PercentType(50), any()));
         reset(eventPublisherMock);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "set brightness high"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(brightness.getName(), new PercentType(90)));
+                .post(ItemEventFactory.createCommandEvent(brightness.getName(), new PercentType(90), any()));
         reset(eventPublisherMock);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "set brightness high two"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(brightness.getName(), new PercentType(100)));
+                .post(ItemEventFactory.createCommandEvent(brightness.getName(), new PercentType(100), any()));
     }
 
     @Test
@@ -302,7 +302,7 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("KEY_4")));
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("KEY_4"), any()));
         reset(eventPublisherMock);
     }
 
@@ -326,7 +326,7 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("KEY_4")));
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("KEY_4"), any()));
         reset(eventPublisherMock);
     }
 
@@ -350,7 +350,7 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "what time is it?"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(triggerItem.getName(), new StringType("time")));
+                .post(ItemEventFactory.createCommandEvent(triggerItem.getName(), new StringType("time"), any()));
         reset(eventPublisherMock);
     }
 
@@ -381,7 +381,7 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "what time is it?"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(triggerItem.getName(), new StringType("time")));
+                .post(ItemEventFactory.createCommandEvent(triggerItem.getName(), new StringType("time"), any()));
         reset(eventPublisherMock);
     }
 
@@ -396,7 +396,7 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("channel 4")));
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("channel 4"), any()));
         reset(eventPublisherMock);
     }
 
@@ -413,7 +413,7 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals("", standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("channel 4")));
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("channel 4"), any()));
         reset(eventPublisherMock);
     }
 
@@ -434,7 +434,7 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("channel 4")));
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("channel 4"), any()));
         reset(eventPublisherMock);
     }
 
@@ -448,7 +448,7 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(virtualItem.getName(), new StringType("channel 4")));
+                .post(ItemEventFactory.createCommandEvent(virtualItem.getName(), new StringType("channel 4"), any()));
         reset(eventPublisherMock);
     }
 
@@ -478,7 +478,7 @@ public class StandardInterpreterTest {
         when(itemRegistryMock.getAll()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(virtualItem.getName(), new StringType("KEY_4")));
+                .post(ItemEventFactory.createCommandEvent(virtualItem.getName(), new StringType("KEY_4"), any()));
         reset(eventPublisherMock);
     }
 
@@ -491,22 +491,22 @@ public class StandardInterpreterTest {
 
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "open blinds"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.UP));
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.UP, any()));
 
         reset(eventPublisherMock);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "open the blinds"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.UP));
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.UP, any()));
 
         reset(eventPublisherMock);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "close blinds"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.DOWN));
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.DOWN, any()));
 
         reset(eventPublisherMock);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "close the blinds"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.DOWN));
+                .post(ItemEventFactory.createCommandEvent(blindsItem.getName(), UpDownType.DOWN, any()));
     }
 
     @Test
@@ -545,7 +545,7 @@ public class StandardInterpreterTest {
         lenient().when(metadataRegistryMock.get(key)).thenReturn(new Metadata(key, "", configuration));
 
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn on light"));
-        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light", OnOffType.ON));
+        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light", OnOffType.ON, any()));
     }
 
     @Test
@@ -555,7 +555,7 @@ public class StandardInterpreterTest {
         lenient().when(itemRegistryMock.getAll()).thenReturn(List.of(lightItem));
 
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn on light"));
-        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light", OnOffType.ON));
+        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light", OnOffType.ON, any()));
 
         reset(eventPublisherMock);
         itemPermissionResolver.modified(
@@ -616,7 +616,7 @@ public class StandardInterpreterTest {
         lenient().when(metadataRegistryMock.get(itemKey)).thenReturn(new Metadata(itemKey, "", itemConfig));
 
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn on light"));
-        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light", OnOffType.ON));
+        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light", OnOffType.ON, any()));
     }
 
     @Test
