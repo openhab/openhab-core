@@ -18,9 +18,11 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
@@ -43,12 +45,15 @@ public class ItemStateLLMTool implements LLMTool {
 
     private final ItemRegistry itemRegistry;
     private final ItemPermissionResolver itemPermissionResolver;
+    private final TimeZoneProvider timeZoneProvider;
 
     @Activate
     public ItemStateLLMTool(final @Reference ItemRegistry itemRegistry,
-            final @Reference ItemPermissionResolver itemPermissionResolver) {
+            final @Reference ItemPermissionResolver itemPermissionResolver,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
         this.itemPermissionResolver = itemPermissionResolver;
+        this.timeZoneProvider = timeZoneProvider;
     }
 
     @Override
@@ -68,7 +73,7 @@ public class ItemStateLLMTool implements LLMTool {
 
     @Override
     public String getDescription(@Nullable Locale locale) {
-        return "This tool allows to retrieve the current state of an item.";
+        return "This tool allows to retrieve the current state of an item. It returns the display state and the raw state if a display state is available, otherwise only the raw state.";
     }
 
     @Override
@@ -96,6 +101,13 @@ public class ItemStateLLMTool implements LLMTool {
             throw new LLMToolException("Item not found: " + itemName);
         }
 
-        return item.getState().toString();
+        String rawState = item.getState().toString();
+        String displayState = ItemDisplayStateUtil.getDisplayState(item, locale, timeZoneProvider.getTimeZone());
+
+        if (displayState != null && !displayState.equals(rawState)) {
+            return displayState + " (" + rawState + ")";
+        }
+
+        return rawState;
     }
 }

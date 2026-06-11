@@ -15,16 +15,20 @@ package org.openhab.core.voice.internal.text.interpreter.llm;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.ZoneId;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.StateDescription;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
@@ -40,6 +44,7 @@ public class ItemStateLLMToolTest {
 
     private final ItemRegistry itemRegistry = mock(ItemRegistry.class);
     private final ItemPermissionResolver itemPermissionResolver = mock(ItemPermissionResolver.class);
+    private final TimeZoneProvider timeZoneProvider = mock(TimeZoneProvider.class);
     private final Item item = mock(Item.class);
 
     private @NonNullByDefault({}) ItemStateLLMTool tool;
@@ -50,8 +55,9 @@ public class ItemStateLLMToolTest {
         when(item.getName()).thenReturn(ITEM_NAME);
         when(item.getState()).thenReturn(OnOffType.ON);
         when(itemPermissionResolver.isAccessible(item)).thenReturn(true);
+        when(timeZoneProvider.getTimeZone()).thenReturn(ZoneId.systemDefault());
 
-        tool = new ItemStateLLMTool(itemRegistry, itemPermissionResolver);
+        tool = new ItemStateLLMTool(itemRegistry, itemPermissionResolver, timeZoneProvider);
     }
 
     @Test
@@ -60,9 +66,32 @@ public class ItemStateLLMToolTest {
     }
 
     @Test
-    public void callReturnsState() throws LLMToolException {
+    public void callReturnsStateWhenNoDisplayState() throws LLMToolException {
+        when(item.getStateDescription(Locale.ENGLISH)).thenReturn(null);
         String result = tool.call(Map.of("itemName", ITEM_NAME), Locale.ENGLISH);
         assertEquals("ON", result);
+    }
+
+    @Test
+    public void callReturnsStateWhenDisplayStateSameAsRaw() throws LLMToolException {
+        StateDescription stateDescription = mock(StateDescription.class);
+        when(stateDescription.getPattern()).thenReturn("%s");
+        when(stateDescription.getOptions()).thenReturn(List.of());
+        when(item.getStateDescription(Locale.ENGLISH)).thenReturn(stateDescription);
+
+        String result = tool.call(Map.of("itemName", ITEM_NAME), Locale.ENGLISH);
+        assertEquals("ON", result);
+    }
+
+    @Test
+    public void callReturnsDisplayAndRawStateWhenDisplayStateAvailableAndDifferent() throws LLMToolException {
+        StateDescription stateDescription = mock(StateDescription.class);
+        when(stateDescription.getPattern()).thenReturn("%s Test");
+        when(stateDescription.getOptions()).thenReturn(List.of());
+        when(item.getStateDescription(Locale.ENGLISH)).thenReturn(stateDescription);
+
+        String result = tool.call(Map.of("itemName", ITEM_NAME), Locale.ENGLISH);
+        assertEquals("ON Test (ON)", result);
     }
 
     @Test
