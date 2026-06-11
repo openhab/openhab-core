@@ -141,7 +141,7 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 static = true
                 parameters += script.toParameter("eventObject", typeRef(Event))
                 parameters += script.toParameter("ctx", typeRef(Map, typeRef(String), typeRef(Object)))
-                parameters += script.toParameter("modulesInputs", typeRef(Map, typeRef(String), typeRef(Map, typeRef(String), typeRef(Object))))                
+                parameters += script.toParameter("inputs", typeRef(Map, typeRef(String), typeRef(Map, typeRef(String), typeRef(Object))))
                 val inputTypeRef = typeRef(String)
                 parameters += script.toParameter(VAR_INPUT, inputTypeRef)
                 val groupTypeRef = typeRef(Item)
