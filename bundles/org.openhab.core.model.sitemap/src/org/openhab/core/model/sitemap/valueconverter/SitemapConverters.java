@@ -113,21 +113,17 @@ public class SitemapConverters extends DefaultTerminalConverters {
                 if (ID_EXT_PATTERN.matcher(string).matches()) {
                     return ID().toValue(string, node);
                 }
+                // Don't interpret each part as INT() to preserve leading zeros, but validate that they are numbers
                 String[] parts = string.split("\\.", -1);
                 if (parts.length > 2) {
                     throw new ValueConverterException("State invalid number format", node, null);
                 }
-                StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < parts.length; i++) {
-                    if (i != 0) {
-                        sb.append(".");
-                    }
                     if (!INT_PATTERN.matcher(parts[i]).matches()) {
                         throw new ValueConverterException("State invalid number format", node, null);
                     }
-                    sb.append(INT().toValue(parts[i], node));
                 }
-                return sb.toString();
+                return string;
             }
 
             @Override
