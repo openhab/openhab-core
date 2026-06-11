@@ -40,7 +40,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
                         || (string.startsWith("\"") && string.endsWith("\""))) {
                     return STRING().toValue(string, node);
                 }
-                String[] parts = string.split(":");
+                String[] parts = string.split(":", -1);
                 if (parts.length > 3) {
                     throw new ValueConverterException("Icon name cannot contain more than 3 parts separated by ':'",
                             node, null);
@@ -53,7 +53,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
                     }
                     sb.append(ID().toValue(parts[i], node)).append(":");
                 }
-                String[] lastParts = parts[parts.length - 1].split("-");
+                String[] lastParts = parts[parts.length - 1].split("-", -1);
                 for (int i = 0; i < lastParts.length; i++) {
                     if (i != 0) {
                         sb.append("-");
@@ -73,7 +73,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
                 if (containsWhiteSpace(value)) {
                     return STRING().toString(value);
                 }
-                String[] parts = value.split(":");
+                String[] parts = value.split(":", -1);
                 if (parts.length > 3) {
                     return STRING().toString(value);
                 }
@@ -84,7 +84,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
                     }
                     sb.append(ID().toString(parts[i])).append(":");
                 }
-                String[] lastParts = parts[parts.length - 1].split("-");
+                String[] lastParts = parts[parts.length - 1].split("-", -1);
                 for (int i = 0; i < lastParts.length; i++) {
                     if (i != 0) {
                         sb.append("-");
@@ -113,7 +113,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
                 if (ID_EXT_PATTERN.matcher(string).matches()) {
                     return ID().toValue(string, node);
                 }
-                String[] parts = string.split("\\.");
+                String[] parts = string.split("\\.", -1);
                 if (parts.length > 2) {
                     throw new ValueConverterException("State invalid number format", node, null);
                 }
@@ -135,7 +135,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
                 if (ID_PATTERN.matcher(value).matches()) {
                     return ID().toString(value);
                 }
-                String[] parts = value.split("\\.");
+                String[] parts = value.split("\\.", -1);
                 if (parts.length <= 2) {
                     for (int i = 0; i < parts.length; i++) {
                         if (!INT_PATTERN.matcher(parts[i]).matches()) {
