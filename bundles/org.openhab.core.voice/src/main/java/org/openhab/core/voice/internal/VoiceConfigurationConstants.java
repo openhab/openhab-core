@@ -13,13 +13,14 @@
 package org.openhab.core.voice.internal;
 
 import org.openhab.core.voice.security.ItemPermission;
+import org.openhab.core.voice.text.conversation.Conversation;
 
 /**
  * Constants related to <code>org.openhab.voice</code> configuration.
  *
  * @author Florian Hotze - Initial contribution
  */
-public class VoiceConfigurationConstants {
+public final class VoiceConfigurationConstants {
     public static final String CONFIGURATION_PID = "org.openhab.voice";
 
     // configuration properties
@@ -34,6 +35,9 @@ public class VoiceConfigurationConstants {
     public static final String CONFIG_IMPLICIT_ITEM_PERMISSION = "implicitItemPermission";
 
     // configuration defaults
-    public static final int DEFAULT_CONVERSATION_HISTORY_LIMIT = 50;
+    public static final int DEFAULT_CONVERSATION_HISTORY_LIMIT = Conversation.DEFAULT_MAX_MESSAGES;
     public static final ItemPermission DEFAULT_IMPLICIT_ITEM_ACCESS = ItemPermission.READ_WRITE;
+
+    private VoiceConfigurationConstants() {
+    }
 }
