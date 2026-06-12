@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.util.Diagnostician;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.xbase.XBlockExpression;
@@ -123,7 +122,7 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
     private static final Pattern CONTEXT_COMMENT_PATTERN = Pattern.compile("^// context:.*$\\R", Pattern.MULTILINE);
     private static final Pattern INDENTATION_PATTERN = Pattern.compile("^(?=.)", Pattern.MULTILINE);
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
-    private static final Pattern TIME_PATTERN = Pattern.compile("^([012]?\\d):([0-6]\\d)$");
+    private static final Pattern TIME_PATTERN = Pattern.compile("^([012]?\\d):([0-5]\\d)$");
     private static final Pattern INDEX_PATTERN = Pattern.compile("-(?<idx>\\d+)$");
     private final Set<String> enumStates;
     private final Set<String> enumCommands;
@@ -159,7 +158,7 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
     }
 
     @Override
-    public @NonNull String getParserFormat() {
+    public String getParserFormat() {
         return "DSL";
     }
 
@@ -358,7 +357,7 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
     }
 
     @Override
-    public @NonNull Collection<Rule> getParsedObjects(String modelName) {
+    public Collection<Rule> getParsedObjects(String modelName) {
         List<Rule> result = new ArrayList<>();
         RuleBuilder builder;
         List<Action> actions = new ArrayList<>();
@@ -582,8 +581,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                     value = trigger.getConfiguration().get(DateTimeTriggerHandler.CONFIG_OFFSET);
                     if (value instanceof String offset) {
                         result.setOffset(offset);
-                        return result;
                     }
+                    return result;
                 }
                 throw new SerializationException("Invalid trigger: " + trigger);
             case ChannelEventTriggerHandler.MODULE_TYPE_ID:
@@ -608,8 +607,8 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                     value = trigger.getConfiguration().get(ThingStatusTriggerHandler.CFG_STATUS);
                     if (value instanceof String status) {
                         result.setState(status);
-                        return result;
                     }
+                    return result;
                 }
                 throw new SerializationException("Invalid trigger: " + trigger);
             case ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID:
@@ -623,9 +622,9 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         value = trigger.getConfiguration().get(ThingStatusTriggerHandler.CFG_PREVIOUS_STATUS);
                         if (value instanceof String previousStatus) {
                             result.setOldState(previousStatus);
-                            return result;
                         }
                     }
+                    return result;
                 }
                 throw new SerializationException("Invalid trigger: " + trigger);
             default:
