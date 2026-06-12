@@ -60,22 +60,22 @@ public class LLMItemSerializerTest {
 
     @BeforeAll
     public static void setUpTags() {
-        SemanticTags.addTagSet("Location_Floor", MockFloor.class);
-        SemanticTags.addTagSet("Location_Room_LivingRoom", MockLivingRoom.class);
-        SemanticTags.addTagSet("Equipment_Entertainment_TV", MockTV.class);
-        SemanticTags.addTagSet("Point_Control_Light", MockLight.class);
-        SemanticTags.addTagSet("Point_Control_Power", MockPower.class);
-        SemanticTags.addTagSet("Property_Power", MockPowerProperty.class);
+        SemanticTags.addTagSet("Mock_Location_Floor", MockFloor.class);
+        SemanticTags.addTagSet("Mock_Location_Room_LivingRoom", MockLivingRoom.class);
+        SemanticTags.addTagSet("Mock_Equipment_Entertainment_TV", MockTV.class);
+        SemanticTags.addTagSet("Mock_Point_Control_Light", MockLight.class);
+        SemanticTags.addTagSet("Mock_Point_Control_Power", MockPower.class);
+        SemanticTags.addTagSet("Mock_Property_Power", MockPowerProperty.class);
     }
 
     @AfterAll
     public static void tearDownTags() {
-        SemanticTags.removeTagSet("Location_Floor", MockFloor.class);
-        SemanticTags.removeTagSet("Location_Room_LivingRoom", MockLivingRoom.class);
-        SemanticTags.removeTagSet("Equipment_Entertainment_TV", MockTV.class);
-        SemanticTags.removeTagSet("Point_Control_Light", MockLight.class);
-        SemanticTags.removeTagSet("Point_Control_Power", MockPower.class);
-        SemanticTags.removeTagSet("Property_Power", MockPowerProperty.class);
+        SemanticTags.removeTagSet("Mock_Location_Floor", MockFloor.class);
+        SemanticTags.removeTagSet("Mock_Location_Room_LivingRoom", MockLivingRoom.class);
+        SemanticTags.removeTagSet("Mock_Equipment_Entertainment_TV", MockTV.class);
+        SemanticTags.removeTagSet("Mock_Point_Control_Light", MockLight.class);
+        SemanticTags.removeTagSet("Mock_Point_Control_Power", MockPower.class);
+        SemanticTags.removeTagSet("Mock_Property_Power", MockPowerProperty.class);
     }
 
     private Item mockItem(String name, @Nullable String label, String type, Set<String> tags, List<String> groupNames) {
@@ -113,22 +113,22 @@ public class LLMItemSerializerTest {
     @Test
     public void testSerializeHierarchicalModel() {
         // GF Floor
-        Item gf = mockItem("GF", "Ground Floor", "Group", Set.of("Location_Floor"), List.of());
+        Item gf = mockItem("GF", "Ground Floor", "Group", Set.of("Mock_Location_Floor"), List.of());
 
         // LivingRoom Room inside GF
-        Item livingRoom = mockItem("LivingRoom", "Living Room", "Group", Set.of("Location_Room_LivingRoom"),
+        Item livingRoom = mockItem("LivingRoom", "Living Room", "Group", Set.of("Mock_Location_Room_LivingRoom"),
                 List.of("GF"));
 
         // TV Equipment inside LivingRoom
-        Item tv = mockItem("TV", "Living Room TV", "Group", Set.of("Equipment_Entertainment_TV"),
+        Item tv = mockItem("TV", "Living Room TV", "Group", Set.of("Mock_Equipment_Entertainment_TV"),
                 List.of("LivingRoom"));
 
         // TV Power Control inside TV
-        Item tvPower = mockItem("TV_Power", "TV Power", "Switch", Set.of("Point_Control_Power", "Property_Power"),
-                List.of("TV"));
+        Item tvPower = mockItem("TV_Power", "TV Power", "Switch",
+                Set.of("Mock_Point_Control_Power", "Mock_Property_Power"), List.of("TV"));
 
         // Living Room Light control inside LivingRoom directly
-        Item lrLight = mockItem("LivingRoom_Light", "Living Room Light", "Dimmer", Set.of("Point_Control_Light"),
+        Item lrLight = mockItem("LivingRoom_Light", "Living Room Light", "Dimmer", Set.of("Mock_Point_Control_Light"),
                 List.of("LivingRoom"));
 
         // Non-semantic Item
