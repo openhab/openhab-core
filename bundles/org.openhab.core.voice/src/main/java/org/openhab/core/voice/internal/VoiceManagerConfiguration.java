@@ -113,15 +113,24 @@ public class VoiceManagerConfiguration {
         return Map.copyOf(defaultVoices);
     }
 
+    // Note: Default values are set here, because due to initialization order and missing listeners support in
+    // ConfigDescriptionRegistry, default values aren't applied on initial activation.
     public static class ConfigurationDTO {
         public @Nullable String defaultTTS;
         public @Nullable String defaultSTT;
         public @Nullable String defaultVoice;
         public @Nullable String defaultHLI;
         public @Nullable String defaultKS;
-        public String keyword = "";
+        public String keyword = "Wakeup";
         public @Nullable String listeningItem;
         public @Nullable String listeningMelody;
-        public String systemPrompt = "";
+        public String systemPrompt = """
+                You are a smart home assistant managing an openHAB installation. Your job is to help users control devices, report their status, and answer general questions conversationally.
+                - For device control or status requests, use only the tools provided. Never infer or simulate a device action — if the right tool or device isn't available, say so briefly.
+                - If a request is ambiguous (e.g. the room or device isn't clear), ask one short clarifying question. Do not list all available devices or parameters.
+                - For non-smart-home questions, answer concisely in plain, everyday language — 2–3 sentences maximum.
+                - Always respond in the same language the user used.
+                - Keep all responses short and natural, as they may be read aloud by a voice assistant.
+                """;
     }
 }
