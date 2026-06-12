@@ -12,6 +12,8 @@
  */
 package org.openhab.core.voice.internal.text.conversation;
 
+import static org.openhab.core.voice.VoiceManager.VOICE_SOURCE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -112,7 +114,7 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
             } else if (createIfMissing) {
                 logger.debug("Creating new conversation '{}'", id);
                 conversation = new Conversation(id);
-                eventPublisher.post(ConversationEventFactory.createConversationCreatedEvent(id, null));
+                eventPublisher.post(ConversationEventFactory.createConversationCreatedEvent(id, VOICE_SOURCE));
             } else {
                 return null;
             }
@@ -157,7 +159,7 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
         }
         if (!id.isBlank()) {
             conversationStorage.remove(id);
-            eventPublisher.post(ConversationEventFactory.createConversationRemovedEvent(id, null));
+            eventPublisher.post(ConversationEventFactory.createConversationRemovedEvent(id, VOICE_SOURCE));
         }
     }
 
@@ -175,7 +177,7 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
     @Override
     public void onMessageAdded(Conversation conversation, Conversation.Message message) {
         eventPublisher.post(ConversationEventFactory.createConversationMessageAddedEvent(conversation.getId(),
-                message.id(), message.role(), message.content(), null));
+                message.id(), message.role(), message.content(), VOICE_SOURCE));
         storeConversation(conversation);
     }
 
@@ -185,7 +187,7 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
             removeConversation(conversation.getId());
         } else {
             eventPublisher.post(ConversationEventFactory.createConversationMessagesRemovedEvent(conversation.getId(),
-                    sinceRemovedMessagesId, null));
+                    sinceRemovedMessagesId, VOICE_SOURCE));
             storeConversation(conversation);
         }
     }

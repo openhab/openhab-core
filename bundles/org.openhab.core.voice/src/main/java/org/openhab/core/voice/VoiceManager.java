@@ -37,6 +37,10 @@ import org.openhab.core.voice.text.InterpretationException;
  */
 @NonNullByDefault
 public interface VoiceManager {
+    /**
+     * The event source for events dispatched by the voice system.
+     */
+    String VOICE_SOURCE = "org.openhab.core.voice";
 
     /**
      * Speaks the passed string using the default TTS service and default audio sink.

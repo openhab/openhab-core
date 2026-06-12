@@ -12,7 +12,7 @@
  */
 package org.openhab.core.voice.text.interpreter.rulebased;
 
-import static org.openhab.core.voice.internal.VoiceManagerImpl.VOICE_SOURCE;
+import static org.openhab.core.voice.VoiceManager.VOICE_SOURCE;
 
 import java.text.ParseException;
 import java.util.ArrayList;

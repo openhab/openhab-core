@@ -54,7 +54,7 @@ public class ItemStateLLMToolTest {
         when(itemRegistry.getItem(ITEM_NAME)).thenReturn(item);
         when(item.getName()).thenReturn(ITEM_NAME);
         when(item.getState()).thenReturn(OnOffType.ON);
-        when(itemPermissionResolver.isAccessible(item)).thenReturn(true);
+        when(itemPermissionResolver.getPermission(item)).thenReturn(ItemPermission.READ_ONLY);
         when(timeZoneProvider.getTimeZone()).thenReturn(ZoneId.systemDefault());
 
         tool = new ItemStateLLMTool(itemRegistry, itemPermissionResolver, timeZoneProvider);

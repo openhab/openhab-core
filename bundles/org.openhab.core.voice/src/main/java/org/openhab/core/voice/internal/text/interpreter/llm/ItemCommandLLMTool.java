@@ -12,7 +12,7 @@
  */
 package org.openhab.core.voice.internal.text.interpreter.llm;
 
-import static org.openhab.core.voice.internal.VoiceManagerImpl.VOICE_SOURCE;
+import static org.openhab.core.voice.VoiceManager.VOICE_SOURCE;
 
 import java.util.List;
 import java.util.Locale;

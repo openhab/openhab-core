@@ -114,8 +114,6 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener,
         RegistryChangeListener<LLMTool> {
-    public static final String VOICE_SOURCE = "org.openhab.core.voice";
-
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
