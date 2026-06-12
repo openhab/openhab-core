@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice.internal.text.conversation;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -25,5 +26,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public record PersistedConversationDTO(String id, List<PersistedMessageDTO> messages) {
+public record PersistedConversationDTO(String id, Instant createdAt, Instant lastUpdated,
+        List<PersistedMessageDTO> messages) {
 }

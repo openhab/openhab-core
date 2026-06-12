@@ -41,6 +41,7 @@ import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.TypeParser;
+import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter;
 import org.openhab.core.voice.text.interpreter.rulebased.Expression;
@@ -58,6 +59,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Laurent Garnier - Added French interpretation rules
  * @author Miguel Álvarez - Added Spanish interpretation rules
  * @author Miguel Álvarez - Added item's dynamic rules
+ * @author Florian Hotze - Implemented configurable Item access
  */
 @NonNullByDefault
 @Component(service = HumanLanguageInterpreter.class)
@@ -68,8 +70,9 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
     @Activate
     public StandardInterpreter(final @Reference EventPublisher eventPublisher,
-            final @Reference ItemRegistry itemRegistry, @Reference MetadataRegistry metadataRegistry) {
-        super(eventPublisher, itemRegistry, metadataRegistry);
+            final @Reference ItemRegistry itemRegistry, @Reference MetadataRegistry metadataRegistry,
+            @Reference ItemPermissionResolver itemPermissionResolver) {
+        super(eventPublisher, itemRegistry, metadataRegistry, itemPermissionResolver);
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
     }
@@ -421,31 +424,33 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
         // Map different item state/command labels with theirs values by item
         HashMap<String, HashMap<Item, String>> options = new HashMap<>();
         List<Rule> customRules = new ArrayList<>();
-        for (var item : itemRegistry.getItems()) {
-            customRules.addAll(createItemMetadataRules(locale, item));
-            var stateDesc = item.getStateDescription(locale);
-            if (stateDesc != null) {
-                stateDesc.getOptions().forEach(op -> {
-                    var label = op.getLabel();
-                    if (label == null || label.isBlank()) {
-                        label = op.getValue();
-                    }
-                    var optionValueByItem = options.getOrDefault(label, new HashMap<>());
-                    optionValueByItem.put(item, op.getValue());
-                    options.put(label, optionValueByItem);
-                });
-            }
-            var commandDesc = item.getCommandDescription(locale);
-            if (commandDesc != null) {
-                commandDesc.getCommandOptions().forEach(op -> {
-                    var label = op.getLabel();
-                    if (label == null || label.isBlank()) {
-                        label = op.getCommand();
-                    }
-                    var optionValueByItem = options.getOrDefault(label, new HashMap<>());
-                    optionValueByItem.put(item, op.getCommand());
-                    options.put(label, optionValueByItem);
-                });
+        for (var item : itemRegistry.getAll()) {
+            if (isAccessible(item)) {
+                customRules.addAll(createItemMetadataRules(locale, item));
+                var stateDesc = item.getStateDescription(locale);
+                if (stateDesc != null) {
+                    stateDesc.getOptions().forEach(op -> {
+                        var label = op.getLabel();
+                        if (label == null || label.isBlank()) {
+                            label = op.getValue();
+                        }
+                        var optionValueByItem = options.getOrDefault(label, new HashMap<>());
+                        optionValueByItem.put(item, op.getValue());
+                        options.put(label, optionValueByItem);
+                    });
+                }
+                var commandDesc = item.getCommandDescription(locale);
+                if (commandDesc != null) {
+                    commandDesc.getCommandOptions().forEach(op -> {
+                        var label = op.getLabel();
+                        if (label == null || label.isBlank()) {
+                            label = op.getCommand();
+                        }
+                        var optionValueByItem = options.getOrDefault(label, new HashMap<>());
+                        optionValueByItem.put(item, op.getCommand());
+                        options.put(label, optionValueByItem);
+                    });
+                }
             }
         }
         // create rules

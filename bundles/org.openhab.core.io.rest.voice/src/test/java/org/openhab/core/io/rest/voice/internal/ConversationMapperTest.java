@@ -38,10 +38,25 @@ public class ConversationMapperTest {
 
         assertNotNull(dto);
         assertEquals(id, dto.id());
+        assertEquals(conversation.getCreated(), dto.created());
+        assertEquals(conversation.getLastUpdated(), dto.lastUpdated());
         assertEquals(2, dto.messages().size());
         assertEquals(ConversationRole.USER, dto.messages().get(0).role());
         assertEquals("Hello", dto.messages().get(0).content());
         assertEquals(ConversationRole.OPENHAB, dto.messages().get(1).role());
         assertEquals("Hi there!", dto.messages().get(1).content());
+    }
+
+    @Test
+    public void testMapInfo() {
+        String id = "test-conversation-info";
+        Conversation conversation = new Conversation(id);
+
+        ConversationInfoDTO dto = ConversationMapper.mapInfo(conversation);
+
+        assertNotNull(dto);
+        assertEquals(id, dto.id());
+        assertEquals(conversation.getCreated(), dto.created());
+        assertEquals(conversation.getLastUpdated(), dto.lastUpdated());
     }
 }

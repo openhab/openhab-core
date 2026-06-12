@@ -31,7 +31,19 @@ public class ConversationMapper {
      * @return the corresponding DTO
      */
     public static ConversationDTO map(Conversation conversation) {
-        return new ConversationDTO(conversation.getId(), conversation.getMessages().stream()
-                .map(m -> new ConversationDTO.MessageDTO(m.id(), m.role(), m.content())).toList());
+        return new ConversationDTO(conversation.getId(), conversation.getCreated(), conversation.getLastUpdated(),
+                conversation.getMessages().stream()
+                        .map(m -> new ConversationDTO.MessageDTO(m.id(), m.role(), m.content())).toList());
+    }
+
+    /**
+     * Maps a {@link Conversation} to a {@link ConversationInfoDTO}.
+     *
+     * @param conversation the conversation
+     *
+     * @return the corresponding DTO
+     */
+    public static ConversationInfoDTO mapInfo(Conversation conversation) {
+        return new ConversationInfoDTO(conversation.getId(), conversation.getCreated(), conversation.getLastUpdated());
     }
 }
