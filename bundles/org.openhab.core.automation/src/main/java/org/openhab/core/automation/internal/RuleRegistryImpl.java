@@ -33,6 +33,7 @@ import org.openhab.core.automation.Rule.TemplateState;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.RuleStatus;
+import org.openhab.core.automation.RuleStatusDetail;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.internal.template.RuleTemplateRegistry;
@@ -490,7 +491,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
         Configuration configuration = rule.getConfiguration();
         ConfigurationNormalizer.normalizeConfiguration(configuration,
                 ConfigurationNormalizer.getConfigDescriptionMap(configDescriptions));
-        Map<String, Object> configurationProperties = configuration.getProperties();
+        Map<String, @Nullable Object> configurationProperties = configuration.getProperties();
         TemplateState templateState = rule.getTemplateState();
         if (templateState == TemplateState.INSTANTIATED || templateState == TemplateState.NO_TEMPLATE) {
             String uid = rule.getUID();
@@ -513,8 +514,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      * @throws IllegalArgumentException If a required configuration property is missing.
      */
     private void validateConfiguration(List<ConfigDescriptionParameter> configDescriptions,
-            Map<String, Object> configuration) throws IllegalArgumentException {
-        Map<String, Object> config = configuration == null ? new HashMap<>() : new HashMap<>(configuration);
+            Map<String, @Nullable Object> configuration) throws IllegalArgumentException {
+        Map<String, @Nullable Object> config = new HashMap<>(configuration);
         if (config.isEmpty()) {
             if (isOptionalConfig(configDescriptions)) {
                 return;

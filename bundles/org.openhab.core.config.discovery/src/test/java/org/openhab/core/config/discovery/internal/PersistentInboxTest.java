@@ -15,6 +15,7 @@ package org.openhab.core.config.discovery.internal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
@@ -106,7 +107,7 @@ public class PersistentInboxTest {
 
     @Test
     public void testConfigUpdateNormalizationWithConfigDescription() throws URISyntaxException {
-        Map<String, Object> props = Map.of("foo", "1");
+        Map<String, @Nullable Object> props = Map.of("foo", "1");
         Configuration config = new Configuration(props);
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);

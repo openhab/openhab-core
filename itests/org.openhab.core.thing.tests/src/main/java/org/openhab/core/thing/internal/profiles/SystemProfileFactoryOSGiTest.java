@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +54,7 @@ import org.openhab.core.thing.type.ChannelType;
 @NonNullByDefault
 public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 
-    private final Map<String, Object> properties = Map.of(SystemOffsetProfile.OFFSET_PARAM, BigDecimal.ZERO,
+    private final Map<String, @Nullable Object> properties = Map.of(SystemOffsetProfile.OFFSET_PARAM, BigDecimal.ZERO,
             SystemHysteresisStateProfile.LOWER_PARAM, BigDecimal.TEN, SystemRangeStateProfile.UPPER_PARAM,
             BigDecimal.valueOf(40));
 

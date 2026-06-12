@@ -15,8 +15,7 @@ package org.openhab.core.automation.module.timer.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -146,7 +145,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
 
         List<Condition> conditions = List.of(getPassingCondition());
 
-        Map<String, Object> cfgEntries = new HashMap<>();
+        Map<String, @Nullable Object> cfgEntries = new HashMap<>();
         cfgEntries.put("itemName", testItemName2);
         cfgEntries.put("command", "ON");
         Configuration actionConfig = new Configuration(cfgEntries);

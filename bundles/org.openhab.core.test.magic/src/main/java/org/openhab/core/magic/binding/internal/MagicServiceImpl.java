@@ -63,12 +63,12 @@ public class MagicServiceImpl implements MagicService {
     }
 
     @Activate
-    public void activate(Map<String, Object> properties) {
+    public void activate(Map<String, @Nullable Object> properties) {
         modified(properties);
     }
 
     @Modified
-    public void modified(Map<String, Object> properties) {
+    public void modified(Map<String, @Nullable Object> properties) {
         MagicServiceConfig config = new Configuration(properties).as(MagicServiceConfig.class);
         logger.debug("Magic Service has been modified: {}", config);
     }

@@ -13,6 +13,7 @@
 package org.openhab.core.model.yaml.internal.things;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -97,7 +98,7 @@ public class YamlThingDTO implements YamlElement, Cloneable {
         }
         if (config != null) {
             try {
-                new Configuration(config);
+                new Configuration(new HashMap<>(config));
             } catch (IllegalArgumentException e) {
                 addToList(errors,
                         "invalid thing \"%s\": invalid data in \"config\" field: %s".formatted(uid, e.getMessage()));

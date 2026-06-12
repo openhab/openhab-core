@@ -96,7 +96,7 @@ public abstract class BaseThingHandler implements ThingHandler {
     }
 
     @Override
-    public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
+    public void handleConfigurationUpdate(Map<String, @Nullable Object> configurationParameters) {
         if (!isModifyingCurrentConfig(configurationParameters)) {
             return;
         }
@@ -105,7 +105,7 @@ public abstract class BaseThingHandler implements ThingHandler {
 
         // can be overridden by subclasses
         Configuration configuration = editConfiguration();
-        for (Entry<String, Object> configurationParameter : configurationParameters.entrySet()) {
+        for (Entry<String, @Nullable Object> configurationParameter : configurationParameters.entrySet()) {
             configuration.put(configurationParameter.getKey(), configurationParameter.getValue());
         }
 
@@ -134,9 +134,9 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param configurationParameters the parameters to check against the current configuration
      * @return true if the parameters would result in a modified configuration, false otherwise
      */
-    protected boolean isModifyingCurrentConfig(Map<String, Object> configurationParameters) {
+    protected boolean isModifyingCurrentConfig(Map<String, @Nullable Object> configurationParameters) {
         Configuration currentConfig = getRawConfig();
-        for (Entry<String, Object> entry : configurationParameters.entrySet()) {
+        for (Entry<String, @Nullable Object> entry : configurationParameters.entrySet()) {
             if (!Objects.equals(currentConfig.get(entry.getKey()), entry.getValue())) {
                 return true;
             }
@@ -209,7 +209,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @throws ConfigValidationException if one or more of the given configuration parameters do not match
      *             their declarations in the configuration description
      */
-    protected void validateConfigurationParameters(Map<String, Object> configurationParameters) {
+    protected void validateConfigurationParameters(Map<String, @Nullable Object> configurationParameters) {
         ThingHandlerCallback callback = this.callback;
         if (callback != null) {
             callback.validateConfigurationParameters(this.getThing(), configurationParameters);
@@ -552,7 +552,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @return copy of the thing configuration (not null)
      */
     protected Configuration editConfiguration() {
-        Map<String, Object> properties = getRawConfig().getProperties();
+        Map<String, @Nullable Object> properties = getRawConfig().getProperties();
         return new Configuration(new HashMap<>(properties));
     }
 
@@ -565,7 +565,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param configuration configuration, that was updated and should be persisted
      */
     protected void updateConfiguration(Configuration configuration) {
-        Map<String, Object> old = getRawConfig().getProperties();
+        Map<String, @Nullable Object> old = getRawConfig().getProperties();
         Configuration oldResolved = getConfig();
         ThingHandlerCallback callback = this.callback;
         if (callback == null) {

@@ -145,12 +145,12 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     };
 
     @Activate
-    protected void activate(Map<String, Object> config) {
+    protected void activate(Map<String, @Nullable Object> config) {
         modified(config);
     }
 
     @Modified
-    protected synchronized void modified(Map<String, Object> config) {
+    protected synchronized void modified(Map<String, @Nullable Object> config) {
         logger.debug("Modifying the configuration of the firmware update service.");
 
         if (!isValid(config)) {
@@ -159,12 +159,12 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
 
         cancelFirmwareUpdateStatusInfoJob();
 
-        firmwareStatusInfoJobPeriod = config.containsKey(PERIOD_CONFIG_KEY) ? (Integer) config.get(PERIOD_CONFIG_KEY)
-                : firmwareStatusInfoJobPeriod;
-        firmwareStatusInfoJobDelay = config.containsKey(DELAY_CONFIG_KEY) ? (Integer) config.get(DELAY_CONFIG_KEY)
-                : firmwareStatusInfoJobDelay;
-        firmwareStatusInfoJobTimeUnit = config.containsKey(TIME_UNIT_CONFIG_KEY)
-                ? TimeUnit.valueOf((String) config.get(TIME_UNIT_CONFIG_KEY))
+        Object jobPeriodObj = config.get(PERIOD_CONFIG_KEY);
+        firmwareStatusInfoJobPeriod = jobPeriodObj != null ? (Integer) jobPeriodObj : firmwareStatusInfoJobPeriod;
+        Object jobDelayObj = config.get(DELAY_CONFIG_KEY);
+        firmwareStatusInfoJobDelay = jobDelayObj != null ? (Integer) jobDelayObj : firmwareStatusInfoJobDelay;
+        Object timeUnitObj = config.get(TIME_UNIT_CONFIG_KEY);
+        firmwareStatusInfoJobTimeUnit = timeUnitObj != null ? TimeUnit.valueOf((String) timeUnitObj)
                 : firmwareStatusInfoJobTimeUnit;
 
         if (!firmwareUpdateHandlers.isEmpty()) {
@@ -414,7 +414,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
         }
     }
 
-    private boolean isValid(Map<String, Object> config) {
+    private boolean isValid(Map<String, @Nullable Object> config) {
         // the config description validator does not support option value validation at the moment; so we will validate
         // the time unit here
         Object timeUnit = config.get(TIME_UNIT_CONFIG_KEY);

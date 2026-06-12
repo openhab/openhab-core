@@ -15,8 +15,8 @@ package org.openhab.core.thing.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
@@ -1016,8 +1016,8 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
     }
 
-    private void assertThingStatus(Map<String, Object> propsThing, Map<String, Object> propsChannel, ThingStatus status,
-            ThingStatusDetail statusDetail) {
+    private void assertThingStatus(Map<String, @Nullable Object> propsThing, Map<String, @Nullable Object> propsChannel,
+            ThingStatus status, ThingStatusDetail statusDetail) {
         Configuration configThing = new Configuration(propsThing);
         Configuration configChannel = new Configuration(propsChannel);
 

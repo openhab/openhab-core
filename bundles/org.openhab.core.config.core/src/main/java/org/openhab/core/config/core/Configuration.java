@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -36,8 +37,9 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Michael Riess - fix concurrent modification exception when setting properties
  * @author Michael Riess - fix equals() implementation
  */
+@NonNullByDefault
 public class Configuration {
-    private final Map<String, Object> properties;
+    private final Map<String, @Nullable Object> properties;
 
     public Configuration() {
         this(Map.of(), true);
@@ -60,7 +62,7 @@ public class Configuration {
      *
      * @param properties the properties the configuration should be filled. If null, an empty configuration is created.
      */
-    public Configuration(@Nullable Map<String, Object> properties) {
+    public Configuration(@Nullable Map<String, @Nullable Object> properties) {
         this(properties == null ? Map.of() : properties, false);
     }
 
@@ -70,7 +72,7 @@ public class Configuration {
      * @param properties the properties to initialize (may be null)
      * @param alreadyNormalized flag if the properties are already normalized
      */
-    private Configuration(final Map<String, Object> properties, final boolean alreadyNormalized) {
+    private Configuration(final Map<String, @Nullable Object> properties, final boolean alreadyNormalized) {
         this.properties = synchronizedMap(alreadyNormalized ? new HashMap<>(properties) : normalizeTypes(properties));
     }
 
@@ -90,16 +92,16 @@ public class Configuration {
         return properties.containsKey(key);
     }
 
-    public Object get(String key) {
+    public @Nullable Object get(String key) {
         return properties.get(key);
     }
 
-    public Object put(String key, @Nullable Object value) {
+    public @Nullable Object put(String key, @Nullable Object value) {
         Object normalizedValue = value == null ? null : ConfigUtil.normalizeType(value, null);
         return properties.put(key, normalizedValue);
     }
 
-    public Object remove(String key) {
+    public @Nullable Object remove(String key) {
         return properties.remove(key);
     }
 
@@ -109,19 +111,19 @@ public class Configuration {
         }
     }
 
-    public Collection<Object> values() {
+    public Collection<@Nullable Object> values() {
         synchronized (properties) {
             return Collections.unmodifiableCollection(new ArrayList<>(properties.values()));
         }
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<String, @Nullable Object> getProperties() {
         synchronized (properties) {
             return Collections.unmodifiableMap(new HashMap<>(properties));
         }
     }
 
-    public void setProperties(Map<String, Object> newProperties) {
+    public void setProperties(Map<String, @Nullable Object> newProperties) {
         synchronized (properties) {
             this.properties.clear();
             newProperties.entrySet().forEach(e -> put(e.getKey(), e.getValue()));
@@ -145,7 +147,7 @@ public class Configuration {
 
         synchronized (properties) {
             boolean first = true;
-            for (final Map.Entry<String, Object> prop : properties.entrySet()) {
+            for (final Map.Entry<String, @Nullable Object> prop : properties.entrySet()) {
                 if (first) {
                     first = false;
                 } else {

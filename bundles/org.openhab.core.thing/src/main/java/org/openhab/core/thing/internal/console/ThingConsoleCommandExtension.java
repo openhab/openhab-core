@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
@@ -252,7 +253,7 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
             console.println("No configuration parameters");
         } else {
             console.println("Configuration parameters:");
-            for (Map.Entry<String, Object> entry : thing.getConfiguration().getProperties().entrySet()) {
+            for (Map.Entry<String, @Nullable Object> entry : thing.getConfiguration().getProperties().entrySet()) {
                 console.println("\t" + entry.getKey() + " : " + entry.getValue());
             }
         }

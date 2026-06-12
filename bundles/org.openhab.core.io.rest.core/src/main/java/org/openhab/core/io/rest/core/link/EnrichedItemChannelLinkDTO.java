@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.core.link;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,7 +32,7 @@ public class EnrichedItemChannelLinkDTO extends ItemChannelLinkDTO {
 
     public Boolean editable;
 
-    public EnrichedItemChannelLinkDTO(String itemName, String channelUID, Map<String, Object> configuration,
+    public EnrichedItemChannelLinkDTO(String itemName, String channelUID, Map<String, @Nullable Object> configuration,
             boolean editable) {
         super(itemName, channelUID, configuration);
         this.editable = editable;

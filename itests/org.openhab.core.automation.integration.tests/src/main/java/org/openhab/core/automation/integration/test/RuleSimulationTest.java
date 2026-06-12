@@ -15,8 +15,7 @@ package org.openhab.core.automation.integration.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -188,7 +187,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     private static Rule createRuleWithCronExpressionTrigger() {
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = new HashMap<>();
+        Map<String, @Nullable Object> configs = new HashMap<>();
         configs.put(GenericCronTriggerHandler.CFG_CRON_EXPRESSION, "0 30 10-11 ? * WED,FRI");
         final Configuration triggerConfig = new Configuration(configs);
         final String triggerUID = "CronTrigger_" + rand;
@@ -217,7 +216,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     private static Rule createRuleWithTimeOfDayTrigger() {
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "16:00");
+        Map<String, @Nullable Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "16:00");
         final Configuration triggerConfig = new Configuration(configs);
         final String triggerUID = "TimeOfDayTrigger_" + rand;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerUID)
@@ -243,7 +242,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     private static Rule createRuleWithEphemerisCondition() {
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "10:00");
+        Map<String, @Nullable Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "10:00");
         final Configuration triggerConfig = new Configuration(configs);
         final String triggerUID = "TimeOfDayTrigger_" + rand;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerUID)

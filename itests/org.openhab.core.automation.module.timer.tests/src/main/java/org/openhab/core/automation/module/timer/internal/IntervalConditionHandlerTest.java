@@ -25,6 +25,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
@@ -118,7 +119,7 @@ public class IntervalConditionHandlerTest extends BasicConditionHandlerTest {
 
         List<Condition> conditions = List.of(getPassingCondition());
 
-        Map<String, Object> cfgEntries = new HashMap<>();
+        Map<String, @Nullable Object> cfgEntries = new HashMap<>();
         cfgEntries.put("itemName", testItemName2);
         cfgEntries.put("command", "ON");
         Configuration actionConfig = new Configuration(cfgEntries);

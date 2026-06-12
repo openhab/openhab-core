@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.Thing;
@@ -79,8 +80,8 @@ public class ThingDTOMapper {
         return ThingHelper.merge(thing, thingDTO);
     }
 
-    private static Map<String, Object> toMap(Configuration configuration) {
-        Map<String, Object> configurationMap = new HashMap<>(configuration.keySet().size());
+    private static Map<String, @Nullable Object> toMap(Configuration configuration) {
+        Map<String, @Nullable Object> configurationMap = new HashMap<>(configuration.keySet().size());
         for (String key : configuration.keySet()) {
             configurationMap.put(key, configuration.get(key));
         }

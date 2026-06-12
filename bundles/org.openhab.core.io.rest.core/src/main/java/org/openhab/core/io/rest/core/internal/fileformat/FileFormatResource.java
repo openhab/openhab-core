@@ -901,8 +901,13 @@ public class FileFormatResource implements RESTResource {
             });
             itemChannelLinkRegistry.getLinks(itemName).forEach(link -> {
                 MetadataKey key = new MetadataKey("channel", itemName);
-                Metadata md = new Metadata(key, link.getLinkedUID().getAsString(),
-                        link.getConfiguration().getProperties());
+                Map<String, Object> config = new HashMap<>();
+                link.getConfiguration().getProperties().forEach((k, v) -> {
+                    if (v != null) {
+                        config.put(k, v);
+                    }
+                });
+                Metadata md = new Metadata(key, link.getLinkedUID().getAsString(), config);
                 metadata.add(md);
             });
         }
@@ -1012,7 +1017,7 @@ public class FileFormatResource implements RESTResource {
      * Create a thing from a discovery result without inserting it in the thing registry
      */
     private Thing simulateThing(DiscoveryResult result, ThingType thingType) {
-        Map<String, Object> configParams = new HashMap<>();
+        Map<String, @Nullable Object> configParams = new HashMap<>();
         List<ConfigDescriptionParameter> configDescriptionParameters = List.of();
         URI descURI = thingType.getConfigDescriptionURI();
         if (descURI != null) {
@@ -1340,7 +1345,7 @@ public class FileFormatResource implements RESTResource {
 
     private @Nullable Map<String, @Nullable Object> normalizeConfiguration(Map<String, @Nullable Object> properties,
             ChannelTypeUID channelTypeUID, ChannelUID channelUID) {
-        if (properties == null || properties.isEmpty()) {
+        if (properties.isEmpty()) {
             return properties;
         }
 
@@ -1357,12 +1362,10 @@ public class FileFormatResource implements RESTResource {
                 configDescriptions.add(typeConfigDesc);
             }
         }
-        if (getConfigDescriptionURI(channelUID) != null) {
-            ConfigDescription channelConfigDesc = configDescRegistry
-                    .getConfigDescription(getConfigDescriptionURI(channelUID));
-            if (channelConfigDesc != null) {
-                configDescriptions.add(channelConfigDesc);
-            }
+        ConfigDescription channelConfigDesc = configDescRegistry
+                .getConfigDescription(getConfigDescriptionURI(channelUID));
+        if (channelConfigDesc != null) {
+            configDescriptions.add(channelConfigDesc);
         }
 
         if (configDescriptions.isEmpty()) {

@@ -210,7 +210,7 @@ public class ThingImpl implements Thing {
 
     @Override
     public @Nullable String setProperty(String name, @Nullable String value) {
-        if (name == null || name.isEmpty()) {
+        if (name.isEmpty()) {
             throw new IllegalArgumentException("Property name must not be null or empty");
         }
         synchronized (this) {
@@ -301,6 +301,9 @@ public class ThingImpl implements Thing {
 
     @Override
     public void setSemanticEquipmentTag(@Nullable SemanticTag semanticEquipmentTag) {
+        if (semanticEquipmentTag == null) {
+            return;
+        }
         setSemanticEquipmentTag(semanticEquipmentTag.getName());
     }
 }

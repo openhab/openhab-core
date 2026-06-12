@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
@@ -83,7 +84,7 @@ public class TimeOfDayConditionHandlerTest extends BasicConditionHandlerTest {
     }
 
     private Configuration getTimeConfiguration(String startTime, String endTime) {
-        Map<String, Object> timeMap = new HashMap<>();
+        Map<String, @Nullable Object> timeMap = new HashMap<>();
         timeMap.put("startTime", startTime);
         timeMap.put("endTime", endTime);
         return new Configuration(timeMap);

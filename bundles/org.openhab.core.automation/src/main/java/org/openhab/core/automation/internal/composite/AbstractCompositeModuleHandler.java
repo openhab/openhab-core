@@ -82,7 +82,11 @@ public abstract class AbstractCompositeModuleHandler<M extends Module, MT extend
      */
     protected Map<String, Object> getCompositeContext(Map<String, ?> context) {
         Map<String, Object> result = new HashMap<>(context);
-        result.putAll(module.getConfiguration().getProperties());
+        module.getConfiguration().getProperties().forEach((k, v) -> {
+            if (v != null) {
+                result.putIfAbsent(k, v);
+            }
+        });
         return result;
     }
 

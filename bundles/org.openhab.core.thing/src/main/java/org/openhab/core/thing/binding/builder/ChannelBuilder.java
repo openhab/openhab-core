@@ -15,7 +15,6 @@ package org.openhab.core.thing.binding.builder;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -142,16 +141,6 @@ public class ChannelBuilder {
      * @return channel builder
      */
     public ChannelBuilder withProperties(Map<String, String> properties) {
-        String propertiesWithNullKeyOrValue = properties.entrySet().stream()
-                .filter(e -> e.getKey() == null || e.getValue() == null).map(e -> String.valueOf(e.getKey())).sorted()
-                .collect(Collectors.joining(", "));
-        if (!propertiesWithNullKeyOrValue.isEmpty()) {
-            logger.error(
-                    "Unexpected properties ({}) with null key or value for channel {}; probably a bug in the related binding!",
-                    propertiesWithNullKeyOrValue, channelUID);
-            throw new IllegalArgumentException("Unexpected properties (%s) with null key or value for channel %s"
-                    .formatted(propertiesWithNullKeyOrValue, channelUID.getAsString()));
-        }
         this.properties = properties;
         return this;
     }

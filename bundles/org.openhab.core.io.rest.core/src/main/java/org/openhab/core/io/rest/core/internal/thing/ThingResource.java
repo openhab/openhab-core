@@ -531,10 +531,14 @@ public class ThingResource implements RESTResource {
         // only move on if Thing is known to be managed and handler is available, so it can get updated
         try {
             // note that we create a Configuration instance here in order to have normalized types
-            thingRegistry.updateConfiguration(thingUIDObject,
-                    new Configuration(
-                            normalizeConfiguration(configurationParameters, thing.getThingTypeUID(), thing.getUID()))
-                            .getProperties());
+            Map<String, Object> config = new HashMap<>();
+            new Configuration(normalizeConfiguration(configurationParameters, thing.getThingTypeUID(), thing.getUID()))
+                    .getProperties().forEach((k, v) -> {
+                        if (v != null) {
+                            config.put(k, v);
+                        }
+                    });
+            thingRegistry.updateConfiguration(thingUIDObject, config);
         } catch (ConfigValidationException ex) {
             logger.debug("Config description validation exception occurred for thingUID {} - Messages: {}", thingUID,
                     ex.getValidationMessages());
@@ -823,7 +827,7 @@ public class ThingResource implements RESTResource {
 
     private @Nullable Map<String, @Nullable Object> normalizeConfiguration(Map<String, @Nullable Object> properties,
             ChannelTypeUID channelTypeUID, ChannelUID channelUID) {
-        if (properties == null || properties.isEmpty()) {
+        if (properties.isEmpty()) {
             return properties;
         }
 
@@ -840,12 +844,10 @@ public class ThingResource implements RESTResource {
                 configDescriptions.add(typeConfigDesc);
             }
         }
-        if (getConfigDescriptionURI(channelUID) != null) {
-            ConfigDescription channelConfigDesc = configDescRegistry
-                    .getConfigDescription(getConfigDescriptionURI(channelUID));
-            if (channelConfigDesc != null) {
-                configDescriptions.add(channelConfigDesc);
-            }
+        ConfigDescription channelConfigDesc = configDescRegistry
+                .getConfigDescription(getConfigDescriptionURI(channelUID));
+        if (channelConfigDesc != null) {
+            configDescriptions.add(channelConfigDesc);
         }
 
         if (configDescriptions.isEmpty()) {
