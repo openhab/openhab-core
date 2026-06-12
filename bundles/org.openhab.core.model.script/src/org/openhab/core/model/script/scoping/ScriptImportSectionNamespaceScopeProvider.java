@@ -29,7 +29,14 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
             "library", "types");
     public static final QualifiedName CORE_LIBRARY_ITEMS_PACKAGE = QualifiedName.create("org", "openhab", "core",
             "library", "items");
+    public static final QualifiedName CORE_TYPES_TIMESERIES_CLASS = QualifiedName.create("org", "openhab", "core",
+            "types", "TimeSeries");
     public static final QualifiedName CORE_ITEMS_PACKAGE = QualifiedName.create("org", "openhab", "core", "items");
+    public static final QualifiedName CORE_THING_PACKAGE = QualifiedName.create("org", "openhab", "core", "thing");
+    public static final QualifiedName CORE_THING_LINK_ITEMCHANNELLINK_CLASS = QualifiedName.create("org", "openhab",
+            "core", "thing", "link", "ItemChannelLink");
+    public static final QualifiedName CORE_THING_LINK_ITEMCHANNELLINKREGISTRY_CLASS = QualifiedName.create("org",
+            "openhab", "core", "thing", "link", "ItemChannelLinkRegistry");
     public static final QualifiedName CORE_PERSISTENCE_PACKAGE = QualifiedName.create("org", "openhab", "core",
             "persistence");
     public static final QualifiedName CORE_PERSISTENCE_RIEMANNTYPE_CLASS = QualifiedName.create("org", "openhab",
@@ -37,8 +44,18 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
     public static final QualifiedName MODEL_SCRIPT_ACTIONS_PACKAGE = QualifiedName.create("org", "openhab", "core",
             "model", "script", "actions");
     public static final QualifiedName TIME_PACKAGE = QualifiedName.create("java", "time");
-    public static final QualifiedName CHRONOUNIT_CLASS = QualifiedName.create("java", "time", "temporal", "ChronoUnit");
+    public static final QualifiedName TIME_FORMAT_PACKAGE = QualifiedName.create("java", "time", "format");
+    public static final QualifiedName TIME_TEMPORAL_PACKAGE = QualifiedName.create("java", "time", "temporal");
+    public static final QualifiedName UTIL_REGEX_PACKAGE = QualifiedName.create("java", "util", "regex");
+    public static final QualifiedName UTIL_LOCALE_CLASS = QualifiedName.create("java", "util", "Locale");
+    public static final QualifiedName UTIL_TIMEZONE_CLASS = QualifiedName.create("java", "util", "TimeZone");
     public static final QualifiedName QUANTITY_PACKAGE = QualifiedName.create("javax", "measure", "quantity");
+    public static final QualifiedName CHANNELS_CLASS = QualifiedName.create("org", "openhab", "core", "model", "script",
+            "lib", "Channels");
+    public static final QualifiedName ITEMS_CLASS = QualifiedName.create("org", "openhab", "core", "model", "script",
+            "lib", "Items");
+    public static final QualifiedName RULES_CLASS = QualifiedName.create("org", "openhab", "core", "model", "script",
+            "lib", "Rules");
 
     @Override
     protected List<ImportNormalizer> getImplicitImports(boolean ignoreCase) {
@@ -46,13 +63,24 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
         implicitImports.add(doCreateImportNormalizer(CORE_LIBRARY_UNITS_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CORE_LIBRARY_TYPES_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CORE_LIBRARY_ITEMS_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(CORE_TYPES_TIMESERIES_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(CORE_ITEMS_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(CORE_THING_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(CORE_THING_LINK_ITEMCHANNELLINK_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(CORE_THING_LINK_ITEMCHANNELLINKREGISTRY_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(CORE_PERSISTENCE_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CORE_PERSISTENCE_RIEMANNTYPE_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(MODEL_SCRIPT_ACTIONS_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(TIME_PACKAGE, true, false));
-        implicitImports.add(doCreateImportNormalizer(CHRONOUNIT_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(TIME_FORMAT_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(TIME_TEMPORAL_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_REGEX_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_LOCALE_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_TIMEZONE_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(QUANTITY_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(CHANNELS_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(ITEMS_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(RULES_CLASS, false, false));
         return implicitImports;
     }
 }

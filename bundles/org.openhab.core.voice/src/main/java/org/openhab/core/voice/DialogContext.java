@@ -34,7 +34,8 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 public record DialogContext(@Nullable DTService dt, @Nullable String keyword, STTService stt, TTSService tts,
         @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink, Locale locale,
         String dialogGroup, @Nullable String locationItem, @Nullable String listeningItem,
-        @Nullable String listeningMelody, Conversation conversation, List<LLMTool> llmTools) {
+        @Nullable String listeningMelody, Conversation conversation, List<LLMTool> llmTools,
+        @Nullable String systemPrompt) {
 
     /**
      * Builder for {@link DialogContext}
@@ -59,6 +60,7 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
         private @Nullable String listeningMelody;
         private String keyword;
         private Locale locale;
+        private @Nullable String systemPrompt;
 
         public Builder(String keyword, Locale locale) {
             this.keyword = keyword;
@@ -184,6 +186,13 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
             return this;
         }
 
+        public Builder withSystemPrompt(@Nullable String systemPrompt) {
+            if (systemPrompt != null) {
+                this.systemPrompt = systemPrompt;
+            }
+            return this;
+        }
+
         /**
          * Creates a new {@link DialogContext}
          *
@@ -219,7 +228,7 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
             } else {
                 return new DialogContext(dtService, keyword, sttService, ttsService, voice, hliServices, audioSource,
                         audioSink, locale, dialogGroup, locationItem, listeningItem, listeningMelody, conversation,
-                        llmTools);
+                        llmTools, systemPrompt);
             }
         }
     }

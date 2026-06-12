@@ -86,7 +86,7 @@ public interface RuleManager {
      * @param uid id of the rule whose actions have to be executed.
      * @return a copy of the rule context, including possible return values
      */
-    Map<String, Object> runNow(String uid);
+    Map<String, @Nullable Object> runNow(String uid);
 
     /**
      * Same as {@link #runNow(String)} with the additional option to enable/disable evaluation of
@@ -97,7 +97,8 @@ public interface RuleManager {
      * @param context the context that is passed to the conditions and the actions of the rule.
      * @return a copy of the rule context, including possible return values
      */
-    Map<String, Object> runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context);
+    Map<String, @Nullable Object> runNow(String uid, boolean considerConditions,
+            @Nullable Map<String, @Nullable Object> context);
 
     /**
      * Simulates the execution of all rules with tag 'Schedule' for the given time interval.

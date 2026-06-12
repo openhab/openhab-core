@@ -32,15 +32,15 @@ public class Ping {
      * is specified (which is the default when configuring just the host), a
      * regular ping is issued. If other ports are specified we try open a new
      * Socket with the given <code>timeout</code>.
-     * 
+     *
      * @param host
      * @param port
      * @param timeout
-     * 
+     *
      * @return <code>true</code> when <code>host</code> is reachable on <code>port</code> within the given
      *         <code>timeout</code> and <code>false</code> in all other
      *         cases.
-     * 
+     *
      * @throws IOException
      * @throws SocketTimeoutException
      */
@@ -53,10 +53,10 @@ public class Ping {
             } else {
                 SocketAddress socketAddress = new InetSocketAddress(host, port);
 
-                Socket socket = new Socket();
-                socket.connect(socketAddress, timeout);
-                success = true;
-                socket.close();
+                try (Socket socket = new Socket()) {
+                    socket.connect(socketAddress, timeout);
+                    success = true;
+                }
             }
         }
 

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.voice.internal.text.conversation;
 
+import static org.openhab.core.voice.VoiceManager.VOICE_SOURCE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -19,15 +21,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationListener;
 import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.conversation.events.ConversationEventFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,21 +43,42 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez Díez - Initial contribution
  * @author Florian Hotze - Initial contribution
  */
-@Component(service = ConversationManager.class)
+@Component(service = ConversationManager.class, configurationPid = VoiceConfigurationConstants.CONFIGURATION_PID)
 @NonNullByDefault
 public class ConversationManagerImpl implements ConversationManager, ConversationListener {
+    private final Logger logger = LoggerFactory.getLogger(ConversationManagerImpl.class);
+
     private final Storage<PersistedConversationDTO> conversationStorage;
     private final Map<String, Conversation> activeConversations = new ConcurrentHashMap<>();
     private final EventPublisher eventPublisher;
-    private final Logger logger = LoggerFactory.getLogger(ConversationManagerImpl.class);
-    private int historyLimit = Conversation.DEFAULT_MAX_MESSAGES;
+
+    private volatile int historyLimit;
 
     @Activate
     public ConversationManagerImpl(final @Reference StorageService storageService,
-            final @Reference EventPublisher eventPublisher) {
+            final @Reference EventPublisher eventPublisher, Map<String, Object> config) {
         this.conversationStorage = storageService.getStorage(Conversation.class.getName(),
                 this.getClass().getClassLoader());
         this.eventPublisher = eventPublisher;
+
+        processConfig(config);
+    }
+
+    private void processConfig(Map<String, Object> config) {
+        historyLimit = ConfigParser.valueAsOrElse(
+                config.get(VoiceConfigurationConstants.CONFIG_CONVERSATION_HISTORY_LIMIT), Integer.class,
+                Conversation.DEFAULT_MAX_MESSAGES);
+    }
+
+    @Modified
+    public void modified(Map<String, Object> config) {
+        processConfig(config);
+        setHistoryLimit(historyLimit);
+    }
+
+    protected void setHistoryLimit(int limit) {
+        this.historyLimit = limit;
+        activeConversations.values().forEach(c -> c.setMaxMessages(limit));
     }
 
     @Override
@@ -88,7 +114,7 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
             } else if (createIfMissing) {
                 logger.debug("Creating new conversation '{}'", id);
                 conversation = new Conversation(id);
-                eventPublisher.post(ConversationEventFactory.createConversationCreatedEvent(id, null));
+                eventPublisher.post(ConversationEventFactory.createConversationCreatedEvent(id, VOICE_SOURCE));
             } else {
                 return null;
             }
@@ -133,7 +159,7 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
         }
         if (!id.isBlank()) {
             conversationStorage.remove(id);
-            eventPublisher.post(ConversationEventFactory.createConversationRemovedEvent(id, null));
+            eventPublisher.post(ConversationEventFactory.createConversationRemovedEvent(id, VOICE_SOURCE));
         }
     }
 
@@ -149,15 +175,9 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
     }
 
     @Override
-    public void setHistoryLimit(int limit) {
-        this.historyLimit = limit;
-        activeConversations.values().forEach(c -> c.setMaxMessages(limit));
-    }
-
-    @Override
     public void onMessageAdded(Conversation conversation, Conversation.Message message) {
         eventPublisher.post(ConversationEventFactory.createConversationMessageAddedEvent(conversation.getId(),
-                message.id(), message.role(), message.content(), null));
+                message.id(), message.role(), message.content(), VOICE_SOURCE));
         storeConversation(conversation);
     }
 
@@ -167,7 +187,7 @@ public class ConversationManagerImpl implements ConversationManager, Conversatio
             removeConversation(conversation.getId());
         } else {
             eventPublisher.post(ConversationEventFactory.createConversationMessagesRemovedEvent(conversation.getId(),
-                    sinceRemovedMessagesId, null));
+                    sinceRemovedMessagesId, VOICE_SOURCE));
             storeConversation(conversation);
         }
     }
