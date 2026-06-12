@@ -106,4 +106,15 @@ Fragment-Host: org.openhab.core.io.rest.core
 	biz.aQute.tester.junit-platform;version='[7.3.0,7.3.1)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.3,2.3.4)',\
 	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
-	org.openhab.core.sitemap;version='[5.2.0,5.2.1)'
+	org.openhab.core.sitemap;version='[5.2.0,5.2.1)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.21.0,2.21.1)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.21.4,2.21.5)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.21.4,2.21.5)',\
+	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.21.4,2.21.5)',\
+	com.fasterxml.jackson.dataformat.jackson-dataformat-yaml;version='[2.21.4,2.21.5)',\
+	de.focus_shift.jollyday-core;version='[1.9.3,1.9.4)',\
+	de.focus_shift.jollyday-jackson;version='[1.9.3,1.9.4)',\
+	org.openhab.core.automation;version='[5.2.0,5.2.1)',\
+	org.openhab.core.ephemeris;version='[5.2.0,5.2.1)',\
+	org.threeten.extra;version='[1.8.0,1.8.1)',\
+	org.yaml.snakeyaml;version='[2.5.0,2.5.1)'
