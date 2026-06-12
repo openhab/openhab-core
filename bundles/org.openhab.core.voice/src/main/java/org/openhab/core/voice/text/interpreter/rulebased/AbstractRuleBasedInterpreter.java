@@ -12,6 +12,8 @@
  */
 package org.openhab.core.voice.text.interpreter.rulebased;
 
+import static org.openhab.core.voice.VoiceManager.VOICE_SOURCE;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -921,7 +923,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             logger.debug("Cannot send command to read-only item {}", item.getName());
             return language.getString(READ_ONLY);
         }
-        eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command));
+        eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, VOICE_SOURCE));
         return !isSilent ? language.getString(OK) : "";
     }
 

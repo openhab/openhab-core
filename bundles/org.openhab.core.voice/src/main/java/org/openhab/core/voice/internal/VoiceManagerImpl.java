@@ -114,7 +114,6 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener,
         RegistryChangeListener<LLMTool> {
-
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
