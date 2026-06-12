@@ -31,6 +31,7 @@ import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.Rule.TemplateState;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
+import org.openhab.core.automation.converter.RuleSerializer.RuleSerializationOption;
 import org.openhab.core.automation.util.RuleUtil;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.io.dto.ModularDTO;
@@ -78,46 +79,73 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
      * @param rule the {@link Rule}.
      */
     public YamlRuleDTO(@NonNull Rule rule) {
+        this(rule, RuleSerializationOption.NORMAL);
+    }
+
+    /**
+     * Creates a new instance based on the specified {@link Rule}.
+     *
+     * @param rule the {@link Rule}.
+     * @param option the {@link RuleSerializationOption} that decides how the to serialize the {@link Rule}.
+     */
+    public YamlRuleDTO(@NonNull Rule rule, RuleSerializationOption option) {
         this.uid = rule.getUID();
-        this.template = rule.getTemplateUID();
-        this.templateState = rule.getTemplateState();
+        this.template = option == RuleSerializationOption.STRIP_TEMPLATE ? null : rule.getTemplateUID();
+        this.templateState = option == RuleSerializationOption.INCLUDE_ALL ? rule.getTemplateState() : null;
         this.label = rule.getName();
-        this.tags = rule.getTags();
+        Set<@NonNull String> tags = rule.getTags();
+        this.tags = option != RuleSerializationOption.INCLUDE_ALL && tags.isEmpty() ? null : tags;
         this.description = rule.getDescription();
-        this.visibility = rule.getVisibility();
-        this.config = rule.getConfiguration().getProperties();
-        List<@NonNull ConfigDescriptionParameter> configDescriptions = rule.getConfigurationDescriptions();
-        if (!configDescriptions.isEmpty()) {
-            Map<String, YamlConfigDescriptionParameterDTO> configDescriptionDtos = new LinkedHashMap<>(
-                    configDescriptions.size());
-            for (ConfigDescriptionParameter parameter : configDescriptions) {
-                configDescriptionDtos.put(parameter.getName(), new YamlConfigDescriptionParameterDTO(parameter));
+        this.visibility = option == RuleSerializationOption.INCLUDE_ALL || rule.getVisibility() != Visibility.VISIBLE
+                ? rule.getVisibility()
+                : null;
+        if (option != RuleSerializationOption.STRIP_TEMPLATE) {
+            this.config = new LinkedHashMap<>(rule.getConfiguration().getProperties());
+            if (option != RuleSerializationOption.INCLUDE_ALL) {
+                this.config.remove(Rule.SOURCE);
+                this.config.remove(Rule.SOURCE_TYPE);
+                if (this.config.isEmpty()) {
+                    this.config = null;
+                }
             }
-            this.configDescriptions = configDescriptionDtos;
         }
-        List<@NonNull Action> actions = rule.getActions();
-        if (!actions.isEmpty()) {
-            List<YamlActionDTO> actionDtos = new ArrayList<>(actions.size());
-            for (Action action : actions) {
-                actionDtos.add(new YamlActionDTO(action));
+        if (option == RuleSerializationOption.INCLUDE_ALL) {
+            List<@NonNull ConfigDescriptionParameter> configDescriptions = rule.getConfigurationDescriptions();
+            if (!configDescriptions.isEmpty()) {
+                Map<String, YamlConfigDescriptionParameterDTO> configDescriptionDtos = new LinkedHashMap<>(
+                        configDescriptions.size());
+                for (ConfigDescriptionParameter parameter : configDescriptions) {
+                    configDescriptionDtos.put(parameter.getName(),
+                            new YamlConfigDescriptionParameterDTO(parameter, true));
+                }
+                this.configDescriptions = configDescriptionDtos;
             }
-            this.actions = actionDtos;
         }
-        List<@NonNull Condition> conditions = rule.getConditions();
-        if (!conditions.isEmpty()) {
-            List<YamlConditionDTO> conditionsDtos = new ArrayList<>(conditions.size());
-            for (Condition condition : conditions) {
-                conditionsDtos.add(new YamlConditionDTO(condition));
+        if (option != RuleSerializationOption.STUB_ONLY) {
+            List<@NonNull Action> actions = rule.getActions();
+            if (!actions.isEmpty()) {
+                List<YamlActionDTO> actionDtos = new ArrayList<>(actions.size());
+                for (Action action : actions) {
+                    actionDtos.add(new YamlActionDTO(action, option));
+                }
+                this.actions = actionDtos;
             }
-            this.conditions = conditionsDtos;
-        }
-        List<@NonNull Trigger> triggers = rule.getTriggers();
-        if (!triggers.isEmpty()) {
-            List<YamlModuleDTO> triggerDtos = new ArrayList<>(triggers.size());
-            for (Trigger trigger : triggers) {
-                triggerDtos.add(new YamlModuleDTO(trigger));
+            List<@NonNull Condition> conditions = rule.getConditions();
+            if (!conditions.isEmpty()) {
+                List<YamlConditionDTO> conditionsDtos = new ArrayList<>(conditions.size());
+                for (Condition condition : conditions) {
+                    conditionsDtos.add(new YamlConditionDTO(condition, option));
+                }
+                this.conditions = conditionsDtos;
             }
-            this.triggers = triggerDtos;
+            List<@NonNull Trigger> triggers = rule.getTriggers();
+            if (!triggers.isEmpty()) {
+                List<YamlModuleDTO> triggerDtos = new ArrayList<>(triggers.size());
+                for (Trigger trigger : triggers) {
+                    triggerDtos.add(new YamlModuleDTO(trigger, option));
+                }
+                this.triggers = triggerDtos;
+            }
         }
     }
 
@@ -139,8 +167,10 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
         try {
             partial = mapper.treeToValue(node, YamlPartialRuleDTO.class);
             result.uid = partial.uid;
-            result.template = partial.template;
-            result.templateState = TemplateState.typeOf(partial.templateState);
+            String templateUID = partial.template;
+            result.template = templateUID;
+            result.templateState = templateUID == null || templateUID.isBlank() ? TemplateState.NO_TEMPLATE
+                    : TemplateState.PENDING;
             result.label = partial.label;
             result.tags = partial.tags;
             result.description = partial.description;
@@ -409,6 +439,7 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
         @JsonAlias({ "templateUid", "templateUID" })
         public String template;
         public String templateState;
+        @JsonAlias({ "name" })
         public String label;
         public Set<@NonNull String> tags;
         public String description;
