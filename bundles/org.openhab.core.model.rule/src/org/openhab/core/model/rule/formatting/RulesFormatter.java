@@ -75,10 +75,8 @@ public class RulesFormatter extends AbstractDeclarativeFormatter {
 
         before(c.setLinewrap(), "}");
 
-        withinKeywordPairs(c.setNoSpace(), "(", ")");
         withinKeywordPairs(c.setNoSpace(), "[", "]");
-        around(c.setNoSpace(), "=");
-        around(c.setNoSpace(), ".");
+        around(c.setNoSpace(), "=", ":");
         before(c.setNoSpace(), ",");
 
         c.setAutoLinewrap(120);
