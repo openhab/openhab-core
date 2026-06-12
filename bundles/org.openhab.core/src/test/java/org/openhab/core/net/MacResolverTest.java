@@ -14,6 +14,7 @@ package org.openhab.core.net;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.net.InetAddress;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +36,7 @@ class MacResolverTest {
     class TestMacResolver extends MacResolver {
 
         @Override
-        protected boolean isOnLocalSubnet(String ip) {
+        protected boolean isOnLocalSubnet(InetAddress addr) {
             return true; // force all IPs to be treated as local
         }
 

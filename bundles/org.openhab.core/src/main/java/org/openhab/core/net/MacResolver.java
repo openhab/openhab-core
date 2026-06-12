@@ -23,17 +23,16 @@ import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +42,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -55,17 +53,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Utility class for resolving MAC addresses from IP addresses via the operating system's ARP cache. The main method
- * {@link #resolveMac(String)} provides an asynchronous API to get the MAC address for a given IP address. If the MAC
+ * Utility class for resolving MAC addresses from IPv4 addresses via the operating system's ARP cache. The main method
+ * {@link #resolveMac(String)} provides an asynchronous API to get the MAC address for a given IPv4 address. If the MAC
  * address is cached and valid, it returns immediately. Otherwise, it starts a front end process that involves probing
- * the IP address to trigger the OS to populate its ARP table, plus a back end process that bulk loads the OS ARP cache
- * into the in-memory cache and completes the pending future when the MAC address becomes available. The implementation
- * includes optimizations to avoid unnecessary ARP cache loads for non-local or unreachable IP addresses, and to share
- * pending resolution tasks for the same IP address to avoid redundant work. Resolved MAC addresses are cached in-memory
- * with an expiration time to avoid frequent lookups, and the back end process is scheduled to run only when there are
- * pending resolutions to avoid unnecessary resource usage. This class is designed to be thread-safe and efficient for
- * typical home network environments where devices may come and go, and ARP cache entries may expire or change over
- * time.
+ * the IPv4 address to trigger the OS to populate its ARP table, plus a back end process that bulk loads the OS ARP
+ * cache into the in-memory cache and completes the pending future when the MAC address becomes available. The
+ * implementation includes optimizations to avoid unnecessary ARP cache loads for non-local or unreachable IP addresses,
+ * and to share pending resolution tasks for the same IP address to avoid redundant work. Resolved MAC addresses are
+ * cached in-memory with an expiration time to avoid frequent lookups, and the back end process is scheduled to run only
+ * when there are pending resolutions to avoid unnecessary resource usage. This class is designed to be thread-safe and
+ * efficient for typical home network environments where devices may come and go, and ARP cache entries may expire or
+ * change over time.
  * 
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -82,8 +80,6 @@ public class MacResolver {
     private static final Pattern MAC_PATTERN = Pattern.compile("([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}");
     private static final Pattern IP_PATTERN = Pattern
             .compile("\\b((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\b");
-
-    private static final String BROADCAST_IP = "255.255.255.255";
 
     private final Logger logger = LoggerFactory.getLogger(MacResolver.class);
 
@@ -127,6 +123,7 @@ public class MacResolver {
     private static final int DISCARD_PORT = 9;
 
     private String windowsArp = "arp";
+    private boolean log2WarnDone = false;
 
     /**
      * Simple wrapper class to hold a MAC address with its expiration time-stamp.
@@ -223,24 +220,24 @@ public class MacResolver {
     }
 
     /**
-     * Resolves the MAC address for a given IP address. If the MAC address is cached and valid, it is returned
+     * Resolves the MAC address for a given IPv4 address. If the MAC address is cached and valid, it is returned
      * immediately. Otherwise, an asynchronous resolution process is started that involves a front end process that
-     * probes the IP to trigger the OS to populate its ARP table, and a back end process that bulk loads the ARP table
-     * and completes the future when the MAC address becomes available. The future completes with {@code null} if
-     * resolution fails or takes too long. The method also includes optimizations to avoid unnecessary ARP cache loads
-     * for invalid, non-local, or unreachable IP addresses by checking these conditions before scheduling the
-     * asynchronous resolution.
+     * probes the IPv4 target device to trigger the OS to populate its ARP table, and a back end process that bulk
+     * loads the ARP table and completes the future when the MAC address becomes available. The future completes
+     * with {@code null} if resolution fails or takes too long. The method also includes optimizations to avoid
+     * unnecessary ARP cache loads for invalid, non-local, or unreachable IPv4 addresses by checking these conditions
+     * before scheduling the asynchronous resolution.
      * 
-     * @param ipAddress the IP address to resolve e.g. "192.168.1.1" or "192.168.1.1:port"
+     * @param ipv4Address the IPv4 address to resolve e.g. "192.168.1.1" or "192.168.1.1:port"
      * @return a future that completes with the resolved MAC address or {@code null} if resolution fails
      *         or times out
      */
-    public CompletableFuture<@Nullable String> resolveMac(String ipAddress) {
-        if (!beginsWithValidIp(ipAddress)) {
-            logger.debug("{} invalid", ipAddress);
+    public CompletableFuture<@Nullable String> resolveMac(String ipv4Address) {
+        if (!beginsWithValidIp(ipv4Address)) {
+            logger.debug("{} invalid", ipv4Address);
             return CompletableFuture.completedFuture(null);
         }
-        String ip = normalizeIp(ipAddress);
+        String ip = normalizeIp(ipv4Address);
 
         // FAST PATH: check cache before doing any async work, and complete immediately if present and valid
         String cachedMac = cacheGet(ip);
@@ -270,11 +267,11 @@ public class MacResolver {
             addr = null;
         }
         if (addr == null || addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isMulticastAddress()
-                || BROADCAST_IP.equals(ip)) {
+                || NetUtil.getAllBroadcastAddresses().contains(ip)) {
             logger.debug("{} is invalid, loopback, 'any', multicast, or broadcast", ip);
             return CompletableFuture.completedFuture(null);
         }
-        if (!isOnLocalSubnet(ip)) {
+        if (!isOnLocalSubnet(addr)) {
             logger.debug("{} not on local sub-net", ip);
             return CompletableFuture.completedFuture(null);
         }
@@ -337,13 +334,13 @@ public class MacResolver {
      * the ARP resolution process, and for our purposes it does not matter how or if the target device responds. Each
      * probe is scoped to the candidate interfaces that are up, non-loopback, and on the same sub-net as the target IP.
      * 
-     * @param ip the target IP address to trigger ARP resolution for
+     * @param ipv4 the target IPv4 address to trigger ARP resolution for
      */
-    protected void triggerArpTableUpdate(String ip) {
+    protected void triggerArpTableUpdate(String ipv4) {
         try {
-            InetAddress target = InetAddress.getByName(ip);
+            InetAddress target = InetAddress.getByName(ipv4);
             DatagramPacket packet = new DatagramPacket(ARP_TRIGGER_BUF, ARP_TRIGGER_BUF_SIZE, target, DISCARD_PORT);
-            for (NetworkInterface netIntf : getCandidateInterfaces(ip)) {
+            for (NetworkInterface netIntf : getCandidateInterfaces(ipv4)) {
                 for (InterfaceAddress intfAddr : netIntf.getInterfaceAddresses()) {
                     if (intfAddr.getAddress() instanceof Inet4Address source) {
                         try (DatagramSocket socket = new DatagramSocket(new InetSocketAddress(source, 0))) {
@@ -361,90 +358,64 @@ public class MacResolver {
     }
 
     /**
-     * Checks if the given IP address is on the same local sub-net as any of the host's network interfaces. This avoids
-     * ARP cache loads for IP addresses that are not local which therefore cannot be resolved to a MAC address via the
-     * OS ARP table.
+     * Checks if the given IPv4 address is on the same local sub-net as any of the host's network interfaces. This
+     * avoids ARP cache loads for IPv4 addresses that are not local which therefore cannot be resolved to a MAC address
+     * via the OS ARP table.
      */
-    protected boolean isOnLocalSubnet(String ip) {
-        try {
-            InetAddress ipv4 = InetAddress.getByName(ip);
-            return Optional.ofNullable(NetworkInterface.getNetworkInterfaces()) //
-                    .map(en -> Collections.list(en).stream()) //
-                    .orElseGet(Stream::empty) //
-                    .filter(nif -> {
-                        try {
-                            return nif.isUp() && !nif.isLoopback();
-                        } catch (Exception e) {
-                            return false;
-                        }
-                    }) //
-                    .anyMatch(nif -> interfaceMatchesSubnet(nif, ipv4));
-        } catch (Exception e) {
-            logger.debug("Sub-net check failed for {}", ip, e);
-            return false;
-        }
+    protected boolean isOnLocalSubnet(InetAddress address) {
+        return NetUtil.getSameSubnetInterfaceAddress(address) != null;
     }
 
     /**
      * Gets a list of network interfaces that are up, non-loopback, and on the same sub-net as the given IP address.
      * This is used for interface-scoped probes to trigger ARP resolution on the correct interface when there are
      * multiple interfaces or sub-nets.
+     * 
+     * @param ipv4 the target IPv4 address to find candidate interfaces for
+     * @return a list of network interfaces that are valid candidates for probing the target IPv4 address
      */
-    private List<NetworkInterface> getCandidateInterfaces(String ip) {
+    private List<NetworkInterface> getCandidateInterfaces(String ipv4) {
         try {
-            InetAddress ipv4 = InetAddress.getByName(ip);
-            return Optional.ofNullable(NetworkInterface.getNetworkInterfaces()).map(en -> Collections.list(en).stream())
-                    .orElseGet(Stream::empty).filter(nif -> {
-                        try {
-                            return nif.isUp() && !nif.isLoopback() && interfaceMatchesSubnet(nif, ipv4);
-                        } catch (Exception ignored) {
-                            return false;
-                        }
-                    }).toList();
+            Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
+            if (nifs == null) {
+                return List.of(); // no interfaces found (should not happen, but just in case)
+            }
+
+            InetAddress target = InetAddress.getByName(ipv4);
+
+            // find one matching InterfaceAddress using NetUtil
+            InterfaceAddress match = NetUtil.getSameSubnetInterfaceAddress(target);
+            if (match == null) {
+                return List.of();
+            }
+            short prefix = match.getNetworkPrefixLength();
+
+            // compute the target's network address using NetUtil
+            String targetNet = NetUtil.getIpv4NetAddress(target.getHostAddress(), prefix);
+
+            // find ALL interface addresses on the same network
+            List<InetAddress> matchingAddrs = NetUtil.getAllInterfaceAddresses().stream()
+                    .filter(cidr -> cidr.getAddress() instanceof Inet4Address)
+                    .filter(cidr -> cidr.getPrefix() == prefix).filter(cidr -> {
+                        String ifaceNet = NetUtil.getIpv4NetAddress(cidr.getAddress().getHostAddress(), prefix);
+                        return ifaceNet.equals(targetNet);
+                    }).map(cidr -> cidr.getAddress()).toList();
+
+            // map those addresses back to their NetworkInterfaces
+            return Collections.list(nifs).stream().filter(nif -> {
+                try {
+                    if (!nif.isUp() || nif.isLoopback()) {
+                        return false;
+                    }
+                    return nif.getInterfaceAddresses().stream().anyMatch(ia -> matchingAddrs.contains(ia.getAddress()));
+                } catch (Exception e) {
+                    return false;
+                }
+            }).toList();
         } catch (Exception e) {
-            logger.debug("Candidate interface check failed for {}", ip, e);
+            logger.debug("Candidate interface check failed for {}", ipv4, e);
             return List.of();
         }
-    }
-
-    /**
-     * Returns true if the given interface has any IPv4 address on the same sub-net as the target IPv4 address.
-     * 
-     * @param nif the network interface to check
-     * @param ipv4 the target IP address to compare against the interface's addresses
-     * 
-     * @return true if the interface has any IPv4 address on the same sub-net as the target, false otherwise
-     */
-    private boolean interfaceMatchesSubnet(NetworkInterface nif, InetAddress ipv4) {
-        try {
-            byte[] t = ipv4.getAddress();
-            if (t.length != 4) {
-                return false; // IPv4 only
-            }
-            int ti = ByteBuffer.wrap(t).getInt();
-
-            for (InterfaceAddress ia : nif.getInterfaceAddresses()) {
-                InetAddress addr = ia.getAddress();
-                byte[] a = addr.getAddress();
-                if (a.length != 4) {
-                    continue; // skip IPv6
-                }
-
-                int prefix = ia.getNetworkPrefixLength();
-                if (prefix <= 0 || prefix > 32) {
-                    continue; // allow /32
-                }
-
-                int mask = ~((1 << (32 - prefix)) - 1);
-                int ai = ByteBuffer.wrap(a).getInt();
-
-                if ((ai & mask) == (ti & mask)) {
-                    return true;
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return false;
     }
 
     /**
@@ -483,7 +454,7 @@ public class MacResolver {
     private void linuxArpCacheLoad() {
         File arpFile = new File("/proc/net/arp");
         if (!arpFile.exists()) {
-            logger.debug("ARP file {} does not exist", arpFile.getAbsolutePath());
+            log2WarnOnce("ARP file {} does not exist", arpFile.getAbsolutePath());
             return;
         }
         try (BufferedReader br = Files.newBufferedReader(arpFile.toPath(), StandardCharsets.UTF_8)) {
@@ -493,7 +464,7 @@ public class MacResolver {
                 parseLine(line);
             }
         } catch (Exception e) {
-            logger.debug("Error reading /proc/net/arp", e);
+            log2WarnOnce("Error reading /proc/net/arp", e);
         }
     }
 
@@ -604,7 +575,6 @@ public class MacResolver {
      * 
      * @param timeout the duration to wait for the process to finish
      * @param command the command and its arguments to execute
-     * 
      * @return the finished Process, or null if timed out or failed
      */
     private @Nullable Process runProcess(Duration timeout, String... command) {
@@ -638,7 +608,7 @@ public class MacResolver {
             }
             return process;
         } catch (Exception e) {
-            logger.debug("Failed to execute command: {}", String.join(" ", command), e);
+            log2WarnOnce("Failed to execute command: {}", String.join(" ", command), e);
             return null;
         }
     }
@@ -662,7 +632,20 @@ public class MacResolver {
                 parseLine(line);
             }
         } catch (Exception e) {
-            logger.debug("Error reading result of command: {}", String.join(" ", command), e);
+            log2WarnOnce("Error reading result of command: {}", String.join(" ", command), e);
+        }
+    }
+
+    /**
+     * Logs ARP-related messages to 'warn' one time only and thereafter subsequently to 'debug'
+     * in order to avoid spamming the logs.
+     */
+    private void log2WarnOnce(String format, Object... args) {
+        if (!log2WarnDone) {
+            logger.warn(format, args);
+            log2WarnDone = true;
+        } else {
+            logger.debug(format, args);
         }
     }
 }
