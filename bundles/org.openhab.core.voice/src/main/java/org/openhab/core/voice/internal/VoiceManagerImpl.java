@@ -55,6 +55,8 @@ import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
@@ -73,6 +75,7 @@ import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
@@ -81,6 +84,7 @@ import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationManager;
 import org.openhab.core.voice.text.conversation.ConversationRole;
+import org.openhab.core.voice.text.interpreter.llm.LLMItemSerializer;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.framework.Bundle;
@@ -124,6 +128,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
     private final LLMToolRegistry llmToolRegistry;
     private final ConversationManager conversationManager;
+    private final ItemRegistry itemRegistry;
+    private final ItemPermissionResolver itemPermissionResolver;
 
     private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
 
@@ -146,7 +152,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
             final @Reference StorageService storageService, final @Reference LLMToolRegistry llmToolRegistry,
             final @Reference ConversationManager conversationManager,
-            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
+            final @Reference ItemRegistry itemRegistry,
+            final @Reference ItemPermissionResolver itemPermissionResolver) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.eventPublisher = eventPublisher;
@@ -155,6 +163,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 this.getClass().getClassLoader());
         this.conversationManager = conversationManager;
         this.llmToolRegistry = llmToolRegistry;
+        this.itemRegistry = itemRegistry;
+        this.itemPermissionResolver = itemPermissionResolver;
         this.configuration = new VoiceManagerConfiguration(configDescriptionRegistry);
     }
 
@@ -402,7 +412,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 locationItem = null;
             }
             InterpreterContext context = new InterpreterContext(conversation, tools, locationItem,
-                    configuration.getSystemPrompt());
+                    enrichSystemPrompt(configuration.getSystemPrompt()));
             InterpretationException exception = null;
             for (var interpreter : interpreters) {
                 try {
@@ -1129,5 +1139,18 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             // try to rebuild in case it was manually stopped
             scheduleDialogRegistrations();
         }
+    }
+
+    @Override
+    public String enrichSystemPrompt(@Nullable String baseSystemPrompt) {
+        String base = baseSystemPrompt != null ? baseSystemPrompt : "";
+        List<Item> accessibleItems = itemRegistry.getItems().stream().filter(itemPermissionResolver::isAccessible)
+                .toList();
+        String serializedItems = LLMItemSerializer.serialize(accessibleItems);
+        if (serializedItems.isEmpty()) {
+            return base;
+        }
+        String itemsSection = "Available items:\n" + serializedItems;
+        return base.isEmpty() ? itemsSection : base + "\n\n" + itemsSection;
     }
 }
