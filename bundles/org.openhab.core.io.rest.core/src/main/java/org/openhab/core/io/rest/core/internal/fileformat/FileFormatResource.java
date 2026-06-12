@@ -1135,7 +1135,8 @@ public class FileFormatResource implements RESTResource {
                 if (ruleSerializer == null) {
                     return JSONResponse.createErrorResponse(Response.Status.UNSUPPORTED_MEDIA_TYPE,
                             "Unsupported media type '" + acceptHeader + "'");
-                } else if (rules.isEmpty()) {
+                }
+                if (rules.isEmpty()) {
                     return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, "No rule loaded from input");
                 }
                 try {
