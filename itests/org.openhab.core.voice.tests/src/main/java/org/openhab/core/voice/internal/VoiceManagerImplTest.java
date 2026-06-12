@@ -715,7 +715,6 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         org.openhab.core.library.items.SwitchItem testItem = new org.openhab.core.library.items.SwitchItem(
                 "TestSwitch");
         testItem.setLabel("Test Switch Label");
-        itemRegistry.add(testItem);
 
         // Setup a custom HumanLanguageInterpreter to capture InterpreterContext
         final String[] capturedPrompt = new String[1];
@@ -758,9 +757,9 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
             }
         };
 
-        registerService(customHli);
-
         try {
+            itemRegistry.add(testItem);
+            registerService(customHli);
             // Configure VoiceManager configuration to use this HLI and have a base system prompt
             Dictionary<String, Object> config = new Hashtable<>();
             config.put("defaultHLI", "customHli");
@@ -769,18 +768,19 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
             Configuration configuration = configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID);
             configuration.update(config);
 
-            // Wait some time to be sure that the configuration will be updated
-            Thread.sleep(2000);
-
-            // Call interpret
-            voiceManager.interpret("hello", new InterpretationArguments("customHli", "", "", "", null));
-
-            // Verify captured prompt contains base prompt and serialized items
-            assertNotNull(capturedPrompt[0]);
-            assertTrue(capturedPrompt[0].contains("You are an assistant."));
-            assertTrue(capturedPrompt[0].contains("Available items:"));
-            assertTrue(capturedPrompt[0].contains("TestSwitch"));
-            assertTrue(capturedPrompt[0].contains("Test Switch Label"));
+            // Wait until the configuration update is effective
+            waitForAssert(() -> {
+                try {
+                    voiceManager.interpret("hello", new InterpretationArguments("customHli", "", "", "", null));
+                } catch (InterpretationException e) {
+                    throw new AssertionError(e);
+                }
+                assertNotNull(capturedPrompt[0]);
+                assertTrue(capturedPrompt[0].contains("You are an assistant."));
+                assertTrue(capturedPrompt[0].contains("Available items:"));
+                assertTrue(capturedPrompt[0].contains("TestSwitch"));
+                assertTrue(capturedPrompt[0].contains("Test Switch Label"));
+            });
         } finally {
             // Clean up item and service
             itemRegistry.remove("TestSwitch");

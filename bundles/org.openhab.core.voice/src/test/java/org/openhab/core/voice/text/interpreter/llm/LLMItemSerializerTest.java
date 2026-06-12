@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -99,8 +98,14 @@ public class LLMItemSerializerTest {
         Item item1 = mockItem("ItemB", "Label B", "Switch", Set.of(), List.of());
         Item item2 = mockItem("ItemA", null, "Dimmer", Set.of(), List.of());
 
-        String expected = "items:\n" + "- name: ItemA\n" + "  type: Dimmer\n" + "- name: ItemB\n" + "  label: Label B\n"
-                + "  type: Switch\n";
+        String expected = """
+                items:
+                - name: ItemA
+                  type: Dimmer
+                - name: ItemB
+                  label: Label B
+                  type: Switch
+                """;
 
         assertEquals(expected, LLMItemSerializer.serialize(List.of(item1, item2)));
     }
@@ -129,20 +134,42 @@ public class LLMItemSerializerTest {
         // Non-semantic Item
         Item systemMode = mockItem("System_Mode", "System Mode", "String", Set.of(), List.of());
 
-        List<Item> items = new ArrayList<>(List.of(tvPower, livingRoom, systemMode, lrLight, tv, gf));
-        // Shuffle the list to ensure the serializer sorts correctly
-        Collections.shuffle(items);
+        // Intentionally provide an unsorted order to ensure the serializer sorts deterministically
+        List<Item> items = List.of(tvPower, livingRoom, systemMode, lrLight, tv, gf);
 
-        String expected = "locationItems:\n" + "- name: GF\n" + "  label: Ground Floor\n" + "  type: Group\n"
-                + "  semanticType: MockFloor\n" + "  locationItems:\n" + "  - name: LivingRoom\n"
-                + "    label: Living Room\n" + "    type: Group\n" + "    semanticType: MockLivingRoom\n"
-                + "    equipmentItems:\n" + "    - name: TV\n" + "      label: Living Room TV\n" + "      type: Group\n"
-                + "      semanticType: MockTV\n" + "      pointItems:\n" + "      - name: TV_Power\n"
-                + "        label: TV Power\n" + "        type: Switch\n" + "        semanticType: MockPower\n"
-                + "        properties:\n" + "        - MockPowerProperty\n" + "    pointItems:\n"
-                + "    - name: LivingRoom_Light\n" + "      label: Living Room Light\n" + "      type: Dimmer\n"
-                + "      semanticType: MockLight\n" + "items:\n" + "- name: System_Mode\n" + "  label: System Mode\n"
-                + "  type: String\n";
+        String expected = """
+                locationItems:
+                - name: GF
+                  label: Ground Floor
+                  type: Group
+                  semanticType: MockFloor
+                  locationItems:
+                  - name: LivingRoom
+                    label: Living Room
+                    type: Group
+                    semanticType: MockLivingRoom
+                    equipmentItems:
+                    - name: TV
+                      label: Living Room TV
+                      type: Group
+                      semanticType: MockTV
+                      pointItems:
+                      - name: TV_Power
+                        label: TV Power
+                        type: Switch
+                        semanticType: MockPower
+                        properties:
+                        - MockPowerProperty
+                    pointItems:
+                    - name: LivingRoom_Light
+                      label: Living Room Light
+                      type: Dimmer
+                      semanticType: MockLight
+                items:
+                - name: System_Mode
+                  label: System Mode
+                  type: String
+                """;
 
         assertEquals(expected, LLMItemSerializer.serialize(items));
     }
@@ -152,8 +179,15 @@ public class LLMItemSerializerTest {
         Item item1 = mockItem("item:with:colon", "label # with hash", "Switch", Set.of(), List.of());
         Item item2 = mockItem("yes", "true", "String", Set.of(), List.of());
 
-        String expected = "items:\n" + "- name: item:with:colon\n" + "  label: \"label # with hash\"\n"
-                + "  type: Switch\n" + "- name: \"yes\"\n" + "  label: \"true\"\n" + "  type: String\n";
+        String expected = """
+                items:
+                - name: item:with:colon
+                  label: "label # with hash"
+                  type: Switch
+                - name: "yes"
+                  label: "true"
+                  type: String
+                """;
 
         assertEquals(expected, LLMItemSerializer.serialize(List.of(item1, item2)));
     }
