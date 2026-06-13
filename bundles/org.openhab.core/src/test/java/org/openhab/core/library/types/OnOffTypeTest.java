@@ -48,4 +48,46 @@ public class OnOffTypeTest {
         assertNull(OnOffType.ON.as(PointType.class));
         assertNull(OnOffType.OFF.as(PointType.class));
     }
+
+    @Test
+    public void testBooleanValue() {
+        assertEquals(true, OnOffType.ON.booleanValue());
+        assertEquals(false, OnOffType.OFF.booleanValue());
+    }
+
+    @Test
+    public void testByteValue() {
+        assertEquals((byte) 1, OnOffType.ON.byteValue());
+        assertEquals((byte) 0, OnOffType.OFF.byteValue());
+    }
+
+    @Test
+    public void testDoubleValue() {
+        assertEquals(1.0, OnOffType.ON.doubleValue());
+        assertEquals(0.0, OnOffType.OFF.doubleValue());
+    }
+
+    @Test
+    public void testFloatValue() {
+        assertEquals(1.0f, OnOffType.ON.floatValue());
+        assertEquals(0.0f, OnOffType.OFF.floatValue());
+    }
+
+    @Test
+    public void testIntValue() {
+        assertEquals(1, OnOffType.ON.intValue());
+        assertEquals(0, OnOffType.OFF.intValue());
+    }
+
+    @Test
+    public void testLongValue() {
+        assertEquals((long) 1, OnOffType.ON.longValue());
+        assertEquals((long) 0, OnOffType.OFF.longValue());
+    }
+
+    @Test
+    public void testShortValue() {
+        assertEquals((short) 1, OnOffType.ON.shortValue());
+        assertEquals((short) 0, OnOffType.OFF.shortValue());
+    }
 }
