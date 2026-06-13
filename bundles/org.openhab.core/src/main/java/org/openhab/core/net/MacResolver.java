@@ -22,13 +22,13 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -337,23 +337,48 @@ public class MacResolver {
      * @param ipv4 the target IPv4 address to trigger ARP resolution for
      */
     protected void triggerArpTableUpdate(String ipv4) {
+        InetAddress targetIpv4;
         try {
-            InetAddress target = InetAddress.getByName(ipv4);
-            DatagramPacket packet = new DatagramPacket(ARP_TRIGGER_BUF, ARP_TRIGGER_BUF_SIZE, target, DISCARD_PORT);
-            for (NetworkInterface netIntf : getCandidateInterfaces(ipv4)) {
-                for (InterfaceAddress intfAddr : netIntf.getInterfaceAddresses()) {
-                    if (intfAddr.getAddress() instanceof Inet4Address source) {
-                        try (DatagramSocket socket = new DatagramSocket(new InetSocketAddress(source, 0))) {
-                            socket.send(packet);
-                        } catch (Exception ignore) {
-                            // don't care if send fails; all that matters is the prior ARP resolution
+            targetIpv4 = InetAddress.getByName(ipv4);
+        } catch (UnknownHostException e) {
+            return; // IP is already validated so this can't occur
+        }
+
+        if (NetUtil.getSameSubnetInterfaceAddress(targetIpv4) == null) {
+            return; // no local interface can reach the target IP
+        }
+
+        List<NetworkInterface> nifs;
+        try {
+            nifs = Collections.list(NetworkInterface.getNetworkInterfaces());
+        } catch (SocketException e) {
+            return; // no network interfaces (should not happen, but just in case)
+        }
+
+        DatagramPacket packet = new DatagramPacket(ARP_TRIGGER_BUF, ARP_TRIGGER_BUF_SIZE, targetIpv4, DISCARD_PORT);
+        for (NetworkInterface nif : nifs) {
+            try {
+                if (!nif.isUp() || nif.isLoopback()) {
+                    continue;
+                }
+                for (InterfaceAddress nifAddr : nif.getInterfaceAddresses()) {
+                    if (nifAddr.getAddress() instanceof Inet4Address nifIpv4) {
+                        short nifPrefixLen = nifAddr.getNetworkPrefixLength();
+                        String nifAddress = NetUtil.getIpv4NetAddress(nifIpv4.getHostAddress(), nifPrefixLen);
+                        String targetAddress = NetUtil.getIpv4NetAddress(targetIpv4.getHostAddress(), nifPrefixLen);
+                        if (nifAddress.equals(targetAddress)) {
+                            try (DatagramSocket socket = new DatagramSocket(new InetSocketAddress(nifIpv4, 0))) {
+                                socket.send(packet);
+                            } catch (Exception ignore) {
+                                // don't care if send fails; all that matters is the prior ARP resolution
+                            }
+                            break; // need only send one packet per interface even if there are multiple addresses
                         }
-                        break; // only need to send one packet per interface even if there are multiple addresses
                     }
                 }
+            } catch (SocketException e) {
+                // ignore this interface and continue
             }
-        } catch (UnknownHostException ignore) {
-            // ip is already validated so this can't occur
         }
     }
 
@@ -364,58 +389,6 @@ public class MacResolver {
      */
     protected boolean isOnLocalSubnet(InetAddress address) {
         return NetUtil.getSameSubnetInterfaceAddress(address) != null;
-    }
-
-    /**
-     * Gets a list of network interfaces that are up, non-loopback, and on the same sub-net as the given IP address.
-     * This is used for interface-scoped probes to trigger ARP resolution on the correct interface when there are
-     * multiple interfaces or sub-nets.
-     * 
-     * @param ipv4 the target IPv4 address to find candidate interfaces for
-     * @return a list of network interfaces that are valid candidates for probing the target IPv4 address
-     */
-    private List<NetworkInterface> getCandidateInterfaces(String ipv4) {
-        try {
-            Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
-            if (nifs == null) {
-                return List.of(); // no interfaces found (should not happen, but just in case)
-            }
-
-            InetAddress target = InetAddress.getByName(ipv4);
-
-            // find one matching InterfaceAddress using NetUtil
-            InterfaceAddress match = NetUtil.getSameSubnetInterfaceAddress(target);
-            if (match == null) {
-                return List.of();
-            }
-            short prefix = match.getNetworkPrefixLength();
-
-            // compute the target's network address using NetUtil
-            String targetNet = NetUtil.getIpv4NetAddress(target.getHostAddress(), prefix);
-
-            // find ALL interface addresses on the same network
-            List<InetAddress> matchingAddrs = NetUtil.getAllInterfaceAddresses().stream()
-                    .filter(cidr -> cidr.getAddress() instanceof Inet4Address)
-                    .filter(cidr -> cidr.getPrefix() == prefix).filter(cidr -> {
-                        String ifaceNet = NetUtil.getIpv4NetAddress(cidr.getAddress().getHostAddress(), prefix);
-                        return ifaceNet.equals(targetNet);
-                    }).map(cidr -> cidr.getAddress()).toList();
-
-            // map those addresses back to their NetworkInterfaces
-            return Collections.list(nifs).stream().filter(nif -> {
-                try {
-                    if (!nif.isUp() || nif.isLoopback()) {
-                        return false;
-                    }
-                    return nif.getInterfaceAddresses().stream().anyMatch(ia -> matchingAddrs.contains(ia.getAddress()));
-                } catch (Exception e) {
-                    return false;
-                }
-            }).toList();
-        } catch (Exception e) {
-            logger.debug("Candidate interface check failed for {}", ipv4, e);
-            return List.of();
-        }
     }
 
     /**
@@ -500,7 +473,8 @@ public class MacResolver {
         // eager execution: check if a running future can be completed early
         Set<CompletableFuture<@Nullable String>> futureMacs = pendingFutureMacs.remove(ip);
         if (futureMacs != null && !futureMacs.isEmpty()) {
-            logger.trace("{} -> {} (eager for {} futures)", ip, mac, futureMacs.size());
+            logger.trace("{} -> {} (eager for {} future{})", ip, mac, futureMacs.size(),
+                    futureMacs.size() > 1 ? "s" : "");
             futureMacs.forEach(futureMac -> futureMac.complete(mac));
         }
 
