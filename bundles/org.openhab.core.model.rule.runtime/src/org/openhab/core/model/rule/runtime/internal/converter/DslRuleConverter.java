@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -97,9 +96,6 @@ import org.openhab.core.model.rule.rules.ValidState;
 import org.openhab.core.model.rule.rules.ValidTrigger;
 import org.openhab.core.model.rule.rules.WeekdayCondition;
 import org.openhab.core.model.rule.runtime.internal.DSLRuleProvider;
-import org.openhab.core.model.script.scoping.StateAndCommandProvider;
-import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -124,8 +120,6 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
     private static final Pattern TIME_PATTERN = Pattern.compile("^([012]?\\d):([0-5]\\d)$");
     private static final Pattern INDEX_PATTERN = Pattern.compile("-(?<idx>\\d+)$");
-    private final Set<String> enumStates;
-    private final Set<String> enumCommands;
 
     private final Logger logger = LoggerFactory.getLogger(DslRuleConverter.class);
 
@@ -143,18 +137,6 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
     public DslRuleConverter(@Reference ModelRepository modelRepository, @Reference DSLRuleProvider ruleProvider) {
         this.modelRepository = modelRepository;
         this.ruleProvider = ruleProvider;
-
-        Set<String> enums = new LinkedHashSet<>();
-        for (State state : StateAndCommandProvider.getAllStates()) {
-            enums.add(state.toString());
-        }
-        this.enumStates = Set.copyOf(enums);
-
-        enums = new LinkedHashSet<>();
-        for (Command command : StateAndCommandProvider.getAllCommands()) {
-            enums.add(command.toString());
-        }
-        this.enumCommands = Set.copyOf(enums);
     }
 
     @Override
@@ -817,8 +799,6 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
         ValidState result;
         if (NUMERIC_PATTERN.matcher(stateValue).matches()) {
             result = RulesFactory.eINSTANCE.createValidStateNumber();
-        } else if (enumStates.contains(stateValue)) {
-            result = RulesFactory.eINSTANCE.createValidStateId();
         } else {
             result = RulesFactory.eINSTANCE.createValidStateString();
         }
@@ -830,8 +810,6 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
         ValidCommand result;
         if (NUMERIC_PATTERN.matcher(commandValue).matches()) {
             result = RulesFactory.eINSTANCE.createValidCommandNumber();
-        } else if (enumCommands.contains(commandValue)) {
-            result = RulesFactory.eINSTANCE.createValidCommandId();
         } else {
             result = RulesFactory.eINSTANCE.createValidCommandString();
         }
