@@ -355,6 +355,9 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().alias(MONTH, "mo");
         SimpleUnitFormat.getInstance().alias(WEEK, "wk");
         SimpleUnitFormat.getInstance().alias(YEAR, "y");
+
+        // Add the single character ㏈ glyph as an alias to improve support of East Asian languages
+        SimpleUnitFormat.getInstance().alias(DECIBEL, "㏈");
     }
 
     private Units() {
