@@ -118,7 +118,7 @@ public final class ImperialUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(POUND_FORCE_SQUARE_INCH, POUND_FORCE_SQUARE_INCH.getSymbol());
         SimpleUnitFormat.getInstance().label(GRAIN, GRAIN.getSymbol());
 
-        // Add the single character ℉ as an alias to improve support of East Asian languages
+        // Add the single character ℉ glyph as an alias to improve support of East Asian languages
         SimpleUnitFormat.getInstance().alias(FAHRENHEIT, "℉");
     }
 

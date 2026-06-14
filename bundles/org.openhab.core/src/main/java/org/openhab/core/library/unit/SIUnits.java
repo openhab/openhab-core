@@ -53,8 +53,14 @@ public final class SIUnits extends CustomUnits {
         // Override the default unit symbol ℃ to better support TTS and UIs:
         SimpleUnitFormat.getInstance().label(CELSIUS, "°C");
 
-        // Add the single character ℃ as an alias to improve support of East Asian languages
+        // Add some single character glyphs as aliases to improve support of East Asian languages
         SimpleUnitFormat.getInstance().alias(CELSIUS, "℃");
+        SimpleUnitFormat.getInstance().alias(METRE.multiply(0.001), "㎜");
+        SimpleUnitFormat.getInstance().alias(METRE.multiply(0.01), "㎝");
+        SimpleUnitFormat.getInstance().alias(METRE.multiply(1000), "㎞");
+        SimpleUnitFormat.getInstance().alias(KILOGRAM, "㎏");
+        SimpleUnitFormat.getInstance().alias(SQUARE_METRE, "㎡");
+        SimpleUnitFormat.getInstance().alias(CUBIC_METRE, "㎥");
     }
 
     private SIUnits() {
