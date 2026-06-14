@@ -27,6 +27,8 @@ import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
  */
 public class YamlConfigDescriptionParameterGroupDTO {
 
+    private static final Boolean ADVANCED_DEFAULT = Boolean.FALSE;
+
     public String context;
     public Boolean advanced;
     public String label;
@@ -42,10 +44,15 @@ public class YamlConfigDescriptionParameterGroupDTO {
      * Creates a new instance based on the specified {@link ConfigDescriptionParameterGroup}.
      *
      * @param parameterGroup the {@link ConfigDescriptionParameterGroup}.
+     * @param includeDefault whether boolean values with the default value should be included.
      */
-    public YamlConfigDescriptionParameterGroupDTO(@NonNull ConfigDescriptionParameterGroup parameterGroup) {
+    public YamlConfigDescriptionParameterGroupDTO(@NonNull ConfigDescriptionParameterGroup parameterGroup,
+            boolean includeDefault) {
         this.context = parameterGroup.getContext();
         this.advanced = parameterGroup.isAdvanced();
+        if (!includeDefault && ADVANCED_DEFAULT.equals(this.advanced)) {
+            this.advanced = null;
+        }
         this.label = parameterGroup.getLabel();
         this.description = parameterGroup.getDescription();
     }

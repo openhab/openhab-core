@@ -59,14 +59,15 @@ public class YamlConfigDescriptionDTO {
      * Creates a new instance based on the specified {@link ConfigDescription}.
      *
      * @param configDescription the {@link ConfigDescription}.
+     * @param includeDefault whether boolean values with the default value should be included.
      */
-    public YamlConfigDescriptionDTO(@NonNull ConfigDescription configDescription) {
+    public YamlConfigDescriptionDTO(@NonNull ConfigDescription configDescription, boolean includeDefault) {
         this.uri = toDecodedString(configDescription.getUID());
         List<@NonNull ConfigDescriptionParameter> fromParams = configDescription.getParameters();
         if (!fromParams.isEmpty()) {
             Map<String, YamlConfigDescriptionParameterDTO> params = new LinkedHashMap<>();
             for (ConfigDescriptionParameter param : fromParams) {
-                params.put(param.getName(), new YamlConfigDescriptionParameterDTO(param));
+                params.put(param.getName(), new YamlConfigDescriptionParameterDTO(param, includeDefault));
             }
             this.params = params;
         }
@@ -74,7 +75,8 @@ public class YamlConfigDescriptionDTO {
         if (!fromParamGroups.isEmpty()) {
             Map<String, YamlConfigDescriptionParameterGroupDTO> paramGroups = new LinkedHashMap<>();
             for (ConfigDescriptionParameterGroup paramGroup : fromParamGroups) {
-                paramGroups.put(paramGroup.getName(), new YamlConfigDescriptionParameterGroupDTO(paramGroup));
+                paramGroups.put(paramGroup.getName(),
+                        new YamlConfigDescriptionParameterGroupDTO(paramGroup, includeDefault));
             }
             this.paramGroups = paramGroups;
         }

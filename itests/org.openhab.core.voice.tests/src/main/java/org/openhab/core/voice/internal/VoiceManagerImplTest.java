@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioManager;
@@ -37,11 +38,13 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.DialogRegistration;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
@@ -701,5 +704,86 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         voiceManager.unregisterDialog(dialogRegistration);
         // Assert dialog has been stopped
         assertTrue(ksService.isAborted());
+    }
+
+    @Test
+    public void testSystemPromptEnrichment() throws Exception {
+        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        assertNotNull(itemRegistry);
+
+        // Add a test item
+        org.openhab.core.library.items.SwitchItem testItem = new org.openhab.core.library.items.SwitchItem(
+                "TestSwitch");
+        testItem.setLabel("Test Switch Label");
+
+        // Setup a custom HumanLanguageInterpreter to capture InterpreterContext
+        final String[] capturedPrompt = new String[1];
+        HumanLanguageInterpreter customHli = new HumanLanguageInterpreter() {
+            @Override
+            public String getId() {
+                return "customHli";
+            }
+
+            @Override
+            public String getLabel(@Nullable Locale locale) {
+                return "Custom HLI";
+            }
+
+            @Override
+            public String interpret(Locale locale, String text) throws InterpretationException {
+                return "Interpreted";
+            }
+
+            @Override
+            public String interpret(Locale locale, org.openhab.core.voice.text.InterpreterContext interpreterContext)
+                    throws InterpretationException {
+                capturedPrompt[0] = interpreterContext.systemPrompt();
+                return "Interpreted Context";
+            }
+
+            @Override
+            public @Nullable String getGrammar(Locale locale, String format) {
+                return null;
+            }
+
+            @Override
+            public Set<Locale> getSupportedLocales() {
+                return Set.of(Locale.ENGLISH);
+            }
+
+            @Override
+            public Set<String> getSupportedGrammarFormats() {
+                return Set.of();
+            }
+        };
+
+        try {
+            itemRegistry.add(testItem);
+            registerService(customHli);
+            // Configure VoiceManager configuration to use this HLI and have a base system prompt
+            Dictionary<String, Object> config = new Hashtable<>();
+            config.put("defaultHLI", "customHli");
+            config.put("systemPrompt", "You are an assistant.");
+            ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
+            Configuration configuration = configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID);
+            configuration.update(config);
+
+            // Wait until the configuration update is effective
+            waitForAssert(() -> {
+                try {
+                    voiceManager.interpret("hello", new InterpretationArguments("customHli", "", "", "", null));
+                } catch (InterpretationException e) {
+                    throw new AssertionError(e);
+                }
+                assertNotNull(capturedPrompt[0]);
+                assertTrue(capturedPrompt[0].contains("You are an assistant."));
+                assertTrue(capturedPrompt[0].contains("Available items:"));
+                assertTrue(capturedPrompt[0].contains("TestSwitch"));
+                assertTrue(capturedPrompt[0].contains("Test Switch Label"));
+            });
+        } finally {
+            // Clean up item and service
+            itemRegistry.remove("TestSwitch");
+        }
     }
 }

@@ -168,6 +168,20 @@ public interface Rule extends Identifiable<String> {
     }
 
     /**
+     * The "magic key" used for the source code string itself when storing {@link Rule}'s source code in its
+     * {@link Configuration}. A {@link Rule} can only have a source code if it is created by a script. The payload
+     * is a string containing the whole source code.
+     */
+    static String SOURCE = "source";
+
+    /**
+     * The "magic key" used for the source code type when storing {@link Rule}'s source code in its
+     * {@link Configuration}. A {@link Rule} can only have a source code if it is created by a script. The payload
+     * is a string containing OH's "quasi MIME-type" for the scripting language of the source code.
+     */
+    static String SOURCE_TYPE = "sourceType";
+
+    /**
      * This enum represent the different states a rule can have in respect to rule templates.
      */
     public enum TemplateState {
