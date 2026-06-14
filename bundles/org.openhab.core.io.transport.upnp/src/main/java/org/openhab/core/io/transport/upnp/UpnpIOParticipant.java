@@ -12,13 +12,21 @@
  */
 package org.openhab.core.io.transport.upnp;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- * The {@link UpnpIOParticipant} is an interface that needs to
- * be implemented by classes that wants to participate in
- * UPNP communication
+ * The {@link UpnpIOParticipant} is an interface that needs to be implemented by classes that wants
+ * to participate in UPnP communication.
+ * <p>
+ * A {@link UpnpIOParticipant} "identifies with" a UPnP device via the UDN (Unique Device Name) returned
+ * by {@link #getUDN()}. This UDN <b>must be</b> of the root UPnP device, not an embedded device, or the
+ * device will never be "discovered" by {@link UpnpIOService}. If a {@link UpnpIOParticipant} changes the
+ * UDN returned by {@link #getUDN()} while being registered by {@link UpnpIOParticipant}, the behavior is
+ * undefined.
  *
  * @author Karel Goderis - Initial contribution
  */
+@NonNullByDefault
 public interface UpnpIOParticipant {
 
     /** Get the UDN of the participant **/
