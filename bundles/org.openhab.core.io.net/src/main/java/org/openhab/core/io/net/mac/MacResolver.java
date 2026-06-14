@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.net;
+package org.openhab.core.io.net.mac;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
@@ -46,6 +46,8 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.io.net.exec.ExecUtil;
+import org.openhab.core.net.NetUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -123,7 +125,7 @@ public class MacResolver {
     private static final int DISCARD_PORT = 9;
 
     private String windowsArp = "arp";
-    private boolean log2WarnDone = false;
+    private volatile boolean log2WarnDone = false;
 
     /**
      * Simple wrapper class to hold a MAC address with its expiration time-stamp.
@@ -234,7 +236,7 @@ public class MacResolver {
      */
     public CompletableFuture<@Nullable String> resolveMac(String ipv4Address) {
         if (!beginsWithValidIp(ipv4Address)) {
-            logger.debug("{} invalid", ipv4Address);
+            logger.debug("'{}' is an invalid IP", ipv4Address);
             return CompletableFuture.completedFuture(null);
         }
         String ip = normalizeIp(ipv4Address);
@@ -268,7 +270,7 @@ public class MacResolver {
         }
         if (addr == null || addr.isLoopbackAddress() || addr.isAnyLocalAddress() || addr.isMulticastAddress()
                 || NetUtil.getAllBroadcastAddresses().contains(ip)) {
-            logger.debug("{} is invalid, loopback, 'any', multicast, or broadcast", ip);
+            logger.debug("'{}' is an invalid, loopback, 'any', multicast, or broadcast IP", ip);
             return CompletableFuture.completedFuture(null);
         }
         if (!isOnLocalSubnet(addr)) {
@@ -364,6 +366,9 @@ public class MacResolver {
                 for (InterfaceAddress nifAddr : nif.getInterfaceAddresses()) {
                     if (nifAddr.getAddress() instanceof Inet4Address nifIpv4) {
                         short nifPrefixLen = nifAddr.getNetworkPrefixLength();
+                        if (nifPrefixLen < 1 || nifPrefixLen > 32) {
+                            continue;
+                        }
                         String nifAddress = NetUtil.getIpv4NetAddress(nifIpv4.getHostAddress(), nifPrefixLen);
                         String targetAddress = NetUtil.getIpv4NetAddress(targetIpv4.getHostAddress(), nifPrefixLen);
                         if (nifAddress.equals(targetAddress)) {
@@ -544,50 +549,6 @@ public class MacResolver {
     }
 
     /**
-     * Runs an OS process with the given timeout and command (String... args). Returns the finished Process, or null
-     * if the process timed out or failed. Timeout is enforced.
-     * 
-     * @param timeout the duration to wait for the process to finish
-     * @param command the command and its arguments to execute
-     * @return the finished Process, or null if timed out or failed
-     */
-    private @Nullable Process runProcess(Duration timeout, String... command) {
-        try {
-            Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
-            boolean finished;
-            try {
-                finished = process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                logger.debug("Interrupted while waiting for command: {}", String.join(" ", command));
-                process.destroyForcibly();
-                // best-effort wait after interrupt
-                try {
-                    process.waitFor(200, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException ignored) {
-                    Thread.currentThread().interrupt();
-                }
-                return null;
-            }
-            if (!finished) {
-                process.destroyForcibly();
-                logger.debug("Time out executing command: {}", String.join(" ", command));
-                // optional short grace wait
-                try {
-                    process.waitFor(200, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
-                return null;
-            }
-            return process;
-        } catch (Exception e) {
-            log2WarnOnce("Failed to execute command: {}", String.join(" ", command), e);
-            return null;
-        }
-    }
-
-    /**
      * Executes an OS process with the given timeout and command (String... args) and parses its output line by line
      * using {@link #parseLine(String)}. Timeout is enforced.
      * 
@@ -595,12 +556,12 @@ public class MacResolver {
      * @param command the command and its arguments to execute
      */
     private void runCommandAndParse(Duration timeout, String... command) {
-        Process process = runProcess(timeout, command);
-        if (process == null) {
+        String response = ExecUtil.executeCommandLineAndWaitResponse(timeout, command);
+        if (response == null) {
+            log2WarnOnce("No response from command: {}", String.join(" ", command));
             return;
         }
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new StringReader(response))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 parseLine(line);

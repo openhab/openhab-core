@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.net;
+package org.openhab.core.io.net.mac;
 
 import static org.junit.jupiter.api.Assertions.*;
 
