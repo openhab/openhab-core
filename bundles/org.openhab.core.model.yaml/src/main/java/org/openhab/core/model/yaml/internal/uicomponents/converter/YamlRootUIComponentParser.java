@@ -10,17 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.yaml.internal.widgets.converter;
+package org.openhab.core.model.yaml.internal.uicomponents.converter;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.YamlModelRepository;
-import org.openhab.core.model.yaml.internal.widgets.YamlWidgetProvider;
+import org.openhab.core.model.yaml.internal.uicomponents.YamlBlocksProvider;
+import org.openhab.core.model.yaml.internal.uicomponents.YamlWidgetProvider;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.converter.RootUIComponentParser;
 import org.osgi.service.component.annotations.Activate;
@@ -28,22 +30,24 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * {@link YamlWidgetParser} is the YAML parser for UI Widget objects.
+ * {@link YamlRootUIComponentParser} is the YAML parser for UI component objects.
  *
  * @author Ravi Nadahar - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = { RootUIComponentParser.class })
-public class YamlWidgetParser implements RootUIComponentParser {
+public class YamlRootUIComponentParser implements RootUIComponentParser {
 
     private final YamlModelRepository modelRepository;
     private final YamlWidgetProvider widgetProvider;
+    private final YamlBlocksProvider blocksProvider;
 
     @Activate
-    public YamlWidgetParser(@Reference YamlModelRepository modelRepository,
-            @Reference YamlWidgetProvider widgetProvider) {
+    public YamlRootUIComponentParser(@Reference YamlModelRepository modelRepository,
+            @Reference YamlWidgetProvider widgetProvider, @Reference YamlBlocksProvider blocksProvider) {
         this.modelRepository = modelRepository;
         this.widgetProvider = widgetProvider;
+        this.blocksProvider = blocksProvider;
     }
 
     @Override
@@ -59,7 +63,8 @@ public class YamlWidgetParser implements RootUIComponentParser {
 
     @Override
     public Collection<RootUIComponent> getParsedObjects(String modelName) {
-        return widgetProvider.getAllFromModel(modelName);
+        return Stream.concat(widgetProvider.getAllFromModel(modelName).stream(),
+                blocksProvider.getAllFromModel(modelName).stream()).toList();
     }
 
     @Override
