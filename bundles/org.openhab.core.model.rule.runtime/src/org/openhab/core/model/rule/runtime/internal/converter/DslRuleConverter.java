@@ -329,7 +329,7 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                         if (!scriptContent.endsWith("\n")) {
                             scriptContent += '\n';
                         }
-                        generated = m.replaceFirst(scriptContent);
+                        generated = m.replaceFirst(Matcher.quoteReplacement(scriptContent));
                     }
                 }
                 m = PLACEHOLDER_PATTERN.matcher(generated);
