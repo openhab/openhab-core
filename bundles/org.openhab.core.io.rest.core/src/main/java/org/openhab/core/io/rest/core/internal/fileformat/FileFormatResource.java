@@ -1044,14 +1044,15 @@ public class FileFormatResource implements RESTResource {
                 tags.add(tag);
             }
         }
+        Comparator<SemanticTag> semanticTagComparator = (tag1, tag2) -> semanticTagCompare(tag1, tag2);
         if (hideNonEditableTags) {
-            tags = tags.stream().filter(tag -> semanticTagRegistry.isEditable(tag))
-                    .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+            tags = tags.stream().filter(tag -> semanticTagRegistry.isEditable(tag)).sorted(semanticTagComparator)
+                    .toList();
         } else if (hideDefaultTags) {
-            tags = tags.stream().filter(tag -> !semanticTagRegistry.isDefault(tag))
-                    .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+            tags = tags.stream().filter(tag -> !semanticTagRegistry.isDefault(tag)).sorted(semanticTagComparator)
+                    .toList();
         } else {
-            tags = tags.stream().sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+            tags = tags.stream().sorted(semanticTagComparator).toList();
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -1158,6 +1159,7 @@ public class FileFormatResource implements RESTResource {
                 break;
             case "application/yaml":
                 if (tagSerializer != null) {
+                    tags.sort((tag1, tag2) -> semanticTagCompare(tag1, tag2));
                     tagSerializer.setSemanticTagsToBeSerialized(genId, tags);
                 }
                 if (thingSerializer != null) {
@@ -1552,6 +1554,35 @@ public class FileFormatResource implements RESTResource {
         Configuration config = new Configuration(configParams);
         return ThingFactory.createThing(thingType, result.getThingUID(), config, result.getBridgeUID(),
                 configDescRegistry);
+    }
+
+    /**
+     * Compare two semantic tags to have a consistent order in the output with Location tags first.
+     *
+     * @param tag1 first semantic tag
+     * @param tag2 second semantic tag
+     * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater
+     *         than the second.
+     */
+    private static int semanticTagCompare(SemanticTag tag1, SemanticTag tag2) {
+        if (tag1.getUID().startsWith("Location") && !tag2.getUID().startsWith("Location")) {
+            return -1;
+        } else if (!tag1.getUID().startsWith("Location") && tag2.getUID().startsWith("Location")) {
+            return 1;
+        } else if (tag1.getUID().startsWith("Equipment") && !tag2.getUID().startsWith("Equipment")) {
+            return -1;
+        } else if (!tag1.getUID().startsWith("Equipment") && tag2.getUID().startsWith("Equipment")) {
+            return 1;
+        } else if (tag1.getUID().startsWith("Point") && !tag2.getUID().startsWith("Point")) {
+            return -1;
+        } else if (!tag1.getUID().startsWith("Point") && tag2.getUID().startsWith("Point")) {
+            return 1;
+        } else if (tag1.getUID().startsWith("Property") && !tag2.getUID().startsWith("Property")) {
+            return -1;
+        } else if (!tag1.getUID().startsWith("Property") && tag2.getUID().startsWith("Property")) {
+            return 1;
+        }
+        return Comparator.comparing(SemanticTag::getUID).compare(tag1, tag2);
     }
 
     private @Nullable SemanticTagSerializer getSemanticTagSerializer(String mediaType) {
