@@ -52,6 +52,7 @@ import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationManager;
+import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -259,7 +260,9 @@ public class VoiceResource implements RESTResource {
     public Response getLLMTools(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
-        List<LLMToolDTO> dtos = llmToolRegistry.getAll().stream().map(tool -> LLMToolMapper.map(tool, locale)).toList();
+        List<LLMToolDTO> dtos = llmToolRegistry.getAll().stream()
+                .sorted(java.util.Comparator.comparing(LLMTool::getUID)).map(tool -> LLMToolMapper.map(tool, locale))
+                .toList();
         return Response.ok(dtos).build();
     }
 
