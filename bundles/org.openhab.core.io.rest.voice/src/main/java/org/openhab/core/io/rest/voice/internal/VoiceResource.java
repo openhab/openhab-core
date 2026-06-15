@@ -52,6 +52,8 @@ import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationManager;
+import org.openhab.core.voice.text.interpreter.llm.LLMTool;
+import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -95,17 +97,20 @@ public class VoiceResource implements RESTResource {
     private final AudioManager audioManager;
     private final VoiceManager voiceManager;
     private final ConversationManager conversationManager;
+    private final LLMToolRegistry llmToolRegistry;
 
     @Activate
     public VoiceResource( //
             final @Reference LocaleService localeService, //
             final @Reference AudioManager audioManager, //
             final @Reference VoiceManager voiceManager, //
-            final @Reference ConversationManager conversationManager) {
+            final @Reference ConversationManager conversationManager, //
+            final @Reference LLMToolRegistry llmToolRegistry) {
         this.localeService = localeService;
         this.audioManager = audioManager;
         this.voiceManager = voiceManager;
         this.conversationManager = conversationManager;
+        this.llmToolRegistry = llmToolRegistry;
     }
 
     @GET
@@ -245,6 +250,20 @@ public class VoiceResource implements RESTResource {
         } catch (InterpretationException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    @GET
+    @Path("/llmtools")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getLLMTools", summary = "Get the list of all LLM tools.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LLMToolDTO.class)))) })
+    public Response getLLMTools(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
+        final Locale locale = localeService.getLocale(language);
+        List<LLMToolDTO> dtos = llmToolRegistry.getAll().stream()
+                .sorted(java.util.Comparator.comparing(LLMTool::getUID)).map(tool -> LLMToolMapper.map(tool, locale))
+                .toList();
+        return Response.ok(dtos).build();
     }
 
     @GET

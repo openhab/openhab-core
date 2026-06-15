@@ -27,6 +27,8 @@ import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationManager;
+import org.openhab.core.voice.text.interpreter.llm.LLMTool;
+import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 
 /**
  * Test class for {@link VoiceResource}.
@@ -40,9 +42,10 @@ public class VoiceResourceTest {
     private AudioManager audioManager = mock(AudioManager.class);
     private VoiceManager voiceManager = mock(VoiceManager.class);
     private ConversationManager conversationManager = mock(ConversationManager.class);
+    private LLMToolRegistry llmToolRegistry = mock(LLMToolRegistry.class);
 
     private VoiceResource voiceResource = new VoiceResource(localeService, audioManager, voiceManager,
-            conversationManager);
+            conversationManager, llmToolRegistry);
 
     @SuppressWarnings("unchecked")
     @Test
@@ -75,5 +78,38 @@ public class VoiceResourceTest {
         assertEquals("conv-2", dto2.id());
         assertEquals(Instant.ofEpochMilli(3000), dto2.created());
         assertEquals(Instant.ofEpochMilli(4000), dto2.lastUpdated());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetLLMTools() {
+        LLMTool tool1 = mock(LLMTool.class);
+        when(tool1.getUID()).thenReturn("tool-1");
+        when(tool1.getLabel(any())).thenReturn("Tool 1");
+        when(tool1.getDescription(any())).thenReturn("Description of tool 1");
+
+        LLMTool tool2 = mock(LLMTool.class);
+        when(tool2.getUID()).thenReturn("tool-2");
+        when(tool2.getLabel(any())).thenReturn("Tool 2");
+        when(tool2.getDescription(any())).thenReturn("Description of tool 2");
+
+        when(llmToolRegistry.getAll()).thenReturn(List.of(tool1, tool2));
+
+        Response response = voiceResource.getLLMTools(null);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        List<LLMToolDTO> entity = (List<LLMToolDTO>) response.getEntity();
+        assertNotNull(entity);
+        assertEquals(2, entity.size());
+
+        LLMToolDTO dto1 = entity.get(0);
+        assertEquals("tool-1", dto1.id());
+        assertEquals("Tool 1", dto1.label());
+        assertEquals("Description of tool 1", dto1.description());
+
+        LLMToolDTO dto2 = entity.get(1);
+        assertEquals("tool-2", dto2.id());
+        assertEquals("Tool 2", dto2.label());
+        assertEquals("Description of tool 2", dto2.description());
     }
 }
