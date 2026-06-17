@@ -12,6 +12,11 @@
  */
 package org.openhab.core.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,6 +34,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.system.StartlevelEvent;
@@ -83,6 +89,8 @@ public class StartLevelService {
     public static final int STARTLEVEL_UI = 70;
     public static final int STARTLEVEL_THINGS = 80;
     public static final int STARTLEVEL_COMPLETE = 100;
+
+    private static final String STARTLEVEL_FILE = "openhab-start-level";
 
     private final Logger logger = LoggerFactory.getLogger(StartLevelService.class);
 
@@ -246,6 +254,7 @@ public class StartLevelService {
         if (job != null) {
             job.cancel(true);
         }
+        atomicSaveFile(0);
     }
 
     private void setStartLevel(int level) {
@@ -255,9 +264,42 @@ public class StartLevelService {
         }
         openHABStartLevel = level;
         scheduler.submit(() -> {
+            atomicSaveFile(level);
             StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level);
             eventPublisher.post(startlevelEvent);
             logger.debug("Reached start level {}", level);
         });
+    }
+
+    /**
+     * Saves the given start level to a specific file in the Karaf data directory. Uses atomic file
+     * operations to ensure that the file is written fully or not at all.
+     */
+    private void atomicSaveFile(int level) {
+        try {
+            String userDataPath = OpenHAB.getUserDataFolder();
+            if (userDataPath == null) {
+                throw new IllegalArgumentException("User data folder property not set");
+            }
+            Path path = Path.of(userDataPath);
+            if (!Files.isDirectory(path)) {
+                throw new IllegalArgumentException("User data path is not a directory: " + userDataPath);
+            }
+            Path file = path.resolve(STARTLEVEL_FILE);
+            Path temp = Files.createTempFile(path, STARTLEVEL_FILE, ".tmp");
+            try {
+                Files.writeString(temp, Integer.toString(level), StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE);
+                Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (IOException e) {
+                try {
+                    Files.deleteIfExists(temp);
+                } catch (IOException ignore) {
+                }
+                throw e;
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            logger.debug("Unable to write openHAB start level marker file", e);
+        }
     }
 }
