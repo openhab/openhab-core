@@ -12,6 +12,10 @@
  */
 package org.openhab.core.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashSet;
@@ -74,6 +78,7 @@ import org.slf4j.LoggerFactory;
 public class StartLevelService {
 
     public static final String STARTLEVEL_MARKER_TYPE = "startlevel";
+    private static final String STARTLEVEL_MARKER_FILE = "openhab.startlevel.current";
 
     public static final int STARTLEVEL_OSGI = 10;
     public static final int STARTLEVEL_MODEL = 20;
@@ -255,9 +260,30 @@ public class StartLevelService {
         }
         openHABStartLevel = level;
         scheduler.submit(() -> {
+            writeCurrentStartLevelFile(level);
             StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level);
             eventPublisher.post(startlevelEvent);
             logger.debug("Reached start level {}", level);
         });
+    }
+
+    /**
+     * Writes the current start level to a marker file in the karaf data directory.
+     * This is used to determine the last reached start level on startup.
+     *
+     * @param level the current start level
+     */
+    private void writeCurrentStartLevelFile(int level) {
+        String userDataPath = System.getProperty("karaf.data");
+        if (userDataPath != null && !userDataPath.isBlank()) {
+            Path marker = Path.of(userDataPath, STARTLEVEL_MARKER_FILE);
+            try {
+                Files.writeString(marker, Integer.toString(level), StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+                return;
+            } catch (IOException e) {
+            }
+        }
+        logger.debug("Unable to write openHAB start level marker file");
     }
 }
