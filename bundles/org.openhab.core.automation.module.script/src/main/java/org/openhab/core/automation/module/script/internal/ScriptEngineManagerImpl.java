@@ -32,6 +32,7 @@ import javax.script.SimpleScriptContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.LockableScriptEngine;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
@@ -56,7 +57,6 @@ import org.slf4j.LoggerFactory;
 @Component(service = ScriptEngineManager.class)
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
-    private static final long LOCK_ACQUISITION_TIMEOUT_S = 60L;
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
@@ -164,10 +164,12 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             return false;
         }
         ScriptEngine engine = container.getScriptEngine();
-        if (engine instanceof Lock lock) {
+        if (engine instanceof LockableScriptEngine lockable) {
+            Lock lock = lockable.getLock();
+            long timeout = lockable.getLockAcquisitionTimeoutMs();
             boolean locked;
             try {
-                locked = lock.tryLock(LOCK_ACQUISITION_TIMEOUT_S, TimeUnit.SECONDS);
+                locked = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 logger.error("Interrupted while waiting to acquire the lock while loading script for engine '{}'",
@@ -182,9 +184,15 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     lock.unlock();
                 }
             } else {
-                logger.error(
-                        "Failed to acquire the lock while loading script for engine '{}' within {} seconds. Aborting loading of script.",
-                        engineIdentifier, LOCK_ACQUISITION_TIMEOUT_S);
+                if (timeout < 2000L) {
+                    logger.error(
+                            "Failed to acquire the lock while loading script for engine '{}' within {} milliseconds. Aborting loading of script.",
+                            engineIdentifier, timeout);
+                } else {
+                    logger.error(
+                            "Failed to acquire the lock while loading script for engine '{}' within {} seconds. Aborting loading of script.",
+                            engineIdentifier, TimeUnit.MILLISECONDS.toSeconds(timeout));
+                }
                 return false;
             }
         } else {
