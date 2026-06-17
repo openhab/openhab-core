@@ -14,6 +14,8 @@ package org.openhab.core.automation.integration.test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -162,8 +164,14 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
         };
 
+        int expectedItemCount = itemProvider.getAll().size();
         registerService(itemProvider);
         registerVolatileStorageService();
+
+        waitForAssert(() -> {
+            ItemRegistry registry = getService(ItemRegistry.class);
+            assertThat(registry.getAll(), hasSize(greaterThanOrEqualTo(expectedItemCount)));
+        }, 5000, 100);
 
         StorageService storageService = getService(StorageService.class);
         ruleRegistry = getService(RuleRegistry.class);
