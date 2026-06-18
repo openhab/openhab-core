@@ -15,6 +15,7 @@ package org.openhab.core.service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -78,7 +79,6 @@ import org.slf4j.LoggerFactory;
 public class StartLevelService {
 
     public static final String STARTLEVEL_MARKER_TYPE = "startlevel";
-    private static final String STARTLEVEL_MARKER_FILE = "openhab.startlevel.current";
 
     public static final int STARTLEVEL_OSGI = 10;
     public static final int STARTLEVEL_MODEL = 20;
@@ -88,6 +88,8 @@ public class StartLevelService {
     public static final int STARTLEVEL_UI = 70;
     public static final int STARTLEVEL_THINGS = 80;
     public static final int STARTLEVEL_COMPLETE = 100;
+
+    private static final String STARTLEVEL_FILE = "start-level";
 
     private final Logger logger = LoggerFactory.getLogger(StartLevelService.class);
 
@@ -245,6 +247,7 @@ public class StartLevelService {
 
     @Deactivate
     protected void deactivate() {
+        atomicSaveFile(0);
         slmarker.clear();
         trackers.values().forEach(readyService::unregisterTracker);
         ScheduledFuture<?> job = this.job;
@@ -260,7 +263,7 @@ public class StartLevelService {
         }
         openHABStartLevel = level;
         scheduler.submit(() -> {
-            writeCurrentStartLevelFile(level);
+            atomicSaveFile(level);
             StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level);
             eventPublisher.post(startlevelEvent);
             logger.debug("Reached start level {}", level);
@@ -268,22 +271,33 @@ public class StartLevelService {
     }
 
     /**
-     * Writes the current start level to a marker file in the karaf data directory.
-     * This is used to determine the last reached start level on startup.
-     *
-     * @param level the current start level
+     * Saves the given start level to a specific file in the Karaf data directory. Uses atomic file
+     * operations to ensure that the file is written fully or not at all.
      */
-    private void writeCurrentStartLevelFile(int level) {
-        String userDataPath = System.getProperty("karaf.data");
-        if (userDataPath != null && !userDataPath.isBlank()) {
-            Path marker = Path.of(userDataPath, STARTLEVEL_MARKER_FILE);
-            try {
-                Files.writeString(marker, Integer.toString(level), StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
-                return;
-            } catch (IOException e) {
+    private void atomicSaveFile(int level) {
+        try {
+            String userDataPath = System.getProperty("karaf.data");
+            if (userDataPath == null) {
+                throw new IllegalArgumentException("karaf.data property not set");
             }
+            Path path = Path.of(userDataPath);
+            if (!Files.isDirectory(path)) {
+                throw new IllegalArgumentException("karaf.data path is not a directory: " + userDataPath);
+            }
+            Path file = path.resolve(STARTLEVEL_FILE);
+            Path temp = Files.createTempFile(path, STARTLEVEL_FILE, ".tmp");
+            try {
+                Files.writeString(temp, Integer.toString(level), StandardOpenOption.TRUNCATE_EXISTING);
+                Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (IOException e) {
+                try {
+                    Files.deleteIfExists(temp);
+                } catch (IOException ignore) {
+                }
+                throw e;
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            logger.debug("Unable to write openHAB start level marker file", e);
         }
-        logger.debug("Unable to write openHAB start level marker file");
     }
 }
