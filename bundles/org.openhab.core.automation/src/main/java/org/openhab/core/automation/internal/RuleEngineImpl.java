@@ -923,8 +923,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (started && slTriggers.stream()
                 .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
                         .intValue() <= startLevel)) {
-            runNow(rule.getUID(), true, Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES,
-                    "event", SystemEventFactory.createStartlevelEvent(startLevel)));
+            // Run off the rule adding thread as running inline can deadlock script loading.
+            getScheduledExecutor().submit(() -> runNow(ruleUID, true,
+                    Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",
+                            SystemEventFactory.createStartlevelEvent(startLevel))));
         }
 
         return true;
