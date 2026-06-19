@@ -154,11 +154,15 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
                 throw new MarketplaceHandlerException("Parsing of YAML failed: " + String.join(", ", errors), null);
             }
             if (!warnings.isEmpty()) {
-                logger.warn("Parsing of markedplace block library add-on {} has warnings: {}", id,
+                logger.warn("Parsing of marketplace block library add-on {} has warnings: {}", id,
                         String.join(", ", warnings));
             }
-            Collection<? extends RootUIComponent> blocksLibraries = parser.getParsedObjects(modelName);
-            parser.finishParsingFormat(modelName);
+            Collection<? extends RootUIComponent> blocksLibraries;
+            try {
+                blocksLibraries = parser.getParsedObjects(modelName);
+            } finally {
+                parser.finishParsingFormat(modelName);
+            }
 
             for (RootUIComponent blocks : blocksLibraries) {
                 // add a tag with the add-on ID to be able to identify the block library in the registry

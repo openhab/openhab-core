@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.Deactivate;
 @Component(immediate = true, service = { UIComponentProvider.class, YamlBlocksProvider.class, YamlModelListener.class })
 public class YamlBlocksProvider extends AbstractYamlRootUIComponentProvider<YamlBlocksDTO> {
 
-    public static final String WIDGETS_NAMESPACE = "ui:blocks";
+    public static final String BLOCKS_NAMESPACE = "ui:blocks";
 
     @Override
     @Deactivate
@@ -40,7 +40,7 @@ public class YamlBlocksProvider extends AbstractYamlRootUIComponentProvider<Yaml
 
     @Override
     public String getNamespace() {
-        return WIDGETS_NAMESPACE;
+        return BLOCKS_NAMESPACE;
     }
 
     @Override

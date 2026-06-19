@@ -14,7 +14,6 @@ package org.openhab.core.model.yaml.internal.uicomponents;
 
 import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
 
-import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -34,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * {@link AbstractYamlRootUIComponentProvider} is an abstract class that contains common functionality needed
- * when implementing a {@link Provider} for UI components in YAML format.
+ * when implementing a {@link UIComponentProvider} for UI components in YAML format.
  *
  * @author Ravi Nadahar - Initial contribution
  *

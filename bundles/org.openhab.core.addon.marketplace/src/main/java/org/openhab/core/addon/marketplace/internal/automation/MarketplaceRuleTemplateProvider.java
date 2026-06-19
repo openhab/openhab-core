@@ -194,11 +194,14 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
                         null));
             }
             if (!warnings.isEmpty()) {
-                logger.warn("Parsing of markedplace rule template add-on {} has warnings: {}", uid,
+                logger.warn("Parsing of marketplace rule template add-on {} has warnings: {}", uid,
                         String.join(", ", warnings));
             }
-            templates = Set.copyOf(parser.getParsedObjects(modelName));
-            parser.finishParsingFormat(modelName);
+            try {
+                templates = Set.copyOf(parser.getParsedObjects(modelName));
+            } finally {
+                parser.finishParsingFormat(modelName);
+            }
         } else {
             // Use the "old YAML" parser
             Parser<RuleTemplate> parser = parsers.get(format);

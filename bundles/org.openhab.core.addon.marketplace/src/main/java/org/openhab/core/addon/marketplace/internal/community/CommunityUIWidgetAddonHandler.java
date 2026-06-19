@@ -156,11 +156,15 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
                 throw new MarketplaceHandlerException("Parsing of YAML failed: " + String.join(", ", errors), null);
             }
             if (!warnings.isEmpty()) {
-                logger.warn("Parsing of markedplace widget add-on {} has warnings: {}", id,
+                logger.warn("Parsing of marketplace widget add-on {} has warnings: {}", id,
                         String.join(", ", warnings));
             }
-            Collection<? extends RootUIComponent> widgets = parser.getParsedObjects(modelName);
-            parser.finishParsingFormat(modelName);
+            Collection<? extends RootUIComponent> widgets;
+            try {
+                widgets = parser.getParsedObjects(modelName);
+            } finally {
+                parser.finishParsingFormat(modelName);
+            }
 
             for (RootUIComponent widget : widgets) {
                 // add a tag with the add-on ID to be able to identify the widget in the registry
