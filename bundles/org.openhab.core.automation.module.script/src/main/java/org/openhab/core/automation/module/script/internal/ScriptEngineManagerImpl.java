@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 import javax.script.Invocable;
 import javax.script.ScriptContext;
@@ -31,6 +32,7 @@ import javax.script.SimpleScriptContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.LockableScriptEngine;
 import org.openhab.core.automation.module.script.ScriptDependencyTracker;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
@@ -159,32 +161,69 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         ScriptEngineContainer container = loadedScriptEngineInstances.get(engineIdentifier);
         if (container == null) {
             logger.error("Could not load script, as no ScriptEngine has been created");
-        } else {
-            ScriptEngine engine = container.getScriptEngine();
-            try {
-                engine.eval(scriptData);
-                if (engine instanceof Invocable inv) {
-                    try {
-                        inv.invokeFunction("scriptLoaded", engineIdentifier);
-                    } catch (NoSuchMethodException e) {
-                        logger.trace("scriptLoaded() is not defined in the script: {}", engineIdentifier);
-                    }
-                } else {
-                    logger.trace("ScriptEngine does not support Invocable interface");
-                }
-                return true;
-            } catch (Exception ex) {
-                logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
-                // Only call logger if debug level is actually enabled, because OPS4J Pax Logging holds (at least for
-                // some time) a reference to the exception and its cause, which may hold a reference to the script
-                // engine.
-                // This prevents garbage collection (at least for some time) to remove the script engine from heap.
-                if (logger.isDebugEnabled()) {
-                    logger.debug("", ex);
-                }
-            }
+            return false;
         }
-        return false;
+        ScriptEngine engine = container.getScriptEngine();
+        if (engine instanceof LockableScriptEngine lockable) {
+            Lock lock = lockable.getLock();
+            long timeout = lockable.getLockAcquisitionTimeoutMs();
+            boolean locked;
+            try {
+                locked = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.error("Interrupted while waiting to acquire the lock while loading script for engine '{}'",
+                        engineIdentifier);
+                logger.trace("", e);
+                return false;
+            }
+            if (locked) {
+                try {
+                    return runScript(engineIdentifier, engine, scriptData);
+                } finally {
+                    lock.unlock();
+                }
+            } else {
+                if (timeout < 2000L) {
+                    logger.error(
+                            "Failed to acquire the lock while loading script for engine '{}' within {} milliseconds. Aborting loading of script.",
+                            engineIdentifier, timeout);
+                } else {
+                    logger.error(
+                            "Failed to acquire the lock while loading script for engine '{}' within {} seconds. Aborting loading of script.",
+                            engineIdentifier, TimeUnit.MILLISECONDS.toSeconds(timeout));
+                }
+                return false;
+            }
+        } else {
+            return runScript(engineIdentifier, engine, scriptData);
+        }
+    }
+
+    private boolean runScript(String engineIdentifier, ScriptEngine engine, InputStreamReader scriptData) {
+        try {
+            engine.eval(scriptData);
+            if (engine instanceof Invocable inv) {
+                try {
+                    inv.invokeFunction("scriptLoaded", engineIdentifier);
+                } catch (NoSuchMethodException e) {
+                    logger.trace("scriptLoaded() is not defined in the script: {}", engineIdentifier);
+                }
+            } else {
+                logger.trace("ScriptEngine does not support Invocable interface");
+            }
+            return true;
+        } catch (Exception ex) {
+            logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
+            // Only call logger if debug level is actually enabled, because OPS4J Pax Logging holds (at least for
+            // some time) a reference to the exception and its cause, which may hold a reference to the script
+            // engine.
+            // This prevents garbage collection (at least for some time) to remove the script engine from heap.
+            if (logger.isDebugEnabled()) {
+                logger.debug("", ex);
+            }
+            return false;
+        }
     }
 
     @Override
