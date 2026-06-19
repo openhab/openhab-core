@@ -247,13 +247,13 @@ public class StartLevelService {
 
     @Deactivate
     protected void deactivate() {
-        atomicSaveFile(0);
         slmarker.clear();
         trackers.values().forEach(readyService::unregisterTracker);
         ScheduledFuture<?> job = this.job;
         if (job != null) {
             job.cancel(true);
         }
+        atomicSaveFile(0);
     }
 
     private void setStartLevel(int level) {
@@ -287,7 +287,8 @@ public class StartLevelService {
             Path file = path.resolve(STARTLEVEL_FILE);
             Path temp = Files.createTempFile(path, STARTLEVEL_FILE, ".tmp");
             try {
-                Files.writeString(temp, Integer.toString(level), StandardOpenOption.TRUNCATE_EXISTING);
+                Files.writeString(temp, Integer.toString(level), StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE);
                 Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException e) {
                 try {
