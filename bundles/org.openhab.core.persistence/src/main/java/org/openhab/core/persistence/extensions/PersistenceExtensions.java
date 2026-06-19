@@ -2053,8 +2053,7 @@ public class PersistenceExtensions {
      * A left approximation type is used for the Riemann sum.
      *
      * <b>Note:</b> The time dimension in the result is in seconds, therefore if you do not use QuantityType results,
-     * you may have to
-     * multiply or divide to get the result in the expected scale.
+     * you may have to multiply or divide to get the result in the expected scale.
      * The default {@link PersistenceService} is used.
      *
      * <b>Note:</b> If the {@link Item} has a dimension, the calculation will be done using the {@link Item}'s
