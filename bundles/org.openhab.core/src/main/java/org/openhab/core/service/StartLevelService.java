@@ -89,7 +89,7 @@ public class StartLevelService {
     public static final int STARTLEVEL_THINGS = 80;
     public static final int STARTLEVEL_COMPLETE = 100;
 
-    private static final String STARTLEVEL_FILE = "start-level";
+    private static final String STARTLEVEL_FILE = "openhab-start-level";
 
     private final Logger logger = LoggerFactory.getLogger(StartLevelService.class);
 
