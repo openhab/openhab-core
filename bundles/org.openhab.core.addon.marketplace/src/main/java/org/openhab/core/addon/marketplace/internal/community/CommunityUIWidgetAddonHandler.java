@@ -22,7 +22,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.Addon;
@@ -31,9 +36,12 @@ import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
+import org.openhab.core.ui.components.converter.RootUIComponentParser;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +63,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
 
     private final ObjectMapper yamlMapper;
     private final UIComponentRegistry widgetRegistry;
+    private final Map<String, RootUIComponentParser> parsers = new ConcurrentHashMap<>();
 
     @Activate
     public CommunityUIWidgetAddonHandler(final @Reference UIComponentRegistryFactory uiComponentRegistryFactory) {
@@ -64,6 +73,15 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
         this.yamlMapper.setDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa", Locale.ENGLISH));
         yamlMapper.setAnnotationIntrospector(new AnnotationIntrospectorPair(new SerializedNameAnnotationIntrospector(),
                 yamlMapper.getSerializationConfig().getAnnotationIntrospector()));
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addParser(RootUIComponentParser parser) {
+        parsers.put(parser.getParserFormat(), parser);
+    }
+
+    protected void removeParser(RootUIComponentParser parser) {
+        parsers.remove(parser.getParserFormat());
     }
 
     @Override
@@ -118,15 +136,52 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
         }
     }
 
-    private void addWidgetAsYAML(String id, String yaml) {
-        try {
-            RootUIComponent widget = yamlMapper.readValue(yaml, RootUIComponent.class);
-            // add a tag with the add-on ID to be able to identify the widget in the registry
-            widget.addTag(id);
-            widgetRegistry.add(widget);
-        } catch (IOException e) {
-            logger.error("Unable to parse YAML: {}", e.getMessage());
-            throw new IllegalArgumentException("Unable to parse YAML");
+    private void addWidgetAsYAML(String id, String yaml) throws MarketplaceHandlerException {
+        if (yaml.trim().startsWith("version:")) {
+            // Use the "new YAML" parser
+            RootUIComponentParser parser = parsers.get("YAML");
+
+            // The parser might not have been registered yet
+            if (parser == null) {
+                throw new MarketplaceHandlerException("No widget YAML parser available", null);
+            }
+
+            List<String> errors = new ArrayList<>();
+            List<String> warnings = new ArrayList<>();
+            String modelName = parser.startParsingFormat(yaml, errors, warnings);
+            if (modelName == null || !errors.isEmpty()) {
+                if (modelName != null) {
+                    parser.finishParsingFormat(modelName);
+                }
+                throw new MarketplaceHandlerException("Parsing of YAML failed: " + String.join(", ", errors), null);
+            }
+            if (!warnings.isEmpty()) {
+                logger.warn("Parsing of marketplace widget add-on {} has warnings: {}", id,
+                        String.join(", ", warnings));
+            }
+            Collection<? extends RootUIComponent> widgets;
+            try {
+                widgets = parser.getParsedObjects(modelName);
+            } finally {
+                parser.finishParsingFormat(modelName);
+            }
+
+            for (RootUIComponent widget : widgets) {
+                // add a tag with the add-on ID to be able to identify the widget in the registry
+                widget.addTag(id);
+                widgetRegistry.add(widget);
+            }
+        } else {
+            // Use the "old YAML" parser
+            try {
+                RootUIComponent widget = yamlMapper.readValue(yaml, RootUIComponent.class);
+                // add a tag with the add-on ID to be able to identify the widget in the registry
+                widget.addTag(id);
+                widgetRegistry.add(widget);
+            } catch (IOException e) {
+                logger.error("Unable to parse YAML: {}", e.getMessage());
+                throw new IllegalArgumentException("Unable to parse YAML");
+            }
         }
     }
 }

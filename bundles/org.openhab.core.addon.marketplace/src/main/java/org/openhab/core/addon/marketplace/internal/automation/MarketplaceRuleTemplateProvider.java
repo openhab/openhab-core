@@ -16,8 +16,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
+import org.openhab.core.automation.converter.RuleTemplateParser;
 import org.openhab.core.automation.dto.RuleTemplateDTO;
 import org.openhab.core.automation.dto.RuleTemplateDTOMapper;
 import org.openhab.core.automation.parser.Parser;
@@ -60,6 +63,7 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
         implements RuleTemplateProvider {
 
     private final Map<String, Parser<RuleTemplate>> parsers = new ConcurrentHashMap<>();
+    private final Map<String, RuleTemplateParser> fileConversionParsers = new ConcurrentHashMap<>();
     ObjectMapper yamlMapper;
 
     @Activate
@@ -92,6 +96,15 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
         String parserType = properties.get(Parser.FORMAT);
         parserType = parserType == null ? Parser.FORMAT_JSON : parserType;
         parsers.remove(parserType);
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addRuleTemplateParser(RuleTemplateParser templateParser) {
+        fileConversionParsers.put(templateParser.getParserFormat(), templateParser);
+    }
+
+    protected void removeRuleTemplateParser(RuleTemplateParser templateParser) {
+        fileConversionParsers.remove(templateParser.getParserFormat());
     }
 
     @Override
@@ -158,30 +171,65 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
      * @throws ValidationException If the validation fails.
      */
     protected void addTemplate(String uid, String content, String format) throws ParsingException, ValidationException {
-        Parser<RuleTemplate> parser = parsers.get(format);
+        Set<RuleTemplate> templates;
+        if (Parser.FORMAT_YAML.equals(format) && content.trim().startsWith("version:")) {
+            // Use the "new YAML" parser
+            RuleTemplateParser parser = fileConversionParsers.get("YAML");
 
-        // The parser might not have been registered yet
-        if (parser == null) {
-            throw new ParsingException(new ParsingNestedException(ParsingNestedException.TEMPLATE,
-                    "No " + format.toUpperCase(Locale.ROOT) + " parser available", null));
+            // The parser might not have been registered yet
+            if (parser == null) {
+                throw new ParsingException(new ParsingNestedException(ParsingNestedException.TEMPLATE,
+                        "No " + format.toUpperCase(Locale.ROOT) + " parser available", null));
+            }
+
+            List<String> errors = new ArrayList<>();
+            List<String> warnings = new ArrayList<>();
+            String modelName = parser.startParsingFormat(content, errors, warnings);
+            if (modelName == null || !errors.isEmpty()) {
+                if (modelName != null) {
+                    parser.finishParsingFormat(modelName);
+                }
+                throw new ParsingException(new ParsingNestedException(ParsingNestedException.TEMPLATE,
+                        "Parsing of " + format.toUpperCase(Locale.ROOT) + " failed: " + String.join(", ", errors),
+                        null));
+            }
+            if (!warnings.isEmpty()) {
+                logger.warn("Parsing of marketplace rule template add-on {} has warnings: {}", uid,
+                        String.join(", ", warnings));
+            }
+            try {
+                templates = Set.copyOf(parser.getParsedObjects(modelName));
+            } finally {
+                parser.finishParsingFormat(modelName);
+            }
+        } else {
+            // Use the "old YAML" parser
+            Parser<RuleTemplate> parser = parsers.get(format);
+
+            // The parser might not have been registered yet
+            if (parser == null) {
+                throw new ParsingException(new ParsingNestedException(ParsingNestedException.TEMPLATE,
+                        "No " + format.toUpperCase(Locale.ROOT) + " parser available", null));
+            }
+
+            try (InputStreamReader isr = new InputStreamReader(
+                    new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)))) {
+                templates = parser.parse(isr);
+            } catch (IOException e) {
+                // Impossible for ByteArrayInputStream
+                templates = Set.of();
+            }
         }
 
-        try (InputStreamReader isr = new InputStreamReader(
-                new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)))) {
-            Set<RuleTemplate> templates = parser.parse(isr);
-
-            // Add a tag with the marketplace add-on ID to be able to identify the template in the registry
-            Set<String> tags;
-            for (RuleTemplate template : templates) {
-                validateTemplate(template);
-                tags = new HashSet<String>(template.getTags());
-                tags.add(uid);
-                add(new RuleTemplate(template.getUID(), template.getLabel(), template.getDescription(), tags,
-                        template.getTriggers(), template.getConditions(), template.getActions(),
-                        template.getConfigurationDescriptions(), template.getVisibility()));
-            }
-        } catch (IOException e) {
-            // Impossible for ByteArrayInputStream
+        // Add a tag with the marketplace add-on ID to be able to identify the template in the registry
+        Set<String> tags;
+        for (RuleTemplate template : templates) {
+            validateTemplate(template);
+            tags = new HashSet<String>(template.getTags());
+            tags.add(uid);
+            add(new RuleTemplate(template.getUID(), template.getLabel(), template.getDescription(), tags,
+                    template.getTriggers(), template.getConditions(), template.getActions(),
+                    template.getConfigurationDescriptions(), template.getVisibility()));
         }
     }
 
