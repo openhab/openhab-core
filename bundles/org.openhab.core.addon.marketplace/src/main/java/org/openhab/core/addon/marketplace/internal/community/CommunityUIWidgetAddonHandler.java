@@ -108,6 +108,9 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
                 logger.error("UI Widget {} has neither download URL nor embedded content", addon.getUid());
                 throw new MarketplaceHandlerException("UI Widget has neither download URL nor embedded content", null);
             }
+        } catch (MarketplaceHandlerException e) {
+            logger.error("Failed to install widget '{}' from the marketplace: {}", addon.getId(), e.getMessage());
+            throw e;
         } catch (IOException e) {
             logger.error("Widget from marketplace cannot be downloaded: {}", e.getMessage());
             throw new MarketplaceHandlerException("Widget cannot be downloaded.", e);
@@ -180,7 +183,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
                 widgetRegistry.add(widget);
             } catch (IOException e) {
                 logger.error("Unable to parse YAML: {}", e.getMessage());
-                throw new IllegalArgumentException("Unable to parse YAML");
+                throw new MarketplaceHandlerException("Unable to parse YAML", e);
             }
         }
     }

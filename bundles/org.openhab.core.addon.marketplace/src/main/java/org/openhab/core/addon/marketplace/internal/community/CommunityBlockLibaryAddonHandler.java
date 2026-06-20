@@ -106,6 +106,10 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
                 throw new MarketplaceHandlerException("Block library has neither download URL nor embedded content",
                         null);
             }
+        } catch (MarketplaceHandlerException e) {
+            logger.error("Failed to install block library '{}' from the marketplace: {}", addon.getId(),
+                    e.getMessage());
+            throw e;
         } catch (IOException e) {
             logger.error("Block library from marketplace cannot be downloaded: {}", e.getMessage());
             throw new MarketplaceHandlerException("Block library cannot be downloaded.", e);
@@ -178,7 +182,7 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
                 blocksRegistry.add(blocks);
             } catch (IOException e) {
                 logger.error("Unable to parse YAML: {}", e.getMessage());
-                throw new IllegalArgumentException("Unable to parse YAML");
+                throw new MarketplaceHandlerException("Unable to parse YAML", e);
             }
         }
     }
