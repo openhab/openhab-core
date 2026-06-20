@@ -38,6 +38,7 @@ import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
 import org.openhab.core.ui.components.converter.RootUIComponentParser;
+import org.openhab.core.ui.components.converter.RootUIComponentParser.RootUIComponentType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -164,7 +165,7 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
             }
             Collection<? extends RootUIComponent> blocksLibraries;
             try {
-                blocksLibraries = parser.getParsedObjects(modelName);
+                blocksLibraries = parser.getParsedObjects(modelName, RootUIComponentType.BLOCK_LIBRARY);
             } finally {
                 parser.finishParsingFormat(modelName);
             }

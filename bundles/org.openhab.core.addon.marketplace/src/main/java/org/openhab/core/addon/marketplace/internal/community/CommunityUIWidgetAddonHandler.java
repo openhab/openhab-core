@@ -38,6 +38,7 @@ import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
 import org.openhab.core.ui.components.converter.RootUIComponentParser;
+import org.openhab.core.ui.components.converter.RootUIComponentParser.RootUIComponentType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -165,7 +166,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
             }
             Collection<? extends RootUIComponent> widgets;
             try {
-                widgets = parser.getParsedObjects(modelName);
+                widgets = parser.getParsedObjects(modelName, RootUIComponentType.WIDGET);
             } finally {
                 parser.finishParsingFormat(modelName);
             }

@@ -37,4 +37,23 @@ public interface RootUIComponentParser extends UIComponentParser {
      */
     @Override
     Collection<? extends RootUIComponent> getParsedObjects(String modelName);
+
+    /**
+     * Get a copy of the collection of {@link RootUIComponent} objects of the specified type, that were found when
+     * parsing the format.
+     *
+     * @param modelName the model name used when parsing.
+     * @param type the {@link RootUIComponentType} to retrieve.
+     * @return The {@link Collection} of {@link RootUIComponent}s.
+     *
+     * @implNote It's important that a copy of the {@link Collection} is returned, so that invoking
+     *           {@link #finishParsingFormat(String)} doesn't modify the returned result.
+     */
+    Collection<? extends RootUIComponent> getParsedObjects(String modelName, RootUIComponentType type);
+
+    public enum RootUIComponentType {
+        BLOCK_LIBRARY,
+        PAGE,
+        WIDGET
+    }
 }
