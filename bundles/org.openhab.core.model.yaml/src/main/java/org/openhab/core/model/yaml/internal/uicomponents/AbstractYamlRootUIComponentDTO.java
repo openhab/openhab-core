@@ -104,7 +104,7 @@ public abstract class AbstractYamlRootUIComponentDTO implements YamlElement, Clo
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof AbstractYamlRootUIComponentDTO)) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         AbstractYamlRootUIComponentDTO other = (AbstractYamlRootUIComponentDTO) obj;

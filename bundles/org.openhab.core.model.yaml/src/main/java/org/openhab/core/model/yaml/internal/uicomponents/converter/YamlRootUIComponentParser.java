@@ -68,6 +68,18 @@ public class YamlRootUIComponentParser implements RootUIComponentParser {
     }
 
     @Override
+    public Collection<? extends RootUIComponent> getParsedObjects(String modelName, RootUIComponentType type) {
+        switch (type) {
+            case BLOCK_LIBRARY:
+                return blocksProvider.getAllFromModel(modelName);
+            case WIDGET:
+                return widgetProvider.getAllFromModel(modelName);
+            default:
+                return List.of();
+        }
+    }
+
+    @Override
     public void finishParsingFormat(String modelName) {
         modelRepository.removeIsolatedModel(modelName);
     }

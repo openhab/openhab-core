@@ -33,10 +33,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
+import org.openhab.core.addon.marketplace.internal.util.Utils;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
 import org.openhab.core.ui.components.converter.RootUIComponentParser;
+import org.openhab.core.ui.components.converter.RootUIComponentParser.RootUIComponentType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -106,6 +108,10 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
                 throw new MarketplaceHandlerException("Block library has neither download URL nor embedded content",
                         null);
             }
+        } catch (MarketplaceHandlerException e) {
+            logger.error("Failed to install block library '{}' from the marketplace: {}", addon.getId(),
+                    e.getMessage());
+            throw e;
         } catch (IOException e) {
             logger.error("Block library from marketplace cannot be downloaded: {}", e.getMessage());
             throw new MarketplaceHandlerException("Block library cannot be downloaded.", e);
@@ -135,7 +141,7 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
     }
 
     private void addBlocksAsYAML(String id, String yaml) throws MarketplaceHandlerException {
-        if (yaml.trim().startsWith("version:")) {
+        if (Utils.isNewYaml(yamlMapper, yaml)) {
             // Use the "new YAML" parser
             RootUIComponentParser parser = parsers.get("YAML");
 
@@ -159,7 +165,7 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
             }
             Collection<? extends RootUIComponent> blocksLibraries;
             try {
-                blocksLibraries = parser.getParsedObjects(modelName);
+                blocksLibraries = parser.getParsedObjects(modelName, RootUIComponentType.BLOCK_LIBRARY);
             } finally {
                 parser.finishParsingFormat(modelName);
             }
@@ -178,7 +184,7 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
                 blocksRegistry.add(blocks);
             } catch (IOException e) {
                 logger.error("Unable to parse YAML: {}", e.getMessage());
-                throw new IllegalArgumentException("Unable to parse YAML");
+                throw new MarketplaceHandlerException("Unable to parse YAML", e);
             }
         }
     }

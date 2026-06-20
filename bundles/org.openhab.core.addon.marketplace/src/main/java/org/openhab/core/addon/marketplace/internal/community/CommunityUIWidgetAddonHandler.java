@@ -33,10 +33,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
+import org.openhab.core.addon.marketplace.internal.util.Utils;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
 import org.openhab.core.ui.components.converter.RootUIComponentParser;
+import org.openhab.core.ui.components.converter.RootUIComponentParser.RootUIComponentType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -108,6 +110,9 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
                 logger.error("UI Widget {} has neither download URL nor embedded content", addon.getUid());
                 throw new MarketplaceHandlerException("UI Widget has neither download URL nor embedded content", null);
             }
+        } catch (MarketplaceHandlerException e) {
+            logger.error("Failed to install widget '{}' from the marketplace: {}", addon.getId(), e.getMessage());
+            throw e;
         } catch (IOException e) {
             logger.error("Widget from marketplace cannot be downloaded: {}", e.getMessage());
             throw new MarketplaceHandlerException("Widget cannot be downloaded.", e);
@@ -137,7 +142,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
     }
 
     private void addWidgetAsYAML(String id, String yaml) throws MarketplaceHandlerException {
-        if (yaml.trim().startsWith("version:")) {
+        if (Utils.isNewYaml(yamlMapper, yaml)) {
             // Use the "new YAML" parser
             RootUIComponentParser parser = parsers.get("YAML");
 
@@ -161,7 +166,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
             }
             Collection<? extends RootUIComponent> widgets;
             try {
-                widgets = parser.getParsedObjects(modelName);
+                widgets = parser.getParsedObjects(modelName, RootUIComponentType.WIDGET);
             } finally {
                 parser.finishParsingFormat(modelName);
             }
@@ -180,7 +185,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
                 widgetRegistry.add(widget);
             } catch (IOException e) {
                 logger.error("Unable to parse YAML: {}", e.getMessage());
-                throw new IllegalArgumentException("Unable to parse YAML");
+                throw new MarketplaceHandlerException("Unable to parse YAML", e);
             }
         }
     }
