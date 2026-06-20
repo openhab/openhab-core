@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.addon.marketplace.internal.util.Utils;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.converter.RuleTemplateParser;
 import org.openhab.core.automation.dto.RuleTemplateDTO;
@@ -172,7 +173,7 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
      */
     protected void addTemplate(String uid, String content, String format) throws ParsingException, ValidationException {
         Set<RuleTemplate> templates;
-        if (Parser.FORMAT_YAML.equals(format) && content.trim().startsWith("version:")) {
+        if (Parser.FORMAT_YAML.equals(format) && Utils.isNewYaml(yamlMapper, content)) {
             // Use the "new YAML" parser
             RuleTemplateParser parser = fileConversionParsers.get("YAML");
 
@@ -203,7 +204,7 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
                 parser.finishParsingFormat(modelName);
             }
         } else {
-            // Use the "old YAML" parser
+            // Use the "old YAML" or JSON parser
             Parser<RuleTemplate> parser = parsers.get(format);
 
             // The parser might not have been registered yet

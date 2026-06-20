@@ -33,6 +33,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
+import org.openhab.core.addon.marketplace.internal.util.Utils;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
@@ -139,7 +140,7 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
     }
 
     private void addBlocksAsYAML(String id, String yaml) throws MarketplaceHandlerException {
-        if (yaml.trim().startsWith("version:")) {
+        if (Utils.isNewYaml(yamlMapper, yaml)) {
             // Use the "new YAML" parser
             RootUIComponentParser parser = parsers.get("YAML");
 
