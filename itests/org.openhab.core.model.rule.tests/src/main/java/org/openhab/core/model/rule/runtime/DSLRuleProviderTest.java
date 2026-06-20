@@ -54,6 +54,7 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.rule.jvmmodel.RulesRefresher;
 import org.openhab.core.model.rule.runtime.internal.DSLRuleProvider;
+import org.openhab.core.model.script.jvmmodel.ScriptItemRefresher;
 import org.openhab.core.model.script.runtime.internal.engine.DSLScriptEngine;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
@@ -90,7 +91,9 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         readyService = getService(ReadyService.class);
         assertThat(readyService, is(notNullValue()));
-        readyService.markReady(new ReadyMarker("rules", RulesRefresher.RULES_REFRESH));
+        readyService.markReady(
+                new ReadyMarker(ScriptItemRefresher.SCRIPTS_REFRESH_MARKER_TYPE, ScriptItemRefresher.SCRIPTS_REFRESH));
+        readyService.markReady(new ReadyMarker(RulesRefresher.RULES_REFRESH_MARKER_TYPE, RulesRefresher.RULES_REFRESH));
     }
 
     @AfterEach

@@ -61,18 +61,20 @@ public class RulesRefresher implements ReadyTracker {
     public static final String RULES_REFRESH_MARKER_TYPE = "rules";
     public static final String RULES_REFRESH = "refresh";
 
-    private final Logger logger = LoggerFactory.getLogger(RulesRefresher.class);
+    private final ReadyMarker MARKER = new ReadyMarker(RULES_REFRESH_MARKER_TYPE, RULES_REFRESH);
 
-    private @Nullable ScheduledFuture<?> job;
-    private final ScheduledExecutorService scheduler = Executors
-            .newSingleThreadScheduledExecutor(new NamedThreadFactory("rulesRefresher"));
-    private boolean started;
-    private final ReadyMarker marker = new ReadyMarker("rules", RULES_REFRESH);
+    private final Logger logger = LoggerFactory.getLogger(RulesRefresher.class);
 
     private final ModelRepository modelRepository;
     private final ItemRegistry itemRegistry;
     private final ThingRegistry thingRegistry;
     private final ReadyService readyService;
+
+    private final ScheduledExecutorService scheduler = Executors
+            .newSingleThreadScheduledExecutor(new NamedThreadFactory("rulesRefresher"));
+
+    private @Nullable ScheduledFuture<?> job;
+    private boolean started;
 
     private final ItemRegistryChangeListener itemRegistryChangeListener = new ItemRegistryChangeListener() {
         @Override
@@ -123,16 +125,17 @@ public class RulesRefresher implements ReadyTracker {
         this.itemRegistry = itemRegistry;
         this.thingRegistry = thingRegistry;
         this.readyService = readyService;
-    }
 
-    @Activate
-    protected void activate() {
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
                 .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
     }
 
     @Deactivate
     protected void deactivate() {
+        ScheduledFuture<?> localJob = job;
+        if (localJob != null && !localJob.isDone()) {
+            localJob.cancel(false);
+        }
         readyService.unregisterTracker(this);
     }
 
@@ -179,7 +182,7 @@ public class RulesRefresher implements ReadyTracker {
             }
             if (!started) {
                 started = true;
-                readyService.markReady(marker);
+                readyService.markReady(MARKER);
             }
         }, delay, TimeUnit.SECONDS);
     }
