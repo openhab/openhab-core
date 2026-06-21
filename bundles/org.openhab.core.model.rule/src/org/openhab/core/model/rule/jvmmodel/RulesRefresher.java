@@ -134,8 +134,10 @@ public class RulesRefresher implements ReadyTracker {
     protected void deactivate() {
         ScheduledFuture<?> localJob = job;
         if (localJob != null && !localJob.isDone()) {
-            localJob.cancel(false);
+            localJob.cancel(true);
         }
+        job = null;
+        started = false;
         readyService.unregisterTracker(this);
     }
 

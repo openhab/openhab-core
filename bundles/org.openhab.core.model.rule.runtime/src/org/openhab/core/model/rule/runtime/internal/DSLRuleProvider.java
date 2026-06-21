@@ -146,6 +146,7 @@ public class DSLRuleProvider
     @Deactivate
     protected void deactivate() {
         modelRepository.removeModelRepositoryChangeListener(this);
+        readyService.unregisterTracker(this);
         rulesMap.clear();
         contexts.clear();
         xExpressions.clear();
@@ -726,10 +727,16 @@ public class DSLRuleProvider
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
-        if ((ScriptItemRefresher.SCRIPTS_REFRESH_MARKER_TYPE.equals(readyMarker.getType())
-                && ScriptItemRefresher.SCRIPTS_REFRESH.equals(readyMarker.getIdentifier()))
-                || (RulesRefresher.RULES_REFRESH_MARKER_TYPE.equals(readyMarker.getType())
-                        && RulesRefresher.RULES_REFRESH.equals(readyMarker.getIdentifier()))) {
+        boolean readyBefore = scriptsReady && rulesReady;
+        if (ScriptItemRefresher.SCRIPTS_REFRESH_MARKER_TYPE.equals(readyMarker.getType())
+                && ScriptItemRefresher.SCRIPTS_REFRESH.equals(readyMarker.getIdentifier())) {
+            scriptsReady = false;
+        } else if (RulesRefresher.RULES_REFRESH_MARKER_TYPE.equals(readyMarker.getType())
+                && RulesRefresher.RULES_REFRESH.equals(readyMarker.getIdentifier())) {
+            rulesReady = false;
+        }
+        boolean readyAfter = scriptsReady && rulesReady;
+        if (readyBefore && !readyAfter) {
             readyService.unmarkReady(marker);
         }
     }
