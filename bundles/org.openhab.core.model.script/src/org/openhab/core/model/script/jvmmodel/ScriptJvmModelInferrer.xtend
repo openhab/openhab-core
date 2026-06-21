@@ -27,6 +27,8 @@ import org.openhab.core.items.Item
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
+import java.util.Map
+import org.openhab.core.events.Event
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -137,6 +139,9 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
             members += script.toMethod("_script", null) [
                 static = true
+                parameters += script.toParameter("eventObject", typeRef(Event))
+                parameters += script.toParameter("ctx", typeRef(Map, typeRef(String), typeRef(Object)))
+                parameters += script.toParameter("inputs", typeRef(Map, typeRef(String), typeRef(Map, typeRef(String), typeRef(Object))))
                 val inputTypeRef = typeRef(String)
                 parameters += script.toParameter(VAR_INPUT, inputTypeRef)
                 val groupTypeRef = typeRef(Item)
