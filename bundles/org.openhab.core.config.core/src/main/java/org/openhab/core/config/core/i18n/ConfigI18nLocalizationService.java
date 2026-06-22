@@ -145,7 +145,7 @@ public class ConfigI18nLocalizationService {
                 .withAdvanced(parameter.isAdvanced()).withVerify(parameter.isVerifyable())
                 .withLimitToOptions(parameter.getLimitToOptions()).withMultipleLimit(parameter.getMultipleLimit())
                 .withUnit(parameter.getUnit()).withUnitLabel(unitLabel == null ? parameter.getUnitLabel() : unitLabel)
-                .build();
+                .withDynamic(parameter.isDynamic()).build();
     }
 
     /**
