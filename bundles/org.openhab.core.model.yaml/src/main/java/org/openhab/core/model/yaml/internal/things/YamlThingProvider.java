@@ -99,7 +99,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     private final List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<>();
     private final Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet<>();
 
-    private final Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap<>();
+    private final Map<String, List<Thing>> thingsMap = new ConcurrentHashMap<>();
 
     private final List<QueueContent> queue = new CopyOnWriteArrayList<>();
     private final Object queueLock = new Object();
@@ -332,24 +332,29 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         if (newThing != null) {
             logger.debug("Successfully loaded thing \'{}\' during retry", thingUID);
             Thing oldThing = null;
-            for (Map.Entry<String, Collection<Thing>> entry : thingsMap.entrySet()) {
-                Collection<Thing> modelThings = entry.getValue();
-                oldThing = modelThings.stream().filter(t -> t.getUID().equals(newThing.getUID())).findFirst()
-                        .orElse(null);
-                if (oldThing != null) {
-                    mergeThing(newThing, oldThing, false);
-                    modelThings.remove(oldThing);
-                    modelThings.add(newThing);
-                    logger.debug("Refreshing thing \'{}\' after successful retry", newThing.getUID());
-                    if (!ThingHelper.equals(oldThing, newThing) && !isIsolatedModel(entry.getKey())) {
-                        notifyListenersAboutUpdatedElement(oldThing, newThing);
+            ThingUID newUid = newThing.getUID();
+            List<Thing> modelThings;
+            boolean found = false;
+            for (Entry<String, List<Thing>> modelEntry : thingsMap.entrySet()) {
+                modelThings = modelEntry.getValue();
+                for (int i = 0; !found && i < modelThings.size(); i++) {
+                    oldThing = modelThings.get(i);
+                    if (newUid.equals(oldThing.getUID())) {
+                        mergeThing(newThing, oldThing, false);
+                        modelThings.set(i, newThing);
+                        logger.debug("Refreshing thing \'{}\' after successful retry", newUid);
+                        if (!ThingHelper.equals(oldThing, newThing) && !isIsolatedModel(modelEntry.getKey())) {
+                            notifyListenersAboutUpdatedElement(oldThing, newThing);
+                        }
+                        found = true;
                     }
+                }
+                if (found) {
                     break;
                 }
             }
-            if (oldThing == null) {
-                logger.debug("Refreshing thing \'{}\' after retry failed because thing is not found",
-                        newThing.getUID());
+            if (!found) {
+                logger.debug("Refreshing thing \'{}\' after retry failed because thing is not found", newUid);
             }
         }
         return newThing != null;
