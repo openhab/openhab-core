@@ -649,7 +649,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             errors.add("Failed to process model: %s".formatted(e.getMessage()));
             valid = false;
         }
-        return valid ? modelName : null;
+        if (!valid) {
+            removeModel(modelName);
+            return null;
+        }
+        return modelName;
     }
 
     @Override
