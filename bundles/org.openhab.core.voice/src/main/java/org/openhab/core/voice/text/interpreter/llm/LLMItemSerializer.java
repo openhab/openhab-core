@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +32,8 @@ import org.openhab.core.semantics.Point;
 import org.openhab.core.semantics.Property;
 import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.semantics.Tag;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.CommandOption;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,17 +68,22 @@ public class LLMItemSerializer {
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private record CommandOptionNode(String command, @Nullable String label) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private record EquipmentNode(String name, @Nullable String label, String type, @Nullable String semanticType,
-            List<EquipmentNode> equipmentItems, List<PointNode> pointItems) {
+            List<CommandOptionNode> commandOptions, List<EquipmentNode> equipmentItems, List<PointNode> pointItems) {
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private record PointNode(String name, @Nullable String label, String type, @Nullable String semanticType,
-            List<String> properties) {
+            List<String> properties, List<CommandOptionNode> commandOptions) {
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private record NonSemanticItemNode(String name, @Nullable String label, String type) {
+    private record NonSemanticItemNode(String name, @Nullable String label, String type,
+            List<CommandOptionNode> commandOptions) {
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -84,12 +92,13 @@ public class LLMItemSerializer {
     }
 
     /**
-     * Serializes a collection of items.
+     * Serializes a collection of items, localizing command options with the given locale if available.
      *
      * @param items the items to serialize
+     * @param locale the locale to use for command options localization
      * @return the serialized representation (YAML) of the items
      */
-    public static String serialize(Collection<Item> items) {
+    public static String serialize(Collection<Item> items, @Nullable Locale locale) {
         if (items.isEmpty()) {
             return "";
         }
@@ -179,16 +188,17 @@ public class LLMItemSerializer {
         List<NonSemanticItemNode> nonSemanticNodes = new ArrayList<>();
 
         for (Item loc : rootLocations) {
-            rootLocNodes.add(buildLocationNode(loc, parentToChildren));
+            rootLocNodes.add(buildLocationNode(loc, parentToChildren, locale));
         }
         for (Item eq : rootEquipments) {
-            rootEqNodes.add(buildEquipmentNode(eq, parentToChildren));
+            rootEqNodes.add(buildEquipmentNode(eq, parentToChildren, locale));
         }
         for (Item pt : rootPoints) {
-            rootPtNodes.add(buildPointNode(pt));
+            rootPtNodes.add(buildPointNode(pt, locale));
         }
         for (Item item : nonSemanticItems) {
-            nonSemanticNodes.add(new NonSemanticItemNode(item.getName(), getOrNullLabel(item), item.getType()));
+            nonSemanticNodes.add(new NonSemanticItemNode(item.getName(), getOrNullLabel(item), item.getType(),
+                    getCommandOptions(item, locale)));
         }
 
         RootNode root = new RootNode(rootLocNodes, rootEqNodes, rootPtNodes, nonSemanticNodes);
@@ -200,7 +210,8 @@ public class LLMItemSerializer {
         }
     }
 
-    private static LocationNode buildLocationNode(Item loc, Map<String, List<Item>> parentToChildren) {
+    private static LocationNode buildLocationNode(Item loc, Map<String, List<Item>> parentToChildren,
+            @Nullable Locale locale) {
         List<Item> children = parentToChildren.getOrDefault(loc.getName(), List.of());
         List<LocationNode> subLocations = new ArrayList<>();
         List<EquipmentNode> equipments = new ArrayList<>();
@@ -208,11 +219,11 @@ public class LLMItemSerializer {
 
         for (Item child : children) {
             if (SemanticTags.getLocation(child) != null) {
-                subLocations.add(buildLocationNode(child, parentToChildren));
+                subLocations.add(buildLocationNode(child, parentToChildren, locale));
             } else if (SemanticTags.getEquipment(child) != null) {
-                equipments.add(buildEquipmentNode(child, parentToChildren));
+                equipments.add(buildEquipmentNode(child, parentToChildren, locale));
             } else if (SemanticTags.getPoint(child) != null || SemanticTags.getProperty(child) != null) {
-                points.add(buildPointNode(child));
+                points.add(buildPointNode(child, locale));
             }
         }
 
@@ -227,16 +238,17 @@ public class LLMItemSerializer {
                 points);
     }
 
-    private static EquipmentNode buildEquipmentNode(Item eq, Map<String, List<Item>> parentToChildren) {
+    private static EquipmentNode buildEquipmentNode(Item eq, Map<String, List<Item>> parentToChildren,
+            @Nullable Locale locale) {
         List<Item> children = parentToChildren.getOrDefault(eq.getName(), List.of());
         List<EquipmentNode> subEquipments = new ArrayList<>();
         List<PointNode> points = new ArrayList<>();
 
         for (Item child : children) {
             if (SemanticTags.getEquipment(child) != null) {
-                subEquipments.add(buildEquipmentNode(child, parentToChildren));
+                subEquipments.add(buildEquipmentNode(child, parentToChildren, locale));
             } else if (SemanticTags.getPoint(child) != null || SemanticTags.getProperty(child) != null) {
-                points.add(buildPointNode(child));
+                points.add(buildPointNode(child, locale));
             }
         }
 
@@ -246,10 +258,11 @@ public class LLMItemSerializer {
         Class<? extends Equipment> eqType = SemanticTags.getEquipment(eq);
         String semType = eqType != null ? eqType.getSimpleName() : null;
 
-        return new EquipmentNode(eq.getName(), getOrNullLabel(eq), eq.getType(), semType, subEquipments, points);
+        return new EquipmentNode(eq.getName(), getOrNullLabel(eq), eq.getType(), semType, getCommandOptions(eq, locale),
+                subEquipments, points);
     }
 
-    private static PointNode buildPointNode(Item pt) {
+    private static PointNode buildPointNode(Item pt, @Nullable Locale locale) {
         Class<? extends Point> ptType = SemanticTags.getPoint(pt);
         String semType = ptType != null ? ptType.getSimpleName() : null;
 
@@ -264,7 +277,28 @@ public class LLMItemSerializer {
             Collections.sort(properties);
         }
 
-        return new PointNode(pt.getName(), getOrNullLabel(pt), pt.getType(), semType, properties);
+        return new PointNode(pt.getName(), getOrNullLabel(pt), pt.getType(), semType, properties,
+                getCommandOptions(pt, locale));
+    }
+
+    private static List<CommandOptionNode> getCommandOptions(Item item, @Nullable Locale locale) {
+        CommandDescription commandDesc = item.getCommandDescription(locale);
+        if (commandDesc == null) {
+            return List.of();
+        }
+        List<CommandOption> options = commandDesc.getCommandOptions();
+        if (options.isEmpty()) {
+            return List.of();
+        }
+        List<CommandOptionNode> commandOptions = new ArrayList<>();
+        for (CommandOption option : options) {
+            String label = option.getLabel();
+            if (label != null && label.isBlank()) {
+                label = null;
+            }
+            commandOptions.add(new CommandOptionNode(option.getCommand(), label));
+        }
+        return commandOptions;
     }
 
     private static @Nullable String getOrNullLabel(Item item) {
