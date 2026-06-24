@@ -15,7 +15,6 @@ package org.openhab.core.automation.rest.internal;
 import java.util.Collection;
 import java.util.Locale;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.dto.RuleTemplateDTO;
