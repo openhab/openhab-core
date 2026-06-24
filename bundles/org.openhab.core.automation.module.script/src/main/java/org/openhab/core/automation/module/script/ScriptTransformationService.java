@@ -301,12 +301,17 @@ public class ScriptTransformationService
     }
 
     private void disposeScriptRecord(ScriptRecord scriptRecord) {
-        ScriptEngineContainer scriptEngineContainer = scriptRecord.scriptEngineContainer;
-        if (scriptEngineContainer != null) {
-            scriptEngineManager.removeEngine(scriptEngineContainer.getIdentifier());
-            scriptRecord.scriptEngineContainer = null;
+        scriptRecord.lock.lock();
+        try {
+            ScriptEngineContainer scriptEngineContainer = scriptRecord.scriptEngineContainer;
+            if (scriptEngineContainer != null) {
+                scriptEngineManager.removeEngine(scriptEngineContainer.getIdentifier());
+                scriptRecord.scriptEngineContainer = null;
+            }
+            scriptRecord.compiledScript = null;
+        } finally {
+            scriptRecord.lock.unlock();
         }
-        scriptRecord.compiledScript = null;
     }
 
     @Override
