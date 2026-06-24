@@ -153,6 +153,12 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.jetty.compression</groupId>
+      <artifactId>jetty-compression-common</artifactId>
+      <version>${jetty.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-proxy</artifactId>
       <version>${jetty.version}</version>
