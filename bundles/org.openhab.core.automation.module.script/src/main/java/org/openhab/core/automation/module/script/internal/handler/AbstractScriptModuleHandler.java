@@ -45,7 +45,8 @@ import org.slf4j.LoggerFactory;
  * @param <T> the type of module the concrete handler can handle
  */
 @NonNullByDefault
-public abstract class AbstractScriptModuleHandler<T extends Module> extends BaseModuleHandler<T> {
+public abstract class AbstractScriptModuleHandler<T extends Module> extends BaseModuleHandler<T>
+        implements ScriptEngineManager.FactoryChangeListener {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractScriptModuleHandler.class);
 
@@ -79,6 +80,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
         this.type = getValidConfigParameter(CONFIG_SCRIPT_TYPE, module.getConfiguration(), module.getId(), false);
         this.script = getValidConfigParameter(CONFIG_SCRIPT, module.getConfiguration(), module.getId(), true);
+
+        scriptEngineManager.addFactoryChangeListener(this);
     }
 
     private static String getValidConfigParameter(String parameter, Configuration config, String moduleId,
@@ -117,6 +120,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     @Override
     public void dispose() {
+        scriptEngineManager.removeFactoryChangeListener(this);
         scriptEngineManager.removeEngine(engineIdentifier);
     }
 
@@ -263,5 +267,22 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
                     logger.isDebugEnabled() ? e : null);
         }
         return null;
+    }
+
+    @Override
+    public void factoryAdded(String scriptType) {
+        try {
+            compileScript();
+        } catch (ScriptException e) {
+            logger.error("Script compilation of rule with UID '{}' failed: {}", ruleUID, e.getMessage());
+        }
+    }
+
+    @Override
+    public void factoryRemoved(String scriptType) {
+        if (!type.equals(scriptType)) {
+            return;
+        }
+        resetScriptEngine();
     }
 }
