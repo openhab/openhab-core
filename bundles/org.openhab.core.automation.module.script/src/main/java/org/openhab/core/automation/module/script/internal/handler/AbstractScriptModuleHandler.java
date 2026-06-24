@@ -271,17 +271,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     @Override
     public void factoryAdded(String scriptType) {
-        if (!type.equals(scriptType)) {
-            return;
-        }
-        try {
-            logger.debug(
-                    "ScriptEngineFactory for script type '{}' has been added, pre-compiling script of rule with UID '{}'.",
-                    type, ruleUID);
-            compileScript();
-        } catch (ScriptException e) {
-            logger.error("Script compilation of rule with UID '{}' failed: {}", ruleUID, e.getMessage());
-        }
+        // we don't need to process this, but could attempt to compile the script here
     }
 
     @Override
