@@ -47,7 +47,7 @@ class SitemapFormatter extends AbstractDeclarativeFormatter {
         c.setNoSpace().after("item=", "label=", "icon=", "staticIcon=")
         c.setNoSpace().after("url=", "refresh=", "encoding=", "service=", "period=", "legend=", "forceasitem=", "yAxisDecimalPattern=", "interpolation=", "height=")
         c.setNoSpace().after("minValue=", "maxValue=", "step=", "inputHint=", "row=", "column=", "click=", "release=")
-        c.setNoSpace().after("labelcolor=", "valuecolor=", "iconcolor=", "visibility=", "mappings=", "buttons=")
+        c.setNoSpace().after("labelcolor=", "valuecolor=", "iconcolor=", "visibility=", "mappings=", "buttons=", "name=")
 
         c.setNoSpace().before(",")
         c.setNoSpace().around(":", "=")

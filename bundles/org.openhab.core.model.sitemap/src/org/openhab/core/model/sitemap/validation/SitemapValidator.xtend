@@ -38,6 +38,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelWebview
 import org.openhab.core.model.sitemap.sitemap.ModelVideo
 import org.openhab.core.model.sitemap.sitemap.ModelWidget
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage
+import org.openhab.core.model.sitemap.sitemap.ModelNestedSitemap
 
 /**
  * Custom validation rules.
@@ -50,7 +51,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         "item=", "label=", "icon=", "staticIcon=", "labelcolor=", "valuecolor=", "iconcolor=", "visibility=",
         "url=", "encoding=", "service=", "refresh=", "period=", "legend=", "forceasitem=", "yAxisDecimalPattern=",
         "interpolation=", "mappings=", "height=", "switchSupport", "releaseOnly", "minValue=", "maxValue=", "step=",
-        "inputHint=", "buttons=", "row=", "column=", "stateless", "click=", "release="
+        "inputHint=", "buttons=", "row=", "column=", "stateless", "click=", "release=", "name="
     }
     val ALLOWED_HINTS = #{"text", "number", "date", "time", "datetime"}
     val ALLOWED_INTERPOLATION = #{"linear", "step"}
@@ -110,7 +111,10 @@ class SitemapValidator extends AbstractSitemapValidator {
 
     @Check
     def void checkWidgetHasItem(ModelWidget w) {
-        if (!(w instanceof ModelFrame || w instanceof ModelText || w instanceof ModelImage || w instanceof ModelVideo || w instanceof ModelWebview || w instanceof ModelButtongrid) && w.item === null) {
+        if (w instanceof ModelFrame || w instanceof ModelText || w instanceof ModelImage || w instanceof ModelVideo || w instanceof ModelWebview || w instanceof ModelButtongrid || w instanceof ModelNestedSitemap) {
+            return
+        }
+        if (w.item === null) {
             error(buildMsgWithLineNb(getWidgetType(w) + " widget doesn't have item defined", w, null, null),
                 SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_WIDGET__ITEM))
         }
@@ -358,6 +362,14 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (w.url === null) {
             error(buildMsgWithLineNb("Webview widget doesn't have url defined", w, null, null),
                 SitemapPackage.Literals.MODEL_WEBVIEW.getEStructuralFeature(SitemapPackage.MODEL_WEBVIEW__URL))
+        }
+    }
+    
+    @Check
+    def void checkNestedSitemapParameters(ModelNestedSitemap w) {
+        if (w.item === null && w.sitemapName === null) {
+            error(buildMsgWithLineNb("Sitemap widget doesn't have item or name defined", w, SitemapPackage.Literals.MODEL_NESTED_SITEMAP__SITEMAP_NAME, SitemapPackage.Literals.MODEL_WIDGET__ITEM),
+                SitemapPackage.Literals.MODEL_NESTED_SITEMAP.getEStructuralFeature(SitemapPackage.MODEL_NESTED_SITEMAP__SITEMAP_NAME))
         }
     }
 
