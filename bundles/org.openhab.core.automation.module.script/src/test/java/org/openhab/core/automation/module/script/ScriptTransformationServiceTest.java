@@ -204,18 +204,25 @@ public class ScriptTransformationServiceTest extends JavaTest {
     }
 
     @Test
-    public void recoversFromClosedScriptContext() throws ScriptException, TransformationException {
-        when(scriptEngine.eval(SCRIPT)).thenThrow(new IllegalStateException("The Context is already closed."))
-                .thenReturn(SCRIPT_OUTPUT);
-        setupInterceptedLogger(ScriptTransformationService.class, LogLevel.WARN);
+    public void factoryRemovedOfDifferentScriptTypeDoesNotDisposeEngine() throws TransformationException {
+        service.transform(SCRIPT_UID, "input");
 
-        String returnValue = Objects.requireNonNull(service.transform(SCRIPT_UID, "input"));
+        service.factoryRemoved("differentLanguage");
+        verify(scriptEngineManager, never()).removeEngine(any());
+    }
 
-        assertThat(returnValue, is(SCRIPT_OUTPUT));
+    @Test
+    public void factoryRemovedOfSameScriptTypeDisposesEngine() throws TransformationException {
+        when(scriptEngineContainer.getIdentifier()).thenReturn("engineId");
+        service.transform(SCRIPT_UID, "input");
 
-        stopInterceptedLogger(ScriptTransformationService.class);
-        assertLogMessage(ScriptTransformationService.class, LogLevel.WARN, "Script engine context " + SCRIPT_UID
-                + " is already closed, this should not happen. Recreating script engine.");
+        // Engine should be disposed
+        service.factoryRemoved(SCRIPT_LANGUAGE);
+        verify(scriptEngineManager).removeEngine("engineId");
+
+        // Subsequent transform should recreate the engine
+        service.transform(SCRIPT_UID, "input");
+        verify(scriptEngineManager, times(2)).createScriptEngine(eq(SCRIPT_LANGUAGE), any());
     }
 
     @Test

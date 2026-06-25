@@ -68,7 +68,8 @@ import org.slf4j.LoggerFactory;
 @Component(factory = "org.openhab.core.automation.module.script.transformation.factory", service = {
         TransformationService.class, ScriptTransformationService.class, ScriptDependencyTracker.Listener.class,
         ConfigOptionProvider.class, ConfigDescriptionProvider.class })
-public class ScriptTransformationService implements TransformationService, ScriptDependencyTracker.Listener,
+public class ScriptTransformationService
+        implements TransformationService, ScriptDependencyTracker.Listener, ScriptEngineManager.FactoryChangeListener,
         ConfigOptionProvider, ConfigDescriptionProvider, RegistryChangeListener<Transformation> {
     public static final String SCRIPT_TYPE_PROPERTY_NAME = "openhab.transform.script.scriptType";
     public static final String OPENHAB_TRANSFORMATION_SCRIPT = "openhab-transformation-script-";
@@ -106,10 +107,12 @@ public class ScriptTransformationService implements TransformationService, Scrip
         this.scriptType = scriptType;
         this.profileConfigUri = URI.create(PROFILE_CONFIG_URI_PREFIX + scriptType.toUpperCase());
         transformationRegistry.addRegistryChangeListener(this);
+        scriptEngineManager.addFactoryChangeListener(this);
     }
 
     @Deactivate
     public void deactivate() {
+        scriptEngineManager.removeFactoryChangeListener(this);
         transformationRegistry.removeRegistryChangeListener(this);
 
         // cleanup script engines
@@ -219,18 +222,6 @@ public class ScriptTransformationService implements TransformationService, Scrip
                 }
             } catch (ScriptException e) {
                 throw new TransformationException("Failed to execute script.", e);
-            } catch (IllegalStateException e) {
-                // ISE thrown by JS Scripting if script engine already closed
-                if ("The Context is already closed.".equals(e.getMessage())) {
-                    logger.warn(
-                            "Script engine context {} is already closed, this should not happen. Recreating script engine.",
-                            scriptUid);
-                    scriptCache.remove(scriptUid);
-                    return transform(function, source);
-                } else {
-                    // rethrow
-                    throw e;
-                }
             }
         } finally {
             scriptRecord.lock.unlock();
@@ -310,11 +301,37 @@ public class ScriptTransformationService implements TransformationService, Scrip
     }
 
     private void disposeScriptRecord(ScriptRecord scriptRecord) {
-        ScriptEngineContainer scriptEngineContainer = scriptRecord.scriptEngineContainer;
-        if (scriptEngineContainer != null) {
-            scriptEngineManager.removeEngine(scriptEngineContainer.getIdentifier());
+        scriptRecord.lock.lock();
+        try {
+            ScriptEngineContainer scriptEngineContainer = scriptRecord.scriptEngineContainer;
+            if (scriptEngineContainer != null) {
+                scriptEngineManager.removeEngine(scriptEngineContainer.getIdentifier());
+                scriptRecord.scriptEngineContainer = null;
+            }
+            scriptRecord.compiledScript = null;
+        } finally {
+            scriptRecord.lock.unlock();
         }
-        scriptRecord.compiledScript = null;
+    }
+
+    @Override
+    public void factoryAdded(String scriptType) {
+        // we don't need to process this, as the scriptCache is lazy-initialized
+    }
+
+    @Override
+    public void factoryRemoved(String scriptType) {
+        if (!this.scriptType.equals(scriptType)) {
+            return;
+        }
+
+        logger.debug(
+                "ScriptEngineFactory for script type '{}' has been removed, disposing script engines of this type.",
+                scriptType);
+        // removal of the ScriptEngineFactory for "our" scriptType causes all ScriptEngines to be closed:
+        // cleanup all script engines so they can be properly recreated when needed and a ScriptEngineFactory for "our"
+        // scriptType is available
+        scriptCache.values().forEach(this::disposeScriptRecord);
     }
 
     private static class ScriptRecord {
