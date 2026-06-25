@@ -412,7 +412,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 locationItem = null;
             }
             InterpreterContext context = new InterpreterContext(conversation, tools, locationItem,
-                    enrichSystemPrompt(configuration.getSystemPrompt()));
+                    enrichSystemPrompt(configuration.getSystemPrompt(), locale));
             InterpretationException exception = null;
             for (var interpreter : interpreters) {
                 try {
@@ -1142,11 +1142,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public String enrichSystemPrompt(@Nullable String baseSystemPrompt) {
+    public String enrichSystemPrompt(@Nullable String baseSystemPrompt, @Nullable Locale locale) {
         String base = baseSystemPrompt != null ? baseSystemPrompt : "";
         List<Item> accessibleItems = itemRegistry.getItems().stream().filter(itemPermissionResolver::isAccessible)
                 .toList();
-        String serializedItems = LLMItemSerializer.serialize(accessibleItems);
+        String serializedItems = LLMItemSerializer.serialize(accessibleItems, locale);
         if (serializedItems.isEmpty()) {
             return base;
         }
