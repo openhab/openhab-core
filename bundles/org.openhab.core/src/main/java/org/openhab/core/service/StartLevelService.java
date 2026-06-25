@@ -272,15 +272,12 @@ public class StartLevelService {
     }
 
     /**
-     * Saves the given start level to a specific file in the Karaf data directory. Uses atomic file
-     * operations to ensure that the file is written fully or not at all.
+     * Saves the given start level to a specific file in the Karaf data directory. Uses
+     * atomic file operations to ensure that the file is written fully or not at all.
      */
     private void atomicSaveFile(int level) {
         try {
             String userDataPath = OpenHAB.getUserDataFolder();
-            if (userDataPath == null) {
-                throw new IllegalArgumentException("User data folder property not set");
-            }
             Path path = Path.of(userDataPath);
             if (!Files.isDirectory(path)) {
                 throw new IllegalArgumentException("User data path is not a directory: " + userDataPath);
