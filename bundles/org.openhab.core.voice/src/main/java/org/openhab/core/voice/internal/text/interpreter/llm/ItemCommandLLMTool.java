@@ -78,7 +78,19 @@ public class ItemCommandLLMTool implements LLMTool {
 
     @Override
     public String getDescription(@Nullable Locale locale) {
-        return "This tool allows to control items by sending commands to them.";
+        return """
+                This tool allows to control items by sending commands to them.
+                The accepted command format depends on the type of the target item:
+                - Switch: ON, OFF
+                - Dimmer: ON, OFF, Percent (0-100), INCREASE, DECREASE
+                - Color: ON, OFF, Percent (0-100), INCREASE, DECREASE, HSB (comma-separated Hue,Saturation,Brightness, e.g., '120,100,100')
+                - Rollershutter: UP, DOWN, STOP, MOVE, Percent (0-100)
+                - Player: PLAY, PAUSE, NEXT, PREVIOUS, REWIND, FASTFORWARD
+                - Number: Decimal numbers (e.g., '21', '23.5') or numbers with unit (e.g., '21 °C')
+                - String: Arbitrary text
+                - DateTime: ISO 8601 formatted date/time (e.g., '2026-06-24T23:49:09+02:00')
+                - Location: GPS coordinates (comma-separated latitude,longitude and optional altitude, e.g., '52.520008,13.404954')
+                - Contact, Image, Call: REFRESH""";
     }
 
     @Override
@@ -87,7 +99,8 @@ public class ItemCommandLLMTool implements LLMTool {
                 new LLMToolParam("itemName", LLMToolParamType.STRING, "The name of the item to control", List.of(),
                         true),
                 new LLMToolParam("command", LLMToolParamType.STRING,
-                        "The command to send to the item (e.g., ON, OFF, a number)", List.of(), true));
+                        "The command to send. Must match the item type, e.g., ON/OFF for Switch/Dimmer, UP/DOWN/STOP/MOVE for Rollershutter, etc.",
+                        List.of(), true));
     }
 
     @Override
