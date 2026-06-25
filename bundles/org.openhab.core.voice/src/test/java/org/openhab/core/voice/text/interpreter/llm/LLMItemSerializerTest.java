@@ -118,6 +118,9 @@ public class LLMItemSerializerTest {
         Item item2 = mockItem("ItemA", null, "Dimmer", Set.of(), List.of());
 
         String expected = """
+                # Format: [..]name [type] ["label"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]
+
+                # Non-semantic Items
                 ItemA Dimmer
                 ItemB Switch "Label B"
                 """;
@@ -152,12 +155,16 @@ public class LLMItemSerializerTest {
         List<Item> items = List.of(tvPower, livingRoom, systemMode, lrLight, tv, gf);
 
         String expected = """
+                # Format: [..]name [type] ["label"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]
+
+                # Semantic Items
                 GF "Ground Floor" :MockFloor
                 ..LivingRoom :MockLivingRoom
                 ....TV "Living Room TV" :MockTV
                 ......TV_Power Switch :MockPower [MockPowerProperty]
                 ....LivingRoom_Light Dimmer :MockLight
 
+                # Non-semantic Items
                 System_Mode String
                 """;
 
@@ -186,10 +193,14 @@ public class LLMItemSerializerTest {
                 List.of(new CommandOption("CH1", "Channel 1"), new CommandOption("CH2", "Channel 2")));
 
         String expected = """
+                # Format: [..]name [type] ["label"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]
+
+                # Semantic Items
                 LocationA "Room" :MockLivingRoom
                 ..TV "Living Room TV" :MockTV
                 ....TV_Channel String :MockSource (CH1=Channel 1,CH2=Channel 2)
 
+                # Non-semantic Items
                 Audio_Source String (TUNER=Tuner,DAB=DAB,AIRPLAY=AirPlay)
                 ItemA Dimmer
                 ItemB Switch "Label B" (ON=On,OFF)

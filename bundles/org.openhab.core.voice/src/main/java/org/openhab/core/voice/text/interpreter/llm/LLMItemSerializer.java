@@ -288,20 +288,32 @@ public class LLMItemSerializer {
             return "";
         }
         StringBuilder sb = new StringBuilder();
-        for (LocationNode loc : root.locationItems()) {
-            formatLocationNode(loc, 0, sb);
+        sb.append(
+                "# Format: [..]name [type] [\"label\"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]\n\n");
+
+        boolean hasSemanticItems = !root.locationItems().isEmpty() || !root.equipmentItems().isEmpty()
+                || !root.pointItems().isEmpty();
+
+        if (hasSemanticItems) {
+            sb.append("# Semantic Items\n");
+            for (LocationNode loc : root.locationItems()) {
+                formatLocationNode(loc, 0, sb);
+            }
+            for (EquipmentNode eq : root.equipmentItems()) {
+                formatEquipmentNode(eq, 0, sb);
+            }
+            for (PointNode pt : root.pointItems()) {
+                formatPointNode(pt, 0, sb);
+            }
         }
-        for (EquipmentNode eq : root.equipmentItems()) {
-            formatEquipmentNode(eq, 0, sb);
-        }
-        for (PointNode pt : root.pointItems()) {
-            formatPointNode(pt, 0, sb);
-        }
-        if (!sb.isEmpty() && !root.items().isEmpty()) {
-            sb.append("\n");
-        }
-        for (NonSemanticItemNode item : root.items()) {
-            formatNonSemanticItemNode(item, sb);
+        if (!root.items().isEmpty()) {
+            if (hasSemanticItems) {
+                sb.append("\n");
+            }
+            sb.append("# Non-semantic Items\n");
+            for (NonSemanticItemNode item : root.items()) {
+                formatNonSemanticItemNode(item, sb);
+            }
         }
         return sb.toString();
     }
