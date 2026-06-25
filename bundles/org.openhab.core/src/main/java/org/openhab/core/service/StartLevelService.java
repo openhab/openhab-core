@@ -272,7 +272,7 @@ public class StartLevelService {
     }
 
     /**
-     * Saves the given start level to a specific file in the Karaf data directory. Uses
+     * Saves the given start level to a specific file in the openHAB data directory. Uses
      * atomic file operations to ensure that the file is written fully or not at all.
      */
     private void atomicSaveFile(int level) {
