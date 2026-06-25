@@ -90,6 +90,11 @@ public class ItemStateLLMTool implements LLMTool {
             throw new LLMToolException("Missing or invalid required parameter 'itemName'");
         }
 
+        int lastDot = itemName.lastIndexOf('.');
+        if (lastDot != -1) {
+            itemName = itemName.substring(lastDot + 1);
+        }
+
         Item item;
         try {
             item = itemRegistry.getItem(itemName);

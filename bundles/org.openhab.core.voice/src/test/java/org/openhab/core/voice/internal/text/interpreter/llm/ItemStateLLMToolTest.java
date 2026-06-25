@@ -118,4 +118,11 @@ public class ItemStateLLMToolTest {
     public void callThrowsLTEOnMissingParams() {
         assertThrows(LLMToolException.class, () -> tool.call(Map.of(), Locale.ENGLISH));
     }
+
+    @Test
+    public void callReturnsStateWithDotPrefixedItem() throws LLMToolException {
+        when(item.getStateDescription(Locale.ENGLISH)).thenReturn(null);
+        String result = tool.call(Map.of("itemName", "......" + ITEM_NAME), Locale.ENGLISH);
+        assertEquals("ON", result);
+    }
 }

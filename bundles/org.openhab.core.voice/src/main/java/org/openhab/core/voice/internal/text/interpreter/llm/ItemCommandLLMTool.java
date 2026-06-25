@@ -113,6 +113,11 @@ public class ItemCommandLLMTool implements LLMTool {
             throw new LLMToolException("Missing or invalid required parameters 'itemName' and 'command'");
         }
 
+        int lastDot = itemName.lastIndexOf('.');
+        if (lastDot != -1) {
+            itemName = itemName.substring(lastDot + 1);
+        }
+
         Item item;
         try {
             item = itemRegistry.getItem(itemName);
