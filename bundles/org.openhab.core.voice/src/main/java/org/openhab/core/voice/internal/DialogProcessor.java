@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.stream.Stream;
@@ -376,7 +377,7 @@ public class DialogProcessor implements KSListener, STTListener {
                     List<LLMTool> tools = dialogContext.llmTools();
                     InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
                             dialogContext.locationItem(),
-                            eventListener.enrichSystemPrompt(dialogContext.systemPrompt()));
+                            eventListener.enrichSystemPrompt(dialogContext.systemPrompt(), dialogContext.locale()));
                     for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
                         try {
                             answer = interpreter.interpret(dialogContext.locale(), interpreterContext);
@@ -536,8 +537,9 @@ public class DialogProcessor implements KSListener, STTListener {
          * Enriches the system prompt with additional context, e.g., available items.
          *
          * @param baseSystemPrompt the base system prompt
+         * @param locale the locale to use for command options localization
          * @return the system prompt with the additional context
          */
-        String enrichSystemPrompt(@Nullable String baseSystemPrompt);
+        String enrichSystemPrompt(@Nullable String baseSystemPrompt, @Nullable Locale locale);
     }
 }

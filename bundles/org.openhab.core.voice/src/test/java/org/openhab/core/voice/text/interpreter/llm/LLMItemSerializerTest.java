@@ -13,6 +13,7 @@
 package org.openhab.core.voice.text.interpreter.llm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +32,8 @@ import org.openhab.core.semantics.Location;
 import org.openhab.core.semantics.Point;
 import org.openhab.core.semantics.Property;
 import org.openhab.core.semantics.SemanticTags;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.CommandOption;
 
 /**
  * Test class for {@link LLMItemSerializer}.
@@ -79,18 +82,29 @@ public class LLMItemSerializerTest {
     }
 
     private Item mockItem(String name, @Nullable String label, String type, Set<String> tags, List<String> groupNames) {
+        return mockItem(name, label, type, tags, groupNames, null);
+    }
+
+    private Item mockItem(String name, @Nullable String label, String type, Set<String> tags, List<String> groupNames,
+            @Nullable List<CommandOption> commandOptions) {
         Item item = mock(Item.class);
         when(item.getName()).thenReturn(name);
         when(item.getLabel()).thenReturn(label);
         when(item.getType()).thenReturn(type);
         when(item.getTags()).thenReturn(tags);
         when(item.getGroupNames()).thenReturn(groupNames);
+        if (commandOptions != null) {
+            CommandDescription desc = mock(CommandDescription.class);
+            when(desc.getCommandOptions()).thenReturn(commandOptions);
+            when(item.getCommandDescription()).thenReturn(desc);
+            when(item.getCommandDescription(any())).thenReturn(desc);
+        }
         return item;
     }
 
     @Test
     public void testSerializeNullOrEmpty() {
-        assertEquals("", LLMItemSerializer.serialize(Collections.emptyList()));
+        assertEquals("", LLMItemSerializer.serialize(Collections.emptyList(), null));
     }
 
     @Test
@@ -107,7 +121,7 @@ public class LLMItemSerializerTest {
                   type: Switch
                 """;
 
-        assertEquals(expected, LLMItemSerializer.serialize(List.of(item1, item2)));
+        assertEquals(expected, LLMItemSerializer.serialize(List.of(item1, item2), null));
     }
 
     @Test
@@ -171,7 +185,7 @@ public class LLMItemSerializerTest {
                   type: String
                 """;
 
-        assertEquals(expected, LLMItemSerializer.serialize(items));
+        assertEquals(expected, LLMItemSerializer.serialize(items, null));
     }
 
     @Test
@@ -189,6 +203,74 @@ public class LLMItemSerializerTest {
                   type: String
                 """;
 
-        assertEquals(expected, LLMItemSerializer.serialize(List.of(item1, item2)));
+        assertEquals(expected, LLMItemSerializer.serialize(List.of(item1, item2), null));
+    }
+
+    @Test
+    public void testSerializeWithCommandOptions() {
+        Item item1 = mockItem("ItemB", "Label B", "Switch", Set.of(), List.of(),
+                List.of(new CommandOption("ON", "On"), new CommandOption("OFF", "")));
+        Item item2 = mockItem("ItemA", null, "Dimmer", Set.of(), List.of(), null);
+        Item item3 = mockItem("Audio_Source", "Audio Source", "String", Set.of(), List.of(),
+                List.of(new CommandOption("TUNER", "Tuner"), new CommandOption("DAB", "DAB"),
+                        new CommandOption("AIRPLAY", "AirPlay")));
+
+        // Location Node should NOT have command options
+        Item locationItem = mockItem("LocationA", "Room", "Group", Set.of("Mock_Location_Room_LivingRoom"), List.of(),
+                List.of(new CommandOption("ON", "On"), new CommandOption("OFF", "Off")));
+
+        // Equipment Node should NOT have command options
+        Item eqItem = mockItem("TV", "Living Room TV", "Group", Set.of("Mock_Equipment_Entertainment_TV"),
+                List.of("LocationA"), List.of());
+
+        // Point Node should have command options
+        Item ptItem = mockItem("Light", "Living Room Light", "Dimmer", Set.of("Mock_Point_Control_Light"),
+                List.of("TV"), List.of(new CommandOption("ON", "On"), new CommandOption("OFF", "Off")));
+
+        String expected = """
+                locationItems:
+                - name: LocationA
+                  label: Room
+                  type: Group
+                  semanticType: MockLivingRoom
+                  equipmentItems:
+                  - name: TV
+                    label: Living Room TV
+                    type: Group
+                    semanticType: MockTV
+                    pointItems:
+                    - name: Light
+                      label: Living Room Light
+                      type: Dimmer
+                      semanticType: MockLight
+                      commandOptions:
+                      - command: "ON"
+                        label: "On"
+                      - command: "OFF"
+                        label: "Off"
+                items:
+                - name: Audio_Source
+                  label: Audio Source
+                  type: String
+                  commandOptions:
+                  - command: TUNER
+                    label: Tuner
+                  - command: DAB
+                    label: DAB
+                  - command: AIRPLAY
+                    label: AirPlay
+                - name: ItemA
+                  type: Dimmer
+                - name: ItemB
+                  label: Label B
+                  type: Switch
+                  commandOptions:
+                  - command: "ON"
+                    label: "On"
+                  - command: "OFF"
+                """;
+
+        assertEquals(expected,
+                LLMItemSerializer.serialize(List.of(item1, item2, item3, locationItem, eqItem, ptItem), null));
     }
 }
