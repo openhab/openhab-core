@@ -73,7 +73,7 @@ public class ItemCommandLLMTool implements LLMTool {
 
     @Override
     public String getShortDescription(@Nullable Locale locale) {
-        return "Sends a command to a specific item.";
+        return "Sends a command to an Item.";
     }
 
     @Override
