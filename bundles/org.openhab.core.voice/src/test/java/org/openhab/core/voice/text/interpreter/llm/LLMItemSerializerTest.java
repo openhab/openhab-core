@@ -275,6 +275,7 @@ public class LLMItemSerializerTest {
                   - command: "OFF"
                 """;
 
-        assertEquals(expected, LLMItemSerializer.serialize(List.of(item1, item2, item3, locationItem, eqItem, ptItem), null));
+        assertEquals(expected,
+                LLMItemSerializer.serialize(List.of(item1, item2, item3, locationItem, eqItem, ptItem), null));
     }
 }
