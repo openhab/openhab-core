@@ -73,7 +73,7 @@ public class ItemCommandLLMTool implements LLMTool {
 
     @Override
     public String getShortDescription(@Nullable Locale locale) {
-        return "Sends a command to an Item.";
+        return "Sends a command to an item.";
     }
 
     @Override
@@ -111,6 +111,11 @@ public class ItemCommandLLMTool implements LLMTool {
 
         if (!(itemNameObj instanceof String itemName) || !(commandObj instanceof String commandString)) {
             throw new LLMToolException("Missing or invalid required parameters 'itemName' and 'command'");
+        }
+
+        int lastDot = itemName.lastIndexOf('.');
+        if (lastDot != -1) {
+            itemName = itemName.substring(lastDot + 1);
         }
 
         Item item;

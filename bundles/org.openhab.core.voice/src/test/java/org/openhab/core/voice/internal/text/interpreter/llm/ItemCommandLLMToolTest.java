@@ -117,4 +117,11 @@ public class ItemCommandLLMToolTest {
     public void callThrowsLTEOnMissingParams() {
         assertThrows(LLMToolException.class, () -> tool.call(Map.of(), Locale.ENGLISH));
     }
+
+    @Test
+    public void callSendsCommandWithDotPrefixedItem() throws LLMToolException {
+        String result = tool.call(Map.of("itemName", "......" + ITEM_NAME, "command", "ON"), Locale.ENGLISH);
+        assertTrue(result.contains("Successfully sent command 'ON' to item 'TestItem'"));
+        verify(eventPublisher).post(any());
+    }
 }

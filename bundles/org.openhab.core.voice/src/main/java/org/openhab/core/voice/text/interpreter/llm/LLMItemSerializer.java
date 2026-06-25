@@ -35,18 +35,12 @@ import org.openhab.core.semantics.Tag;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-
 /**
  * {@link LLMItemSerializer} is a utility class to serialize a collection of items (both semantic and non-semantic) into
  * a structured,
  * hierarchical string representation for passing into the context of a Large Language Model (LLM) based
  * {@link org.openhab.core.voice.text.HumanLanguageInterpreter}.
- * The output format is YAML, as this is hierarchical and token-efficient, as well as easy to generate using Jackson.
+ * The output format is a custom format designed to be highly token-efficient.
  *
  * @author Florian Hotze - Initial contribution
  */
@@ -54,39 +48,26 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 public class LLMItemSerializer {
 
     private static final Comparator<Item> ITEM_COMPARATOR = Comparator.comparing(Item::getName);
-    private static final ObjectMapper mapper;
 
-    static {
-        YAMLFactory yamlFactory = new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
-        mapper = new ObjectMapper(yamlFactory);
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private record LocationNode(String name, @Nullable String label, String type, @Nullable String semanticType,
             List<LocationNode> locationItems, List<EquipmentNode> equipmentItems, List<PointNode> pointItems) {
     }
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private record CommandOptionNode(String command, @Nullable String label) {
     }
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private record EquipmentNode(String name, @Nullable String label, String type, @Nullable String semanticType,
             List<CommandOptionNode> commandOptions, List<EquipmentNode> equipmentItems, List<PointNode> pointItems) {
     }
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private record PointNode(String name, @Nullable String label, String type, @Nullable String semanticType,
             List<String> properties, List<CommandOptionNode> commandOptions) {
     }
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private record NonSemanticItemNode(String name, @Nullable String label, String type,
             List<CommandOptionNode> commandOptions) {
     }
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private record RootNode(List<LocationNode> locationItems, List<EquipmentNode> equipmentItems,
             List<PointNode> pointItems, List<NonSemanticItemNode> items) {
     }
@@ -200,14 +181,8 @@ public class LLMItemSerializer {
             nonSemanticNodes.add(new NonSemanticItemNode(item.getName(), getOrNullLabel(item), item.getType(),
                     getCommandOptions(item, locale)));
         }
-
         RootNode root = new RootNode(rootLocNodes, rootEqNodes, rootPtNodes, nonSemanticNodes);
-
-        try {
-            return mapper.writeValueAsString(root);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize items to YAML", e);
-        }
+        return formatRoot(root);
     }
 
     private static LocationNode buildLocationNode(Item loc, Map<String, List<Item>> parentToChildren,
@@ -305,5 +280,154 @@ public class LLMItemSerializer {
     private static @Nullable String getOrNullLabel(Item item) {
         String label = item.getLabel();
         return (label == null || label.isBlank()) ? null : label;
+    }
+
+    private static String formatRoot(RootNode root) {
+        if (root.locationItems().isEmpty() && root.equipmentItems().isEmpty() && root.pointItems().isEmpty()
+                && root.items().isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(
+                "# Format: [..]name [type] [\"label\"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]\n\n");
+
+        boolean hasSemanticItems = !root.locationItems().isEmpty() || !root.equipmentItems().isEmpty()
+                || !root.pointItems().isEmpty();
+
+        if (hasSemanticItems) {
+            sb.append("# Semantic Items\n");
+            for (LocationNode loc : root.locationItems()) {
+                formatLocationNode(loc, 0, sb);
+            }
+            for (EquipmentNode eq : root.equipmentItems()) {
+                formatEquipmentNode(eq, 0, sb);
+            }
+            for (PointNode pt : root.pointItems()) {
+                formatPointNode(pt, 0, sb);
+            }
+        }
+        if (!root.items().isEmpty()) {
+            if (hasSemanticItems) {
+                sb.append("\n");
+            }
+            sb.append("# Non-semantic Items\n");
+            for (NonSemanticItemNode item : root.items()) {
+                formatNonSemanticItemNode(item, sb);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static void formatLocationNode(LocationNode loc, int depth, StringBuilder sb) {
+        sb.append(getIndent(depth)).append(loc.name());
+
+        if (!"Group".equals(loc.type())) {
+            sb.append(" ").append(loc.type());
+        }
+        if (shouldPrintLabel(loc.name(), loc.label())) {
+            sb.append(" \"").append(loc.label().replace("\"", "\\\"")).append("\"");
+        }
+        if (loc.semanticType() != null) {
+            sb.append(" :").append(loc.semanticType());
+        }
+        sb.append("\n");
+
+        for (LocationNode subLoc : loc.locationItems()) {
+            formatLocationNode(subLoc, depth + 1, sb);
+        }
+        for (EquipmentNode eq : loc.equipmentItems()) {
+            formatEquipmentNode(eq, depth + 1, sb);
+        }
+        for (PointNode pt : loc.pointItems()) {
+            formatPointNode(pt, depth + 1, sb);
+        }
+    }
+
+    private static void formatEquipmentNode(EquipmentNode eq, int depth, StringBuilder sb) {
+        sb.append(getIndent(depth)).append(eq.name());
+
+        if (!"Group".equals(eq.type())) {
+            sb.append(" ").append(eq.type());
+        }
+        if (shouldPrintLabel(eq.name(), eq.label())) {
+            sb.append(" \"").append(eq.label().replace("\"", "\\\"")).append("\"");
+        }
+        if (eq.semanticType() != null) {
+            sb.append(" :").append(eq.semanticType());
+        }
+        if (!eq.commandOptions().isEmpty()) {
+            sb.append(" (").append(formatCommandOptions(eq.commandOptions())).append(")");
+        }
+        sb.append("\n");
+
+        for (EquipmentNode subEq : eq.equipmentItems()) {
+            formatEquipmentNode(subEq, depth + 1, sb);
+        }
+        for (PointNode pt : eq.pointItems()) {
+            formatPointNode(pt, depth + 1, sb);
+        }
+    }
+
+    private static void formatPointNode(PointNode pt, int depth, StringBuilder sb) {
+        sb.append(getIndent(depth)).append(pt.name());
+
+        if (!"Group".equals(pt.type())) {
+            sb.append(" ").append(pt.type());
+        }
+        if (shouldPrintLabel(pt.name(), pt.label())) {
+            sb.append(" \"").append(pt.label().replace("\"", "\\\"")).append("\"");
+        }
+        if (pt.semanticType() != null) {
+            sb.append(" :").append(pt.semanticType());
+        }
+        if (!pt.properties().isEmpty()) {
+            sb.append(" [").append(String.join(",", pt.properties())).append("]");
+        }
+        if (!pt.commandOptions().isEmpty()) {
+            sb.append(" (").append(formatCommandOptions(pt.commandOptions())).append(")");
+        }
+        sb.append("\n");
+    }
+
+    private static void formatNonSemanticItemNode(NonSemanticItemNode item, StringBuilder sb) {
+        sb.append(item.name());
+
+        if (!"Group".equals(item.type())) {
+            sb.append(" ").append(item.type());
+        }
+        if (shouldPrintLabel(item.name(), item.label())) {
+            sb.append(" \"").append(item.label().replace("\"", "\\\"")).append("\"");
+        }
+        if (!item.commandOptions().isEmpty()) {
+            sb.append(" (").append(formatCommandOptions(item.commandOptions())).append(")");
+        }
+        sb.append("\n");
+    }
+
+    private static boolean shouldPrintLabel(String name, @Nullable String label) {
+        if (label == null || label.isBlank()) {
+            return false;
+        }
+        String cleanLabel = label.replace(" ", "").replace("_", "");
+        String cleanName = name.replace("_", "");
+        return !cleanLabel.equalsIgnoreCase(cleanName);
+    }
+
+    private static String getIndent(int depth) {
+        StringBuilder sb = new StringBuilder();
+        sb.repeat("..", Math.max(0, depth));
+        return sb.toString();
+    }
+
+    private static String formatCommandOptions(List<CommandOptionNode> commandOptions) {
+        List<String> formatted = new ArrayList<>();
+        for (CommandOptionNode option : commandOptions) {
+            if (option.label() != null && !option.label().isBlank()) {
+                formatted.add(option.command() + "=" + option.label());
+            } else {
+                formatted.add(option.command());
+            }
+        }
+        return String.join(",", formatted);
     }
 }
