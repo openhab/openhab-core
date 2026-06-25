@@ -282,6 +282,7 @@ public class LLMItemSerializer {
     }
 
     private static List<CommandOptionNode> getCommandOptions(Item item, @Nullable Locale locale) {
+        @Nullable
         CommandDescription commandDesc = item.getCommandDescription(locale);
         if (commandDesc == null) {
             return List.of();
