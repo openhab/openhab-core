@@ -79,18 +79,19 @@ public class ItemCommandLLMTool implements LLMTool {
     @Override
     public String getDescription(@Nullable Locale locale) {
         return """
-                This tool allows to control items by sending commands to them.
-                The accepted command format depends on the type of the target item:
+                Control items via commands. Valid commands by item type:
                 - Switch: ON, OFF
                 - Dimmer: ON, OFF, Percent (0-100), INCREASE, DECREASE
-                - Color: ON, OFF, Percent (0-100), INCREASE, DECREASE, HSB (comma-separated Hue,Saturation,Brightness, e.g., '120,100,100')
+                - Color: Dimmer commands, HSB (comma-separated Hue,Saturation,Brightness, e.g., '120,100,100')
                 - Rollershutter: UP, DOWN, STOP, MOVE, Percent (0-100)
                 - Player: PLAY, PAUSE, NEXT, PREVIOUS, REWIND, FASTFORWARD
-                - Number: Decimal numbers (e.g., '21', '23.5') or numbers with unit (e.g., '21 °C')
-                - String: Arbitrary text
-                - DateTime: ISO 8601 formatted date/time (e.g., '2026-06-24T23:49:09+02:00')
-                - Location: GPS coordinates (comma-separated latitude,longitude and optional altitude, e.g., '52.520008,13.404954')
-                - Contact, Image, Call: REFRESH""";
+                - Number: Decimals without (e.g., '21', '23.5') or with unit (e.g., '21 °C')
+                - String: Text
+                - DateTime: ISO 8601 (e.g., '2026-06-24T23:49:09+02:00')
+                - Location: Latitude,longitude[,altitude] (e.g., '52.520008,13.404954')
+                - Contact, Image, Call: REFRESH
+                Items may accept command options (command/label pairs).
+                """;
     }
 
     @Override
