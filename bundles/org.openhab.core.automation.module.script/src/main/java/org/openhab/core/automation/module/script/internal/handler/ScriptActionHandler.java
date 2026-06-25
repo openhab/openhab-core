@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.ActionHandler;
+import org.openhab.core.automation.module.script.LockableScriptEngine;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,15 +86,29 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
         }
 
         ScriptEngine scriptEngine = getScriptEngine();
+        Lock lock = null;
+        long timeout = 0L;
+        if (scriptEngine instanceof LockableScriptEngine lockable) {
+            lock = lockable.getLock();
+            timeout = lockable.getLockAcquisitionTimeoutMs();
+        }
         if (scriptEngine != null) {
             try {
-                if (scriptEngine instanceof Lock lock && !lock.tryLock(1, TimeUnit.MINUTES)) {
-                    logger.error(
-                            "Failed to acquire lock within one minute for script module '{}' of rule with UID '{}'",
-                            module.getId(), ruleUID);
+                if (lock != null && !lock.tryLock(timeout, TimeUnit.MILLISECONDS)) {
+                    if (timeout < 2000L) {
+                        logger.error(
+                                "Failed to acquire lock within {} milliseconds for script module '{}' of rule with UID '{}'",
+                                timeout, module.getId(), ruleUID);
+
+                    } else {
+                        logger.error(
+                                "Failed to acquire lock within {} seconds for script module '{}' of rule with UID '{}'",
+                                TimeUnit.MILLISECONDS.toSeconds(timeout), module.getId(), ruleUID);
+                    }
                     return resultMap;
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             }
             try {
@@ -101,9 +116,8 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
                 Object result = eval(scriptEngine);
                 resultMap.put("result", result);
                 resetExecutionContext(scriptEngine, context);
-            } finally { // Make sure that Lock is unlocked regardless of an exception being thrown or not to avoid
-                        // deadlocks
-                if (scriptEngine instanceof Lock lock) {
+            } finally {
+                if (lock != null) {
                     lock.unlock();
                 }
             }

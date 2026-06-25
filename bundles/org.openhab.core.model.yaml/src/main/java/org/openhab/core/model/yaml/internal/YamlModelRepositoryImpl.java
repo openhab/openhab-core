@@ -45,13 +45,14 @@ import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
-import org.openhab.core.model.yaml.internal.pages.YamlPageDTO;
 import org.openhab.core.model.yaml.internal.rules.YamlRuleDTO;
 import org.openhab.core.model.yaml.internal.rules.YamlRuleTemplateDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
 import org.openhab.core.model.yaml.internal.sitemaps.YamlSitemapDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
-import org.openhab.core.model.yaml.internal.widgets.YamlWidgetDTO;
+import org.openhab.core.model.yaml.internal.uicomponents.YamlBlocksDTO;
+import org.openhab.core.model.yaml.internal.uicomponents.YamlPageDTO;
+import org.openhab.core.model.yaml.internal.uicomponents.YamlWidgetDTO;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
@@ -107,7 +108,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             getElementName(YamlItemDTO.class), // "items"
             getElementName(YamlPageDTO.class), // "pages"
             getElementName(YamlWidgetDTO.class), // "widgets"
-            getElementName(YamlSitemapDTO.class) // "sitemaps"
+            getElementName(YamlSitemapDTO.class), // "sitemaps"
+            getElementName(YamlBlocksDTO.class) // "blocks"
     );
 
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
@@ -647,7 +649,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             errors.add("Failed to process model: %s".formatted(e.getMessage()));
             valid = false;
         }
-        return valid ? modelName : null;
+        if (!valid) {
+            removeModel(modelName);
+            return null;
+        }
+        return modelName;
     }
 
     @Override

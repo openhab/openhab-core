@@ -14,6 +14,7 @@ package org.openhab.core.automation;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -99,6 +100,47 @@ public interface RuleManager {
      */
     Map<String, @Nullable Object> runNow(String uid, boolean considerConditions,
             @Nullable Map<String, @Nullable Object> context);
+
+    /**
+     * The method skips triggers and conditions and executes the actions of the rule asynchronously.
+     * This should always be possible unless an action has a mandatory input that is linked to a trigger.
+     * In that case the action is skipped and the rule engine continues execution of remaining actions.
+     * <p>
+     * <b>Note:</b> Unlike {@link #runNow(String)}, this method will return immediately. To wait for the execution to be
+     * completed, call {@link Future#get()} on the returned {@link Future}.
+     *
+     * @param ruleUID uid of the rule whose actions should be executed.
+     * @return A {@link Future} containing the copy of the rule context after completion, including possible return
+     *         values.
+     * @throws UnsupportedOperationException If asynchronous execution isn't supported by the {@link RuleManager}
+     *             implementation.
+     *
+     * @implNote The default implementation simply calls {@link #runAsync(String, boolean, Map)}.
+     */
+    default Future<Map<String, @Nullable Object>> runAsync(String ruleUID) {
+        return runAsync(ruleUID, false, null);
+    }
+
+    /**
+     * Same as {@link #runAsync(String)} with the additional option to enable/disable evaluation of
+     * conditions defined in the target rule. The context can be set here, too, but might also be {@code null}.
+     * <p>
+     * <b>Note:</b> Unlike {@link #runNow(String, boolean, Map)}, this method will return immediately. To wait for the
+     * execution to be completed, call {@link Future#get()} on the returned {@link Future}.
+     *
+     * @param ruleUID uid of the rule whose actions should be executed.
+     * @param considerConditions if {@code true} the conditions of the rule will be checked.
+     * @param context the context that is passed to the conditions and the actions of the rule.
+     * @return a copy of the rule context, including possible return values
+     * @throws UnsupportedOperationException If asynchronous execution isn't supported by the {@link RuleManager}
+     *             implementation.
+     *
+     * @implNote The default implementation throws an {@link UnsupportedOperationException}.
+     */
+    default Future<Map<String, @Nullable Object>> runAsync(String ruleUID, boolean considerConditions,
+            @Nullable Map<String, @Nullable Object> context) {
+        throw new UnsupportedOperationException("runAsync() isn't implemented by " + getClass().getName());
+    }
 
     /**
      * Simulates the execution of all rules with tag 'Schedule' for the given time interval.
