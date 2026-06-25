@@ -73,7 +73,7 @@ public class ItemStateLLMTool implements LLMTool {
 
     @Override
     public String getDescription(@Nullable Locale locale) {
-        return "This tool allows to retrieve the current state of an item. It returns the display state and the raw state if a display state is available, otherwise only the raw state.";
+        return "Get the current state of an item. Returns display and raw state if display state is available, otherwise only raw state.";
     }
 
     @Override
