@@ -219,9 +219,9 @@ public class LLMItemSerializerTest {
         Item locationItem = mockItem("LocationA", "Room", "Group", Set.of("Mock_Location_Room_LivingRoom"), List.of(),
                 List.of(new CommandOption("ON", "On"), new CommandOption("OFF", "Off")));
 
-        // Equipment Node should have command options
+        // Equipment Node should NOT have command options
         Item eqItem = mockItem("TV", "Living Room TV", "Group", Set.of("Mock_Equipment_Entertainment_TV"),
-                List.of("LocationA"), List.of(new CommandOption("ON", "On"), new CommandOption("OFF", "Off")));
+                List.of("LocationA"), List.of());
 
         // Point Node should have command options
         Item ptItem = mockItem("Light", "Living Room Light", "Dimmer", Set.of("Mock_Point_Control_Light"),
@@ -238,11 +238,6 @@ public class LLMItemSerializerTest {
                     label: Living Room TV
                     type: Group
                     semanticType: MockTV
-                    commandOptions:
-                    - command: "ON"
-                      label: "On"
-                    - command: "OFF"
-                      label: "Off"
                     pointItems:
                     - name: Light
                       label: Living Room Light
