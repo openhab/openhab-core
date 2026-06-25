@@ -326,8 +326,8 @@ public class ScriptTransformationService
         }
 
         logger.debug(
-                "ScriptEngineFactory for script type '{}' has been removed, disposing script engines of type '{}'.",
-                scriptType, scriptType);
+                "ScriptEngineFactory for script type '{}' has been removed, disposing script engines of this type.",
+                scriptType);
         // removal of the ScriptEngineFactory for "our" scriptType causes all ScriptEngines to be closed:
         // cleanup all script engines so they can be properly recreated when needed and a ScriptEngineFactory for "our"
         // scriptType is available
