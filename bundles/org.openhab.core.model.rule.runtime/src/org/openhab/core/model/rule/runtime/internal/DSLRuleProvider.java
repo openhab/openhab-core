@@ -92,10 +92,10 @@ import org.openhab.core.model.rule.rules.TimerTrigger;
 import org.openhab.core.model.rule.rules.UpdateEventTrigger;
 import org.openhab.core.model.rule.rules.WeekdayCondition;
 import org.openhab.core.model.rule.rules.impl.RuleImpl;
+import org.openhab.core.model.script.jvmmodel.ScriptItemRefresher;
 import org.openhab.core.model.script.runtime.DSLScriptContextProvider;
 import org.openhab.core.model.script.script.Script;
 import org.openhab.core.service.ReadyMarker;
-import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.ReadyService.ReadyTracker;
 import org.osgi.service.component.annotations.Activate;
@@ -112,6 +112,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Add support for conditions
  * @author Laurent Garnier - Add optional rule UID + registry notification refactoring
+ * @author Laurent Garnier - wait for marker scripts=refresh in addition to marker rules=refresh
  */
 @NonNullByDefault
 @Component(immediate = true, service = { DSLRuleProvider.class, RuleProvider.class, DSLScriptContextProvider.class })
@@ -131,21 +132,21 @@ public class DSLRuleProvider
     private final ModelRepository modelRepository;
     private final ReadyService readyService;
 
+    private boolean scriptsReady;
+    private boolean rulesReady;
+
     @Activate
     public DSLRuleProvider(@Reference ModelRepository modelRepository, @Reference ReadyService readyService) {
         this.modelRepository = modelRepository;
         this.readyService = readyService;
-    }
 
-    @Activate
-    protected void activate() {
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(RulesRefresher.RULES_REFRESH_MARKER_TYPE)
-                .withIdentifier(RulesRefresher.RULES_REFRESH));
+        readyService.registerTracker(this);
     }
 
     @Deactivate
     protected void deactivate() {
         modelRepository.removeModelRepositoryChangeListener(this);
+        readyService.unregisterTracker(this);
         rulesMap.clear();
         contexts.clear();
         xExpressions.clear();
@@ -652,6 +653,19 @@ public class DSLRuleProvider
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
+        if (ScriptItemRefresher.SCRIPTS_REFRESH_MARKER_TYPE.equals(readyMarker.getType())
+                && ScriptItemRefresher.SCRIPTS_REFRESH.equals(readyMarker.getIdentifier())) {
+            scriptsReady = true;
+        } else if (RulesRefresher.RULES_REFRESH_MARKER_TYPE.equals(readyMarker.getType())
+                && RulesRefresher.RULES_REFRESH.equals(readyMarker.getIdentifier())) {
+            rulesReady = true;
+        } else {
+            return;
+        }
+        if (!scriptsReady || !rulesReady) {
+            return;
+        }
+
         for (String modelFileName : modelRepository.getAllModelNamesOfType("script")) {
             logger.debug("onReadyMarkerAdded handle script {}", modelFileName);
             EObject model = modelRepository.getModel(modelFileName);
@@ -713,7 +727,18 @@ public class DSLRuleProvider
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
-        readyService.unmarkReady(marker);
+        boolean readyBefore = scriptsReady && rulesReady;
+        if (ScriptItemRefresher.SCRIPTS_REFRESH_MARKER_TYPE.equals(readyMarker.getType())
+                && ScriptItemRefresher.SCRIPTS_REFRESH.equals(readyMarker.getIdentifier())) {
+            scriptsReady = false;
+        } else if (RulesRefresher.RULES_REFRESH_MARKER_TYPE.equals(readyMarker.getType())
+                && RulesRefresher.RULES_REFRESH.equals(readyMarker.getIdentifier())) {
+            rulesReady = false;
+        }
+        boolean readyAfter = scriptsReady && rulesReady;
+        if (readyBefore && !readyAfter) {
+            readyService.unmarkReady(marker);
+        }
     }
 
     private record RulePair(Rule oldRule, Rule newRule) {

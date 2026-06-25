@@ -18,12 +18,21 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemRegistryChangeListener;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyMarkerFilter;
+import org.openhab.core.service.ReadyService;
+import org.openhab.core.service.ReadyService.ReadyTracker;
+import org.openhab.core.service.StartLevelService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -35,64 +44,78 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Libutzki - Initial contribution
  * @author Kai Kreuzer - added delayed execution
+ * @author Laurent Garnier - delayed execution until start level 20 is reached
  */
 @Component(service = {})
-public class ScriptItemRefresher implements ItemRegistryChangeListener {
+public class ScriptItemRefresher implements ItemRegistryChangeListener, ReadyTracker {
+
+    // delay in seconds before script resources are refreshed after items or services have changed
+    private static final long REFRESH_DELAY = 30;
+
+    public static final String SCRIPTS_REFRESH_MARKER_TYPE = "scripts";
+    public static final String SCRIPTS_REFRESH = "refresh";
+
+    private final ReadyMarker MARKER = new ReadyMarker(SCRIPTS_REFRESH_MARKER_TYPE, SCRIPTS_REFRESH);
 
     private final Logger logger = LoggerFactory.getLogger(ScriptItemRefresher.class);
 
-    // delay before rule resources are refreshed after items or services have changed
-    private static final long REFRESH_DELAY = 2000;
+    private final ModelRepository modelRepository;
+    private final ItemRegistry itemRegistry;
+    private final ReadyService readyService;
 
-    ModelRepository modelRepository;
-    private ItemRegistry itemRegistry;
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private ScheduledFuture<?> job;
+    private final ScheduledExecutorService scheduler = Executors
+            .newSingleThreadScheduledExecutor(new NamedThreadFactory("scriptsRefresher"));
 
-    @Reference
-    public void setModelRepository(ModelRepository modelRepository) {
+    private @Nullable ScheduledFuture<?> job;
+    private boolean started;
+
+    @Activate
+    public ScriptItemRefresher(@Reference ModelRepository modelRepository, @Reference ItemRegistry itemRegistry,
+            @Reference ReadyService readyService) {
         this.modelRepository = modelRepository;
-    }
-
-    public void unsetModelRepository(ModelRepository modelRepository) {
-        if (job != null && !job.isDone()) {
-            job.cancel(false);
-        }
-        this.modelRepository = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setItemRegistry(ItemRegistry itemRegistry) {
         this.itemRegistry = itemRegistry;
-        this.itemRegistry.addRegistryChangeListener(this);
+        this.readyService = readyService;
+
+        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
+                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
     }
 
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry.removeRegistryChangeListener(this);
-        this.itemRegistry = null;
+    @Deactivate
+    protected void deactivate() {
+        ScheduledFuture<?> localJob = job;
+        if (localJob != null && !localJob.isDone()) {
+            localJob.cancel(true);
+        }
+        job = null;
+        started = false;
+        readyService.unregisterTracker(this);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addActionService(ActionService actionService) {
-        logger.debug("Script action added => scripts are going to be refreshed");
-        scheduleScriptRefresh();
+        if (started) {
+            logger.debug("Script action added => scripts are going to be refreshed");
+            scheduleScriptRefresh(REFRESH_DELAY);
+        }
     }
 
     protected void removeActionService(ActionService actionService) {
-        logger.debug("Script action removed => scripts are going to be refreshed");
-        scheduleScriptRefresh();
+        if (started) {
+            logger.debug("Script action removed => scripts are going to be refreshed");
+            scheduleScriptRefresh(REFRESH_DELAY);
+        }
     }
 
     @Override
     public void added(Item element) {
         logger.debug("Item \"{}\" added => scripts are going to be refreshed", element.getName());
-        scheduleScriptRefresh();
+        scheduleScriptRefresh(REFRESH_DELAY);
     }
 
     @Override
     public void removed(Item element) {
         logger.debug("Item \"{}\" removed => scripts are going to be refreshed", element.getName());
-        scheduleScriptRefresh();
+        scheduleScriptRefresh(REFRESH_DELAY);
     }
 
     @Override
@@ -102,24 +125,35 @@ public class ScriptItemRefresher implements ItemRegistryChangeListener {
     @Override
     public void allItemsChanged(Collection<String> oldItemNames) {
         logger.debug("All items changed => scripts are going to be refreshed");
-        scheduleScriptRefresh();
+        scheduleScriptRefresh(REFRESH_DELAY);
     }
 
-    private synchronized void scheduleScriptRefresh() {
-        if (job != null && !job.isDone()) {
-            job.cancel(false);
+    private synchronized void scheduleScriptRefresh(long delay) {
+        ScheduledFuture<?> localJob = job;
+        if (localJob != null && !localJob.isDone()) {
+            localJob.cancel(false);
         }
-        job = scheduler.schedule(runnable, REFRESH_DELAY, TimeUnit.MILLISECONDS);
-    }
-
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
+        job = scheduler.schedule(() -> {
             try {
                 modelRepository.reloadAllModelsOfType("script");
             } catch (Exception e) {
                 logger.debug("Exception occurred during execution: {}", e.getMessage(), e);
             }
-        }
-    };
+            if (!started) {
+                started = true;
+                readyService.markReady(MARKER);
+            }
+        }, delay, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void onReadyMarkerAdded(ReadyMarker readyMarker) {
+        scheduleScriptRefresh(0);
+        itemRegistry.addRegistryChangeListener(this);
+    }
+
+    @Override
+    public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
+        itemRegistry.removeRegistryChangeListener(this);
+    }
 }
