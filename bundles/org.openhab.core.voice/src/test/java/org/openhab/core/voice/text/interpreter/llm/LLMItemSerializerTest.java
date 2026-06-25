@@ -58,6 +58,9 @@ public class LLMItemSerializerTest {
     private interface MockPower extends Point {
     }
 
+    private interface MockSource extends Point {
+    }
+
     private interface MockPowerProperty extends Property {
     }
 
@@ -65,9 +68,10 @@ public class LLMItemSerializerTest {
     public static void setUpTags() {
         SemanticTags.addTagSet("Mock_Location_Floor", MockFloor.class);
         SemanticTags.addTagSet("Mock_Location_Room_LivingRoom", MockLivingRoom.class);
-        SemanticTags.addTagSet("Mock_Equipment_Entertainment_TV", MockTV.class);
+        SemanticTags.addTagSet("Mock_Equipment_Television", MockTV.class);
         SemanticTags.addTagSet("Mock_Point_Control_Light", MockLight.class);
         SemanticTags.addTagSet("Mock_Point_Control_Power", MockPower.class);
+        SemanticTags.addTagSet("Mock_Point_Control_Source", MockSource.class);
         SemanticTags.addTagSet("Mock_Property_Power", MockPowerProperty.class);
     }
 
@@ -75,9 +79,10 @@ public class LLMItemSerializerTest {
     public static void tearDownTags() {
         SemanticTags.removeTagSet("Mock_Location_Floor", MockFloor.class);
         SemanticTags.removeTagSet("Mock_Location_Room_LivingRoom", MockLivingRoom.class);
-        SemanticTags.removeTagSet("Mock_Equipment_Entertainment_TV", MockTV.class);
+        SemanticTags.removeTagSet("Mock_Equipment_Television", MockTV.class);
         SemanticTags.removeTagSet("Mock_Point_Control_Light", MockLight.class);
         SemanticTags.removeTagSet("Mock_Point_Control_Power", MockPower.class);
+        SemanticTags.removeTagSet("Mock_Point_Control_Source", MockSource.class);
         SemanticTags.removeTagSet("Mock_Property_Power", MockPowerProperty.class);
     }
 
@@ -113,12 +118,8 @@ public class LLMItemSerializerTest {
         Item item2 = mockItem("ItemA", null, "Dimmer", Set.of(), List.of());
 
         String expected = """
-                items:
-                - name: ItemA
-                  type: Dimmer
-                - name: ItemB
-                  label: Label B
-                  type: Switch
+                ItemA Dimmer
+                ItemB Switch "Label B"
                 """;
 
         assertEquals(expected, LLMItemSerializer.serialize(List.of(item1, item2), null));
@@ -134,8 +135,7 @@ public class LLMItemSerializerTest {
                 List.of("GF"));
 
         // TV Equipment inside LivingRoom
-        Item tv = mockItem("TV", "Living Room TV", "Group", Set.of("Mock_Equipment_Entertainment_TV"),
-                List.of("LivingRoom"));
+        Item tv = mockItem("TV", "Living Room TV", "Group", Set.of("Mock_Equipment_Television"), List.of("LivingRoom"));
 
         // TV Power Control inside TV
         Item tvPower = mockItem("TV_Power", "TV Power", "Switch",
@@ -152,58 +152,16 @@ public class LLMItemSerializerTest {
         List<Item> items = List.of(tvPower, livingRoom, systemMode, lrLight, tv, gf);
 
         String expected = """
-                locationItems:
-                - name: GF
-                  label: Ground Floor
-                  type: Group
-                  semanticType: MockFloor
-                  locationItems:
-                  - name: LivingRoom
-                    label: Living Room
-                    type: Group
-                    semanticType: MockLivingRoom
-                    equipmentItems:
-                    - name: TV
-                      label: Living Room TV
-                      type: Group
-                      semanticType: MockTV
-                      pointItems:
-                      - name: TV_Power
-                        label: TV Power
-                        type: Switch
-                        semanticType: MockPower
-                        properties:
-                        - MockPowerProperty
-                    pointItems:
-                    - name: LivingRoom_Light
-                      label: Living Room Light
-                      type: Dimmer
-                      semanticType: MockLight
-                items:
-                - name: System_Mode
-                  label: System Mode
-                  type: String
+                GF "Ground Floor" :MockFloor
+                ..LivingRoom :MockLivingRoom
+                ....TV "Living Room TV" :MockTV
+                ......TV_Power Switch :MockPower [MockPowerProperty]
+                ....LivingRoom_Light Dimmer :MockLight
+
+                System_Mode String
                 """;
 
         assertEquals(expected, LLMItemSerializer.serialize(items, null));
-    }
-
-    @Test
-    public void testSerializeEscapingAndReservedWords() {
-        Item item1 = mockItem("item:with:colon", "label # with hash", "Switch", Set.of(), List.of());
-        Item item2 = mockItem("yes", "true", "String", Set.of(), List.of());
-
-        String expected = """
-                items:
-                - name: item:with:colon
-                  label: "label # with hash"
-                  type: Switch
-                - name: "yes"
-                  label: "true"
-                  type: String
-                """;
-
-        assertEquals(expected, LLMItemSerializer.serialize(List.of(item1, item2), null));
     }
 
     @Test
@@ -220,54 +178,21 @@ public class LLMItemSerializerTest {
                 List.of(new CommandOption("ON", "On"), new CommandOption("OFF", "Off")));
 
         // Equipment Node should NOT have command options
-        Item eqItem = mockItem("TV", "Living Room TV", "Group", Set.of("Mock_Equipment_Entertainment_TV"),
+        Item eqItem = mockItem("TV", "Living Room TV", "Group", Set.of("Mock_Equipment_Television"),
                 List.of("LocationA"), List.of());
 
         // Point Node should have command options
-        Item ptItem = mockItem("Light", "Living Room Light", "Dimmer", Set.of("Mock_Point_Control_Light"),
-                List.of("TV"), List.of(new CommandOption("ON", "On"), new CommandOption("OFF", "Off")));
+        Item ptItem = mockItem("TV_Channel", "TV Channel", "String", Set.of("Mock_Point_Control_Source"), List.of("TV"),
+                List.of(new CommandOption("CH1", "Channel 1"), new CommandOption("CH2", "Channel 2")));
 
         String expected = """
-                locationItems:
-                - name: LocationA
-                  label: Room
-                  type: Group
-                  semanticType: MockLivingRoom
-                  equipmentItems:
-                  - name: TV
-                    label: Living Room TV
-                    type: Group
-                    semanticType: MockTV
-                    pointItems:
-                    - name: Light
-                      label: Living Room Light
-                      type: Dimmer
-                      semanticType: MockLight
-                      commandOptions:
-                      - command: "ON"
-                        label: "On"
-                      - command: "OFF"
-                        label: "Off"
-                items:
-                - name: Audio_Source
-                  label: Audio Source
-                  type: String
-                  commandOptions:
-                  - command: TUNER
-                    label: Tuner
-                  - command: DAB
-                    label: DAB
-                  - command: AIRPLAY
-                    label: AirPlay
-                - name: ItemA
-                  type: Dimmer
-                - name: ItemB
-                  label: Label B
-                  type: Switch
-                  commandOptions:
-                  - command: "ON"
-                    label: "On"
-                  - command: "OFF"
+                LocationA "Room" :MockLivingRoom
+                ..TV "Living Room TV" :MockTV
+                ....TV_Channel String :MockSource (CH1=Channel 1,CH2=Channel 2)
+
+                Audio_Source String (TUNER=Tuner,DAB=DAB,AIRPLAY=AirPlay)
+                ItemA Dimmer
+                ItemB Switch "Label B" (ON=On,OFF)
                 """;
 
         assertEquals(expected,
