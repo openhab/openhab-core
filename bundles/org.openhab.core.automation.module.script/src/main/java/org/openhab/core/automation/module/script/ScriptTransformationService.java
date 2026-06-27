@@ -305,7 +305,12 @@ public class ScriptTransformationService
         try {
             ScriptEngineContainer scriptEngineContainer = scriptRecord.scriptEngineContainer;
             if (scriptEngineContainer != null) {
-                scriptEngineManager.removeEngine(scriptEngineContainer.getIdentifier());
+                try {
+                    scriptEngineManager.removeEngine(scriptEngineContainer.getIdentifier());
+                } catch (Exception e) {
+                    logger.error("Exception occurred while disposing script {}", scriptEngineContainer.getIdentifier(),
+                            e);
+                }
                 scriptRecord.scriptEngineContainer = null;
             }
             scriptRecord.compiledScript = null;
