@@ -242,9 +242,9 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     logger.trace("scriptUnloaded() is not defined in the script");
                 } catch (ScriptException ex) {
                     logger.error("Error executing scriptUnloaded() of ScriptEngine '{}'", engineIdentifier, ex);
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     Throwable cause = e.getCause();
-                    while (cause.getCause() != null) {
+                    while (cause != null && cause.getCause() != null) {
                         cause = cause.getCause();
                     }
                     if (cause instanceof IllegalStateException
