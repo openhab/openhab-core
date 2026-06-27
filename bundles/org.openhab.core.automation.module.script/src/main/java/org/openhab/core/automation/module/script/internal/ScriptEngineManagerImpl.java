@@ -247,12 +247,13 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     while (cause.getCause() != null) {
                         cause = cause.getCause();
                     }
-                    // Ignore ISE thrown by Graal languages if underlying org.graalvm.polyglot.Engine is closed
                     if (cause instanceof IllegalStateException
                             && "The Context is already closed.".equals(cause.getMessage())) {
+                        // Ignore ISE thrown by Graal languages if underlying org.graalvm.polyglot.Engine is closed
                         logger.debug("ScriptEngine '{}' already closed when attempting to execute scriptUnloaded()",
                                 engineIdentifier);
                     } else {
+                        // Do NOT rethrow, we always want to close the engine and remove script extensions.
                         logger.warn("Error attempting to execute scriptUnloaded() of ScriptEngine '{}', ScriptEngine",
                                 engineIdentifier, e);
                     }
