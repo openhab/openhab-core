@@ -239,8 +239,8 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 try {
                     inv.invokeFunction("scriptUnloaded");
                 } catch (NoSuchMethodException e) {
-                    logger.trace("scriptUnloaded() is not defined in the script");
-                } catch (ScriptException ex) {
+                    logger.trace("scriptUnloaded() is not defined in ScriptEngine '{}'", engineIdentifier);
+                }
                     logger.error("Error executing scriptUnloaded() of ScriptEngine '{}'", engineIdentifier, ex);
                 } catch (RuntimeException e) {
                     Throwable cause = e.getCause();
@@ -254,8 +254,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                                 engineIdentifier);
                     } else {
                         // Do NOT rethrow, we always want to close the engine and remove script extensions.
-                        logger.warn("Error attempting to execute scriptUnloaded() of ScriptEngine '{}', ScriptEngine",
-                                engineIdentifier, e);
+                        logger.warn("Error attempting to execute scriptUnloaded() of ScriptEngine '{}' (continuing cleanup)", engineIdentifier, e);
                     }
                 }
             } else {
