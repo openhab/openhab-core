@@ -335,6 +335,42 @@ public class ScriptProfileTest extends JavaTest {
         verify(profileCallback).sendTimeSeries(transformedTimeSeries);
     }
 
+    @Test
+    public void scriptNotExecutedIfTransformationServiceSupplierReturnsNull() throws TransformationException {
+        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
+                .withToHandlerScript("outScript").withCommandFromItemScript("itemCommandScript")
+                .withStateFromItemScript("itemStateScript").withAcceptedCommandTypes(List.of(OnOffType.class))
+                .withAcceptedDataTypes(List.of(OnOffType.class))
+                .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
+
+        ItemChannelLink link = new ItemChannelLink("DummyItem", new ChannelUID("foo:bar:baz:qux"));
+        when(profileCallback.getItemChannelLink()).thenReturn(link);
+
+        setupInterceptedLogger(ScriptProfile.class, LogLevel.ERROR);
+
+        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
+                () -> null);
+
+        scriptProfile.onCommandFromHandler(OnOffType.ON);
+        scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
+        scriptProfile.onTimeSeriesFromHandler(createTimeSeries(OnOffType.ON));
+        scriptProfile.onCommandFromItem(OnOffType.ON);
+        scriptProfile.onStateUpdateFromItem(OnOffType.ON);
+
+        verify(transformationServiceMock, never()).transform(any(), any());
+        verify(profileCallback, never()).handleCommand(any());
+        verify(profileCallback, never()).sendTimeSeries(any());
+        verify(profileCallback, never()).sendUpdate(any());
+        verify(profileCallback, never()).sendCommand(any());
+
+        assertLogMessage(ScriptProfile.class, LogLevel.ERROR,
+                "Failed to process script 'inScript' in link '" + link + "': transformation service is not available.");
+        assertLogMessage(ScriptProfile.class, LogLevel.ERROR, "Failed to process script 'itemCommandScript' in link '"
+                + link + "': transformation service is not available.");
+        assertLogMessage(ScriptProfile.class, LogLevel.ERROR, "Failed to process script 'itemStateScript' in link '"
+                + link + "': transformation service is not available.");
+    }
+
     private ScriptProfile createScriptProfile(ProfileContext profileContext) {
         return new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
                 () -> transformationServiceMock);
