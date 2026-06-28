@@ -239,14 +239,29 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 try {
                     inv.invokeFunction("scriptUnloaded");
                 } catch (NoSuchMethodException e) {
-                    logger.trace("scriptUnloaded() is not defined in the script");
+                    logger.trace("scriptUnloaded() is not defined in ScriptEngine '{}'", engineIdentifier);
                 } catch (ScriptException ex) {
-                    logger.error("Error while executing script", ex);
+                    logger.error("Error executing scriptUnloaded() of ScriptEngine '{}'", engineIdentifier, ex);
+                } catch (RuntimeException e) {
+                    Throwable cause = e;
+                    while (cause != null && cause.getCause() != null) {
+                        cause = cause.getCause();
+                    }
+                    if (cause instanceof IllegalStateException
+                            && "The Context is already closed.".equals(cause.getMessage())) {
+                        // Ignore ISE thrown by Graal languages if underlying org.graalvm.polyglot.Engine is closed
+                        logger.debug("ScriptEngine '{}' already closed when attempting to execute scriptUnloaded()",
+                                engineIdentifier);
+                    } else {
+                        // Do NOT rethrow, we always want to close the engine and remove script extensions.
+                        logger.warn(
+                                "Error attempting to execute scriptUnloaded() of ScriptEngine '{}' (continuing cleanup)",
+                                engineIdentifier, e);
+                    }
                 }
             } else {
-                logger.trace("ScriptEngine does not support Invocable interface");
+                logger.trace("ScriptEngine '{}' does not support Invocable interface", engineIdentifier);
             }
-
             if (scriptEngine instanceof AutoCloseable closeable) {
                 // we cannot not use ScheduledExecutorService.execute here as it might execute the task in the calling
                 // thread (calling ScriptEngine.close in the same thread may result in a deadlock if the ScriptEngine
@@ -255,22 +270,22 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     try {
                         closeable.close();
                     } catch (Exception e) {
-                        logger.error("Error while closing script engine", e);
+                        logger.error("Error closing ScriptEngine '{}'", engineIdentifier, e);
                     }
                 }, 0, TimeUnit.SECONDS);
             } else {
-                logger.trace("ScriptEngine does not support AutoCloseable interface");
+                logger.trace("ScriptEngine '{}' does not support AutoCloseable interface", engineIdentifier);
             }
 
             removeScriptExtensions(engineIdentifier);
         }
     }
 
-    private void removeScriptExtensions(String pathIdentifier) {
+    private void removeScriptExtensions(String engineIdentifier) {
         try {
-            scriptExtensionManager.dispose(pathIdentifier);
+            scriptExtensionManager.dispose(engineIdentifier);
         } catch (Exception ex) {
-            logger.error("Error removing ScriptEngine", ex);
+            logger.error("Error removing ScriptEngine '{}'", engineIdentifier, ex);
         }
     }
 
