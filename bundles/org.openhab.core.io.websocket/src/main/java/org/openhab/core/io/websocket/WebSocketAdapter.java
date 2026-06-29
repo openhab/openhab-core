@@ -13,8 +13,8 @@
 package org.openhab.core.io.websocket;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
 
 /**
  * The {@link WebSocketAdapter} can be implemented to register an adapter for a websocket connection.
@@ -40,5 +40,6 @@ public interface WebSocketAdapter {
      * 
      * @return a websocket instance.
      */
-    Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest, ServletUpgradeResponse servletUpgradeResponse);
+    Object createWebSocket(JettyServerUpgradeRequest servletUpgradeRequest,
+            JettyServerUpgradeResponse servletUpgradeResponse);
 }

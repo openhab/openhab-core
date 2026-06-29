@@ -17,8 +17,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
 import org.openhab.core.io.websocket.WebSocketAdapter;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -68,8 +68,8 @@ public class LogWebSocketAdapter implements WebSocketAdapter {
     }
 
     @Override
-    public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
-            ServletUpgradeResponse servletUpgradeResponse) {
+    public Object createWebSocket(JettyServerUpgradeRequest servletUpgradeRequest,
+            JettyServerUpgradeResponse servletUpgradeResponse) {
         return new LogWebSocket(gson, LogWebSocketAdapter.this);
     }
 

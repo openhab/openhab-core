@@ -14,7 +14,6 @@ package org.openhab.core.io.websocket.audio.internal;
 
 import static java.nio.ByteBuffer.wrap;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,8 +25,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.openhab.core.audio.AudioDialogProvider;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.common.ThreadPoolManager;
@@ -98,8 +98,8 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     }
 
     @Override
-    public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
-            ServletUpgradeResponse servletUpgradeResponse) {
+    public Object createWebSocket(JettyServerUpgradeRequest servletUpgradeRequest,
+            JettyServerUpgradeResponse servletUpgradeResponse) {
         logger.debug("creating connection");
         return new PCMWebSocketConnection(this, executor);
     }
@@ -117,19 +117,16 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
         for (var handler : handlers) {
             if (handler != null) {
                 boolean pinged = false;
-                var remote = handler.getRemote();
-                if (remote != null) {
-                    try {
-                        remote.sendPing(wrap("oh".getBytes(StandardCharsets.UTF_8)));
-                        pinged = true;
-                    } catch (IOException ignored) {
-                    }
+                var session = handler.getSession();
+                if (session != null) {
+                    session.sendPing(wrap("oh".getBytes(StandardCharsets.UTF_8)), Callback.NOOP);
+                    pinged = true;
                 }
                 if (!pinged) {
                     logger.debug("Ping failed, disconnecting speaker '{}'", handler.getId());
-                    var session = handler.getSession();
-                    if (session != null) {
-                        session.close();
+                    var session2 = handler.getSession();
+                    if (session2 != null) {
+                        session2.close();
                     }
                 }
             }

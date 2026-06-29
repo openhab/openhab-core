@@ -34,8 +34,8 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLHandshakeException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
