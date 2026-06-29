@@ -130,4 +130,5 @@ Fragment-Host: org.openhab.core.io.rest.core
 	org.glassfish.jaxb.runtime;version='[4.0.9,4.0.10)',\
 	org.glassfish.jaxb.txw2;version='[4.0.9,4.0.10)',\
 	jakarta.xml.bind-api;version='[4.0.5,4.0.6)',\
-	stax2-api;version='[4.2.2,4.2.3)'
+	stax2-api;version='[4.2.2,4.2.3)',\
+	org.osgi.service.servlet;version='[2.0.0,2.0.1)'
