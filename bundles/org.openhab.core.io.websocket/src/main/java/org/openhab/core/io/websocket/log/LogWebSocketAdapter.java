@@ -16,9 +16,13 @@ import java.util.Enumeration;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import javax.ws.rs.core.SecurityContext;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.openhab.core.auth.Role;
 import org.openhab.core.io.websocket.WebSocketAdapter;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -26,6 +30,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogReaderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
@@ -38,6 +44,8 @@ import com.google.gson.Gson;
 @Component(immediate = true, service = { WebSocketAdapter.class })
 public class LogWebSocketAdapter implements WebSocketAdapter {
     public static final String ADAPTER_ID = "logs";
+
+    private final Logger logger = LoggerFactory.getLogger(LogWebSocketAdapter.class);
     private final Gson gson = new Gson();
     private final Set<LogWebSocket> webSockets = new CopyOnWriteArraySet<>();
     private final LogReaderService logReaderService;
@@ -68,9 +76,14 @@ public class LogWebSocketAdapter implements WebSocketAdapter {
     }
 
     @Override
-    public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
-            ServletUpgradeResponse servletUpgradeResponse) {
-        return new LogWebSocket(gson, LogWebSocketAdapter.this);
+    public @Nullable Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
+            ServletUpgradeResponse servletUpgradeResponse, SecurityContext securityContext) {
+        if (securityContext.isUserInRole(Role.ADMIN)) {
+            return new LogWebSocket(gson, LogWebSocketAdapter.this);
+        }
+        logger.warn("Unauthorized access to log websocket from {}, admin role required.",
+                servletUpgradeRequest.getRemoteAddress());
+        return null;
     }
 
     public Enumeration<LogEntry> getLog() {
