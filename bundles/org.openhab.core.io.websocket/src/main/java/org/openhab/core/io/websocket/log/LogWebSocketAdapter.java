@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.websocket.log;
 
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -81,8 +82,11 @@ public class LogWebSocketAdapter implements WebSocketAdapter {
         if (securityContext.isUserInRole(Role.ADMIN)) {
             return new LogWebSocket(gson, LogWebSocketAdapter.this);
         }
-        logger.warn("Unauthorized access to log websocket from {}, admin role required.",
-                servletUpgradeRequest.getRemoteAddress());
+        try {
+            servletUpgradeResponse.sendForbidden("Admin role required.");
+        } catch (IOException e) {
+            logger.warn("Failed to send forbidden response to {}", servletUpgradeRequest.getRemoteAddress(), e);
+        }
         return null;
     }
 
