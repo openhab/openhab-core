@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -99,44 +98,23 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     private final List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<>();
     private final Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet<>();
 
-    private final Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap<>();
+    // All access must be guarded by "this"
+    private final Map<String, List<Thing>> thingsMap = new HashMap<>();
 
-    private final List<QueueContent> queue = new CopyOnWriteArrayList<>();
-    private final Object queueLock = new Object();
+    // All access must be guarded by "this"
+    private final List<QueueContent> queue = new ArrayList<>();
 
-    private final Runnable lazyRetryRunnable = new Runnable() {
-        @Override
-        public void run() {
-            threadStopping = false;
-            logger.debug("Starting lazy retry thread");
-            boolean stop = false;
-            do {
-                // Wait 1s before retrying
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    stop = true;
-                    threadStopping = true;
-                }
-                if (!stop) {
-                    synchronized (queueLock) {
-                        queue.removeIf(qc -> retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration,
-                                qc.thingUID, qc.bridgeUID));
-                        stop = queue.isEmpty();
-                        threadStopping = stop == true;
-                    }
-                }
-            } while (!stop);
-            logger.debug("Lazy retry thread ran out of work. Good bye.");
-        }
-    };
-
-    protected @Nullable Thread lazyRetryThread;
-    private boolean threadStopping;
+    // All access must be guarded by "this"
+    protected @Nullable RetryThread retryThread;
 
     private record QueueContent(ThingHandlerFactory thingHandlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
+    }
+
+    private record ThingPair(Thing oldThing, Thing newThing) {
+    }
+
+    private record RetryResult(boolean success, @Nullable ThingPair thingPair) {
     }
 
     @Activate
@@ -154,21 +132,26 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Deactivate
     public void deactivate() {
-        synchronized (queueLock) {
+        RetryThread thread;
+        synchronized (this) {
             queue.clear();
+            thingsMap.clear();
+            thread = retryThread;
         }
-        thingsMap.clear();
+        if (thread != null && thread.isAlive() && !thread.isStopping()) {
+            thread.interrupt();
+        }
         loadedXmlThingTypes.clear();
     }
 
     @Override
-    public Collection<Thing> getAll() {
+    public synchronized Collection<Thing> getAll() {
         // Ignore isolated models
         return thingsMap.keySet().stream().filter(name -> !isIsolatedModel(name))
                 .map(name -> thingsMap.getOrDefault(name, List.of())).flatMap(list -> list.stream()).toList();
     }
 
-    public Collection<Thing> getAllFromModel(String modelName) {
+    public synchronized Collection<Thing> getAllFromModel(String modelName) {
         Collection<Thing> things = thingsMap.get(modelName);
         return things == null ? List.of() : List.copyOf(things);
     }
@@ -192,9 +175,11 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     public void addedModel(String modelName, Collection<YamlThingDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
         List<Thing> added = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
-        Collection<Thing> modelThings = Objects
-                .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
-        modelThings.addAll(added);
+        synchronized (this) {
+            Collection<Thing> modelThings = Objects
+                    .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
+            modelThings.addAll(added);
+        }
         added.forEach(t -> {
             logger.debug("model {} added thing {}", modelName, t.getUID());
             if (!isolated) {
@@ -212,44 +197,65 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             });
         }
         List<Thing> updated = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
-        Collection<Thing> modelThings = Objects
-                .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
-        updated.forEach(t -> {
-            modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldThing -> {
-                modelThings.remove(oldThing);
-                modelThings.add(t);
-                logger.debug("model {} updated thing {}", modelName, t.getUID());
-                if (!isolated) {
-                    notifyListenersAboutUpdatedElement(oldThing, t);
-                }
-            }, () -> {
-                modelThings.add(t);
-                logger.debug("model {} added thing {}", modelName, t.getUID());
-                if (!isolated) {
-                    notifyListenersAboutAddedElement(t);
-                }
+        List<ThingPair> notifyUpdated = new ArrayList<>();
+        List<Thing> notifyAdded = new ArrayList<>();
+        synchronized (this) {
+            Collection<Thing> modelThings = Objects
+                    .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
+            updated.forEach(t -> {
+                modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst()
+                        .ifPresentOrElse(oldThing -> {
+                            modelThings.remove(oldThing);
+                            modelThings.add(t);
+                            logger.debug("model {} updated thing {}", modelName, t.getUID());
+                            if (!isolated) {
+                                notifyUpdated.add(new ThingPair(oldThing, t));
+                            }
+                        }, () -> {
+                            modelThings.add(t);
+                            logger.debug("model {} added thing {}", modelName, t.getUID());
+                            if (!isolated) {
+                                notifyAdded.add(t);
+                            }
+                        });
             });
-        });
+        }
+
+        // Don't invoke listeners while holding a lock, so do it here, after releasing the lock
+        for (Thing addedThing : notifyAdded) {
+            notifyListenersAboutAddedElement(addedThing);
+        }
+        for (ThingPair updatedThing : notifyUpdated) {
+            notifyListenersAboutUpdatedElement(updatedThing.oldThing, updatedThing.newThing);
+        }
     }
 
     @Override
     public void removedModel(String modelName, Collection<YamlThingDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
-        Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, new ArrayList<>());
-        elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
-            if (!isolated) {
-                removeFromRetryQueue(uid);
-            }
-            modelThings.stream().filter(th -> th.getUID().equals(uid)).findFirst().ifPresentOrElse(oldThing -> {
-                modelThings.remove(oldThing);
-                logger.debug("model {} removed thing {}", modelName, uid);
+        List<Thing> notifyRemoved = new ArrayList<>();
+        synchronized (this) {
+            Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, new ArrayList<>());
+            elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
                 if (!isolated) {
-                    notifyListenersAboutRemovedElement(oldThing);
+                    removeFromRetryQueue(uid);
                 }
-            }, () -> logger.debug("model {} thing {} not found", modelName, uid));
-        });
-        if (modelThings.isEmpty()) {
-            thingsMap.remove(modelName);
+                modelThings.stream().filter(th -> th.getUID().equals(uid)).findFirst().ifPresentOrElse(oldThing -> {
+                    modelThings.remove(oldThing);
+                    logger.debug("model {} removed thing {}", modelName, uid);
+                    if (!isolated) {
+                        notifyRemoved.add(oldThing);
+                    }
+                }, () -> logger.debug("model {} thing {} not found", modelName, uid));
+            });
+            if (modelThings.isEmpty()) {
+                thingsMap.remove(modelName);
+            }
+        }
+
+        // Don't invoke listeners while holding a lock, so do it here, after releasing the lock
+        for (Thing removedThing : notifyRemoved) {
+            notifyListenersAboutRemovedElement(removedThing);
         }
     }
 
@@ -293,66 +299,86 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         logger.debug("thingHandlerFactoryAdded {} isThingHandlerFactoryReady={}",
                 handlerFactory.getClass().getSimpleName(), isThingHandlerFactoryReady(handlerFactory));
         if (isThingHandlerFactoryReady(handlerFactory)) {
-            if (!thingsMap.isEmpty()) {
-                logger.debug("Refreshing models due to new thing handler factory {}",
-                        handlerFactory.getClass().getSimpleName());
-                thingsMap.keySet().stream().filter(name -> !isIsolatedModel(name)).forEach(modelName -> {
-                    List<Thing> things = thingsMap.getOrDefault(modelName, List.of()).stream()
-                            .filter(th -> handlerFactory.supportsThingType(th.getThingTypeUID())).toList();
-                    if (!things.isEmpty()) {
-                        logger.info("Refreshing YAML model {} ({} things with {})", modelName, things.size(),
-                                handlerFactory.getClass().getSimpleName());
-                        things.forEach(thing -> {
-                            if (!retryCreateThing(handlerFactory, thing.getThingTypeUID(), thing.getConfiguration(),
-                                    thing.getUID(), thing.getBridgeUID())) {
-                                // Possible cause: Asynchronous loading of the XML files
-                                // Add the data to the queue in order to retry it later
-                                logger.debug(
-                                        "ThingHandlerFactory \'{}\' claimed it can handle \'{}\' type but actually did not. Queued for later refresh.",
-                                        handlerFactory.getClass().getSimpleName(), thing.getThingTypeUID());
-                                queueRetryThingCreation(handlerFactory, thing.getThingTypeUID(),
+            List<ThingPair> pairs = new ArrayList<>();
+            synchronized (this) {
+                if (!thingsMap.isEmpty()) {
+                    logger.debug("Refreshing models due to new thing handler factory {}",
+                            handlerFactory.getClass().getSimpleName());
+                    thingsMap.keySet().stream().filter(name -> !isIsolatedModel(name)).forEach(modelName -> {
+                        List<Thing> things = thingsMap.getOrDefault(modelName, List.of()).stream()
+                                .filter(th -> handlerFactory.supportsThingType(th.getThingTypeUID())).toList();
+                        if (!things.isEmpty()) {
+                            logger.info("Refreshing YAML model {} ({} things with {})", modelName, things.size(),
+                                    handlerFactory.getClass().getSimpleName());
+                            things.forEach(thing -> {
+                                RetryResult retryResult = retryCreateThing(handlerFactory, thing.getThingTypeUID(),
                                         thing.getConfiguration(), thing.getUID(), thing.getBridgeUID());
-                            }
-                        });
-                    } else {
-                        logger.debug("No refresh needed from YAML model {}", modelName);
-                    }
-                });
-            } else {
-                logger.debug("No things yet loaded; no need to trigger a refresh due to new thing handler factory");
+                                ThingPair pair;
+                                if (!retryResult.success) {
+                                    // Possible cause: Asynchronous loading of the XML files
+                                    // Add the data to the queue in order to retry it later
+                                    logger.debug(
+                                            "ThingHandlerFactory \'{}\' claimed it can handle \'{}\' type but actually did not. Queued for later refresh.",
+                                            handlerFactory.getClass().getSimpleName(), thing.getThingTypeUID());
+                                    queueRetryThingCreation(handlerFactory, thing.getThingTypeUID(),
+                                            thing.getConfiguration(), thing.getUID(), thing.getBridgeUID());
+                                } else if ((pair = retryResult.thingPair) != null) {
+                                    pairs.add(pair);
+                                }
+                            });
+                        } else {
+                            logger.debug("No refresh needed from YAML model {}", modelName);
+                        }
+                    });
+                } else {
+                    logger.debug("No things yet loaded; no need to trigger a refresh due to new thing handler factory");
+                }
+            }
+
+            // Don't invoke listeners while holding a lock, so do it here, after releasing the lock
+            for (ThingPair pair : pairs) {
+                notifyListenersAboutUpdatedElement(pair.oldThing, pair.newThing);
             }
         }
     }
 
-    private boolean retryCreateThing(ThingHandlerFactory handlerFactory, ThingTypeUID thingTypeUID,
+    private RetryResult retryCreateThing(ThingHandlerFactory handlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
         logger.trace("Retry creating thing {}", thingUID);
         Thing newThing = handlerFactory.createThing(thingTypeUID, new Configuration(configuration), thingUID,
                 bridgeUID);
+        Thing oldThing = null;
+        ThingPair pair = null;
         if (newThing != null) {
             logger.debug("Successfully loaded thing \'{}\' during retry", thingUID);
-            Thing oldThing = null;
-            for (Map.Entry<String, Collection<Thing>> entry : thingsMap.entrySet()) {
-                Collection<Thing> modelThings = entry.getValue();
-                oldThing = modelThings.stream().filter(t -> t.getUID().equals(newThing.getUID())).findFirst()
-                        .orElse(null);
-                if (oldThing != null) {
-                    mergeThing(newThing, oldThing, false);
-                    modelThings.remove(oldThing);
-                    modelThings.add(newThing);
-                    logger.debug("Refreshing thing \'{}\' after successful retry", newThing.getUID());
-                    if (!ThingHelper.equals(oldThing, newThing) && !isIsolatedModel(entry.getKey())) {
-                        notifyListenersAboutUpdatedElement(oldThing, newThing);
+            ThingUID newUid = newThing.getUID();
+            List<Thing> modelThings;
+            boolean found = false;
+            synchronized (this) {
+                for (Entry<String, List<Thing>> modelEntry : thingsMap.entrySet()) {
+                    modelThings = modelEntry.getValue();
+                    for (int i = 0; !found && i < modelThings.size(); i++) {
+                        oldThing = modelThings.get(i);
+                        if (newUid.equals(oldThing.getUID())) {
+                            mergeThing(newThing, oldThing, false);
+                            modelThings.set(i, newThing);
+                            logger.debug("Refreshing thing \'{}\' after successful retry", newUid);
+                            if (!ThingHelper.equals(oldThing, newThing) && !isIsolatedModel(modelEntry.getKey())) {
+                                pair = new ThingPair(oldThing, newThing);
+                            }
+                            found = true;
+                        }
                     }
-                    break;
+                    if (found) {
+                        break;
+                    }
                 }
             }
-            if (oldThing == null) {
-                logger.debug("Refreshing thing \'{}\' after retry failed because thing is not found",
-                        newThing.getUID());
+            if (!found) {
+                logger.debug("Refreshing thing \'{}\' after retry failed because thing is not found", newUid);
             }
         }
-        return newThing != null;
+        return new RetryResult(newThing != null, pair);
     }
 
     private boolean isThingHandlerFactoryReady(ThingHandlerFactory thingHandlerFactory) {
@@ -555,37 +581,21 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         ThingHelper.addChannelsToThing(target, channelsToAdd);
     }
 
-    private void queueRetryThingCreation(ThingHandlerFactory handlerFactory, ThingTypeUID thingTypeUID,
+    private synchronized void queueRetryThingCreation(ThingHandlerFactory handlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
-        synchronized (queueLock) {
-            queue.add(new QueueContent(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID));
-        }
-        Thread thread = lazyRetryThread;
-        boolean stopping = threadStopping;
-        if (thread != null && thread.isAlive() && stopping) {
-            // Wait for the thread to terminate
-            while (thread.isAlive()) {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
-        if (thread == null || !thread.isAlive()) {
-            thread = new Thread(lazyRetryRunnable);
-            lazyRetryThread = thread;
+        queue.add(new QueueContent(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID));
+        RetryThread thread = retryThread;
+        if (thread == null || !thread.isAlive() || thread.isStopping()) {
+            retryThread = thread = new RetryThread();
             thread.start();
         }
     }
 
-    private void removeFromRetryQueue(ThingUID thingUID) {
-        synchronized (queueLock) {
-            queue.removeIf(qc -> thingUID.equals(qc.thingUID));
-        }
+    private synchronized void removeFromRetryQueue(ThingUID thingUID) {
+        queue.removeIf(qc -> thingUID.equals(qc.thingUID));
     }
 
-    public int getRetryQueueSize() {
+    public synchronized int getRetryQueueSize() {
         return queue.size();
     }
 
@@ -699,5 +709,59 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             }
         }
         return params;
+    }
+
+    class RetryThread extends Thread {
+
+        private volatile boolean stopping = false;
+
+        public RetryThread() {
+            super("OH-YamlThingProvider-retry");
+        }
+
+        @Override
+        public void run() {
+            if (isInterrupted()) {
+                stopping = true;
+                return;
+            }
+            logger.debug("Starting lazy retry thread");
+            List<ThingPair> pairs = new ArrayList<>();
+            while (!stopping) {
+                // Wait 1s before retrying
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    stopping = true;
+                    break;
+                }
+                pairs.clear();
+                synchronized (YamlThingProvider.this) {
+                    queue.removeIf(qc -> {
+                        RetryResult retryResult = retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID,
+                                qc.configuration, qc.thingUID, qc.bridgeUID);
+                        ThingPair pair = retryResult.thingPair;
+                        if (pair != null) {
+                            pairs.add(pair);
+                        }
+                        return retryResult.success;
+                    });
+                    if (queue.isEmpty()) {
+                        stopping = true;
+                    }
+                }
+
+                // Don't invoke listeners while holding a lock, so do it here, after releasing the lock
+                for (ThingPair pair : pairs) {
+                    notifyListenersAboutUpdatedElement(pair.oldThing, pair.newThing);
+                }
+            }
+            logger.debug("Lazy retry thread ran out of work. Good bye.");
+        }
+
+        public boolean isStopping() {
+            return stopping;
+        }
     }
 }
