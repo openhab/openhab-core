@@ -23,8 +23,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
@@ -41,6 +39,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * The {@link PCMWebSocketAdapter} creates instances of {@link PCMWebSocketConnection} to handle PCM audio streams.
@@ -100,7 +100,7 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     }
 
     @Override
-    public Object createWebSocket(JettyServerUpgradeRequest servletUpgradeRequest,
+    public @Nullable Object createWebSocket(JettyServerUpgradeRequest servletUpgradeRequest,
             JettyServerUpgradeResponse servletUpgradeResponse, SecurityContext securityContext) {
         logger.debug("creating connection");
         return new PCMWebSocketConnection(this, executor);

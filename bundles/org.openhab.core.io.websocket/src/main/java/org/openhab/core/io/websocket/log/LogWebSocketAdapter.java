@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
 import org.openhab.core.auth.Role;
@@ -76,7 +77,7 @@ public class LogWebSocketAdapter implements WebSocketAdapter {
     }
 
     @Override
-    public Object createWebSocket(JettyServerUpgradeRequest servletUpgradeRequest,
+    public @Nullable Object createWebSocket(JettyServerUpgradeRequest servletUpgradeRequest,
             JettyServerUpgradeResponse servletUpgradeResponse, SecurityContext securityContext) {
         if (securityContext.isUserInRole(Role.ADMIN)) {
             return new LogWebSocket(gson, LogWebSocketAdapter.this);
