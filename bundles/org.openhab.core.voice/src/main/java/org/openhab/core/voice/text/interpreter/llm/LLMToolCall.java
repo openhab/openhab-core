@@ -13,23 +13,36 @@
 package org.openhab.core.voice.text.interpreter.llm;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 /**
  * A DTO to store information about a tool call.
- * 
- * @param tool the UID of the {@link LLMTool}
- * @param params the params of the tool call
  *
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public record LLMToolCall(String tool, Map<String, Object> params) {
-    private static final Gson GSON = new Gson();
+public class LLMToolCall {
+    protected static final Gson GSON = new Gson();
+
+    /**
+     * the UID of the {@link LLMTool}
+     */
+    public final String tool;
+    /**
+     * the params of the tool call
+     */
+    public final Map<String, Object> params;
+
+    public LLMToolCall(String tool, Map<String, Object> params) {
+        this.tool = tool;
+        this.params = params;
+    }
 
     public static LLMToolCall map(LLMTool tool, Map<String, Object> params) {
         return new LLMToolCall(tool.getUID(), params);
@@ -57,5 +70,18 @@ public record LLMToolCall(String tool, Map<String, Object> params) {
             throw new JsonSyntaxException("Deserialized LLMToolCall is null.");
         }
         return call;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (!(o instanceof LLMToolCall call)) {
+            return false;
+        }
+        return Objects.equals(tool, call.tool) && Objects.equals(params, call.params);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tool, params);
     }
 }

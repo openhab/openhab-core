@@ -87,6 +87,8 @@ public class LLMToolCallTest {
 
         LLMToolCall roundTrip = LLMToolCall.fromJson(serialized);
         assertEquals(call, roundTrip);
+        assertEquals(call.tool, roundTrip.tool);
+        assertEquals(call.params, roundTrip.params);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -98,6 +100,8 @@ public class LLMToolCallTest {
 
         LLMToolCall deserialized = LLMToolCall.fromJson(json);
         assertEquals(original, deserialized);
+        assertEquals(original.tool, deserialized.tool);
+        assertEquals(original.params, deserialized.params);
     }
 
     @Test
