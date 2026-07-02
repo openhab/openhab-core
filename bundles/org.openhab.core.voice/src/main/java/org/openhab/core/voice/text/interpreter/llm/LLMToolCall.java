@@ -40,8 +40,8 @@ public class LLMToolCall {
     public final Map<String, Object> params;
 
     public LLMToolCall(String tool, Map<String, Object> params) {
-        this.tool = tool;
-        this.params = params;
+        this.tool = Objects.requireNonNull(tool, "tool must not be null");
+        this.params = Objects.requireNonNull(params, "params must not be null");
     }
 
     public static LLMToolCall map(LLMTool tool, Map<String, Object> params) {
@@ -69,15 +69,23 @@ public class LLMToolCall {
         if (call == null) {
             throw new JsonSyntaxException("Deserialized LLMToolCall is null.");
         }
+        if (call.tool == null || call.params == null) {
+            throw new JsonSyntaxException("Deserialized LLMToolCall has null tool or params.");
+        }
         return call;
     }
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (!(o instanceof LLMToolCall call)) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        return Objects.equals(tool, call.tool) && Objects.equals(params, call.params);
+
+        LLMToolCall call = (LLMToolCall) o;
+        return tool.equals(call.tool) && params.equals(call.params);
     }
 
     @Override
