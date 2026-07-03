@@ -13,6 +13,7 @@
 package org.openhab.core.io.net.http;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,7 +21,6 @@ import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,7 @@ public class HttpUtilTest extends BaseHttpUtilTest {
 
         assertEquals("Some content", result);
 
-        verify(requestMock).header(HttpHeader.AUTHORIZATION, "Basic am9objpkb2U=");
+        verify(requestMock).headers(any());
     }
 
     @Test

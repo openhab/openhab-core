@@ -23,8 +23,6 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GroupItem;
@@ -43,6 +41,8 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * The {@link EnrichedItemDTOMapper} is a utility class to map items into enriched item data transform objects (DTOs).

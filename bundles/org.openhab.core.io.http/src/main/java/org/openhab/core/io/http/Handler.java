@@ -12,8 +12,8 @@
  */
 package org.openhab.core.io.http;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Handler which is responsible for processing request and response.
