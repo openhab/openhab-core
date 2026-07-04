@@ -25,12 +25,12 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.engine.action.ParamDoc;
 import org.openhab.core.model.script.internal.engine.action.VoiceActionService;
-import org.openhab.core.voice.KSService;
-import org.openhab.core.voice.STTService;
-import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.dialog.trigger.ks.KSService;
+import org.openhab.core.voice.stt.STTService;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.tts.TTSService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -319,7 +319,7 @@ public class Voice {
             dialogContextBuilder.withTTS(ttsService);
         }
         if (voice != null) {
-            org.openhab.core.voice.Voice prefVoice = getVoice(voice);
+            org.openhab.core.voice.tts.Voice prefVoice = getVoice(voice);
             if (prefVoice == null) {
                 logger.warn("Failed starting dialog processing: voice '{}' not found", voice);
                 return;
@@ -447,7 +447,7 @@ public class Voice {
                 dialogContextBuilder.withTTS(ttsService);
             }
             if (voice != null) {
-                org.openhab.core.voice.Voice prefVoice = getVoice(voice);
+                org.openhab.core.voice.tts.Voice prefVoice = getVoice(voice);
                 if (prefVoice == null) {
                     logger.warn("Failed executing simple dialog: voice '{}' not found", voice);
                     return;
@@ -489,7 +489,7 @@ public class Voice {
         }
     }
 
-    private static org.openhab.core.voice.@Nullable Voice getVoice(String id) {
+    private static org.openhab.core.voice.tts.@Nullable Voice getVoice(String id) {
         return VoiceActionService.voiceManager.getAllVoices().stream().filter(voice -> voice.getUID().equals(id))
                 .findAny().orElse(null);
     }
