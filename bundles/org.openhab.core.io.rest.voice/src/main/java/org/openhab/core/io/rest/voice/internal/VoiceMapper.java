@@ -13,7 +13,7 @@
 package org.openhab.core.io.rest.voice.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.Voice;
+import org.openhab.core.voice.tts.Voice;
 
 /**
  * Mapper class that maps {@link Voice} instanced to their respective DTOs.
