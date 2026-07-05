@@ -124,6 +124,10 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
     @Override
     public void refreshSource() {
+        refreshSource(false);
+    }
+
+    private void refreshSource(boolean installedOnly) {
         if (!addonHandlers.stream().allMatch(MarketplaceAddonHandler::isReady)) {
             logger.debug("Add-on service '{}' tried to refresh source before add-on handlers ready. Exiting.",
                     getClass());
@@ -157,7 +161,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         List<String> currentAddonIds = addons.stream().map(Addon::getUid).toList();
 
         // get the remote addons
-        if (remoteEnabled()) {
+        if (!installedOnly && remoteEnabled()) {
             List<Addon> remoteAddons = Objects.requireNonNullElse(cachedRemoteAddons.getValue(), List.of());
             remoteAddons.stream().filter(a -> !currentAddonIds.contains(a.getUid())).forEach(addon -> {
                 setInstalled(addon);
@@ -181,7 +185,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         cachedAddons = addons;
         this.installedAddonIds = currentAddonIds;
 
-        if (!missingAddons.isEmpty()) {
+        if (!installedOnly && !missingAddons.isEmpty()) {
             logger.info("Re-installing missing add-ons from remote repository: {}", missingAddons);
             scheduler.execute(() -> missingAddons.forEach(this::install));
         }
@@ -222,7 +226,13 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
     @Override
     public List<Addon> getAddons(@Nullable Locale locale) {
-        refreshSource();
+        refreshSource(false);
+        return cachedAddons;
+    }
+
+    @Override
+    public List<Addon> getAddons(@Nullable Locale locale, boolean installedOnly) {
+        refreshSource(installedOnly);
         return cachedAddons;
     }
 
