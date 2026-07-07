@@ -155,18 +155,22 @@ public class AddonResource implements RESTResource {
             @ApiResponse(responseCode = "404", description = "Service not found") })
     public Response getAddon(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
-            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
+            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId,
+            @QueryParam("installedOnly") @Parameter(description = "true to return only installed add-ons") @Nullable Boolean installedOnly) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
 
         final Locale locale = localeService.getLocale(language);
+
         if ("all".equals(serviceId)) {
-            return Response.ok(new Stream2JSONInputStream(getAllAddons(locale))).build();
+            return Response.ok(new Stream2JSONInputStream(getAllAddons(locale, Boolean.TRUE.equals(installedOnly))))
+                    .build();
         } else {
             AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
             if (addonService == null) {
                 return Response.status(HttpStatus.NOT_FOUND_404).build();
             }
-            return Response.ok(new Stream2JSONInputStream(addonService.getAddons(locale).stream())).build();
+            return Response.ok(new Stream2JSONInputStream(
+                    addonService.getAddons(locale, Boolean.TRUE.equals(installedOnly)).stream())).build();
         }
     }
 
@@ -412,8 +416,8 @@ public class AddonResource implements RESTResource {
                 .findFirst().orElse(addonServices.stream().findFirst().orElse(null));
     }
 
-    private Stream<Addon> getAllAddons(Locale locale) {
-        return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(Collection::stream);
+    private Stream<Addon> getAllAddons(Locale locale, boolean installedOnly) {
+        return addonServices.stream().map(s -> s.getAddons(locale, installedOnly)).flatMap(Collection::stream);
     }
 
     private Set<AddonType> getAllAddonTypes(Locale locale) {

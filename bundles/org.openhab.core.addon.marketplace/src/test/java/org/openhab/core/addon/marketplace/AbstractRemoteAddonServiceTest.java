@@ -146,6 +146,18 @@ public class AbstractRemoteAddonServiceTest {
     }
 
     @Test
+    public void testInstalledOnlyAddonsDoNotTriggerRemoteLookup() {
+        addonService.setInstalled(TEST_ADDON);
+        addonService.addToStorage(TEST_ADDON);
+
+        List<Addon> addons = addonService.getAddons(null, true);
+        assertThat(addons, hasSize(1));
+        assertThat(addons.getFirst().getUid(), is(getFullAddonId(TEST_ADDON)));
+        assertThat(addons.getFirst().isInstalled(), is(true));
+        assertThat(addonService.getRemoteCalls(), is(0));
+    }
+
+    @Test
     public void testIncompatibleAddonsNotIncludedByDefault() {
         assertThat(addonService.getAddons(null), hasSize(COMPATIBLE_ADDON_COUNT));
     }
