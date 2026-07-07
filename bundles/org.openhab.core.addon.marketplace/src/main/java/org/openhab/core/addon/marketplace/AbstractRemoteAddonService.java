@@ -150,6 +150,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                     "Failed to read JSON database, trying to purge it. You might need to re-install {} from the '{}' service.",
                     installedAddonStorage.getKeys(), getId());
             refreshSource(installedOnly);
+            return;
         }
 
         // remove not installed add-ons from the add-ons list, but remember their UIDs to re-install them
