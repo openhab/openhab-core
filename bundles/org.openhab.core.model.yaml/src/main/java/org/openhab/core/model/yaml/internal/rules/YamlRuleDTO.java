@@ -63,9 +63,9 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
     public Visibility visibility;
     public Map<@NonNull String, @NonNull Object> config;
     public Map<@NonNull String, @NonNull YamlConfigDescriptionParameterDTO> configDescriptions;
+    public List<@NonNull YamlModuleDTO> triggers;
     public List<@NonNull YamlConditionDTO> conditions;
     public List<@NonNull YamlActionDTO> actions;
-    public List<@NonNull YamlModuleDTO> triggers;
 
     /**
      * Creates a new instance.
@@ -212,21 +212,21 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                 result.configDescriptions = configDescriptions;
             }
 
-            if (partial.actions != null && !partial.actions.isEmpty()) {
-                if (!partial.actions.isArray()) {
-                    throw new SerializationException("Expected actions to be an array node");
+            if (partial.triggers != null && !partial.triggers.isEmpty()) {
+                if (!partial.triggers.isArray()) {
+                    throw new SerializationException("Expected triggers to be an array node");
                 }
-                List<YamlActionDTO> actions = new ArrayList<>(partial.actions.size());
-                JsonNode actionNode;
-                YamlActionDTO action;
-                for (Iterator<JsonNode> iterator = partial.actions.elements(); iterator.hasNext();) {
-                    actionNode = iterator.next();
-                    action = mapper.treeToValue(actionNode, YamlActionDTO.class);
-                    action.type = ModuleTypeAliases.aliasToType(Action.class, action.type);
-                    translateMIMETypeAliases(action);
-                    actions.add(action);
+                List<YamlModuleDTO> triggers = new ArrayList<>(partial.triggers.size());
+                JsonNode triggerNode;
+                YamlModuleDTO trigger;
+                for (Iterator<JsonNode> iterator = partial.triggers.elements(); iterator.hasNext();) {
+                    triggerNode = iterator.next();
+                    trigger = mapper.treeToValue(triggerNode, YamlModuleDTO.class);
+                    trigger.type = ModuleTypeAliases.aliasToType(Trigger.class, trigger.type);
+                    translateMIMETypeAliases(trigger);
+                    triggers.add(trigger);
                 }
-                result.actions = actions;
+                result.triggers = triggers;
             }
             if (partial.conditions != null && !partial.conditions.isEmpty()) {
                 if (!partial.conditions.isArray()) {
@@ -244,21 +244,21 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                 }
                 result.conditions = conditions;
             }
-            if (partial.triggers != null && !partial.triggers.isEmpty()) {
-                if (!partial.triggers.isArray()) {
-                    throw new SerializationException("Expected triggers to be an array node");
+            if (partial.actions != null && !partial.actions.isEmpty()) {
+                if (!partial.actions.isArray()) {
+                    throw new SerializationException("Expected actions to be an array node");
                 }
-                List<YamlModuleDTO> triggers = new ArrayList<>(partial.triggers.size());
-                JsonNode triggerNode;
-                YamlModuleDTO trigger;
-                for (Iterator<JsonNode> iterator = partial.triggers.elements(); iterator.hasNext();) {
-                    triggerNode = iterator.next();
-                    trigger = mapper.treeToValue(triggerNode, YamlModuleDTO.class);
-                    trigger.type = ModuleTypeAliases.aliasToType(Trigger.class, trigger.type);
-                    translateMIMETypeAliases(trigger);
-                    triggers.add(trigger);
+                List<YamlActionDTO> actions = new ArrayList<>(partial.actions.size());
+                JsonNode actionNode;
+                YamlActionDTO action;
+                for (Iterator<JsonNode> iterator = partial.actions.elements(); iterator.hasNext();) {
+                    actionNode = iterator.next();
+                    action = mapper.treeToValue(actionNode, YamlActionDTO.class);
+                    action.type = ModuleTypeAliases.aliasToType(Action.class, action.type);
+                    translateMIMETypeAliases(action);
+                    actions.add(action);
                 }
-                result.triggers = triggers;
+                result.actions = actions;
             }
         } catch (JsonProcessingException | IllegalArgumentException e) {
             throw new SerializationException(e.getMessage(), e);
@@ -418,14 +418,14 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
         if (configDescriptions != null) {
             builder.append("configDescriptions=").append(configDescriptions).append(", ");
         }
+        if (triggers != null) {
+            builder.append("triggers=").append(triggers).append(", ");
+        }
         if (conditions != null) {
             builder.append("conditions=").append(conditions).append(", ");
         }
         if (actions != null) {
-            builder.append("actions=").append(actions).append(", ");
-        }
-        if (triggers != null) {
-            builder.append("triggers=").append(triggers);
+            builder.append("actions=").append(actions);
         }
         builder.append("]");
         return builder.toString();
@@ -447,8 +447,8 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
         @JsonAlias({ "configuration" })
         public Map<@NonNull String, @NonNull Object> config;
         public JsonNode configDescriptions;
+        public JsonNode triggers;
         public JsonNode conditions;
         public JsonNode actions;
-        public JsonNode triggers;
     }
 }

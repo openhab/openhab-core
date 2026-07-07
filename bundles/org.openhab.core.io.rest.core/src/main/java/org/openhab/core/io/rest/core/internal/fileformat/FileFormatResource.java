@@ -259,6 +259,11 @@ public class FileFormatResource implements RESTResource {
               MyRule:
                 label: My Rule
                 description: My rule description
+                triggers:
+                  - id: "1"
+                    config:
+                      time: 12:00
+                    type: TimeOfDay
                 actions:
                   - id: "2"
                     config:
@@ -266,11 +271,6 @@ public class FileFormatResource implements RESTResource {
                       script: |
                         logInfo("Test", "MyRule is running")
                     type: Script
-                triggers:
-                  - id: "1"
-                    config:
-                      time: 12:00
-                    type: TimeOfDay
             """;
 
     private static final String JSON_RULE_UID_CHECK_EXAMPLE = """
@@ -359,13 +359,6 @@ public class FileFormatResource implements RESTResource {
                     advanced: false
                     verify: false
                     limitToOptions: true
-                actions:
-                  - id: "2"
-                    config:
-                      type: DSL
-                      script: |
-                        logInfo("Test", "{{sourceItem}} turned on")
-                    type: Script
                 triggers:
                   - id: "1"
                     config:
@@ -373,6 +366,13 @@ public class FileFormatResource implements RESTResource {
                       state: "ON"
                       previousState: "OFF"
                     type: ItemChanged
+                actions:
+                  - id: "2"
+                    config:
+                      type: DSL
+                      script: |
+                        logInfo("Test", "{{sourceItem}} turned on")
+                    type: Script
             """;
 
     private static final String DSL_SITEMAPS_EXAMPLE = """
@@ -460,16 +460,16 @@ public class FileFormatResource implements RESTResource {
             rules:
               MyRule:
                 label: Label
+                triggers:
+                  - config:
+                      itemName: MyItem
+                    type: ItemReceivedCommand
                 actions:
                   - config:
                       type: DSL
                       script: |
                         logInfo("Test", "MyRule is running")
                     type: Script
-                triggers:
-                  - config:
-                      itemName: MyItem
-                    type: ItemReceivedCommand
             ruleTemplates:
               my-template:
                 label: My Template
@@ -486,13 +486,6 @@ public class FileFormatResource implements RESTResource {
                     advanced: false
                     verify: false
                     limitToOptions: true
-                actions:
-                  - id: "2"
-                    config:
-                      type: DSL
-                      script: |
-                        logInfo("Test", "{{sourceItem}} turned on")
-                    type: Script
                 triggers:
                   - id: "1"
                     config:
@@ -500,6 +493,13 @@ public class FileFormatResource implements RESTResource {
                       state: "ON"
                       previousState: "OFF"
                     type: ItemChanged
+                actions:
+                  - id: "2"
+                    config:
+                      type: DSL
+                      script: |
+                        logInfo("Test", "{{sourceItem}} turned on")
+                    type: Script
             sitemaps:
               MySitemap:
                 label: My Sitemap
