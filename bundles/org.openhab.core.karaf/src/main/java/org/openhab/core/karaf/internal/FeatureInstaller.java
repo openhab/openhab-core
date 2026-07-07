@@ -436,7 +436,8 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private void installFeatures(Set<String> addons) {
+    /* package-private (instead of private) for testing */
+    void installFeatures(Set<String> addons) {
         Set<String> failed = installFeatureSet(addons);
 
         // If more than one add-on was requested and some failed, a single add-on that cannot be resolved or
