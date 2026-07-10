@@ -13,3 +13,16 @@ things:
         type: string-channel
         config:
           DateTimeFormat: 123.45
+  ntp:ntp:local2:
+    config:
+      hostname: false
+      timeZone: 12.3
+    channels:
+      string:
+        type: string-channel
+        config:
+          DateTimeFormat: 100
+      date-only-string:
+        type: string-channel
+        config:
+          DateTimeFormat: true
