@@ -13,7 +13,6 @@
 package org.openhab.core.model.script.runtime.internal.engine;
 
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,20 +182,21 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             }
         }
 
-        Map<String, Object> ctx = new LinkedHashMap<>();
+        Map<String, @Nullable Object> ctx = new LinkedHashMap<>();
         Event eventObject = null;
-        Map<String, Map<String, Object>> inputs = new HashMap<>();
+        Map<String, Map<String, @Nullable Object>> inputs = new LinkedHashMap<>();
         Object ctxObject = context.getAttribute("ctx");
         if (ctxObject instanceof Map<?, ?> untypedCtx) {
             String stem;
             Matcher m;
-            Map<String, Object> map;
+            Map<String, @Nullable Object> map;
             Object value;
             for (Entry<?, ?> entry : untypedCtx.entrySet()) {
-                if (entry.getKey() instanceof String key && (value = entry.getValue()) != null) {
+                if (entry.getKey() instanceof String key) {
+                    value = entry.getValue();
                     if (key.indexOf('.') >= 0 && (m = KEY_SPLITTER.matcher(key)).matches()) {
                         map = Objects.requireNonNull(
-                                inputs.compute(m.group("prefix"), (k, v) -> v == null ? new HashMap<>() : v));
+                                inputs.compute(m.group("prefix"), (k, v) -> v == null ? new LinkedHashMap<>() : v));
                         map.put(stem = m.group("stem"), value);
                         if ("event".equals(stem) && value instanceof Event ev) {
                             eventObject = ev;
