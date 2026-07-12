@@ -128,7 +128,7 @@ public class AbstractRemoteAddonServiceTest {
     }
 
     @Test
-    public void testInstalledAddonIsStillPresentAfterRemoteIsDisabledOrMissing() {
+    public void testInstalledAddonIsStillPresentAfterRemoteIsDisabledOrMissingAfterRefresh() {
         addonService.setInstalled(TEST_ADDON);
         addonService.addToStorage(TEST_ADDON);
 
@@ -139,22 +139,13 @@ public class AbstractRemoteAddonServiceTest {
         // disable remote repo
         properties.put(CONFIG_REMOTE_ENABLED, false);
 
+        // force refresh after changing settings
+        addonService.refreshSource();
+
         // check only the installed addon is present
         addons = addonService.getAddons(null);
         assertThat(addons, hasSize(1));
         assertThat(addons.getFirst().getUid(), is(getFullAddonId(TEST_ADDON)));
-    }
-
-    @Test
-    public void testInstalledOnlyAddonsDoNotTriggerRemoteLookup() {
-        addonService.setInstalled(TEST_ADDON);
-        addonService.addToStorage(TEST_ADDON);
-
-        List<Addon> addons = addonService.getAddons(null, true);
-        assertThat(addons, hasSize(1));
-        assertThat(addons.getFirst().getUid(), is(getFullAddonId(TEST_ADDON)));
-        assertThat(addons.getFirst().isInstalled(), is(true));
-        assertThat(addonService.getRemoteCalls(), is(0));
     }
 
     @Test

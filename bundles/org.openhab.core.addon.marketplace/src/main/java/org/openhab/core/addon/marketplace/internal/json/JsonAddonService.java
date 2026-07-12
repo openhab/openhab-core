@@ -95,7 +95,6 @@ public class JsonAddonService extends AbstractRemoteAddonService {
             String urls = ConfigParser.valueAsOrElse(config.get(CONFIG_URLS), String.class, "");
             addonServiceUrls = Arrays.asList(urls.split("\\|")).stream().filter(this::isValidUrl).toList();
             showUnstable = ConfigParser.valueAsOrElse(config.get(CONFIG_SHOW_UNSTABLE), Boolean.class, false);
-            cachedRemoteAddons.invalidateValue();
             refreshSource();
         }
     }

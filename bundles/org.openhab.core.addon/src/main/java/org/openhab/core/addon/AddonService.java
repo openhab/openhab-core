@@ -64,22 +64,6 @@ public interface AddonService {
     List<Addon> getAddons(@Nullable Locale locale);
 
     /**
-     * Retrieves add-ons, optionally restricted to installed ones only.
-     *
-     * Implementations that can avoid remote lookups when {@code installedOnly} is {@code true} should do so.
-     *
-     * @param locale the locale to use for the result
-     * @param installedOnly {@code true} to return only installed add-ons
-     * @return the localized add-ons
-     */
-    default List<Addon> getAddons(@Nullable Locale locale, boolean installedOnly) {
-        if (installedOnly) {
-            return getAddons(locale).stream().filter(Addon::isInstalled).toList();
-        }
-        return getAddons(locale);
-    }
-
-    /**
      * Retrieves the add-on for the given id.
      *
      * @param id the id of the add-on
