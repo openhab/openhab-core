@@ -69,12 +69,12 @@ public class YamlRuleTemplateDTOTest {
                 RuleTemplateSerializationOption.INCLUDE_ALL);
         assertNotNull(templateDTO);
         assertEquals(
-                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, visibility=VISIBLE, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, conditions=[YamlConditionDTO [id=condition1, inputs={}, type=type1, config={}]], actions=[YamlActionDTO [id=action1, inputs={}, type=type1, config={}]], triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]]]",
+                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, visibility=VISIBLE, configDescriptions={number=YamlConfigDescriptionParameterDTO [required=false, type=DECIMAL, readOnly=false, multiple=false, advanced=false, verify=false, limitToOptions=true, ]}, triggers=[YamlModuleDTO [id=trigger1, type=type1, config={}]], conditions=[YamlConditionDTO [id=condition1, inputs={}, type=type1, config={}]], actions=[YamlActionDTO [id=action1, inputs={}, type=type1, config={}]]]",
                 templateDTO.toString());
         templateDTO = new YamlRuleTemplateDTO(template, RuleTemplateSerializationOption.NORMAL);
         assertNotNull(templateDTO);
         assertEquals(
-                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, configDescriptions={number=YamlConfigDescriptionParameterDTO [type=DECIMAL, ]}, conditions=[YamlConditionDTO [id=condition1, type=type1]], actions=[YamlActionDTO [id=action1, type=type1]], triggers=[YamlModuleDTO [id=trigger1, type=type1]]]",
+                "YamlRuleTemplateDTO [uid=template1, label=Foo Template, tags=[test], description=Foo rule template, configDescriptions={number=YamlConfigDescriptionParameterDTO [type=DECIMAL, ]}, triggers=[YamlModuleDTO [id=trigger1, type=type1]], conditions=[YamlConditionDTO [id=condition1, type=type1]], actions=[YamlActionDTO [id=action1, type=type1]]]",
                 templateDTO.toString());
     }
 
