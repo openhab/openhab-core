@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
@@ -84,7 +85,7 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
     }
 
     @Override
-    public boolean supports(String type, String contentType) {
+    public boolean supports(String type, @Nullable String contentType) {
         return "automation".equals(type) && BLOCKLIBRARIES_CONTENT_TYPE.equals(contentType);
     }
 

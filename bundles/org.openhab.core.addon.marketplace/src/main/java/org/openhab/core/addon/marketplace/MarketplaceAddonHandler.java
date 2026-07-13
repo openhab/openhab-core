@@ -13,6 +13,7 @@
 package org.openhab.core.addon.marketplace;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 
 /**
@@ -38,7 +39,7 @@ public interface MarketplaceAddonHandler {
      * @param contentType the content type of the add-on on question
      * @return true, if the addon type and contentType are supported, false otherwise
      */
-    boolean supports(String type, String contentType);
+    boolean supports(String type, @Nullable String contentType);
 
     /**
      * Tells whether a given add-on is currently installed.
