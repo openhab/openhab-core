@@ -38,10 +38,6 @@ public final class Activator implements BundleActivator {
     @Override
     public void start(@Nullable BundleContext bc) throws Exception {
         logger.info("Starting openHAB {} ({})", OpenHAB.getVersion(), OpenHAB.buildString());
-
-        // Enable GraalVM Truffle to run on unsupported platforms, e.g., BSD
-        System.setProperty("polyglot.engine.allowUnsupportedPlatform", "true");
-
         ServiceReference<ConfigurationAdmin> ref;
         if (bc != null && (ref = bc.getServiceReference(ConfigurationAdmin.class)) != null) {
             ConfigurationAdmin ca = bc.getService(ref);
