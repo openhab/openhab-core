@@ -40,6 +40,7 @@ updates:
     #
     # Reminder: do not exclude
     # - org.apache.maven:maven-artifact
+    # - org.bouncycastle
     #
       - dependency-name: "aopalliance:aopalliance"
       - dependency-name: "biz.aQute.bnd:biz.aQute.tester.junit-platform"
@@ -234,9 +235,6 @@ updates:
       - dependency-name: "org.apache.xbean:xbean-finder"
       - dependency-name: "org.apiguardian:apiguardian-api"
       - dependency-name: "org.bitbucket.b_c:jose4j"
-      - dependency-name: "org.bouncycastle:bcpkix-jdk18on"
-      - dependency-name: "org.bouncycastle:bcprov-jdk18on"
-      - dependency-name: "org.bouncycastle:bcutil-jdk18on"
       - dependency-name: "org.checkerframework:checker-qual"
       - dependency-name: "org.codehaus.mojo:animal-sniffer-annotations"
       - dependency-name: "org.codehaus.plexus:plexus-classworlds"
