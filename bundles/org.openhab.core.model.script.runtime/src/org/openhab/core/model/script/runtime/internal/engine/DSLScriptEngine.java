@@ -13,8 +13,13 @@
 package org.openhab.core.model.script.runtime.internal.engine;
 
 import java.io.Reader;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -32,6 +37,7 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationContext;
 import org.openhab.core.automation.module.script.ScriptExtensionAccessor;
+import org.openhab.core.events.Event;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.model.script.engine.Script;
@@ -71,6 +77,8 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM, //
             "triggeringGroup", ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP, //
             "input", ScriptJvmModelInferrer.VAR_INPUT);
+
+    private static final Pattern KEY_SPLITTER = Pattern.compile("(?<prefix>[^.]+)\\.(?<stem>.+)");
 
     private final Logger logger = LoggerFactory.getLogger(DSLScriptEngine.class);
 
@@ -174,6 +182,36 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             }
         }
 
+        Map<String, @Nullable Object> ctx = new LinkedHashMap<>();
+        Event eventObject = null;
+        Map<String, Map<String, @Nullable Object>> inputs = new LinkedHashMap<>();
+        Object ctxObject = context.getAttribute("ctx");
+        if (ctxObject instanceof Map<?, ?> untypedCtx) {
+            String stem;
+            Matcher m;
+            Map<String, @Nullable Object> map;
+            Object value;
+            for (Entry<?, ?> entry : untypedCtx.entrySet()) {
+                if (entry.getKey() instanceof String key) {
+                    value = entry.getValue();
+                    if (key.indexOf('.') >= 0 && (m = KEY_SPLITTER.matcher(key)).matches()) {
+                        map = Objects.requireNonNull(
+                                inputs.compute(m.group("prefix"), (k, v) -> v == null ? new LinkedHashMap<>() : v));
+                        map.put(stem = m.group("stem"), value);
+                        if ("event".equals(stem) && value instanceof Event ev) {
+                            eventObject = ev;
+                        }
+                    } else if ("event".equals(key) && value instanceof Event ev) {
+                        eventObject = ev;
+                    }
+                    ctx.put(key, value);
+                }
+            }
+        }
+        evalContext.newValue(QualifiedName.create("ctx"), ctx);
+        evalContext.newValue(QualifiedName.create("eventObject"), eventObject);
+        evalContext.newValue(QualifiedName.create("inputs"), inputs);
+
         Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache",
                 (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
         evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_SHARED_CACHE),
@@ -181,13 +219,13 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
         evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_PRIVATE_CACHE),
                 cachePreset.get("privateCache"));
         // now add specific implicit vars, where we have to map the right content
-        Object value = context.getAttribute(OUTPUT_EVENT);
-        if (value instanceof ChannelTriggeredEvent event) {
+        ctxObject = context.getAttribute(OUTPUT_EVENT);
+        if (ctxObject instanceof ChannelTriggeredEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_RECEIVED_EVENT), event.getEvent());
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_CHANNEL),
                     event.getChannel().getAsString());
         }
-        if (value instanceof ItemEvent event) {
+        if (ctxObject instanceof ItemEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM_NAME),
                     event.getItemName());
             Object group = context.getAttribute(ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP);
@@ -196,7 +234,7 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
                         groupItem.getName());
             }
         }
-        if (value instanceof ThingStatusInfoChangedEvent event) {
+        if (ctxObject instanceof ThingStatusInfoChangedEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_THING),
                     event.getThingUID().toString());
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_PREVIOUS_STATUS),
