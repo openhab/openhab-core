@@ -156,22 +156,35 @@ public class AddonResource implements RESTResource {
     public Response getAddon(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId,
-            @QueryParam("installedOnly") @Parameter(description = "true to return only installed add-ons") @Nullable Boolean installedOnly) {
+            @QueryParam("installedOnly") @Parameter(description = "true to return only installed add-ons") @Nullable Boolean installedOnly,
+            @QueryParam("refresh") @Parameter(description = "true to refresh add-ons before returning them") @Nullable Boolean refresh) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
 
         final Locale locale = localeService.getLocale(language);
+        boolean forceRefresh = Boolean.TRUE.equals(refresh);
 
+        Stream<Addon> addons;
         if ("all".equals(serviceId)) {
-            return Response.ok(new Stream2JSONInputStream(getAllAddons(locale, Boolean.TRUE.equals(installedOnly))))
-                    .build();
+            if (forceRefresh) {
+                addonServices.forEach(AddonService::refreshSource);
+            }
+            addons = getAllAddons(locale);
         } else {
             AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
             if (addonService == null) {
                 return Response.status(HttpStatus.NOT_FOUND_404).build();
             }
-            return Response.ok(new Stream2JSONInputStream(
-                    addonService.getAddons(locale, Boolean.TRUE.equals(installedOnly)).stream())).build();
+            if (forceRefresh) {
+                addonService.refreshSource();
+            }
+            addons = addonService.getAddons(locale).stream();
         }
+
+        if (Boolean.TRUE.equals(installedOnly)) {
+            addons = addons.filter(Addon::isInstalled);
+        }
+
+        return Response.ok(new Stream2JSONInputStream(addons)).build();
     }
 
     @GET
@@ -416,8 +429,8 @@ public class AddonResource implements RESTResource {
                 .findFirst().orElse(addonServices.stream().findFirst().orElse(null));
     }
 
-    private Stream<Addon> getAllAddons(Locale locale, boolean installedOnly) {
-        return addonServices.stream().map(s -> s.getAddons(locale, installedOnly)).flatMap(Collection::stream);
+    private Stream<Addon> getAllAddons(Locale locale) {
+        return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(Collection::stream);
     }
 
     private Set<AddonType> getAllAddonTypes(Locale locale) {

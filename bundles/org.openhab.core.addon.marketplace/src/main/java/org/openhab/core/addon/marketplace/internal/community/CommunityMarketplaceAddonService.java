@@ -126,7 +126,6 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
             this.showUnpublished = ConfigParser.valueAsOrElse(config.get(CONFIG_SHOW_UNPUBLISHED_ENTRIES_KEY),
                     Boolean.class, false);
             this.enabled = ConfigParser.valueAsOrElse(config.get(CONFIG_ENABLED_KEY), Boolean.class, true);
-            cachedRemoteAddons.invalidateValue();
             refreshSource();
         }
     }

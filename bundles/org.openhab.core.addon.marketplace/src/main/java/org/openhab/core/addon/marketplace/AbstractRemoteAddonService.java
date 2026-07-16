@@ -15,17 +15,16 @@ package org.openhab.core.addon.marketplace;
 import static org.openhab.core.common.ThreadPoolManager.THREAD_POOL_NAME_COMMON;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -37,7 +36,6 @@ import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
-import org.openhab.core.cache.ExpiringCache;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.events.Event;
@@ -86,15 +84,14 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     protected final BundleVersion coreVersion;
 
     protected final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-    protected final Set<MarketplaceAddonHandler> addonHandlers = new HashSet<>();
+    protected final Set<MarketplaceAddonHandler> addonHandlers = new CopyOnWriteArraySet<>();
     protected final Storage<String> installedAddonStorage;
     protected final EventPublisher eventPublisher;
     protected final ConfigurationAdmin configurationAdmin;
-    protected final ExpiringCache<List<Addon>> cachedRemoteAddons = new ExpiringCache<>(Duration.ofMinutes(15),
-            this::getRemoteAddons);
+    protected volatile List<Addon> cachedRemoteAddons = List.of();
     protected final AddonInfoRegistry addonInfoRegistry;
-    protected List<Addon> cachedAddons = List.of();
-    protected List<String> installedAddonIds = List.of();
+    protected volatile List<Addon> cachedAddons = List.of();
+    protected volatile List<String> installedAddonIds = List.of();
 
     private final Logger logger = LoggerFactory.getLogger(AbstractRemoteAddonService.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME_COMMON);
@@ -124,10 +121,10 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
     @Override
     public void refreshSource() {
-        refreshSource(false);
+        refreshSource(true);
     }
 
-    private void refreshSource(boolean installedOnly) {
+    private synchronized void refreshSource(boolean fetchRemoteAddons) {
         if (!addonHandlers.stream().allMatch(MarketplaceAddonHandler::isReady)) {
             logger.debug("Add-on service '{}' tried to refresh source before add-on handlers ready. Exiting.",
                     getClass());
@@ -149,7 +146,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             logger.error(
                     "Failed to read JSON database, trying to purge it. You might need to re-install {} from the '{}' service.",
                     installedAddonStorage.getKeys(), getId());
-            refreshSource(installedOnly);
+            refreshSource(fetchRemoteAddons);
             return;
         }
 
@@ -162,12 +159,16 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         List<String> currentAddonIds = addons.stream().map(Addon::getUid).toList();
 
         // get the remote addons
-        if (!installedOnly && remoteEnabled()) {
-            List<Addon> remoteAddons = Objects.requireNonNullElse(cachedRemoteAddons.getValue(), List.of());
-            remoteAddons.stream().filter(a -> !currentAddonIds.contains(a.getUid())).forEach(addon -> {
+        if (remoteEnabled()) {
+            if (fetchRemoteAddons || cachedRemoteAddons.isEmpty()) {
+                cachedRemoteAddons = List.copyOf(getRemoteAddons());
+            }
+            cachedRemoteAddons.stream().filter(a -> !currentAddonIds.contains(a.getUid())).forEach(addon -> {
                 setInstalled(addon);
                 addons.add(addon);
             });
+        } else if (!cachedRemoteAddons.isEmpty()) {
+            cachedRemoteAddons = List.of();
         }
 
         // remove incompatible add-ons if not enabled
@@ -183,10 +184,10 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             }
         }
 
-        cachedAddons = addons;
+        cachedAddons = List.copyOf(addons);
         this.installedAddonIds = currentAddonIds;
 
-        if (!installedOnly && !missingAddons.isEmpty()) {
+        if (!missingAddons.isEmpty()) {
             logger.info("Re-installing missing add-ons from remote repository: {}", missingAddons);
             scheduler.execute(() -> missingAddons.forEach(this::install));
         }
@@ -232,12 +233,6 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     }
 
     @Override
-    public List<Addon> getAddons(@Nullable Locale locale, boolean installedOnly) {
-        refreshSource(installedOnly);
-        return cachedAddons;
-    }
-
-    @Override
     public List<AddonType> getTypes(@Nullable Locale locale) {
         return AddonType.DEFAULT_TYPES;
     }
@@ -256,8 +251,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                         handler.install(addon);
                         addon.setInstalled(true);
                         installedAddonStorage.put(id, gson.toJson(addon));
-                        cachedRemoteAddons.invalidateValue();
-                        refreshSource();
+                        refreshSource(false);
                         postInstalledEvent(addon.getUid());
                     } catch (MarketplaceHandlerException e) {
                         postFailureEvent(addon.getUid(), e.getMessage());
@@ -284,8 +278,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                     try {
                         handler.uninstall(addon);
                         installedAddonStorage.remove(id);
-                        cachedRemoteAddons.invalidateValue();
-                        refreshSource();
+                        refreshSource(false);
                         postUninstalledEvent(addon.getUid());
                     } catch (MarketplaceHandlerException e) {
                         postFailureEvent(addon.getUid(), e.getMessage());
