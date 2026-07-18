@@ -46,7 +46,6 @@ import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCate
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscourseTopicItem;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscourseUser;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO;
-import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO.DiscoursePostLink;
 import org.openhab.core.common.VersionRange;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
@@ -97,6 +96,8 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final Pattern CODE_MARKUP_PATTERN = Pattern.compile(
             "<pre(?: data-code-wrap=\"[-a-zA-Z]+\")?><code class=\"lang-(?<lang>[-a-zA-Z]+)\">(?<content>.*?)</code></pre>\\n?",
             Pattern.DOTALL);
+    private static final Pattern LAST_RESOURCE_LINK_PATTERN = Pattern.compile(
+            ".*href=\"(?<url>[^\"]+\\.(?<extension>jar|kar|json|yaml))\"", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static final Integer BUNDLES_CATEGORY = 73;
     private static final Integer RULETEMPLATES_CATEGORY = 74;
@@ -406,35 +407,36 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         String detailedDescription = topic.postStream.posts[0].cooked;
         String id = null;
 
-        // try to extract contents or links
-        if (topic.postStream.posts[0].linkCounts != null) {
-            URI uri;
-            String path;
-            for (DiscoursePostLink postLink : topic.postStream.posts[0].linkCounts) {
-                try {
-                    uri = processResourceURL(postLink.url);
-                    path = uri.getPath();
-                    if (path == null) {
-                        continue;
+        Matcher matcher = LAST_RESOURCE_LINK_PATTERN.matcher(detailedDescription);
+        if (matcher.find()) {
+            try {
+                URI uri = processResourceURL(matcher.group("url"));
+                String path = uri.getPath();
+                if (path != null) {
+                    switch (matcher.group("extension").toLowerCase(Locale.ROOT)) {
+                        case "jar":
+                            properties.put(JAR_DOWNLOAD_URL_PROPERTY, uri.toString());
+                            id = determineIdFromUrl(path);
+                            break;
+                        case "kar":
+                            properties.put(KAR_DOWNLOAD_URL_PROPERTY, uri.toString());
+                            id = determineIdFromUrl(path);
+                            break;
+                        case "json":
+                            properties.put(JSON_DOWNLOAD_URL_PROPERTY, uri.toString());
+                            break;
+                        case "yaml":
+                            properties.put(YAML_DOWNLOAD_URL_PROPERTY, uri.toString());
+                            break;
                     }
-                } catch (IllegalArgumentException e) {
-                    continue;
+                } else {
+                    logger.debug(
+                            "Failed to extract path from resource URL for marketplace add-on '{}'. This should be impossible",
+                            topic.title);
                 }
-                path = path.toLowerCase(Locale.ROOT);
-                if (path.endsWith(".jar")) {
-                    properties.put(JAR_DOWNLOAD_URL_PROPERTY, uri.toString());
-                    id = determineIdFromUrl(postLink.url);
-                }
-                if (path.endsWith(".kar")) {
-                    properties.put(KAR_DOWNLOAD_URL_PROPERTY, uri.toString());
-                    id = determineIdFromUrl(postLink.url);
-                }
-                if (path.endsWith(".json")) {
-                    properties.put(JSON_DOWNLOAD_URL_PROPERTY, uri.toString());
-                }
-                if (path.endsWith(".yaml")) {
-                    properties.put(YAML_DOWNLOAD_URL_PROPERTY, uri.toString());
-                }
+            } catch (IllegalArgumentException e) {
+                logger.debug("Add-on '{}' ({}) has an invalid resource URL '{}': {}", topic.title, topic.id,
+                        matcher.group("url"), e.getMessage());
             }
         }
 
@@ -442,10 +444,9 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
             id = topic.id.toString(); // this is a fallback if we couldn't find a better id
         }
 
-        Matcher codeMarkup = CODE_MARKUP_PATTERN.matcher(detailedDescription);
-        if (codeMarkup.find()) {
-            properties.put(codeMarkup.group("lang") + CODE_CONTENT_SUFFIX,
-                    unescapeEntities(codeMarkup.group("content")));
+        matcher = CODE_MARKUP_PATTERN.matcher(detailedDescription);
+        if (matcher.find()) {
+            properties.put(matcher.group("lang") + CODE_CONTENT_SUFFIX, unescapeEntities(matcher.group("content")));
         }
 
         // try to use a handler to determine if the add-on is installed
@@ -454,7 +455,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
         String title = topic.title;
         boolean compatible = true;
-        Matcher matcher = VersionRange.RANGE_PATTERN.matcher(title);
+        matcher = VersionRange.RANGE_PATTERN.matcher(title);
         if (matcher.find()) {
             compatible = VersionRange.valueOf(matcher.group().trim()).includes(coreVersion);
             title = matcher.replaceFirst("").trim();
