@@ -14,11 +14,11 @@ package org.openhab.core.model.yaml.internal.things;
 
 import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -655,8 +655,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     value = elements;
                 } else if (value instanceof Object && value.getClass().isArray()) {
                     List<Object> elements = new ArrayList<>();
-                    for (Object element : Arrays.asList((Object[]) value)) {
-                        elements.add(processSingleTextParam(uid, name, element));
+                    int length = Array.getLength(value);
+                    for (int i = 0; i < length; i++) {
+                        elements.add(processSingleTextParam(uid, name, Array.get(value, i)));
                     }
                     value = elements;
                 } else {

@@ -520,10 +520,10 @@ public class YamlThingProviderTest {
         Files.copy(SOURCE_PATH.resolve("thingWithNumberInTextParam.yaml"), fullModelPath);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
-        Collection<Thing> things = thingProvider.getAllFromModel(MODEL_NAME);
+        List<Thing> things = new ArrayList<>(thingProvider.getAllFromModel(MODEL_NAME));
+        things.sort((o1, o2) -> o1.getUID().toString().compareTo(o2.getUID().toString()));
         assertThat(things, hasSize(2));
-        Iterator<Thing> it = things.iterator();
-        Thing thing = it.next();
+        Thing thing = things.get(0);
         assertEquals(NTP_THING_UID, thing.getUID());
 
         assertThat(thing.getConfiguration().keySet(),
@@ -542,7 +542,7 @@ public class YamlThingProviderTest {
         assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
         assertEquals("123.45", channel.getConfiguration().get("DateTimeFormat"));
 
-        thing = it.next();
+        thing = things.get(1);
         assertEquals(NTP_THING_UID2, thing.getUID());
 
         assertThat(thing.getConfiguration().keySet(),
