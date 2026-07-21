@@ -58,6 +58,7 @@ import org.openhab.core.automation.internal.module.handler.IntervalConditionHand
 import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.SystemConditionHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
@@ -85,6 +86,7 @@ import org.openhab.core.model.rule.rules.IntervalCondition;
 import org.openhab.core.model.rule.rules.ItemStateCondition;
 import org.openhab.core.model.rule.rules.RuleModel;
 import org.openhab.core.model.rule.rules.RulesFactory;
+import org.openhab.core.model.rule.rules.SystemStartlevelCondition;
 import org.openhab.core.model.rule.rules.SystemStartlevelTrigger;
 import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger;
 import org.openhab.core.model.rule.rules.ThingStateUpdateEventTrigger;
@@ -774,6 +776,15 @@ public class DslRuleConverter implements RuleSerializer, RuleParser {
                     throw new SerializationException("Invalid condition: " + condition);
                 }
                 return ivCond;
+            case SystemConditionHandler.STARTLEVEL_MODULE_TYPE_ID:
+                SystemStartlevelCondition slCond = factory.createSystemStartlevelCondition();
+                value = condition.getConfiguration().get(SystemConditionHandler.CFG_MIN_STARTLEVEL);
+                if (value instanceof Number startlevel) {
+                    slCond.setLevel(startlevel.intValue());
+                } else {
+                    throw new SerializationException("Invalid condition: " + condition);
+                }
+                return slCond;
             case ThingStatusConditionHandler.THING_STATUS_CONDITION:
                 ThingStatusCondition tsCond = factory.createThingStatusCondition();
                 value = condition.getConfiguration().get(ThingStatusConditionHandler.CFG_THING_UID);
