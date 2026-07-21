@@ -1,0 +1,41 @@
+{
+	"conditions": [
+		{
+			"uid": "core.SystemStartlevelCondition",
+			"label": "a system start level has been reached",
+			"description": "Checks if the specified system start level has been reached.",
+			"configDescriptions": [
+				{
+					"name": "minStartlevel",
+					"type": "INTEGER",
+					"label": "Minimum Start Level",
+					"description": "Returns true if the system has reached this start level.",
+					"required": true,
+					"default": 80,
+					"options": [
+						{
+							"label": "40 - Rules loaded",
+							"value": 40
+						},
+						{
+							"label": "50 - Rule engine started",
+							"value": 50
+						},
+						{
+							"label": "70 - User interfaces started",
+							"value": 70
+						},
+						{
+							"label": "80 - Things initialized",
+							"value": 80
+						},
+						{
+							"label": "100 - Startup complete",
+							"value": 100
+						}
+					]
+				}
+			]
+		}
+	]
+}
