@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.lib;
 
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -142,6 +143,113 @@ public class Rules {
             throw new IllegalArgumentException("Rule with UID '" + ruleUid + "' doesn't exist");
         }
         return ruleManager.runNow(ruleUid, considerConditions, context);
+    }
+
+    /**
+     * Run the rule with the specified UID asynchronously.
+     *
+     * @param ruleUid the UID of the rule to run.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid) {
+        RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
+        if (ruleManager == null) {
+            throw new IllegalStateException("RuleManager doesn't exist");
+        }
+        if (ruleManager.getStatus(ruleUid) == null) {
+            throw new IllegalArgumentException("Rule with UID '" + ruleUid + "' doesn't exist");
+        }
+        return ruleManager.runAsync(ruleUid);
+    }
+
+    /**
+     * Run the rule with the specified UID asynchronously while optionally taking conditions into account.
+     *
+     * @param ruleUid the UID of the rule to run.
+     * @param considerConditions {@code true} to not run the rule if its conditions don't qualify.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid, boolean considerConditions) {
+        RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
+        if (ruleManager == null) {
+            throw new IllegalStateException("RuleManager doesn't exist");
+        }
+        if (ruleManager.getStatus(ruleUid) == null) {
+            throw new IllegalArgumentException("Rule with UID '" + ruleUid + "' doesn't exist");
+        }
+        return ruleManager.runAsync(ruleUid, considerConditions, null);
+    }
+
+    /**
+     * Run the rule with the specified UID asynchronously, with the specified context.
+     *
+     * @param ruleUid the UID of the rule to run.
+     * @param context the {@link Map} of {@link String} and {@link Object} pairs that constitutes the context.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid,
+            Map<String, @Nullable Object> context) {
+        RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
+        if (ruleManager == null) {
+            throw new IllegalStateException("RuleManager doesn't exist");
+        }
+        if (ruleManager.getStatus(ruleUid) == null) {
+            throw new IllegalArgumentException("Rule with UID '" + ruleUid + "' doesn't exist");
+        }
+        return ruleManager.runAsync(ruleUid, false, context);
+    }
+
+    /**
+     * Run the rule with the specified UID asynchronously, with the specified context, while optionally taking
+     * conditions into account.
+     *
+     * @param ruleUid the UID of the rule to run.
+     * @param considerConditions {@code true} to not run the rule if its conditions don't qualify.
+     * @param context the pairs of {@link String}s and {@link Object}s that constitutes the context. Must be in pairs,
+     *            the first is the key, the second is the value.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid, boolean considerConditions,
+            Object... context) {
+        RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
+        if (ruleManager == null) {
+            throw new IllegalStateException("RuleManager doesn't exist");
+        }
+        if (ruleManager.getStatus(ruleUid) == null) {
+            throw new IllegalArgumentException("Rule with UID '" + ruleUid + "' doesn't exist");
+        }
+        return ruleManager.runAsync(ruleUid, considerConditions, Utils.parseObjectArrayNullableValues(context));
+    }
+
+    /**
+     * Run the rule with the specified UID asynchronously, with the specified context, while optionally taking
+     * conditions into account.
+     *
+     * @param ruleUid the UID of the rule to run.
+     * @param considerConditions {@code true} to not run the rule if its conditions don't qualify.
+     * @param context the {@link Map} of {@link String} and {@link Object} pairs that constitutes the context.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid, boolean considerConditions,
+            @Nullable Map<String, @Nullable Object> context) {
+        RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
+        if (ruleManager == null) {
+            throw new IllegalStateException("RuleManager doesn't exist");
+        }
+        if (ruleManager.getStatus(ruleUid) == null) {
+            throw new IllegalArgumentException("Rule with UID '" + ruleUid + "' doesn't exist");
+        }
+        return ruleManager.runAsync(ruleUid, considerConditions, context);
     }
 
     /**
