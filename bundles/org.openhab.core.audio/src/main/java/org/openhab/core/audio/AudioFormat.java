@@ -45,8 +45,12 @@ public class AudioFormat {
             null, null, null);
 
     // generic AAC format without any further constraints
-    public static final AudioFormat AAC = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_AAC, null, null,
+    public static final AudioFormat AAC = new AudioFormat(AudioFormat.CONTAINER_MP4, AudioFormat.CODEC_AAC, null, null,
             null, null);
+
+    // generic FLAC format without any further constraints
+    public static final AudioFormat FLAC = new AudioFormat(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC, null,
+            null, null, null);
 
     /**
      * {@code AudioCodec} encoded data without any container header or footer,
@@ -62,6 +66,23 @@ public class AudioFormat {
      * @see <a href="http://bit.ly/1TUWSlk">RIFF container format</a>
      */
     public static final String CONTAINER_WAVE = "WAVE";
+
+    /**
+     * FLAC container format
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/FLAC#File_structure">FLAC File Structure</a>
+     */
+    public static final String CONTAINER_FLAC = "FLAC";
+
+    /**
+     * MPEG-4 Part 14 container format, an extension of ISO base media file format. Often seen with
+     * {@code .mp4}, {@code .m4a}, {@code .m4p}, {@code .m4b} or {@code .m4v} extensions, but it's also
+     * the "parent" for many other formats.
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/MP4_file_format"></a>
+     * @see <a href="">https://en.wikipedia.org/wiki/ISO_base_media_file_format</a>
+     */
+    public static final String CONTAINER_MP4 = "MP4";
 
     /**
      * OGG container format
@@ -116,6 +137,16 @@ public class AudioFormat {
      * AAC Codec
      */
     public static final String CODEC_AAC = "AAC";
+
+    /**
+     * Free Lossless Audio Codec
+     */
+    public static final String CODEC_FLAC = "FLAC";
+
+    /**
+     * Opus
+     */
+    public static final String CODEC_OPUS = "OPUS";
 
     /**
      * Codec
