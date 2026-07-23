@@ -43,12 +43,30 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
             "core", "persistence", "extensions", "PersistenceExtensions", "RiemannType");
     public static final QualifiedName MODEL_SCRIPT_ACTIONS_PACKAGE = QualifiedName.create("org", "openhab", "core",
             "model", "script", "actions");
+    public static final QualifiedName LANG_RUNNABLE_IF = QualifiedName.create("java", "lang", "Runnable");
     public static final QualifiedName TIME_PACKAGE = QualifiedName.create("java", "time");
     public static final QualifiedName TIME_FORMAT_PACKAGE = QualifiedName.create("java", "time", "format");
     public static final QualifiedName TIME_TEMPORAL_PACKAGE = QualifiedName.create("java", "time", "temporal");
+    public static final QualifiedName UTIL_CALLABLE_IF = QualifiedName.create("java", "util", "concurrent", "Callable");
+    public static final QualifiedName UTIL_FUTURE_IF = QualifiedName.create("java", "util", "concurrent", "Future");
+    public static final QualifiedName UTIL_LOCK_IF = QualifiedName.create("java", "util", "concurrent", "locks",
+            "Lock");
+    public static final QualifiedName UTIL_REENTRANTLOCK_CLASS = QualifiedName.create("java", "util", "concurrent",
+            "locks", "ReentrantLock");
+    public static final QualifiedName UTIL_REENTRANTREADWRITELOCK_CLASS = QualifiedName.create("java", "util",
+            "concurrent", "locks", "ReentrantReadWriteLock");
     public static final QualifiedName UTIL_REGEX_PACKAGE = QualifiedName.create("java", "util", "regex");
+    public static final QualifiedName UTIL_ARRAYLIST_CLASS = QualifiedName.create("java", "util", "ArrayList");
+    public static final QualifiedName UTIL_COLLECTION_IF = QualifiedName.create("java", "util", "Collection");
+    public static final QualifiedName UTIL_HASHMAP_CLASS = QualifiedName.create("java", "util", "HashMap");
+    public static final QualifiedName UTIL_HASHSET_CLASS = QualifiedName.create("java", "util", "HashSet");
+    public static final QualifiedName UTIL_LINKEDHASHMAP_CLASS = QualifiedName.create("java", "util", "LinkedHashMap");
+    public static final QualifiedName UTIL_LIST_IF = QualifiedName.create("java", "util", "List");
     public static final QualifiedName UTIL_LOCALE_CLASS = QualifiedName.create("java", "util", "Locale");
+    public static final QualifiedName UTIL_MAP_IF = QualifiedName.create("java", "util", "Map");
+    public static final QualifiedName UTIL_SET_IF = QualifiedName.create("java", "util", "Set");
     public static final QualifiedName UTIL_TIMEZONE_CLASS = QualifiedName.create("java", "util", "TimeZone");
+    public static final QualifiedName UTIL_TREEMAP_CLASS = QualifiedName.create("java", "util", "TreeMap");
     public static final QualifiedName QUANTITY_PACKAGE = QualifiedName.create("javax", "measure", "quantity");
     public static final QualifiedName CHANNELS_CLASS = QualifiedName.create("org", "openhab", "core", "model", "script",
             "lib", "Channels");
@@ -71,12 +89,27 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
         implicitImports.add(doCreateImportNormalizer(CORE_PERSISTENCE_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CORE_PERSISTENCE_RIEMANNTYPE_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(MODEL_SCRIPT_ACTIONS_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(LANG_RUNNABLE_IF, false, false));
         implicitImports.add(doCreateImportNormalizer(TIME_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(TIME_FORMAT_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(TIME_TEMPORAL_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_CALLABLE_IF, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_FUTURE_IF, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_LOCK_IF, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_REENTRANTLOCK_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_REENTRANTREADWRITELOCK_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(UTIL_REGEX_PACKAGE, true, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_ARRAYLIST_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_COLLECTION_IF, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_HASHMAP_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_HASHSET_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_LINKEDHASHMAP_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_LIST_IF, false, false));
         implicitImports.add(doCreateImportNormalizer(UTIL_LOCALE_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_MAP_IF, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_SET_IF, false, false));
         implicitImports.add(doCreateImportNormalizer(UTIL_TIMEZONE_CLASS, false, false));
+        implicitImports.add(doCreateImportNormalizer(UTIL_TREEMAP_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(QUANTITY_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CHANNELS_CLASS, false, false));
         implicitImports.add(doCreateImportNormalizer(ITEMS_CLASS, false, false));
