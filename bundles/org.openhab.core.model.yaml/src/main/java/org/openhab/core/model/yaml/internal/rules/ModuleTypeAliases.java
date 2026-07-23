@@ -37,6 +37,7 @@ import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandl
 import org.openhab.core.automation.internal.module.handler.ItemStateUpdateActionHandler;
 import org.openhab.core.automation.internal.module.handler.RuleEnablementActionHandler;
 import org.openhab.core.automation.internal.module.handler.RunRuleActionHandler;
+import org.openhab.core.automation.internal.module.handler.SystemConditionHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
@@ -73,6 +74,7 @@ public class ModuleTypeAliases {
                 { "C", "Dayset", EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID }, //
                 { "C", "Holiday", EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID }, //
                 { "C", "Interval", IntervalConditionHandler.MODULE_TYPE_ID }, //
+                { "C", "StartLevel", SystemConditionHandler.STARTLEVEL_MODULE_TYPE_ID }, //
                 { "C", "ItemState", ItemStateConditionHandler.ITEM_STATE_CONDITION }, //
                 { "C", "NotHoliday", EphemerisConditionHandler.NOT_HOLIDAY_MODULE_TYPE_ID }, //
                 { "C", "Script", ScriptConditionHandler.TYPE_ID }, //

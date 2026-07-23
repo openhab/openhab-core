@@ -50,6 +50,7 @@ import org.openhab.core.automation.internal.module.handler.IntervalConditionHand
 import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.SystemConditionHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
@@ -83,6 +84,7 @@ import org.openhab.core.model.rule.rules.ItemStateCondition;
 import org.openhab.core.model.rule.rules.RuleModel;
 import org.openhab.core.model.rule.rules.SystemOnShutdownTrigger;
 import org.openhab.core.model.rule.rules.SystemOnStartupTrigger;
+import org.openhab.core.model.rule.rules.SystemStartlevelCondition;
 import org.openhab.core.model.rule.rules.SystemStartlevelTrigger;
 import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger;
 import org.openhab.core.model.rule.rules.ThingStateUpdateEventTrigger;
@@ -613,6 +615,11 @@ public class DSLRuleProvider
                 cfg.put(IntervalConditionHandler.CFG_MIN_INTERVAL, intervalCond.getInterval());
                 yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
                         .withTypeUID(IntervalConditionHandler.MODULE_TYPE_ID).withConfiguration(cfg).build();
+            }
+            case SystemStartlevelCondition startlevelCond -> {
+                cfg.put(SystemConditionHandler.CFG_MIN_STARTLEVEL, startlevelCond.getLevel());
+                yield ConditionBuilder.create().withId(Integer.toString(triggerId++))
+                        .withTypeUID(SystemConditionHandler.STARTLEVEL_MODULE_TYPE_ID).withConfiguration(cfg).build();
             }
             case ThingStatusCondition tsCond -> {
                 cfg.put(ThingStatusConditionHandler.CFG_THING_UID, tsCond.getThing());

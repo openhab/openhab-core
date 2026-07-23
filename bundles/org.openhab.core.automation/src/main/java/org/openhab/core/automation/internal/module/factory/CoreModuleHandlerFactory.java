@@ -37,6 +37,7 @@ import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandl
 import org.openhab.core.automation.internal.module.handler.ItemStateUpdateActionHandler;
 import org.openhab.core.automation.internal.module.handler.RuleEnablementActionHandler;
 import org.openhab.core.automation.internal.module.handler.RunRuleActionHandler;
+import org.openhab.core.automation.internal.module.handler.SystemConditionHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
@@ -75,7 +76,8 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             ItemStateUpdateActionHandler.ITEM_STATE_UPDATE_ACTION, GenericEventTriggerHandler.MODULE_TYPE_ID,
             ChannelEventTriggerHandler.MODULE_TYPE_ID, GenericEventConditionHandler.MODULETYPE_ID,
             GenericEventConditionHandler.MODULETYPE_ID, CompareConditionHandler.MODULE_TYPE,
-            SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID, RuleEnablementActionHandler.UID, RunRuleActionHandler.UID);
+            SystemConditionHandler.STARTLEVEL_MODULE_TYPE_ID, SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID,
+            RuleEnablementActionHandler.UID, RunRuleActionHandler.UID);
 
     private final ThingRegistry thingRegistry;
     private final ItemRegistry itemRegistry;
@@ -143,6 +145,8 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
                 return new GenericEventConditionHandler(condition);
             } else if (CompareConditionHandler.MODULE_TYPE.equals(moduleTypeUID)) {
                 return new CompareConditionHandler(condition);
+            } else if (SystemConditionHandler.STARTLEVEL_MODULE_TYPE_ID.equals(moduleTypeUID)) {
+                return new SystemConditionHandler(condition, startLevelService);
             }
         } else if (module instanceof Action action) {
             // Handle actions
