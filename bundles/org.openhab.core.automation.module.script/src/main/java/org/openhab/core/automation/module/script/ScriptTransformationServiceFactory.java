@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
-@Component(immediate = true, service = { ScriptTransformationServiceFactory.class })
+@Component
 @NonNullByDefault
 public class ScriptTransformationServiceFactory {
 
