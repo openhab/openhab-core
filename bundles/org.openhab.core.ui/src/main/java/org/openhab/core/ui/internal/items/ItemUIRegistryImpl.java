@@ -14,6 +14,8 @@ package org.openhab.core.ui.internal.items;
 
 import static org.openhab.core.transform.util.ItemDisplayStateUtil.EXTRACT_TRANSFORM_FUNCTION_PATTERN;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -63,17 +66,21 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.sitemap.Default;
 import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Sitemap;
 import org.openhab.core.sitemap.Slider;
 import org.openhab.core.sitemap.Switch;
+import org.openhab.core.sitemap.Text;
 import org.openhab.core.sitemap.Widget;
 import org.openhab.core.sitemap.registry.SitemapFactory;
+import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.CommandDescription;
@@ -87,6 +94,7 @@ import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -112,12 +120,13 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Implement sitemap registry
  * @author Florian Hotze - Refactor getLabel(Widget w) to use {@link ItemDisplayStateUtil}
  * @author Laurent Garnier - Change widget id coding to support any number of widgets in frame/page
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
         property = Constants.SERVICE_PID + "=org.openhab.sitemap")
 @ConfigurableService(category = "system", label = "Sitemap", description_uri = ItemUIRegistryImpl.CONFIG_URI)
-public class ItemUIRegistryImpl implements ItemUIRegistry {
+public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListener<Sitemap> {
 
     protected static final String CONFIG_URI = "system:sitemap";
 
@@ -135,9 +144,15 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private final ItemRegistry itemRegistry;
     private final SitemapFactory sitemapFactory;
+    private final SitemapRegistry sitemapRegistry;
     private final TimeZoneProvider timeZoneProvider;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<NestedSitemap, Map<String, Text>> nestedSitemapWidgetsCache = new ConcurrentHashMap<>();
+    private final Map<NestedSitemap, Text> defaultNestedSitemapWidgetsCache = new ConcurrentHashMap<>();
+
+    // Cache for reflection fields to avoid performance issues with reflection in copying widgets
+    private final Map<Class<?>, List<Field>> fieldCache = new ConcurrentHashMap<>();
 
     private String groupMembersSorting = DEFAULT_SORTING;
 
@@ -153,10 +168,22 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Activate
     public ItemUIRegistryImpl(final @Reference ItemRegistry itemRegistry,
-            final @Reference SitemapFactory sitemapFactory, final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference SitemapFactory sitemapFactory, final @Reference SitemapRegistry sitemapRegistry,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
         this.sitemapFactory = sitemapFactory;
+        this.sitemapRegistry = sitemapRegistry;
         this.timeZoneProvider = timeZoneProvider;
+        sitemapRegistry.addRegistryChangeListener(this);
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        itemUIProviders.clear();
+        defaultWidgets.clear();
+        nestedSitemapWidgetsCache.clear();
+        defaultNestedSitemapWidgetsCache.clear();
+        sitemapRegistry.removeRegistryChangeListener(this);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -176,6 +203,108 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Modified
     protected void modified(@Nullable Map<String, Object> config) {
         applyConfig(config);
+    }
+
+    @Override
+    public void added(Sitemap element) {
+        // nothing to do
+    }
+
+    @Override
+    public void updated(Sitemap oldElement, Sitemap element) {
+        if (element.equals(oldElement)) {
+            return;
+        }
+        removed(oldElement);
+    }
+
+    @Override
+    public void removed(Sitemap element) {
+        // Name of the sitemap being updated/removed
+        final String sitemapName = element.getName();
+
+        // 1) Remove nestedSitemap outer keys whose parent chain ends at the updated sitemap
+        nestedSitemapWidgetsCache.keySet().removeIf(nestedSitemap -> {
+            Parent parent = nestedSitemap.getParent();
+            while (parent instanceof LinkableWidget linkableWidget) {
+                parent = linkableWidget.getParent();
+            }
+            // only remove if parent is null or belongs to the updated sitemap (or sitemap equals oldElement)
+            if (parent instanceof Sitemap sitemap && !sitemap.getName().equals(sitemapName)) {
+                return false;
+            }
+            return true;
+        });
+        defaultNestedSitemapWidgetsCache.keySet().removeIf(nestedSitemap -> {
+            Parent parent = nestedSitemap.getParent();
+            while (parent instanceof LinkableWidget linkableWidget) {
+                parent = linkableWidget.getParent();
+            }
+            // only remove if parent is null or belongs to the updated sitemap (or sitemap equals oldElement)
+            if (parent instanceof Sitemap sitemap && !sitemap.getName().equals(sitemapName)) {
+                return false;
+            }
+            return true;
+        });
+
+        // 2) Remove per-name entries for the updated sitemap and collect removed Texts
+        // so we can also purge other caches that reference those Texts
+        Set<Text> removedTexts = ConcurrentHashMap.newKeySet();
+        nestedSitemapWidgetsCache.forEach((ns, innerMap) -> {
+            Text removed = innerMap.remove(sitemapName);
+            if (removed != null) {
+                removedTexts.add(removed);
+            }
+        });
+
+        // 3) Also remove any other inner-map entries whose trees contain a removed Text
+        if (!removedTexts.isEmpty()) {
+            nestedSitemapWidgetsCache.forEach((ns, innerMap) -> {
+                List<String> keysToRemove = new ArrayList<>();
+                for (Map.Entry<String, Text> me : innerMap.entrySet()) {
+                    Text t = me.getValue();
+                    if (removedTexts.contains(t) || containsAnyCachedTextRecursive(t, removedTexts)) {
+                        keysToRemove.add(me.getKey());
+                    }
+                }
+                for (String key : keysToRemove) {
+                    Text removed = innerMap.remove(key);
+                    if (removed != null) {
+                        removedTexts.add(removed);
+                    }
+                }
+            });
+            defaultNestedSitemapWidgetsCache.entrySet().removeIf(e -> {
+                Text t = e.getValue();
+                if (removedTexts.contains(t) || containsAnyCachedTextRecursive(t, removedTexts)) {
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        // 4) Clean up outer entries after possible inner removals
+        nestedSitemapWidgetsCache.entrySet().removeIf(e -> e.getValue().isEmpty());
+    }
+
+    /**
+     * Recursively search the widget tree rooted at 'root' for any Text instances contained in 'targets'.
+     * Returns true as soon as any match is found.
+     */
+    private boolean containsAnyCachedTextRecursive(LinkableWidget root, Set<Text> targets) {
+        if (root instanceof Text rootText && targets.contains(rootText)) {
+            return true;
+        }
+        List<Widget> children = root.getWidgets();
+        if (children.isEmpty()) {
+            return false;
+        }
+        for (Widget child : children) {
+            if (child instanceof LinkableWidget childLw && containsAnyCachedTextRecursive(childLw, targets)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -699,16 +828,26 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     }
                     if (idValue.length() >= codingSize && (idValue.length() % codingSize) == 0) {
                         int widgetID = Integer.parseInt(idValue.substring(0, codingSize));
-                        if (widgetID < sitemap.getWidgets().size()) {
-                            w = sitemap.getWidgets().get(widgetID);
+                        List<Widget> sitemapWidgets = getChildren(sitemap);
+                        if (widgetID < sitemapWidgets.size()) {
+                            w = sitemapWidgets.get(widgetID);
                             for (int i = codingSize; i < idValue.length(); i += codingSize) {
                                 int childWidgetID = Integer.parseInt(idValue.substring(i, i + codingSize));
-                                if (childWidgetID < ((LinkableWidget) w).getWidgets().size()) {
-                                    w = ((LinkableWidget) w).getWidgets().get(childWidgetID);
+                                if (w instanceof LinkableWidget lw) {
+                                    List<Widget> childWidgets = getChildren(lw);
+                                    if (childWidgetID < childWidgets.size()) {
+                                        w = childWidgets.get(childWidgetID);
+                                    } else {
+                                        logger.warn(
+                                                "Widget id '{}' is invalid, index {} outside the number ({}) of widgets in the page",
+                                                id, childWidgetID, childWidgets.size());
+                                        w = null;
+                                        break;
+                                    }
                                 } else {
                                     logger.warn(
-                                            "Widget id '{}' is invalid, index {} outside the number ({}) of widgets in the page",
-                                            id, childWidgetID, ((LinkableWidget) w).getWidgets().size());
+                                            "Widget id '{}' is invalid, widget at sub-id {} cannot have child widgets",
+                                            id, idValue.substring(0, i + codingSize));
                                     w = null;
                                     break;
                                 }
@@ -733,21 +872,20 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public List<Widget> getChildren(Sitemap sitemap) {
-        List<Widget> widgets = sitemap.getWidgets();
-
-        List<Widget> result = new ArrayList<>();
-        widgets.stream().map(this::resolveDefault).filter(Objects::nonNull).map(Objects::requireNonNull)
-                .forEach(result::add);
-        return result;
+        return getChildren((Parent) sitemap);
     }
 
     @Override
     public List<Widget> getChildren(LinkableWidget w) {
+        return getChildren((Parent) w);
+    }
+
+    public List<Widget> getChildren(Parent p) {
         List<Widget> widgets;
-        if (w instanceof Group group && w.getWidgets().isEmpty()) {
+        if (p instanceof Group group && p.getWidgets().isEmpty()) {
             widgets = getDynamicGroupChildren(group);
         } else {
-            widgets = w.getWidgets();
+            widgets = p.getWidgets();
         }
 
         List<Widget> result = new ArrayList<>();
@@ -764,9 +902,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     private @Nullable Widget resolveDefault(@Nullable Widget widget) {
-        if (!(widget instanceof Default)) {
-            return widget;
-        } else {
+        if (widget instanceof Default) {
             String itemName = widget.getItem();
             if (itemName != null) {
                 Item item = get(itemName);
@@ -780,6 +916,75 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 }
             }
             return null;
+        } else if (widget instanceof NestedSitemap nestedSitemap) {
+            String itemName = nestedSitemap.getItem();
+            String sitemapName = nestedSitemap.getName();
+            if (itemName != null) {
+                Item item = get(itemName);
+                if (item != null) {
+                    State state = item.getState();
+                    if (state instanceof StringType stringState && !StringType.EMPTY.equals(stringState)) {
+                        sitemapName = stringState.toString();
+                    }
+                }
+            }
+            // Avoid linking back to the root sitemap to prevent loops
+            if (sitemapName != null) {
+                Parent parent = nestedSitemap.getParent();
+                while (parent instanceof LinkableWidget linkableParent) {
+                    parent = linkableParent.getParent();
+                }
+                if (parent instanceof Sitemap parentSitemap && parentSitemap.getName().equals(sitemapName)) {
+                    logger.warn(
+                            "Nested sitemap widget with sitemap name '{}' links to the root sitemap, which is not supported to avoid loops",
+                            sitemapName);
+                    sitemapName = null;
+                }
+            }
+            Sitemap sitemap = sitemapName != null ? sitemapRegistry.get(sitemapName) : null;
+            if (sitemap != null && sitemapName != null) {
+                Map<String, Text> sitemapWidgets = nestedSitemapWidgetsCache.computeIfAbsent(nestedSitemap,
+                        ns -> new ConcurrentHashMap<>());
+                if (sitemapWidgets == null) {
+                    return null;
+                }
+                return sitemapWidgets.computeIfAbsent(sitemapName, sn -> {
+                    Text text = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactory.TEXT));
+                    copyProperties(widget, text);
+                    if (text.getLabel() == null) {
+                        text.setLabel(sitemap.getLabel());
+                    }
+                    if (text.getIcon() == null) {
+                        text.setIcon(sitemap.getIcon());
+                    }
+                    Parent parent = nestedSitemap.getParent();
+                    if (parent != null) {
+                        text.setParent(parent);
+                    }
+                    text.setWidgets(copyWidgets(sitemap.getWidgets(), text));
+                    return text;
+                });
+            } else {
+                String name = sitemapName;
+                return defaultNestedSitemapWidgetsCache.computeIfAbsent(nestedSitemap, ns -> {
+                    if (name != null && sitemap == null) {
+                        logger.warn("Cannot find sitemap '{}' for nested sitemap widget", name);
+                    }
+                    Text text = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactory.TEXT));
+                    copyProperties(widget, text);
+                    Parent parent = nestedSitemap.getParent();
+                    if (parent != null) {
+                        text.setParent(parent);
+                    }
+                    // we return an empty nested text widget, so the link to the sitemap is visible in the UI
+                    Text nestedText = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactory.TEXT));
+                    text.setWidgets(new ArrayList<Widget>(List.of(nestedText)));
+                    nestedText.setParent(text);
+                    return text;
+                });
+            }
+        } else {
+            return widget;
         }
     }
 
@@ -808,6 +1013,54 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             ruleCopy.setArgument(rule.getArgument());
             return ruleCopy;
         }).toList();
+    }
+
+    private List<Widget> copyWidgets(List<Widget> widgets, Parent parent) {
+        return widgets.stream().map(widget -> copyWidget(widget, parent)).collect(Collectors.toList());
+    }
+
+    private Widget copyWidget(Widget source, Parent parent) {
+        Widget copy = Objects.requireNonNull(sitemapFactory.createWidget(source.getWidgetType()));
+
+        for (Field field : getAllWidgetFields(source.getClass())) {
+            try {
+                field.set(copy, field.get(source));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Failed to copy field: " + field.getName(), e);
+            }
+        }
+
+        copy.setParent(parent);
+
+        // Recursively copy children if this is a LinkableWidget
+        if (source instanceof LinkableWidget sourceLink) {
+            LinkableWidget copyLink = (LinkableWidget) copy;
+            List<Widget> copiedChildren = copyWidgets(sourceLink.getWidgets(), copyLink);
+            copyLink.setWidgets(copiedChildren);
+        }
+
+        return copy;
+    }
+
+    private List<Field> getAllWidgetFields(Class<?> clazz) {
+        List<Field> widgetFields = fieldCache.computeIfAbsent(clazz, c -> {
+            List<Field> fields = new ArrayList<>();
+            Class<?> widgetClazz = c;
+            while (widgetClazz != null) {
+                for (Field field : widgetClazz.getDeclaredFields()) {
+                    if (!Modifier.isStatic(field.getModifiers())) {
+                        field.setAccessible(true);
+                        fields.add(field);
+                    }
+                }
+                widgetClazz = widgetClazz.getSuperclass();
+            }
+            return fields;
+        });
+        if (widgetFields == null) {
+            return List.of();
+        }
+        return widgetFields;
     }
 
     /**
@@ -990,11 +1243,19 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         List<Integer> indexes = new ArrayList<>();
         Widget w = widget;
         while (w.getParent() instanceof LinkableWidget parent) {
-            indexes.add(parent.getWidgets().indexOf(w));
+            int parentIndex = getChildren(parent).indexOf(w);
+            if (parentIndex < 0) {
+                parentIndex = parent.getWidgets().indexOf(w);
+            }
+            indexes.add(parentIndex);
             w = parent;
         }
         if (w.getParent() instanceof Sitemap sitemap) {
-            indexes.add(sitemap.getWidgets().indexOf(w));
+            int parentIndex = getChildren(sitemap).indexOf(w);
+            if (parentIndex < 0) {
+                parentIndex = sitemap.getWidgets().indexOf(w);
+            }
+            indexes.add(parentIndex);
         }
         String id = "";
         if (!indexes.isEmpty()) {
@@ -1419,5 +1680,25 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         String unit = index > 0 ? format.substring(index + 1) : null;
         unit = UnitUtils.UNIT_PERCENT_FORMAT_STRING.equals(unit) ? "%" : unit;
         return unit;
+    }
+
+    /**
+     * This method is used to be able to test the nested sitemap widgets cache and is only there for testing purposes.
+     * It is not intended to be used by other classes.
+     *
+     * @return the nestedSitemapWidgetsCache
+     */
+    Map<NestedSitemap, Map<String, Text>> getNestedSitemapWidgetsCache() {
+        return nestedSitemapWidgetsCache;
+    }
+
+    /**
+     * This method is used to be able to test the nested sitemap widgets cache and is only there for testing purposes.
+     * It is not intended to be used by other classes.
+     *
+     * @return the defaultNestedSitemapWidgetsCache
+     */
+    Map<NestedSitemap, Text> getDefaultNestedSitemapWidgetsCache() {
+        return defaultNestedSitemapWidgetsCache;
     }
 }

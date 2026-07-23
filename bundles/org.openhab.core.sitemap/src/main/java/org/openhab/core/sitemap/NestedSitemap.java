@@ -12,31 +12,30 @@
  */
 package org.openhab.core.sitemap;
 
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Interface representing all sitemap entities that can be parents, should be extended by Sitemap and LinkableWidget.
- * This is a marker interface.
+ * A representation of a sitemap NestedSitemap widget.
  *
  * @author Mark Herwege - Initial contribution
  */
 @NonNullByDefault
-public interface Parent {
+public interface NestedSitemap extends NonLinkableWidget {
 
     /**
-     * Get the child {@link Widget}s. This method should return a modifiable list, allowing updates to the child
-     * widgets.
+     * Get the name of the nested sitemap.
      *
-     * @return widgets
+     * @return name of nested sitemap
      */
-    List<Widget> getWidgets();
+    @Nullable
+    String getName();
 
     /**
-     * Replace the child widgets with a new list of widgets.
+     * Set the name of the nested sitemap. This is used to link to another sitemap, which will be rendered when the user
+     * clicks on this widget.
      *
-     * @param widgets
+     * @param name the name of the nested sitemap
      */
-    void setWidgets(List<Widget> widgets);
+    void setName(@Nullable String name);
 }
