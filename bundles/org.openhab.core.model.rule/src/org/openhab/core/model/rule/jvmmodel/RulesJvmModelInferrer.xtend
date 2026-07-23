@@ -31,7 +31,6 @@ import org.openhab.core.model.rule.rules.RuleModel
 import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger
 import org.openhab.core.model.rule.rules.UpdateEventTrigger
 import org.openhab.core.model.script.jvmmodel.ScriptJvmModelInferrer
-import org.openhab.core.model.script.scoping.StateAndCommandProvider
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.slf4j.Logger
@@ -82,17 +81,6 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
             ]
 
             val Set<String> fieldNames = newHashSet()
-
-            StateAndCommandProvider::allTypes.forEach [ type |
-                val name = type.toString
-                if (fieldNames.add(name)) {
-                    members += ruleModel.toField(name, typeRef(type.class)) [
-                        static = true
-                    ]
-                } else {
-                    logger.warn("Duplicate field: '{}'. Ignoring '{}'.", name, type.class.name)
-                }
-            ]
 
             itemRegistry?.items?.forEach [ item |
                 val name = item.name
