@@ -36,7 +36,9 @@ import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
+import org.openhab.core.addon.dto.AddonDTO;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.common.Version;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -67,21 +69,11 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         if (compatible != 0) {
             return compatible;
         }
-        try {
-            // Add-on versions often contain a dash instead of a dot as separator for the qualifier (e.g. -SNAPSHOT)
-            // This is not a valid format and everything after the dash needs to be removed.
-            BundleVersion version1 = new BundleVersion(addon1.getVersion().replaceAll("-.*", ".0"));
-            BundleVersion version2 = new BundleVersion(addon2.getVersion().replaceAll("-.*", ".0"));
-
-            // prefer newer version over older
-            return version2.compareTo(version1);
-        } catch (IllegalArgumentException e) {
-            // assume they are equal (for ordering) if we can't compare the versions
-            return 0;
-        }
+        Version v2 = addon2.getVersion();
+        return v2 == null ? 1 : v2.compareTo(addon1.getVersion());
     };
 
-    protected final BundleVersion coreVersion;
+    protected final Version coreVersion;
 
     protected final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
     protected final Set<MarketplaceAddonHandler> addonHandlers = new CopyOnWriteArraySet<>();
@@ -105,12 +97,12 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         this.coreVersion = getCoreVersion();
     }
 
-    protected BundleVersion getCoreVersion() {
-        return new BundleVersion(FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString());
+    protected Version getCoreVersion() {
+        return Version.valueOf(FrameworkUtil.getBundle(OpenHAB.class).getVersion());
     }
 
     private Addon convertFromStorage(Map.Entry<String, @Nullable String> entry) {
-        Addon storedAddon = Objects.requireNonNull(gson.fromJson(entry.getValue(), Addon.class));
+        Addon storedAddon = Objects.requireNonNull(gson.fromJson(entry.getValue(), AddonDTO.class)).toAddon();
         AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(storedAddon.getType() + "-" + storedAddon.getId());
         if (addonInfo != null && storedAddon.getConfigDescriptionURI().isBlank()) {
             return Addon.create(storedAddon).withConfigDescriptionURI(addonInfo.getConfigDescriptionURI()).build();
@@ -125,7 +117,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     }
 
     private synchronized void refreshSource(boolean fetchRemoteAddons) {
-        if (!addonHandlers.stream().allMatch(MarketplaceAddonHandler::isReady)) {
+        if (addonHandlers.isEmpty() || !addonHandlers.stream().allMatch(MarketplaceAddonHandler::isReady)) {
             logger.debug("Add-on service '{}' tried to refresh source before add-on handlers ready. Exiting.",
                     getClass());
             return;
@@ -177,7 +169,8 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
         // check and remove duplicate uids
         Map<String, List<Addon>> addonMap = new HashMap<>();
-        addons.forEach(a -> addonMap.computeIfAbsent(a.getUid(), k -> new ArrayList<>()).add(a));
+        addons.forEach(
+                a -> Objects.requireNonNull(addonMap.computeIfAbsent(a.getUid(), k -> new ArrayList<>())).add(a));
         for (List<Addon> partialAddonList : addonMap.values()) {
             if (partialAddonList.size() > 1) {
                 partialAddonList.stream().sorted(BY_COMPATIBLE_AND_VERSION).skip(1).forEach(addons::remove);
@@ -250,11 +243,13 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                     try {
                         handler.install(addon);
                         addon.setInstalled(true);
-                        installedAddonStorage.put(id, gson.toJson(addon));
+                        installedAddonStorage.put(id, gson.toJson(new AddonDTO(addon)));
                         refreshSource(false);
                         postInstalledEvent(addon.getUid());
                     } catch (MarketplaceHandlerException e) {
                         postFailureEvent(addon.getUid(), e.getMessage());
+                        logger.warn("Failed to install add-on \"{}\": {}", addon.getUid(), e.getMessage());
+                        logger.trace("", e);
                     }
                 } else {
                     postFailureEvent(addon.getUid(), "Add-on is already installed.");
@@ -282,6 +277,8 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                         postUninstalledEvent(addon.getUid());
                     } catch (MarketplaceHandlerException e) {
                         postFailureEvent(addon.getUid(), e.getMessage());
+                        logger.warn("Failed to uninstall add-on \"{}\": {}", addon.getUid(), e.getMessage());
+                        logger.trace("", e);
                     }
                 } else {
                     installedAddonStorage.remove(id);

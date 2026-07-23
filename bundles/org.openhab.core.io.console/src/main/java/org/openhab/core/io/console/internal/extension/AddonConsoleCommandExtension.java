@@ -141,7 +141,7 @@ public class AddonConsoleCommandExtension extends AbstractConsoleCommandExtensio
             addons = service.getAddons(null);
         }
         addons.forEach(addon -> console.println(String.format("%s %-45s %-20s %s", addon.isInstalled() ? "i" : " ",
-                addon.getUid(), addon.getVersion().isBlank() ? "not set" : addon.getVersion(), addon.getLabel())));
+                addon.getUid(), addon.getVersion() == null ? "not set" : addon.getVersion(), addon.getLabel())));
     }
 
     private void installAddon(Console console, String addonUid) {
