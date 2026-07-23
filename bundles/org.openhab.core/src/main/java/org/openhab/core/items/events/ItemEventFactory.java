@@ -25,16 +25,20 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.dto.ItemDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.Type;
 import org.openhab.core.types.UnDefType;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * An {@link ItemEventFactory} is responsible for creating item event instances, e.g. {@link ItemCommandEvent}s and
@@ -71,14 +75,20 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private static final String ITEM_UPDATED_EVENT_TOPIC = "openhab/items/{itemName}/updated";
 
+    private static final String DATE_TIME_TYPE_TYPE = "DateTime";
+
+    private final TimeZoneProvider timeZoneProvider;
+
     /**
      * Constructs a new ItemEventFactory.
      */
-    public ItemEventFactory() {
+    @Activate
+    public ItemEventFactory(@Reference TimeZoneProvider timeZoneProvider) {
         super(Set.of(ItemCommandEvent.TYPE, ItemStateEvent.TYPE, ItemStatePredictedEvent.TYPE,
                 ItemStateUpdatedEvent.TYPE, ItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE,
                 ItemRemovedEvent.TYPE, GroupStateUpdatedEvent.TYPE, GroupItemStateChangedEvent.TYPE,
                 ItemTimeSeriesEvent.TYPE, ItemTimeSeriesUpdatedEvent.TYPE));
+        this.timeZoneProvider = timeZoneProvider;
     }
 
     @Override
@@ -115,7 +125,7 @@ public class ItemEventFactory extends AbstractEventFactory {
     private Event createGroupStateUpdatedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
         String memberName = getMemberName(topic);
-        ItemStateUpdatedEventPayloadBean bean = deserializePayload(payload, ItemStateUpdatedEventPayloadBean.class);
+        ItemStateUpdatedEventPayloadBean bean = processPayload(payload, ItemStateUpdatedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         ZonedDateTime lastStateUpdate = bean.getLastStateUpdate();
         return new GroupStateUpdatedEvent(topic, payload, itemName, memberName, state, lastStateUpdate, null);
@@ -124,7 +134,7 @@ public class ItemEventFactory extends AbstractEventFactory {
     private Event createGroupStateChangedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
         String memberName = getMemberName(topic);
-        ItemStateChangedEventPayloadBean bean = deserializePayload(payload, ItemStateChangedEventPayloadBean.class);
+        ItemStateChangedEventPayloadBean bean = processPayload(payload, ItemStateChangedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         State oldState = getState(bean.getOldType(), bean.getOldValue());
         ZonedDateTime lastStateChange = bean.getLastStateChange();
@@ -135,28 +145,28 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private Event createCommandEvent(String topic, String payload, @Nullable String source) {
         String itemName = getItemName(topic);
-        ItemEventPayloadBean bean = deserializePayload(payload, ItemEventPayloadBean.class);
+        ItemEventPayloadBean bean = processPayload(payload, ItemEventPayloadBean.class);
         Command command = parseType(bean.getType(), bean.getValue(), Command.class);
         return new ItemCommandEvent(topic, payload, itemName, command, source);
     }
 
     private Event createStateEvent(String topic, String payload, @Nullable String source) {
         String itemName = getItemName(topic);
-        ItemEventPayloadBean bean = deserializePayload(payload, ItemEventPayloadBean.class);
+        ItemEventPayloadBean bean = processPayload(payload, ItemEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         return new ItemStateEvent(topic, payload, itemName, state, source);
     }
 
     private Event createStatePredictedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
-        ItemStatePredictedEventPayloadBean bean = deserializePayload(payload, ItemStatePredictedEventPayloadBean.class);
+        ItemStatePredictedEventPayloadBean bean = processPayload(payload, ItemStatePredictedEventPayloadBean.class);
         State state = getState(bean.getPredictedType(), bean.getPredictedValue());
         return new ItemStatePredictedEvent(topic, payload, itemName, state, bean.isConfirmation());
     }
 
     private Event createStateUpdatedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
-        ItemStateUpdatedEventPayloadBean bean = deserializePayload(payload, ItemStateUpdatedEventPayloadBean.class);
+        ItemStateUpdatedEventPayloadBean bean = processPayload(payload, ItemStateUpdatedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         ZonedDateTime lastStateUpdate = bean.getLastStateUpdate();
         return new ItemStateUpdatedEvent(topic, payload, itemName, state, lastStateUpdate, null);
@@ -164,7 +174,7 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private Event createStateChangedEvent(String topic, String payload, @Nullable String source) {
         String itemName = getItemName(topic);
-        ItemStateChangedEventPayloadBean bean = deserializePayload(payload, ItemStateChangedEventPayloadBean.class);
+        ItemStateChangedEventPayloadBean bean = processPayload(payload, ItemStateChangedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         State oldState = getState(bean.getOldType(), bean.getOldValue());
         ZonedDateTime lastStateUpdate = bean.getLastStateUpdate();
@@ -175,14 +185,14 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private Event createTimeSeriesEvent(String topic, String payload) {
         String itemName = getItemName(topic);
-        ItemTimeSeriesEventPayloadBean bean = deserializePayload(payload, ItemTimeSeriesEventPayloadBean.class);
+        ItemTimeSeriesEventPayloadBean bean = processPayload(payload, ItemTimeSeriesEventPayloadBean.class);
         TimeSeries timeSeries = bean.getTimeSeries();
         return new ItemTimeSeriesEvent(topic, payload, itemName, timeSeries, null);
     }
 
     private Event createTimeSeriesUpdatedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
-        ItemTimeSeriesEventPayloadBean bean = deserializePayload(payload, ItemTimeSeriesEventPayloadBean.class);
+        ItemTimeSeriesEventPayloadBean bean = processPayload(payload, ItemTimeSeriesEventPayloadBean.class);
         TimeSeries timeSeries = bean.getTimeSeries();
         return new ItemTimeSeriesUpdatedEvent(topic, payload, itemName, timeSeries, null);
     }
@@ -265,6 +275,53 @@ public class ItemEventFactory extends AbstractEventFactory {
         return new ItemUpdatedEvent(topic, payload, itemDTOs[0], itemDTOs[1]);
     }
 
+    private <T> T processPayload(String payload, Class<T> classOfPayload) {
+        T result = deserializePayload(payload, classOfPayload);
+        switch (result) {
+            case ItemEventPayloadBean iep:
+                if (DATE_TIME_TYPE_TYPE.equals(iep.type) && iep.value != null && iep.value.charAt(0) == '?') {
+                    iep.value = new DateTimeType(iep.value).toZone(timeZoneProvider.getTimeZone()).toFullString();
+                }
+                break;
+            case ItemStateUpdatedEventPayloadBean isuep:
+                if (DATE_TIME_TYPE_TYPE.equals(isuep.type) && isuep.value != null && isuep.value.charAt(0) == '?') {
+                    isuep.value = new DateTimeType(isuep.value).toZone(timeZoneProvider.getTimeZone()).toFullString();
+                }
+                break;
+            case ItemStateChangedEventPayloadBean iscep:
+                if (DATE_TIME_TYPE_TYPE.equals(iscep.type) && iscep.value != null && iscep.value.charAt(0) == '?') {
+                    iscep.value = new DateTimeType(iscep.value).toZone(timeZoneProvider.getTimeZone()).toFullString();
+                }
+                if (DATE_TIME_TYPE_TYPE.equals(iscep.oldType) && iscep.value != null
+                        && iscep.oldValue.charAt(0) == '?') {
+                    iscep.oldValue = new DateTimeType(iscep.oldValue).toZone(timeZoneProvider.getTimeZone())
+                            .toFullString();
+                }
+                break;
+            case ItemStatePredictedEventPayloadBean ispep:
+                if (DATE_TIME_TYPE_TYPE.equals(ispep.predictedType) && ispep.predictedValue != null
+                        && ispep.predictedValue.charAt(0) == '?') {
+                    ispep.predictedValue = new DateTimeType(ispep.predictedValue).toZone(timeZoneProvider.getTimeZone())
+                            .toFullString();
+                }
+                break;
+            case ItemTimeSeriesEventPayloadBean itsep:
+                List<ItemTimeSeriesEventPayloadBean.TimeSeriesPayload> series = itsep.timeSeries;
+                if (series != null) {
+                    for (ItemTimeSeriesEventPayloadBean.TimeSeriesPayload tsp : series) {
+                        if (DATE_TIME_TYPE_TYPE.equals(tsp.type) && tsp.value != null && tsp.value.charAt(0) == '?') {
+                            tsp.value = new DateTimeType(tsp.value).toZone(timeZoneProvider.getTimeZone())
+                                    .toFullString();
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
     /**
      * Creates an item command event.
      *
@@ -277,7 +334,7 @@ public class ItemEventFactory extends AbstractEventFactory {
     public static ItemCommandEvent createCommandEvent(String itemName, Command command, @Nullable String source) {
         assertValidArguments(itemName, command, "command");
         String topic = buildTopic(ITEM_COMAND_EVENT_TOPIC, itemName);
-        ItemEventPayloadBean bean = new ItemEventPayloadBean(getCommandType(command), command.toString());
+        ItemEventPayloadBean bean = new ItemEventPayloadBean(getCommandType(command), command.toFullString());
         String payload = serializePayload(bean);
         return new ItemCommandEvent(topic, payload, itemName, command, source);
     }
