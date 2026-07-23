@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.lib;
 
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -93,6 +94,77 @@ public class RuleExtensions {
     public static Map<String, @Nullable Object> run(Rule rule, boolean considerConditions,
             @Nullable Map<String, @Nullable Object> context) {
         return Rules.runRule(rule.getUID(), considerConditions, context);
+    }
+
+    /**
+     * Run the specified rule asynchronously.
+     *
+     * @param rule the {@link Rule} to run.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If the specified rule isn't registered.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(Rule rule) {
+        return Rules.runAsync(rule.getUID());
+    }
+
+    /**
+     * Run the specified rule asynchronously, while optionally taking conditions into account.
+     *
+     * @param rule the {@link Rule} to run.
+     * @param considerConditions {@code true} to not run the rule if its conditions don't qualify.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If the specified rule isn't registered.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(Rule rule, boolean considerConditions) {
+        return Rules.runAsync(rule.getUID(), considerConditions);
+    }
+
+    /**
+     * Run the specified rule asynchronously, with the specified context.
+     *
+     * @param rule the {@link Rule} to run.
+     * @param context the {@link Map} of {@link String} and {@link Object} pairs that constitutes the context.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If the specified rule isn't registered.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(Rule rule, Map<String, @Nullable Object> context) {
+        return Rules.runAsync(rule.getUID(), context);
+    }
+
+    /**
+     * Run the specified rule asynchronously, with the specified context, while optionally taking conditions into
+     * account.
+     *
+     * @param rule the {@link Rule} to run.
+     * @param considerConditions {@code true} to not run the rule if its conditions don't qualify.
+     * @param context the pairs of {@link String}s and {@link Object}s that constitutes the context. Must be in pairs,
+     *            the first is the key, the second is the value.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If the specified rule isn't registered.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(Rule rule, boolean considerConditions,
+            Object... context) {
+        return Rules.runAsync(rule.getUID(), considerConditions, context);
+    }
+
+    /**
+     * Run the specified rule asynchronously, with the specified context, while optionally taking conditions into
+     * account.
+     *
+     * @param rule the {@link Rule} to run.
+     * @param considerConditions {@code true} to not run the rule if its conditions don't qualify.
+     * @param context the {@link Map} of {@link String} and {@link Object} pairs that constitutes the context.
+     * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
+     * @throws IllegalArgumentException If the specified rule isn't registered.
+     * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     */
+    public static Future<Map<String, @Nullable Object>> runAsync(Rule rule, boolean considerConditions,
+            @Nullable Map<String, @Nullable Object> context) {
+        return Rules.runAsync(rule.getUID(), considerConditions, context);
     }
 
     /**
