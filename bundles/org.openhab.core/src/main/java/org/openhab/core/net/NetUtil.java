@@ -81,18 +81,28 @@ public class NetUtil implements NetworkAddressService {
     private static final Pattern IPV4_PATTERN = Pattern
             .compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
 
+    // All access must be guarded by "this"
     private @Nullable String primaryAddress;
+
+    // All access must be guarded by "this"
     private @Nullable String configuredBroadcastAddress;
+
+    // All access must be guarded by "this"
     private boolean useOnlyOneAddress;
+
+    // All access must be guarded by "this"
     private boolean useIPv6;
 
     // must be initialized before activate due to OSGi reference
-    private Set<NetworkAddressChangeListener> networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
+    private final Set<NetworkAddressChangeListener> networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
 
+    // All access must be guarded by "this"
     private Collection<CidrAddress> lastKnownInterfaceAddresses = List.of();
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
-    private @Nullable ScheduledFuture<?> networkInterfacePollFuture = null;
+
+    // All access must be guarded by "this"
+    private @Nullable ScheduledFuture<?> networkInterfacePollFuture;
 
     private final SafeCaller safeCaller;
 
@@ -103,19 +113,28 @@ public class NetUtil implements NetworkAddressService {
 
     @Activate
     protected void activate(Map<String, Object> props) {
-        lastKnownInterfaceAddresses = List.of();
-        modified(props);
+        synchronized (this) {
+            lastKnownInterfaceAddresses = List.of();
+            modified(props);
+        }
     }
 
     @Deactivate
-    protected void deactivate() {
+    protected synchronized void deactivate() {
         lastKnownInterfaceAddresses = List.of();
-        networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
-
         if (networkInterfacePollFuture instanceof ScheduledFuture<?> future) {
             future.cancel(true);
             networkInterfacePollFuture = null;
         }
+        NetworkAddressChangeListener safeListener;
+        for (NetworkAddressChangeListener listener : networkAddressChangeListeners) {
+            safeListener = safeCaller
+                    .create(listener, NetworkAddressChangeListener.class).withTimeout(15000).onException(e -> LOGGER
+                            .debug("NetworkAddressChangeListener.onNotificationsEnded() failed: {}", e.getMessage(), e))
+                    .build();
+            safeListener.onNotificationsEnded();
+        }
+        networkAddressChangeListeners.clear();
     }
 
     @Modified
@@ -159,8 +178,12 @@ public class NetUtil implements NetworkAddressService {
     @Override
     public @Nullable String getPrimaryIpv4HostAddress() {
         String primaryIP;
+        String address;
+        synchronized (this) {
+            address = primaryAddress;
+        }
 
-        if (primaryAddress instanceof String address) {
+        if (address != null) {
             String[] addrString = address.split("/");
             if (addrString.length > 1) {
                 String ip = getIPv4inSubnet(addrString[0], addrString[1]);
@@ -188,7 +211,7 @@ public class NetUtil implements NetworkAddressService {
      * @return use only one address per interface and family
      */
     @Override
-    public boolean isUseOnlyOneAddress() {
+    public synchronized boolean isUseOnlyOneAddress() {
         return useOnlyOneAddress;
     }
 
@@ -198,7 +221,7 @@ public class NetUtil implements NetworkAddressService {
      * @return use IPv6
      */
     @Override
-    public boolean isUseIPv6() {
+    public synchronized boolean isUseIPv6() {
         return useIPv6;
     }
 
@@ -333,16 +356,8 @@ public class NetUtil implements NetworkAddressService {
     }
 
     @Override
-    public @Nullable String getConfiguredBroadcastAddress() {
-        String broadcastAddr;
-
-        if (configuredBroadcastAddress != null) {
-            broadcastAddr = configuredBroadcastAddress;
-        } else {
-            // we do not seem to have any network interfaces
-            broadcastAddr = null;
-        }
-        return broadcastAddr;
+    public synchronized @Nullable String getConfiguredBroadcastAddress() {
+        return configuredBroadcastAddress;
     }
 
     private @Nullable String getPrimaryBroadcastAddress() {
@@ -574,7 +589,7 @@ public class NetUtil implements NetworkAddressService {
         return false;
     }
 
-    private void scheduleToPollNetworkInterface(int intervalInSeconds) {
+    private synchronized void scheduleToPollNetworkInterface(int intervalInSeconds) {
         if (networkInterfacePollFuture instanceof ScheduledFuture<?> future) {
             future.cancel(true);
             networkInterfacePollFuture = null;
@@ -586,21 +601,23 @@ public class NetUtil implements NetworkAddressService {
 
     private void pollAndNotifyNetworkInterfaceAddress() {
         Collection<CidrAddress> newInterfaceAddresses = getAllInterfaceAddresses();
-        if (networkAddressChangeListeners.isEmpty()) {
-            // no listeners listening, just update
+        Collection<CidrAddress> oldInterfaceAddresses;
+        synchronized (this) {
+            oldInterfaceAddresses = lastKnownInterfaceAddresses;
             lastKnownInterfaceAddresses = newInterfaceAddresses;
+        }
+        if (networkAddressChangeListeners.isEmpty()) {
+            // no listeners listening
             return;
         }
 
         // Look for added addresses to notify
         List<CidrAddress> added = newInterfaceAddresses.stream()
-                .filter(newInterfaceAddr -> !lastKnownInterfaceAddresses.contains(newInterfaceAddr)).toList();
+                .filter(newInterfaceAddr -> !oldInterfaceAddresses.contains(newInterfaceAddr)).toList();
 
         // Look for removed addresses to notify
-        List<CidrAddress> removed = lastKnownInterfaceAddresses.stream()
-                .filter(lastKnownInterfaceAddr -> !newInterfaceAddresses.contains(lastKnownInterfaceAddr)).toList();
-
-        lastKnownInterfaceAddresses = newInterfaceAddresses;
+        List<CidrAddress> removed = oldInterfaceAddresses.stream()
+                .filter(oldInterfaceAddr -> !newInterfaceAddresses.contains(oldInterfaceAddr)).toList();
 
         if (!added.isEmpty() || !removed.isEmpty()) {
             if (LOGGER.isDebugEnabled()) {
