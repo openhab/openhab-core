@@ -152,6 +152,8 @@ public class Rules {
      * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
      * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     * @throws UnsupportedOperationException If asynchronous execution isn't supported by the active
+     *             {@link RuleManager}.
      */
     public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid) {
         RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
@@ -172,6 +174,8 @@ public class Rules {
      * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
      * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     * @throws UnsupportedOperationException If asynchronous execution isn't supported by the active
+     *             {@link RuleManager}.
      */
     public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid, boolean considerConditions) {
         RuleManager ruleManager = ScriptServiceUtil.getRuleManager();
@@ -192,6 +196,8 @@ public class Rules {
      * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
      * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     * @throws UnsupportedOperationException If asynchronous execution isn't supported by the active
+     *             {@link RuleManager}.
      */
     public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid,
             Map<String, @Nullable Object> context) {
@@ -216,6 +222,8 @@ public class Rules {
      * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
      * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     * @throws UnsupportedOperationException If asynchronous execution isn't supported by the active
+     *             {@link RuleManager}.
      */
     public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid, boolean considerConditions,
             Object... context) {
@@ -239,6 +247,8 @@ public class Rules {
      * @return A {@link Future} that can provide the copy of the rule context, including possible return values.
      * @throws IllegalArgumentException If a rule with the specified UID doesn't exist.
      * @throws IllegalStateException If no {@link RuleManager} instance exists.
+     * @throws UnsupportedOperationException If asynchronous execution isn't supported by the active
+     *             {@link RuleManager}.
      */
     public static Future<Map<String, @Nullable Object>> runAsync(String ruleUid, boolean considerConditions,
             @Nullable Map<String, @Nullable Object> context) {
