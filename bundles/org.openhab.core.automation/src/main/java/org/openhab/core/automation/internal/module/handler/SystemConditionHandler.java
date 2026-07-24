@@ -37,11 +37,23 @@ public class SystemConditionHandler extends BaseConditionModuleHandler {
     private final int minStartlevel;
     private final StartLevelService startLevelService;
 
-    public SystemConditionHandler(Condition condition, StartLevelService startLevelService) {
+    /**
+     * Creates a new system start level condition instance.
+     *
+     * @param condition the {@link Condition} module instance.
+     * @param startLevelService the {@link StartLevelService} to use.
+     * @throws IllegalArgumentException If {@value #CFG_MIN_STARTLEVEL} isn't a valid integer.
+     */
+    public SystemConditionHandler(Condition condition, StartLevelService startLevelService)
+            throws IllegalArgumentException {
         super(condition);
         this.startLevelService = startLevelService;
-        Configuration configuration = module.getConfiguration();
-        this.minStartlevel = ((Number) configuration.get(CFG_MIN_STARTLEVEL)).intValue();
+        try {
+            Configuration configuration = module.getConfiguration();
+            this.minStartlevel = ((Number) configuration.get(CFG_MIN_STARTLEVEL)).intValue();
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("'" + CFG_MIN_STARTLEVEL + "' parameter must be an integer value.", e);
+        }
     }
 
     @Override

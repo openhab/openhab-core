@@ -75,9 +75,8 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             ItemStateConditionHandler.ITEM_STATE_CONDITION, ItemCommandActionHandler.ITEM_COMMAND_ACTION,
             ItemStateUpdateActionHandler.ITEM_STATE_UPDATE_ACTION, GenericEventTriggerHandler.MODULE_TYPE_ID,
             ChannelEventTriggerHandler.MODULE_TYPE_ID, GenericEventConditionHandler.MODULETYPE_ID,
-            GenericEventConditionHandler.MODULETYPE_ID, CompareConditionHandler.MODULE_TYPE,
-            SystemConditionHandler.STARTLEVEL_MODULE_TYPE_ID, SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID,
-            RuleEnablementActionHandler.UID, RunRuleActionHandler.UID);
+            CompareConditionHandler.MODULE_TYPE, SystemConditionHandler.STARTLEVEL_MODULE_TYPE_ID,
+            SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID, RuleEnablementActionHandler.UID, RunRuleActionHandler.UID);
 
     private final ThingRegistry thingRegistry;
     private final ItemRegistry itemRegistry;
