@@ -128,8 +128,8 @@ public class NetUtil implements NetworkAddressService {
         }
         NetworkAddressChangeListener safeListener;
         for (NetworkAddressChangeListener listener : networkAddressChangeListeners) {
-            safeListener = safeCaller
-                    .create(listener, NetworkAddressChangeListener.class).withTimeout(15000).onException(e -> LOGGER
+            safeListener = safeCaller.create(listener, NetworkAddressChangeListener.class).withAsync()
+                    .withTimeout(15000).onException(e -> LOGGER
                             .debug("NetworkAddressChangeListener.onNotificationsEnded() failed: {}", e.getMessage(), e))
                     .build();
             safeListener.onNotificationsEnded();
@@ -639,7 +639,7 @@ public class NetUtil implements NetworkAddressService {
         // SafeCaller prevents bad listeners running too long or throws runtime exceptions
         for (NetworkAddressChangeListener listener : networkAddressChangeListeners) {
             NetworkAddressChangeListener safeListener = safeCaller.create(listener, NetworkAddressChangeListener.class)
-                    .withTimeout(15000)
+                    .withAsync().withTimeout(15000)
                     .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception", exception))
                     .build();
             safeListener.onChanged(unmodifiableAddedList, unmodifiableRemovedList);
@@ -652,7 +652,7 @@ public class NetUtil implements NetworkAddressService {
             // SafeCaller prevents bad listeners running too long or throws runtime exceptions
             for (NetworkAddressChangeListener listener : networkAddressChangeListeners) {
                 NetworkAddressChangeListener safeListener = safeCaller
-                        .create(listener, NetworkAddressChangeListener.class).withTimeout(15000)
+                        .create(listener, NetworkAddressChangeListener.class).withAsync().withTimeout(15000)
                         .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception", exception))
                         .build();
                 safeListener.onPrimaryAddressChanged(oldPrimaryAddress, newPrimaryAddress);
