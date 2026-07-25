@@ -12,7 +12,7 @@
  */
 package org.openhab.core.addon;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -362,7 +362,7 @@ public class Addon {
             this.connection = addon.connection;
             this.backgroundColor = addon.backgroundColor;
             this.imageLink = addon.imageLink;
-            this.properties = addon.properties;
+            this.properties = new LinkedHashMap<>(addon.properties);
             this.loggerPackages = addon.loggerPackages;
         }
 
@@ -446,7 +446,7 @@ public class Addon {
             return countries;
         }
 
-        public Builder withCountries(List<@NonNull String> countries) {
+        public Builder withCountries(@Nullable List<@NonNull String> countries) {
             this.countries = countries;
             return this;
         }
@@ -474,7 +474,7 @@ public class Addon {
         public Builder withProperty(@NonNull String key, @NonNull Object value) {
             Map<@NonNull String, @NonNull Object> props = this.properties;
             if (props == null) {
-                props = new HashMap<>();
+                props = new LinkedHashMap<>();
             }
             props.put(key, value);
             this.properties = props;

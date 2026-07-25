@@ -199,7 +199,7 @@ public class VersionRange {
         if (h != 0) {
             return h;
         }
-        return h = Objects.hash(leftInclusive, left, right, rightInclusive);
+        return hash = Objects.hash(leftInclusive, left, right, rightInclusive);
     }
 
     @Override

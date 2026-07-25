@@ -69,8 +69,9 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         if (compatible != 0) {
             return compatible;
         }
+        Version v1 = addon1.getVersion();
         Version v2 = addon2.getVersion();
-        return v2 == null ? 1 : v2.compareTo(addon1.getVersion());
+        return v1 == null && v2 == null ? 0 : v2 == null ? 1 : v2.compareTo(v1);
     };
 
     protected final Version coreVersion;
