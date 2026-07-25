@@ -67,6 +67,12 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
     // All access must be guarded by "this"
     private final Set<ServiceDescription> activeServices = new LinkedHashSet<>();
 
+    // All access must be guarded by "this"
+    private final Set<ServiceListenerRegistration> listeners = new HashSet<>();
+
+    // All access must be guarded by "this"
+    private boolean deactivated;
+
     private final NetworkAddressService networkAddressService;
 
     private final ExecutorService executor = ThreadPoolManager.getPool(MDNS_POOL_NAME);
@@ -161,6 +167,7 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
     public void deactivate() {
         networkAddressService.removeNetworkAddressChangeListener(this);
         synchronized (this) {
+            deactivated = true;
             close();
             activeServices.clear();
         }
@@ -168,11 +175,13 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
 
     @Override
     public synchronized void addServiceListener(String type, ServiceListener listener) {
+        listeners.add(new ServiceListenerRegistration(type, listener));
         jmdnsInstances.values().forEach(jmdns -> jmdns.addServiceListener(type, listener));
     }
 
     @Override
     public synchronized void removeServiceListener(String type, ServiceListener listener) {
+        listeners.remove(new ServiceListenerRegistration(type, listener));
         jmdnsInstances.values().forEach(jmdns -> jmdns.removeServiceListener(type, listener));
     }
 
@@ -181,7 +190,7 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
         executor.execute(() -> {
             List<JmDNS> instances = null;
             synchronized (MDNSClientImpl.this) {
-                if (activeServices.add(description)) {
+                if (!deactivated && activeServices.add(description)) {
                     instances = List.copyOf(jmdnsInstances.values());
                 }
             }
@@ -316,9 +325,18 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
                 JmDNS jmdns = JmDNS.create(address, null);
                 JmDNS oldJmdns;
                 Set<ServiceDescription> services;
+                boolean deactivated;
+                Set<ServiceListenerRegistration> listeners;
                 synchronized (MDNSClientImpl.this) {
-                    oldJmdns = jmdnsInstances.put(address, jmdns);
-                    services = Set.copyOf(activeServices);
+                    deactivated = this.deactivated;
+                    listeners = Set.copyOf(this.listeners);
+                    if (deactivated) {
+                        oldJmdns = jmdns;
+                        services = Set.of();
+                    } else {
+                        oldJmdns = jmdnsInstances.put(address, jmdns);
+                        services = Set.copyOf(activeServices);
+                    }
                 }
                 // Prevent multiple instances for an address from existing
                 if (oldJmdns != null) {
@@ -327,9 +345,17 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
                     }
                     closeQuietly(oldJmdns);
                 }
+                if (deactivated) {
+                    logger.debug("mDNS: Not starting services for {} because {} has been deactivated",
+                            address.getHostAddress(), getClass().getSimpleName());
+                    return;
+                }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("mDNS: Services has been started ({} for IP {})", jmdns.getName(),
+                    logger.debug("mDNS: Services have been started ({} for IP {})", jmdns.getName(),
                             address.getHostAddress());
+                }
+                for (ServiceListenerRegistration listener : listeners) {
+                    jmdns.addServiceListener(listener.type, listener.listener);
                 }
                 for (ServiceDescription description : services) {
                     registerServiceInstance(jmdns, description);
@@ -363,7 +389,7 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
                         unregisterServiceInstance(inst, description);
                     }
                     closeQuietly(inst);
-                    logger.debug("mDNS: Services has been stopped ({} for IP {})", inst.getName(),
+                    logger.debug("mDNS: Services have been stopped ({} for IP {})", inst.getName(),
                             addr.getHostAddress());
                     iterator.remove();
                 } else {
@@ -379,4 +405,7 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
             createJmDNSByAddress(addr);
         }
     }
+
+    private record ServiceListenerRegistration(String type, ServiceListener listener) {
+    };
 }
