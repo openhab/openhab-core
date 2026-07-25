@@ -38,9 +38,21 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 @NonNullByDefault
 public abstract class XmlDocumentReader<@NonNull T> {
 
+    /**
+     * SPI lookups are <b>not</b> thread-safe, leading to "random failures" during {@link XStream} initialization,
+     * especially during tests. {@link XStream} instances themselves are thread-safe once initialized, and they
+     * are supposed to share the lifecycle of the application. That's not practical in an OSGi environment, where
+     * there is no overall lifecycle, but many bundles with their individual lifecycles.
+     * <p>
+     * To try to protect against concurrency issues during SPI resolution, this static lock exists. By serializing
+     * SPI lookups using this lock, there should be no opportunity for concurrency issues. The lock object is public
+     * to enable other classes to apply the same lock. The lock object itself shares its lifecycle with the JVM.
+     */
+    public static final Object XSTREAM_SPI_LOCK = new Object();
+
     protected static final String[] DEFAULT_ALLOWED_TYPES_WILDCARD = new String[] { "org.openhab.core.**" };
 
-    private final XStream xstream = new XStream(new StaxDriver());
+    private final XStream xstream;
 
     /**
      * The default constructor of this class initializes the {@code XStream} object by calling:
@@ -52,6 +64,9 @@ public abstract class XmlDocumentReader<@NonNull T> {
      * </ol>
      */
     public XmlDocumentReader() {
+        synchronized (XSTREAM_SPI_LOCK) {
+            xstream = new XStream(new StaxDriver());
+        }
         configureSecurity(xstream);
         registerConverters(xstream);
         registerAliases(xstream);
