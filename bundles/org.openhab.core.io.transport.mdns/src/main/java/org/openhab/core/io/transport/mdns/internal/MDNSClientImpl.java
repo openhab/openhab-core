@@ -328,16 +328,20 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
                 JmDNS oldJmdns;
                 Set<ServiceDescription> services;
                 boolean deactivated;
-                Set<ServiceListenerRegistration> listeners;
                 synchronized (MDNSClientImpl.this) {
                     deactivated = this.deactivated;
-                    listeners = Set.copyOf(this.listeners);
                     if (deactivated) {
                         oldJmdns = jmdns;
                         services = Set.of();
                     } else {
                         oldJmdns = jmdnsInstances.put(address, jmdns);
                         services = Set.copyOf(activeServices);
+                        for (ServiceListenerRegistration listener : listeners) {
+                            jmdns.addServiceListener(listener.type, listener.listener);
+                        }
+                        for (ServiceDescription description : activeServices) {
+                            registerServiceInstance(jmdns, description);
+                        }
                     }
                 }
                 // Prevent multiple instances for an address from existing
@@ -347,22 +351,15 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
                     }
                     closeQuietly(oldJmdns);
                 }
-                if (deactivated) {
-                    logger.debug("mDNS: Not starting services for {} because {} has been deactivated",
-                            address.getHostAddress(), getClass().getSimpleName());
-                    return;
-                }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("mDNS: Services have been started ({} for IP {})", jmdns.getName(),
-                            address.getHostAddress());
+                    if (deactivated) {
+                        logger.debug("mDNS: Not starting services for {} because {} has been deactivated",
+                                address.getHostAddress(), getClass().getSimpleName());
+                    } else {
+                        logger.debug("mDNS: Services have been started ({} for IP {})", jmdns.getName(),
+                                address.getHostAddress());
+                    }
                 }
-                for (ServiceListenerRegistration listener : listeners) {
-                    jmdns.addServiceListener(listener.type, listener.listener);
-                }
-                for (ServiceDescription description : services) {
-                    registerServiceInstance(jmdns, description);
-                }
-
             } catch (IOException e) {
                 logger.debug("mDNS: JmDNS instantiation failed ({})!", address.getHostAddress());
             }
