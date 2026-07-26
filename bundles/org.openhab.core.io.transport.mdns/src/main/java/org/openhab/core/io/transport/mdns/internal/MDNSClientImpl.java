@@ -37,6 +37,7 @@ import javax.jmdns.ServiceListener;
 import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.transport.mdns.MDNSClient;
+import org.openhab.core.io.transport.mdns.MDNSService;
 import org.openhab.core.io.transport.mdns.ServiceDescription;
 import org.openhab.core.net.CidrAddress;
 import org.openhab.core.net.NetworkAddressChangeListener;
@@ -53,10 +54,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Victor Belov - Initial contribution
  * @author Gary Tse - Add NetworkAddressChangeListener to handle interface changes
- * @author Ravi Nadahar - Refactor to be thread-safe
+ * @author Ravi Nadahar - Refactor to be thread-safe and to implement {@link MDNSService}
  */
-@Component(immediate = true, service = MDNSClient.class)
-public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener {
+@Component(immediate = true, service = { MDNSClient.class, MDNSService.class })
+public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressChangeListener {
     public static final String MDNS_POOL_NAME = "mDNS";
 
     private final Logger logger = LoggerFactory.getLogger(MDNSClientImpl.class);
@@ -168,9 +169,16 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
         networkAddressService.removeNetworkAddressChangeListener(this);
         synchronized (this) {
             deactivated = true;
-            close();
             activeServices.clear();
+            for (Entry<InetAddress, JmDNS> entry : jmdnsInstances.entrySet()) {
+                closeQuietly(entry.getValue());
+                logger.debug("mDNS: Services for {} have been stopped ({})", entry.getKey().getHostAddress(),
+                        entry.getValue().getName());
+            }
+            jmdnsInstances.clear();
+
         }
+        logger.debug("mDNS: All services have been stopped");
     }
 
     @Override
@@ -258,14 +266,6 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
     }
 
     @Override
-    public synchronized void unregisterAllServices() {
-        activeServices.clear();
-        for (JmDNS instance : jmdnsInstances.values()) {
-            instance.unregisterAllServices();
-        }
-    }
-
-    @Override
     public ServiceInfo[] list(String type) {
         ServiceInfo[] services = new ServiceInfo[0];
         synchronized (this) {
@@ -285,15 +285,6 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
             }
         }
         return services;
-    }
-
-    @Override
-    public synchronized void close() {
-        for (JmDNS jmdns : jmdnsInstances.values()) {
-            closeQuietly(jmdns);
-            logger.debug("mDNS: Services have been stopped ({})", jmdns.getName());
-        }
-        jmdnsInstances.clear();
     }
 
     private void closeQuietly(JmDNS jmdns) {
