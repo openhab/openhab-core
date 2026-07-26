@@ -15,9 +15,10 @@ package org.openhab.core.io.transport.mdns.internal;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.io.transport.mdns.MDNSService;
 import org.openhab.core.io.transport.mdns.ServiceDescription;
@@ -43,12 +44,14 @@ public class MDNSServiceImpl implements MDNSService {
 
     private final Set<ServiceDescription> servicesToRegisterQueue = new CopyOnWriteArraySet<>();
 
+    private final ExecutorService executor = ThreadPoolManager.getPool(MDNSClientImpl.MDNS_POOL_NAME);
+
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     protected void setMDNSClient(MDNSClient client) {
         this.mdnsClient = client;
         // register queued services
         if (!servicesToRegisterQueue.isEmpty()) {
-            Executors.newSingleThreadExecutor().execute(() -> {
+            executor.execute(() -> {
                 logger.debug("Registering {} queued services", servicesToRegisterQueue.size());
                 for (ServiceDescription description : servicesToRegisterQueue) {
                     try {
@@ -82,7 +85,7 @@ public class MDNSServiceImpl implements MDNSService {
             // queue the service to register it as soon as the mDNS client is available
             servicesToRegisterQueue.add(description);
         } else {
-            Executors.newSingleThreadExecutor().execute(() -> {
+            executor.execute(() -> {
                 try {
                     localClient.registerService(description);
                 } catch (IOException e) {

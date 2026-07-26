@@ -228,17 +228,19 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
 
     @Override
     public void unregisterService(ServiceDescription description) {
-        List<JmDNS> instances = null;
-        synchronized (this) {
-            if (activeServices.remove(description)) {
-                instances = List.copyOf(jmdnsInstances.values());
+        executor.execute(() -> {
+            List<JmDNS> instances = null;
+            synchronized (MDNSClientImpl.this) {
+                if (activeServices.remove(description)) {
+                    instances = List.copyOf(jmdnsInstances.values());
+                }
             }
-        }
-        if (instances != null) {
-            for (JmDNS instance : instances) {
-                unregisterServiceInstance(instance, description);
+            if (instances != null) {
+                for (JmDNS instance : instances) {
+                    unregisterServiceInstance(instance, description);
+                }
             }
-        }
+        });
     }
 
     private void unregisterServiceInstance(JmDNS instance, ServiceDescription description) {
