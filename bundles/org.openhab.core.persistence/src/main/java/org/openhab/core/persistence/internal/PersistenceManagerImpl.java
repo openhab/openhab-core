@@ -195,7 +195,14 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 .filter(itemConfig -> itemConfig.filters().stream().allMatch(filter -> filter.apply(item)))
                 .forEach(itemConfig -> {
                     itemConfig.filters().forEach(filter -> filter.persisted(item));
-                    container.getPersistenceService().store(item, container.getAlias(item));
+                    PersistenceService persistenceService = container.getPersistenceService();
+                    if (persistenceService instanceof ModifiablePersistenceService modPersistenceService) {
+                        modPersistenceService.store(item,
+                                Objects.requireNonNullElse(item.getLastStateUpdate(), ZonedDateTime.now()),
+                                item.getState(), container.getAlias(item));
+                    } else {
+                        persistenceService.store(item, container.getAlias(item));
+                    }
                 });
     }
 
@@ -817,12 +824,18 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
         }
 
         private void persistJob(List<PersistenceItemConfiguration> itemConfigs) {
+            ZonedDateTime now = ZonedDateTime.now();
+
             itemConfigs.forEach(itemConfig -> {
                 for (Item item : getAllItems(itemConfig)) {
                     if (itemConfig.filters().stream().allMatch(filter -> filter.apply(item))) {
                         long startTime = System.nanoTime();
                         itemConfig.filters().forEach(filter -> filter.persisted(item));
-                        persistenceService.store(item, getAlias(item));
+                        if (persistenceService instanceof ModifiablePersistenceService modPersistenceService) {
+                            modPersistenceService.store(item, now, item.getState(), getAlias(item));
+                        } else {
+                            persistenceService.store(item, getAlias(item));
+                        }
                         logger.trace("Storing item '{}' with persistence service '{}' took {}ms", item.getName(),
                                 configuration.getUID(), TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
                     }
