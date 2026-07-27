@@ -129,8 +129,7 @@ public class PlayerItem extends GenericItem {
 
     @Override
     public void setTimeSeries(TimeSeries timeSeries) {
-        if (timeSeries.getStates()
-                .allMatch(s -> s.state() instanceof PlayPauseType || s.state() instanceof RewindFastforwardType)) {
+        if (timeSeries.getStates().allMatch(s -> isAcceptedState(ACCEPTED_DATA_TYPES, s.state()))) {
             applyTimeSeries(timeSeries);
         } else {
             logSetTypeError(timeSeries);
