@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
@@ -267,10 +269,25 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
 
     @Override
     public ServiceInfo[] list(String type) {
-        ServiceInfo[] services = new ServiceInfo[0];
+        List<Future<ServiceInfo[]>> futures;
         synchronized (this) {
-            for (JmDNS instance : jmdnsInstances.values()) {
-                services = concatenate(services, instance.list(type));
+            futures = jmdnsInstances.values().stream().map(inst -> executor.submit(() -> {
+                return inst.list(type);
+            })).toList();
+        }
+
+        ServiceInfo[] services = new ServiceInfo[0];
+        for (Future<ServiceInfo[]> future : futures) {
+            try {
+                services = concatenate(services, future.get());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.debug("mDNS: Interrupted while gathering service info, aborting");
+                return services;
+            } catch (ExecutionException e) {
+                logger.debug("mDNS: An error occurred while gathering service info, skipping network: {}",
+                        e.getCause() instanceof Throwable cause ? cause.getMessage() : e.getMessage());
+                logger.trace("", e);
             }
         }
         return services;
@@ -278,10 +295,25 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
 
     @Override
     public ServiceInfo[] list(String type, Duration timeout) {
-        ServiceInfo[] services = new ServiceInfo[0];
+        List<Future<ServiceInfo[]>> futures;
         synchronized (this) {
-            for (JmDNS instance : jmdnsInstances.values()) {
-                services = concatenate(services, instance.list(type, timeout.toMillis()));
+            futures = jmdnsInstances.values().stream().map(inst -> executor.submit(() -> {
+                return inst.list(type, timeout.toMillis());
+            })).toList();
+        }
+
+        ServiceInfo[] services = new ServiceInfo[0];
+        for (Future<ServiceInfo[]> future : futures) {
+            try {
+                services = concatenate(services, future.get());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.debug("mDNS: Interrupted while gathering service info, aborting");
+                return services;
+            } catch (ExecutionException e) {
+                logger.debug("mDNS: An error occurred while gathering service info, skipping network: {}",
+                        e.getCause() instanceof Throwable cause ? cause.getMessage() : e.getMessage());
+                logger.trace("", e);
             }
         }
         return services;
