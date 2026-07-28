@@ -62,15 +62,17 @@ import org.slf4j.LoggerFactory;
  *
  * Start levels are defined as values between 0 and 100. They carry the following semantics:
  *
- * 00 - OSGi framework has been started.
- * 10 - OSGi application start level has been reached, i.e. bundles are activated.
- * 20 - Model entities (items, things, links, persist config) have been loaded, both from db as well as files.
- * 30 - Item states have been restored from persistence service, where applicable.
- * 40 - Rules from db, dsl and script files are loaded and parsed, script engine factories are available.
- * 50 - Rule engine has executed all "system started" rules and is active.
- * 70 - User interface is up and running.
- * 80 - All things have been initialized.
- * 100 - Startup is fully complete.
+ * <ul>
+ * <li>00 - OSGi framework has been started.</li>
+ * <li>10 - OSGi application start level has been reached, i.e. bundles are activated.</li>
+ * <li>20 - Model entities (items, things, links, persist config) have been loaded, both from db as well as files.</li>
+ * <li>30 - Item states have been restored from persistence service, where applicable.</li>
+ * <li>40 - Rules from db, dsl and script files are loaded and parsed, script engine factories are available.</li>
+ * <li>50 - Rule engine has executed all "system started" rules and is active.</li>
+ * <li>70 - User interface is up and running.</li>
+ * <li>80 - All things have been initialized.</li>
+ * <li>100 - Startup is fully complete.</li>
+ * </ul>
  *
  * @author Kai Kreuzer - Initial contribution
  *
