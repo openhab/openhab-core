@@ -129,6 +129,7 @@ public class YamlThingProviderTest {
     private static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss z";
 
     private static final ThingUID NTP_THING_UID = new ThingUID(NTP_THING_TYPE_UID, "local");
+    private static final ThingUID NTP_THING_UID2 = new ThingUID(NTP_THING_TYPE_UID, "local2");
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
     private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
@@ -519,9 +520,10 @@ public class YamlThingProviderTest {
         Files.copy(SOURCE_PATH.resolve("thingWithNumberInTextParam.yaml"), fullModelPath);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
-        Collection<Thing> things = thingProvider.getAllFromModel(MODEL_NAME);
-        assertThat(things, hasSize(1));
-        Thing thing = things.iterator().next();
+        List<Thing> things = new ArrayList<>(thingProvider.getAllFromModel(MODEL_NAME));
+        things.sort((o1, o2) -> o1.getUID().toString().compareTo(o2.getUID().toString()));
+        assertThat(things, hasSize(2));
+        Thing thing = things.get(0);
         assertEquals(NTP_THING_UID, thing.getUID());
 
         assertThat(thing.getConfiguration().keySet(),
@@ -530,15 +532,34 @@ public class YamlThingProviderTest {
         assertEquals("12.3", thing.getConfiguration().get("timeZone"));
 
         assertEquals(2, thing.getChannels().size());
-        Iterator<Channel> it = thing.getChannels().iterator();
-        Channel channel = it.next();
+        Iterator<Channel> chIt = thing.getChannels().iterator();
+        Channel channel = chIt.next();
         assertEquals(new ChannelUID(NTP_THING_UID, "string"), channel.getUID());
         assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
         assertEquals("100", channel.getConfiguration().get("DateTimeFormat"));
-        channel = it.next();
+        channel = chIt.next();
         assertEquals(new ChannelUID(NTP_THING_UID, "date-only-string"), channel.getUID());
         assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
         assertEquals("123.45", channel.getConfiguration().get("DateTimeFormat"));
+
+        thing = things.get(1);
+        assertEquals(NTP_THING_UID2, thing.getUID());
+
+        assertThat(thing.getConfiguration().keySet(),
+                containsInAnyOrder("hostname", "timeZone", "refreshInterval", "refreshNtp", "serverPort"));
+        assertEquals("false", thing.getConfiguration().get("hostname"));
+        assertEquals("12.3", thing.getConfiguration().get("timeZone"));
+
+        assertEquals(2, thing.getChannels().size());
+        chIt = thing.getChannels().iterator();
+        channel = chIt.next();
+        assertEquals(new ChannelUID(NTP_THING_UID2, "string"), channel.getUID());
+        assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
+        assertEquals("100", channel.getConfiguration().get("DateTimeFormat"));
+        channel = chIt.next();
+        assertEquals(new ChannelUID(NTP_THING_UID2, "date-only-string"), channel.getUID());
+        assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
+        assertEquals("true", channel.getConfiguration().get("DateTimeFormat"));
     }
 
     @Test
