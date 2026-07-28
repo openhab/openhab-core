@@ -107,6 +107,7 @@ Condition:
 	HolidayCondition |
 	InDaysetCondition |
 	IntervalCondition |
+	SystemStartlevelCondition |
 	ThingStatusCondition |
 	ItemStateCondition
 ;
@@ -133,6 +134,10 @@ InDaysetCondition:
 
 IntervalCondition:
 	interval=INT 'ms' 'between' 'executions'
+;
+
+SystemStartlevelCondition:
+	'System' 'start level is at least' level=INT
 ;
 
 ThingStatusCondition:

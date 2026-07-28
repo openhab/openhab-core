@@ -43,6 +43,7 @@ import org.openhab.core.automation.internal.module.handler.IntervalConditionHand
 import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.SystemConditionHandler;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
@@ -314,7 +315,8 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
                 "   Item X ON and\n" + //
                 "   Item Y != 0 and\n" + //
                 "   Item Z > 5.25 and\n" + //
-                "   15000 ms between executions\n" + //
+                "   15000 ms between executions and\n" + //
+                "   System start level is at least 70\n" + //
                 "then\n" + //
                 "   logInfo('Test', 'Test')\n" + //
                 "end\n\n";
@@ -331,7 +333,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(rule.getUID(), is("dslruletest-1"));
         assertThat(rule.getName(), is("RuleWithAllConditions"));
-        assertThat(rule.getConditions().size(), is(14));
+        assertThat(rule.getConditions().size(), is(15));
 
         assertThat(rule.getConditions().getFirst().getTypeUID(), is(TimeOfDayConditionHandler.MODULE_TYPE_ID));
         assertThat(rule.getConditions().getFirst().getConfiguration().get(TimeOfDayConditionHandler.CFG_START_TIME),
@@ -400,6 +402,10 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(rule.getConditions().get(13).getTypeUID(), is(IntervalConditionHandler.MODULE_TYPE_ID));
         assertThat(rule.getConditions().get(13).getConfiguration().get(IntervalConditionHandler.CFG_MIN_INTERVAL),
                 is(new BigDecimal(15000)));
+
+        assertThat(rule.getConditions().get(14).getTypeUID(), is(SystemConditionHandler.STARTLEVEL_MODULE_TYPE_ID));
+        assertThat(rule.getConditions().get(14).getConfiguration().get(SystemConditionHandler.CFG_MIN_STARTLEVEL),
+                is(new BigDecimal(70)));
     }
 
     @Test
