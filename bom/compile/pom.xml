@@ -230,6 +230,12 @@
       <version>${jupnp.version}</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jupnp</groupId>
+      <artifactId>org.jupnp.transport.httpservice</artifactId>
+      <version>${jupnp.version}</version>
+      <scope>compile</scope>
+    </dependency>
 
     <!-- Measurement -->
     <!-- Attention: before upgrading these dependencies check that the dimension X is still not used, otherwise change the
