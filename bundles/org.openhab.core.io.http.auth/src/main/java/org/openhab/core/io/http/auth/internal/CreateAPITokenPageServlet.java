@@ -94,12 +94,12 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
             removeCsrfToken(params.get("csrf_token")[0]);
 
             String username = params.get("username")[0];
-            String password = params.get("password")[0];
+            char[] password = params.get("password")[0].toCharArray();
             String tokenName = params.get("token_name")[0];
             String tokenScope = params.get("token_scope")[0];
 
             User user = login(username, password);
-            String newApiToken;
+            char[] newApiToken;
 
             if (user instanceof AuthenticatedUser authenticatedUser) {
                 if (authenticatedUser.getApiTokens().stream()
@@ -124,7 +124,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
             }
 
             String resultMessage = getLocalizedMessage("auth.createapitoken.success") + "<br /><br /><code>"
-                    + newApiToken + "</code>";
+                    + String.valueOf(newApiToken) + "</code>";
             resultMessage += "<br /><br /><small>" + getLocalizedMessage("auth.createapitoken.success.footer")
                     + "</small>";
             resp.setContentType("text/html;charset=UTF-8");

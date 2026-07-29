@@ -32,12 +32,45 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * responsible for their secure storage (for instance by hashing the password), then return the newly created
      * {@link User} instance.
      *
+     * @deprecated Passwords should not be stored as {@link String}s, use {@link #register(String, char[], Set)}
+     *             instead.
+     *
      * @param username the username of the new user
      * @param password the user password
      * @param roles the roles attributed to the new user
      * @return the new registered {@link User} instance
      */
-    User register(String username, String password, Set<String> roles);
+    @Deprecated
+    default User register(String username, String password, Set<String> roles) {
+        return register(username, password.toCharArray(), roles);
+    }
+
+    /**
+     * Adds a new {@link User} in this registry. The implementation receives the clear text credentials and is
+     * responsible for their secure storage (for instance by hashing the password), then return the newly created
+     * {@link User} instance.
+     *
+     * @param username the username of the new user
+     * @param password the user password
+     * @param roles the roles attributed to the new user
+     * @return the new registered {@link User} instance
+     */
+    User register(String username, char[] password, Set<String> roles);
+
+    /**
+     * Change the password for a {@link User} in this registry. The implementation receives the new password and is
+     * responsible for their secure storage (for instance by hashing the password).
+     *
+     * @deprecated Passwords should not be stored as {@link String}s, use {@link #changePassword(User, char[])}
+     *             instead.
+     *
+     * @param user the username of the existing user
+     * @param newPassword the new password
+     */
+    @Deprecated
+    default void changePassword(User user, String newPassword) {
+        changePassword(user, newPassword.toCharArray());
+    }
 
     /**
      * Change the password for a {@link User} in this registry. The implementation receives the new password and is
@@ -46,7 +79,7 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param user the username of the existing user
      * @param newPassword the new password
      */
-    void changePassword(User user, String newPassword);
+    void changePassword(User user, char[] newPassword);
 
     /**
      * Adds a new session to the user profile
@@ -78,9 +111,9 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param user the user
      * @param name the name of the API token to create
      * @param scope the scope this API token will be valid for
-     * @return the string that can be used as a Bearer token to match the new API token
+     * @return the characters that can be used as a Bearer token to match the new API token
      */
-    String addUserApiToken(User user, String name, String scope);
+    char[] addUserApiToken(User user, String name, String scope);
 
     /**
      * Removes the specified API token from the user profile

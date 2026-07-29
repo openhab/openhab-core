@@ -12,6 +12,8 @@
  */
 package org.openhab.core.internal.auth;
 
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -95,34 +97,31 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     }
 
     @Override
-    public User register(String username, String password, Set<String> roles) {
-        String passwordSalt = generateSalt(KEY_LENGTH / 8).get();
+    public User register(String username, char[] password, Set<String> roles) {
+        byte[] passwordSalt = generateSalt(KEY_LENGTH / 8);
         String passwordHash = hash(password, passwordSalt, PASSWORD_ITERATIONS).get();
-        ManagedUser user = new ManagedUser(username, passwordSalt, passwordHash);
+        ManagedUser user = new ManagedUser(username, new String(passwordSalt, StandardCharsets.UTF_8), passwordHash);
         user.setRoles(new HashSet<>(roles));
         super.add(user);
         return user;
     }
 
-    private Optional<String> generateSalt(final int length) {
+    private byte[] generateSalt(final int length) {
         if (length < 1) {
             logger.error("error in generateSalt: length must be > 0");
-            return Optional.empty();
+            return new byte[0];
         }
 
         byte[] salt = new byte[length];
         RAND.nextBytes(salt);
 
-        return Optional.of(Base64.getEncoder().encodeToString(salt));
+        return Base64.getEncoder().encode(salt);
     }
 
-    private Optional<String> hash(String password, String salt, int iterations) {
-        char[] chars = password.toCharArray();
-        byte[] bytes = salt.getBytes();
+    private Optional<String> hash(char[] password, byte[] salt, int iterations) {
+        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, KEY_LENGTH);
 
-        PBEKeySpec spec = new PBEKeySpec(chars, bytes, iterations, KEY_LENGTH);
-
-        Arrays.fill(chars, Character.MIN_VALUE);
+        Arrays.fill(password, Character.MIN_VALUE);
 
         try {
             SecretKeyFactory fac = SecretKeyFactory.getInstance(ALGORITHM);
@@ -137,61 +136,79 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     }
 
     @Override
-    public Authentication authenticate(Credentials credentials) throws AuthenticationException {
-        if (credentials instanceof UsernamePasswordCredentials usernamePasswordCreds) {
-            User user = get(usernamePasswordCreds.getUsername());
-            if (user == null) {
-                throw new AuthenticationException("User not found: " + usernamePasswordCreds.getUsername());
-            }
+    public Authentication authenticate(Credentials credentials, boolean dispose) throws AuthenticationException {
+        try {
+            if (credentials instanceof UsernamePasswordCredentials usernamePasswordCreds) {
+                User user = get(usernamePasswordCreds.getUsername());
+                if (user == null) {
+                    throw new AuthenticationException("User not found: " + usernamePasswordCreds.getUsername());
+                }
 
-            ManagedUser managedUser = (ManagedUser) user;
-            String hashedPassword = hash(usernamePasswordCreds.getPassword(), managedUser.getPasswordSalt(),
-                    PASSWORD_ITERATIONS).get();
-            if (!hashedPassword.equals(managedUser.getPasswordHash())) {
-                throw new AuthenticationException("Wrong password for user " + usernamePasswordCreds.getUsername());
-            }
+                ManagedUser managedUser = (ManagedUser) user;
+                String hashedPassword = hash(usernamePasswordCreds.getPassword(),
+                        managedUser.getPasswordSalt().getBytes(StandardCharsets.UTF_8), PASSWORD_ITERATIONS).get();
+                if (!hashedPassword.equals(managedUser.getPasswordHash())) {
+                    throw new AuthenticationException("Wrong password for user " + usernamePasswordCreds.getUsername());
+                }
 
-            return new Authentication(managedUser.getName(), managedUser.getRoles().stream().toArray(String[]::new));
-        } else if (credentials instanceof UserApiTokenCredentials apiTokenCreds) {
-            String[] apiTokenParts = apiTokenCreds.getApiToken().split("\\.");
-            if (apiTokenParts.length != 3 || !APITOKEN_PREFIX.equals(apiTokenParts[0])) {
-                throw new AuthenticationException("Invalid API token format");
-            }
-            for (User user : getAll()) {
-                if (user instanceof AuthenticatedUser authenticatedUser) {
-                    for (UserApiToken userApiToken : authenticatedUser.getApiTokens()) {
-                        // only check if the name in the token matches
-                        if (!userApiToken.getName().equals(apiTokenParts[1])) {
-                            continue;
-                        }
-                        String[] existingTokenHashAndSalt = userApiToken.getApiToken().split(":");
-                        String incomingTokenHash = hash(apiTokenCreds.getApiToken(), existingTokenHashAndSalt[1],
-                                APITOKEN_ITERATIONS).get();
+                return new Authentication(managedUser.getName(),
+                        managedUser.getRoles().stream().toArray(String[]::new));
+            } else if (credentials instanceof UserApiTokenCredentials apiTokenCreds) {
+                char[] apiToken = apiTokenCreds.getApiToken();
+                int sepNum = 0;
+                int offset = 0;
+                char[][] parts = new char[2][];
+                for (int i = 0; i < apiToken.length && sepNum < 2; i++) {
+                    if (apiToken[i] == '.') {
+                        parts[sepNum] = new char[i - offset];
+                        System.arraycopy(apiToken, offset, parts[sepNum++], 0, i - offset);
+                        offset = i + 1;
+                    }
+                }
+                if (sepNum != 2 || !APITOKEN_PREFIX.equals(String.valueOf(parts[0]))) {
+                    throw new AuthenticationException("Invalid API token format");
+                }
 
-                        if (incomingTokenHash.equals(existingTokenHashAndSalt[0])) {
-                            return new Authentication(authenticatedUser.getName(),
-                                    authenticatedUser.getRoles().toArray(String[]::new), userApiToken.getScope());
+                String name = String.valueOf(parts[1]);
+                for (User user : getAll()) {
+                    if (user instanceof AuthenticatedUser authenticatedUser) {
+                        for (UserApiToken userApiToken : authenticatedUser.getApiTokens()) {
+                            // only check if the name in the token matches
+                            if (!userApiToken.getName().equals(name)) {
+                                continue;
+                            }
+                            String incomingTokenHash = hash(apiTokenCreds.getApiToken(), userApiToken.getSalt(),
+                                    APITOKEN_ITERATIONS).get();
+
+                            if (incomingTokenHash.equals(userApiToken.getTokenHash())) {
+                                return new Authentication(authenticatedUser.getName(),
+                                        authenticatedUser.getRoles().toArray(String[]::new), userApiToken.getScope());
+                            }
                         }
                     }
                 }
+
+                throw new AuthenticationException("Unknown API token");
             }
 
-            throw new AuthenticationException("Unknown API token");
+            throw new IllegalArgumentException("Invalid credential type");
+        } finally {
+            if (dispose) {
+                credentials.dispose();
+            }
         }
-
-        throw new IllegalArgumentException("Invalid credential type");
     }
 
     @Override
-    public void changePassword(User user, String newPassword) {
+    public void changePassword(User user, char[] newPassword) {
         if (!(user instanceof ManagedUser)) {
             throw new IllegalArgumentException("User is not managed: " + user.getName());
         }
 
         ManagedUser managedUser = (ManagedUser) user;
-        String passwordSalt = generateSalt(KEY_LENGTH / 8).get();
+        byte[] passwordSalt = generateSalt(KEY_LENGTH / 8);
         String passwordHash = hash(newPassword, passwordSalt, PASSWORD_ITERATIONS).get();
-        managedUser.setPasswordSalt(passwordSalt);
+        managedUser.setPasswordSalt(new String(passwordSalt, StandardCharsets.UTF_8));
         managedUser.setPasswordHash(passwordHash);
         update(user);
     }
@@ -227,7 +244,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     }
 
     @Override
-    public String addUserApiToken(User user, String name, String scope) {
+    public char[] addUserApiToken(User user, String name, String scope) {
         if (!(user instanceof AuthenticatedUser authenticatedUser)) {
             throw new IllegalArgumentException("User authentication is not managed by openHAB: " + user.getName());
         }
@@ -235,14 +252,39 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
             throw new IllegalArgumentException("API token name format invalid, alphanumeric characters only");
         }
 
-        String tokenSalt = generateSalt(KEY_LENGTH / 8).get();
+        byte[] tokenSalt = generateSalt(KEY_LENGTH / 8);
         byte[] rnd = new byte[64];
         RAND.nextBytes(rnd);
-        String token = APITOKEN_PREFIX + "." + name + "."
-                + Base64.getEncoder().encodeToString(rnd).replaceAll("(\\+|/|=)", "");
-        String tokenHash = hash(token, tokenSalt, APITOKEN_ITERATIONS).get();
 
-        UserApiToken userApiToken = new UserApiToken(name, tokenHash + ":" + tokenSalt, scope);
+        byte[] base64Bytes = Base64.getEncoder().encode(rnd);
+        char[] nameChars = name.toCharArray();
+        int maxCapacity = APITOKEN_PREFIX.length() + nameChars.length + base64Bytes.length + 2;
+        CharBuffer buffer = CharBuffer.allocate(maxCapacity);
+        buffer.put(APITOKEN_PREFIX);
+        buffer.put('.');
+        buffer.put(nameChars);
+        buffer.put('.');
+
+        char c;
+        for (byte b : base64Bytes) {
+            c = (char) (b & 0xff); // Safe ASCII cast for Base64 characters
+            if (c != '+' && c != '/' && c != '=') {
+                buffer.put(c);
+            }
+        }
+        buffer.flip();
+        char[] token = new char[buffer.remaining()];
+        buffer.get(token);
+
+        // Clean up temporary buffers
+        Arrays.fill(base64Bytes, (byte) 0);
+        Arrays.fill(buffer.array(), Character.MIN_VALUE);
+
+        char[] disposable = new char[token.length];
+        System.arraycopy(token, 0, disposable, 0, token.length);
+        String tokenHash = hash(disposable, tokenSalt, APITOKEN_ITERATIONS).get();
+
+        UserApiToken userApiToken = new UserApiToken(name, tokenHash, tokenSalt, scope);
 
         authenticatedUser.getApiTokens().add(userApiToken);
         update(user);

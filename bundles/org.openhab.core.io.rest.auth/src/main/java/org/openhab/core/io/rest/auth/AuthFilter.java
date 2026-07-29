@@ -188,8 +188,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
     private SecurityContext authenticateBearerToken(String token) throws AuthenticationException {
         if (token.startsWith(API_TOKEN_PREFIX)) {
-            UserApiTokenCredentials credentials = new UserApiTokenCredentials(token);
-            Authentication auth = userRegistry.authenticate(credentials);
+            Authentication auth = userRegistry.authenticate(new UserApiTokenCredentials(token.toCharArray()));
             User user = userRegistry.get(auth.getUsername());
             if (user == null) {
                 throw new AuthenticationException("User not found in registry");
@@ -216,9 +215,8 @@ public class AuthFilter implements ContainerRequestFilter {
             throw new AuthenticationException("Invalid Basic authentication credential format");
         }
 
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(decodedCredentials[0],
-                decodedCredentials[1]);
-        Authentication auth = userRegistry.authenticate(credentials);
+        Authentication auth = userRegistry.authenticate(
+                new UsernamePasswordCredentials(decodedCredentials[0], decodedCredentials[1].toCharArray()));
         User user = userRegistry.get(auth.getUsername());
         if (user == null) {
             throw new AuthenticationException("User not found in registry");
