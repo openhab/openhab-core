@@ -83,6 +83,7 @@
     <jackson.annotations.version>2.22</jackson.annotations.version>
     <jackson.version>2.22.4</jackson.version>
     <jbbp.version>3.0.3</jbbp.version>
+    <jupnp.version>4.0.0-SNAPSHOT</jupnp.version>
     <karaf.compile.version>4.4.12</karaf.compile.version>
     <karaf.tooling.version>4.4.12</karaf.tooling.version>
     <maven.plugin.tools.version>3.16.0</maven.plugin.tools.version>
