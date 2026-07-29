@@ -215,7 +215,19 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>3.0.5</version>
+      <version>${jupnp.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jupnp</groupId>
+      <artifactId>org.jupnp.transport.jetty9</artifactId>
+      <version>${jupnp.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jupnp</groupId>
+      <artifactId>org.jupnp.transport.servlet</artifactId>
+      <version>${jupnp.version}</version>
       <scope>compile</scope>
     </dependency>
 
