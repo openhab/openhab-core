@@ -16,7 +16,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -28,7 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -234,12 +233,9 @@ public class LogWebSocket implements LogListener, WriteCallback {
         Predicate<LogEntry> nameMatchesAnyPattern = log -> loggerPatterns.stream()
                 .anyMatch(pattern -> pattern.matcher(log.getLoggerName()).matches());
 
-        List<LogEntry> filteredEvents = logs.stream().filter(withinTimeRange.and(withinSequence))
-                .collect(Collectors.toList());
-        // List<LogEntry> filteredEvents = logs.stream().filter(withinTimeRange.and(nameMatchesAnyPattern))
-        // .collect(Collectors.toList());
-        List<LogDTO> dtoList = filteredEvents.stream().map(this::map).collect(Collectors.toList());
-        Collections.sort(dtoList);
+        Stream<LogEntry> filteredEvents = logs.stream().filter(withinTimeRange.and(withinSequence));
+        // Stream<LogEntry> filteredEvents = logs.stream().filter(withinTimeRange.and(nameMatchesAnyPattern));
+        List<LogDTO> dtoList = filteredEvents.map(this::map).sorted().toList();
 
         sendMessage(gson.toJson(dtoList), remoteEndpoint);
 
