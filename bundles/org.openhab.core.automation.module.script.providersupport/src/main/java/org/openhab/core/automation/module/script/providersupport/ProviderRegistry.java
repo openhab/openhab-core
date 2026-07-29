@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.providersupport.internal;
+package org.openhab.core.automation.module.script.providersupport;
 
 /**
  * Interface to be implemented by all {@link org.openhab.core.common.registry.Registry} (delegates) that are used to

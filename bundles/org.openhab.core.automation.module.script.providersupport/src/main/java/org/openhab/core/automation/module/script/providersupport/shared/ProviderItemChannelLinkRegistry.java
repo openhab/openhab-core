@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistry;
+import org.openhab.core.automation.module.script.providersupport.ProviderRegistry;
 import org.openhab.core.common.registry.Registry;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.thing.ThingUID;
