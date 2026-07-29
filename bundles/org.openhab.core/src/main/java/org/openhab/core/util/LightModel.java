@@ -974,6 +974,15 @@ public class LightModel {
     }
 
     /**
+     * Runtime State: get the current LED operating mode.
+     *
+     * @return the current LED operating mode.
+     */
+    public LedOperatingMode getLedOperatingMode() {
+        return ledOperatingMode;
+    }
+
+    /**
      * Runtime State: update the hue from the remote light, ensuring it is in the range [0.0..360.0]
      *
      * @param hue in the range [0..360]
