@@ -44,6 +44,9 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.items.CallItem;
 import org.openhab.core.library.items.ColorItem;
 import org.openhab.core.library.items.ContactItem;
@@ -128,12 +131,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private static final int MAX_BUTTONS = 4;
 
     private static final String DEFAULT_SORTING = "NONE";
+    private static final String WIDGET_ORDER_KEY = "widgetOrder";
 
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
     private final ItemRegistry itemRegistry;
+    private final MetadataRegistry metadataRegistry;
     private final SitemapFactory sitemapFactory;
     private final TimeZoneProvider timeZoneProvider;
 
@@ -153,8 +158,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Activate
     public ItemUIRegistryImpl(final @Reference ItemRegistry itemRegistry,
-            final @Reference SitemapFactory sitemapFactory, final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference MetadataRegistry metadataRegistry, final @Reference SitemapFactory sitemapFactory,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
+        this.metadataRegistry = metadataRegistry;
         this.sitemapFactory = sitemapFactory;
         this.timeZoneProvider = timeZoneProvider;
     }
@@ -840,6 +847,25 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                             break;
                         case "NAME":
                             members.sort(Comparator.comparing(Item::getName));
+                            break;
+                        case "METADATA":
+                            members.sort((u1, u2) -> {
+                                MetadataKey u1Key = new MetadataKey(WIDGET_ORDER_KEY, u1.getName());
+                                Metadata u1Order = metadataRegistry.get(u1Key);
+                                String u1OrderValue = u1Order != null ? u1Order.getValue() : null;
+                                MetadataKey u2Key = new MetadataKey(WIDGET_ORDER_KEY, u2.getName());
+                                Metadata u2Order = metadataRegistry.get(u2Key);
+                                String u2OrderValue = u2Order != null ? u2Order.getValue() : null;
+                                if (u1OrderValue == null && u2OrderValue == null) {
+                                    return u1.getName().compareTo(u2.getName());
+                                } else if (u1OrderValue == null) {
+                                    return 1;
+                                } else if (u2OrderValue == null) {
+                                    return -1;
+                                } else {
+                                    return u1OrderValue.compareTo(u2OrderValue);
+                                }
+                            });
                             break;
                         default:
                             break;

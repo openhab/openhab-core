@@ -43,6 +43,7 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.items.CallItem;
 import org.openhab.core.library.items.ColorItem;
 import org.openhab.core.library.items.ContactItem;
@@ -116,6 +117,7 @@ public class ItemUIRegistryImplTest {
     private @NonNullByDefault({}) ItemUIRegistryImpl uiRegistry;
 
     private @Mock @NonNullByDefault({}) ItemRegistry registryMock;
+    private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
     private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactoryMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) Sitemap sitemapMock;
@@ -153,7 +155,8 @@ public class ItemUIRegistryImplTest {
     @BeforeEach
     @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registryMock, sitemapFactoryMock, timeZoneProviderMock);
+        uiRegistry = new ItemUIRegistryImpl(registryMock, metadataRegistryMock, sitemapFactoryMock,
+                timeZoneProviderMock);
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
