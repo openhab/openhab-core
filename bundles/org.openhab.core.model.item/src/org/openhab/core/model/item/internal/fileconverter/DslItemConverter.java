@@ -161,9 +161,7 @@ public class DslItemConverter extends AbstractItemSerializer implements ItemPars
         for (String group : item.getGroupNames()) {
             model.getGroups().add(group);
         }
-        for (String tag : item.getTags().stream().sorted().collect(Collectors.toList())) {
-            model.getTags().add(tag);
-        }
+        item.getTags().stream().sorted().forEach(tag -> model.getTags().add(tag));
 
         for (Metadata md : channelLinks) {
             String namespace = md.getUID().getNamespace();
