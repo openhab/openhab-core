@@ -43,7 +43,9 @@ public class SitemapConverters extends DefaultTerminalConverters {
                 }
                 // For backward compatibility, we allow the icon name to contain a file extension, but we remove it when
                 // validating the name
-                String[] segments = trimmedString.split("\\.")[0].trim().split(":", -1);
+                int lastDotIndex = trimmedString.lastIndexOf(".");
+                trimmedString = lastDotIndex != -1 ? trimmedString.substring(0, lastDotIndex) : trimmedString;
+                String[] segments = trimmedString.split(":", -1);
                 if (segments.length > 3) {
                     throw new ValueConverterException("Icon name cannot contain more than 3 segments separated by ':'",
                             node, null);
@@ -62,7 +64,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
                             throw new ValueConverterException(
                                     "Icon name segment '" + segments[i] + "' is not a valid identifier", node, null);
                         }
-                        sb.append(parts[j]);
+                        sb.append(ID().toValue(parts[j], node));
                     }
                 }
                 return sb.toString();
