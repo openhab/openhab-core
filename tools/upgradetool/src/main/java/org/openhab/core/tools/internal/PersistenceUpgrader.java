@@ -112,8 +112,8 @@ public class PersistenceUpgrader implements Upgrader {
 
         // Add all installed persistence services without explicit configuration with their previous default
         // configuration
-        List<String> managedConfigsToAdd = managedConfigs.stream()
-                .filter(serviceId -> !persistenceStorageKeys.contains(serviceId)).toList();
+        Stream<String> managedConfigsToAdd = managedConfigs.stream()
+                .filter(serviceId -> !persistenceStorageKeys.contains(serviceId));
         managedConfigsToAdd.forEach(serviceId -> {
             PersistenceServiceConfigurationDTO serviceConfigDTO = defaultServiceConfig(serviceId);
             if (serviceConfigDTO != null) {
