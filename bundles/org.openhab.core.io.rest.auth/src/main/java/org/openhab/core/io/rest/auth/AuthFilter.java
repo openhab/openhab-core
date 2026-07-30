@@ -54,7 +54,6 @@ import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.auth.internal.ExpiringUserSecurityContextCache;
-import org.openhab.core.io.rest.auth.internal.JwtHelper;
 import org.openhab.core.io.rest.auth.internal.JwtSecurityContext;
 import org.openhab.core.io.rest.auth.internal.UserSecurityContext;
 import org.osgi.framework.Constants;
