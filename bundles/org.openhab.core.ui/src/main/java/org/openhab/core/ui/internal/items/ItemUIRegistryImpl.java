@@ -131,7 +131,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private static final int MAX_BUTTONS = 4;
 
     private static final String DEFAULT_SORTING = "NONE";
-    private static final String WIDGET_ORDER_KEY = "widgetOrder";
+    protected static final String WIDGET_ORDER_KEY = "widgetOrder";
 
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
@@ -837,12 +837,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         case "LABEL":
                             members.sort((u1, u2) -> {
                                 String u1Label = u1.getLabel();
+                                u1Label = u1Label != null ? u1Label : u1.getName();
                                 String u2Label = u2.getLabel();
-                                if (u1Label != null && u2Label != null) {
-                                    return u1Label.compareTo(u2Label);
-                                } else {
+                                u2Label = u2Label != null ? u2Label : u2.getName();
+                                if (u1Label.equals(u2Label)) {
                                     return u1.getName().compareTo(u2.getName());
                                 }
+                                return u1Label.compareTo(u2Label);
                             });
                             break;
                         case "NAME":
@@ -862,6 +863,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                                     return 1;
                                 } else if (u2OrderValue == null) {
                                     return -1;
+                                } else if (u1OrderValue.equals(u2OrderValue)) {
+                                    return u1.getName().compareTo(u2.getName());
                                 } else {
                                     return u1OrderValue.compareTo(u2OrderValue);
                                 }
