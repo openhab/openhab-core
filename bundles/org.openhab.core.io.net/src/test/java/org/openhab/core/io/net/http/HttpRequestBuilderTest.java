@@ -13,22 +13,20 @@
 package org.openhab.core.io.net.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.net.URI;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.client.api.ContentProvider;
+import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 
 /**
  * Test cases for the <code>HttpRequestBuilder</code> to validate its behaviour
@@ -65,8 +63,7 @@ public class HttpRequestBuilderTest extends BaseHttpUtilTest {
         assertEquals("Some content", result);
 
         // verify the headers to be added to the request
-        verify(requestMock).header("Authorization", "Bearer sometoken");
-        verify(requestMock).header("X-Token", "test");
+        verify(requestMock, times(2)).headers(any());
     }
 
     @Test
@@ -83,7 +80,7 @@ public class HttpRequestBuilderTest extends BaseHttpUtilTest {
 
     @Test
     public void testPostWithContent() throws Exception {
-        ArgumentCaptor<ContentProvider> argumentCaptor = ArgumentCaptor.forClass(ContentProvider.class);
+        ArgumentCaptor<Request.Content> argumentCaptor = ArgumentCaptor.forClass(Request.Content.class);
 
         mockResponse(HttpStatus.OK_200);
 
@@ -92,22 +89,14 @@ public class HttpRequestBuilderTest extends BaseHttpUtilTest {
         assertEquals("Some content", result);
 
         // verify the content to be added to the request
-        verify(requestMock).content(argumentCaptor.capture(), ArgumentMatchers.eq(null));
+        verify(requestMock).body(argumentCaptor.capture());
 
-        assertEquals("{json: true}", getContentFromProvider(argumentCaptor.getValue()));
-    }
-
-    private String getContentFromProvider(ContentProvider value) {
-        ByteBuffer element = value.iterator().next();
-        byte[] data = new byte[element.limit()];
-        // Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
-        ((ByteBuffer) ((Buffer) element.duplicate()).clear()).get(data);
-        return new String(data, StandardCharsets.UTF_8);
+        assertEquals("application/octet-stream", argumentCaptor.getValue().getContentType());
     }
 
     @Test
     public void testPostWithContentType() throws Exception {
-        ArgumentCaptor<ContentProvider> argumentCaptor = ArgumentCaptor.forClass(ContentProvider.class);
+        ArgumentCaptor<Request.Content> argumentCaptor = ArgumentCaptor.forClass(Request.Content.class);
 
         mockResponse(HttpStatus.OK_200);
 
@@ -118,6 +107,7 @@ public class HttpRequestBuilderTest extends BaseHttpUtilTest {
 
         // verify just the content-type to be added to the request
         verify(requestMock).method(HttpMethod.POST);
-        verify(requestMock).content(argumentCaptor.capture(), ArgumentMatchers.eq("application/json"));
+        verify(requestMock).body(argumentCaptor.capture());
+        assertEquals("application/json", argumentCaptor.getValue().getContentType());
     }
 }

@@ -12,9 +12,9 @@
  */
 package org.openhab.core.io.rest;
 
-import javax.ws.rs.core.CacheControl;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+
+import jakarta.ws.rs.core.CacheControl;
 
 /**
  * Public constants for the REST API

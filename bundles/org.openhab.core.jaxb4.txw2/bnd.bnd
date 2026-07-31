@@ -1,0 +1,4 @@
+Bundle-SymbolicName: org.glassfish.jaxb.txw2
+Bundle-Version: 4.0.9
+Private-Package: com.sun.xml.txw2.*
+Export-Package: com.sun.xml.txw2.*
