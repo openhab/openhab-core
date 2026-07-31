@@ -96,7 +96,7 @@
 		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.21.4</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.21.4</bundle>
 		<!-- Transitive dependency of jackson-dataformat-xml -->
-		<bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/4.2.2</bundle>
+		<bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/4.3.0</bundle>
 		<!-- Transitive dependency of jackson-dataformat-yaml -->
 		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.5</bundle>
 	</feature>
