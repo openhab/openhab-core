@@ -54,18 +54,55 @@ class RuleMetricTest {
 
         RuleMetric ruleMetric = new RuleMetric(mock(BundleContext.class), List.of(), mock(RuleRegistry.class));
         ruleMetric.bindTo(meterRegistry);
-        fireRule(ruleMetric, clock, RULE1);
-        assertMeters(meterRegistry, 1);
-        assertMeter(meterRegistry, RULE1, 1, 1);
+        try {
+            fireRule(ruleMetric, clock, RULE1);
+            assertMeters(meterRegistry, 1);
+            assertMeter(meterRegistry, RULE1, 1, 1);
 
-        fireRule(ruleMetric, clock, RULE2);
-        assertMeters(meterRegistry, 2);
-        assertMeter(meterRegistry, RULE2, 1, 1);
+            fireRule(ruleMetric, clock, RULE2);
+            assertMeters(meterRegistry, 2);
+            assertMeter(meterRegistry, RULE2, 1, 1);
 
-        // fire again, use the same metric
-        fireRule(ruleMetric, clock, RULE2);
-        assertMeters(meterRegistry, 2);
-        assertMeter(meterRegistry, RULE2, 2, 2);
+            // fire again, use the same metric
+            fireRule(ruleMetric, clock, RULE2);
+            assertMeters(meterRegistry, 2);
+            assertMeter(meterRegistry, RULE2, 2, 2);
+        } finally {
+            ruleMetric.unbind();
+        }
+    }
+
+    @Test
+    void testPurgeExpired() {
+        MockClock clock = new MockClock();
+        SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry(SimpleConfig.DEFAULT, clock);
+
+        RuleMetric ruleMetric = new RuleMetric(mock(BundleContext.class), List.of(), mock(RuleRegistry.class));
+        ruleMetric.bindTo(meterRegistry);
+
+        try {
+            // Rule starts
+            String topic = RULES_TOPIC_PREFIX + RULE1 + RULES_TOPIC_SUFFIX;
+            ruleMetric.receive(new RuleStatusInfoEvent(topic, RuleStatus.RUNNING.name(), RULE1,
+                    mock(RuleStatusInfo.class), RULE1));
+
+            // Wait 6 minutes (more than 5)
+            clock.add(Duration.ofMinutes(6));
+
+            ruleMetric.purgeExpired();
+
+            // IDLE event arrives, but it should have been purged
+            ruleMetric.receive(
+                    new RuleStatusInfoEvent(topic, RuleStatus.IDLE.name(), RULE1, mock(RuleStatusInfo.class), RULE1));
+
+            // No duration meter should have been created (or at least count should be 0 if it was never stopped
+            // correctly)
+            // Actually, if purged, it's removed from cache, so ruleSample will be null in receive()
+            List<Meter> durationMeters = getMeters(meterRegistry);
+            Assertions.assertEquals(0, durationMeters.size());
+        } finally {
+            ruleMetric.unbind();
+        }
     }
 
     private static void fireRule(RuleMetric ruleMetric, MockClock clock, String ruleName) {
