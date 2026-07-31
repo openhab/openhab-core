@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.AuthenticatedUser;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
+import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.Credentials;
 import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.User;
@@ -58,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - initial contribution
  */
 @NonNullByDefault
-@Component(service = UserRegistry.class, immediate = true)
+@Component(service = { UserRegistry.class, AuthenticationProvider.class }, immediate = true)
 public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvider> implements UserRegistry {
 
     private final Logger logger = LoggerFactory.getLogger(UserRegistryImpl.class);
