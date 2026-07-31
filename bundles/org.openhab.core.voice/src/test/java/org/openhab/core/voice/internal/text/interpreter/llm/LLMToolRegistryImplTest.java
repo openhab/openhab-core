@@ -87,6 +87,17 @@ public class LLMToolRegistryImplTest {
     }
 
     @Test
+    public void getByIdsStringsReturnsAllLLMToolsForWildcard() {
+        registry.addLLMTool(tool1);
+        registry.addLLMTool(tool2);
+
+        List<LLMTool> result = registry.getByIds("*");
+        assertEquals(2, result.size());
+        assertTrue(result.contains(tool1));
+        assertTrue(result.contains(tool2));
+    }
+
+    @Test
     public void getByIdsStringHandlesBlankStringOrNull() {
         registry.addLLMTool(tool1);
         registry.addLLMTool(tool2);
