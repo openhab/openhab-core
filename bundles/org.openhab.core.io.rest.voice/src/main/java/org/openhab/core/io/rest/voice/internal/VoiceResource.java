@@ -19,6 +19,7 @@ import java.util.Objects;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -202,7 +203,7 @@ public class VoiceResource implements RESTResource {
     public Response interpret(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("conversation") @Parameter(description = "Conversation id") @Nullable String conversationId,
-            @QueryParam("llmTools") @Parameter(description = "Comma separated list of llm-tool ids") @Nullable List<String> llmToolIds,
+            @DefaultValue("*") @QueryParam("llmTools") @Parameter(description = "Comma separated list of llm-tool ids or * wildcard") @Nullable List<String> llmToolIds,
             @QueryParam("locationItem") @Parameter(description = "Location item id to contextualize the command") @Nullable String locationItem,
             @Parameter(description = "text to interpret", required = true) String text,
             @PathParam("ids") @Parameter(description = "comma separated list of interpreter ids") List<String> ids) {
@@ -212,7 +213,7 @@ public class VoiceResource implements RESTResource {
 
         final Locale locale = localeService.getLocale(language);
         InterpretationArguments args = new InterpretationArguments(String.join(",", ids),
-                Objects.requireNonNullElse(conversationId, ""), llmToolIds == null ? "" : String.join(",", llmToolIds),
+                Objects.requireNonNullElse(conversationId, ""), llmToolIds == null ? "*" : String.join(",", llmToolIds),
                 locationItem, locale);
         try {
             String answer = voiceManager.interpret(text, args);
@@ -233,7 +234,7 @@ public class VoiceResource implements RESTResource {
     public Response interpret(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("conversation") @Parameter(description = "Conversation id") @Nullable String conversationId,
-            @QueryParam("llmTools") @Parameter(description = "Comma separated list of llm-tool ids") @Nullable List<String> llmToolIds,
+            @DefaultValue(".*") @QueryParam("llmTools") @Parameter(description = "Comma separated list of llm-tool ids or * wildcard") @Nullable List<String> llmToolIds,
             @QueryParam("locationItem") @Parameter(description = "Location item id to contextualize the command") @Nullable String locationItem,
             @Parameter(description = "text to interpret", required = true) String text) {
         final Locale locale = localeService.getLocale(language);
@@ -243,7 +244,7 @@ public class VoiceResource implements RESTResource {
         }
 
         InterpretationArguments args = new InterpretationArguments("", Objects.requireNonNullElse(conversationId, ""),
-                llmToolIds == null ? "" : String.join(",", llmToolIds), locationItem, locale);
+                llmToolIds == null ? "*" : String.join(",", llmToolIds), locationItem, locale);
         try {
             String answer = voiceManager.interpret(text, args);
             return Response.ok(answer, MediaType.TEXT_PLAIN).build();
