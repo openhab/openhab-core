@@ -42,6 +42,8 @@ import javax.ws.rs.ext.Provider;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jose4j.jwt.consumer.ErrorCodes;
+import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.User;
@@ -239,7 +241,12 @@ public class AuthFilter implements ContainerRequestFilter {
                     requestContext.setSecurityContext(sc);
                 }
             } catch (AuthenticationException e) {
-                logger.warn("Unauthorized API request from {}: {}", getClientIp(servletRequest), e.getMessage());
+                if (e.getCause() instanceof InvalidJwtException ije && ije.hasErrorCode(ErrorCodes.EXPIRED)) {
+                    logger.debug("API request with expired token from {}: {}", getClientIp(servletRequest),
+                            ije.getMessage());
+                } else {
+                    logger.warn("Unauthorized API request from {}: {}", getClientIp(servletRequest), e.getMessage());
+                }
                 requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
         }
