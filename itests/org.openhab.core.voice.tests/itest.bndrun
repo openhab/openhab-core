@@ -4,7 +4,6 @@ Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.voice
 
 -runblacklist: \
-	bnd.identity;id='org.osgi.service.cm',\
 	bnd.identity;id='org.junit.jupiter.api'
 
 -runrequires: \

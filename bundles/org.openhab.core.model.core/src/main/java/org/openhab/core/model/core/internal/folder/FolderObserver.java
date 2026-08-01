@@ -93,7 +93,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
         this.watchPath = watchService.getWatchPath();
     }
 
-    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addModelParser(ModelParser modelParser) {
         String extensionList = modelParser.getExtension();
         String extensions[] = extensionList.split(",");
