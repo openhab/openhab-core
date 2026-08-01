@@ -163,10 +163,7 @@ public class YamlItemConverter extends AbstractItemSerializer implements ItemPar
             });
         }
         if (!item.getTags().isEmpty()) {
-            dto.tags = new LinkedHashSet<>();
-            item.getTags().stream().sorted().collect(Collectors.toList()).forEach(tag -> {
-                dto.tags.add(tag);
-            });
+            dto.tags = item.getTags().stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
         }
 
         if (channelLinks.size() == 1 && channelLinks.getFirst().getConfiguration().isEmpty()) {
