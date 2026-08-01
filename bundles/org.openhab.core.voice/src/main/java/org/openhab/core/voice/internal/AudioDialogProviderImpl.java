@@ -25,6 +25,7 @@ import org.openhab.core.voice.DTService;
 import org.openhab.core.voice.DTServiceHandle;
 import org.openhab.core.voice.DTTriggeredEvent;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -38,10 +39,12 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class AudioDialogProviderImpl implements AudioDialogProvider {
     private final VoiceManager voiceManager;
+    private final LLMToolRegistry llmToolRegistry;
 
     @Activate
-    public AudioDialogProviderImpl(@Reference VoiceManager voiceManager) {
+    public AudioDialogProviderImpl(@Reference VoiceManager voiceManager, @Reference LLMToolRegistry llmToolRegistry) {
         this.voiceManager = voiceManager;
+        this.llmToolRegistry = llmToolRegistry;
     }
 
     @Override
@@ -55,6 +58,7 @@ public class AudioDialogProviderImpl implements AudioDialogProvider {
                         .withLocationItem(locationItem) //
                         .withListeningItem(listeningItem) //
                         .withDT(dt) //
+                        .withLLMTools(llmToolRegistry.getAll()) //
                         .build() //
         );
         if (triggerHandle == null) {
