@@ -59,5 +59,11 @@ Export-Package:
 	-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar,\
 	-Xshare:off
 
--runblacklist.itest-include: \
+# We would like to use the following bundles to ensure deterministic bundle resolution:
+# - the JAX-RS API provided by Apache Aries (org.apache.aries.javax.jax.rs-api)
+# - the Configuration Admin API exported by Apache Felix Config Admin (org.apache.felix.configadmin)
+# - the SLF4J API and implementation provided by Pax Logging (org.ops4j.pax.logging.pax-logging-api)
+-runblacklist.itest-common: \
+	bnd.identity;id='jakarta.ws.rs-api',\
+	bnd.identity;id='org.osgi.service.cm',\
 	bnd.identity;id='slf4j.api'

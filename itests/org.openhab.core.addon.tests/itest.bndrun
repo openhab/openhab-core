@@ -3,9 +3,6 @@
 Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.addon
 
--runblacklist: \
-	bnd.identity;id='org.osgi.service.cm'
-
 -runrequires: \
 	bnd.identity;id='org.openhab.core.addon.tests'
 
