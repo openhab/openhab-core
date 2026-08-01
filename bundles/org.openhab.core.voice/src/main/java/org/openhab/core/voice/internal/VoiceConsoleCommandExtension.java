@@ -130,17 +130,17 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_DIALOG_REGS,
                         "lists the existing dialog registrations and their selected audio/voice services"),
                 buildCommandUsage(SUBCMD_REGISTER_DIALOG
-                        + " [--source <source>] [--sink <sink>] [--hli <comma,separated,interpreterIds>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>] [--location-item <locationItem>] [--dialog-group <dialogGroup>]",
+                        + " [--source <source>] [--sink <sink>] [--hli <comma,separated,interpreterIds>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>] [--location-item <locationItem>] [--dialog-group <dialogGroup>] [--llm-tools <comma,separated,llmToolIds>]",
                         "register a new dialog processing using the default services or the services identified with provided arguments, it will be persisted and keep running whenever is possible."),
                 buildCommandUsage(SUBCMD_UNREGISTER_DIALOG + " [source]",
                         "unregister the dialog processing for the default audio source or the audio source identified with provided argument, stopping it if started"),
                 buildCommandUsage(SUBCMD_START_DIALOG
-                        + " [--source <source>] [--sink <sink>] [--hli <comma,separated,interpreterIds>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>] [--location-item <locationItem>] [--dialog-group <dialogGroup>]",
+                        + " [--source <source>] [--sink <sink>] [--hli <comma,separated,interpreterIds>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>] [--location-item <locationItem>] [--dialog-group <dialogGroup>] [--llm-tools <comma,separated,llmToolIds>]",
                         "start a new dialog processing using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_STOP_DIALOG + " [<source>]",
                         "stop the dialog processing for the default audio source or the audio source identified with provided argument"),
                 buildCommandUsage(SUBCMD_LISTEN_ANSWER
-                        + " [--source <source>] [--sink <sink>] [--hli <comma,separated,interpreterIds>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--listening-item <listeningItem>] [--location-item <locationItem>] [--dialog-group <dialogGroup>]",
+                        + " [--source <source>] [--sink <sink>] [--hli <comma,separated,interpreterIds>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--listening-item <listeningItem>] [--location-item <locationItem>] [--dialog-group <dialogGroup>] [--llm-tools <comma,separated,llmToolIds>]",
                         "Execute a simple dialog sequence without keyword spotting using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_INTERPRETERS, "lists the interpreters"),
                 buildCommandUsage(SUBCMD_KEYWORD_SPOTTERS, "lists the keyword spotters"),
@@ -360,7 +360,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         var interpretationArgs = new InterpretationArguments( //
                 Objects.requireNonNullElse(hliIdList, ""), //
                 Objects.requireNonNullElse(conversationId, ""), //
-                Objects.requireNonNullElse(llmToolIdList, ""), //
+                Objects.requireNonNullElse(llmToolIdList, "*"), //
                 Objects.requireNonNullElse(locationItem, ""), null //
         );
         try {
@@ -698,7 +698,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private DialogContext.Builder parseDialogContext(String[] args) {
         var dialogContextBuilder = voiceManager.getDialogContextBuilder();
         if (args.length < 1) {
-            return dialogContextBuilder;
+            return dialogContextBuilder.withLLMTools(llmToolRegistry.getAll());
         }
         var parameters = parseNamedParameters(args, false);
         String sourceId = parameters.remove("source");
@@ -719,6 +719,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
         Conversation conversation = conversationManager
                 .getConversation(Objects.requireNonNullElse(parameters.remove("conversation"), ""));
+        String llmToolsParam = Objects.requireNonNullElse(parameters.remove("llm-tools"), "*");
         dialogContextBuilder //
                 .withSTT(voiceManager.getSTT(parameters.remove("stt"))) //
                 .withTTS(voiceManager.getTTS(parameters.remove("tts"))) //
@@ -729,7 +730,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 .withLocationItem(parameters.remove("location-item")) //
                 .withDialogGroup(parameters.remove("dialog-group")) //
                 .withConversation(conversation) //
-                .withLLMTools(llmToolRegistry.getByIds(parameters.remove("llm-tools"))) //
+                .withLLMTools(llmToolRegistry.getByIds(llmToolsParam)) //
                 .withKeyword(parameters.remove("keyword"));
         if (!parameters.isEmpty()) {
             throw new IllegalStateException(
@@ -771,10 +772,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         if (hliIds != null) {
             dr.hliIds = Arrays.stream(hliIds.split(",")).map(String::trim).toList();
         }
-        String llmToolIds = parameters.remove("llm-tools");
-        if (llmToolIds != null) {
-            dr.llmToolIds = Arrays.stream(llmToolIds.split(",")).map(String::trim).toList();
-        }
+        String llmToolIds = Objects.requireNonNullElse(parameters.remove("llm-tools"), "*");
+        dr.llmToolIds = Arrays.stream(llmToolIds.split(",")).map(String::trim).toList();
         if (!parameters.isEmpty()) {
             throw new IllegalStateException(
                     "Argument " + parameters.keySet().stream().findAny().orElse("") + " is not supported");
