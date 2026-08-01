@@ -60,6 +60,10 @@ public class LLMToolRegistryImpl implements LLMToolRegistry {
 
     @Override
     public List<LLMTool> getByIds(List<String> ids) {
+        if (ids.contains("*")) {
+            return stream().toList();
+        }
+
         List<LLMTool> tools = new ArrayList<>();
         for (String id : ids) {
             LLMTool tool = llmTools.get(id);

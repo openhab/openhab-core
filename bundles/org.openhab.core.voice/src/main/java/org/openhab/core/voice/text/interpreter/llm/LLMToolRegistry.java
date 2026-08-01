@@ -38,9 +38,6 @@ public interface LLMToolRegistry extends Registry<LLMTool, String> {
         if (ids == null || ids.isBlank()) {
             return List.of();
         }
-        if ("*".equals(ids)) {
-            return stream().toList();
-        }
         return getByIds(Arrays.stream(ids.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
     }
 
