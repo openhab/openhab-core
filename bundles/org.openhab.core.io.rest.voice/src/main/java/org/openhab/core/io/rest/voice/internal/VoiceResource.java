@@ -234,7 +234,7 @@ public class VoiceResource implements RESTResource {
     public Response interpret(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("conversation") @Parameter(description = "Conversation id") @Nullable String conversationId,
-            @DefaultValue(".*") @QueryParam("llmTools") @Parameter(description = "Comma separated list of llm-tool ids or * wildcard") @Nullable List<String> llmToolIds,
+            @DefaultValue("*") @QueryParam("llmTools") @Parameter(description = "Comma separated list of llm-tool ids or * wildcard") @Nullable List<String> llmToolIds,
             @QueryParam("locationItem") @Parameter(description = "Location item id to contextualize the command") @Nullable String locationItem,
             @Parameter(description = "text to interpret", required = true) String text) {
         final Locale locale = localeService.getLocale(language);

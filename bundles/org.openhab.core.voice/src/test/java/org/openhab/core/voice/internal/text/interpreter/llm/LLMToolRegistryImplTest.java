@@ -87,7 +87,7 @@ public class LLMToolRegistryImplTest {
     }
 
     @Test
-    public void getByIdsStringsReturnsAllLLMToolsForWildcard() {
+    public void getByIdsStringReturnsAllLLMToolsForWildcard() {
         registry.addLLMTool(tool1);
         registry.addLLMTool(tool2);
 
