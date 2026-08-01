@@ -788,7 +788,7 @@ public class LightModel {
              * If the light has a warm and a cool white led, the mix of white values are determined
              * by the brightness and the color temperature.
              */
-            if (RGB_W_TYPES.contains(rgbDataType)) {
+            if (RGB_C_W_TYPES.contains(rgbDataType)) {
                 double denominator = warmWhiteLed.getMirek() - coolWhiteLed.getMirek();
                 double ratio;
                 if (denominator > 0 && !Double.isNaN(cachedMirek)) {
