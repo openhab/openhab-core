@@ -320,7 +320,12 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole</artifactId>
-      <version>4.8.12</version>
+      <version>5.0.18</version>
+    </dependency>
+    <dependency>
+      <groupId>org.owasp.encoder</groupId>
+      <artifactId>encoder</artifactId>
+      <version>1.3.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
