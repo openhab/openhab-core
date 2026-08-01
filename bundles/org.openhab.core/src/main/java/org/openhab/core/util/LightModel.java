@@ -15,6 +15,7 @@ package org.openhab.core.util;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -237,8 +238,28 @@ public class LightModel {
         /** supports 4-element RGB with white channel */
         RGB_W,
         /** supports 5-element RGB with cold and warm white channels */
-        RGB_C_W
+        RGB_C_W,
+        // as RGB_W but ignores brightness (i.e. only HS parts of HSBType)
+        RGB_W_NO_BRIGHTNESS,
+        // as RGB_C_W but ignores brightness (i.e. only HS parts of HSBType)
+        RGB_C_W_NO_BRIGHTNESS
     }
+
+    /**
+     * Set of RGB data types that do not use the brightness part of the HSBType state.
+     */
+    public static final Set<RgbDataType> NO_BRIGHTNESS_TYPES = Set.of(RgbDataType.RGB_NO_BRIGHTNESS,
+            RgbDataType.RGB_W_NO_BRIGHTNESS, RgbDataType.RGB_C_W_NO_BRIGHTNESS);
+
+    /**
+     * Set of RGB data types that use a white channel.
+     */
+    public static final Set<RgbDataType> RGB_W_TYPES = Set.of(RgbDataType.RGB_W, RgbDataType.RGB_W_NO_BRIGHTNESS);
+
+    /**
+     * Set of RGB data types that use cold and warm white channels.
+     */
+    public static final Set<RgbDataType> RGB_C_W_TYPES = Set.of(RgbDataType.RGB_C_W, RgbDataType.RGB_C_W_NO_BRIGHTNESS);
 
     /**
      * Enum for the LED operating mode
@@ -607,7 +628,7 @@ public class LightModel {
         this.rgbDataType = rgbType;
         switch (rgbType) {
             case DEFAULT:
-            case RGB_NO_BRIGHTNESS:
+            case RGB_NO_BRIGHTNESS, RGB_W_NO_BRIGHTNESS, RGB_C_W_NO_BRIGHTNESS:
                 ledOperatingMode = LedOperatingMode.RGB_ONLY;
             default:
         }
@@ -747,7 +768,7 @@ public class LightModel {
      * @throws IllegalStateException if the RGB data type is not compatible with the current LED operating mode.
      */
     public synchronized double[] getRGBx() throws IllegalStateException {
-        HSBType hsb = RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType
+        HSBType hsb = NO_BRIGHTNESS_TYPES.contains(rgbDataType)
                 ? new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.HUNDRED)
                 : cachedHSB;
 
@@ -758,7 +779,7 @@ public class LightModel {
             /*
              * If the light has a single white led then its value is determined by the brightness only.
              */
-            if (RgbDataType.RGB_W == rgbDataType) {
+            if (RGB_W_TYPES.contains(rgbDataType)) {
                 double w = cachedHSB.getBrightness().doubleValue() * 255.0 / 100.0;
                 return new double[] { 0.0, 0.0, 0.0, w };
             }
@@ -767,7 +788,7 @@ public class LightModel {
              * If the light has a warm and a cool white led, the mix of white values are determined
              * by the brightness and the color temperature.
              */
-            if (RgbDataType.RGB_C_W == rgbDataType) {
+            if (RGB_W_TYPES.contains(rgbDataType)) {
                 double denominator = warmWhiteLed.getMirek() - coolWhiteLed.getMirek();
                 double ratio;
                 if (denominator > 0 && !Double.isNaN(cachedMirek)) {
@@ -794,9 +815,9 @@ public class LightModel {
              */
             PercentType[] rgbP = ColorUtil.hsbToRgbPercent(hsb);
             double[] rgb = Arrays.stream(rgbP).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0).toArray();
-            if (RgbDataType.RGB_W == rgbDataType) {
+            if (RGB_W_TYPES.contains(rgbDataType)) {
                 return new double[] { rgb[0], rgb[1], rgb[2], 0 };
-            } else if (RgbDataType.RGB_C_W == rgbDataType) {
+            } else if (RGB_C_W_TYPES.contains(rgbDataType)) {
                 return new double[] { rgb[0], rgb[1], rgb[2], 0, 0 };
             }
             return rgb;
@@ -806,7 +827,7 @@ public class LightModel {
          * In combined mode the RGB and white values are all determined by the HSB values.
          */
         if (LedOperatingMode.COMBINED == ledOperatingMode) {
-            if (RgbDataType.RGB_C_W == rgbDataType) {
+            if (RGB_C_W_TYPES.contains(rgbDataType)) {
                 /*
                  * RGBCW - convert HSB to RGB, normalize it, then convert to RGBCW, then scale to [0..255]
                  */
@@ -815,7 +836,7 @@ public class LightModel {
                 double[] rgbcw = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
                 rgbcw = Arrays.stream(rgbcw).map(d -> Math.round(d * 255 * 10) / 10).toArray(); // // round to 1
                 return rgbcw;
-            } else if (RgbDataType.RGB_W == rgbDataType) {
+            } else if (RGB_W_TYPES.contains(rgbDataType)) {
                 /*
                  * RGBW - convert HSB to RGBW, then scale to [0..255]
                  */
@@ -1049,8 +1070,8 @@ public class LightModel {
         if (rgbxParameter.length > 5) {
             throw new IllegalArgumentException("Too many arguments in RGBx array");
         }
-        if (rgbxParameter.length < 3 || (RgbDataType.RGB_W == rgbDataType && rgbxParameter.length < 4)
-                || (RgbDataType.RGB_C_W == rgbDataType && rgbxParameter.length < 5)) {
+        if (rgbxParameter.length < 3 || (RGB_W_TYPES.contains(rgbDataType) && rgbxParameter.length < 4)
+                || (RGB_C_W_TYPES.contains(rgbDataType) && rgbxParameter.length < 5)) {
             throw new IllegalArgumentException("Too few arguments in RGBx array");
         }
         if (rgbxParameter.length == 3 && ledOperatingMode != LedOperatingMode.RGB_ONLY) {
@@ -1127,7 +1148,7 @@ public class LightModel {
                 hsb = ColorUtil.rgbToHsb(Arrays.stream(rgbx).map(d -> d * 100.0 / 255.0)
                         .mapToObj(d -> zPercentTypeFrom(d)).toArray(PercentType[]::new));
 
-                if (RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType) {
+                if (NO_BRIGHTNESS_TYPES.contains(rgbDataType)) {
                     hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedHSB.getBrightness());
                 }
                 break;
