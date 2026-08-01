@@ -14,6 +14,7 @@ package org.openhab.core.voice.internal;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -374,7 +375,7 @@ public class DialogProcessor implements KSListener, STTListener {
                     error = "Unable to add message to conversation: " + e.getMessage();
                 }
                 if (error == null) {
-                    List<LLMTool> tools = dialogContext.llmTools();
+                    Collection<LLMTool> tools = dialogContext.llmTools();
                     InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
                             dialogContext.locationItem(),
                             eventListener.enrichSystemPrompt(dialogContext.systemPrompt(), dialogContext.locale()));

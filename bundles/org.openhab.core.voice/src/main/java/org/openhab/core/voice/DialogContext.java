@@ -34,7 +34,7 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 public record DialogContext(@Nullable DTService dt, @Nullable String keyword, STTService stt, TTSService tts,
         @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink, Locale locale,
         String dialogGroup, @Nullable String locationItem, @Nullable String listeningItem,
-        @Nullable String listeningMelody, Conversation conversation, List<LLMTool> llmTools,
+        @Nullable String listeningMelody, Conversation conversation, Collection<LLMTool> llmTools,
         @Nullable String systemPrompt) {
 
     /**
@@ -50,7 +50,7 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
         private @Nullable TTSService tts;
         private @Nullable Voice voice;
         private List<HumanLanguageInterpreter> hlis = List.of();
-        private List<LLMTool> llmTools = List.of();
+        private Collection<LLMTool> llmTools = List.of();
         // state
         private Conversation conversation = new Conversation("");
         // options
@@ -144,7 +144,7 @@ public record DialogContext(@Nullable DTService dt, @Nullable String keyword, ST
             return this;
         }
 
-        public Builder withLLMTools(List<LLMTool> llmTools) {
+        public Builder withLLMTools(Collection<LLMTool> llmTools) {
             if (!llmTools.isEmpty()) {
                 this.llmTools = llmTools;
             }
