@@ -15,7 +15,7 @@ package org.openhab.core.voice.internal;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.voice.Voice;
+import org.openhab.core.voice.tts.Voice;
 
 /**
  * A {@link Voice} stub used for the tests.

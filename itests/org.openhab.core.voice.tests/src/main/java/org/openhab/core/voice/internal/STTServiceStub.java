@@ -19,12 +19,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.voice.STTException;
-import org.openhab.core.voice.STTListener;
-import org.openhab.core.voice.STTService;
-import org.openhab.core.voice.STTServiceHandle;
-import org.openhab.core.voice.SpeechRecognitionErrorEvent;
-import org.openhab.core.voice.SpeechRecognitionEvent;
+import org.openhab.core.voice.stt.STTException;
+import org.openhab.core.voice.stt.STTListener;
+import org.openhab.core.voice.stt.STTService;
+import org.openhab.core.voice.stt.STTServiceHandle;
+import org.openhab.core.voice.stt.SpeechRecognitionErrorEvent;
+import org.openhab.core.voice.stt.SpeechRecognitionEvent;
 
 /**
  * A {@link STTService} stub used for the tests.
@@ -70,8 +70,8 @@ public class STTServiceStub implements STTService {
     }
 
     @Override
-    public STTServiceHandle recognize(STTListener sttListener, AudioStream audioStream, Locale locale,
-            Set<String> grammars) throws STTException {
+    public STTServiceHandle recognize(STTListener sttListener, AudioStream audioStream, Locale locale)
+            throws STTException {
         if (exceptionExpected) {
             throw new STTException(EXCEPTION_MESSAGE);
         } else {

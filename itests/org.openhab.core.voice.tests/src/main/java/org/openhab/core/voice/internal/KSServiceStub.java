@@ -19,12 +19,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.voice.KSErrorEvent;
-import org.openhab.core.voice.KSException;
-import org.openhab.core.voice.KSListener;
-import org.openhab.core.voice.KSService;
-import org.openhab.core.voice.KSServiceHandle;
-import org.openhab.core.voice.KSpottedEvent;
+import org.openhab.core.voice.dialog.trigger.ks.KSErrorEvent;
+import org.openhab.core.voice.dialog.trigger.ks.KSException;
+import org.openhab.core.voice.dialog.trigger.ks.KSListener;
+import org.openhab.core.voice.dialog.trigger.ks.KSService;
+import org.openhab.core.voice.dialog.trigger.ks.KSServiceHandle;
+import org.openhab.core.voice.dialog.trigger.ks.KSpottedEvent;
 
 /**
  * A {@link KSService} stub used for the tests.
