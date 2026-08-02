@@ -120,8 +120,8 @@ public class LightModelTest {
         assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
         assertNull(lsm.getColorTemperature());
         assertNull(lsm.getColorTemperaturePercent());
-        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColorTemperature()));
-        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColorTemperaturePercent()));
+        assertEquals(UnDefType.UNDEF, LightModel.toNonNull(lsm.getColorTemperature()));
+        assertEquals(UnDefType.UNDEF, LightModel.toNonNull(lsm.getColorTemperaturePercent()));
 
         lsm.handleCommand(PercentType.ZERO);
         assertEquals(PercentType.ZERO, lsm.getBrightness(true));
@@ -139,7 +139,7 @@ public class LightModelTest {
         assertNull(lsm.getColor());
         assertEquals(PercentType.HUNDRED, lsm.getBrightness());
         assertEquals(OnOffType.ON, lsm.getOnOff(true));
-        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColor()));
+        assertEquals(UnDefType.UNDEF, LightModel.toNonNull(lsm.getColor()));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
         assertEquals(OnOffType.ON, lsm.getOnOff(true));
@@ -162,7 +162,7 @@ public class LightModelTest {
         assertNull(lsm.getColor());
         assertEquals(PercentType.HUNDRED, lsm.getBrightness());
         assertEquals(OnOffType.ON, lsm.getOnOff(true));
-        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColor()));
+        assertEquals(UnDefType.UNDEF, LightModel.toNonNull(lsm.getColor()));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
         assertEquals(OnOffType.ON, lsm.getOnOff(true));
@@ -185,8 +185,8 @@ public class LightModelTest {
         assertNull(lsm.getColor());
         assertNull(lsm.getBrightness());
         assertEquals(OnOffType.ON, lsm.getOnOff());
-        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getColor()));
-        assertEquals(UnDefType.UNDEF, lsm.toNonNull(lsm.getBrightness()));
+        assertEquals(UnDefType.UNDEF, LightModel.toNonNull(lsm.getColor()));
+        assertEquals(UnDefType.UNDEF, LightModel.toNonNull(lsm.getBrightness()));
 
         lsm.handleCommand(QuantityType.valueOf(500, Units.MIRED));
         assertEquals(OnOffType.ON, lsm.getOnOff());
@@ -913,5 +913,81 @@ public class LightModelTest {
         assertEquals(0.0, rgbx[1], 0.01);
         assertEquals(0.0, rgbx[2], 0.01);
         assertEquals(255.0, rgbx[3] + rgbx[4], 0.01);
+    }
+
+    @Test
+    public void testRgbwIgnoreBrightness() {
+        LightModel lsm = new LightModel(LightCapabilities.COLOR_WITH_COLOR_TEMPERATURE,
+                RgbDataType.RGB_W_NO_BRIGHTNESS);
+        assertTrue(lsm.configGetLightCapabilities().supportsColor());
+        assertTrue(lsm.configGetLightCapabilities().supportsBrightness());
+        assertTrue(lsm.configGetLightCapabilities().supportsColorTemperature());
+
+        lsm.handleCommand(HSBType.RED);
+        assertEquals(HSBType.RED, lsm.getColor());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+
+        double[] full = lsm.getRGBx();
+        assertEquals(4, full.length);
+        assertEquals(255.0, full[0], 1);
+        assertEquals(0.0, full[1], 1);
+        assertEquals(0.0, full[2], 1);
+        assertEquals(0.0, full[3], 1);
+
+        lsm.handleCommand(new PercentType(50));
+        double[] dimmed = lsm.getRGBx();
+        assertEquals(4, dimmed.length);
+
+        // Brightness is ignored for this RGB data type.
+        assertArrayEquals(full, dimmed, 1.0);
+
+        lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 55.0 });
+
+        PercentType brightness = lsm.getBrightness(true);
+        assertNotNull(brightness);
+        assertEquals(new PercentType(50), brightness);
+
+        HSBType color = lsm.getColor();
+        assertNotNull(color);
+        assertEquals(50.0, color.getBrightness().doubleValue(), 1);
+    }
+
+    @Test
+    public void testRgbcwIgnoreBrightness() {
+        LightModel lsm = new LightModel(LightCapabilities.COLOR_WITH_COLOR_TEMPERATURE,
+                RgbDataType.RGB_C_W_NO_BRIGHTNESS);
+
+        lsm.handleCommand(HSBType.RED);
+        assertEquals(HSBType.RED, lsm.getColor());
+        assertEquals(PercentType.HUNDRED, lsm.getBrightness(true));
+        assertEquals(OnOffType.ON, lsm.getOnOff(true));
+
+        double[] full = lsm.getRGBx();
+        assertEquals(5, full.length);
+        assertEquals(255.0, full[0], 1);
+        assertEquals(0.0, full[1], 1);
+        assertEquals(0.0, full[2], 1);
+        assertEquals(0.0, full[3], 1);
+        assertEquals(0.0, full[4], 1);
+
+        lsm.handleCommand(new PercentType(50));
+        double[] dimmed = lsm.getRGBx();
+        assertEquals(5, dimmed.length);
+
+        // Brightness is ignored for this RGB data type.
+        assertArrayEquals(full, dimmed, 1.0);
+
+        lsm.setRGBx(new double[] { 0.0, 100.0, 200.0, 40.0, 15.0 });
+
+        // In NO_BRIGHTNESS mode, brightness is preserved from cached HSB
+        // rather than derived from the incoming RGBx payload.
+        PercentType brightness = lsm.getBrightness(true);
+        assertNotNull(brightness);
+        assertEquals(new PercentType(50), brightness);
+
+        HSBType color = lsm.getColor();
+        assertNotNull(color);
+        assertEquals(50.0, color.getBrightness().doubleValue(), 1);
     }
 }

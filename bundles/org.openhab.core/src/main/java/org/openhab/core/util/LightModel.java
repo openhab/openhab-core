@@ -239,27 +239,28 @@ public class LightModel {
         RGB_W,
         /** supports 5-element RGB with cold and warm white channels */
         RGB_C_W,
-        // as RGB_W but ignores brightness (i.e. only HS parts of HSBType)
+        /** as RGB_W but ignores brightness (i.e. only HS parts of HSBType) */
         RGB_W_NO_BRIGHTNESS,
-        // as RGB_C_W but ignores brightness (i.e. only HS parts of HSBType)
+        /* as RGB_C_W but ignores brightness (i.e. only HS parts of HSBType) */
         RGB_C_W_NO_BRIGHTNESS
     }
 
     /**
      * Set of RGB data types that do not use the brightness part of the HSBType state.
      */
-    public static final Set<RgbDataType> NO_BRIGHTNESS_TYPES = Set.of(RgbDataType.RGB_NO_BRIGHTNESS,
+    private static final Set<RgbDataType> NO_BRIGHTNESS_TYPES = Set.of(RgbDataType.RGB_NO_BRIGHTNESS,
             RgbDataType.RGB_W_NO_BRIGHTNESS, RgbDataType.RGB_C_W_NO_BRIGHTNESS);
 
     /**
      * Set of RGB data types that use a white channel.
      */
-    public static final Set<RgbDataType> RGB_W_TYPES = Set.of(RgbDataType.RGB_W, RgbDataType.RGB_W_NO_BRIGHTNESS);
+    private static final Set<RgbDataType> RGB_W_TYPES = Set.of(RgbDataType.RGB_W, RgbDataType.RGB_W_NO_BRIGHTNESS);
 
     /**
      * Set of RGB data types that use cold and warm white channels.
      */
-    public static final Set<RgbDataType> RGB_C_W_TYPES = Set.of(RgbDataType.RGB_C_W, RgbDataType.RGB_C_W_NO_BRIGHTNESS);
+    private static final Set<RgbDataType> RGB_C_W_TYPES = Set.of(RgbDataType.RGB_C_W,
+            RgbDataType.RGB_C_W_NO_BRIGHTNESS);
 
     /**
      * Enum for the LED operating mode
@@ -628,7 +629,7 @@ public class LightModel {
         this.rgbDataType = rgbType;
         switch (rgbType) {
             case DEFAULT:
-            case RGB_NO_BRIGHTNESS, RGB_W_NO_BRIGHTNESS, RGB_C_W_NO_BRIGHTNESS:
+            case RGB_NO_BRIGHTNESS:
                 ledOperatingMode = LedOperatingMode.RGB_ONLY;
             default:
         }
@@ -744,7 +745,7 @@ public class LightModel {
      */
     public synchronized @Nullable OnOffType getOnOff(boolean forceChannelVisible) {
         return (!lightCapabilities.supportsColor() && !lightCapabilities.supportsBrightness()) || forceChannelVisible
-                ? OnOffType.from(cachedHSB.getBrightness().doubleValue() >= minimumOnBrightness)
+                ? OnOffType.from(cachedHSB.getBrightness().doubleValue() > minimumOnBrightness)
                 : null;
     }
 
@@ -755,10 +756,10 @@ public class LightModel {
      * follows:
      *
      * <ul>
-     * <li>'RGB_NO_BRIGHTNESS': The return result does not depend on the current brightness. In other words the values
-     * only relate to the 'HS' part of the {@link HSBType} state. Note: this means that in this case a round trip of
-     * setRGBx() followed by getRGBx() will NOT necessarily contain identical values, although the RGB ratios will
-     * certainly be the same.</li>
+     * <li>'RGB_NO_BRIGHTNESS', 'RGB_W_NO_BRIGHTNESS', 'RGB_C_W_NO_BRIGHTNESS': The return result does not depend on
+     * the current brightness. In other words the values only relate to the 'HS' part of the {@link HSBType} state.
+     * Note: this means that in this case a round trip of setRGBx() followed by getRGBx() will NOT necessarily contain
+     * identical values, although the RGB ratios will certainly be the same.</li>
      *
      * <li>All other values of {@link #rgbDataType}: The return result depends on the current brightness. In other
      * words the values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
@@ -1052,10 +1053,10 @@ public class LightModel {
      * on the value of {@link #rgbDataType} the brightness may or may not change as follows:
      *
      * <ul>
-     * <li>'RGB_NO_BRIGHTNESS' both [255,0,0] and [127.5,0,0] change the color to RED without a change in brightness.
-     * In other words the values only relate to the 'HS' part of the {@link HSBType} state. Note: this means that in
-     * this case a round trip of 'setRGBx()' followed by 'getRGBx()' will NOT necessarily contain identical values,
-     * although the RGB ratios will certainly be the same.</li>
+     * <li>'RGB_NO_BRIGHTNESS', 'RGB_W_NO_BRIGHTNESS', 'RGB_C_W_NO_BRIGHTNESS': The set value does not affect the
+     * current brightness. In other words the values only relate to the 'HS' part of the {@link HSBType} state. Note:
+     * this means that in this case a round trip of 'setRGBx()' followed by 'getRGBx()' will NOT necessarily contain
+     * identical values, although the RGB ratios will certainly be the same.</li>
      *
      * <li>All other values of {@link #rgbDataType}: both [255,0,0] and [127.5,0,0] change the color to RED and the
      * former changes the brightness to 100 percent, whereas the latter changes it to 50 percent. In other words the
@@ -1135,7 +1136,7 @@ public class LightModel {
 
             case COMBINED:
                 double[] rgbx;
-                if (RgbDataType.RGB_C_W == rgbDataType) {
+                if (RGB_C_W_TYPES.contains(rgbDataType)) {
                     // RGBCW - normalize, convert to RGB, then scale back to [0..255]
                     rgbx = Arrays.stream(rgbxParameter).map(d -> d / 255.0).toArray();
                     rgbx = RgbcwMath.rgbcw2rgb(rgbx, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
