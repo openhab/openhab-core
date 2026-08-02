@@ -43,6 +43,7 @@ Fragment-Host: org.openhab.core.io.net
 	org.eclipse.jetty.alpn.client;version='[12.1.10,12.1.11)',\
 	org.eclipse.jetty.client;version='[12.1.10,12.1.11)',\
 	org.eclipse.jetty.compression.common;version='[12.1.10,12.1.11)',\
+	org.eclipse.jetty.compression.gzip;version='[12.1.10,12.1.11)',\
 	org.eclipse.jetty.http;version='[12.1.10,12.1.11)',\
 	org.eclipse.jetty.http2.client;version='[12.1.10,12.1.11)',\
 	org.eclipse.jetty.http2.common;version='[12.1.10,12.1.11)',\
