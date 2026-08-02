@@ -467,7 +467,25 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>4.0.0-SNAPSHOT</version>
+      <version>${jupnp.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jupnp</groupId>
+      <artifactId>org.jupnp.transport.jetty12</artifactId>
+      <version>${jupnp.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jupnp</groupId>
+      <artifactId>org.jupnp.transport.jakarta.servlet</artifactId>
+      <version>${jupnp.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jupnp</groupId>
+      <artifactId>org.jupnp.transport.jakarta.httpservice</artifactId>
+      <version>${jupnp.version}</version>
       <scope>compile</scope>
     </dependency>
 

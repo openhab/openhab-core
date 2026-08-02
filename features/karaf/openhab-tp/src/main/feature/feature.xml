@@ -210,11 +210,19 @@
 	</feature>
 
 	<feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
-		<capability>openhab.tp;feature=jupnp;version=4.0.0</capability>
+		<capability>openhab.tp;feature=jupnp;version=${jupnp.version}</capability>
 		<feature dependency="true">http</feature>
 		<feature dependency="true">scr</feature>
 		<feature dependency="true">openhab.tp-httpclient</feature>
-		<bundle>mvn:org.jupnp/org.jupnp/4.0.0-SNAPSHOT</bundle>
+		<bundle>mvn:org.jupnp/org.jupnp/${jupnp.version}</bundle>
+		<!-- jUPnP no longer bundles a transport implementation; the Jetty 12 transport (and the
+			generic servlet transport infrastructure it depends on) must be added explicitly. -->
+		<bundle>mvn:org.jupnp/org.jupnp.transport.jakarta.servlet/${jupnp.version}</bundle>
+		<bundle>mvn:org.jupnp/org.jupnp.transport.jetty12/${jupnp.version}</bundle>
+		<!-- Without this bridge, OSGiUpnpServiceConfiguration falls through to jetty9's standalone
+			StreamServer, which opens its own socket on the UPnP callback port (default 8080) instead
+			of sharing openHAB's existing HttpService - colliding with pax-web on that same port. -->
+		<bundle>mvn:org.jupnp/org.jupnp.transport.jakarta.httpservice/${jupnp.version}</bundle>
 	</feature>
 
 	<feature name="openhab.tp-lsp4j" description="Eclipse LSP4J" version="${project.version}">
