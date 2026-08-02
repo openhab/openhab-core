@@ -80,6 +80,10 @@
 		<feature dependency="true">pax-web-jetty-http2</feature>
 		<feature dependency="true">pax-web-jetty-http2-extras</feature>
 		<feature dependency="true">pax-web-jetty-websockets</feature>
+		<!-- jetty-client requires both jetty-compression-common (provided transitively via
+			pax-web-jetty-websockets) and jetty-compression-gzip; pax-web-features does not ship
+			the latter, so it must be added explicitly here. -->
+		<bundle>mvn:org.eclipse.jetty.compression/jetty-compression-gzip/${jetty.version}</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">

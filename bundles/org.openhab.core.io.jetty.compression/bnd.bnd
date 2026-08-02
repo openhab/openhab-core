@@ -1,4 +1,5 @@
 Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.eclipse.jetty.client
-Import-Package: org.eclipse.jetty.compression
+Import-Package: org.eclipse.jetty.compression,\
+	org.eclipse.jetty.compression.gzip
 Export-Package:
