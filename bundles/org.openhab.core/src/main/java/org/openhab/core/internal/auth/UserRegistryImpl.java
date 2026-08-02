@@ -257,6 +257,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         RAND.nextBytes(rnd);
 
         byte[] base64Bytes = Base64.getEncoder().encode(rnd);
+        Arrays.fill(rnd, (byte) 0);
         char[] nameChars = name.toCharArray();
         int maxCapacity = APITOKEN_PREFIX.length() + nameChars.length + base64Bytes.length + 2;
         CharBuffer buffer = CharBuffer.allocate(maxCapacity);

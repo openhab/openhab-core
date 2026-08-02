@@ -55,7 +55,7 @@ public class UserApiTokenCredentials implements Credentials {
      * @return the token
      */
     public synchronized char[] getApiToken() {
-        return userApiToken;
+        return Arrays.copyOf(userApiToken, userApiToken.length);
     }
 
     @Override

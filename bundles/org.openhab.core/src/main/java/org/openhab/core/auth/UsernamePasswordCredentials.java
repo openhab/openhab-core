@@ -60,7 +60,7 @@ public class UsernamePasswordCredentials implements Credentials {
     }
 
     @Override
-    public void dispose() {
+    public synchronized void dispose() {
         Arrays.fill(password, Character.MIN_VALUE);
     }
 
