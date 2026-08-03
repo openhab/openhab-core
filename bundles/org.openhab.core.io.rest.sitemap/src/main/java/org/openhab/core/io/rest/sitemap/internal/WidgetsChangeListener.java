@@ -211,7 +211,7 @@ public class WidgetsChangeListener implements EventSubscriber {
             if (!skipWidget && w instanceof Chart chartWidget) {
                 skipWidget = chartWidget.getRefresh() > 0;
             }
-            if (!skipWidget || definesVisibilityOrColorOrIcon(w, item.getName())) {
+            if (!skipWidget || definesVisibilityOrConfirmOrColorOrIcon(w, item.getName())) {
                 SitemapWidgetEvent event = constructSitemapEventForWidget(item, state, w);
                 events.add(event);
             }
@@ -239,6 +239,7 @@ public class WidgetsChangeListener implements EventSubscriber {
             event.labelSource = WidgetLabelSource.SITEMAP_WIDGET.toString();
         }
         event.visibility = itemUIRegistry.getVisiblity(widget);
+        event.confirmCmd = itemUIRegistry.getConfirmCmd(widget);
         event.descriptionChanged = false;
         // event.item contains the (potentially changed) data of the item belonging to
         // the widget including its state (in event.item.state)
@@ -279,8 +280,9 @@ public class WidgetsChangeListener implements EventSubscriber {
         return null;
     }
 
-    private boolean definesVisibilityOrColorOrIcon(Widget w, String name) {
+    private boolean definesVisibilityOrConfirmOrColorOrIcon(Widget w, String name) {
         return w.getVisibility().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
+                || w.getConfirmCmdRules().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
                 || w.getLabelColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
                 || w.getValueColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
                 || w.getIconColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))

@@ -61,6 +61,7 @@ import org.osgi.service.component.annotations.Reference;
  * {@link YamlSitemapConverter} is the YAML converter for {@link Sitemap} objects.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapSerializer.class, SitemapParser.class })
@@ -223,6 +224,17 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
             } else {
                 dto.visibility = visibilityRules;
             }
+        }
+
+        List<Object> confirmCmdRules = buildRules(widget.getConfirmCmdRules(), true);
+        if (!confirmCmdRules.isEmpty()) {
+            if (confirmCmdRules.size() == 1) {
+                dto.confirmCmd = confirmCmdRules.getFirst();
+            } else {
+                dto.confirmCmd = confirmCmdRules;
+            }
+        } else if (widget.getConfirmCmd()) {
+            dto.confirmCmd = true;
         }
 
         switch (widget) {

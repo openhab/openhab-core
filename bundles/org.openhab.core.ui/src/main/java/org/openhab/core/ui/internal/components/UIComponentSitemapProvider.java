@@ -80,6 +80,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Implement sitemap registry
  * @author Mark Herwege - Make provider managed and add support for adding/updating/removing sitemaps via the provider
  *         interface
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(service = { SitemapProvider.class, ManagedSitemapProvider.class }, immediate = true)
@@ -222,6 +223,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         setWidgetPropertyFromComponentConfig(widget, component, "label");
         setWidgetPropertyFromComponentConfig(widget, component, "icon");
         setWidgetPropertyFromComponentConfig(widget, component, "staticIcon");
+        setWidgetPropertyFromComponentConfig(widget, component, "confirmCmd");
 
         if (widget instanceof LinkableWidget linkableWidget) {
             if (component.getSlots() != null && component.getSlots().containsKey("widgets")) {
@@ -239,6 +241,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         addWidgetRules(widget.getValueColor(), component, "valuecolor");
         addWidgetRules(widget.getIconColor(), component, "iconcolor");
         addWidgetRules(widget.getIconRules(), component, "iconrules");
+        addWidgetRules(widget.getConfirmCmdRules(), component, "confirmcmdrules");
 
         return widget;
     }
@@ -365,7 +368,9 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             if (sourceRules instanceof Collection<?> sourceRulesCollection) {
                 for (Object sourceRule : sourceRulesCollection) {
                     if (sourceRule instanceof String) {
-                        String argument = !"visibility".equals(key) ? getRuleArgument(sourceRule.toString()) : null;
+                        String argument = !("visibility".equals(key) || "confirmcmdrules".equals(key))
+                                ? getRuleArgument(sourceRule.toString())
+                                : null;
                         List<String> conditionsString = getRuleConditions(sourceRule.toString(), argument);
                         Rule rule = sitemapFactory.createRule();
                         List<Condition> conditions = getConditions(conditionsString, component, key);
