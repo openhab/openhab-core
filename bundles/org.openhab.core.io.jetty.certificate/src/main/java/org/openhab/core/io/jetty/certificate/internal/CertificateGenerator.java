@@ -75,7 +75,7 @@ public class CertificateGenerator implements BundleActivator {
     private static final String KEY_FACTORY_TYPE = "EC";
     private static final String CONTENT_SIGNER_ALGORITHM = "SHA256withECDSA";
     private static final String CERTIFICATE_X509_TYPE = "X.509";
-    private static final String X500_NAME = "CN=openhab.org, OU=None, O=None, L=None, C=None";
+    private static final String X500_NAME = "CN=openhab.org, OU=None, O=None, L=None";
 
     private Logger logger;
 
