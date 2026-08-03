@@ -21,6 +21,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Laurent Garnier - New field iconcolor
  * @author Laurent Garnier - New field reloadIcon
  * @author Danny Baumann - New field labelSource
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 public class SitemapWidgetEvent extends SitemapEvent {
 
@@ -37,6 +38,7 @@ public class SitemapWidgetEvent extends SitemapEvent {
     public String state;
     public EnrichedItemDTO item;
     public boolean descriptionChanged;
+    public boolean confirmCmd;
 
     public SitemapWidgetEvent() {
     }

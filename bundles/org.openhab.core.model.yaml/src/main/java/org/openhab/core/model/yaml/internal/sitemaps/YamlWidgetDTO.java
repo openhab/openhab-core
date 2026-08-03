@@ -30,9 +30,10 @@ import org.openhab.core.items.ItemUtil;
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 /**
- * This is a data transfer object that is used to serialize widgets.
+ * This is a data transfer object that is used to serialize sitemap widgets.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 public class YamlWidgetDTO {
 
@@ -65,23 +66,23 @@ public class YamlWidgetDTO {
 
         OPTIONAL_FIELDS.put(FRAME, Set.of("item"));
         OPTIONAL_FIELDS.put(BUTTON_GRID, Set.of());
-        OPTIONAL_FIELDS.put(BUTTON, Set.of("releaseCommand", "stateless"));
+        OPTIONAL_FIELDS.put(BUTTON, Set.of("releaseCommand", "stateless", "confirmCmd"));
         OPTIONAL_FIELDS.put(GROUP, Set.of());
         OPTIONAL_FIELDS.put(TEXT, Set.of("item"));
-        OPTIONAL_FIELDS.put(COLOR_PICKER, Set.of());
-        OPTIONAL_FIELDS.put(COLOR_TEMPERATURE_PICKER, Set.of("min", "max"));
-        OPTIONAL_FIELDS.put(INPUT, Set.of("hint"));
-        OPTIONAL_FIELDS.put(SWITCH, Set.of("mappings"));
-        OPTIONAL_FIELDS.put(SELECTION, Set.of("mappings"));
-        OPTIONAL_FIELDS.put(SETPOINT, Set.of("min", "max", "step"));
-        OPTIONAL_FIELDS.put(SLIDER, Set.of("switchSupport", "releaseOnly", "min", "max", "step"));
+        OPTIONAL_FIELDS.put(COLOR_PICKER, Set.of("confirmCmd"));
+        OPTIONAL_FIELDS.put(COLOR_TEMPERATURE_PICKER, Set.of("min", "max", "confirmCmd"));
+        OPTIONAL_FIELDS.put(INPUT, Set.of("hint", "confirmCmd"));
+        OPTIONAL_FIELDS.put(SWITCH, Set.of("mappings", "confirmCmd"));
+        OPTIONAL_FIELDS.put(SELECTION, Set.of("mappings", "confirmCmd"));
+        OPTIONAL_FIELDS.put(SETPOINT, Set.of("min", "max", "step", "confirmCmd"));
+        OPTIONAL_FIELDS.put(SLIDER, Set.of("switchSupport", "releaseOnly", "min", "max", "step", "confirmCmd"));
         OPTIONAL_FIELDS.put(IMAGE, Set.of("item", "url", "refresh"));
         OPTIONAL_FIELDS.put(CHART,
                 Set.of("refresh", "service", "legend", "forceAsItem", "yAxisDecimalPattern", "interpolation"));
         OPTIONAL_FIELDS.put(VIDEO, Set.of("item", "encoding"));
         OPTIONAL_FIELDS.put(MAPVIEW, Set.of("height"));
         OPTIONAL_FIELDS.put(WEBVIEW, Set.of("item", "height"));
-        OPTIONAL_FIELDS.put(DEFAULT, Set.of("height"));
+        OPTIONAL_FIELDS.put(DEFAULT, Set.of("height", "confirmCmd"));
     }
 
     public String type;
@@ -115,6 +116,7 @@ public class YamlWidgetDTO {
     public Boolean stateless;
 
     public Object visibility;
+    public Object confirmCmd;
 
     public List<YamlWidgetDTO> widgets;
 
@@ -176,52 +178,9 @@ public class YamlWidgetDTO {
                     .formatted(minValue.doubleValue(), maxValue.doubleValue()));
         }
 
-        List<String> ruleErrors = new ArrayList<>();
-        List<String> ruleWarnings = new ArrayList<>();
-        if (visibility instanceof List<?> rules) {
-            for (Object r : rules) {
-                if (r instanceof YamlRuleWithAndConditionsDTO rule) {
-                    ok &= rule.isValid(ruleErrors, ruleWarnings);
-                    if (rule.value != null) {
-                        addToList(warnings, "rule in \"visibility\" field: unexpected \"value\" field is ignored");
-                    }
-                } else if (r instanceof YamlRuleWithUniqueConditionDTO rule) {
-                    ok &= rule.isValid(ruleErrors, ruleWarnings);
-                    if (rule.item == null && rule.operator == null && rule.argument == null) {
-                        addToList(errors,
-                                "invalid rule in \"visibility\" field: \"argument\" field missing while mandatory in condition");
-                        ok = false;
-                    }
-                    if (rule.value != null) {
-                        addToList(warnings, "rule in \"visibility\" field: unexpected \"value\" field is ignored");
-                    }
-                } else {
-                    addToList(errors, "invalid type for rule in \"visibility\" field");
-                    ok = false;
-                }
-            }
-        } else if (visibility instanceof YamlRuleWithAndConditionsDTO rule) {
-            ok &= rule.isValid(ruleErrors, ruleWarnings);
-            if (rule.value != null) {
-                addToList(warnings, "rule in \"visibility\" field: unexpected \"value\" field is ignored");
-            }
-        } else if (visibility instanceof YamlRuleWithUniqueConditionDTO rule) {
-            ok &= rule.isValid(ruleErrors, ruleWarnings);
-            if (rule.item == null && rule.operator == null && rule.argument == null) {
-                addToList(errors,
-                        "invalid rule in \"visibility\" field: \"argument\" field missing while mandatory in condition");
-                ok = false;
-            }
-            if (rule.value != null) {
-                addToList(warnings, "rule in \"visibility\" field: unexpected \"value\" field is ignored");
-            }
-        }
-        ruleErrors.forEach(error -> {
-            addToList(errors, "invalid rule in \"visibility\" field: %s".formatted(error));
-        });
-        ruleWarnings.forEach(warning -> {
-            addToList(warnings, "rule in \"visibility\" field: %s".formatted(warning));
-        });
+        ok &= isValidRule(errors, warnings, visibility, "visibility");
+        ok &= isValidField("confirmCmd", confirmCmd, errors, warnings); // Check if field is allowed for the widget type
+        ok &= isValidRule(errors, warnings, confirmCmd, "confirmCmd"); // Check if valid rule
 
         if (widgets != null) {
             if (!LINKABLE_WIDGETS.contains(type)) {
@@ -344,6 +303,64 @@ public class YamlWidgetDTO {
         return ok;
     }
 
+    private boolean isValidRule(@NonNull List<@NonNull String> errors, @NonNull List<@NonNull String> warnings,
+            Object parameter, String parameterName) {
+        boolean ok = true;
+        List<String> ruleErrors = new ArrayList<>();
+        List<String> ruleWarnings = new ArrayList<>();
+        if (parameter instanceof List<?> rules) {
+            for (Object r : rules) {
+                if (r instanceof YamlRuleWithAndConditionsDTO rule) {
+                    ok &= rule.isValid(ruleErrors, ruleWarnings);
+                    if (rule.value != null) {
+                        addToList(warnings,
+                                "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
+                    }
+                } else if (r instanceof YamlRuleWithUniqueConditionDTO rule) {
+                    ok &= rule.isValid(ruleErrors, ruleWarnings);
+                    if (rule.item == null && rule.operator == null && rule.argument == null) {
+                        addToList(errors,
+                                "invalid rule in \"%s\" field: \"argument\" field missing while mandatory in condition"
+                                        .formatted(parameterName));
+                        ok = false;
+                    }
+                    if (rule.value != null) {
+                        addToList(warnings,
+                                "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
+                    }
+                } else {
+                    addToList(errors, "invalid type for rule in \"%s\" field".formatted(parameterName));
+                    ok = false;
+                }
+            }
+        } else if (parameter instanceof YamlRuleWithAndConditionsDTO rule) {
+            ok &= rule.isValid(ruleErrors, ruleWarnings);
+            if (rule.value != null) {
+                addToList(warnings,
+                        "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
+            }
+        } else if (parameter instanceof YamlRuleWithUniqueConditionDTO rule) {
+            ok &= rule.isValid(ruleErrors, ruleWarnings);
+            if (rule.item == null && rule.operator == null && rule.argument == null) {
+                addToList(errors,
+                        "invalid rule in \"%s\" field: \"argument\" field missing while mandatory in condition"
+                                .formatted(parameterName));
+                ok = false;
+            }
+            if (rule.value != null) {
+                addToList(warnings,
+                        "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
+            }
+        }
+        ruleErrors.forEach(error -> {
+            addToList(errors, "invalid rule in \"%s\" field: %s".formatted(parameterName, error));
+        });
+        ruleWarnings.forEach(warning -> {
+            addToList(warnings, "rule in \"%s\" field: %s".formatted(parameterName, warning));
+        });
+        return ok;
+    }
+
     private void addToList(@Nullable List<@NonNull String> list, String value) {
         if (list != null) {
             list.add(value);
@@ -354,7 +371,7 @@ public class YamlWidgetDTO {
     public int hashCode() {
         return Objects.hash(type, item, label, icon, mappings, switchSupport, releaseOnly, height, min, max, step, hint,
                 url, refresh, encoding, service, period, legend, forceAsItem, yAxisDecimalPattern, interpolation, row,
-                column, command, releaseCommand, stateless, visibility, widgets);
+                column, command, releaseCommand, stateless, visibility, confirmCmd, widgets);
     }
 
     @Override
@@ -378,7 +395,8 @@ public class YamlWidgetDTO {
                 && Objects.equals(interpolation, other.interpolation) && Objects.equals(row, other.row)
                 && Objects.equals(column, other.column) && Objects.equals(command, other.command)
                 && Objects.equals(releaseCommand, other.releaseCommand) && Objects.equals(stateless, other.stateless)
-                && Objects.equals(visibility, other.visibility) && Objects.equals(widgets, other.widgets);
+                && Objects.equals(visibility, other.visibility) && Objects.equals(confirmCmd, other.confirmCmd)
+                && Objects.equals(widgets, other.widgets);
     }
 
     record ButtonPosition(Integer row, Integer column) {

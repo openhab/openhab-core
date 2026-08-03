@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
  * These sitemaps are automatically exposed to the {@link SitemapRegistry}.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapProvider.class, YamlSitemapProvider.class, YamlModelListener.class })
@@ -238,6 +239,12 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
             widget.setStaticIcon(staticIcon);
 
             addWidgetRules(widget.getVisibility(), widgetDTO.visibility, true);
+
+            if (widgetDTO.confirmCmd instanceof Boolean confirmCmd) {
+                widget.setConfirmCmd(confirmCmd);
+            } else {
+                addWidgetRules(widget.getConfirmCmdRules(), widgetDTO.confirmCmd, true);
+            }
 
             switch (widget) {
                 case Image imageWidget:

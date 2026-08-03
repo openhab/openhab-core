@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * A representation of a sitemap widget.
  *
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 public interface Widget {
@@ -175,6 +176,37 @@ public interface Widget {
      * @param visibilityRules
      */
     void setVisibility(List<Rule> visibilityRules);
+
+    /**
+     * Get the confirm cmd setting for the widget. If true, the user will be prompted to confirm commands.
+     *
+     * @return confirm cmd setting
+     */
+    boolean getConfirmCmd();
+
+    /**
+     * Set the confirm cmd setting for the widget. If true, the user will be prompted to confirm commands. If false
+     * or
+     * null, no confirmation is required.
+     *
+     * @param confirmCmd
+     */
+    void setConfirmCmd(@Nullable Boolean confirmCmd);
+
+    /**
+     * Get the confirm cmd rules. This method should return a modifiable list, allowing commands to the confirm
+     * change rules.
+     *
+     * @return confirm cmd rules
+     */
+    List<Rule> getConfirmCmdRules();
+
+    /**
+     * Replace the widget confirm cmd rules with a new list of confirm cmd rules.
+     *
+     * @param confirmCmdRules
+     */
+    void setConfirmCmdRules(List<Rule> confirmCmdRules);
 
     /**
      * Get type of widget.

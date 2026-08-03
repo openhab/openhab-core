@@ -32,6 +32,8 @@ import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.model.sitemap.sitemap.ModelBooleanRule;
+import org.openhab.core.model.sitemap.sitemap.ModelBooleanRuleList;
 import org.openhab.core.model.sitemap.sitemap.ModelButton;
 import org.openhab.core.model.sitemap.sitemap.ModelButtonDefinition;
 import org.openhab.core.model.sitemap.sitemap.ModelButtonDefinitionList;
@@ -39,6 +41,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelButtongrid;
 import org.openhab.core.model.sitemap.sitemap.ModelChart;
 import org.openhab.core.model.sitemap.sitemap.ModelColorArray;
 import org.openhab.core.model.sitemap.sitemap.ModelColorArrayList;
+import org.openhab.core.model.sitemap.sitemap.ModelColorpicker;
 import org.openhab.core.model.sitemap.sitemap.ModelColortemperaturepicker;
 import org.openhab.core.model.sitemap.sitemap.ModelCondition;
 import org.openhab.core.model.sitemap.sitemap.ModelDefault;
@@ -56,14 +59,13 @@ import org.openhab.core.model.sitemap.sitemap.ModelSitemap;
 import org.openhab.core.model.sitemap.sitemap.ModelSlider;
 import org.openhab.core.model.sitemap.sitemap.ModelSwitch;
 import org.openhab.core.model.sitemap.sitemap.ModelVideo;
-import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRule;
-import org.openhab.core.model.sitemap.sitemap.ModelVisibilityRuleList;
 import org.openhab.core.model.sitemap.sitemap.ModelWebview;
 import org.openhab.core.model.sitemap.sitemap.ModelWidget;
 import org.openhab.core.model.sitemap.sitemap.SitemapModel;
 import org.openhab.core.sitemap.Button;
 import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
+import org.openhab.core.sitemap.Colorpicker;
 import org.openhab.core.sitemap.Colortemperaturepicker;
 import org.openhab.core.sitemap.Condition;
 import org.openhab.core.sitemap.Default;
@@ -96,6 +98,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Mark Herwege - Separate registry from model
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(service = { SitemapProvider.class, DslSitemapProvider.class }, immediate = true)
@@ -203,6 +206,8 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                 case Switch switchWidget:
                     ModelSwitch modelSwitch = (ModelSwitch) modelWidget;
                     addWidgetMappings(switchWidget.getMappings(), modelSwitch.getMappings());
+                    widget.setConfirmCmd(Boolean.TRUE.equals(modelSwitch.getConfirmCmd()));
+                    addWidgetBooleanRules(widget.getConfirmCmdRules(), modelSwitch.getConfirmCmdRules());
                     break;
                 case Mapview mapviewWidget:
                     ModelMapview modelMapview = (ModelMapview) modelWidget;
@@ -215,25 +220,41 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     sliderWidget.setStep(modelSlider.getStep());
                     sliderWidget.setSwitchEnabled(modelSlider.isSwitchEnabled());
                     sliderWidget.setReleaseOnly(modelSlider.isReleaseOnly());
+                    widget.setConfirmCmd(Boolean.TRUE.equals(modelSlider.getConfirmCmd()));
+                    addWidgetBooleanRules(widget.getConfirmCmdRules(), modelSlider.getConfirmCmdRules());
                     break;
                 case Selection selectionWidget:
                     ModelSelection modelSelection = (ModelSelection) modelWidget;
                     addWidgetMappings(selectionWidget.getMappings(), modelSelection.getMappings());
+                    widget.setConfirmCmd(Boolean.TRUE.equals(modelSelection.getConfirmCmd()));
+                    addWidgetBooleanRules(widget.getConfirmCmdRules(), modelSelection.getConfirmCmdRules());
                     break;
                 case Input inputWidget:
                     ModelInput modelInput = (ModelInput) modelWidget;
                     inputWidget.setInputHint(modelInput.getInputHint());
+                    widget.setConfirmCmd(Boolean.TRUE.equals(modelInput.getConfirmCmd()));
+                    addWidgetBooleanRules(widget.getConfirmCmdRules(), modelInput.getConfirmCmdRules());
                     break;
                 case Setpoint setpointWidget:
                     ModelSetpoint modelSetpoint = (ModelSetpoint) modelWidget;
                     setpointWidget.setMinValue(modelSetpoint.getMinValue());
                     setpointWidget.setMaxValue(modelSetpoint.getMaxValue());
                     setpointWidget.setStep(modelSetpoint.getStep());
+                    widget.setConfirmCmd(Boolean.TRUE.equals(modelSetpoint.getConfirmCmd()));
+                    addWidgetBooleanRules(widget.getConfirmCmdRules(), modelSetpoint.getConfirmCmdRules());
+                    break;
+                case Colorpicker colorpickerWidget:
+                    ModelColorpicker modelColorpicker = (ModelColorpicker) modelWidget;
+                    widget.setConfirmCmd(Boolean.TRUE.equals(modelColorpicker.getConfirmCmd()));
+                    addWidgetBooleanRules(widget.getConfirmCmdRules(), modelColorpicker.getConfirmCmdRules());
                     break;
                 case Colortemperaturepicker colortemperaturepickerWidget:
                     ModelColortemperaturepicker modelColortemperaturepicker = (ModelColortemperaturepicker) modelWidget;
                     colortemperaturepickerWidget.setMinValue(modelColortemperaturepicker.getMinValue());
                     colortemperaturepickerWidget.setMaxValue(modelColortemperaturepicker.getMaxValue());
+                    widget.setConfirmCmd(Boolean.TRUE.equals(modelColortemperaturepicker.getConfirmCmd()));
+                    addWidgetBooleanRules(widget.getConfirmCmdRules(),
+                            modelColortemperaturepicker.getConfirmCmdRules());
                     break;
                 case Buttongrid buttongridWidget:
                     ModelButtongrid modelButtongrid = (ModelButtongrid) modelWidget;
@@ -246,10 +267,14 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     buttonWidget.setStateless(modelButton.isStateless());
                     buttonWidget.setCmd(modelButton.getCmd());
                     buttonWidget.setReleaseCmd(modelButton.getReleaseCmd());
+                    widget.setConfirmCmd(Boolean.TRUE.equals(modelButton.getConfirmCmd()));
+                    addWidgetBooleanRules(widget.getConfirmCmdRules(), modelButton.getConfirmCmdRules());
                     break;
                 case Default defaultWidget:
                     ModelDefault modelDefault = (ModelDefault) modelWidget;
                     defaultWidget.setHeight(modelDefault.getHeight());
+                    widget.setConfirmCmd(Boolean.TRUE.equals(modelDefault.getConfirmCmd()));
+                    addWidgetBooleanRules(widget.getConfirmCmdRules(), modelDefault.getConfirmCmdRules());
                     break;
                 default:
                     break;
@@ -273,7 +298,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                         .forEach(childModelWidget -> addWidget(childWidgets, childModelWidget, linkableWidget));
             }
 
-            addWidgetVisibilityRules(widget.getVisibility(), modelWidget.getVisibility());
+            addWidgetBooleanRules(widget.getVisibility(), modelWidget.getVisibility());
             addWidgetColorRules(widget.getLabelColor(), modelWidget.getLabelColor());
             addWidgetColorRules(widget.getValueColor(), modelWidget.getValueColor());
             addWidgetColorRules(widget.getIconColor(), modelWidget.getIconColor());
@@ -330,18 +355,6 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         return deprecated;
     }
 
-    private void addWidgetVisibilityRules(List<Rule> visibilityRules,
-            @Nullable ModelVisibilityRuleList modelVisibilityRuleList) {
-        if (modelVisibilityRuleList != null) {
-            EList<ModelVisibilityRule> modelVisibilityRules = modelVisibilityRuleList.getElements();
-            modelVisibilityRules.forEach(modelVisibilityRule -> {
-                Rule visibilityRule = sitemapFactory.createRule();
-                addRuleConditions(visibilityRule.getConditions(), modelVisibilityRule.getConditions());
-                visibilityRules.add(visibilityRule);
-            });
-        }
-    }
-
     private void addWidgetColorRules(List<Rule> colorRules, @Nullable ModelColorArrayList modelColorRuleList) {
         if (modelColorRuleList != null) {
             EList<ModelColorArray> modelColorRules = modelColorRuleList.getElements();
@@ -362,6 +375,17 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                 addRuleConditions(iconRule.getConditions(), modelIconRule.getConditions());
                 iconRule.setArgument(modelIconRule.getArg());
                 iconRules.add(iconRule);
+            });
+        }
+    }
+
+    private void addWidgetBooleanRules(List<Rule> booleanRules, @Nullable ModelBooleanRuleList modelBooleanRuleList) {
+        if (modelBooleanRuleList != null) {
+            EList<ModelBooleanRule> modelBooleanRules = modelBooleanRuleList.getElements();
+            modelBooleanRules.forEach(modelBooleanRule -> {
+                Rule booleanRule = sitemapFactory.createRule();
+                addRuleConditions(booleanRule.getConditions(), modelBooleanRule.getConditions());
+                booleanRules.add(booleanRule);
             });
         }
     }

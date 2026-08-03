@@ -115,6 +115,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Implement sitemap registry
  * @author Florian Hotze - Refactor getLabel(Widget w) to use {@link ItemDisplayStateUtil}
  * @author Laurent Garnier - Change widget id coding to support any number of widgets in frame/page
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -1326,6 +1327,23 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         logger.debug("Widget {} is not visible.", w.getLabel());
 
+        return false;
+    }
+
+    @Override
+    public boolean getConfirmCmd(Widget w) {
+        // Default to confirm cmd parameter if no rules defined
+        List<Rule> ruleList = w.getConfirmCmdRules();
+        logger.debug("Checking confirm command parameter for widget '{}'.", w.getLabel());
+
+        if (ruleList.isEmpty()) {
+            return w.getConfirmCmd();
+        }
+        for (Rule rule : ruleList) {
+            if (allConditionsOk(rule.getConditions(), w)) {
+                return true;
+            }
+        }
         return false;
     }
 
