@@ -82,10 +82,10 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
     private boolean deactivated;
 
     // All access must be guarded by "addressQueue"
-    private final Queue<QueueTaskHandler<@Nullable Void, InetAddress>> addressQueue = new LinkedList<>();
+    final Queue<QueueTaskHandler<@Nullable Void, InetAddress>> addressQueue = new LinkedList<>();
 
     // All access must be guarded by "serviceQueue"
-    private final Queue<QueueTaskHandler<@Nullable Void, ServiceDescription>> serviceQueue = new LinkedList<>();
+    final Queue<QueueTaskHandler<@Nullable Void, ServiceDescription>> serviceQueue = new LinkedList<>();
 
     private final NetworkAddressService networkAddressService;
 
@@ -357,8 +357,8 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
         }
     }
 
-    private <@Nullable E, I> void submitToQueue(Queue<QueueTaskHandler<E, I>> queue, I identifier,
-            @Nullable TaskAction action, Callable<E> task) {
+    <@Nullable E, I> void submitToQueue(Queue<QueueTaskHandler<E, I>> queue, I identifier, @Nullable TaskAction action,
+            Callable<E> task) {
         QueueTaskHandler<E, I> taskHandler = new QueueTaskHandler<>(queue, identifier, action, task);
 
         synchronized (queue) {
@@ -531,7 +531,7 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
         }
     }
 
-    private class QueueTaskHandler<@Nullable E, I> implements Callable<E> {
+    class QueueTaskHandler<@Nullable E, I> implements Callable<E> {
 
         private final Queue<QueueTaskHandler<E, I>> queue;
         private final Callable<E> task;
@@ -599,14 +599,14 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
                 builder.append("identifier=").append(identifier).append(", ");
             }
             if (action != null) {
-                builder.append("action=").append(action);
+                builder.append("action=").append(action).append(", ");
             }
-            builder.append("]");
+            builder.append("active=").append(active).append("]");
             return builder.toString();
         }
     }
 
-    private static enum TaskAction {
+    static enum TaskAction {
         REGISTER,
         UNREGISTER;
 
