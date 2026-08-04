@@ -241,7 +241,7 @@ public class LightModel {
         RGB_C_W,
         /** as RGB_W but ignores brightness (i.e. only HS parts of HSBType) */
         RGB_W_NO_BRIGHTNESS,
-        /* as RGB_C_W but ignores brightness (i.e. only HS parts of HSBType) */
+        /** as RGB_C_W but ignores brightness (i.e. only HS parts of HSBType) */
         RGB_C_W_NO_BRIGHTNESS
     }
 
@@ -540,7 +540,7 @@ public class LightModel {
      * @throws IllegalArgumentException if the minimumBrightness parameter is out of range.
      */
     public synchronized void configSetMinimumOnBrightness(double minimumOnBrightness) throws IllegalArgumentException {
-        if (minimumOnBrightness < 0.1 || minimumOnBrightness > 10.0) {
+        if (minimumOnBrightness < 0.0 || minimumOnBrightness > 10.0) {
             throw new IllegalArgumentException(
                     "Minimum brightness '%.1f' out of range [0.1..10.0]".formatted(minimumOnBrightness));
         }
@@ -763,7 +763,7 @@ public class LightModel {
      *
      * <li>All other values of {@link #rgbDataType}: The return result depends on the current brightness. In other
      * words the values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
-     * <ul>
+     * </ul>
      *
      * @return double[] representing the RGB(C)(W) components in range [0..255.0]
      * @throws IllegalStateException if the RGB data type is not compatible with the current LED operating mode.
@@ -1061,7 +1061,7 @@ public class LightModel {
      * <li>All other values of {@link #rgbDataType}: both [255,0,0] and [127.5,0,0] change the color to RED and the
      * former changes the brightness to 100 percent, whereas the latter changes it to 50 percent. In other words the
      * values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
-     * <ul>
+     * </ul>
      *
      * @param rgbxParameter an array of double representing RGB or RGBW values in range [0.0..255.0]
      * @throws IllegalArgumentException if the array length is not 3, 4, or 5 depending on the light's capabilities,
@@ -1231,12 +1231,12 @@ public class LightModel {
      * @param brightness the brightness {@link PercentType} to set.
      */
     private void zHandleBrightness(PercentType brightness) {
-        if (brightness.doubleValue() >= minimumOnBrightness) {
+        if (brightness.doubleValue() > minimumOnBrightness) {
             cachedBrightness = brightness;
             cachedHSB = new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), brightness);
             cachedOnOff = OnOffType.ON;
         } else {
-            if (OnOffType.ON == cachedOnOff && cachedHSB.getBrightness().doubleValue() >= minimumOnBrightness) {
+            if (OnOffType.ON == cachedOnOff && cachedHSB.getBrightness().doubleValue() > minimumOnBrightness) {
                 cachedBrightness = cachedHSB.getBrightness(); // cache the last 'ON' state brightness
             }
             cachedHSB = new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.ZERO);
