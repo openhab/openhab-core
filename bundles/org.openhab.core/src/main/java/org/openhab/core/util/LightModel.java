@@ -64,7 +64,7 @@ import org.openhab.core.types.UnDefType;
  * Also set {@link #rgbDataType} to the chosen RGB data type RGB, RGBW, RGBCW etc.
  * And optionally set the following configuration parameters:
  * <ul>
- * <li>Optionally override {@link #minimumOnBrightness} to a minimum brightness percent in the range [0.1..10.0]
+ * <li>Optionally override {@link #minimumOnBrightness} to a minimum brightness percent in the range [0.0..10.0]
  * percent, to consider as being "ON". The default is 1 percent.</li>
  * <li>Optionally override {@link #mirekControlWarmest} to a 'warmest' white color temperature in the range
  * [{@link #mirekControlCoolest}..1000.0] Mirek/Mired. The default is 500 Mirek/Mired.</li>
@@ -542,7 +542,7 @@ public class LightModel {
     public synchronized void configSetMinimumOnBrightness(double minimumOnBrightness) throws IllegalArgumentException {
         if (minimumOnBrightness < 0.0 || minimumOnBrightness > 10.0) {
             throw new IllegalArgumentException(
-                    "Minimum brightness '%.1f' out of range [0.1..10.0]".formatted(minimumOnBrightness));
+                    "Minimum brightness '%.1f' out of range [0.0..10.0]".formatted(minimumOnBrightness));
         }
         this.minimumOnBrightness = minimumOnBrightness;
     }
