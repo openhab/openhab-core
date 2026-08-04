@@ -19,15 +19,19 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -37,6 +41,7 @@ import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.io.transport.mdns.MDNSService;
@@ -76,6 +81,12 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
     // All access must be guarded by "this"
     private boolean deactivated;
 
+    // All access must be guarded by "addressQueue"
+    private final Queue<QueueTaskHandler<@Nullable Void, InetAddress>> addressQueue = new LinkedList<>();
+
+    // All access must be guarded by "serviceQueue"
+    private final Queue<QueueTaskHandler<@Nullable Void, ServiceDescription>> serviceQueue = new LinkedList<>();
+
     private final NetworkAddressService networkAddressService;
 
     private final ExecutorService executor = ThreadPoolManager.getPool(MDNS_POOL_NAME);
@@ -84,14 +95,8 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
     public MDNSClientImpl(final @Reference NetworkAddressService networkAddressService) {
         this.networkAddressService = networkAddressService;
         networkAddressService.addNetworkAddressChangeListener(this);
-
-        // Even though each JmDNS instance is created using the executor, testing shows that getAllInetAddresses()
-        // itself can be slow, so there's no reason why the bundle activation should have to wait for that.
-        executor.execute(() -> {
-            for (InetAddress address : getAllInetAddresses()) {
-                createJmDNSByAddress(address);
-            }
-        });
+        logger.debug("mDNS: Starting services");
+        updateNetworkAddresses();
     }
 
     private Set<InetAddress> getAllInetAddresses() {
@@ -169,6 +174,7 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
     @Deactivate
     public void deactivate() {
         networkAddressService.removeNetworkAddressChangeListener(this);
+        logger.debug("mDNS: Stopping services");
         synchronized (this) {
             deactivated = true;
             activeServices.clear();
@@ -197,19 +203,7 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
 
     @Override
     public void registerService(ServiceDescription description) {
-        executor.execute(() -> {
-            List<JmDNS> instances = null;
-            synchronized (MDNSClientImpl.this) {
-                if (!deactivated && activeServices.add(description)) {
-                    instances = List.copyOf(jmdnsInstances.values());
-                }
-            }
-            if (instances != null) {
-                for (JmDNS instance : instances) {
-                    registerServiceInstance(instance, description);
-                }
-            }
-        });
+        submitToQueue(serviceQueue, description, TaskAction.REGISTER, new RegisterService(description));
     }
 
     private void registerServiceInstance(JmDNS instance, ServiceDescription description) {
@@ -224,7 +218,7 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
             }
         }
 
-        // Create one ServiceInfo object for the JmDNS instance
+        // Create a ServiceInfo object for this JmDNS instance
         ServiceInfo serviceInfo = ServiceInfo.create(description.serviceType, description.serviceName,
                 description.servicePort, 0, 0, description.serviceProperties);
         try {
@@ -238,19 +232,7 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
 
     @Override
     public void unregisterService(ServiceDescription description) {
-        executor.execute(() -> {
-            List<JmDNS> instances = null;
-            synchronized (MDNSClientImpl.this) {
-                if (activeServices.remove(description)) {
-                    instances = List.copyOf(jmdnsInstances.values());
-                }
-            }
-            if (instances != null) {
-                for (JmDNS instance : instances) {
-                    unregisterServiceInstance(instance, description);
-                }
-            }
-        });
+        submitToQueue(serviceQueue, description, TaskAction.UNREGISTER, new UnregisterService(description));
     }
 
     private void unregisterServiceInstance(JmDNS instance, ServiceDescription description) {
@@ -344,15 +326,144 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
         return c;
     }
 
-    private void createJmDNSByAddress(InetAddress address) {
-        executor.execute(() -> {
+    @Override
+    public void onChanged(List<CidrAddress> added, List<CidrAddress> removed) {
+        logger.debug("mDNS: IP address change: added {}, removed {}", added, removed);
+        updateNetworkAddresses();
+    }
+
+    private void updateNetworkAddresses() {
+        Set<InetAddress> add = getAllInetAddresses();
+        List<InetAddress> remove = new ArrayList<>();
+        synchronized (this) {
+            for (InetAddress addr : jmdnsInstances.keySet()) {
+                if (!add.contains(addr)) {
+                    // IP address no longer in use, unregister
+                    remove.add(addr);
+                } else {
+                    // The IP was and still is in use, leave it alone
+                    add.remove(addr);
+                }
+            }
+        }
+
+        for (InetAddress addr : remove) {
+            submitToQueue(addressQueue, addr, TaskAction.UNREGISTER, new DisposeJmDNSTask(addr));
+        }
+
+        // Any remaining addresses at this point isn't registered, so let's register them
+        for (InetAddress addr : add) {
+            submitToQueue(addressQueue, addr, TaskAction.REGISTER, new CreateJmDNSTask(addr));
+        }
+    }
+
+    private <@Nullable E, I> void submitToQueue(Queue<QueueTaskHandler<E, I>> queue, I identifier,
+            @Nullable TaskAction action, Callable<E> task) {
+        QueueTaskHandler<E, I> taskHandler = new QueueTaskHandler<>(queue, identifier, action, task);
+
+        synchronized (queue) {
+            boolean canceled = false;
+            boolean isInQueue = false;
+
+            QueueTaskHandler<E, I> queuedTask;
+            for (Iterator<QueueTaskHandler<E, I>> iterator = queue.iterator(); !canceled && iterator.hasNext();) {
+                queuedTask = iterator.next();
+                if (identifier.equals(queuedTask.getIdentifier())) {
+                    if (queuedTask.isActive()) {
+                        isInQueue = true;
+                    } else if (!canceled && action != null && action.isOppositeOf(queuedTask.getAction())) {
+                        iterator.remove();
+                        canceled = true;
+                    }
+                }
+            }
+
+            if (canceled) {
+                logger.debug("mDNS: {} canceled out opposite task for {}", action, identifier);
+                return;
+            }
+
+            queue.offer(taskHandler);
+
+            // If identifier not in the queue, execute directly
+            if (!isInQueue) {
+                taskHandler.active = true;
+                executor.submit(taskHandler);
+            }
+        }
+    }
+
+    private record ServiceListenerRegistration(String type, ServiceListener listener) {
+    }
+
+    private class RegisterService implements Callable<Void> {
+
+        private final @NonNull ServiceDescription serviceDescription;
+
+        public RegisterService(@NonNull ServiceDescription serviceDescription) {
+            this.serviceDescription = serviceDescription;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            List<JmDNS> instances = null;
+            synchronized (MDNSClientImpl.this) {
+                if (!deactivated && activeServices.add(serviceDescription)) {
+                    instances = List.copyOf(jmdnsInstances.values());
+                }
+            }
+            if (instances != null) {
+                for (JmDNS instance : instances) {
+                    registerServiceInstance(instance, serviceDescription);
+                }
+            }
+            return null;
+        }
+    }
+
+    private class UnregisterService implements Callable<Void> {
+
+        private final @NonNull ServiceDescription serviceDescription;
+
+        public UnregisterService(@NonNull ServiceDescription serviceDescription) {
+            this.serviceDescription = serviceDescription;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            List<JmDNS> instances = null;
+            synchronized (MDNSClientImpl.this) {
+                if (activeServices.remove(serviceDescription)) {
+                    instances = List.copyOf(jmdnsInstances.values());
+                }
+            }
+            if (instances != null) {
+                for (JmDNS instance : instances) {
+                    unregisterServiceInstance(instance, serviceDescription);
+                }
+            }
+            return null;
+        }
+    }
+
+    private class CreateJmDNSTask implements Callable<Void> {
+
+        private final @NonNull InetAddress address;
+
+        public CreateJmDNSTask(@NonNull InetAddress address) {
+            this.address = address;
+        }
+
+        @Override
+        public Void call() throws Exception {
             try {
+                logger.debug("mDNS: Starting services for IP address '{}'", address.getHostAddress());
                 JmDNS jmdns = JmDNS.create(address, null);
                 JmDNS oldJmdns;
                 Set<ServiceDescription> services;
                 boolean deactivated;
                 synchronized (MDNSClientImpl.this) {
-                    deactivated = this.deactivated;
+                    deactivated = MDNSClientImpl.this.deactivated;
                     if (deactivated) {
                         oldJmdns = jmdns;
                         services = Set.of();
@@ -383,51 +494,124 @@ public class MDNSClientImpl implements MDNSClient, MDNSService, NetworkAddressCh
                                 address.getHostAddress());
                     }
                 }
+                return null;
             } catch (IOException e) {
                 logger.debug("mDNS: JmDNS instantiation failed ({})!", address.getHostAddress());
+                throw e;
             }
-        });
+        }
     }
 
-    @Override
-    public void onChanged(List<CidrAddress> added, List<CidrAddress> removed) {
-        logger.debug("mDNS: IP address change: added {}, removed {}", added, removed);
+    private class DisposeJmDNSTask implements Callable<Void> {
 
-        Set<InetAddress> filteredAddresses = getAllInetAddresses();
+        private final @NonNull InetAddress address;
 
-        synchronized (this) {
-            Entry<InetAddress, JmDNS> entry;
-            InetAddress addr;
+        public DisposeJmDNSTask(@NonNull InetAddress address) {
+            this.address = address;
+        }
+
+        @Override
+        public Void call() throws Exception {
             JmDNS inst;
-            for (Iterator<@NonNull Entry<InetAddress, JmDNS>> iterator = jmdnsInstances.entrySet().iterator(); iterator
-                    .hasNext();) {
-                entry = iterator.next();
-                addr = entry.getKey();
-                inst = entry.getValue();
-                if (!filteredAddresses.contains(addr)) {
-                    // IP address no longer in use, unregister
-                    logger.debug("mDNS: Stopping services for removed IP address '{}'", addr.getHostAddress());
-                    for (ServiceDescription description : activeServices) {
-                        unregisterServiceInstance(inst, description);
-                    }
+            synchronized (MDNSClientImpl.this) {
+                inst = jmdnsInstances.remove(address);
+                if (inst != null) {
+                    logger.debug("mDNS: Stopping services for removed IP address '{}'", address.getHostAddress());
                     closeQuietly(inst);
                     logger.debug("mDNS: Services have been stopped ({} for IP {})", inst.getName(),
-                            addr.getHostAddress());
-                    iterator.remove();
+                            address.getHostAddress());
                 } else {
-                    // The IP was and still is in use, leave it alone
-                    filteredAddresses.remove(addr);
+                    logger.debug(
+                            "mDNS: Trying to stop services for removed IP address '{}', but the instance wasn't found",
+                            address.getHostAddress());
+                }
+            }
+
+            return null;
+        }
+    }
+
+    private class QueueTaskHandler<@Nullable E, I> implements Callable<E> {
+
+        private final Queue<QueueTaskHandler<E, I>> queue;
+        private final Callable<E> task;
+        private final I identifier;
+        private final @Nullable TaskAction action;
+
+        // All access must be guarded by "queue"
+        private boolean active;
+
+        public QueueTaskHandler(Queue<QueueTaskHandler<E, I>> queue, I identifier, @Nullable TaskAction action,
+                Callable<E> task) {
+            this.queue = queue;
+            this.task = task;
+            this.identifier = identifier;
+            this.action = action;
+        }
+
+        public I getIdentifier() {
+            return identifier;
+        }
+
+        public TaskAction getAction() {
+            return action;
+        }
+
+        // All access must be guarded by "queue"
+        public boolean isActive() {
+            return active;
+        }
+
+        @Override
+        public @Nullable E call() throws Exception {
+            try {
+                return task.call();
+            } catch (Exception e) {
+                logger.debug("mDNS: Queued task {} failed for identifier {}: {}", action, identifier, e.getMessage());
+                logger.trace("", e);
+                throw e;
+            } finally {
+                synchronized (queue) {
+                    queue.remove(this);
+
+                    QueueTaskHandler<E, I> nextTask = null;
+                    QueueTaskHandler<E, I> queuedTask;
+                    for (Iterator<QueueTaskHandler<E, I>> iterator = queue.iterator(); iterator.hasNext();) {
+                        queuedTask = iterator.next();
+                        if (queuedTask.identifier.equals(this.identifier)) {
+                            nextTask = queuedTask;
+                            break;
+                        }
+                    }
+
+                    if (nextTask != null) {
+                        nextTask.active = true;
+                        executor.submit(nextTask);
+                    }
                 }
             }
         }
 
-        // Any remaining addresses in filteredAddresses at this point isn't registered, so let's register them
-        for (InetAddress addr : filteredAddresses) {
-            logger.debug("mDNS: Starting services for new IP address '{}'", addr.getHostAddress());
-            createJmDNSByAddress(addr);
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(getClass().getSimpleName()).append(" [");
+            if (identifier != null) {
+                builder.append("identifier=").append(identifier).append(", ");
+            }
+            if (action != null) {
+                builder.append("action=").append(action);
+            }
+            builder.append("]");
+            return builder.toString();
         }
     }
 
-    private record ServiceListenerRegistration(String type, ServiceListener listener) {
-    };
+    private static enum TaskAction {
+        REGISTER,
+        UNREGISTER;
+
+        public boolean isOppositeOf(@Nullable TaskAction other) {
+            return (this == REGISTER && other == UNREGISTER) || (this == UNREGISTER && other == REGISTER);
+        }
+    }
 }
