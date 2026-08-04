@@ -31,12 +31,14 @@ public interface LLMToolRegistry extends Registry<LLMTool, String> {
      * Retrieves a {@link LLMTool} collection.
      * If no services match the provided ids returns an empty list.
      *
-     * @param ids Comma separated list of LLM tool ids to use
+     * @param ids Comma separated list of LLM tool ids to get, or <code>*</code> wildcard to get all available tools
      * @return a list of {@link LLMTool} or an empty list if none of them is available
      */
     default List<LLMTool> getByIds(@Nullable String ids) {
-        return ids == null || ids.isBlank() ? List.of()
-                : getByIds(Arrays.stream(ids.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
+        if (ids == null || ids.isBlank()) {
+            return List.of();
+        }
+        return getByIds(Arrays.stream(ids.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
     }
 
     /**

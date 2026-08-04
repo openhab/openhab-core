@@ -12,7 +12,7 @@
  */
 package org.openhab.core.voice.text;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -26,7 +26,6 @@ import org.openhab.core.voice.text.interpreter.llm.LLMTool;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public record InterpreterContext(Conversation conversation, List<LLMTool> tools, @Nullable String locationItem,
+public record InterpreterContext(Conversation conversation, Collection<LLMTool> tools, @Nullable String locationItem,
         @Nullable String systemPrompt) {
-
 }
