@@ -1,0 +1,1 @@
+REWRITE_SYSTEM "https://openhab.org/schemas/" "../../org.openhab.core.config.core/schema/"
