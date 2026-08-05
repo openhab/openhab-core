@@ -781,7 +781,7 @@ public class LightModel {
              * If the light has a single white led then its value is determined by the brightness only.
              */
             if (RGB_W_TYPES.contains(rgbDataType)) {
-                double w = cachedHSB.getBrightness().doubleValue() * 255.0 / 100.0;
+                double w = hsb.getBrightness().doubleValue() * 255.0 / 100.0;
                 return new double[] { 0.0, 0.0, 0.0, w };
             }
 
@@ -797,7 +797,7 @@ public class LightModel {
                 } else {
                     ratio = 0.5;
                 }
-                double bri = cachedHSB.getBrightness().doubleValue() * 255.0 / 100.0;
+                double bri = hsb.getBrightness().doubleValue() * 255.0 / 100.0;
                 double cool = bri * ratio;
                 double warm = bri - cool;
                 return new double[] { 0.0, 0.0, 0.0, cool, warm };
@@ -1086,10 +1086,11 @@ public class LightModel {
         }
 
         HSBType hsb;
+        Double mirek;
+        PercentType oldBri = cachedHSB.getBrightness();
         switch (ledOperatingMode) {
             case WHITE_ONLY:
                 double white;
-                double mirek;
                 if (rgbxParameter.length == 5) {
                     /*
                      * We have both a C and a W channel so we create a pure white whose brightness
@@ -1149,17 +1150,20 @@ public class LightModel {
                 hsb = ColorUtil.rgbToHsb(Arrays.stream(rgbx).map(d -> d * 100.0 / 255.0)
                         .mapToObj(d -> zPercentTypeFrom(d)).toArray(PercentType[]::new));
 
-                if (NO_BRIGHTNESS_TYPES.contains(rgbDataType)) {
-                    hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedHSB.getBrightness());
-                }
+                mirek = zMirekFrom(hsb);
                 break;
 
             default:
                 return; // safe coding but will never happen
         }
 
-        cachedHSB = hsb;
-        cachedMirek = zMirekFrom(hsb);
+        if (NO_BRIGHTNESS_TYPES.contains(rgbDataType)) {
+            cachedHSB = new HSBType(hsb.getHue(), hsb.getSaturation(), oldBri);
+        } else {
+            cachedHSB = hsb;
+            zHandleBrightness(hsb.getBrightness()); // refresh cached brightness and on/off state
+        }
+        cachedMirek = mirek;
     }
 
     /**
