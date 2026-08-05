@@ -149,10 +149,10 @@ public class Matchers {
      *
      * <pre>
      * // Direct matching
-     * assertThat(collection, new WaitUntil<>(hasSize(3), 5000L));
+     * assertThat(collection, new WaitUntil&lt;&gt;(hasSize(3), 5000L));
      *
      * // Property extraction
-     * assertThat(myObject, new WaitUntil<>("status", equalTo("READY"), 5000L));
+     * assertThat(myObject, new WaitUntil&lt;&gt;("status", equalTo("READY"), 5000L));
      * </pre>
      *
      * @param <T> the type of the value being matched.
