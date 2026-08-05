@@ -1016,6 +1016,7 @@ public class LightModelTest {
         assertEquals(255.0, before[0], 1);
 
         lsm.setLedOperatingMode(LedOperatingMode.WHITE_ONLY);
+        lsm.setBrightness(50.0);
         double[] rgbw = lsm.getRGBx();
 
         // RGB channels must be zero
@@ -1024,7 +1025,7 @@ public class LightModelTest {
         assertEquals(0.0, rgbw[2], 0.01);
 
         // White channel must carry full brightness
-        assertEquals(255.0, rgbw[3], 1.0);
+        assertEquals(127.5, rgbw[3], 1.0);
     }
 
     @Test
@@ -1036,6 +1037,7 @@ public class LightModelTest {
         assertEquals(255.0, before[0], 1);
 
         lsm.setLedOperatingMode(LedOperatingMode.WHITE_ONLY);
+        lsm.setBrightness(50.0);
         double[] rgbcw = lsm.getRGBx();
 
         // RGB channels must be zero
@@ -1044,7 +1046,7 @@ public class LightModelTest {
         assertEquals(0.0, rgbcw[2], 0.01);
 
         // CW + WW must equal full brightness
-        assertEquals(255.0, rgbcw[3] + rgbcw[4], 1.0);
+        assertEquals(127.5, rgbcw[3] + rgbcw[4], 1.0);
     }
 
     @Test
@@ -1057,6 +1059,7 @@ public class LightModelTest {
         assertEquals(255.0, before[0], 1);
 
         lsm.setLedOperatingMode(LedOperatingMode.WHITE_ONLY);
+        lsm.setBrightness(50.0);
         double[] rgbw = lsm.getRGBx();
 
         // RGB channels must be zero
@@ -1078,6 +1081,7 @@ public class LightModelTest {
         assertEquals(255.0, before[0], 1);
 
         lsm.setLedOperatingMode(LedOperatingMode.WHITE_ONLY);
+        lsm.setBrightness(50.0);
         double[] rgbcw = lsm.getRGBx();
 
         // RGB channels must be zero
@@ -1130,11 +1134,11 @@ public class LightModelTest {
                 LightModel.RgbDataType.RGB_W_NO_BRIGHTNESS, null, null, null, null, 153.0, 500.0);
         lsm.setLedOperatingMode(LightModel.LedOperatingMode.WHITE_ONLY);
 
+        double expectedBrightness = 88.0;
+        lsm.setBrightness(expectedBrightness);
+
         double[] rgbw = new double[] { 0, 0, 0, 200 };
         lsm.setRGBx(rgbw);
-
-        double expectedBrightness = 99.0;
-        lsm.setBrightness(expectedBrightness);
 
         double expectedMirek = (153.0 + 500.0) / 2.0;
 
@@ -1148,11 +1152,11 @@ public class LightModelTest {
                 LightModel.RgbDataType.RGB_C_W_NO_BRIGHTNESS, null, null, null, null, 153.0, 500.0);
         lsm.setLedOperatingMode(LightModel.LedOperatingMode.WHITE_ONLY);
 
+        double expectedBrightness = 33.0;
+        lsm.setBrightness(expectedBrightness);
+
         double[] rgbcw = new double[] { 0, 0, 0, 100, 50 };
         lsm.setRGBx(rgbcw);
-
-        double expectedBrightness = 99.0;
-        lsm.setBrightness(expectedBrightness);
 
         double cw = 100;
         double ww = 50;
