@@ -23,6 +23,8 @@ import java.text.DecimalFormatSymbols;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.measure.quantity.Temperature;
@@ -43,6 +45,9 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.items.CallItem;
 import org.openhab.core.library.items.ColorItem;
 import org.openhab.core.library.items.ContactItem;
@@ -110,17 +115,24 @@ public class ItemUIRegistryImplTest {
     // we need to get the decimal separator of the default locale for our tests
     private static final char SEP = (new DecimalFormatSymbols().getDecimalSeparator());
     private static final String ITEM_NAME = "Item";
+    private static final String GROUP_ITEM_NAME = "GroupItem";
     private static final String SITEMAP_NAME = "Sitemap";
     private static final String DEFAULT_TIME_ZONE = "GMT-6";
 
     private @NonNullByDefault({}) ItemUIRegistryImpl uiRegistry;
 
     private @Mock @NonNullByDefault({}) ItemRegistry registryMock;
+    private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
     private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactoryMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) Sitemap sitemapMock;
     private @Mock @NonNullByDefault({}) Widget widgetMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
+
+    private @Mock @NonNullByDefault({}) GroupItem groupItemMock;
+    private @Mock @NonNullByDefault({}) SwitchItem switchItemMock; // Will have Switch as default widget
+    private @Mock @NonNullByDefault({}) DimmerItem dimmerItemMock; // Will have Slider as default widget
+    private @Mock @NonNullByDefault({}) ContactItem contactItemMock; // Will have Text as default widget
 
     @BeforeAll
     public static void setUpClass() {
@@ -153,7 +165,8 @@ public class ItemUIRegistryImplTest {
     @BeforeEach
     @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registryMock, sitemapFactoryMock, timeZoneProviderMock);
+        uiRegistry = new ItemUIRegistryImpl(registryMock, metadataRegistryMock, sitemapFactoryMock,
+                timeZoneProviderMock);
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
@@ -162,6 +175,7 @@ public class ItemUIRegistryImplTest {
         TimeZone.setDefault(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
 
         setupSitemapFactoryMock();
+        setupGroupItemMock();
     }
 
     private void setupSitemapFactoryMock() {
@@ -175,6 +189,20 @@ public class ItemUIRegistryImplTest {
         when(sitemapFactoryMock.createWidget("Selection")).thenReturn(selectionMock);
 
         when(sitemapFactoryMock.createMapping()).thenReturn(mappingMock);
+    }
+
+    private void setupGroupItemMock() throws Exception {
+        when(switchItemMock.getName()).thenReturn("Zebra");
+        when(switchItemMock.getLabel()).thenReturn("Alpha");
+        when(switchMock.getItem()).thenReturn("Zebra");
+        when(dimmerItemMock.getName()).thenReturn("Alpha");
+        when(dimmerItemMock.getLabel()).thenReturn("Zebra");
+        when(sliderMock.getItem()).thenReturn("Alpha");
+        when(contactItemMock.getName()).thenReturn("Mango"); // No label
+        when(textMock.getItem()).thenReturn("Mango");
+        when(groupItemMock.getMembers()).thenReturn(Set.of(switchItemMock, dimmerItemMock, contactItemMock));
+        when(registryMock.getItem(GROUP_ITEM_NAME)).thenReturn(groupItemMock);
+        when(groupMock.getItem()).thenReturn(GROUP_ITEM_NAME);
     }
 
     @Test
@@ -1528,5 +1556,63 @@ public class ItemUIRegistryImplTest {
         assertNull(uiRegistry.getWidget(sitemapMock, "01"));
         assertNull(uiRegistry.getWidget(sitemapMock, "0002"));
         assertNull(uiRegistry.getWidget(sitemapMock, "000101"));
+    }
+
+    private void setSorting(String mode) throws Exception {
+        uiRegistry.modified(Map.of("groupMembersSorting", mode));
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByName() throws Exception {
+        setSorting("NAME");
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        assertEquals(List.of("Alpha", "Mango", "Zebra"), children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByLabel() throws Exception {
+        setSorting("LABEL");
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        // switchItem label "Alpha", dimmerItem label "Zebra", contactItem no label -> falls back to name "Mango"
+        assertEquals(List.of("Zebra", "Mango", "Alpha"), // Alpha(label) < Mango(name-fallback) < Zebra(label)
+                children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByMetadataWithValues() throws Exception {
+        setSorting("METADATA");
+        setOrderMetadata(switchItemMock.getName(), "2");
+        setOrderMetadata(dimmerItemMock.getName(), "1");
+        setOrderMetadata(contactItemMock.getName(), "3");
+
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        assertEquals(List.of("Alpha", "Zebra", "Mango"), children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByMetadataMissingValuesGoLast() throws Exception {
+        setSorting("METADATA");
+        setOrderMetadata(dimmerItemMock.getName(), "1"); // only one member has metadata
+
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        // memberB (has metadata) first, then remaining two by name fallback: Mango, Zebra
+        assertEquals(List.of("Alpha", "Mango", "Zebra"), children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByMetadataStringNotNumericComparison() throws Exception {
+        setSorting("METADATA");
+        setOrderMetadata(switchItemMock.getName(), "10");
+        setOrderMetadata(dimmerItemMock.getName(), "2");
+        setOrderMetadata(contactItemMock.getName(), "1");
+
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        // Lexicographic string compare: "1" < "10" < "2"
+        assertEquals(List.of("Mango", "Zebra", "Alpha"), children.stream().map(Widget::getItem).toList());
+    }
+
+    private void setOrderMetadata(String itemName, String value) {
+        MetadataKey key = new MetadataKey(ItemUIRegistryImpl.WIDGET_ORDER_KEY, itemName);
+        when(metadataRegistryMock.get(key)).thenReturn(new Metadata(key, value, null));
     }
 }

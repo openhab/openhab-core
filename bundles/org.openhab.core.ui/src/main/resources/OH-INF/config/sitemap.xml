@@ -14,6 +14,7 @@
 				<option value="NONE">No sorting</option>
 				<option value="LABEL">Sorted by label</option>
 				<option value="NAME">Sorted by name</option>
+				<option value="METADATA">Sorted by item widget order metadata</option>
 			</options>
 			<default>NONE</default>
 		</parameter>
