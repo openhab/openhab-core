@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import org.apache.karaf.kar.KarService;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
@@ -72,7 +73,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     }
 
     @Override
-    public boolean supports(String type, String contentType) {
+    public boolean supports(String type, @Nullable String contentType) {
         return SUPPORTED_EXT_TYPES.contains(type) && KAR_CONTENT_TYPE.equals(contentType);
     }
 
