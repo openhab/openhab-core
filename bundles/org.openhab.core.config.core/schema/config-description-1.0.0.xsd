@@ -62,6 +62,7 @@
 		<xs:attribute name="readOnly" type="xs:boolean"/>
 		<xs:attribute name="multiple" type="xs:boolean"/>
 		<xs:attribute name="unit" type="config-description:unitType"/>
+		<xs:attribute name="dynamic" type="xs:boolean"/>
 	</xs:complexType>
 
 	<xs:complexType name="parameterGroup">
