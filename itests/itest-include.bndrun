@@ -59,5 +59,9 @@ Export-Package:
 	-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar,\
 	-Xshare:off
 
+# We would like to use:
+# - the SLF4J API and implementation provided by Pax Logging
+# - the Configuration Admin API exported by Apache Felix Config Admin
 -runblacklist.itest-include: \
-	bnd.identity;id='slf4j.api'
+	bnd.identity;id='slf4j.api',\
+	bnd.identity;id='org.osgi.service.cm'
