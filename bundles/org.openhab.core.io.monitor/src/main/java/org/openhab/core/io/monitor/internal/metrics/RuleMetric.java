@@ -12,9 +12,14 @@
  */
 package org.openhab.core.io.monitor.internal.metrics;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -22,6 +27,7 @@ import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
 import org.osgi.framework.BundleContext;
@@ -29,19 +35,24 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Timer;
 
 /**
- * The {@link RuleMetric} class implements a gauge metric for rules RUNNING events (per rule)
+ * The {@link RuleMetric} class implements a gauge metric for rules RUNNING events
+ * and for rule duration (per rule)
  *
  * @author Robert Bach - Initial contribution
+ * @author Robert Delbrück - Added Rule duration metric
  */
 @NonNullByDefault
 public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
 
     public static final String METRIC_NAME = "openhab.rule.runs";
+    public static final String METRIC_DURATION_NAME = "openhab.rule.duration";
     public static final String RULES_TOPIC_PREFIX = "openhab/rules/";
     public static final String RULES_TOPIC_SUFFIX = "/state";
     private final Logger logger = LoggerFactory.getLogger(RuleMetric.class);
@@ -51,8 +62,21 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
     private @Nullable MeterRegistry meterRegistry;
     private final Set<Tag> tags = new HashSet<>();
     private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
-    private BundleContext bundleContext;
-    private RuleRegistry ruleRegistry;
+    private final BundleContext bundleContext;
+    private final RuleRegistry ruleRegistry;
+    private static final String THREAD_POOL_NAME = "rule-metric";
+    private final Map<String, RuleSample> cache = new ConcurrentHashMap<>();
+    private @Nullable ScheduledFuture<?> cleanupTask;
+
+    private static class RuleSample {
+        final Timer.Sample sample;
+        final long startTime;
+
+        RuleSample(Timer.Sample sample, long startTime) {
+            this.sample = sample;
+            this.startTime = startTime;
+        }
+    }
 
     public RuleMetric(BundleContext bundleContext, Collection<Tag> tags, RuleRegistry ruleRegistry) {
         this.tags.addAll(tags);
@@ -67,6 +91,8 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
         logger.debug("RuleMetric is being bound...");
         this.meterRegistry = meterRegistry;
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
+        cleanupTask = ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME).scheduleWithFixedDelay(this::purgeExpired, 1,
+                1, TimeUnit.MINUTES);
     }
 
     @Override
@@ -75,6 +101,13 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
         if (meterRegistry == null) {
             return;
         }
+
+        ScheduledFuture<?> task = cleanupTask;
+        if (task != null) {
+            task.cancel(false);
+            cleanupTask = null;
+        }
+
         for (Meter meter : meterRegistry.getMeters()) {
             if (meter.getId().getTags().contains(CORE_RULE_METRIC_TAG)) {
                 meterRegistry.remove(meter);
@@ -87,6 +120,7 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
             eventSubscriberRegistration.unregister();
             this.eventSubscriberRegistration = null;
         }
+        cache.clear();
     }
 
     @Override
@@ -104,23 +138,59 @@ public class RuleMetric implements OpenhabCoreMeterBinder, EventSubscriber {
 
         String topic = event.getTopic();
         String ruleId = topic.substring(RULES_TOPIC_PREFIX.length(), topic.lastIndexOf(RULES_TOPIC_SUFFIX));
-        if (!event.getPayload().contains(RuleStatus.RUNNING.name())) {
-            logger.trace("Skipping rule status info with status other than RUNNING {}", event.getPayload());
-            return;
-        }
+        String ruleStatus = event.getPayload();
 
-        logger.debug("Rule {} RUNNING - updating metric.", ruleId);
+        Set<Tag> tagsWithRule = createTags(ruleId);
+
+        if (ruleStatus.contains(RuleStatus.RUNNING.name())) {
+            logger.debug("Rule {} RUNNING - updating metric.", ruleId);
+            Counter.builder(METRIC_NAME).description("Execution count of the rules").tags(tagsWithRule)
+                    .register(this.meterRegistry).increment();
+            Timer.Sample start = Timer.start(meterRegistry);
+            cache.put(topic, new RuleSample(start, meterRegistry.config().clock().wallTime()));
+        } else if (ruleStatus.contains(RuleStatus.IDLE.name())) {
+            RuleSample ruleSample = cache.remove(topic);
+            if (ruleSample != null) {
+                Timer timer = Timer.builder(METRIC_DURATION_NAME).description("Execution duration of the rules")
+                        .tags(tagsWithRule).register(meterRegistry);
+                long duration = ruleSample.sample.stop(timer);
+                logger.debug("Rule {} Finished - updating duration metric ({}ns).", ruleId, duration);
+            } else {
+                logger.trace("Rule {} Finished - but running state missed.", ruleId);
+            }
+        } else {
+            logger.trace("Skipping rule status info with status {}", ruleStatus);
+        }
+    }
+
+    private Set<Tag> createTags(String ruleId) {
         Set<Tag> tagsWithRule = new HashSet<>(tags);
         tagsWithRule.add(Tag.of(RULE_ID_TAG_NAME, ruleId));
         String ruleName = getRuleName(ruleId);
         if (ruleName != null) {
             tagsWithRule.add(Tag.of(RULE_NAME_TAG_NAME, ruleName));
         }
-        meterRegistry.counter(METRIC_NAME, tagsWithRule).increment();
+        return tagsWithRule;
     }
 
     private @Nullable String getRuleName(String ruleId) {
         Rule rule = ruleRegistry.get(ruleId);
         return rule == null ? null : rule.getName();
+    }
+
+    void purgeExpired() {
+        MeterRegistry meterRegistry = this.meterRegistry;
+        if (meterRegistry == null) {
+            return;
+        }
+        long now = meterRegistry.config().clock().wallTime();
+        long expiryMillis = Duration.ofMinutes(5).toMillis();
+        cache.entrySet().removeIf(entry -> {
+            if (now - entry.getValue().startTime > expiryMillis) {
+                logger.debug("Rule execution {} expired after 5 minutes and is removed from cache.", entry.getKey());
+                return true;
+            }
+            return false;
+        });
     }
 }

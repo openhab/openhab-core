@@ -40,7 +40,7 @@ import io.micrometer.core.instrument.Tag;
 @NonNullByDefault
 public class EventCountMetric implements OpenhabCoreMeterBinder, EventSubscriber {
 
-    public static final String METRIC_NAME = "event_count";
+    public static final String METRIC_NAME = "event.count";
     private final Logger logger = LoggerFactory.getLogger(EventCountMetric.class);
     private static final Tag CORE_EVENT_COUNT_METRIC_TAG = Tag.of("metric", "openhab.core.metric.eventcount");
     private static final String TOPIC_TAG_NAME = "topic";
