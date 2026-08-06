@@ -92,7 +92,7 @@ public class EnrichedItemDTOMapper {
         String state;
         if (item instanceof DateTimeItem dateTimeItem && zoneId != null) {
             DateTimeType dateTime = dateTimeItem.getStateAs(DateTimeType.class);
-            if (dateTime == null) {
+            if (dateTime == null || dateTime.isZoneAuthoritative()) {
                 state = item.getState().toFullString();
             } else {
                 state = dateTime.toFullString(zoneId);

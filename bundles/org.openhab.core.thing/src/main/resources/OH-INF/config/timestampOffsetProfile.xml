@@ -12,5 +12,10 @@
 				in the reverse
 				direction.</description>
 		</parameter>
+		<parameter name="timezone" type="text">
+			<label>Time Zone</label>
+			<description>Time zone to be applied on the state.</description>
+			<advanced>true</advanced>
+		</parameter>
 	</config-description>
 </config-description:config-descriptions>
