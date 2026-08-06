@@ -19,7 +19,7 @@
 
   <properties>
     <jackson.annotations.version>2.21</jackson.annotations.version>
-    <jackson.version>2.21.4</jackson.version>
+    <jackson.version>2.22.0</jackson.version>
   </properties>
 
   <dependencies>
