@@ -231,10 +231,10 @@ GroupItemRef:
     ID;
 
 Icon returns ecore::EString:
-    STRING | (ID ':' (ID ':')?)? IconName;
+    STRING | (IconSegment ':' (IconSegment ':')?)? IconSegment;
 
-// Allow hyphen inside an icon name
-IconName:
+// Allow hyphen inside an icon segment
+IconSegment:
     (ID '-')* ID;
 
 Period:
