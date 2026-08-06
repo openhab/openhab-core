@@ -15,6 +15,7 @@ package org.openhab.core.util;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -63,7 +64,7 @@ import org.openhab.core.types.UnDefType;
  * Also set {@link #rgbDataType} to the chosen RGB data type RGB, RGBW, RGBCW etc.
  * And optionally set the following configuration parameters:
  * <ul>
- * <li>Optionally override {@link #minimumOnBrightness} to a minimum brightness percent in the range [0.1..10.0]
+ * <li>Optionally override {@link #minimumOnBrightness} to a minimum brightness percent in the range [0.0..10.0]
  * percent, to consider as being "ON". The default is 1 percent.</li>
  * <li>Optionally override {@link #mirekControlWarmest} to a 'warmest' white color temperature in the range
  * [{@link #mirekControlCoolest}..1000.0] Mirek/Mired. The default is 500 Mirek/Mired.</li>
@@ -237,8 +238,29 @@ public class LightModel {
         /** supports 4-element RGB with white channel */
         RGB_W,
         /** supports 5-element RGB with cold and warm white channels */
-        RGB_C_W
+        RGB_C_W,
+        /** as RGB_W but ignores brightness (i.e. only HS parts of HSBType) */
+        RGB_W_NO_BRIGHTNESS,
+        /** as RGB_C_W but ignores brightness (i.e. only HS parts of HSBType) */
+        RGB_C_W_NO_BRIGHTNESS
     }
+
+    /**
+     * Set of RGB data types that do not use the brightness part of the HSBType state.
+     */
+    private static final Set<RgbDataType> NO_BRIGHTNESS_TYPES = Set.of(RgbDataType.RGB_NO_BRIGHTNESS,
+            RgbDataType.RGB_W_NO_BRIGHTNESS, RgbDataType.RGB_C_W_NO_BRIGHTNESS);
+
+    /**
+     * Set of RGB data types that use a white channel.
+     */
+    private static final Set<RgbDataType> RGB_W_TYPES = Set.of(RgbDataType.RGB_W, RgbDataType.RGB_W_NO_BRIGHTNESS);
+
+    /**
+     * Set of RGB data types that use cold and warm white channels.
+     */
+    private static final Set<RgbDataType> RGB_C_W_TYPES = Set.of(RgbDataType.RGB_C_W,
+            RgbDataType.RGB_C_W_NO_BRIGHTNESS);
 
     /**
      * Enum for the LED operating mode
@@ -518,9 +540,9 @@ public class LightModel {
      * @throws IllegalArgumentException if the minimumBrightness parameter is out of range.
      */
     public synchronized void configSetMinimumOnBrightness(double minimumOnBrightness) throws IllegalArgumentException {
-        if (minimumOnBrightness < 0.1 || minimumOnBrightness > 10.0) {
+        if (minimumOnBrightness < 0.0 || minimumOnBrightness > 10.0) {
             throw new IllegalArgumentException(
-                    "Minimum brightness '%.1f' out of range [0.1..10.0]".formatted(minimumOnBrightness));
+                    "Minimum brightness '%.1f' out of range [0.0..10.0]".formatted(minimumOnBrightness));
         }
         this.minimumOnBrightness = minimumOnBrightness;
     }
@@ -723,7 +745,7 @@ public class LightModel {
      */
     public synchronized @Nullable OnOffType getOnOff(boolean forceChannelVisible) {
         return (!lightCapabilities.supportsColor() && !lightCapabilities.supportsBrightness()) || forceChannelVisible
-                ? OnOffType.from(cachedHSB.getBrightness().doubleValue() >= minimumOnBrightness)
+                ? OnOffType.from(cachedHSB.getBrightness().doubleValue() > minimumOnBrightness)
                 : null;
     }
 
@@ -734,20 +756,20 @@ public class LightModel {
      * follows:
      *
      * <ul>
-     * <li>'RGB_NO_BRIGHTNESS': The return result does not depend on the current brightness. In other words the values
-     * only relate to the 'HS' part of the {@link HSBType} state. Note: this means that in this case a round trip of
-     * setRGBx() followed by getRGBx() will NOT necessarily contain identical values, although the RGB ratios will
-     * certainly be the same.</li>
+     * <li>'RGB_NO_BRIGHTNESS', 'RGB_W_NO_BRIGHTNESS', 'RGB_C_W_NO_BRIGHTNESS': The return result does not depend on
+     * the current brightness. In other words the values only relate to the 'HS' part of the {@link HSBType} state.
+     * Note: this means that in this case a round trip of setRGBx() followed by getRGBx() will NOT necessarily contain
+     * identical values, although the RGB ratios will certainly be the same.</li>
      *
      * <li>All other values of {@link #rgbDataType}: The return result depends on the current brightness. In other
      * words the values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
-     * <ul>
+     * </ul>
      *
      * @return double[] representing the RGB(C)(W) components in range [0..255.0]
      * @throws IllegalStateException if the RGB data type is not compatible with the current LED operating mode.
      */
     public synchronized double[] getRGBx() throws IllegalStateException {
-        HSBType hsb = RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType
+        HSBType hsb = NO_BRIGHTNESS_TYPES.contains(rgbDataType)
                 ? new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.HUNDRED)
                 : cachedHSB;
 
@@ -758,8 +780,8 @@ public class LightModel {
             /*
              * If the light has a single white led then its value is determined by the brightness only.
              */
-            if (RgbDataType.RGB_W == rgbDataType) {
-                double w = cachedHSB.getBrightness().doubleValue() * 255.0 / 100.0;
+            if (RGB_W_TYPES.contains(rgbDataType)) {
+                double w = hsb.getBrightness().doubleValue() * 255.0 / 100.0;
                 return new double[] { 0.0, 0.0, 0.0, w };
             }
 
@@ -767,7 +789,7 @@ public class LightModel {
              * If the light has a warm and a cool white led, the mix of white values are determined
              * by the brightness and the color temperature.
              */
-            if (RgbDataType.RGB_C_W == rgbDataType) {
+            if (RGB_C_W_TYPES.contains(rgbDataType)) {
                 double denominator = warmWhiteLed.getMirek() - coolWhiteLed.getMirek();
                 double ratio;
                 if (denominator > 0 && !Double.isNaN(cachedMirek)) {
@@ -775,7 +797,7 @@ public class LightModel {
                 } else {
                     ratio = 0.5;
                 }
-                double bri = cachedHSB.getBrightness().doubleValue() * 255.0 / 100.0;
+                double bri = hsb.getBrightness().doubleValue() * 255.0 / 100.0;
                 double cool = bri * ratio;
                 double warm = bri - cool;
                 return new double[] { 0.0, 0.0, 0.0, cool, warm };
@@ -794,9 +816,9 @@ public class LightModel {
              */
             PercentType[] rgbP = ColorUtil.hsbToRgbPercent(hsb);
             double[] rgb = Arrays.stream(rgbP).mapToDouble(p -> p.doubleValue() * 255.0 / 100.0).toArray();
-            if (RgbDataType.RGB_W == rgbDataType) {
+            if (RGB_W_TYPES.contains(rgbDataType)) {
                 return new double[] { rgb[0], rgb[1], rgb[2], 0 };
-            } else if (RgbDataType.RGB_C_W == rgbDataType) {
+            } else if (RGB_C_W_TYPES.contains(rgbDataType)) {
                 return new double[] { rgb[0], rgb[1], rgb[2], 0, 0 };
             }
             return rgb;
@@ -806,7 +828,7 @@ public class LightModel {
          * In combined mode the RGB and white values are all determined by the HSB values.
          */
         if (LedOperatingMode.COMBINED == ledOperatingMode) {
-            if (RgbDataType.RGB_C_W == rgbDataType) {
+            if (RGB_C_W_TYPES.contains(rgbDataType)) {
                 /*
                  * RGBCW - convert HSB to RGB, normalize it, then convert to RGBCW, then scale to [0..255]
                  */
@@ -815,7 +837,7 @@ public class LightModel {
                 double[] rgbcw = RgbcwMath.rgb2rgbcw(rgb, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
                 rgbcw = Arrays.stream(rgbcw).map(d -> Math.round(d * 255 * 10) / 10).toArray(); // // round to 1
                 return rgbcw;
-            } else if (RgbDataType.RGB_W == rgbDataType) {
+            } else if (RGB_W_TYPES.contains(rgbDataType)) {
                 /*
                  * RGBW - convert HSB to RGBW, then scale to [0..255]
                  */
@@ -1031,15 +1053,15 @@ public class LightModel {
      * on the value of {@link #rgbDataType} the brightness may or may not change as follows:
      *
      * <ul>
-     * <li>'RGB_NO_BRIGHTNESS' both [255,0,0] and [127.5,0,0] change the color to RED without a change in brightness.
-     * In other words the values only relate to the 'HS' part of the {@link HSBType} state. Note: this means that in
-     * this case a round trip of 'setRGBx()' followed by 'getRGBx()' will NOT necessarily contain identical values,
-     * although the RGB ratios will certainly be the same.</li>
+     * <li>'RGB_NO_BRIGHTNESS', 'RGB_W_NO_BRIGHTNESS', 'RGB_C_W_NO_BRIGHTNESS': The set value does not affect the
+     * current brightness. In other words the values only relate to the 'HS' part of the {@link HSBType} state. Note:
+     * this means that in this case a round trip of 'setRGBx()' followed by 'getRGBx()' will NOT necessarily contain
+     * identical values, although the RGB ratios will certainly be the same.</li>
      *
      * <li>All other values of {@link #rgbDataType}: both [255,0,0] and [127.5,0,0] change the color to RED and the
      * former changes the brightness to 100 percent, whereas the latter changes it to 50 percent. In other words the
      * values relate to all the 'HSB' parts of the {@link HSBType} state.</li>
-     * <ul>
+     * </ul>
      *
      * @param rgbxParameter an array of double representing RGB or RGBW values in range [0.0..255.0]
      * @throws IllegalArgumentException if the array length is not 3, 4, or 5 depending on the light's capabilities,
@@ -1049,8 +1071,8 @@ public class LightModel {
         if (rgbxParameter.length > 5) {
             throw new IllegalArgumentException("Too many arguments in RGBx array");
         }
-        if (rgbxParameter.length < 3 || (RgbDataType.RGB_W == rgbDataType && rgbxParameter.length < 4)
-                || (RgbDataType.RGB_C_W == rgbDataType && rgbxParameter.length < 5)) {
+        if (rgbxParameter.length < 3 || (RGB_W_TYPES.contains(rgbDataType) && rgbxParameter.length < 4)
+                || (RGB_C_W_TYPES.contains(rgbDataType) && rgbxParameter.length < 5)) {
             throw new IllegalArgumentException("Too few arguments in RGBx array");
         }
         if (rgbxParameter.length == 3 && ledOperatingMode != LedOperatingMode.RGB_ONLY) {
@@ -1064,10 +1086,11 @@ public class LightModel {
         }
 
         HSBType hsb;
+        Double mirek;
+        PercentType oldBri = cachedHSB.getBrightness();
         switch (ledOperatingMode) {
             case WHITE_ONLY:
                 double white;
-                double mirek;
                 if (rgbxParameter.length == 5) {
                     /*
                      * We have both a C and a W channel so we create a pure white whose brightness
@@ -1114,7 +1137,7 @@ public class LightModel {
 
             case COMBINED:
                 double[] rgbx;
-                if (RgbDataType.RGB_C_W == rgbDataType) {
+                if (RGB_C_W_TYPES.contains(rgbDataType)) {
                     // RGBCW - normalize, convert to RGB, then scale back to [0..255]
                     rgbx = Arrays.stream(rgbxParameter).map(d -> d / 255.0).toArray();
                     rgbx = RgbcwMath.rgbcw2rgb(rgbx, coolWhiteLed.getProfile(), warmWhiteLed.getProfile());
@@ -1127,17 +1150,20 @@ public class LightModel {
                 hsb = ColorUtil.rgbToHsb(Arrays.stream(rgbx).map(d -> d * 100.0 / 255.0)
                         .mapToObj(d -> zPercentTypeFrom(d)).toArray(PercentType[]::new));
 
-                if (RgbDataType.RGB_NO_BRIGHTNESS == rgbDataType) {
-                    hsb = new HSBType(hsb.getHue(), hsb.getSaturation(), cachedHSB.getBrightness());
-                }
+                mirek = zMirekFrom(hsb);
                 break;
 
             default:
                 return; // safe coding but will never happen
         }
 
-        cachedHSB = hsb;
-        cachedMirek = zMirekFrom(hsb);
+        if (NO_BRIGHTNESS_TYPES.contains(rgbDataType)) {
+            cachedHSB = new HSBType(hsb.getHue(), hsb.getSaturation(), oldBri);
+        } else {
+            cachedHSB = hsb;
+            zHandleBrightness(hsb.getBrightness()); // refresh cached brightness and on/off state
+        }
+        cachedMirek = mirek;
     }
 
     /**
@@ -1209,12 +1235,12 @@ public class LightModel {
      * @param brightness the brightness {@link PercentType} to set.
      */
     private void zHandleBrightness(PercentType brightness) {
-        if (brightness.doubleValue() >= minimumOnBrightness) {
+        if (brightness.doubleValue() > minimumOnBrightness) {
             cachedBrightness = brightness;
             cachedHSB = new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), brightness);
             cachedOnOff = OnOffType.ON;
         } else {
-            if (OnOffType.ON == cachedOnOff && cachedHSB.getBrightness().doubleValue() >= minimumOnBrightness) {
+            if (OnOffType.ON == cachedOnOff && cachedHSB.getBrightness().doubleValue() > minimumOnBrightness) {
                 cachedBrightness = cachedHSB.getBrightness(); // cache the last 'ON' state brightness
             }
             cachedHSB = new HSBType(cachedHSB.getHue(), cachedHSB.getSaturation(), PercentType.ZERO);
