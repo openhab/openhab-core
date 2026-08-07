@@ -152,7 +152,10 @@ public class LLMItemSerializerTest {
 
     @Test
     public void testSerializeHierarchicalModel() {
-        MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of());
+        MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of("LivingRoom", Map.of("isPartOf", "GF"), //
+                "TV", Map.of("hasLocation", "LivingRoom"), //
+                "TV_Power", Map.of("isPointOf", "TV"), //
+                "LivingRoom_Light", Map.of("hasLocation", "LivingRoom")));
 
         // GF Floor
         Item gf = mockItem("GF", "Ground Floor", "Group", Set.of("Mock_Location_Floor"), List.of());
@@ -229,7 +232,8 @@ public class LLMItemSerializerTest {
 
     @Test
     public void testSerializeWithCommandOptions() {
-        MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of());
+        MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of("TV", Map.of("hasLocation", "LocationA"), //
+                "TV_Channel", Map.of("isPointOf", "TV")));
 
         Item item1 = mockItem("ItemB", "Label B", "Switch", Set.of(), List.of(),
                 List.of(new CommandOption("ON", "On"), new CommandOption("OFF", "")));
@@ -273,16 +277,14 @@ public class LLMItemSerializerTest {
         /*
          * Complex model hierarchy:
          * House (Location)
-         * ├── GroundFloor (Location, isPartOf House)
-         * ├── LivingRoom (Location, isPartOf GroundFloor)
-         * │ ├── EqA (Equipment, hasLocation LivingRoom)
-         * │ │ └── EqB (Equipment, isPartOf EqA)
-         * │ │ __└── EqC (Equipment, isPartOf EqB)
-         * │ │ ____└── PointC (Point, isPointOf EqC)
-         * │ └── RoomLight (Point, hasLocation LivingRoom)
-         * └── OutdoorEq (Equipment, hasLocation GroundFloor via group fallback)
-         * 
-         * Specifically, EqC has isPartOf EqB (so EqA -> EqC is NOT serialized directly under EqA).
+         * └── GroundFloor (Location, isPartOf House)
+         * __├── LivingRoom (Location, isPartOf GroundFloor)
+         * __│ ├── EqA (Equipment, hasLocation LivingRoom)
+         * __│ │ └── EqB (Equipment, isPartOf EqA)
+         * __│ │ __└── EqC (Equipment, isPartOf EqB)
+         * __│ │ ____└── PointC (Point, isPointOf EqC)
+         * __│ └── RoomLight (Point, hasLocation LivingRoom)
+         * __└── OutdoorEq (Equipment, hasLocation GroundFloor)
          */
 
         MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of("GroundFloor", Map.of("isPartOf", "House"), //
@@ -291,7 +293,8 @@ public class LLMItemSerializerTest {
                 "EqB", Map.of("isPartOf", "EqA"), //
                 "EqC", Map.of("isPartOf", "EqB"), //
                 "PointC", Map.of("isPointOf", "EqC"), //
-                "RoomLight", Map.of("hasLocation", "LivingRoom")));
+                "RoomLight", Map.of("hasLocation", "LivingRoom"), //
+                "OutdoorEq", Map.of("hasLocation", "GroundFloor")));
 
         Item house = mockItem("House", "Main House", "Group", Set.of("Mock_Location_Floor"), List.of());
         Item gf = mockItem("GroundFloor", null, "Group", Set.of("Mock_Location_Floor"), List.of());
@@ -304,7 +307,6 @@ public class LLMItemSerializerTest {
 
         Item roomLight = mockItem("RoomLight", "Room Light", "Dimmer", Set.of("Mock_Point_Control_Light"), List.of());
 
-        // Uses group fallback for parent location resolution
         Item outdoorEq = mockItem("OutdoorEq", "Outdoor Equipment", "Group", Set.of("Mock_Equipment_Television"),
                 List.of("GroundFloor"));
 

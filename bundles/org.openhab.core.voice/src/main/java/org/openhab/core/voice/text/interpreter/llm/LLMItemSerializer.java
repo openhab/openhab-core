@@ -174,15 +174,15 @@ public class LLMItemSerializer {
     }
 
     /**
-     * Resolves the parent item names for a child item using semantic relation metadata first,
-     * falling back to standard Group membership hierarchy, and including non-semantic group parents.
+     * Resolves the parent item names for a child item using semantic relation metadata for semantic parents
+     * and group membership for non-semantic parent groups.
      */
     private static List<String> findParentNames(MetadataRegistry metadataRegistry, Item child,
             Map<String, Item> itemMap, boolean isLocation, boolean isEquipment, boolean isPoint) {
 
         List<String> parents = new ArrayList<>();
 
-        // Try resolving via SemanticsMetadataProvider configuration keys
+        // Resolve semantic parent via SemanticsMetadataProvider configuration keys
         Metadata md = metadataRegistry.get(new MetadataKey(NAMESPACE, child.getName()));
         if (md != null) {
             Map<String, Object> config = md.getConfiguration();
@@ -220,9 +220,7 @@ public class LLMItemSerializer {
             }
         }
 
-        // Group membership processing (semantic parent fallback + non-semantic group parents)
-        String semanticFallbackParent = null;
-
+        // Add non-semantic parent groups from group membership
         for (String groupName : child.getGroupNames()) {
             Item parent = itemMap.get(groupName);
             if (parent == null) {
@@ -232,27 +230,9 @@ public class LLMItemSerializer {
             boolean parentIsLocation = SemanticTags.getLocation(parent) != null;
             boolean parentIsEquipment = SemanticTags.getEquipment(parent) != null;
 
-            if (parents.isEmpty()) {
-                if (isLocation) {
-                    if (parentIsLocation) {
-                        parents.add(groupName);
-                    }
-                } else {
-                    if (parentIsEquipment) {
-                        parents.add(groupName); // Direct Equipment parent has higher priority
-                    } else if (parentIsLocation && semanticFallbackParent == null) {
-                        semanticFallbackParent = groupName;
-                    }
-                }
-            }
-
             if (!parentIsLocation && !parentIsEquipment && !parents.contains(groupName)) {
                 parents.add(groupName);
             }
-        }
-
-        if (parents.isEmpty() && semanticFallbackParent != null) {
-            parents.addFirst(semanticFallbackParent);
         }
 
         return parents;
