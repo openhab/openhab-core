@@ -12,6 +12,11 @@
  */
 package org.openhab.core.voice.text.interpreter.llm;
 
+import static org.openhab.core.semantics.internal.SemanticsMetadataProvider.NAMESPACE;
+import static org.openhab.core.semantics.internal.SemanticsMetadataProvider.REL_HAS_LOCATION;
+import static org.openhab.core.semantics.internal.SemanticsMetadataProvider.REL_IS_PART_OF;
+import static org.openhab.core.semantics.internal.SemanticsMetadataProvider.REL_IS_POINT_OF;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +31,9 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.semantics.Equipment;
 import org.openhab.core.semantics.Location;
 import org.openhab.core.semantics.Point;
@@ -37,10 +45,12 @@ import org.openhab.core.types.CommandOption;
 
 /**
  * {@link LLMItemSerializer} is a utility class to serialize a collection of items (both semantic and non-semantic) into
- * a structured,
- * hierarchical string representation for passing into the context of a Large Language Model (LLM) based
+ * a structured, hierarchical string representation for passing into the context of a Large Language Model (LLM) based
  * {@link org.openhab.core.voice.text.HumanLanguageInterpreter}.
- * The output format is a custom format designed to be highly token-efficient.
+ * <p>
+ * Evaluates semantic relations via {@link MetadataRegistry} (using keys like {@code hasLocation}, {@code isPartOf}, and
+ * {@code isPointOf}) with fallback to standard Group membership hierarchy.
+ * Output is formatted in a custom, token-efficient syntax.
  *
  * @author Florian Hotze - Initial contribution
  */
@@ -73,13 +83,15 @@ public class LLMItemSerializer {
     }
 
     /**
-     * Serializes a collection of items, localizing command options with the given locale if available.
+     * Serializes a collection of items, evaluating openHAB semantic relations and group membership,
+     * localizing command options with the given locale if available.
      *
      * @param items the items to serialize
+     * @param metadataRegistry the metadata registry used to query semantic relation metadata, or null
      * @param locale the locale to use for command options localization
-     * @return the serialized representation (YAML) of the items
+     * @return the serialized representation of the items
      */
-    public static String serialize(Collection<Item> items, @Nullable Locale locale) {
+    public static String serialize(Collection<Item> items, MetadataRegistry metadataRegistry, @Nullable Locale locale) {
         if (items.isEmpty()) {
             return "";
         }
@@ -101,29 +113,7 @@ public class LLMItemSerializer {
                 continue;
             }
 
-            String parentName = null;
-            String fallbackParent = null;
-            for (String groupName : child.getGroupNames()) {
-                Item parent = itemMap.get(groupName);
-                if (parent != null) {
-                    if (isLocation) {
-                        if (SemanticTags.getLocation(parent) != null) {
-                            parentName = groupName;
-                            break;
-                        }
-                    } else {
-                        if (SemanticTags.getEquipment(parent) != null) {
-                            parentName = groupName;
-                            break;
-                        } else if (SemanticTags.getLocation(parent) != null && fallbackParent == null) {
-                            fallbackParent = groupName;
-                        }
-                    }
-                }
-            }
-            if (parentName == null) {
-                parentName = fallbackParent;
-            }
+            String parentName = findParentName(metadataRegistry, child, itemMap, isLocation, isEquipment, isPoint);
 
             if (parentName != null) {
                 parentToChildren.computeIfAbsent(parentName, k -> new ArrayList<>()).add(child);
@@ -183,6 +173,80 @@ public class LLMItemSerializer {
         }
         RootNode root = new RootNode(rootLocNodes, rootEqNodes, rootPtNodes, nonSemanticNodes);
         return formatRoot(root);
+    }
+
+    /**
+     * Resolves the parent item name for a child item using semantic relation metadata first,
+     * falling back to standard Group membership hierarchy.
+     */
+    private static @Nullable String findParentName(MetadataRegistry metadataRegistry, Item child,
+            Map<String, Item> itemMap, boolean isLocation, boolean isEquipment, boolean isPoint) {
+
+        // Try resolving via SemanticsMetadataProvider configuration keys
+        Metadata md = metadataRegistry.get(new MetadataKey(NAMESPACE, child.getName()));
+        if (md != null) {
+            Map<String, Object> config = md.getConfiguration();
+
+            if (isLocation) {
+                // Sub-location -> Parent Location
+                String parentLoc = getValidTarget(config.get(REL_IS_PART_OF), itemMap);
+                if (parentLoc != null) {
+                    return parentLoc;
+                }
+            } else if (isEquipment) {
+                // Sub-equipment -> Parent Equipment
+                String parentEq = getValidTarget(config.get(REL_IS_PART_OF), itemMap);
+                if (parentEq != null) {
+                    return parentEq;
+                }
+                // Equipment -> Parent Location
+                String parentLoc = getValidTarget(config.get(REL_HAS_LOCATION), itemMap);
+                if (parentLoc != null) {
+                    return parentLoc;
+                }
+            } else if (isPoint) {
+                // Point -> Parent Equipment
+                String parentEq = getValidTarget(config.get(REL_IS_POINT_OF), itemMap);
+                if (parentEq != null) {
+                    return parentEq;
+                }
+                // Loose Point -> Parent Location
+                String parentLoc = getValidTarget(config.get(REL_HAS_LOCATION), itemMap);
+                if (parentLoc != null) {
+                    return parentLoc;
+                }
+            }
+        }
+
+        // Fallback: Resolve parent via Group membership
+        String fallbackParent = null;
+        for (String groupName : child.getGroupNames()) {
+            Item parent = itemMap.get(groupName);
+            if (parent == null) {
+                continue;
+            }
+
+            if (isLocation) {
+                if (SemanticTags.getLocation(parent) != null) {
+                    return groupName;
+                }
+            } else {
+                if (SemanticTags.getEquipment(parent) != null) {
+                    return groupName; // Direct Equipment parent has higher priority
+                } else if (SemanticTags.getLocation(parent) != null && fallbackParent == null) {
+                    fallbackParent = groupName; // Location parent is fallback for Equipment/Points
+                }
+            }
+        }
+
+        return fallbackParent;
+    }
+
+    private static @Nullable String getValidTarget(@Nullable Object targetName, Map<String, Item> itemMap) {
+        if (targetName instanceof String name && itemMap.containsKey(name)) {
+            return name;
+        }
+        return null;
     }
 
     private static LocationNode buildLocationNode(Item loc, Map<String, List<Item>> parentToChildren,

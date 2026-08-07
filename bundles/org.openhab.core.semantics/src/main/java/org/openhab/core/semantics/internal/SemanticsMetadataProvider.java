@@ -66,6 +66,13 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     // the namespace to use for the metadata
     public static final String NAMESPACE = "semantics";
 
+    // the config property names to use for the metadata
+    public static final String REL_HAS_LOCATION = "hasLocation";
+    public static final String REL_IS_PART_OF = "isPartOf";
+    public static final String REL_IS_POINT_OF = "isPointOf";
+    public static final String REL_HAS_POINT = "hasPoint";
+    public static final String REL_RELATES_TO = "relatesTo";
+
     // holds the static definition of the relations between entities
     private final Map<List<Class<? extends Tag>>, String> parentRelations = new HashMap<>();
     private final Map<List<Class<? extends Tag>>, String> memberRelations = new HashMap<>();
@@ -77,7 +84,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     private final ItemRegistry itemRegistry;
     private final SemanticTagRegistry semanticTagRegistry;
 
-    private SemanticTagRegistryChangeListener listener;
+    private final SemanticTagRegistryChangeListener listener;
 
     @Activate
     public SemanticsMetadataProvider(final @Reference ItemRegistry itemRegistry,
@@ -254,15 +261,15 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     }
 
     private void initRelations() {
-        parentRelations.put(List.of(Equipment.class, Location.class), "hasLocation");
-        parentRelations.put(List.of(Point.class, Location.class), "hasLocation");
-        parentRelations.put(List.of(Location.class, Location.class), "isPartOf");
-        parentRelations.put(List.of(Equipment.class, Equipment.class), "isPartOf");
-        parentRelations.put(List.of(Point.class, Equipment.class), "isPointOf");
+        parentRelations.put(List.of(Equipment.class, Location.class), REL_HAS_LOCATION);
+        parentRelations.put(List.of(Point.class, Location.class), REL_HAS_LOCATION);
+        parentRelations.put(List.of(Location.class, Location.class), REL_IS_PART_OF);
+        parentRelations.put(List.of(Equipment.class, Equipment.class), REL_IS_PART_OF);
+        parentRelations.put(List.of(Point.class, Equipment.class), REL_IS_POINT_OF);
 
-        memberRelations.put(List.of(Equipment.class, Point.class), "hasPoint");
+        memberRelations.put(List.of(Equipment.class, Point.class), REL_HAS_POINT);
 
-        propertyRelations.put(List.of(Point.class), "relatesTo");
+        propertyRelations.put(List.of(Point.class), REL_RELATES_TO);
     }
 
     @Override
