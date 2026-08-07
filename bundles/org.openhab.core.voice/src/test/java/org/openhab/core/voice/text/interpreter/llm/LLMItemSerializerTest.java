@@ -327,4 +327,31 @@ public class LLMItemSerializerTest {
 
         assertEquals(expected, LLMItemSerializer.serialize(items, metadataRegistry, null));
     }
+
+    @Test
+    public void testSerializeItemInSemanticAndNonSemanticGroups() {
+        MetadataRegistry metadataRegistry = mockMetadataRegistry(
+                Map.of("LivingRoom_Light", Map.of("hasLocation", "LivingRoom")));
+
+        Item livingRoom = mockItem("LivingRoom", null, "Group", Set.of("Mock_Location_Room_LivingRoom"), List.of());
+        Item gLights = mockItem("gLights", "All Lights", "Group", Set.of(), List.of());
+        Item lrLight = mockItem("LivingRoom_Light", "Living Room Light", "Dimmer", Set.of("Mock_Point_Control_Light"),
+                List.of("LivingRoom", "gLights"));
+
+        List<Item> items = List.of(livingRoom, gLights, lrLight);
+
+        String expected = """
+                # Format: [..]name [type] ["label"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]
+
+                # Semantic Items
+                LivingRoom :MockLivingRoom
+                ..LivingRoom_Light Dimmer :MockLight
+
+                # Non-semantic Items
+                gLights "All Lights"
+                ..LivingRoom_Light Dimmer
+                """;
+
+        assertEquals(expected, LLMItemSerializer.serialize(items, metadataRegistry, null));
+    }
 }
