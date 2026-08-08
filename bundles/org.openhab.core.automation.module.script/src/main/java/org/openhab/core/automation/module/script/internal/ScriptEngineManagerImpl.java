@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -61,8 +62,8 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
-    private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
-    private final Map<String, ScriptEngineFactory> factories = new HashMap<>();
+    private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new ConcurrentHashMap<>();
+    private final Map<String, ScriptEngineFactory> factories = new ConcurrentHashMap<>();
     private final ScriptExtensionManager scriptExtensionManager;
     private final Set<FactoryChangeListener> listeners = new CopyOnWriteArraySet<>();
 
@@ -113,9 +114,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         ScriptEngineContainer result = null;
         ScriptEngineFactory engineFactory = findEngineFactory(scriptType);
 
-        if (loadedScriptEngineInstances.containsKey(engineIdentifier)) {
-            removeEngine(engineIdentifier);
-        }
+        removeEngine(engineIdentifier);
 
         if (engineFactory == null) {
             logger.error("ScriptEngine for language '{}' could not be found for identifier: {}", scriptType,
