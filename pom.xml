@@ -76,7 +76,7 @@
     <bouncycastle.version>1.85</bouncycastle.version>
     <commons.net.version>3.13.0</commons.net.version>
     <eea.version>2.4.0</eea.version>
-    <jupnp.version>3.0.5-SNAPSHOT</jupnp.version>
+    <jupnp.version>4.0.0-SNAPSHOT</jupnp.version>
     <karaf.compile.version>4.5.0-SNAPSHOT</karaf.compile.version>
     <karaf.tooling.version>4.5.0-SNAPSHOT</karaf.tooling.version>
     <sat.version>0.18.0</sat.version>
