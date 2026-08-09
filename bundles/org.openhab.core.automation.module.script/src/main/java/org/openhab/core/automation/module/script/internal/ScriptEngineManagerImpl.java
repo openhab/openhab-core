@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -62,7 +63,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
     private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
-    private final Map<String, ScriptEngineFactory> factories = new HashMap<>();
+    private final Map<String, ScriptEngineFactory> factories = new ConcurrentHashMap<>();
     private final ScriptExtensionManager scriptExtensionManager;
     private final Set<FactoryChangeListener> listeners = new CopyOnWriteArraySet<>();
 
