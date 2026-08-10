@@ -165,8 +165,8 @@ public class ItemUIRegistryImplTest {
     @BeforeEach
     @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registryMock, metadataRegistryMock, sitemapFactoryMock,
-                timeZoneProviderMock);
+        uiRegistry = spy(
+                new ItemUIRegistryImpl(registryMock, metadataRegistryMock, sitemapFactoryMock, timeZoneProviderMock));
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
@@ -1600,19 +1600,129 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
-    public void testDynamicGroupChildrenSortByMetadataStringNotNumericComparison() throws Exception {
+    public void testDynamicGroupChildrenSortByMetadataStringNumericComparison() throws Exception {
         setSorting("METADATA");
         setOrderMetadata(switchItemMock.getName(), "10");
         setOrderMetadata(dimmerItemMock.getName(), "2");
         setOrderMetadata(contactItemMock.getName(), "1");
 
         List<Widget> children = uiRegistry.getChildren(groupMock);
-        // Lexicographic string compare: "1" < "10" < "2"
-        assertEquals(List.of("Mango", "Zebra", "Alpha"), children.stream().map(Widget::getItem).toList());
+        assertEquals(List.of("Mango", "Alpha", "Zebra"), children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByLocationHierarchySameParentUsesOwnWidgetOrder() throws Exception {
+        setSorting("METADATA");
+        setupThreeLocationMembers("Kitchen", "LivingRoom", "Garage");
+        setLocationMetadata("Kitchen", "GroundFloor");
+        setLocationMetadata("LivingRoom", "GroundFloor");
+        setLocationMetadata("Garage", "GroundFloor");
+        setOrderMetadata("Kitchen", "2");
+        setOrderMetadata("LivingRoom", "1");
+        setOrderMetadata("Garage", "3");
+
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        assertEquals(List.of("LivingRoom", "Kitchen", "Garage"), children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByLocationHierarchyDifferentParentsUsesParentOrder() throws Exception {
+        setSorting("METADATA");
+        setupThreeLocationMembers("Kitchen", "Zzz_Bedroom", "Garage");
+        setLocationMetadata("Kitchen", "GroundFloor");
+        setLocationMetadata("Zzz_Bedroom", "FirstFloor");
+        setLocationMetadata("Garage", "GroundFloor");
+        setOrderMetadata("GroundFloor", "2");
+        setOrderMetadata("FirstFloor", "1");
+
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        // FirstFloor (order 1) < GroundFloor (order 2) => Bedroom before the GroundFloor rooms.
+        // Among the two GroundFloor siblings (Kitchen, Garage) with no own widgetOrder,
+        // falls back to label/name: "Garage" < "Kitchen".
+        assertEquals(List.of("Zzz_Bedroom", "Garage", "Kitchen"), children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByLocationHierarchyThreeLevelsDivergesAtGrandparent() throws Exception {
+        setSorting("METADATA");
+        setupThreeLocationMembers("RoomA", "RoomB", "RoomC");
+        setLocationMetadata("RoomA", "Floor1");
+        setLocationMetadata("RoomB", "Floor2");
+        setLocationMetadata("RoomC", "Floor2");
+        setLocationMetadata("Floor1", "Home");
+        setLocationMetadata("Floor2", "Home");
+        setOrderMetadata("Floor1", "2");
+        setOrderMetadata("Floor2", "1");
+        setOrderMetadata("RoomB", "2");
+        setOrderMetadata("RoomC", "1");
+
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        // Floor2 (order 1) beats Floor1 (order 2) => RoomB/RoomC before RoomA.
+        // Within Floor2, siblings RoomB (order 2) vs RoomC (order 1) => RoomC before RoomB.
+        assertEquals(List.of("RoomC", "RoomB", "RoomA"), children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByLocationHierarchyDifferentDepthShallowerFirst() throws Exception {
+        setSorting("METADATA");
+        setupThreeLocationMembers("RoomA", "RoomB", "RoomC");
+        setLocationMetadata("RoomA", "FirstFloor");
+        setLocationMetadata("RoomB", "FirstFloor");
+        setLocationMetadata("FirstFloor", "Home");
+        setLocationMetadata("RoomC", "Home");
+        setOrderMetadata("Room1", "2");
+        setOrderMetadata("RoomB", "1");
+        setOrderMetadata("FirstFloor", "10");
+        setOrderMetadata("RoomC", "9");
+
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        // FirstFloor & RoomC are both depth 1 -> compared by own widgetOrder (9 < 10).
+        assertEquals(List.of("RoomC", "RoomB", "RoomA"), children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByMetadataMixedLocationAndNonLocationFallsBackToWidgetOrder()
+            throws Exception {
+        setSorting("METADATA");
+        setupThreeLocationMembers("Kitchen", "TemperatureSensor", "Garage");
+        setLocationMetadata("Kitchen", "GroundFloor");
+        setLocationMetadata("Garage", "GroundFloor");
+        setOrderMetadata("TemperatureSensor", "1");
+        setOrderMetadata("Kitchen", "2");
+
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        assertEquals(List.of("TemperatureSensor", "Kitchen", "Garage"),
+                children.stream().map(Widget::getItem).toList());
     }
 
     private void setOrderMetadata(String itemName, String value) {
         MetadataKey key = new MetadataKey(ItemUIRegistryImpl.WIDGET_ORDER_KEY, itemName);
         when(metadataRegistryMock.get(key)).thenReturn(new Metadata(key, value, null));
+    }
+
+    private void setLocationMetadata(String itemName, @Nullable String parentName) {
+        MetadataKey key = new MetadataKey(ItemUIRegistryImpl.SEMANTICS_KEY, itemName);
+        Map<String, Object> config = parentName != null
+                ? Map.of(ItemUIRegistryImpl.SEMANTICS_PARENT_LOCATION_CONFIG, parentName)
+                : Map.of();
+        // Value just needs to start with SEMANTICS_LOCATION for isLocationContext to be true.
+        when(metadataRegistryMock.get(key))
+                .thenReturn(new Metadata(key, ItemUIRegistryImpl.SEMANTICS_LOCATION + "_Room", config));
+    }
+
+    private void setupThreeLocationMembers(String name1, String name2, String name3) throws Exception {
+        GroupItem groupItem1 = new GroupItem(name1);
+        GroupItem groupItem2 = new GroupItem(name2);
+        GroupItem groupItem3 = new GroupItem(name3);
+        Group group1Mock = mock(Group.class);
+        Group group2Mock = mock(Group.class);
+        Group group3Mock = mock(Group.class);
+        when(groupItemMock.getMembers()).thenReturn(Set.of(groupItem1, groupItem2, groupItem3));
+        when(group1Mock.getItem()).thenReturn(name1);
+        when(group2Mock.getItem()).thenReturn(name2);
+        when(group3Mock.getItem()).thenReturn(name3);
+        doReturn(group1Mock).when(uiRegistry).getDefaultWidget(GroupItem.class, name1);
+        doReturn(group2Mock).when(uiRegistry).getDefaultWidget(GroupItem.class, name2);
+        doReturn(group3Mock).when(uiRegistry).getDefaultWidget(GroupItem.class, name3);
     }
 }

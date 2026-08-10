@@ -132,6 +132,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private static final String DEFAULT_SORTING = "NONE";
     protected static final String WIDGET_ORDER_KEY = "widgetOrder";
+    protected static final String SEMANTICS_KEY = "semantics";
+    protected static final String SEMANTICS_LOCATION = "Location";
+    protected static final String SEMANTICS_PARENT_LOCATION_CONFIG = "isPartOf";
 
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
@@ -835,40 +838,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     List<Item> members = new ArrayList<>(groupItem.getMembers());
                     switch (groupMembersSorting) {
                         case "LABEL":
-                            members.sort((u1, u2) -> {
-                                String u1Label = u1.getLabel();
-                                u1Label = u1Label != null ? u1Label : u1.getName();
-                                String u2Label = u2.getLabel();
-                                u2Label = u2Label != null ? u2Label : u2.getName();
-                                if (u1Label.equals(u2Label)) {
-                                    return u1.getName().compareTo(u2.getName());
-                                }
-                                return u1Label.compareTo(u2Label);
-                            });
+                            members.sort(Comparator.comparing(this::getItemLabel));
                             break;
                         case "NAME":
                             members.sort(Comparator.comparing(Item::getName));
                             break;
                         case "METADATA":
-                            members.sort((u1, u2) -> {
-                                MetadataKey u1Key = new MetadataKey(WIDGET_ORDER_KEY, u1.getName());
-                                Metadata u1Order = metadataRegistry.get(u1Key);
-                                String u1OrderValue = u1Order != null ? u1Order.getValue() : null;
-                                MetadataKey u2Key = new MetadataKey(WIDGET_ORDER_KEY, u2.getName());
-                                Metadata u2Order = metadataRegistry.get(u2Key);
-                                String u2OrderValue = u2Order != null ? u2Order.getValue() : null;
-                                if (u1OrderValue == null && u2OrderValue == null) {
-                                    return u1.getName().compareTo(u2.getName());
-                                } else if (u1OrderValue == null) {
-                                    return 1;
-                                } else if (u2OrderValue == null) {
-                                    return -1;
-                                } else if (u1OrderValue.equals(u2OrderValue)) {
-                                    return u1.getName().compareTo(u2.getName());
-                                } else {
-                                    return u1OrderValue.compareTo(u2OrderValue);
-                                }
-                            });
+                            sortByMetadata(members);
                             break;
                         default:
                             break;
@@ -892,6 +868,110 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     group.getLabel(), itemName);
         }
         return children;
+    }
+
+    private void sortByMetadata(List<Item> members) {
+        members.sort((u1, u2) -> {
+            String u1Name = u1.getName();
+            String u2Name = u2.getName();
+
+            boolean isLocationContext = true;
+            MetadataKey u1SemanticsKey = new MetadataKey(SEMANTICS_KEY, u1Name);
+            Metadata u1Semantics = metadataRegistry.get(u1SemanticsKey);
+            isLocationContext &= (u1Semantics != null && u1Semantics.getValue().startsWith(SEMANTICS_LOCATION));
+            MetadataKey u2SemanticsKey = new MetadataKey(SEMANTICS_KEY, u2Name);
+            Metadata u2Semantics = metadataRegistry.get(u2SemanticsKey);
+            isLocationContext &= (u2Semantics != null && u2Semantics.getValue().startsWith(SEMANTICS_LOCATION));
+
+            if (isLocationContext) {
+                int modelOrder = compareLocationParents(u1Name, u2Name);
+                if (modelOrder != 0) {
+                    // For Location Items, own-item widgetOrder only used to compare Items sharing the same parent
+                    // location
+                    return modelOrder;
+                }
+            }
+            return compareWidgetOrder(u1Name, u2Name);
+        });
+    }
+
+    private String getItemLabel(Item item) {
+        String label = item.getLabel();
+        return label != null ? label : item.getName();
+    }
+
+    private String getItemLabel(String itemName) {
+        Item item = get(itemName);
+        return item != null ? getItemLabel(item) : itemName;
+    }
+
+    private @Nullable String getParentLocationName(String locationItemName) {
+        MetadataKey semanticsKey = new MetadataKey(SEMANTICS_KEY, locationItemName);
+        Metadata semantics = metadataRegistry.get(semanticsKey);
+        Object isPartOf = semantics != null ? semantics.getConfiguration().get(SEMANTICS_PARENT_LOCATION_CONFIG) : null;
+        return isPartOf instanceof String ? (String) isPartOf : null;
+    }
+
+    /**
+     * Compares items based on widgetOrder or lexicographical order of their ancestors in Model (starting at the top
+     * level)
+     *
+     * @param u1
+     * @param u2
+     * @return 0 if both items are siblings, -1 if u1 is before u2, 1 if u1 is after u2
+     */
+    private int compareLocationParents(String u1Name, String u2Name) {
+        List<String> u1Ancestors = new ArrayList<>();
+        String u1ParentName = getParentLocationName(u1Name);
+        while (u1ParentName != null) {
+            u1Ancestors.add(u1ParentName);
+            u1ParentName = getParentLocationName(u1ParentName);
+        }
+        List<String> u2Ancestors = new ArrayList<>();
+        String u2ParentName = getParentLocationName(u2Name);
+        while (u2ParentName != null) {
+            u2Ancestors.add(u2ParentName);
+            u2ParentName = getParentLocationName(u2ParentName);
+        }
+
+        int u1Depth = u1Ancestors.size();
+        int u2Depth = u2Ancestors.size();
+        int minDepth = Math.min(u1Depth, u2Depth);
+        for (int d = 0; d < minDepth; d++) {
+            String ancestorName1 = u1Ancestors.get(u1Depth - 1 - d);
+            String ancestorName2 = u2Ancestors.get(u2Depth - 1 - d);
+            if (!ancestorName1.equals(ancestorName2)) {
+                return compareWidgetOrder(ancestorName1, ancestorName2);
+            }
+        }
+        // A parent comes before its children
+        return Integer.compare(u1Depth, u2Depth);
+    }
+
+    private int compareWidgetOrder(String u1Name, String u2Name) {
+        MetadataKey u1Key = new MetadataKey(WIDGET_ORDER_KEY, u1Name);
+        Metadata u1Order = metadataRegistry.get(u1Key);
+        MetadataKey u2Key = new MetadataKey(WIDGET_ORDER_KEY, u2Name);
+        Metadata u2Order = metadataRegistry.get(u2Key);
+        Float u1OrderValue = null;
+        Float u2OrderValue = null;
+        try {
+            u1OrderValue = u1Order != null ? Float.parseFloat(u1Order.getValue()) : null;
+            u2OrderValue = u2Order != null ? Float.parseFloat(u2Order.getValue()) : null;
+        } catch (NumberFormatException e) {
+            // ignore
+        }
+
+        if ((u1OrderValue == null && u2OrderValue == null)
+                || (u1OrderValue != null && u1OrderValue.equals(u2OrderValue))) {
+            return getItemLabel(u1Name).compareTo(getItemLabel(u2Name));
+        } else if (u1OrderValue == null) {
+            return 1;
+        } else if (u2OrderValue == null) {
+            return -1;
+        } else {
+            return u1OrderValue.compareTo(u2OrderValue);
+        }
     }
 
     private boolean isReadOnly(String itemName) {
