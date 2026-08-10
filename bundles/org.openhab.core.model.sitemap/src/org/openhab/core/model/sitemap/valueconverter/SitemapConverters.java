@@ -41,10 +41,6 @@ public class SitemapConverters extends DefaultTerminalConverters {
                         || (string.startsWith("\"") && string.endsWith("\""))) {
                     trimmedString = STRING().toValue(string, node);
                 }
-                // For backward compatibility, we allow the icon name to contain a file extension, but we remove it when
-                // validating the name
-                int lastDotIndex = trimmedString.lastIndexOf(".");
-                trimmedString = lastDotIndex != -1 ? trimmedString.substring(0, lastDotIndex) : trimmedString;
                 String[] segments = trimmedString.split(":", -1);
                 if (segments.length > 3) {
                     throw new ValueConverterException("Icon name cannot contain more than 3 segments separated by ':'",
@@ -55,7 +51,16 @@ public class SitemapConverters extends DefaultTerminalConverters {
                     if (i != 0) {
                         sb.append(":");
                     }
-                    String[] parts = segments[i].split("-", -1);
+                    String segment = segments[i];
+                    if (i == segments.length - 1) {
+                        // For backward compatibility, we allow the icon name to contain a file extension, but we remove
+                        // it when validating the name
+                        int lastDotIndex = segment.lastIndexOf(".");
+                        segment = (lastDotIndex != -1) && (lastDotIndex != segment.length() - 1)
+                                ? segment.substring(0, lastDotIndex)
+                                : segment;
+                    }
+                    String[] parts = segment.split("-", -1);
                     for (int j = 0; j < parts.length; j++) {
                         if (j != 0) {
                             sb.append("-");
