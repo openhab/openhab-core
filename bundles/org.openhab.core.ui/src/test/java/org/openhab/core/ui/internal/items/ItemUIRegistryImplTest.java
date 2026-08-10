@@ -1670,7 +1670,7 @@ public class ItemUIRegistryImplTest {
         setLocationMetadata("RoomB", "FirstFloor");
         setLocationMetadata("FirstFloor", "Home");
         setLocationMetadata("RoomC", "Home");
-        setOrderMetadata("Room1", "2");
+        setOrderMetadata("RoomA", "2");
         setOrderMetadata("RoomB", "1");
         setOrderMetadata("FirstFloor", "10");
         setOrderMetadata("RoomC", "9");
