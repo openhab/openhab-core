@@ -24,21 +24,19 @@ import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jetty.client.Authentication;
+import org.eclipse.jetty.client.AuthenticationStore;
+import org.eclipse.jetty.client.BasicAuthentication;
+import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
+import org.eclipse.jetty.client.InputStreamRequestContent;
 import org.eclipse.jetty.client.ProxyConfiguration;
-import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
-import org.eclipse.jetty.client.api.Authentication;
-import org.eclipse.jetty.client.api.AuthenticationStore;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.util.BasicAuthentication;
-import org.eclipse.jetty.client.util.InputStreamContentProvider;
+import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
@@ -205,10 +203,9 @@ public class HttpUtil {
         if (proxyHost != null && !proxyHost.isBlank() && proxyPort != null && shouldUseProxy(uri, nonProxyHosts)) {
             AuthenticationStore authStore = httpClient.getAuthenticationStore();
             ProxyConfiguration proxyConfig = httpClient.getProxyConfiguration();
-            List<Proxy> proxies = proxyConfig.getProxies();
 
             proxy = new HttpProxy(proxyHost, proxyPort);
-            proxies.add(proxy);
+            proxyConfig.addProxy(proxy);
 
             authStore.addAuthentication(
                     new BasicAuthentication(proxy.getURI(), Authentication.ANY_REALM, proxyUser, proxyPassword));
@@ -223,7 +220,7 @@ public class HttpUtil {
                 if (httpHeaderKey.equalsIgnoreCase(HttpHeader.USER_AGENT.toString())) {
                     request.agent(httpHeaders.getProperty(httpHeaderKey));
                 } else {
-                    request.header(httpHeaderKey, httpHeaders.getProperty(httpHeaderKey));
+                    request.headers(f -> f.add(httpHeaderKey, httpHeaders.getProperty(httpHeaderKey)));
                 }
             }
         }
@@ -237,16 +234,13 @@ public class HttpUtil {
 
             String basicAuthentication = "Basic "
                     + Base64.getEncoder().encodeToString((user + ":" + password).getBytes());
-            request.header(HttpHeader.AUTHORIZATION, basicAuthentication);
+            request.headers(f -> f.add(HttpHeader.AUTHORIZATION, basicAuthentication));
         }
 
         // add content if a valid method is given ...
         if (content != null && (HttpMethod.POST.equals(method) || HttpMethod.PUT.equals(method))) {
-            // Close this outmost stream again after use!
-            try (final InputStreamContentProvider inputStreamContentProvider = new InputStreamContentProvider(
-                    content)) {
-                request.content(inputStreamContentProvider, contentType);
-            }
+            request.body(contentType != null ? new InputStreamRequestContent(contentType, content)
+                    : new InputStreamRequestContent(content));
         }
 
         if (LOGGER.isDebugEnabled()) {
@@ -267,7 +261,7 @@ public class HttpUtil {
         } finally {
             if (proxy != null) {
                 // Remove the proxy, that has been added for this request
-                httpClient.getProxyConfiguration().getProxies().remove(proxy);
+                httpClient.getProxyConfiguration().removeProxy(proxy);
             }
         }
     }
