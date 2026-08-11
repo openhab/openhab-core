@@ -871,28 +871,21 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     private void sortByMetadata(List<Item> members) {
-        members.sort((u1, u2) -> {
-            String u1Name = u1.getName();
-            String u2Name = u2.getName();
+        // Location items are sorted among themselves (by hierarchy, then widgetOrder),
+        // and placed ahead of all other members.
+        Map<Boolean, List<Item>> byLocation = members.stream().collect(Collectors.partitioningBy(this::isLocationItem));
+        List<Item> sorted = new ArrayList<>(byLocation.getOrDefault(true, List.of()).stream()
+                .sorted(Comparator.comparing(Item::getName, this::compareLocationMembers)).toList());
+        sorted.addAll(byLocation.getOrDefault(false, List.of()).stream()
+                .sorted(Comparator.comparing(Item::getName, this::compareWidgetOrder)).toList());
+        members.clear();
+        members.addAll(sorted);
+    }
 
-            boolean isLocationContext = true;
-            MetadataKey u1SemanticsKey = new MetadataKey(SEMANTICS_KEY, u1Name);
-            Metadata u1Semantics = metadataRegistry.get(u1SemanticsKey);
-            isLocationContext &= (u1Semantics != null && u1Semantics.getValue().startsWith(SEMANTICS_LOCATION));
-            MetadataKey u2SemanticsKey = new MetadataKey(SEMANTICS_KEY, u2Name);
-            Metadata u2Semantics = metadataRegistry.get(u2SemanticsKey);
-            isLocationContext &= (u2Semantics != null && u2Semantics.getValue().startsWith(SEMANTICS_LOCATION));
-
-            if (isLocationContext) {
-                int modelOrder = compareLocationParents(u1Name, u2Name);
-                if (modelOrder != 0) {
-                    // For Location Items, own-item widgetOrder only used to compare Items sharing the same parent
-                    // location
-                    return modelOrder;
-                }
-            }
-            return compareWidgetOrder(u1Name, u2Name);
-        });
+    private boolean isLocationItem(Item item) {
+        MetadataKey semanticsKey = new MetadataKey(SEMANTICS_KEY, item.getName());
+        Metadata semantics = metadataRegistry.get(semanticsKey);
+        return semantics != null && semantics.getValue().startsWith(SEMANTICS_LOCATION);
     }
 
     private String getItemLabel(Item item) {
@@ -912,24 +905,18 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return isPartOf instanceof String ? (String) isPartOf : null;
     }
 
-    /**
-     * Compares items based on widgetOrder or lexicographical order of their ancestors in Model (starting at the top
-     * level)
-     *
-     * @param u1
-     * @param u2
-     * @return 0 if both items are siblings, -1 if u1 is before u2, 1 if u1 is after u2
-     */
-    private int compareLocationParents(String u1Name, String u2Name) {
+    private int compareLocationMembers(String u1Name, String u2Name) {
         List<String> u1Ancestors = new ArrayList<>();
+        u1Ancestors.add(u1Name);
         String u1ParentName = getParentLocationName(u1Name);
-        while (u1ParentName != null) {
+        while (u1ParentName != null && !u1Ancestors.contains(u1ParentName)) {
             u1Ancestors.add(u1ParentName);
             u1ParentName = getParentLocationName(u1ParentName);
         }
         List<String> u2Ancestors = new ArrayList<>();
+        u2Ancestors.add(u2Name);
         String u2ParentName = getParentLocationName(u2Name);
-        while (u2ParentName != null) {
+        while (u2ParentName != null && !u2Ancestors.contains(u2ParentName)) {
             u2Ancestors.add(u2ParentName);
             u2ParentName = getParentLocationName(u2ParentName);
         }
@@ -954,9 +941,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         MetadataKey u2Key = new MetadataKey(WIDGET_ORDER_KEY, u2Name);
         Metadata u2Order = metadataRegistry.get(u2Key);
         Float u1OrderValue = null;
-        Float u2OrderValue = null;
         try {
             u1OrderValue = u1Order != null ? Float.parseFloat(u1Order.getValue()) : null;
+        } catch (NumberFormatException e) {
+            // ignore
+        }
+        Float u2OrderValue = null;
+        try {
             u2OrderValue = u2Order != null ? Float.parseFloat(u2Order.getValue()) : null;
         } catch (NumberFormatException e) {
             // ignore

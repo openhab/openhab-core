@@ -1663,21 +1663,40 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
-    public void testDynamicGroupChildrenSortByLocationHierarchyDifferentDepthShallowerFirst() throws Exception {
+    public void testDynamicGroupChildrenSortByLocationHierarchyDifferentDepth() throws Exception {
         setSorting("METADATA");
         setupThreeLocationMembers("RoomA", "RoomB", "RoomC");
         setLocationMetadata("RoomA", "FirstFloor");
         setLocationMetadata("RoomB", "FirstFloor");
         setLocationMetadata("FirstFloor", "Home");
         setLocationMetadata("RoomC", "Home");
-        setOrderMetadata("RoomA", "2");
-        setOrderMetadata("RoomB", "1");
-        setOrderMetadata("FirstFloor", "10");
-        setOrderMetadata("RoomC", "9");
+        setOrderMetadata("RoomA", "10");
+        setOrderMetadata("RoomB", "9");
+        setOrderMetadata("FirstFloor", "1");
+        setOrderMetadata("RoomC", "2");
 
         List<Widget> children = uiRegistry.getChildren(groupMock);
-        // FirstFloor & RoomC are both depth 1 -> compared by own widgetOrder (9 < 10).
-        assertEquals(List.of("RoomC", "RoomB", "RoomA"), children.stream().map(Widget::getItem).toList());
+        // FirstFloor & RoomC are both depth 1 -> compared by own widgetOrder (1 < 2).
+        assertEquals(List.of("RoomB", "RoomA", "RoomC"), children.stream().map(Widget::getItem).toList());
+    }
+
+    @Test
+    public void testDynamicGroupChildrenSortByLocationHierarchyDifferentDepthShallowFirst() throws Exception {
+        setSorting("METADATA");
+        setupThreeLocationMembers("RoomA", "RoomB", "RoomC");
+        setLocationMetadata("RoomA", "Upstairs");
+        setLocationMetadata("RoomB", "FirstFloor");
+        setLocationMetadata("FirstFloor", "Upstairs");
+        setLocationMetadata("Upstairs", "Home");
+        setLocationMetadata("RoomC", "Home");
+        setOrderMetadata("Upstairs", "1");
+        setOrderMetadata("RoomC", "2");
+
+        List<Widget> children = uiRegistry.getChildren(groupMock);
+        // RoomA (depth 2) vs RoomB (depth 3): comparison is between RoomA and FirstFloor (depth 2), FirstFloor (and
+        // therefore RoomB) comes first
+        // RoomC (depth 1) compares to Upstairs -> widgetOrder of Upstairs (1) < RoomC (2)
+        assertEquals(List.of("RoomB", "RoomA", "RoomC"), children.stream().map(Widget::getItem).toList());
     }
 
     @Test
@@ -1687,11 +1706,11 @@ public class ItemUIRegistryImplTest {
         setupThreeLocationMembers("Kitchen", "TemperatureSensor", "Garage");
         setLocationMetadata("Kitchen", "GroundFloor");
         setLocationMetadata("Garage", "GroundFloor");
-        setOrderMetadata("TemperatureSensor", "1");
-        setOrderMetadata("Kitchen", "2");
+        setOrderMetadata("Kitchen", "1");
+        setOrderMetadata("Garage", "2");
 
         List<Widget> children = uiRegistry.getChildren(groupMock);
-        assertEquals(List.of("TemperatureSensor", "Kitchen", "Garage"),
+        assertEquals(List.of("Kitchen", "Garage", "TemperatureSensor"),
                 children.stream().map(Widget::getItem).toList());
     }
 
