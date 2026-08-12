@@ -23,6 +23,18 @@
     <swagger.version>2.2.49</swagger.version>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jupnp.bom</groupId>
+        <artifactId>org.jupnp.bom</artifactId>
+        <version>${jupnp.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -227,25 +239,21 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>${jupnp.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp.transport.jetty12</artifactId>
-      <version>${jupnp.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp.transport.jakarta.servlet</artifactId>
-      <version>${jupnp.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp.transport.jakarta.httpservice</artifactId>
-      <version>${jupnp.version}</version>
       <scope>compile</scope>
     </dependency>
 
