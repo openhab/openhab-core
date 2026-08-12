@@ -77,11 +77,6 @@ public class ChannelDTO {
         if (configuration == null) {
             return null;
         }
-
-        Map<String, Object> configurationMap = new HashMap<>(configuration.keySet().size());
-        for (String key : configuration.keySet()) {
-            configurationMap.put(key, configuration.get(key));
-        }
-        return configurationMap;
+        return new HashMap<>(configuration.getRawProperties());
     }
 }

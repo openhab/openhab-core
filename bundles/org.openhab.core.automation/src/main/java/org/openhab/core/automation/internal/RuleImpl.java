@@ -103,8 +103,7 @@ public class RuleImpl implements Rule {
         this.conditions = conditions == null ? List.of() : List.copyOf(conditions);
         this.actions = actions == null ? List.of() : List.copyOf(actions);
         this.configDescriptions = configDescriptions == null ? List.of() : List.copyOf(configDescriptions);
-        this.configuration = configuration == null ? new Configuration()
-                : new Configuration(configuration.getProperties());
+        this.configuration = configuration == null ? new Configuration() : new Configuration(configuration);
         this.templateUID = templateUID;
         this.templateState = templateState;
         this.visibility = visibility == null ? Visibility.VISIBLE : visibility;

@@ -49,6 +49,7 @@ import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.FilterCriteria;
 import org.openhab.core.config.core.ParameterOption;
@@ -75,10 +76,26 @@ public class YamlRuleProviderTest {
     private @TempDir @NonNullByDefault({}) Path watchPath;
     private @NonNullByDefault({}) Path rulesPath;
 
+    private static class ConfigUtilAccessor extends ConfigUtil {
+        static void setEnv(Map<String, String> values) {
+            setEnvProvider(values::get);
+        }
+
+        static void resetEnv() {
+            setEnvProvider(System::getenv);
+        }
+    }
+
     @BeforeEach
     public void setup() {
         rulesPath = watchPath.resolve(RULES_PATH);
+        ConfigUtilAccessor.setEnv(Map.of("OPENHAB_TEST_DO_NOT_SET", "openhab-host"));
         when(watchServiceMock.getWatchPath()).thenReturn(watchPath);
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    public void tearDown() {
+        ConfigUtilAccessor.resetEnv();
     }
 
     @Test
@@ -199,6 +216,46 @@ public class YamlRuleProviderTest {
         assertThat(action.getConfiguration().getProperties(), hasEntry("text", "The sleep temperature has been set"));
         assertThat(action.getConfiguration().getProperties(), is(aMapWithSize(2)));
         assertThat(action.getInputs(), is(anEmptyMap()));
+    }
+
+    @Test
+    public void rawPlaceholdersArePreservedInRuleConfigurationsTest() throws IOException {
+        String model = """
+                version: 1
+                rules:
+                  raw:test:
+                    label: Raw Placeholder Rule
+                    config:
+                      sourceItem: '${ENV:OPENHAB_TEST_DO_NOT_SET}'
+                    triggers:
+                      - id: "1"
+                        config:
+                          time: "14:05"
+                        type: timer.TimeOfDayTrigger
+                    actions:
+                      - id: "2"
+                        config:
+                          sink: webaudio
+                          text: '${ENV:OPENHAB_TEST_DO_NOT_SET}'
+                        type: media.SayAction
+                """;
+        Files.writeString(rulesPath, model);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
+        YamlRuleProvider ruleProvider = new YamlRuleProvider();
+        TestRuleChangeListener ruleListener = new TestRuleChangeListener();
+        ruleProvider.addProviderChangeListener(ruleListener);
+        modelRepository.addYamlModelListener(ruleProvider);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, rulesPath);
+
+        assertThat(ruleListener.rules, is(aMapWithSize(1)));
+        Rule rule = ruleListener.rules.values().iterator().next();
+        assertThat(rule.getConfiguration().get("sourceItem"), is("openhab-host"));
+        assertThat(rule.getConfiguration().getRawProperties().get("sourceItem"), is("${ENV:OPENHAB_TEST_DO_NOT_SET}"));
+
+        Action action = rule.getActions().getFirst();
+        assertThat(action.getConfiguration().get("text"), is("openhab-host"));
+        assertThat(action.getConfiguration().getRawProperties().get("text"), is("${ENV:OPENHAB_TEST_DO_NOT_SET}"));
     }
 
     @Test

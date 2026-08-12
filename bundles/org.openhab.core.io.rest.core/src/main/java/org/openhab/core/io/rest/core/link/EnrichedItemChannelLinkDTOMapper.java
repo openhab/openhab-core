@@ -32,6 +32,6 @@ public class EnrichedItemChannelLinkDTOMapper {
      */
     public static EnrichedItemChannelLinkDTO map(ItemChannelLink link, boolean editable) {
         return new EnrichedItemChannelLinkDTO(link.getItemName(), link.getLinkedUID().toString(),
-                link.getConfiguration().getProperties(), editable);
+                link.getConfiguration().getRawProperties(), editable);
     }
 }

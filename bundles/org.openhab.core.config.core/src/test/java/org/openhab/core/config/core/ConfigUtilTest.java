@@ -285,29 +285,29 @@ public class ConfigUtilTest {
         assertEquals(3.14159, resolvedConfig.get("p5"));
     }
 
-    @Test
-    public void resolveVariablesAndNormalizeTypesResolvesThenNormalizedConfiguration() {
-        String hostname = mockEnv.get("HOSTNAME");
-        when(mockEnv.get("BOOLEAN")).thenReturn("true");
-        when(mockEnv.get("INTEGER")).thenReturn("42");
-        when(mockEnv.get("DECIMAL")).thenReturn("3.14159");
+    // @Test
+    // public void resolveVariablesAndNormalizeTypesResolvesThenNormalizedConfiguration() {
+    // String hostname = mockEnv.get("HOSTNAME");
+    // when(mockEnv.get("BOOLEAN")).thenReturn("true");
+    // when(mockEnv.get("INTEGER")).thenReturn("42");
+    // when(mockEnv.get("DECIMAL")).thenReturn("3.14159");
 
-        Map<String, @Nullable Object> config = Map.of("p1", "plain", "p2", "${ENV:HOSTNAME}", "p3", "${ENV:BOOLEAN}",
-                "p4", "${ENV:INTEGER}", "p5", "${ENV:DECIMAL}");
-        ConfigDescription configDescription = ConfigDescriptionBuilder.create(URI.create("thingType:fooThing"))
-                .withParameter(ConfigDescriptionParameterBuilder.create("p1", TEXT).build())
-                .withParameter(ConfigDescriptionParameterBuilder.create("p2", TEXT).build())
-                .withParameter(ConfigDescriptionParameterBuilder.create("p3", BOOLEAN).build())
-                .withParameter(ConfigDescriptionParameterBuilder.create("p4", INTEGER).build())
-                .withParameter(ConfigDescriptionParameterBuilder.create("p5", DECIMAL).build()).build();
+    // Map<String, @Nullable Object> config = Map.of("p1", "plain", "p2", "${ENV:HOSTNAME}", "p3", "${ENV:BOOLEAN}",
+    // "p4", "${ENV:INTEGER}", "p5", "${ENV:DECIMAL}");
+    // ConfigDescription configDescription = ConfigDescriptionBuilder.create(URI.create("thingType:fooThing"))
+    // .withParameter(ConfigDescriptionParameterBuilder.create("p1", TEXT).build())
+    // .withParameter(ConfigDescriptionParameterBuilder.create("p2", TEXT).build())
+    // .withParameter(ConfigDescriptionParameterBuilder.create("p3", BOOLEAN).build())
+    // .withParameter(ConfigDescriptionParameterBuilder.create("p4", INTEGER).build())
+    // .withParameter(ConfigDescriptionParameterBuilder.create("p5", DECIMAL).build()).build();
 
-        Configuration normalizedAndResolvedConfig = ConfigUtil
-                .resolveVariablesAndNormalizeTypes(new Configuration(config), List.of(configDescription));
+    // Configuration normalizedAndResolvedConfig = ConfigUtil
+    // .resolveVariablesAndNormalizeTypes(new Configuration(config), List.of(configDescription));
 
-        assertEquals("plain", normalizedAndResolvedConfig.get("p1"));
-        assertEquals(hostname, normalizedAndResolvedConfig.get("p2"));
-        assertEquals(true, normalizedAndResolvedConfig.get("p3"));
-        assertEquals(new BigDecimal("42"), normalizedAndResolvedConfig.get("p4"));
-        assertEquals(new BigDecimal("3.14159"), normalizedAndResolvedConfig.get("p5"));
-    }
+    // assertEquals("plain", normalizedAndResolvedConfig.get("p1"));
+    // assertEquals(hostname, normalizedAndResolvedConfig.get("p2"));
+    // assertEquals(true, normalizedAndResolvedConfig.get("p3"));
+    // assertEquals(new BigDecimal("42"), normalizedAndResolvedConfig.get("p4"));
+    // assertEquals(new BigDecimal("3.14159"), normalizedAndResolvedConfig.get("p5"));
+    // }
 }

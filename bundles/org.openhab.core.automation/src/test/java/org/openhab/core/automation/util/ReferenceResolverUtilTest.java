@@ -98,17 +98,17 @@ public class ReferenceResolverUtilTest {
         Module trigger = ModuleBuilder.createTrigger().withId("id1").withTypeUID("typeUID1")
                 .withConfiguration(new Configuration(MODULE_CONFIGURATION)).build();
         ReferenceResolver.updateConfiguration(trigger.getConfiguration(), CONTEXT, logger);
-        assertEquals(new Configuration(EXPECTED_MODULE_CONFIGURATION), trigger.getConfiguration());
+        assertEquals(EXPECTED_MODULE_CONFIGURATION, trigger.getConfiguration().getProperties());
         // test condition configuration.
         Module condition = ModuleBuilder.createCondition().withId("id2").withTypeUID("typeUID2")
                 .withConfiguration(new Configuration(MODULE_CONFIGURATION)).build();
         ReferenceResolver.updateConfiguration(condition.getConfiguration(), CONTEXT, logger);
-        assertEquals(new Configuration(EXPECTED_MODULE_CONFIGURATION), condition.getConfiguration());
+        assertEquals(EXPECTED_MODULE_CONFIGURATION, condition.getConfiguration().getProperties());
         // test action configuration.
         Module action = ModuleBuilder.createAction().withId("id3").withTypeUID("typeUID3")
                 .withConfiguration(new Configuration(MODULE_CONFIGURATION)).build();
         ReferenceResolver.updateConfiguration(action.getConfiguration(), CONTEXT, logger);
-        assertEquals(new Configuration(EXPECTED_MODULE_CONFIGURATION), action.getConfiguration());
+        assertEquals(EXPECTED_MODULE_CONFIGURATION, action.getConfiguration().getProperties());
     }
 
     @Test

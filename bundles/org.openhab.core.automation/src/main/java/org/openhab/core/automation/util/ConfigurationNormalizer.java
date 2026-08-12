@@ -91,10 +91,10 @@ public class ConfigurationNormalizer {
                     if (defaultValue == null) {
                         configuration.remove(parameterName);
                     } else {
-                        configuration.put(parameterName, ConfigUtil.normalizeType(defaultValue, parameter));
+                        configuration.putNormalized(parameterName, ConfigUtil.normalizeType(defaultValue, parameter));
                     }
                 } else {
-                    configuration.put(parameterName, ConfigUtil.normalizeType(value, parameter));
+                    configuration.putNormalized(parameterName, ConfigUtil.normalizeType(value, parameter));
                 }
             }
         }

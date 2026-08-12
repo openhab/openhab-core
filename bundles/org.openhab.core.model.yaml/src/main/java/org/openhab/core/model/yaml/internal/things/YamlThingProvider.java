@@ -14,7 +14,6 @@ package org.openhab.core.model.yaml.internal.things;
 
 import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -514,28 +513,26 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         target.setLocation(source.getLocation());
         target.setBridgeUID(source.getBridgeUID());
 
+        Configuration targetConfig = target.getConfiguration();
         if (keepSourceConfig) {
-            target.getConfiguration().setProperties(Map.of());
+            targetConfig.setProperties(Map.of());
         }
-        Configuration thingConfig = processThingConfiguration(target.getThingTypeUID(), target.getUID(),
+        Configuration processedSourceConfig = processThingConfiguration(target.getThingTypeUID(), target.getUID(),
                 source.getConfiguration());
-        thingConfig.keySet().forEach(paramName -> {
-            target.getConfiguration().put(paramName, thingConfig.get(paramName));
-        });
+        processedSourceConfig.getRawProperties().forEach(targetConfig::put);
 
         List<Channel> channelsToAdd = new ArrayList<>();
         source.getChannels().forEach(channel -> {
             Channel targetChannel = target.getChannels().stream().filter(c -> c.getUID().equals(channel.getUID()))
                     .findFirst().orElse(null);
             if (targetChannel != null) {
+                Configuration targetChannelConfig = targetChannel.getConfiguration();
                 if (keepSourceConfig) {
-                    targetChannel.getConfiguration().setProperties(Map.of());
+                    targetChannelConfig.setProperties(Map.of());
                 }
                 Configuration channelConfig = processChannelConfiguration(targetChannel.getChannelTypeUID(),
                         targetChannel.getUID(), channel.getConfiguration());
-                channelConfig.keySet().forEach(paramName -> {
-                    targetChannel.getConfiguration().put(paramName, channelConfig.get(paramName));
-                });
+                channelConfig.getRawProperties().forEach(targetChannelConfig::put);
             } else {
                 Channel newChannel = channel;
                 if (channel.getChannelTypeUID() != null) {
@@ -607,11 +604,12 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     private Object processSingleTextParam(UID uid, String name, Object param) {
-        if (param instanceof Number || param instanceof Boolean) {
+        Object normalizedParam = ConfigUtil.normalizeType(param);
+        if (normalizedParam instanceof Number || normalizedParam instanceof Boolean) {
             logger.info(
                     "\"{}\": the value of TEXT configuration parameter \"{}\" has been interpreted as a {}, and will "
                             + "be converted to a string. Enclose your value in double quotes to prevent conversion.",
-                    uid, name, param instanceof Boolean ? "boolean" : "number");
+                    uid, name, normalizedParam instanceof Boolean ? "boolean" : "number");
             // if the value in YAML is an unquoted number, the value resulting of the parsing can then be
             // of type BigDecimal or BigInteger.
             // If the value is of type BigDecimal, we convert it into a String. If there is no decimal,
@@ -621,18 +619,18 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             // - Value 1.5 in YAML is converted into String "1.5"
             // If the value is not of type BigDecimal, it is kept unchanged. Conversion to a String will
             // be applied at a next step during configuration normalization.
-            if (param instanceof BigDecimal bigDecimalValue) {
+            if (normalizedParam instanceof BigDecimal bigDecimalValue) {
                 try {
                     Object result = bigDecimalValue.stripTrailingZeros().scale() <= 0
                             ? String.valueOf(bigDecimalValue.toBigIntegerExact().longValue())
                             : bigDecimalValue.toString();
-                    logger.trace("config param {}: {} ({}) converted into {} ({})", name, param,
-                            param.getClass().getSimpleName(), result, result.getClass().getSimpleName());
+                    logger.trace("config param {}: {} ({}) converted into {} ({})", name, normalizedParam,
+                            normalizedParam.getClass().getSimpleName(), result, result.getClass().getSimpleName());
                     return result;
                 } catch (ArithmeticException e) {
                     // Ignore error and return the original value
                 }
-            } else if (param instanceof Boolean bool) {
+            } else if (normalizedParam instanceof Boolean bool) {
                 return bool.booleanValue() ? "true" : "false";
             }
         }
@@ -640,34 +638,41 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     private Configuration processConfiguration(UID uid, Configuration configuration, Set<String> textParameters) {
-        Map<String, Object> params = new HashMap<>();
-        Object value;
-        String name;
-        for (Entry<String, Object> entry : configuration.getProperties().entrySet()) {
-            name = entry.getKey();
-            value = entry.getValue();
-            if (textParameters.contains(name)) {
-                if (value instanceof Iterable<?> iterable) {
-                    List<Object> elements = new ArrayList<>();
-                    for (Object element : iterable) {
-                        elements.add(processSingleTextParam(uid, name, element));
-                    }
-                    value = elements;
-                } else if (value instanceof Object && value.getClass().isArray()) {
-                    List<Object> elements = new ArrayList<>();
-                    int length = Array.getLength(value);
-                    for (int i = 0; i < length; i++) {
-                        elements.add(processSingleTextParam(uid, name, Array.get(value, i)));
-                    }
-                    value = elements;
-                } else {
-                    value = processSingleTextParam(uid, name, value);
-                }
+        Configuration processedConfig = new Configuration(configuration);
+        for (Entry<String, Object> entry : configuration.getRawProperties().entrySet()) {
+            String name = entry.getKey();
+            Object value = entry.getValue();
+            if (value == null || !textParameters.contains(name)) {
+                continue; // Skip entirely if it's not a text parameter
             }
-            params.put(name, value);
+            processedConfig.put(name, processValue(uid, name, value, textParameters));
+        }
+        return processedConfig;
+    }
+
+    private @Nullable Object processValue(UID uid, String name, @Nullable Object value, Set<String> textParameters) {
+        if (value == null) {
+            return null;
         }
 
-        return new Configuration(params);
+        if (value instanceof Map<?, ?> map) {
+            Map<String, @Nullable Object> processedMap = new HashMap<>();
+            for (Entry<?, ?> entry : map.entrySet()) {
+                String subKey = String.valueOf(entry.getKey());
+                processedMap.put(subKey, processValue(uid, subKey, entry.getValue(), textParameters));
+            }
+            return processedMap;
+        } else if (value instanceof Iterable<?> iterable) {
+            List<@Nullable Object> elements = new ArrayList<>();
+            for (Object element : iterable) {
+                elements.add(processValue(uid, name, element, textParameters));
+            }
+            return elements;
+        }
+
+        // Since processConfiguration already checked textParameters.contains(name),
+        // any leaf node reaching here is guaranteed to be a target text parameter.
+        return processSingleTextParam(uid, name, value);
     }
 
     private Set<String> getThingConfigTextParameters(ThingTypeUID thingTypeUID, ThingUID thingUID) {

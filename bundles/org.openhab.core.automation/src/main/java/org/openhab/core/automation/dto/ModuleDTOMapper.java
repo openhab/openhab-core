@@ -27,7 +27,7 @@ public class ModuleDTOMapper {
         to.id = from.getId();
         to.label = from.getLabel();
         to.description = from.getDescription();
-        to.configuration = from.getConfiguration().getProperties();
+        to.configuration = from.getConfiguration().getRawProperties();
         to.type = from.getTypeUID();
     }
 }

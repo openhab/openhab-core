@@ -73,9 +73,9 @@ public class FileFormatItemDTOMapper {
         List<FileFormatChannelLinkDTO> channelLinksDTO = new ArrayList<>();
         channelLinks.forEach(link -> {
             if (item.getName().equals(link.getItemName())) {
+                Map<String, Object> rawConfiguration = link.getConfiguration().getRawProperties();
                 channelLinksDTO.add(new FileFormatChannelLinkDTO(link.getLinkedUID().getAsString(),
-                        link.getConfiguration().getProperties().isEmpty() ? null
-                                : link.getConfiguration().getProperties()));
+                        rawConfiguration.isEmpty() ? null : rawConfiguration));
             }
         });
         if (!channelLinksDTO.isEmpty()) {

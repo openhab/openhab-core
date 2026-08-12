@@ -708,7 +708,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         }
 
         Objects.requireNonNull(ConfigUtil.normalizeTypes(configuration.getProperties(), List.of(configDescription)))
-                .forEach(configuration::put);
+                .forEach(configuration::putNormalized);
     }
 
     private void doInitializeHandler(final ThingHandler thingHandler) {

@@ -65,7 +65,7 @@ public class ConfigUtil {
      * <p>
      * This <strong>MUST NOT</strong> be called in production environments as it can break environment variable
      * resolving.
-     * 
+     *
      * @param provider the env provider to use for resolving environment variables
      */
     protected static void setEnvProvider(EnvProvider provider) {
@@ -147,7 +147,7 @@ public class ConfigUtil {
 
     /**
      * Applies the default values from a give {@link ConfigDescription} to the given configuration {@link Map}.
-     * 
+     *
      * @param configuration the configuration {@link Map} where the default values should be added (must not be null)
      * @param configDescription the {@link ConfigDescription} where the default values are located (may be null, but
      *            method won't have any effect then)
@@ -178,7 +178,7 @@ public class ConfigUtil {
             @Nullable ConfigDescription configDescription) {
         Map<String, @Nullable Object> properties = new HashMap<>(configuration.getProperties());
         applyDefaultConfiguration(properties, configDescription);
-        configuration.setProperties(properties);
+        properties.forEach(configuration::putNormalized);
     }
 
     /**
@@ -416,9 +416,10 @@ public class ConfigUtil {
      * @return the resolved configuration
      * @throws IllegalArgumentException if a variable fails to resolve
      */
-    public static Configuration resolveVariables(Configuration configuration) throws IllegalArgumentException {
-        return new Configuration(resolveVariables(configuration.getProperties()));
-    }
+    // @Deprecated
+    // public static Configuration resolveVariables(Configuration configuration) throws IllegalArgumentException {
+    // return new Configuration(resolveVariables(configuration.getRawProperties()));
+    // }
 
     /**
      * Resolve variables and normalize the results in the given {@link Configuration}.
@@ -432,11 +433,11 @@ public class ConfigUtil {
      * @return the normalized configuration
      * @throws IllegalArgumentException if a variable fails to refresh or the given config description is null
      */
-    public static Configuration resolveVariablesAndNormalizeTypes(Configuration configuration,
-            List<ConfigDescription> configDescriptions) throws IllegalArgumentException {
-        final Map<String, @Nullable Object> resolvedConfiguration = resolveVariables(configuration.getProperties());
-        return new Configuration(normalizeTypes(resolvedConfiguration, configDescriptions));
-    }
+    // public static Configuration resolveVariablesAndNormalizeTypes(Configuration configuration,
+    // List<ConfigDescription> configDescriptions) throws IllegalArgumentException {
+    // final Map<String, @Nullable Object> resolvedConfiguration = resolveVariables(configuration.getRawProperties());
+    // return new Configuration(normalizeTypes(resolvedConfiguration, configDescriptions));
+    // }
 
     /**
      * A provider for environment variables.

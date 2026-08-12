@@ -64,13 +64,13 @@ import org.slf4j.LoggerFactory
 
 /**
  * {@link ThingProvider} implementation which computes *.things files.
- * 
+ *
  * @author Oliver Libutzki - Initial contribution
  * @author niehues - Fix ESH Bug 450236
  *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=450236 - Considering
  *         ThingType Description
- * @author Simon Kaufmann - Added asynchronous retry in case the handler 
- *         factory cannot load a thing yet (bug 470368), 
+ * @author Simon Kaufmann - Added asynchronous retry in case the handler
+ *         factory cannot load a thing yet (bug 470368),
  *         added delay until ThingTypes are fully loaded
  * @author Markus Rathgeb - Add locale provider support
  * @author Laurent Garnier - Add method getAllFromModel + do not notify the thing registry for isolated models
@@ -198,8 +198,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
             return #[]
         }
 
-        // construct the thingUID up front: this will ensure that short notation things with reference to a bridge 
-        // do not end up with the bridge id in their id. 
+        // construct the thingUID up front: this will ensure that short notation things with reference to a bridge
+        // do not end up with the bridge id in their id.
         things.forEach([thingId = thingId ?: constructThingUID.toString])
         things.filter(typeof(ModelBridge)).forEach([
             val bridge = it;
@@ -342,8 +342,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         if (keepSourceConfig) {
             target.setProperties(Map.of())
         }
-        source.keySet.forEach [
-            target.put(it, source.get(it))
+        source.rawProperties.keySet.forEach [
+            target.put(it, source.rawProperties.get(it))
         ]
     }
 
@@ -436,15 +436,15 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     }
 
     def private createConfiguration(ModelPropertyContainer propertyContainer) {
-        val configuration = new Configuration
+        val properties = <String, Object>newHashMap
         propertyContainer.properties.forEach [
             if (value.size === 1) {
-                configuration.put(key, value.get(0))
+                properties.put(key, value.get(0))
             } else {
-                configuration.put(key, value)
+                properties.put(key, value)
             }
         ]
-        configuration
+        new Configuration(properties)
     }
 
     def private getThingType(ThingTypeUID thingTypeUID) {

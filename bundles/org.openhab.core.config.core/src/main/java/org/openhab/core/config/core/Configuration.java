@@ -13,7 +13,6 @@
 package org.openhab.core.config.core;
 
 import static java.util.Collections.synchronizedMap;
-import static org.openhab.core.config.core.ConfigUtil.normalizeTypes;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,9 +37,10 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 public class Configuration {
     private final Map<String, Object> properties;
+    private final Map<String, Object> normalizedProperties;
 
     public Configuration() {
-        this(Map.of(), true);
+        this(Map.of(), Map.of());
     }
 
     /**
@@ -52,31 +52,34 @@ public class Configuration {
      * @param configuration the configuration that should be cloned (may be null)
      */
     public Configuration(final @Nullable Configuration configuration) {
-        this(configuration == null ? Map.of() : configuration.properties, true);
+        this(configuration == null ? Map.of() : configuration.properties,
+                configuration == null ? Map.of() : configuration.normalizedProperties);
     }
 
     /**
      * Create a new configuration.
      *
-     * @param properties the properties the configuration should be filled. If null, an empty configuration is created.
+     * @param properties the raw properties the configuration should be filled. If null, an empty configuration is
+     *            created.
      */
     public Configuration(@Nullable Map<String, Object> properties) {
-        this(properties == null ? Map.of() : properties, false);
+        this(properties == null ? Map.of() : properties, Map.of());
     }
 
     /**
      * Create a new configuration.
      *
-     * @param properties the properties to initialize (may be null)
-     * @param alreadyNormalized flag if the properties are already normalized
+     * @param properties the properties to initialize
+     * @param normalizedProperties the normalized properties to initialize
      */
-    private Configuration(final Map<String, Object> properties, final boolean alreadyNormalized) {
-        this.properties = synchronizedMap(alreadyNormalized ? new HashMap<>(properties) : normalizeTypes(properties));
+    private Configuration(final Map<String, Object> properties, final Map<String, Object> normalizedProperties) {
+        this.properties = synchronizedMap(new HashMap<>(properties));
+        this.normalizedProperties = synchronizedMap(new HashMap<>(normalizedProperties));
     }
 
     public <T> T as(Class<T> configurationClass) {
         synchronized (properties) {
-            return ConfigParser.configurationAs(properties, configurationClass);
+            return ConfigParser.configurationAs(resolvedProperties(), configurationClass);
         }
     }
 
@@ -91,16 +94,47 @@ public class Configuration {
     }
 
     public Object get(String key) {
-        return properties.get(key);
+        synchronized (properties) {
+            if (!properties.containsKey(key)) {
+                normalizedProperties.remove(key);
+                return null;
+            } else if (normalizedProperties.containsKey(key)) {
+                return normalizedProperties.get(key);
+            }
+
+            Object rawValue = properties.get(key);
+            if (rawValue == null) {
+                return null;
+            }
+
+            Object resolvedValue = resolveValue(rawValue);
+            Object normalizedValue = ConfigUtil.normalizeType(resolvedValue);
+            normalizedProperties.put(key, normalizedValue);
+            return normalizedValue;
+        }
     }
 
     public Object put(String key, @Nullable Object value) {
-        Object normalizedValue = value == null ? null : ConfigUtil.normalizeType(value, null);
-        return properties.put(key, normalizedValue);
+        synchronized (properties) {
+            normalizedProperties.remove(key);
+            return properties.put(key, value);
+        }
+    }
+
+    public Object putNormalized(String key, @Nullable Object value) {
+        synchronized (properties) {
+            if (!properties.containsKey(key)) {
+                properties.put(key, value);
+            }
+            return normalizedProperties.put(key, value);
+        }
     }
 
     public Object remove(String key) {
-        return properties.remove(key);
+        synchronized (properties) {
+            normalizedProperties.remove(key);
+            return properties.remove(key);
+        }
     }
 
     public Set<String> keySet() {
@@ -111,11 +145,22 @@ public class Configuration {
 
     public Collection<Object> values() {
         synchronized (properties) {
-            return Collections.unmodifiableCollection(new ArrayList<>(properties.values()));
+            return Collections.unmodifiableCollection(new ArrayList<>(resolvedProperties().values()));
         }
     }
 
     public Map<String, Object> getProperties() {
+        synchronized (properties) {
+            return Collections.unmodifiableMap(resolvedProperties());
+        }
+    }
+
+    /**
+     * Returns a copy of the raw, uninterpolated configuration properties.
+     *
+     * @return raw configuration properties
+     */
+    public Map<String, Object> getRawProperties() {
         synchronized (properties) {
             return Collections.unmodifiableMap(new HashMap<>(properties));
         }
@@ -123,9 +168,23 @@ public class Configuration {
 
     public void setProperties(Map<String, Object> newProperties) {
         synchronized (properties) {
+            this.normalizedProperties.clear();
             this.properties.clear();
-            newProperties.entrySet().forEach(e -> put(e.getKey(), e.getValue()));
+            this.properties.putAll(newProperties);
         }
+    }
+
+    private Map<String, Object> resolvedProperties() {
+        Map<String, Object> copy = new HashMap<>(properties.size());
+        properties.keySet().forEach(key -> copy.put(key, get(key)));
+        return copy;
+    }
+
+    private static @Nullable Object resolveValue(@Nullable Object value) {
+        if (value == null) {
+            return value;
+        }
+        return ConfigUtil.resolveVariables(value);
     }
 
     @Override

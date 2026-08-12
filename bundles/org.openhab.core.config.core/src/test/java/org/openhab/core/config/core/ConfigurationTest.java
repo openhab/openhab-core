@@ -15,6 +15,7 @@ package org.openhab.core.config.core;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,7 +26,16 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * Test for Configuration class.
@@ -34,7 +44,19 @@ import org.junit.jupiter.api.Test;
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 @NonNullByDefault
+@Execution(ExecutionMode.SAME_THREAD)
+@ResourceLock(value = "org.openhab.core.config.core.ConfigUtil", mode = ResourceAccessMode.READ_WRITE)
 public class ConfigurationTest {
+
+    private static class ConfigUtilAccessor extends ConfigUtil {
+        static void setEnv(Map<String, String> values) {
+            setEnvProvider(values::get);
+        }
+
+        static void resetEnv() {
+            setEnvProvider(System::getenv);
+        }
+    }
 
     public static class ConfigClass {
         public enum MyEnum {
@@ -62,6 +84,16 @@ public class ConfigurationTest {
             Set<String> setField, org.openhab.core.config.core.ConfigurationTest.ConfigClass.MyEnum enumField) {
         @SuppressWarnings("unused")
         private static final String CONSTANT = "SOME_CONSTANT";
+    }
+
+    @BeforeEach
+    public void setUp() {
+        ConfigUtilAccessor.setEnv(Map.of("HOSTNAME", "openhab-host", "PORT", "8080"));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ConfigUtilAccessor.resetEnv();
     }
 
     @Test
@@ -233,5 +265,45 @@ public class ConfigurationTest {
         ConfigClass configClass = configuration.as(ConfigClass.class);
 
         assertThat(configClass.listField, is(hasItems("one")));
+    }
+
+    @Test
+    public void assertGetResolvesEnvVariablesAndGetRawKeepsSource() {
+        Configuration configuration = new Configuration(Map.of("host", "${ENV:HOSTNAME}", "port", "${ENV:PORT}"));
+
+        assertThat(configuration.get("host"), is(equalTo("openhab-host")));
+        assertThat(configuration.get("port"), is(equalTo("8080")));
+        assertThat(configuration.getRawProperties().get("host"), is(equalTo("${ENV:HOSTNAME}")));
+        assertThat(configuration.getRawProperties().get("port"), is(equalTo("${ENV:PORT}")));
+    }
+
+    @Test
+    public void assertGetPropertiesAndAsResolveEnvVariables() {
+        Configuration configuration = new Configuration(
+                Map.of("stringField", "${ENV:HOSTNAME}", "listField", List.of("${ENV:HOSTNAME}", "plain")));
+
+        assertThat(configuration.getProperties().get("stringField"), is(equalTo("openhab-host")));
+        assertThat(configuration.getRawProperties().get("stringField"), is(equalTo("${ENV:HOSTNAME}")));
+
+        ConfigClass configClass = configuration.as(ConfigClass.class);
+        assertThat(configClass.stringField, is(equalTo("openhab-host")));
+        assertThat(configClass.listField, is(hasItems("openhab-host", "plain")));
+    }
+
+    @Test
+    public void assertConfigurationSerializerUsesRawValues() {
+        Gson gson = new GsonBuilder().registerTypeAdapter(Configuration.class, new ConfigurationSerializer()).create();
+        Configuration configuration = new Configuration(Map.of("host", "${ENV:HOSTNAME}", "port", "${ENV:PORT}"));
+
+        assertEquals("{\"host\":\"${ENV:HOSTNAME}\",\"port\":\"${ENV:PORT}\"}", gson.toJson(configuration));
+    }
+
+    @Test
+    public void assertConstructorPreservesSourceValuesAndNormalizesTypes() {
+        Configuration configuration = new Configuration(Map.of("host", "${ENV:HOSTNAME}", "count", 1));
+
+        assertThat(configuration.get("host"), is(equalTo("openhab-host")));
+        assertThat(configuration.getRawProperties().get("host"), is(equalTo("${ENV:HOSTNAME}")));
+        assertThat(configuration.get("count"), is(equalTo(BigDecimal.ONE)));
     }
 }

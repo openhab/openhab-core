@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -114,6 +115,7 @@ public abstract class AbstractThingSerializer implements ThingSerializer {
     private List<ConfigParameter> getConfigurationParameters(
             List<ConfigDescriptionParameter> configDescriptionParameter, Configuration configParameters,
             boolean hideDefaultParameters) {
+        Map<String, Object> rawConfigParameters = configParameters.getRawProperties();
         List<ConfigParameter> parameters = new ArrayList<>();
         Set<String> handledNames = new HashSet<>();
         for (ConfigDescriptionParameter param : configDescriptionParameter) {
@@ -121,18 +123,18 @@ public abstract class AbstractThingSerializer implements ThingSerializer {
             if (handledNames.contains(paramName)) {
                 continue;
             }
-            Object value = configParameters.get(paramName);
+            Object value = rawConfigParameters.get(paramName);
             Object defaultValue = ConfigUtil.getDefaultValueAsCorrectType(param);
             if (value != null && (!hideDefaultParameters || !value.equals(defaultValue))) {
                 parameters.add(new ConfigParameter(paramName, value));
             }
             handledNames.add(paramName);
         }
-        for (String paramName : configParameters.keySet().stream().sorted().collect(Collectors.toList())) {
+        for (String paramName : rawConfigParameters.keySet().stream().sorted().toList()) {
             if (handledNames.contains(paramName)) {
                 continue;
             }
-            Object value = configParameters.get(paramName);
+            Object value = rawConfigParameters.get(paramName);
             if (value != null) {
                 parameters.add(new ConfigParameter(paramName, value));
             }
@@ -189,13 +191,11 @@ public abstract class AbstractThingSerializer implements ThingSerializer {
     }
 
     private boolean channelWithNonDefaultConfig(Channel channel) {
+        Map<String, Object> rawConfiguration = channel.getConfiguration().getRawProperties();
         for (ConfigDescriptionParameter param : getConfigDescriptionParameters(channel)) {
-            Object value = channel.getConfiguration().get(param.getName());
-            if (value != null) {
-                value = ConfigUtil.normalizeType(value, param);
-                if (!value.equals(ConfigUtil.getDefaultValueAsCorrectType(param))) {
-                    return true;
-                }
+            Object value = rawConfiguration.get(param.getName());
+            if (value != null && !value.equals(ConfigUtil.getDefaultValueAsCorrectType(param))) {
+                return true;
             }
         }
         return false;

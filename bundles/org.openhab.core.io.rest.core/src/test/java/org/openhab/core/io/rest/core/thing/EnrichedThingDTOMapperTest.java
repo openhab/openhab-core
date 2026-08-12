@@ -67,6 +67,7 @@ public class EnrichedThingDTOMapperTest {
         when(thingMock.getLabel()).thenReturn(THING_LABEL);
         when(thingMock.getChannels()).thenReturn(mockChannels());
         when(thingMock.getConfiguration()).thenReturn(configurationMock);
+        when(configurationMock.getRawProperties()).thenReturn(Map.of());
         when(thingMock.getProperties()).thenReturn(propertiesMock);
         when(thingMock.getLocation()).thenReturn(LOCATION);
     }

@@ -82,7 +82,7 @@ public class ReferenceResolver {
             Object o = config.get(configKey);
             if (o instanceof String string) {
                 Object result = resolveProperty(config, context, logger, configKey, string);
-                config.put(configKey, result);
+                config.putNormalized(configKey, result);
             } else if (o instanceof List list) {
                 List<Object> resultList = new ArrayList<>();
                 for (Object obj : list) {
@@ -90,7 +90,7 @@ public class ReferenceResolver {
                         resultList.add(resolveProperty(config, context, logger, configKey, string));
                     }
                 }
-                config.put(configKey, resultList);
+                config.putNormalized(configKey, resultList);
             }
         }
     }

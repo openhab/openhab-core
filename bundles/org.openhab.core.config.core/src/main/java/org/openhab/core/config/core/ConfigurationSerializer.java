@@ -35,8 +35,9 @@ public class ConfigurationSerializer implements JsonSerializer<Configuration> {
     @Override
     public JsonElement serialize(Configuration src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject result = new JsonObject();
-        src.keySet().stream().sorted().forEachOrdered((String propName) -> {
-            Object value = src.get(propName);
+        var rawProperties = src.getRawProperties();
+        rawProperties.keySet().stream().sorted().forEachOrdered((String propName) -> {
+            Object value = rawProperties.get(propName);
             if (value instanceof List list) {
                 JsonArray array = new JsonArray();
                 for (Object element : list) {

@@ -80,10 +80,6 @@ public class ThingDTOMapper {
     }
 
     private static Map<String, Object> toMap(Configuration configuration) {
-        Map<String, Object> configurationMap = new HashMap<>(configuration.keySet().size());
-        for (String key : configuration.keySet()) {
-            configurationMap.put(key, configuration.get(key));
-        }
-        return configurationMap;
+        return new HashMap<>(configuration.getRawProperties());
     }
 }

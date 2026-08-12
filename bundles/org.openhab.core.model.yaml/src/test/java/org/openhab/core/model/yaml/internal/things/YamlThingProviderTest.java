@@ -39,6 +39,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -149,8 +150,19 @@ public class YamlThingProviderTest {
     private @NonNullByDefault({}) TestThingChangeListener thingListener;
     private @NonNullByDefault({}) NtpThingHandlerFactory thingHandlerFactory;
 
+    private static class ConfigUtilAccessor extends ConfigUtil {
+        static void setEnv(Map<String, String> values) {
+            setEnvProvider(values::get);
+        }
+
+        static void resetEnv() {
+            setEnvProvider(System::getenv);
+        }
+    }
+
     @BeforeEach
     public void setup() {
+        ConfigUtilAccessor.setEnv(Map.of("OPENHAB_TEST_DO_NOT_SET", "openhab-host"));
         fullModelPath = watchPath.resolve(MODEL_PATH);
         when(watchServiceMock.getWatchPath()).thenReturn(watchPath);
 
@@ -243,6 +255,11 @@ public class YamlThingProviderTest {
 
         modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(thingProvider);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ConfigUtilAccessor.resetEnv();
     }
 
     @Test
@@ -560,6 +577,40 @@ public class YamlThingProviderTest {
         assertEquals(new ChannelUID(NTP_THING_UID2, "date-only-string"), channel.getUID());
         assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
         assertEquals("true", channel.getConfiguration().get("DateTimeFormat"));
+    }
+
+    @Test
+    public void testRawPlaceholdersArePreservedInThingAndChannelConfigurations() throws IOException {
+        String model = """
+                version: 1
+                things:
+                  ntp:ntp:local:
+                    config:
+                      hostname: '${ENV:OPENHAB_TEST_DO_NOT_SET}'
+                      timeZone: '${ENV:OPENHAB_TEST_DO_NOT_SET}'
+                    channels:
+                      string:
+                        type: string-channel
+                        config:
+                          DateTimeFormat: '${ENV:OPENHAB_TEST_DO_NOT_SET}'
+                """;
+        Files.writeString(fullModelPath, model);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        Collection<Thing> things = thingProvider.getAll();
+        assertThat(things, hasSize(1));
+        Thing thing = things.iterator().next();
+
+        assertEquals("openhab-host", thing.getConfiguration().get("hostname"));
+        assertEquals("openhab-host", thing.getConfiguration().get("timeZone"));
+        assertEquals("${ENV:OPENHAB_TEST_DO_NOT_SET}", thing.getConfiguration().getRawProperties().get("hostname"));
+        assertEquals("${ENV:OPENHAB_TEST_DO_NOT_SET}", thing.getConfiguration().getRawProperties().get("timeZone"));
+
+        Channel channel = thing.getChannels().stream().filter(c -> "string".equals(c.getUID().getId())).findFirst()
+                .orElseThrow();
+        assertEquals("openhab-host", channel.getConfiguration().get("DateTimeFormat"));
+        assertEquals("${ENV:OPENHAB_TEST_DO_NOT_SET}",
+                channel.getConfiguration().getRawProperties().get("DateTimeFormat"));
     }
 
     @Test

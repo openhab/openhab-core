@@ -54,7 +54,7 @@ public class RuleDTOMapper {
         to.triggers = TriggerDTOMapper.map(from.getTriggers());
         to.conditions = ConditionDTOMapper.map(from.getConditions());
         to.actions = ActionDTOMapper.map(from.getActions());
-        to.configuration = from.getConfiguration().getProperties();
+        to.configuration = from.getConfiguration().getRawProperties();
         to.configDescriptions = ConfigDescriptionDTOMapper.mapParameters(from.getConfigurationDescriptions());
         to.templateUID = from.getTemplateUID();
         to.templateState = from.getTemplateState().toString();

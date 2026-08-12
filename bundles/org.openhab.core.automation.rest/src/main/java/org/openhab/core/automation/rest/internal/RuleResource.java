@@ -314,7 +314,7 @@ public class RuleResource implements RESTResource {
                     ruleUID);
             return Response.status(Status.NOT_FOUND).build();
         } else {
-            return Response.ok(rule.getConfiguration().getProperties()).build();
+            return Response.ok(rule.getConfiguration().getRawProperties()).build();
         }
     }
 
@@ -526,7 +526,7 @@ public class RuleResource implements RESTResource {
         if (rule != null) {
             Module module = getModule(rule, moduleCategory, id);
             if (module != null) {
-                return Response.ok(module.getConfiguration().getProperties()).build();
+                return Response.ok(module.getConfiguration().getRawProperties()).build();
             }
         }
         return Response.status(Status.NOT_FOUND).build();
@@ -546,7 +546,7 @@ public class RuleResource implements RESTResource {
         if (rule != null) {
             Module module = getModule(rule, moduleCategory, id);
             if (module != null) {
-                return Response.ok(module.getConfiguration().getProperties().get(param)).build();
+                return Response.ok(module.getConfiguration().getRawProperties().get(param)).build();
             }
         }
         return Response.status(Status.NOT_FOUND).build();

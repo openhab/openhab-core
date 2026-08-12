@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.xtext.naming.QualifiedName;
@@ -51,6 +52,7 @@ import org.openhab.core.automation.internal.module.handler.TimeOfDayConditionHan
 import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
 import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;
 import org.openhab.core.automation.module.script.internal.handler.ScriptActionHandler;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.rule.jvmmodel.RulesRefresher;
@@ -74,8 +76,19 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
     private @NonNullByDefault({}) DSLRuleProvider dslRuleProvider;
     private @NonNullByDefault({}) ReadyService readyService;
 
+    private static class ConfigUtilAccessor extends ConfigUtil {
+        static void setEnv(Map<String, String> values) {
+            setEnvProvider(values::get);
+        }
+
+        static void resetEnv() {
+            setEnvProvider(System::getenv);
+        }
+    }
+
     @BeforeEach
     public void setup() {
+        ConfigUtilAccessor.setEnv(Map.of("OPENHAB_TEST_DO_NOT_SET", "openhab-host"));
         registerVolatileStorageService();
 
         EventPublisher eventPublisher = event -> {
@@ -100,6 +113,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
     @AfterEach
     public void tearDown() {
         modelRepository.removeModel(TESTMODEL_NAME);
+        ConfigUtilAccessor.resetEnv();
     }
 
     @Test
@@ -461,5 +475,30 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         Collection<Rule> actualRules = dslRuleProvider.getAll();
 
         assertThat(actualRules.size(), is(1));
+    }
+
+    @Test
+    public void testRawPlaceholderIsPreservedInScriptConfiguration() {
+        Collection<Rule> rules = dslRuleProvider.getAll();
+        assertThat(rules.size(), is(0));
+
+        String model = """
+                rule RawPlaceholderRule
+                when
+                   System started
+                then
+                   logInfo("Test", "${ENV:OPENHAB_TEST_DO_NOT_SET}")
+                end
+                """;
+
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME,
+                new ByteArrayInputStream(model.getBytes(StandardCharsets.UTF_8)));
+        Collection<Rule> actualRules = dslRuleProvider.getAll();
+        assertThat(actualRules.size(), is(1));
+
+        Rule rule = actualRules.iterator().next();
+        String rawScript = (String) rule.getActions().getFirst().getConfiguration().getRawProperties()
+                .get(AbstractScriptModuleHandler.CONFIG_SCRIPT);
+        assertThat(rawScript, containsString("${ENV:OPENHAB_TEST_DO_NOT_SET}"));
     }
 }
