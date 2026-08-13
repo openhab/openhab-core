@@ -268,7 +268,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                     error(buildMsgWithLineNb("Button widget doens't have click command defined", w, null, null),
                         w, SitemapPackage.Literals.MODEL_BUTTON.getEStructuralFeature(SitemapPackage.MODEL_BUTTON__CMD))
                 }
-                if (w.confirmCmd && w.releaseCmd !== null) {
+                if (w.confirmCmd != null && w.releaseCmd !== null) {
                     warning(buildMsgWithLineNb("Button widget has both confirmCmd and release command defined", w, null, null), w, null)
                 }
             } else {

@@ -219,7 +219,7 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      * Gets the widget confirm cmd property based on the item state
      *
      * @param w Widget
-     * @return true if the changing the item state requires a confirmation dialog
+     * @return true if changing the item state requires a confirmation dialog
      */
     boolean getConfirmCmd(Widget w);
 

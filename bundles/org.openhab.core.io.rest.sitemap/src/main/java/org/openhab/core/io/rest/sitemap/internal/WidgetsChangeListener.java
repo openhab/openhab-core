@@ -153,6 +153,10 @@ public class WidgetsChangeListener implements EventSubscriber {
                 for (Rule rule : widget.getIconColor()) {
                     addItemsFromConditions(items, rule.getConditions());
                 }
+                // now scan confirm command rules
+                for (Rule rule : widget.getConfirmCmdRules()) {
+                    addItemsFromConditions(items, rule.getConditions());
+                }
             }
         }
         return items;

@@ -180,7 +180,9 @@ public class YamlWidgetDTO {
 
         ok &= isValidRule(errors, warnings, visibility, "visibility");
         ok &= isValidField("confirmCmd", confirmCmd, errors, warnings); // Check if field is allowed for the widget type
-        ok &= isValidRule(errors, warnings, confirmCmd, "confirmCmd"); // Check if valid rule
+        if (!(confirmCmd instanceof Boolean)) {
+            ok &= isValidRule(errors, warnings, confirmCmd, "confirmCmd"); // Check if valid rule
+        }
 
         if (widgets != null) {
             if (!LINKABLE_WIDGETS.contains(type)) {
