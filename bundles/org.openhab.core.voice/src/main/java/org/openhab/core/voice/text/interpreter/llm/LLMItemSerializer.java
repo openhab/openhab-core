@@ -12,10 +12,10 @@
  */
 package org.openhab.core.voice.text.interpreter.llm;
 
-import static org.openhab.core.semantics.internal.SemanticsMetadataProvider.NAMESPACE;
-import static org.openhab.core.semantics.internal.SemanticsMetadataProvider.REL_HAS_LOCATION;
-import static org.openhab.core.semantics.internal.SemanticsMetadataProvider.REL_IS_PART_OF;
-import static org.openhab.core.semantics.internal.SemanticsMetadataProvider.REL_IS_POINT_OF;
+import static org.openhab.core.semantics.SemanticTags.METADATA_NAMESPACE;
+import static org.openhab.core.semantics.SemanticTags.REL_HAS_LOCATION;
+import static org.openhab.core.semantics.SemanticTags.REL_IS_PART_OF;
+import static org.openhab.core.semantics.SemanticTags.REL_IS_POINT_OF;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -183,7 +183,7 @@ public class LLMItemSerializer {
         List<String> parents = new ArrayList<>();
 
         // Resolve semantic parent via SemanticsMetadataProvider configuration keys
-        Metadata md = metadataRegistry.get(new MetadataKey(NAMESPACE, child.getName()));
+        Metadata md = metadataRegistry.get(new MetadataKey(METADATA_NAMESPACE, child.getName()));
         if (md != null) {
             Map<String, Object> config = md.getConfiguration();
 
