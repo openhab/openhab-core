@@ -157,6 +157,19 @@ public abstract class BaseThingHandler implements ThingHandler {
     @Override
     public void thingUpdated(Thing thing) {
         dispose();
+        setThing(thing);
+        initialize();
+    }
+
+    /**
+     * Replaces the {@link Thing} handled by this handler and refreshes its resolved configuration.
+     * <p>
+     * Custom {@link #thingUpdated(Thing)} implementations should use this method instead of assigning directly to
+     * {@link #thing}, so the Thing and resolved configuration remain consistent.
+     *
+     * @param thing the updated Thing
+     */
+    protected final void setThing(Thing thing) {
         Configuration resolvedConfiguration;
         try {
             resolvedConfiguration = ConfigUtil.resolveVariables(thing.getConfiguration());
@@ -169,7 +182,6 @@ public abstract class BaseThingHandler implements ThingHandler {
             this.thing = thing;
             this.resolvedConfig = resolvedConfiguration;
         }
-        initialize();
     }
 
     @Override
