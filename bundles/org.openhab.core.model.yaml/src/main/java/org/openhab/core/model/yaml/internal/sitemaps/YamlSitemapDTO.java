@@ -262,6 +262,16 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
             }
         }
 
+        if (partial.confirmCmd != null) {
+            if (partial.confirmCmd.isValueNode()) {
+                result.confirmCmd = partial.confirmCmd.asBoolean();
+            } else if (partial.confirmCmd.isArray()) {
+                result.confirmCmd = toRulesDto(partial.confirmCmd);
+            } else {
+                result.confirmCmd = toRuleDto(partial.confirmCmd);
+            }
+        }
+
         if (partial.widgets != null) {
             List<YamlWidgetDTO> widgets = new ArrayList<>(partial.widgets.size());
             for (YamlPartialWidgetDTO widget : partial.widgets) {
@@ -381,6 +391,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         public String releaseCommand;
         public Boolean stateless;
         public JsonNode visibility;
+        public JsonNode confirmCmd;
         public List<YamlPartialWidgetDTO> widgets;
     }
 }
