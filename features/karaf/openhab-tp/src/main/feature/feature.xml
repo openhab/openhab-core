@@ -208,12 +208,12 @@
 		<bundle>mvn:org.jupnp/org.jupnp/${jupnp.version}</bundle>
 		<!-- jUPnP no longer bundles a transport implementation; the Jetty 9 transport (and the
 			generic servlet transport infrastructure it depends on) must be added explicitly. -->
-		<bundle>mvn:org.jupnp/org.jupnp.transport.servlet/${jupnp.version}</bundle>
+		<bundle>mvn:org.jupnp/org.jupnp.transport.javax.servlet/${jupnp.version}</bundle>
 		<bundle>mvn:org.jupnp/org.jupnp.transport.jetty9/${jupnp.version}</bundle>
 		<!-- Without this bridge, OSGiUpnpServiceConfiguration falls through to jetty9's standalone
 			StreamServer, which opens its own socket on the UPnP callback port (default 8080) instead
 			of sharing openHAB's existing HttpService - colliding with pax-web on that same port. -->
-		<bundle>mvn:org.jupnp/org.jupnp.transport.httpservice/${jupnp.version}</bundle>
+		<bundle>mvn:org.jupnp/org.jupnp.transport.javax.httpservice/${jupnp.version}</bundle>
 	</feature>
 
 	<feature name="openhab.tp-lsp4j" description="Eclipse LSP4J" version="${project.version}">
