@@ -194,8 +194,8 @@ public interface Widget {
     void setConfirmCmd(@Nullable Boolean confirmCmd);
 
     /**
-     * Get the confirm cmd rules. This method should return a modifiable list, allowing commands to the confirm
-     * change rules.
+     * Get the confirm cmd rules. This method should return a modifiable list, allowing updates to the confirm
+     * cmd rules.
      *
      * @return confirm cmd rules
      */

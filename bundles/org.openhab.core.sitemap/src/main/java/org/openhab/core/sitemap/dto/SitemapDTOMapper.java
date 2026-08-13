@@ -79,7 +79,9 @@ public class SitemapDTOMapper {
         if (widget.isStaticIcon()) {
             widgetDTO.staticIcon = true;
         }
-        widgetDTO.confirmCmd = widget.getConfirmCmd();
+        if (widget.getConfirmCmd()) {
+            widgetDTO.confirmCmd = true;
+        }
 
         List<Rule> iconRules = widget.getIconRules();
         if (!iconRules.isEmpty()) {
