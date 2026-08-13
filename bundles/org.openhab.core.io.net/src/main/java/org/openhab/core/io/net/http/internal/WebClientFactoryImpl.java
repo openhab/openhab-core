@@ -240,6 +240,10 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                 // Jetty's ContainerLifeCycle javadoc). It is stopped explicitly in deactivate().
                 try {
                     threadPool.start();
+                    // Set the stop timeout right after starting the pool we now own. We need the
+                    // stop timeout in order to prevent blocking the deactivation of this
+                    // component, see https://github.com/eclipse/smarthome/issues/6632
+                    threadPool.setStopTimeout(0);
                 } catch (Exception e) {
                     // roll back so a later initialize() retry recreates the pool
                     // instead of reusing a dead one
@@ -250,11 +254,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
 
             if (commonHttpClient == null) {
                 commonHttpClient = createHttpClientInternal("common", null, true, threadPool);
-                // we need to set the stop timeout AFTER the client has been started, because
-                // otherwise the Jetty client sets it back to the default value.
-                // We need the stop timeout in order to prevent blocking the deactivation of this
-                // component, see https://github.com/eclipse/smarthome/issues/6632
-                threadPool.setStopTimeout(0);
                 logger.debug("Jetty shared http client created");
             }
 
