@@ -74,7 +74,15 @@ public class WebClientFactoryImplTest {
         // tear down the shared thread pool underneath the common WebSocketClient, whose selector
         // then died with a ClosedSelectorException and deactivate() blocked forever.
         // Deactivation must always complete.
-        Thread deactivateThread = new Thread(() -> webClientFactory.deactivate());
+        deactivateWithTimeout();
+    }
+
+    private void deactivateWithTimeout() throws InterruptedException {
+        // Regression-safe: run deactivate() on a DAEMON thread so a blocked
+        // deactivation can neither keep the test JVM alive nor leak a running
+        // non-daemon thread into subsequent tests; fail loudly via the assert.
+        Thread deactivateThread = new Thread(() -> webClientFactory.deactivate(), "webClientFactory-deactivate");
+        deactivateThread.setDaemon(true);
         deactivateThread.start();
         deactivateThread.join(10_000);
         assertThat("deactivate() did not complete", deactivateThread.isAlive(), is(false));
@@ -105,7 +113,7 @@ public class WebClientFactoryImplTest {
         assertThat(sharedPool.isRunning(), is(true));
 
         // deactivation stops the pool itself, after both clients
-        webClientFactory.deactivate();
+        deactivateWithTimeout();
         assertThat(sharedPool.isRunning(), is(false));
     }
 
