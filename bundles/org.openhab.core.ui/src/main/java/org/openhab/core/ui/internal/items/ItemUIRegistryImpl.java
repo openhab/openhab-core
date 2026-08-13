@@ -1334,16 +1334,21 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     public boolean getConfirmCmd(Widget w) {
         // Default to confirm cmd parameter if no rules defined
         List<Rule> ruleList = w.getConfirmCmdRules();
-        logger.debug("Checking confirm command parameter for widget '{}'.", w.getLabel());
 
         if (ruleList.isEmpty()) {
             return w.getConfirmCmd();
         }
+
+        logger.debug("Checking confirm command parameter for widget '{}'.", w.getLabel());
+
         for (Rule rule : ruleList) {
             if (allConditionsOk(rule.getConditions(), w)) {
                 return true;
             }
         }
+
+        logger.debug("Widget {} commands don't require confirmation.", w.getLabel());
+
         return false;
     }
 
