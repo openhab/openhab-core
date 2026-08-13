@@ -45,11 +45,11 @@ Fragment-Host: org.openhab.core.config.dispatch
 	org.eclipse.jetty.server;version='[12.1.12,12.1.13)',\
 	org.eclipse.jetty.session;version='[12.1.12,12.1.13)',\
 	org.eclipse.jetty.util;version='[12.1.12,12.1.13)',\
-	org.objectweb.asm;version='[9.10.0,9.10.1)',\
-	org.objectweb.asm.commons;version='[9.10.0,9.10.1)',\
-	org.objectweb.asm.tree;version='[9.10.0,9.10.1)',\
-	org.objectweb.asm.tree.analysis;version='[9.10.0,9.10.1)',\
-	org.objectweb.asm.util;version='[9.10.0,9.10.1)',\
+	org.objectweb.asm;version='[9.10.1,9.10.2)',\
+	org.objectweb.asm.commons;version='[9.10.1,9.10.2)',\
+	org.objectweb.asm.tree;version='[9.10.1,9.10.2)',\
+	org.objectweb.asm.tree.analysis;version='[9.10.1,9.10.2)',\
+	org.objectweb.asm.util;version='[9.10.1,9.10.2)',\
 	org.openhab.core;version='[5.3.0,5.3.1)',\
 	org.openhab.core.config.dispatch;version='[5.3.0,5.3.1)',\
 	org.openhab.core.config.dispatch.tests;version='[5.3.0,5.3.1)',\
