@@ -136,6 +136,13 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             commonWebSocketClient = null;
             logger.debug("Jetty shared web socket client stopped");
         }
+        if (threadPool != null) {
+            try {
+                threadPool.stop();
+            } catch (Exception e) {
+                logger.error("error while stopping shared Jetty thread pool", e);
+            }
+        }
         threadPool = null;
     }
 
@@ -227,6 +234,18 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         try {
             if (threadPool == null) {
                 threadPool = createThreadPool("common", minThreadsShared, maxThreadsShared, keepAliveTimeoutShared);
+                // The pool is shared between the http client and the web socket client. Start it
+                // ourselves so both Jetty containers treat it as an unmanaged bean and neither
+                // stops it while the other client is still using it (see the shared-bean rule in
+                // Jetty's ContainerLifeCycle javadoc). It is stopped explicitly in deactivate().
+                try {
+                    threadPool.start();
+                } catch (Exception e) {
+                    // roll back so a later initialize() retry recreates the pool
+                    // instead of reusing a dead one
+                    threadPool = null;
+                    throw e;
+                }
             }
 
             if (commonHttpClient == null) {
