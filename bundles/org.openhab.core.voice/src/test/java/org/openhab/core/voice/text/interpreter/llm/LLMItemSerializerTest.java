@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.openhab.core.semantics.internal.SemanticsMetadataProvider.NAMESPACE;
+import static org.openhab.core.semantics.SemanticTags.METADATA_NAMESPACE;
 
 import java.util.Collections;
 import java.util.List;
@@ -116,7 +116,7 @@ public class LLMItemSerializerTest {
         MetadataRegistry registry = mock(MetadataRegistry.class);
         when(registry.get(any(MetadataKey.class))).thenAnswer(invocation -> {
             MetadataKey key = invocation.getArgument(0);
-            if (NAMESPACE.equals(key.getNamespace())) {
+            if (METADATA_NAMESPACE.equals(key.getNamespace())) {
                 Map<String, Object> config = semanticsConfigMap.get(key.getItemName());
                 if (config != null) {
                     return new Metadata(key, "", config);
@@ -352,6 +352,66 @@ public class LLMItemSerializerTest {
                 # Non-semantic Items
                 gLights "All Lights"
                 ..LivingRoom_Light Dimmer
+                """;
+
+        assertEquals(expected, LLMItemSerializer.serialize(items, metadataRegistry, null));
+    }
+
+    @Test
+    public void testSerializeSemanticRootInNonSemanticGroup() {
+        MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of());
+
+        Item gSensors = mockItem("gSensors", "Sensors Group", "Group", Set.of(), List.of());
+        Item tempSensor = mockItem("Temperature_Sensor", "Temperature Sensor", "Number",
+                Set.of("Mock_Point_Control_Light"), List.of("gSensors"));
+
+        List<Item> items = List.of(gSensors, tempSensor);
+
+        String expected = """
+                # Format: [..]name [type] ["label"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]
+
+                # Semantic Items
+                Temperature_Sensor Number :MockLight
+
+                # Non-semantic Items
+                gSensors "Sensors Group"
+                ..Temperature_Sensor Number
+                """;
+
+        assertEquals(expected, LLMItemSerializer.serialize(items, metadataRegistry, null));
+    }
+
+    @Test
+    public void testSerializeRecursiveGroups() {
+        MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of());
+
+        Item groupA = mockItem("GroupA", "Group A", "Group", Set.of(), List.of("GroupC"));
+        Item groupB = mockItem("GroupB", "Group B", "Group", Set.of(), List.of("GroupA"));
+        Item groupC = mockItem("GroupC", "Group C", "Group", Set.of(), List.of("GroupB"));
+
+        List<Item> items = List.of(groupA, groupB, groupC);
+
+        String result = LLMItemSerializer.serialize(items, metadataRegistry, null);
+        assertEquals("", result);
+    }
+
+    @Test
+    public void testSerializeRecursiveGroupsFromRoot() {
+        MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of());
+
+        Item groupA = mockItem("GroupA", "Label A", "Group", Set.of(), List.of());
+        Item groupB = mockItem("GroupB", "Label B", "Group", Set.of(), List.of("GroupA", "GroupC"));
+        Item groupC = mockItem("GroupC", "Label C", "Group", Set.of(), List.of("GroupB"));
+
+        List<Item> items = List.of(groupA, groupB, groupC);
+
+        String expected = """
+                # Format: [..]name [type] ["label"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]
+
+                # Non-semantic Items
+                GroupA "Label A"
+                ..GroupB "Label B"
+                ....GroupC "Label C"
                 """;
 
         assertEquals(expected, LLMItemSerializer.serialize(items, metadataRegistry, null));
