@@ -488,7 +488,7 @@
     </dependency>
     <dependency>
       <groupId>org.jupnp</groupId>
-      <artifactId>org.jupnp.transport.jakarta.httpservice</artifactId>
+      <artifactId>org.jupnp.transport.jakarta.whiteboard</artifactId>
       <scope>compile</scope>
     </dependency>
 
@@ -769,13 +769,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.30</version>
+      <version>4.31</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.30</version>
+      <version>4.31</version>
       <scope>compile</scope>
     </dependency>
 

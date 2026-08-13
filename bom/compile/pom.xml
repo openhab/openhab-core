@@ -253,7 +253,7 @@
     </dependency>
     <dependency>
       <groupId>org.jupnp</groupId>
-      <artifactId>org.jupnp.transport.jakarta.httpservice</artifactId>
+      <artifactId>org.jupnp.transport.jakarta.whiteboard</artifactId>
       <scope>compile</scope>
     </dependency>
 

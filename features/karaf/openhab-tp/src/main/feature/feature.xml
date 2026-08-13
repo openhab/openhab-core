@@ -226,7 +226,7 @@
 		<!-- Without this bridge, OSGiUpnpServiceConfiguration falls through to jetty9's standalone
 			StreamServer, which opens its own socket on the UPnP callback port (default 8080) instead
 			of sharing openHAB's existing HttpService - colliding with pax-web on that same port. -->
-		<bundle>mvn:org.jupnp/org.jupnp.transport.jakarta.httpservice/${jupnp.version}</bundle>
+		<bundle>mvn:org.jupnp/org.jupnp.transport.jakarta.whiteboard/${jupnp.version}</bundle>
 	</feature>
 
 	<feature name="openhab.tp-lsp4j" description="Eclipse LSP4J" version="${project.version}">
