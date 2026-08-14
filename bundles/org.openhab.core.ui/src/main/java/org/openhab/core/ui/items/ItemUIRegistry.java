@@ -216,12 +216,14 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
     boolean getVisiblity(Widget w);
 
     /**
-     * Gets the widget confirm cmd property based on the item state
+     * Gets the widget confirm cmd message property based on the item state
      *
      * @param w Widget
-     * @return true if changing the item state requires a confirmation dialog
+     * @return message to show in the confirmation dialog or null if no message is defined and no confirmation dialog
+     *         should be shown
      */
-    boolean getConfirmCmd(Widget w);
+    @Nullable
+    String getConfirmCmdMessage(Widget w);
 
     /**
      * Gets the item state

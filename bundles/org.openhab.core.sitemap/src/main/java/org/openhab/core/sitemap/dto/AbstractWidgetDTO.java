@@ -39,10 +39,6 @@ public abstract class AbstractWidgetDTO {
      * with conditional rules.
      */
     public Boolean staticIcon;
-    /**
-     * confirmCmd is a boolean indicating if a widget command must be confirmed before sending the command.
-     */
-    public Boolean confirmCmd;
 
     // widget-specific attributes
     public Boolean switchSupport;

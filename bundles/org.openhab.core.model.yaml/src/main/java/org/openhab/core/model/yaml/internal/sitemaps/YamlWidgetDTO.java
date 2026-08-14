@@ -178,10 +178,10 @@ public class YamlWidgetDTO {
                     .formatted(minValue.doubleValue(), maxValue.doubleValue()));
         }
 
-        ok &= isValidRule(errors, warnings, visibility, "visibility");
+        ok &= isValidRule(errors, warnings, visibility, "visibility", true);
         ok &= isValidField("confirmCmd", confirmCmd, errors, warnings); // Check if field is allowed for the widget type
         if (!(confirmCmd instanceof Boolean)) {
-            ok &= isValidRule(errors, warnings, confirmCmd, "confirmCmd"); // Check if valid rule
+            ok &= isValidRule(errors, warnings, confirmCmd, "confirmCmd", false); // Check if valid rule
         }
 
         if (widgets != null) {
@@ -306,7 +306,7 @@ public class YamlWidgetDTO {
     }
 
     private boolean isValidRule(@NonNull List<@NonNull String> errors, @NonNull List<@NonNull String> warnings,
-            Object parameter, String parameterName) {
+            Object parameter, String parameterName, boolean ignoreValue) {
         boolean ok = true;
         List<String> ruleErrors = new ArrayList<>();
         List<String> ruleWarnings = new ArrayList<>();
@@ -314,7 +314,7 @@ public class YamlWidgetDTO {
             for (Object r : rules) {
                 if (r instanceof YamlRuleWithAndConditionsDTO rule) {
                     ok &= rule.isValid(ruleErrors, ruleWarnings);
-                    if (rule.value != null) {
+                    if (ignoreValue && rule.value != null) {
                         addToList(warnings,
                                 "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
                     }
@@ -326,7 +326,7 @@ public class YamlWidgetDTO {
                                         .formatted(parameterName));
                         ok = false;
                     }
-                    if (rule.value != null) {
+                    if (ignoreValue && rule.value != null) {
                         addToList(warnings,
                                 "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
                     }
@@ -337,7 +337,7 @@ public class YamlWidgetDTO {
             }
         } else if (parameter instanceof YamlRuleWithAndConditionsDTO rule) {
             ok &= rule.isValid(ruleErrors, ruleWarnings);
-            if (rule.value != null) {
+            if (ignoreValue && rule.value != null) {
                 addToList(warnings,
                         "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
             }
@@ -349,7 +349,7 @@ public class YamlWidgetDTO {
                                 .formatted(parameterName));
                 ok = false;
             }
-            if (rule.value != null) {
+            if (ignoreValue && rule.value != null) {
                 addToList(warnings,
                         "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
             }

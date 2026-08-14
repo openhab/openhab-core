@@ -27,6 +27,11 @@ public class WidgetDefinitionDTO extends AbstractWidgetDTO {
 
     public String item;
 
+    /**
+     * confirmCmd is a boolean indicating if a widget command must be confirmed before sending the command.
+     */
+    public Boolean confirmCmd;
+
     public List<MappingDTO> mappings;
 
     public List<RuleDTO> visibilityRules;

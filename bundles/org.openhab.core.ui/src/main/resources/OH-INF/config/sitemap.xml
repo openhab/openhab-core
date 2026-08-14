@@ -18,6 +18,11 @@
 			</options>
 			<default>NONE</default>
 		</parameter>
+		<parameter name="confirmationDialogMessage" type="text">
+			<label>Confirmation Dialog Message</label>
+			<description>Defines the default message to be shown in confirmation dialogs in the UI.</description>
+			<default>Are you sure?</default>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>

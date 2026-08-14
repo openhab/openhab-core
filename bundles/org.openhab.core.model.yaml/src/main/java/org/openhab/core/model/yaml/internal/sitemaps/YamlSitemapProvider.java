@@ -243,7 +243,7 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
             if (widgetDTO.confirmCmd instanceof Boolean confirmCmd) {
                 widget.setConfirmCmd(confirmCmd);
             } else {
-                addWidgetRules(widget.getConfirmCmdRules(), widgetDTO.confirmCmd, true);
+                addWidgetRules(widget.getConfirmCmdRules(), widgetDTO.confirmCmd, false);
             }
 
             switch (widget) {
