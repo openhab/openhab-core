@@ -85,7 +85,18 @@ public class WebClientFactoryImplTest {
         deactivateThread.setDaemon(true);
         deactivateThread.start();
         deactivateThread.join(10_000);
-        assertThat("deactivate() did not complete", deactivateThread.isAlive(), is(false));
+
+        // Capture the verdict BEFORE interrupting: the interrupt is cleanup, not a second chance.
+        // If it unblocked the deactivation, this test still has to report the timeout it observed,
+        // otherwise a real shutdown regression would pass.
+        boolean timedOut = deactivateThread.isAlive();
+        if (timedOut) {
+            // Best effort to release a blocked deactivation instead of leaving it running next to
+            // the following tests; the daemon flag above remains the final safeguard for the case
+            // where Jetty does not react to the interrupt at all.
+            deactivateThread.interrupt();
+        }
+        assertThat("deactivate() did not complete", timedOut, is(false));
     }
 
     @Test
