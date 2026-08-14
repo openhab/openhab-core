@@ -45,6 +45,7 @@ public class WidgetDTO extends AbstractWidgetDTO {
     public String labelcolor;
     public String valuecolor;
     public String iconcolor;
+    public String confirmCmdMessage;
 
     public String pattern;
     public String unit;

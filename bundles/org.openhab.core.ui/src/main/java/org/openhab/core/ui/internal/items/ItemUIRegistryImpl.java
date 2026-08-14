@@ -137,6 +137,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected static final String SEMANTICS_LOCATION = "Location";
     protected static final String SEMANTICS_PARENT_LOCATION_CONFIG = "isPartOf";
 
+    private static final String DEFAULT_CONFIRM_CMD_MESSAGE = "Are you sure?";
+
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
@@ -149,6 +151,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
     private String groupMembersSorting = DEFAULT_SORTING;
+    private String confirmCmdMessage = DEFAULT_CONFIRM_CMD_MESSAGE;
 
     private static class WidgetLabelWithSource {
         public final String label;
@@ -199,6 +202,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             final String groupMembersSortingString = Objects.toString(config.get("groupMembersSorting"), null);
             if (groupMembersSortingString != null) {
                 groupMembersSorting = groupMembersSortingString;
+            }
+            final String confirmCmdMessageString = Objects.toString(config.get("confirmCmdMessage"), null);
+            if (confirmCmdMessageString != null) {
+                confirmCmdMessage = confirmCmdMessageString;
             }
         }
     }
@@ -1331,25 +1338,24 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public boolean getConfirmCmd(Widget w) {
-        // Default to confirm cmd parameter if no rules defined
+    public @Nullable String getConfirmCmdMessage(Widget w) {
         List<Rule> ruleList = w.getConfirmCmdRules();
 
         if (ruleList.isEmpty()) {
-            return w.getConfirmCmd();
+            return w.getConfirmCmd() ? confirmCmdMessage : null;
         }
 
-        logger.debug("Checking confirm command parameter for widget '{}'.", w.getLabel());
+        logger.debug("Checking confirm command rules for widget '{}'.", w.getLabel());
 
         for (Rule rule : ruleList) {
             if (allConditionsOk(rule.getConditions(), w)) {
-                return true;
+                String arg = rule.getArgument();
+                return arg != null && !arg.isBlank() ? arg : confirmCmdMessage;
             }
         }
 
         logger.debug("Widget {} commands don't require confirmation.", w.getLabel());
-
-        return false;
+        return null;
     }
 
     @Override

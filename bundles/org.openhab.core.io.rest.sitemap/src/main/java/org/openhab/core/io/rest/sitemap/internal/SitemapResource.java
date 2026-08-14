@@ -728,7 +728,7 @@ public class SitemapResource
         bean.unit = itemUIRegistry.getUnitForWidget(widget);
         bean.type = widget.getWidgetType();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
-        bean.confirmCmd = itemUIRegistry.getConfirmCmd(widget);
+        bean.confirmCmdMessage = itemUIRegistry.getConfirmCmdMessage(widget);
         if (widget instanceof LinkableWidget linkableWidget) {
             List<Widget> children = itemUIRegistry.getChildren(linkableWidget);
             if (widget instanceof Frame || widget instanceof Buttongrid) {
