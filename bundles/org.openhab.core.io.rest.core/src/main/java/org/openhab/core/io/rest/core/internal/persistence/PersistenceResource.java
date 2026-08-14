@@ -72,6 +72,12 @@ import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceProblem;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.config.PersistenceAllConfig;
+import org.openhab.core.persistence.config.PersistenceConfig;
+import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceGroupExcludeConfig;
+import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.PersistenceCronStrategyDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
@@ -122,6 +128,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Mark Herwege - Implement aliases
  * @author Mark Herwege - Make default strategy to be only a configuration suggestion
+ * @author Martin Littkovsky - Do not report a missing store strategy when another configuration stores the items
  */
 @Component
 @JaxrsResource
@@ -425,7 +432,8 @@ public class PersistenceResource implements RESTResource {
                             persistenceProblems.add(new PersistenceServiceProblem(
                                     PersistenceServiceProblem.PERSISTENCE_NO_STRATEGY, serviceId, items, editable));
                         } else if (strategies.size() == 1
-                                && PersistenceStrategy.Globals.RESTORE.equals(strategies.getFirst())) {
+                                && PersistenceStrategy.Globals.RESTORE.equals(strategies.getFirst())
+                                && !isStoredByAnotherConfig(config, configs)) {
                             persistenceProblems.add(new PersistenceServiceProblem(
                                     PersistenceServiceProblem.PERSISTENCE_NO_STORE_STRATEGY, serviceId, items,
                                     editable));
@@ -435,6 +443,75 @@ public class PersistenceResource implements RESTResource {
             }
         }
         return JSONResponse.createResponse(Status.OK, persistenceProblems, null);
+    }
+
+    /**
+     * Checks whether the items of {@code config} (which itself only has a {@code restoreOnStartup} strategy) are
+     * actually stored by another configuration entry of the same persistence service. Persistence application is
+     * additive: every configuration entry that matches an item is applied to it, so a
+     * {@link PersistenceServiceProblem#PERSISTENCE_NO_STORE_STRATEGY} warning would be a false positive whenever
+     * another entry both has a store strategy and provably covers the same items.
+     *
+     * @param config the configuration entry that only has a {@code restoreOnStartup} strategy
+     * @param configs all configuration entries of the same persistence service
+     * @return true if another entry with a store strategy provably covers {@code config}'s items
+     */
+    private static boolean isStoredByAnotherConfig(PersistenceItemConfiguration config,
+            List<PersistenceItemConfiguration> configs) {
+        return configs.stream().filter(other -> !other.equals(config))
+                .anyMatch(other -> hasStoreStrategy(other) && coversItems(other, config));
+    }
+
+    /**
+     * A store strategy is any strategy that is not the {@code restoreOnStartup} or {@code forecast} global
+     * strategy. This includes cron strategies, since {@code PersistenceManagerImpl} schedules those into regular
+     * persist jobs just like {@code everyUpdate} and {@code everyChange}.
+     */
+    private static boolean hasStoreStrategy(PersistenceItemConfiguration config) {
+        return config.strategies().stream().anyMatch(strategy -> !PersistenceStrategy.Globals.RESTORE.equals(strategy)
+                && !PersistenceStrategy.Globals.FORECAST.equals(strategy));
+    }
+
+    /**
+     * Determines, conservatively, whether {@code other} is guaranteed to cover every item that {@code config}
+     * selects. This is only provable if {@code other} has no exclude selectors, and either selects all items, or
+     * has a structurally equal counterpart for each of {@code config}'s (non-exclude) selectors. When coverage
+     * cannot be proven this way, the caller must keep warning.
+     */
+    private static boolean coversItems(PersistenceItemConfiguration other, PersistenceItemConfiguration config) {
+        List<PersistenceConfig> otherSelectors = other.items();
+        if (otherSelectors.stream().anyMatch(PersistenceResource::isExcludeSelector)) {
+            return false;
+        }
+        if (otherSelectors.stream().anyMatch(PersistenceAllConfig.class::isInstance)) {
+            return true;
+        }
+        return config.items().stream().filter(selector -> !isExcludeSelector(selector))
+                .allMatch(selector -> otherSelectors.stream()
+                        .anyMatch(otherSelector -> isStructurallyEqual(selector, otherSelector)));
+    }
+
+    private static boolean isExcludeSelector(PersistenceConfig selector) {
+        return selector instanceof PersistenceItemExcludeConfig || selector instanceof PersistenceGroupExcludeConfig;
+    }
+
+    /**
+     * Compares two selectors by concrete type and identifying field, since the {@link PersistenceConfig}
+     * implementations do not override {@link Object#equals(Object)}.
+     */
+    private static boolean isStructurallyEqual(PersistenceConfig selector, PersistenceConfig otherSelector) {
+        if (selector.getClass() != otherSelector.getClass()) {
+            return false;
+        }
+        if (selector instanceof PersistenceItemConfig itemSelector) {
+            return itemSelector.getItem().equals(((PersistenceItemConfig) otherSelector).getItem());
+        }
+        if (selector instanceof PersistenceGroupConfig groupSelector) {
+            return groupSelector.getGroup().equals(((PersistenceGroupConfig) otherSelector).getGroup());
+        }
+        // Any other PersistenceConfig implementation (e.g. PersistenceAllConfig) has no further distinguishing
+        // state, so matching concrete types is sufficient.
+        return true;
     }
 
     private ZonedDateTime convertTime(String sTime) {

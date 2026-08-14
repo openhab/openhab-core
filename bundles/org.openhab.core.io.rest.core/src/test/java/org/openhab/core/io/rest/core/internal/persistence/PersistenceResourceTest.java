@@ -20,6 +20,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -29,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -54,18 +60,29 @@ import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
+import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceItemInfo;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceProblem;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.persistence.config.PersistenceAllConfig;
+import org.openhab.core.persistence.config.PersistenceConfig;
+import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
 import org.openhab.core.persistence.internal.PersistenceManagerImpl;
 import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
+import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
+
+import com.google.gson.Gson;
 
 /**
  * Tests for PersistenceItem REST resource
@@ -79,7 +96,9 @@ import org.openhab.core.types.UnDefType;
 public class PersistenceResourceTest {
 
     private static final String PERSISTENCE_SERVICE_ID = "TestServiceID";
+    private static final String PERSISTENCE_SERVICE_ID_2 = "TestServiceID2";
     private static final String ITEM_NAME = "testItem";
+    private static final String RESTORE_ONLY_GROUP = "gRestoreOnStartup";
 
     private @NonNullByDefault({}) PersistenceResource pResource;
     private @NonNullByDefault({}) List<HistoricItem> items;
@@ -476,5 +495,150 @@ public class PersistenceResourceTest {
         assertThat(itemInfo.latest(),
                 is(Date.from(ZonedDateTime.of(END_VALUE, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant())));
         assertThat(itemInfo.count(), is(VALUE_COUNT));
+    }
+
+    @Test
+    public void testHealthStandardPatternNotReported() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        PersistenceItemConfiguration everyChangeAll = itemConfiguration(List.of(PersistenceStrategy.Globals.CHANGE),
+                new PersistenceAllConfig());
+        PersistenceItemConfiguration restoreOnlyGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, everyChangeAll, restoreOnlyGroup);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(0L));
+    }
+
+    @Test
+    public void testHealthRestoreOnlyWithoutCoverageIsReported() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        PersistenceItemConfiguration restoreOnlyGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, restoreOnlyGroup);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(1L));
+    }
+
+    @Test
+    public void testHealthAllConfigWithExcludeStillReported() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        PersistenceItemConfiguration everyChangeAllWithExclude = itemConfiguration(
+                List.of(PersistenceStrategy.Globals.CHANGE), new PersistenceAllConfig(),
+                new PersistenceItemExcludeConfig("excludedItem"));
+        PersistenceItemConfiguration restoreOnlyGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, everyChangeAllWithExclude, restoreOnlyGroup);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(1L));
+    }
+
+    @Test
+    public void testHealthCoveredByCronStrategyNotReported() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        PersistenceItemConfiguration cronGroup = itemConfiguration(
+                List.of(new PersistenceCronStrategy("everyHour", "0 0 * * * ?")),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        PersistenceItemConfiguration restoreOnlyGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, cronGroup, restoreOnlyGroup);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(0L));
+    }
+
+    @Test
+    public void testHealthCoveredOnlyByForecastStillReported() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        PersistenceItemConfiguration forecastGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.FORECAST),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        PersistenceItemConfiguration restoreOnlyGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, forecastGroup, restoreOnlyGroup);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(1L));
+    }
+
+    @Test
+    public void testHealthDoesNotBleedAcrossServices() throws IOException {
+        PersistenceService serviceAMock = mock(PersistenceService.class);
+        when(serviceAMock.getId()).thenReturn(PERSISTENCE_SERVICE_ID);
+        PersistenceService serviceBMock = mock(PersistenceService.class);
+        when(serviceBMock.getId()).thenReturn(PERSISTENCE_SERVICE_ID_2);
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(serviceAMock, serviceBMock));
+
+        PersistenceItemConfiguration everyChangeAll = itemConfiguration(List.of(PersistenceStrategy.Globals.CHANGE),
+                new PersistenceAllConfig());
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, everyChangeAll);
+
+        PersistenceItemConfiguration restoreOnlyGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID_2, restoreOnlyGroup);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(0L));
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID_2), is(1L));
+    }
+
+    @Test
+    public void testHealthExactSelectorCoverageNotReported() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        PersistenceItemConfiguration restoreOnlyGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        PersistenceItemConfiguration everyUpdateSameGroup = itemConfiguration(
+                List.of(PersistenceStrategy.Globals.UPDATE), new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, restoreOnlyGroup, everyUpdateSameGroup);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(0L));
+    }
+
+    private static PersistenceItemConfiguration itemConfiguration(List<PersistenceStrategy> strategies,
+            PersistenceConfig... selectors) {
+        return new PersistenceItemConfiguration(List.of(selectors), strategies, List.of());
+    }
+
+    private void mockServiceConfiguration(String serviceId, PersistenceItemConfiguration... configs) {
+        when(persistenceServiceConfigurationRegistryMock.get(serviceId)).thenReturn(
+                new PersistenceServiceConfiguration(serviceId, List.of(configs), Map.of(), List.of(), List.of()));
+    }
+
+    private List<PersistenceServiceProblem> getPersistenceProblems() throws IOException {
+        HttpHeaders headersMock = mock(HttpHeaders.class);
+        Response response = pResource.httpGetPersistenceHealth(headersMock);
+        assertThat(response.getStatus(), is(200));
+        PersistenceServiceProblem[] problems = new Gson().fromJson(toString(response.getEntity()),
+                PersistenceServiceProblem[].class);
+        return List.of(problems);
+    }
+
+    private long countNoStoreStrategyProblems(List<PersistenceServiceProblem> problems, String serviceId) {
+        return problems.stream()
+                .filter(problem -> PersistenceServiceProblem.PERSISTENCE_NO_STORE_STRATEGY.equals(problem.reason())
+                        && serviceId.equals(problem.serviceId()))
+                .count();
+    }
+
+    private String toString(Object entity) throws IOException {
+        byte[] bytes;
+        if (entity instanceof StreamingOutput streaming) {
+            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                streaming.write(buffer);
+                bytes = buffer.toByteArray();
+            }
+        } else {
+            bytes = ((InputStream) entity).readAllBytes();
+        }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 }
