@@ -66,6 +66,10 @@ class BaseThingHandlerTest {
         public void initialize() {
             this.configInInitialize = getConfig();
         }
+
+        public void replaceThing(Thing thing) {
+            setThing(thing);
+        }
     }
 
     private static class ConfigUtilAccessor extends ConfigUtil {
@@ -119,6 +123,18 @@ class BaseThingHandlerTest {
         Thing thing = handler.editThing()
                 .withConfiguration(new Configuration(Map.of("p1", "${ENV:FOO}", "p2", "${ENV:BAR}"))).build();
         handler.thingUpdated(thing);
+
+        assertEquals("resolved-foo", handler.getConfig().get("p1"));
+        assertEquals("resolved-bar", handler.getConfig().get("p2"));
+    }
+
+    @Test
+    public void testResolvedConfigAfterSetThing() {
+        handler.getConfig();
+        Thing thing = handler.editThing()
+                .withConfiguration(new Configuration(Map.of("p1", "${ENV:FOO}", "p2", "${ENV:BAR}"))).build();
+
+        handler.replaceThing(thing);
 
         assertEquals("resolved-foo", handler.getConfig().get("p1"));
         assertEquals("resolved-bar", handler.getConfig().get("p2"));
