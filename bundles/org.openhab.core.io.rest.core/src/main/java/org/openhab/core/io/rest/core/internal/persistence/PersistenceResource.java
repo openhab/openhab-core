@@ -87,6 +87,7 @@ import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurat
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationDTOMapper;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
+import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.State;
@@ -458,37 +459,36 @@ public class PersistenceResource implements RESTResource {
      */
     private static boolean isStoredByAnotherConfig(PersistenceItemConfiguration config,
             List<PersistenceItemConfiguration> configs) {
-        return configs.stream().filter(other -> !other.equals(config))
-                .anyMatch(other -> hasStoreStrategy(other) && coversItems(other, config));
-    }
-
-    /**
-     * A store strategy is any strategy that is not the {@code restoreOnStartup} or {@code forecast} global
-     * strategy. This includes cron strategies, since {@code PersistenceManagerImpl} schedules those into regular
-     * persist jobs just like {@code everyUpdate} and {@code everyChange}.
-     */
-    private static boolean hasStoreStrategy(PersistenceItemConfiguration config) {
-        return config.strategies().stream().anyMatch(strategy -> !PersistenceStrategy.Globals.RESTORE.equals(strategy)
-                && !PersistenceStrategy.Globals.FORECAST.equals(strategy));
-    }
-
-    /**
-     * Determines, conservatively, whether {@code other} is guaranteed to cover every item that {@code config}
-     * selects. This is only provable if {@code other} has no exclude selectors, and either selects all items, or
-     * has a structurally equal counterpart for each of {@code config}'s (non-exclude) selectors. When coverage
-     * cannot be proven this way, the caller must keep warning.
-     */
-    private static boolean coversItems(PersistenceItemConfiguration other, PersistenceItemConfiguration config) {
-        List<PersistenceConfig> otherSelectors = other.items();
-        if (otherSelectors.stream().anyMatch(PersistenceResource::isExcludeSelector)) {
-            return false;
-        }
-        if (otherSelectors.stream().anyMatch(PersistenceAllConfig.class::isInstance)) {
+        // An entry carrying an exclude selector cannot be proven to cover anything, because appliesToItem()
+        // drops the entire entry for the excluded items.
+        List<PersistenceItemConfiguration> storing = configs.stream().filter(other -> !other.equals(config))
+                .filter(PersistenceResource::hasStoreStrategy)
+                .filter(other -> other.items().stream().noneMatch(PersistenceResource::isExcludeSelector)).toList();
+        if (storing.stream()
+                .anyMatch(other -> other.items().stream().anyMatch(PersistenceAllConfig.class::isInstance))) {
             return true;
         }
-        return config.items().stream().filter(selector -> !isExcludeSelector(selector))
-                .allMatch(selector -> otherSelectors.stream()
-                        .anyMatch(otherSelector -> isStructurallyEqual(selector, otherSelector)));
+        List<PersistenceConfig> selectors = config.items().stream().filter(selector -> !isExcludeSelector(selector))
+                .toList();
+        if (selectors.isEmpty()) {
+            return false;
+        }
+        // Coverage is additive too: a selector only has to be found in SOME storing entry, not all of them in
+        // the same one, so "ItemA, ItemB" is covered by two entries storing ItemA and ItemB separately.
+        return selectors.stream().allMatch(selector -> storing.stream().flatMap(other -> other.items().stream())
+                .anyMatch(otherSelector -> isStructurallyEqual(selector, otherSelector)));
+    }
+
+    /**
+     * Only the strategies {@code PersistenceManagerImpl} actually stores for count: {@code everyUpdate},
+     * {@code everyChange} and cron strategies. They are identified positively on purpose - a file-based
+     * configuration may name arbitrary strategies, which {@code PersistenceModelManager} turns into plain
+     * {@link PersistenceStrategy} instances that nothing ever executes. Treating "neither restore nor forecast"
+     * as storing would let such a strategy silence a warning that should fire.
+     */
+    private static boolean hasStoreStrategy(PersistenceItemConfiguration config) {
+        return config.strategies().stream().anyMatch(strategy -> PersistenceStrategy.Globals.UPDATE.equals(strategy)
+                || PersistenceStrategy.Globals.CHANGE.equals(strategy) || strategy instanceof PersistenceCronStrategy);
     }
 
     private static boolean isExcludeSelector(PersistenceConfig selector) {
@@ -509,9 +509,10 @@ public class PersistenceResource implements RESTResource {
         if (selector instanceof PersistenceGroupConfig groupSelector) {
             return groupSelector.getGroup().equals(((PersistenceGroupConfig) otherSelector).getGroup());
         }
-        // Any other PersistenceConfig implementation (e.g. PersistenceAllConfig) has no further distinguishing
-        // state, so matching concrete types is sufficient.
-        return true;
+        // Any other implementation may carry distinguishing state this method does not know about, and calling
+        // two of them equal would silence a warning that should fire. PersistenceAllConfig, the one type where
+        // the class alone is decisive, is handled by the caller before this is reached.
+        return false;
     }
 
     private ZonedDateTime convertTime(String sTime) {

@@ -68,6 +68,7 @@ import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.config.PersistenceConfig;
 import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceItemConfig;
 import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
@@ -601,6 +602,54 @@ public class PersistenceResourceTest {
         List<PersistenceServiceProblem> problems = getPersistenceProblems();
 
         assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(0L));
+    }
+
+    @Test
+    public void testHealthArbitraryNamedStrategyDoesNotCountAsStoring() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        PersistenceItemConfiguration restoreOnlyGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        // A file-based configuration may name any strategy; PersistenceModelManager turns it into a plain
+        // PersistenceStrategy that PersistenceManagerImpl never acts on, so it stores nothing.
+        PersistenceItemConfiguration namedStrategySameGroup = itemConfiguration(
+                List.of(new PersistenceStrategy("someNamedStrategy")), new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, restoreOnlyGroup, namedStrategySameGroup);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(1L));
+    }
+
+    @Test
+    public void testHealthCoverageMayBeSplitAcrossStoreConfigurations() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        // Coverage is additive as well: neither store entry covers both items on its own.
+        PersistenceItemConfiguration restoreTwoItems = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceItemConfig("ItemA"), new PersistenceItemConfig("ItemB"));
+        PersistenceItemConfiguration storeItemA = itemConfiguration(List.of(PersistenceStrategy.Globals.CHANGE),
+                new PersistenceItemConfig("ItemA"));
+        PersistenceItemConfiguration storeItemB = itemConfiguration(List.of(PersistenceStrategy.Globals.UPDATE),
+                new PersistenceItemConfig("ItemB"));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, restoreTwoItems, storeItemA, storeItemB);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(0L));
+    }
+
+    @Test
+    public void testHealthPartiallySplitCoverageStillReported() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        // Only one of the two selectors is covered - the entry must still be reported.
+        PersistenceItemConfiguration restoreTwoItems = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceItemConfig("ItemA"), new PersistenceItemConfig("ItemB"));
+        PersistenceItemConfiguration storeItemA = itemConfiguration(List.of(PersistenceStrategy.Globals.CHANGE),
+                new PersistenceItemConfig("ItemA"));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, restoreTwoItems, storeItemA);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(1L));
     }
 
     private static PersistenceItemConfiguration itemConfiguration(List<PersistenceStrategy> strategies,
