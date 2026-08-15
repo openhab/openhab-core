@@ -65,6 +65,7 @@ public class HttpUtilTest extends BaseHttpUtilTest {
         assertEquals(HttpMethod.GET, HttpUtil.createHttpMethod("GET"));
         assertEquals(HttpMethod.PUT, HttpUtil.createHttpMethod("PUT"));
         assertEquals(HttpMethod.POST, HttpUtil.createHttpMethod("POST"));
+        assertEquals(HttpMethod.PATCH, HttpUtil.createHttpMethod("PATCH"));
         assertEquals(HttpMethod.DELETE, HttpUtil.createHttpMethod("DELETE"));
     }
 
