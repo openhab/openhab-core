@@ -44,6 +44,9 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.items.CallItem;
 import org.openhab.core.library.items.ColorItem;
 import org.openhab.core.library.items.ContactItem;
@@ -128,12 +131,17 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private static final int MAX_BUTTONS = 4;
 
     private static final String DEFAULT_SORTING = "NONE";
+    protected static final String WIDGET_ORDER_KEY = "widgetOrder";
+    protected static final String SEMANTICS_KEY = "semantics";
+    protected static final String SEMANTICS_LOCATION = "Location";
+    protected static final String SEMANTICS_PARENT_LOCATION_CONFIG = "isPartOf";
 
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
     private final ItemRegistry itemRegistry;
+    private final MetadataRegistry metadataRegistry;
     private final SitemapFactory sitemapFactory;
     private final TimeZoneProvider timeZoneProvider;
 
@@ -153,8 +161,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Activate
     public ItemUIRegistryImpl(final @Reference ItemRegistry itemRegistry,
-            final @Reference SitemapFactory sitemapFactory, final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference MetadataRegistry metadataRegistry, final @Reference SitemapFactory sitemapFactory,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
+        this.metadataRegistry = metadataRegistry;
         this.sitemapFactory = sitemapFactory;
         this.timeZoneProvider = timeZoneProvider;
     }
@@ -828,18 +838,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     List<Item> members = new ArrayList<>(groupItem.getMembers());
                     switch (groupMembersSorting) {
                         case "LABEL":
-                            members.sort((u1, u2) -> {
-                                String u1Label = u1.getLabel();
-                                String u2Label = u2.getLabel();
-                                if (u1Label != null && u2Label != null) {
-                                    return u1Label.compareTo(u2Label);
-                                } else {
-                                    return u1.getName().compareTo(u2.getName());
-                                }
-                            });
+                            members.sort(Comparator.comparing(this::getItemLabel));
                             break;
                         case "NAME":
                             members.sort(Comparator.comparing(Item::getName));
+                            break;
+                        case "METADATA":
+                            sortByMetadata(members);
                             break;
                         default:
                             break;
@@ -863,6 +868,101 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     group.getLabel(), itemName);
         }
         return children;
+    }
+
+    private void sortByMetadata(List<Item> members) {
+        // Location items are sorted among themselves (by hierarchy, then widgetOrder),
+        // and placed ahead of all other members.
+        Map<Boolean, List<Item>> byLocation = members.stream().collect(Collectors.partitioningBy(this::isLocationItem));
+        List<Item> sorted = new ArrayList<>(byLocation.getOrDefault(true, List.of()).stream()
+                .sorted(Comparator.comparing(Item::getName, this::compareLocationMembers)).toList());
+        sorted.addAll(byLocation.getOrDefault(false, List.of()).stream()
+                .sorted(Comparator.comparing(Item::getName, this::compareWidgetOrder)).toList());
+        members.clear();
+        members.addAll(sorted);
+    }
+
+    private boolean isLocationItem(Item item) {
+        MetadataKey semanticsKey = new MetadataKey(SEMANTICS_KEY, item.getName());
+        Metadata semantics = metadataRegistry.get(semanticsKey);
+        return semantics != null && semantics.getValue().startsWith(SEMANTICS_LOCATION);
+    }
+
+    private String getItemLabel(Item item) {
+        String label = item.getLabel();
+        return label != null ? label : item.getName();
+    }
+
+    private String getItemLabel(String itemName) {
+        Item item = get(itemName);
+        return item != null ? getItemLabel(item) : itemName;
+    }
+
+    private @Nullable String getParentLocationName(String locationItemName) {
+        MetadataKey semanticsKey = new MetadataKey(SEMANTICS_KEY, locationItemName);
+        Metadata semantics = metadataRegistry.get(semanticsKey);
+        Object isPartOf = semantics != null ? semantics.getConfiguration().get(SEMANTICS_PARENT_LOCATION_CONFIG) : null;
+        return isPartOf instanceof String ? (String) isPartOf : null;
+    }
+
+    private int compareLocationMembers(String u1Name, String u2Name) {
+        List<String> u1Ancestors = new ArrayList<>();
+        u1Ancestors.add(u1Name);
+        String u1ParentName = getParentLocationName(u1Name);
+        while (u1ParentName != null && !u1Ancestors.contains(u1ParentName)) {
+            u1Ancestors.add(u1ParentName);
+            u1ParentName = getParentLocationName(u1ParentName);
+        }
+        List<String> u2Ancestors = new ArrayList<>();
+        u2Ancestors.add(u2Name);
+        String u2ParentName = getParentLocationName(u2Name);
+        while (u2ParentName != null && !u2Ancestors.contains(u2ParentName)) {
+            u2Ancestors.add(u2ParentName);
+            u2ParentName = getParentLocationName(u2ParentName);
+        }
+
+        int u1Depth = u1Ancestors.size();
+        int u2Depth = u2Ancestors.size();
+        int minDepth = Math.min(u1Depth, u2Depth);
+        for (int d = 0; d < minDepth; d++) {
+            String ancestorName1 = u1Ancestors.get(u1Depth - 1 - d);
+            String ancestorName2 = u2Ancestors.get(u2Depth - 1 - d);
+            if (!ancestorName1.equals(ancestorName2)) {
+                return compareWidgetOrder(ancestorName1, ancestorName2);
+            }
+        }
+        // A parent comes before its children
+        return Integer.compare(u1Depth, u2Depth);
+    }
+
+    private int compareWidgetOrder(String u1Name, String u2Name) {
+        MetadataKey u1Key = new MetadataKey(WIDGET_ORDER_KEY, u1Name);
+        Metadata u1Order = metadataRegistry.get(u1Key);
+        MetadataKey u2Key = new MetadataKey(WIDGET_ORDER_KEY, u2Name);
+        Metadata u2Order = metadataRegistry.get(u2Key);
+        Float u1OrderValue = null;
+        try {
+            u1OrderValue = u1Order != null ? Float.parseFloat(u1Order.getValue()) : null;
+        } catch (NumberFormatException e) {
+            // ignore
+        }
+        Float u2OrderValue = null;
+        try {
+            u2OrderValue = u2Order != null ? Float.parseFloat(u2Order.getValue()) : null;
+        } catch (NumberFormatException e) {
+            // ignore
+        }
+
+        if ((u1OrderValue == null && u2OrderValue == null)
+                || (u1OrderValue != null && u1OrderValue.equals(u2OrderValue))) {
+            return getItemLabel(u1Name).compareTo(getItemLabel(u2Name));
+        } else if (u1OrderValue == null) {
+            return 1;
+        } else if (u2OrderValue == null) {
+            return -1;
+        } else {
+            return u1OrderValue.compareTo(u2OrderValue);
+        }
     }
 
     private boolean isReadOnly(String itemName) {
