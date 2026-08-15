@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,9 +38,10 @@ import org.openhab.core.io.net.http.HttpUtil;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
+@NonNullByDefault
 class HTTPTest {
 
-    private MockedStatic<HttpUtil> httpUtilMock;
+    private @Nullable MockedStatic<HttpUtil> httpUtilMock;
 
     @BeforeEach
     void setUp() {
