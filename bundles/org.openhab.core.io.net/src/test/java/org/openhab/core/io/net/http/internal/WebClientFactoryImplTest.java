@@ -78,22 +78,15 @@ public class WebClientFactoryImplTest {
     }
 
     private void deactivateWithTimeout() throws InterruptedException {
-        // Regression-safe: run deactivate() on a DAEMON thread so a blocked
-        // deactivation can neither keep the test JVM alive nor leak a running
-        // non-daemon thread into subsequent tests; fail loudly via the assert.
         Thread deactivateThread = new Thread(() -> webClientFactory.deactivate(), "webClientFactory-deactivate");
         deactivateThread.setDaemon(true);
         deactivateThread.start();
         deactivateThread.join(10_000);
 
-        // Capture the verdict BEFORE interrupting: the interrupt is cleanup, not a second chance.
-        // If it unblocked the deactivation, this test still has to report the timeout it observed,
-        // otherwise a real shutdown regression would pass.
+        // Capture the verdict before interrupting: the interrupt is cleanup, so an interrupt that
+        // happens to unblock the deactivation must not turn an observed timeout into a pass.
         boolean timedOut = deactivateThread.isAlive();
         if (timedOut) {
-            // Best effort to release a blocked deactivation instead of leaving it running next to
-            // the following tests; the daemon flag above remains the final safeguard for the case
-            // where Jetty does not react to the interrupt at all.
             deactivateThread.interrupt();
         }
         assertThat("deactivate() did not complete", timedOut, is(false));
