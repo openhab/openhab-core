@@ -263,7 +263,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         }
 
         if (partial.confirmCmd != null) {
-            if (partial.confirmCmd.isValueNode()) {
+            if (partial.confirmCmd.isBoolean()) {
                 result.confirmCmd = partial.confirmCmd.asBoolean();
             } else if (partial.confirmCmd.isArray()) {
                 result.confirmCmd = toRulesDto(partial.confirmCmd);

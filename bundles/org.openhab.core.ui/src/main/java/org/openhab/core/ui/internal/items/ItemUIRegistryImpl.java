@@ -203,7 +203,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             if (groupMembersSortingString != null) {
                 groupMembersSorting = groupMembersSortingString;
             }
-            final String confirmCmdMessageString = Objects.toString(config.get("confirmCmdMessage"), null);
+            final String confirmCmdMessageString = Objects.toString(config.get("confirmationDialogMessage"), null);
             if (confirmCmdMessageString != null) {
                 confirmCmdMessage = confirmCmdMessageString;
             }
