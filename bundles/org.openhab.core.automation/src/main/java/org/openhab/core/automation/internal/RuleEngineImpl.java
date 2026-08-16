@@ -1179,7 +1179,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         }
 
         Future<Map<String, @Nullable Object>> future;
-        long startTime = System.currentTimeMillis();
         try {
             future = thCallback.getScheduler().submit(new RunRuleCallable(rule, considerConditions, context));
         } catch (RejectedExecutionException e) {
@@ -1822,6 +1821,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 // change state to RUNNING
                 setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
             }
+            long startTime = System.currentTimeMillis();
             try {
                 clearContext(ruleUID);
                 Map<String, @Nullable Object> context = this.context;
@@ -1837,9 +1837,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 logger.error("Failed to execute rule '{}': ", ruleUID, t);
             } finally {
                 // change state to IDLE only if the rule has not been DISABLED.
+                long duration = System.currentTimeMillis() - startTime;
                 synchronized (RuleEngineImpl.this) {
                     if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
-                        setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
+                        setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE, RuleStatusDetail.NONE, null, duration));
                     }
                 }
             }
