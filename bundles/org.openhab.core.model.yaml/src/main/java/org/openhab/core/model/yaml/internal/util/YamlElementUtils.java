@@ -12,8 +12,11 @@
  */
 package org.openhab.core.model.yaml.internal.util;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.AbstractUID;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.types.util.UnitUtils;
 import org.openhab.core.util.StringUtils;
@@ -25,6 +28,8 @@ import org.openhab.core.util.StringUtils;
  */
 @NonNullByDefault
 public class YamlElementUtils {
+
+    private static final Pattern ICON_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
     public static @Nullable String getAdjustedItemType(@Nullable String type) {
         return type == null ? null : StringUtils.capitalize(type);
@@ -59,5 +64,19 @@ public class YamlElementUtils {
         String adjustedType = getAdjustedItemType(type);
         String adjustedDimension = getAdjustedItemDimension(dimension);
         return adjustedType != null ? adjustedType + (adjustedDimension == null ? "" : ":" + adjustedDimension) : null;
+    }
+
+    public static boolean isValidIcon(String icon) {
+        String[] segments = icon.split(AbstractUID.SEPARATOR, -1);
+        int nb = segments.length;
+        if (nb > 3) {
+            return false;
+        }
+        for (int i = 0; i < nb; i++) {
+            if (!ICON_SEGMENT_PATTERN.matcher(segments[i]).matches()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

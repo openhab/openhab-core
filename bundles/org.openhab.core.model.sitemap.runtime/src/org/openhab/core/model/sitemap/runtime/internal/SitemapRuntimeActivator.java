@@ -36,6 +36,6 @@ public class SitemapRuntimeActivator implements ModelParser {
 
     @Override
     public String getExtension() {
-        return "sitemap";
+        return "sitemap,sitemaps";
     }
 }

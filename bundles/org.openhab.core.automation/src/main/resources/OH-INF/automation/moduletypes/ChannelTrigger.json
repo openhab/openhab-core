@@ -10,7 +10,7 @@
 					"type": "TEXT",
 					"context": "channel",
 					"label": "Channel",
-					"description": "the id of the channel which should be observed for triggers",
+					"description": "the id of the channel which should be observed for triggers. '*' and '?' can be used as wildcards to match multiple channels.",
 					"required": true,
 					"filterCriteria": [
 						{

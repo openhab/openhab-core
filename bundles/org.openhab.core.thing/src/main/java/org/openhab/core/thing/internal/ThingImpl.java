@@ -214,10 +214,8 @@ public class ThingImpl implements Thing {
             throw new IllegalArgumentException("Property name must not be null or empty");
         }
         synchronized (this) {
-            if (value == null) {
-                return properties.remove(name);
-            }
-            return properties.put(name, value);
+            String val = value;
+            return val == null ? properties.remove(name) : properties.put(name, val);
         }
     }
 

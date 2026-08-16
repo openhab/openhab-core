@@ -20,8 +20,8 @@ import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
-import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
+import org.openhab.core.io.rest.core.config.dto.EnrichedConfigDescriptionDTO;
 
 /**
  * The {@link EnrichedConfigDescriptionDTOMapper} is a utility class to map {@link ConfigDescription}s to config
@@ -31,7 +31,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
  * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public class EnrichedConfigDescriptionDTOMapper extends ConfigDescriptionDTOMapper {
+public class EnrichedConfigDescriptionDTOMapper {
 
     /**
      * Maps configuration description into configuration description DTO object.
@@ -39,11 +39,13 @@ public class EnrichedConfigDescriptionDTOMapper extends ConfigDescriptionDTOMapp
      * @param configDescription the configuration description (not null)
      * @return enriched configuration description DTO object
      */
-    public static ConfigDescriptionDTO map(ConfigDescription configDescription) {
-        List<ConfigDescriptionParameterGroupDTO> parameterGroups = mapParameterGroups(
-                configDescription.getParameterGroups());
-        List<ConfigDescriptionParameterDTO> parameters = mapEnrichedParameters(configDescription.getParameters());
-        return new ConfigDescriptionDTO(toDecodedString(configDescription.getUID()), parameters, parameterGroups);
+    public static EnrichedConfigDescriptionDTO map(ConfigDescription configDescription) {
+        List<ConfigDescriptionParameterGroupDTO> parameterGroups = ConfigDescriptionDTOMapper
+                .mapParameterGroups(configDescription.getParameterGroups());
+        List<EnrichedConfigDescriptionParameterDTO> parameters = mapEnrichedParameters(
+                configDescription.getParameters());
+        return new EnrichedConfigDescriptionDTO(ConfigDescriptionDTOMapper.toDecodedString(configDescription.getUID()),
+                parameters, parameterGroups);
     }
 
     /**
@@ -52,19 +54,21 @@ public class EnrichedConfigDescriptionDTOMapper extends ConfigDescriptionDTOMapp
      * @param parameters the configuration description parameters (not null)
      * @return the parameter enriched DTO objects
      */
-    public static List<ConfigDescriptionParameterDTO> mapEnrichedParameters(
+    public static List<EnrichedConfigDescriptionParameterDTO> mapEnrichedParameters(
             List<ConfigDescriptionParameter> parameters) {
-        List<ConfigDescriptionParameterDTO> configDescriptionParameterBeans = new ArrayList<>(parameters.size());
+        List<EnrichedConfigDescriptionParameterDTO> configDescriptionParameterBeans = new ArrayList<>(
+                parameters.size());
         for (ConfigDescriptionParameter configDescriptionParameter : parameters) {
-            ConfigDescriptionParameterDTO configDescriptionParameterBean = new EnrichedConfigDescriptionParameterDTO(
+            EnrichedConfigDescriptionParameterDTO configDescriptionParameterBean = new EnrichedConfigDescriptionParameterDTO(
                     configDescriptionParameter.getName(), configDescriptionParameter.getType(),
                     configDescriptionParameter.getMinimum(), configDescriptionParameter.getMaximum(),
                     configDescriptionParameter.getStepSize(), configDescriptionParameter.getPattern(),
                     configDescriptionParameter.isRequired(), configDescriptionParameter.isReadOnly(),
                     configDescriptionParameter.isMultiple(), configDescriptionParameter.getContext(),
                     configDescriptionParameter.getDefault(), configDescriptionParameter.getLabel(),
-                    configDescriptionParameter.getDescription(), mapOptions(configDescriptionParameter.getOptions()),
-                    mapFilterCriteria(configDescriptionParameter.getFilterCriteria()),
+                    configDescriptionParameter.getDescription(),
+                    ConfigDescriptionDTOMapper.mapOptions(configDescriptionParameter.getOptions()),
+                    ConfigDescriptionDTOMapper.mapFilterCriteria(configDescriptionParameter.getFilterCriteria()),
                     configDescriptionParameter.getGroupName(), configDescriptionParameter.isAdvanced(),
                     configDescriptionParameter.getLimitToOptions(), configDescriptionParameter.getMultipleLimit(),
                     configDescriptionParameter.getUnit(), configDescriptionParameter.getUnitLabel(),

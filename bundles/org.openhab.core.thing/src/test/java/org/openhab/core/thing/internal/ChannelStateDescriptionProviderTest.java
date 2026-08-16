@@ -81,6 +81,7 @@ public class ChannelStateDescriptionProviderTest {
 
         ChannelType channelType1 = Mockito.mock(ChannelType.class);
 
+        assertNotNull(stateDescription1);
         when(channelType1.getState()).thenReturn(stateDescription1);
         when(thingTypeRegistry.getChannelType(channel1, Locale.ENGLISH)).thenReturn(channelType1);
         when(dynamicStateDescriptionProvider.getStateDescription(channel1, stateDescription1, Locale.ENGLISH))
@@ -93,6 +94,8 @@ public class ChannelStateDescriptionProviderTest {
                 .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(channel2State).withPattern("%s")
                 .build().toStateDescription();
         ChannelType channelType2 = Mockito.mock(ChannelType.class);
+        assertNotNull(stateDescription2);
+
         when(channelType2.getState()).thenReturn(stateDescription2);
         when(thingTypeRegistry.getChannelType(channel2, Locale.ENGLISH)).thenReturn(channelType2);
         when(dynamicStateDescriptionProvider.getStateDescription(channel2, stateDescription2, Locale.ENGLISH))
@@ -117,6 +120,8 @@ public class ChannelStateDescriptionProviderTest {
                 .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(Boolean.TRUE).withPattern("%s")
                 .build().toStateDescription();
         ChannelType channelType = Mockito.mock(ChannelType.class);
+
+        assertNotNull(stateDescription1);
         when(channelType.getState()).thenReturn(stateDescription1);
         when(thingTypeRegistry.getChannelType(channel1, Locale.ENGLISH)).thenReturn(channelType);
 
@@ -142,6 +147,8 @@ public class ChannelStateDescriptionProviderTest {
                 .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(Boolean.FALSE).withPattern("%s")
                 .build().toStateDescription();
         ChannelType channelType = Mockito.mock(ChannelType.class);
+
+        assertNotNull(stateDescription1);
         when(channelType.getState()).thenReturn(stateDescription1);
         when(thingTypeRegistry.getChannelType(channel1, Locale.ENGLISH)).thenReturn(channelType);
 

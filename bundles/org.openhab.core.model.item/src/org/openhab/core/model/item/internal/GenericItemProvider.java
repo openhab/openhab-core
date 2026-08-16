@@ -173,7 +173,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     }
 
     public Collection<Item> getAllFromModel(String modelName) {
-        return itemsMap.getOrDefault(modelName, List.of());
+        return List.copyOf(itemsMap.getOrDefault(modelName, List.of()));
     }
 
     public Map<String, String> getStateFormattersFromModel(String modelName) {
@@ -556,7 +556,10 @@ public class GenericItemProvider extends AbstractProvider<Item>
         };
 
         Item baseItem = createItemOfType(baseItemType, modelItem.getName());
-        return applyGroupFunction(baseItem, modelItem, function);
+        if (baseItem != null) {
+            return applyGroupFunction(baseItem, modelItem, function);
+        }
+        return null;
     }
 
     /**

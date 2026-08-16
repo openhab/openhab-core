@@ -15,11 +15,14 @@ package org.openhab.core.thing.binding.builder;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_OUTDOOR_TEMPERATURE;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.CoreItemFactory;
@@ -41,6 +44,7 @@ public class ChannelBuilderTest {
 
     private static final String KEY1 = "key1";
     private static final String KEY2 = "key2";
+    private static final String KEY3 = "key3";
     private static final String VALUE1 = "value1";
     private static final String VALUE2 = "value2";
 
@@ -100,5 +104,26 @@ public class ChannelBuilderTest {
         assertThat(otherChannel.getLabel(), is(not(channel.getLabel())));
         assertThat(otherChannel.getAcceptedItemType(), is(not(channel.getAcceptedItemType())));
         assertThat(otherChannel.getProperties().size(), is(not(channel.getProperties().size())));
+    }
+
+    @Test
+    public void testChannelBuilderWithInvalidProperties() {
+        Map<@Nullable String, @Nullable String> map = new HashMap<>();
+        map.put(KEY1, null);
+        map.put(KEY2, VALUE2);
+        map.put(KEY3, null);
+        map.put(null, VALUE1);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            builder.withProperties(toNonNullStringMap(map));
+        });
+        assertEquals(
+                "Unexpected properties (key1, key3, null) with null key or value for channel bindingId:thingTypeId:thingId:temperature",
+                exception.getMessage());
+    }
+
+    @SuppressWarnings("unchecked") // Map may contain null keys or values; this is intentional for this test
+    private static Map<String, String> toNonNullStringMap(Map<@Nullable String, @Nullable String> source) {
+        return (Map<String, String>) (Map<?, ?>) source;
     }
 }

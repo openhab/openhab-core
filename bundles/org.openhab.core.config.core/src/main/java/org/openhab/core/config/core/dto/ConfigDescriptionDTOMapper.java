@@ -49,7 +49,7 @@ public class ConfigDescriptionDTOMapper {
         return new ConfigDescriptionDTO(toDecodedString(configDescription.getUID()), parameters, parameterGroups);
     }
 
-    protected static String toDecodedString(URI uri) {
+    public static String toDecodedString(URI uri) {
         // combine these partials because URI.toString() does not decode
         return uri.getScheme() + ":" + uri.getSchemeSpecificPart();
     }
@@ -156,7 +156,7 @@ public class ConfigDescriptionDTOMapper {
         return parameterGroupBeans;
     }
 
-    protected static List<FilterCriteriaDTO> mapFilterCriteria(List<FilterCriteria> filterCriteria) {
+    public static List<FilterCriteriaDTO> mapFilterCriteria(List<FilterCriteria> filterCriteria) {
         if (filterCriteria == null) {
             return null;
         }
@@ -167,7 +167,7 @@ public class ConfigDescriptionDTOMapper {
         return result;
     }
 
-    protected static List<ParameterOptionDTO> mapOptions(List<ParameterOption> options) {
+    public static List<ParameterOptionDTO> mapOptions(List<ParameterOption> options) {
         if (options == null) {
             return null;
         }

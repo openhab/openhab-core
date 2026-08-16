@@ -20,7 +20,6 @@ var rootPath = ".."
 var fileExtensions = "items"
 var projectName = "org.openhab.core.model.item"
 var languageName = "org.openhab.core.model.Items"
-var generateXtendStub = true
 var encoding = "UTF-8"
 
 Workflow {
@@ -51,8 +50,9 @@ Workflow {
     language = StandardLanguage {
       name = languageName
       fileExtensions = fileExtensions
+      generator = null
       serializer = {
-        generateStub = generateXtendStub
+        generateStub = false
       }
       validator = {
         composedCheck = "org.eclipse.xtext.validation.NamesAreUniqueValidator"

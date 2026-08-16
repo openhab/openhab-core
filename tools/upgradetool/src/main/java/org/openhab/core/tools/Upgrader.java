@@ -30,6 +30,10 @@ public interface Upgrader {
 
     String getDescription();
 
+    default @Nullable String getTargetVersion() {
+        return null;
+    }
+
     /**
      * Executes the upgrade process.
      *

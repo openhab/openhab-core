@@ -133,12 +133,11 @@ public class YamlItemDTO implements YamlElement, Cloneable {
                         "item \"%s\": \"dimension\" field ignored as type is not Number".formatted(name, dimension));
             }
         }
-        if (icon != null) {
-            subErrors.clear();
-            ok &= isValidIcon(icon, subErrors);
-            subErrors.forEach(error -> {
-                addToList(errors, "invalid item \"%s\": %s".formatted(name, error));
-            });
+        if (icon != null && !YamlElementUtils.isValidIcon(icon)) {
+            addToList(errors,
+                    "invalid item \"%s\": invalid value \"%s\" for \"icon\" field; it must contain a maximum of 3 segments separated by a colon, each segment matching pattern [a-zA-Z0-9_][a-zA-Z0-9_-]*"
+                            .formatted(name, icon));
+            ok = false;
         }
         if (groups != null) {
             for (String gr : groups) {
@@ -201,26 +200,6 @@ public class YamlItemDTO implements YamlElement, Cloneable {
                 addToList(warnings,
                         "item \"%s\": \"expire\" field is redundant with \"expire\" metadata; value \"%s\" will be considered"
                                 .formatted(name, md.getValue()));
-            }
-        }
-        return ok;
-    }
-
-    private boolean isValidIcon(String icon, List<@NonNull String> errors) {
-        boolean ok = true;
-        String[] segments = icon.split(AbstractUID.SEPARATOR);
-        int nb = segments.length;
-        if (nb > 3) {
-            errors.add("too many segments in value \"%s\" for \"icon\" field; maximum 3 is expected".formatted(icon));
-            ok = false;
-            nb = 3;
-        }
-        for (int i = 0; i < nb; i++) {
-            String segment = segments[i];
-            if (!ICON_SEGMENT_PATTERN.matcher(segment).matches()) {
-                errors.add("segment \"%s\" in \"icon\" field not matching the expected syntax %s".formatted(segment,
-                        ICON_SEGMENT_PATTERN.pattern()));
-                ok = false;
             }
         }
         return ok;

@@ -19,7 +19,6 @@ var rootPath = ".."
 var fileExtensions = "things"
 var projectName = "org.openhab.core.model.thing"
 var languageName = "org.openhab.core.model.thing.Thing"
-var generateXtendStub = true
 var encoding = "UTF-8"
 
 Workflow {
@@ -50,8 +49,9 @@ Workflow {
     language = StandardLanguage {
       name = languageName
       fileExtensions = fileExtensions
+      generator = null
       serializer = {
-        generateStub = generateXtendStub
+        generateXtendStub = false
       }
     }
   }

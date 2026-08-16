@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class ItemStateConditionHandler extends BaseConditionModuleHandler implements EventSubscriber {
 
     /**
-     * Constants for Config-Parameters corresponding to Definition in ItemModuleTypeDefinition.json
+     * Constants for Config-Parameters corresponding to Definition in ItemConditions.json
      */
     public static final String ITEM_NAME = "itemName";
     public static final String OPERATOR = "operator";

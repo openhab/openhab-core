@@ -12,6 +12,7 @@
  */
 package org.openhab.core.addon;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
@@ -97,6 +98,16 @@ public class AddonInfoRegistry {
         AddonInfo.Builder builder = AddonInfo.builder(a);
         if (a.getDescription().isBlank()) {
             builder.withDescription(b.getDescription());
+        }
+        Set<String> keywords = new HashSet<>();
+        if (a.getKeywords() instanceof String ka) {
+            Arrays.stream(ka.split(",")).map(String::trim).filter(s -> !s.isEmpty()).forEach(keywords::add);
+        }
+        if (b.getKeywords() instanceof String kb) {
+            Arrays.stream(kb.split(",")).map(String::trim).filter(s -> !s.isEmpty()).forEach(keywords::add);
+        }
+        if (!keywords.isEmpty()) {
+            builder.withKeywords(keywords.stream().collect(Collectors.joining(",")));
         }
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());

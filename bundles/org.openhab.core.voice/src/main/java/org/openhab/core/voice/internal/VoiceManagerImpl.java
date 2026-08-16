@@ -25,7 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -48,12 +47,16 @@ import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
@@ -72,8 +75,18 @@ import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationException;
+import org.openhab.core.voice.text.conversation.ConversationManager;
+import org.openhab.core.voice.text.conversation.ConversationRole;
+import org.openhab.core.voice.text.interpreter.llm.LLMItemSerializer;
+import org.openhab.core.voice.text.interpreter.llm.LLMTool;
+import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -99,29 +112,12 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Use dialog context
  * @author Miguel Álvarez - Add transcribe method
  */
-@Component(immediate = true, configurationPid = VoiceManagerImpl.CONFIGURATION_PID, //
+@Component(immediate = true, configurationPid = VoiceConfigurationConstants.CONFIGURATION_PID, //
         property = Constants.SERVICE_PID + "=org.openhab.voice")
-@ConfigurableService(category = "system", label = "Voice", description_uri = VoiceManagerImpl.CONFIG_URI)
+@ConfigurableService(category = "system", label = "Voice", description_uri = VoiceConfigurationConstants.CONFIG_URI)
 @NonNullByDefault
-public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener {
-
-    public static final String CONFIGURATION_PID = "org.openhab.voice";
-
-    // the default keyword to use if no other is configured
-    private static final String DEFAULT_KEYWORD = "Wakeup";
-
-    // constants for the configuration properties
-    protected static final String CONFIG_URI = "system:voice";
-    private static final String CONFIG_KEYWORD = "keyword";
-    private static final String CONFIG_LISTENING_ITEM = "listeningItem";
-    private static final String CONFIG_LISTENING_MELODY = "listeningMelody";
-    private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
-    private static final String CONFIG_DEFAULT_KS = "defaultKS";
-    private static final String CONFIG_DEFAULT_STT = "defaultSTT";
-    private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
-    private static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
-    private static final String CONFIG_PREFIX_DEFAULT_VOICE = "defaultVoice.";
-
+public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, DialogProcessor.DialogEventListener,
+        RegistryChangeListener<LLMTool> {
     private final Logger logger = LoggerFactory.getLogger(VoiceManagerImpl.class);
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
@@ -130,6 +126,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final Map<String, STTService> sttServices = new HashMap<>();
     private final Map<String, TTSService> ttsServices = new HashMap<>();
     private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
+    private final LLMToolRegistry llmToolRegistry;
+    private final ConversationManager conversationManager;
+    private final ItemRegistry itemRegistry;
+    private final ItemPermissionResolver itemPermissionResolver;
 
     private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
 
@@ -138,21 +138,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
     private final Storage<DialogRegistration> dialogRegistrationStorage;
+    private final VoiceManagerConfiguration configuration;
 
     private @Nullable Bundle bundle;
 
-    /**
-     * default settings filled through the service configuration
-     */
-    private String keyword = DEFAULT_KEYWORD;
-    private @Nullable String listeningItem;
-    private @Nullable String listeningMelody;
-    private @Nullable String defaultTTS;
-    private @Nullable String defaultSTT;
-    private @Nullable String defaultKS;
-    private @Nullable String defaultHLI;
-    private @Nullable String defaultVoice;
-    private final Map<String, String> defaultVoices = new HashMap<>();
     private final Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
     private final Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
     private @Nullable DialogContext lastDialogContext;
@@ -161,23 +150,34 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
             final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
-            final @Reference StorageService storageService) {
+            final @Reference StorageService storageService, final @Reference LLMToolRegistry llmToolRegistry,
+            final @Reference ConversationManager conversationManager,
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
+            final @Reference ItemRegistry itemRegistry,
+            final @Reference ItemPermissionResolver itemPermissionResolver) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
         this.dialogRegistrationStorage = storageService.getStorage(DialogRegistration.class.getName(),
                 this.getClass().getClassLoader());
+        this.conversationManager = conversationManager;
+        this.llmToolRegistry = llmToolRegistry;
+        this.itemRegistry = itemRegistry;
+        this.itemPermissionResolver = itemPermissionResolver;
+        this.configuration = new VoiceManagerConfiguration(configDescriptionRegistry);
     }
 
     @Activate
     protected void activate(BundleContext bundleContext, Map<String, Object> config) {
         this.bundle = bundleContext.getBundle();
+        llmToolRegistry.addRegistryChangeListener(this);
         modified(config);
     }
 
     @Deactivate
     protected void deactivate() {
+        llmToolRegistry.removeRegistryChangeListener(this);
         dialogProcessors.values().forEach(DialogProcessor::stop);
         dialogProcessors.clear();
         ScheduledFuture<?> dialogRegistrationFuture = this.dialogRegistrationFuture;
@@ -191,27 +191,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Modified
     protected void modified(Map<String, Object> config) {
         if (config != null) {
-            this.keyword = config.containsKey(CONFIG_KEYWORD) ? config.get(CONFIG_KEYWORD).toString() : DEFAULT_KEYWORD;
-            this.listeningItem = config.containsKey(CONFIG_LISTENING_ITEM)
-                    ? config.get(CONFIG_LISTENING_ITEM).toString()
-                    : null;
-            this.listeningMelody = config.containsKey(CONFIG_LISTENING_MELODY)
-                    ? config.get(CONFIG_LISTENING_MELODY).toString()
-                    : null;
-            this.defaultTTS = config.containsKey(CONFIG_DEFAULT_TTS) ? config.get(CONFIG_DEFAULT_TTS).toString() : null;
-            this.defaultSTT = config.containsKey(CONFIG_DEFAULT_STT) ? config.get(CONFIG_DEFAULT_STT).toString() : null;
-            this.defaultKS = config.containsKey(CONFIG_DEFAULT_KS) ? config.get(CONFIG_DEFAULT_KS).toString() : null;
-            this.defaultHLI = config.containsKey(CONFIG_DEFAULT_HLI) ? config.get(CONFIG_DEFAULT_HLI).toString() : null;
-            this.defaultVoice = config.containsKey(CONFIG_DEFAULT_VOICE) ? config.get(CONFIG_DEFAULT_VOICE).toString()
-                    : null;
-
-            for (Entry<String, Object> entry : config.entrySet()) {
-                String key = entry.getKey();
-                if (key.startsWith(CONFIG_PREFIX_DEFAULT_VOICE)) {
-                    String tts = key.substring(CONFIG_PREFIX_DEFAULT_VOICE.length());
-                    defaultVoices.put(tts, entry.getValue().toString());
-                }
-            }
+            configuration.update(config);
         }
     }
 
@@ -250,7 +230,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             String selectedVoiceId = voiceId;
             if (selectedVoiceId == null) {
                 // use the configured default, if set
-                selectedVoiceId = defaultVoice;
+                selectedVoiceId = configuration.getDefaultVoice();
             }
             if (selectedVoiceId == null) {
                 tts = getTTS();
@@ -378,7 +358,9 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             logger.warn("InterruptedException waiting for transcription: {}", e.getMessage());
             sttServiceHandle.abort();
         } catch (ExecutionException e) {
-            logger.warn("ExecutionException running transcription: {}", e.getCause().getMessage());
+            var cause = e.getCause();
+            logger.warn("ExecutionException running transcription: {}",
+                    cause != null ? cause.getMessage() : e.getMessage());
         } catch (TimeoutException e) {
             logger.warn("TimeoutException waiting for transcription");
             sttServiceHandle.abort();
@@ -388,43 +370,77 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public String interpret(String text) throws InterpretationException {
-        return interpret(text, null);
+        return interpret(text, (InterpretationArguments) null);
     }
 
     @Override
     public String interpret(String text, @Nullable String hliIdList) throws InterpretationException {
+        return interpret(text, hliIdList == null ? null : new InterpretationArguments(hliIdList, "", "", "", null));
+    }
+
+    @Override
+    public String interpret(String text, @Nullable InterpretationArguments args) throws InterpretationException {
+        if (args == null) {
+            args = new InterpretationArguments("", "", "", "", null);
+        }
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
-        if (hliIdList == null) {
+        if (args.hliIdList().isEmpty()) {
             HumanLanguageInterpreter interpreter = getHLI();
             if (interpreter != null) {
                 interpreters.add(interpreter);
             }
         } else {
-            interpreters = getHLIsByIds(hliIdList);
+            interpreters = getHLIsByIds(args.hliIdList());
         }
 
         if (!interpreters.isEmpty()) {
-            Locale locale = localeProvider.getLocale();
+            Locale locale = args.locale();
+            if (locale == null) {
+                locale = localeProvider.getLocale();
+            }
+            Conversation conversation = conversationManager.getConversation(args.conversationId());
+            try {
+                conversation.addMessage(ConversationRole.USER, text);
+            } catch (ConversationException e) {
+                String errMsg = e.getMessage();
+                throw new InterpretationException(
+                        errMsg != null ? errMsg : "Unknown exception adding user message to conversation");
+            }
+            List<LLMTool> tools = llmToolRegistry.getByIds(args.toolIdList());
+            String locationItem = args.locationItem();
+            if (locationItem != null && locationItem.isBlank()) {
+                locationItem = null;
+            }
+            InterpreterContext context = new InterpreterContext(conversation, tools, locationItem,
+                    enrichSystemPrompt(configuration.getSystemPrompt(), locale));
             InterpretationException exception = null;
             for (var interpreter : interpreters) {
                 try {
-                    String answer = interpreter.interpret(locale, text);
-                    logger.debug("Interpretation result: {}", answer);
+                    String answer = interpreter.interpret(locale, context);
+                    logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(), answer);
                     return answer;
                 } catch (InterpretationException e) {
-                    logger.debug("Interpretation exception: {}", e.getMessage());
+                    logger.debug("Interpretation exception from interpreter '{}': {}", interpreter.getId(),
+                            e.getMessage());
                     exception = e;
                 }
             }
-            if (exception != null) { // this should always be the case here
+            if (exception != null) {
+                try {
+                    String errMsg = exception.getMessage();
+                    context.conversation().addMessage(ConversationRole.OPENHAB,
+                            errMsg != null ? errMsg : "Unknown interpreter error");
+                } catch (ConversationException e) {
+                    logger.error("Error adding error message to conversation: {}", e.getMessage());
+                }
                 throw exception;
             }
         }
 
-        if (hliIdList == null) {
+        if (args.hliIdList().isEmpty()) {
             throw new InterpretationException("No human language interpreter available!");
         } else {
-            throw new InterpretationException("No human language interpreter can be found for " + hliIdList);
+            throw new InterpretationException("No human language interpreter can be found for " + args.hliIdList());
         }
     }
 
@@ -586,16 +602,18 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public DialogContext.Builder getDialogContextBuilder() {
-        return new DialogContext.Builder(keyword, localeProvider.getLocale()) //
+        return new DialogContext.Builder(configuration.getKeyword(), localeProvider.getLocale()) //
                 .withSink(audioManager.getSink()) //
                 .withSource(audioManager.getSource()) //
+                .withConversation(conversationManager.getConversation("")) //
                 .withKS(this.getKS()) //
                 .withSTT(this.getSTT()) //
                 .withTTS(this.getTTS()) //
                 .withHLI(this.getHLI()) //
                 .withVoice(this.getDefaultVoice()) //
-                .withMelody(listeningMelody) //
-                .withListeningItem(listeningItem);
+                .withMelody(configuration.getListeningMelody()) //
+                .withListeningItem(configuration.getListeningItem()) //
+                .withSystemPrompt(configuration.getSystemPrompt());
     }
 
     @Override
@@ -831,12 +849,27 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
+    public void added(LLMTool tool) {
+        scheduleDialogRegistrations();
+    }
+
+    @Override
+    public void removed(LLMTool tool) {
+        stopDialogs(dialog -> dialog.dialogContext.llmTools().stream().anyMatch(t -> t.getUID().equals(tool.getUID())));
+    }
+
+    @Override
+    public void updated(LLMTool oldElement, LLMTool element) {
+        // do nothing
+    }
+
+    @Override
     public @Nullable TTSService getTTS() {
         TTSService tts = null;
-        if (defaultTTS != null) {
-            tts = ttsServices.get(defaultTTS);
+        if (configuration.getDefaultTTS() != null) {
+            tts = ttsServices.get(configuration.getDefaultTTS());
             if (tts == null) {
-                logger.warn("Default TTS service '{}' not available!", defaultTTS);
+                logger.warn("Default TTS service '{}' not available!", configuration.getDefaultTTS());
             }
         } else if (!ttsServices.isEmpty()) {
             tts = ttsServices.values().iterator().next();
@@ -863,10 +896,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     public @Nullable STTService getSTT() {
         STTService stt = null;
-        if (defaultSTT != null) {
-            stt = sttServices.get(defaultSTT);
+        if (configuration.getDefaultSTT() != null) {
+            stt = sttServices.get(configuration.getDefaultSTT());
             if (stt == null) {
-                logger.warn("Default STT service '{}' not available!", defaultSTT);
+                logger.warn("Default STT service '{}' not available!", configuration.getDefaultSTT());
             }
         } else if (!sttServices.isEmpty()) {
             stt = sttServices.values().iterator().next();
@@ -889,10 +922,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     public @Nullable KSService getKS() {
         KSService ks = null;
-        if (defaultKS != null) {
-            ks = ksServices.get(defaultKS);
+        if (configuration.getDefaultKS() != null) {
+            ks = ksServices.get(configuration.getDefaultKS());
             if (ks == null) {
-                logger.warn("Default KS service '{}' not available!", defaultKS);
+                logger.warn("Default KS service '{}' not available!", configuration.getDefaultKS());
             }
         } else if (!ksServices.isEmpty()) {
             ks = ksServices.values().iterator().next();
@@ -915,10 +948,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     public @Nullable HumanLanguageInterpreter getHLI() {
         HumanLanguageInterpreter hli = null;
-        if (defaultHLI != null) {
-            hli = humanLanguageInterpreters.get(defaultHLI);
+        if (configuration.getDefaultHLI() != null) {
+            hli = humanLanguageInterpreters.get(configuration.getDefaultHLI());
             if (hli == null) {
-                logger.warn("Default HumanLanguageInterpreter '{}' not available!", defaultHLI);
+                logger.warn("Default HumanLanguageInterpreter '{}' not available!", configuration.getDefaultHLI());
             }
         } else if (!humanLanguageInterpreters.isEmpty()) {
             hli = humanLanguageInterpreters.values().iterator().next();
@@ -993,32 +1026,32 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public @Nullable Voice getDefaultVoice() {
-        String localDefaultVoice = defaultVoice;
+        String localDefaultVoice = configuration.getDefaultVoice();
         return localDefaultVoice != null ? getVoice(localDefaultVoice) : null;
     }
 
     @Override
     public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
             @Nullable Locale locale) {
-        if (CONFIG_URI.equals(uri.toString())) {
+        if (VoiceConfigurationConstants.CONFIG_URI.equals(uri.toString())) {
             switch (param) {
-                case CONFIG_DEFAULT_HLI:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_HLI:
                     return humanLanguageInterpreters.values().stream()
                             .sorted((hli1, hli2) -> hli1.getLabel(locale).compareToIgnoreCase(hli2.getLabel(locale)))
                             .map(hli -> new ParameterOption(hli.getId(), hli.getLabel(locale))).toList();
-                case CONFIG_DEFAULT_KS:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_KS:
                     return ksServices.values().stream()
                             .sorted((ks1, ks2) -> ks1.getLabel(locale).compareToIgnoreCase(ks2.getLabel(locale)))
                             .map(ks -> new ParameterOption(ks.getId(), ks.getLabel(locale))).toList();
-                case CONFIG_DEFAULT_STT:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_STT:
                     return sttServices.values().stream()
                             .sorted((stt1, stt2) -> stt1.getLabel(locale).compareToIgnoreCase(stt2.getLabel(locale)))
                             .map(stt -> new ParameterOption(stt.getId(), stt.getLabel(locale))).toList();
-                case CONFIG_DEFAULT_TTS:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_TTS:
                     return ttsServices.values().stream()
                             .sorted((tts1, tts2) -> tts1.getLabel(locale).compareToIgnoreCase(tts2.getLabel(locale)))
                             .map(tts -> new ParameterOption(tts.getId(), tts.getLabel(locale))).toList();
-                case CONFIG_DEFAULT_VOICE:
+                case VoiceConfigurationConstants.CONFIG_DEFAULT_VOICE:
                     Locale nullSafeLocale = locale != null ? locale : localeProvider.getLocale();
                     return getAllVoicesSorted(nullSafeLocale)
                             .stream().filter(v -> getTTS(v) != null).map(
@@ -1067,6 +1100,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             dialogRegistrationStorage.getValues().forEach(dr -> {
                 if (dr != null && !dialogProcessors.containsKey(dr.sourceId)) {
                     try {
+                        Conversation conversation = conversationManager
+                                .getConversation(Objects.requireNonNullElse(dr.conversationId, ""));
                         startDialog(getDialogContextBuilder() //
                                 .withSink(audioManager.getSink(dr.sinkId)) //
                                 .withSource(audioManager.getSource(dr.sourceId)) //
@@ -1076,8 +1111,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                                 .withTTS(getTTS(dr.ttsId)) //
                                 .withVoice(getVoice(dr.voiceId)) //
                                 .withHLIs(getHLIsByIds(dr.hliIds)) //
+                                .withLLMTools(llmToolRegistry.getByIds(dr.llmToolIds)) //
                                 .withLocale(dr.locale) //
                                 .withDialogGroup(dr.dialogGroup) //
+                                .withConversation(conversation) //
                                 .withLocationItem(dr.locationItem) //
                                 .withListeningItem(dr.listeningItem) //
                                 .withMelody(dr.listeningMelody) //
@@ -1102,5 +1139,18 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             // try to rebuild in case it was manually stopped
             scheduleDialogRegistrations();
         }
+    }
+
+    @Override
+    public String enrichSystemPrompt(@Nullable String baseSystemPrompt, @Nullable Locale locale) {
+        String base = baseSystemPrompt != null ? baseSystemPrompt : "";
+        List<Item> accessibleItems = itemRegistry.getItems().stream().filter(itemPermissionResolver::isAccessible)
+                .toList();
+        String serializedItems = LLMItemSerializer.serialize(accessibleItems, locale);
+        if (serializedItems.isEmpty()) {
+            return base;
+        }
+        String itemsSection = "Available items:\n" + serializedItems;
+        return base.isEmpty() ? itemsSection : base + "\n\n" + itemsSection;
     }
 }

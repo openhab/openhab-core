@@ -1,7 +1,6 @@
 Bundle-SymbolicName: ${project.artifactId}
 Export-Package: org.openhab.core.model.thing,\
  org.openhab.core.model.thing.formatting,\
- org.openhab.core.model.thing.generator,\
  org.openhab.core.model.thing.parser.antlr,\
  org.openhab.core.model.thing.parser.antlr.internal,\
  org.openhab.core.model.thing.scoping,\

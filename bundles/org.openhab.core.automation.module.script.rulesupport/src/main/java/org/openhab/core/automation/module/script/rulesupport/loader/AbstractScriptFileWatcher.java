@@ -271,6 +271,9 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
                     return null;
                 });
+            } catch (Throwable t) {
+                logger.error("Exception occurred while unloading script '{}'", scriptIdentifier, t);
+                throw t; // Re-throw to propagate it to the CompletableFuture
             } finally {
                 if (scriptMap.containsKey(scriptIdentifier)) {
                     logger.warn("Failed to unload script '{}'", scriptIdentifier);

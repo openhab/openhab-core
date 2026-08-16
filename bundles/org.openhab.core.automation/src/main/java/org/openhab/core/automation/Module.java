@@ -77,4 +77,11 @@ public interface Module {
      * @return the current configuration values of the {@link Module}.
      */
     Configuration getConfiguration();
+
+    /**
+     * The "magic key" used for {@link Module}s that depend on shared context that isn't part of the {@link Module}
+     * object itself, for example the {@link Action}s of DSL rules with definitions outside the {@code rule} section.
+     * The information is stored in the {@link Module}'s {@link Configuration}. The payload is a {@link Boolean}.
+     */
+    static String SHARED_CONTEXT = "sharedContext";
 }

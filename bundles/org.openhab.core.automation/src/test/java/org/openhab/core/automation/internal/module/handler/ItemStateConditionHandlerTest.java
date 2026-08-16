@@ -204,9 +204,9 @@ public class ItemStateConditionHandlerTest extends JavaTest {
 
     private @NonNullByDefault({}) Item item;
 
-    private @NonNullByDefault({}) @Mock ItemRegistry mockItemRegistry;
-    private @NonNullByDefault({}) @Mock BundleContext mockBundleContext;
-    private @NonNullByDefault({}) @Mock TimeZoneProvider mockTimeZoneProvider;
+    private @Mock @NonNullByDefault({}) ItemRegistry mockItemRegistry;
+    private @Mock @NonNullByDefault({}) BundleContext mockBundleContext;
+    private @Mock @NonNullByDefault({}) TimeZoneProvider mockTimeZoneProvider;
 
     @BeforeEach
     public void setup() throws ItemNotFoundException {

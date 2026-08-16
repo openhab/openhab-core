@@ -75,6 +75,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -200,7 +201,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @Path("/{serviceId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getServiceConfig", summary = "Get service configuration for given service ID.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(type = "object"))),
             @ApiResponse(responseCode = "500", description = "Configuration can not be read due to internal error") })
     public Response getConfiguration(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         try {
@@ -217,8 +218,8 @@ public class ConfigurableServiceResource implements RESTResource {
     @Path("/{serviceId}/config")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "updateServiceConfig", summary = "Updates a service configuration for given service ID and returns the old configuration.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+    @Operation(operationId = "updateServiceConfig", summary = "Updates a service configuration for given service ID and returns the old configuration.", requestBody = @RequestBody(required = false, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "object"))), responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(type = "object"))),
             @ApiResponse(responseCode = "204", description = "No old configuration"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
     public Response updateConfiguration(
@@ -269,7 +270,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @Path("/{serviceId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "deleteServiceConfig", summary = "Deletes a service configuration for given service ID and returns the old configuration.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(type = "object"))),
             @ApiResponse(responseCode = "204", description = "No old configuration"),
             @ApiResponse(responseCode = "500", description = "Configuration can not be deleted due to internal error") })
     public Response deleteConfiguration(

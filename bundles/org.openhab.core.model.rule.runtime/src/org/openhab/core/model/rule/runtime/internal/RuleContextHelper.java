@@ -16,7 +16,6 @@ import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.xtext.naming.QualifiedName;
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.openhab.core.model.rule.RulesStandaloneSetup;
 import org.openhab.core.model.rule.rules.RuleModel;
@@ -45,15 +44,14 @@ public class RuleContextHelper {
      * @return the evaluation context
      */
     public static synchronized IEvaluationContext getContext(RuleModel ruleModel) {
-        Logger logger = LoggerFactory.getLogger(RuleContextHelper.class);
-        Injector injector = RulesStandaloneSetup.getInjector();
-
         // check if a context already exists on the resource
         for (Adapter adapter : ruleModel.eAdapters()) {
             if (adapter instanceof RuleContextAdapter contextAdapter) {
                 return contextAdapter.getContext();
             }
         }
+        Logger logger = LoggerFactory.getLogger(RuleContextHelper.class);
+        Injector injector = RulesStandaloneSetup.getInjector();
         Provider<@NonNull IEvaluationContext> contextProvider = injector.getProvider(IEvaluationContext.class);
         // no evaluation context found, so create a new one
         ScriptEngine scriptEngine = injector.getInstance(ScriptEngine.class);
@@ -61,7 +59,7 @@ public class RuleContextHelper {
         for (VariableDeclaration var : ruleModel.getVariables()) {
             try {
                 Object initialValue = var.getRight() == null ? null
-                        : scriptEngine.newScriptFromXExpression(var.getRight()).execute();
+                        : scriptEngine.newScriptFromXExpression(var.getRight()).execute(evaluationContext);
                 evaluationContext.newValue(QualifiedName.create(var.getName()), initialValue);
             } catch (ScriptExecutionException e) {
                 logger.warn("Variable '{}' on rule file '{}' cannot be initialized with value '{}': {}", var.getName(),
@@ -70,14 +68,6 @@ public class RuleContextHelper {
         }
         ruleModel.eAdapters().add(new RuleContextAdapter(evaluationContext));
         return evaluationContext;
-    }
-
-    public static synchronized String getVariableDeclaration(RuleModel ruleModel) {
-        StringBuilder vars = new StringBuilder();
-        for (VariableDeclaration var : ruleModel.getVariables()) {
-            vars.append(NodeModelUtils.findActualNodeFor(var).getText());
-        }
-        return vars.toString();
     }
 
     /**

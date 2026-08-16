@@ -44,6 +44,15 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
     private final ConfigDispatcher configDispatcher;
     private final WatchService watchService;
 
+    /**
+     * Creates and activates the ConfigDispatcherFileWatcher.
+     * This constructor is called by the OSGi framework during component activation.
+     * It registers this component as a file system watch listener for the services configuration
+     * directory and performs an initial processing of all existing configuration files.
+     *
+     * @param configDispatcher the ConfigDispatcher service used to process configuration files
+     * @param watchService the WatchService used to monitor file system changes in the configuration directory
+     */
     @Activate
     public ConfigDispatcherFileWatcher(final @Reference ConfigDispatcher configDispatcher,
             final @Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
@@ -57,11 +66,25 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
         configDispatcher.processConfigFile(Path.of(OpenHAB.getConfigFolder(), servicesFolder).toFile());
     }
 
+    /**
+     * Deactivates the ConfigDispatcherFileWatcher.
+     * This method is called by the OSGi framework during component deactivation.
+     * It unregisters this component from the watch service to stop receiving file system events.
+     */
     @Deactivate
     public void deactivate() {
         watchService.unregisterListener(this);
     }
 
+    /**
+     * Processes file system watch events for configuration files.
+     * This method is called by the WatchService when a file is created, modified, or deleted
+     * in the monitored services directory. It filters events to process only .cfg files that
+     * are not hidden, and delegates the actual processing to the ConfigDispatcher.
+     *
+     * @param kind the type of file system event (CREATE, MODIFY, or DELETE)
+     * @param fullPath the full path to the file that triggered the event
+     */
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path fullPath) {
         try {

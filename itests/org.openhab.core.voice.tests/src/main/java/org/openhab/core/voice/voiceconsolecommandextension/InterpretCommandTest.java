@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
 import org.openhab.core.voice.internal.TTSServiceStub;
-import org.openhab.core.voice.internal.VoiceManagerImpl;
+import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.openhab.core.voice.internal.VoiceStub;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -65,7 +65,7 @@ public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
         config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
         config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
+        Configuration configuration = configAdmin.getConfiguration(VoiceConfigurationConstants.CONFIGURATION_PID);
         configuration.update(config);
     }
 

@@ -13,8 +13,7 @@
 package org.openhab.core.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -35,6 +34,7 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.semantics.internal.SemanticTagRegistryImpl;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.service.ReadyService;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -49,6 +49,7 @@ public class SemanticTagsTest {
     private static final String CUSTOM_PROPERTY = "CustomProperty";
 
     private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
     private @NonNullByDefault({}) GroupItem locationItem;
     private @NonNullByDefault({}) GroupItem equipmentItem;
@@ -80,7 +81,7 @@ public class SemanticTagsTest {
         SemanticTag customPropertyTag = new SemanticTagImpl("Property_" + CUSTOM_PROPERTY, null, null, List.of());
         when(managedSemanticTagProviderMock.getAll())
                 .thenReturn(List.of(customLocationTag, customEquipmentTag, customPointTag, customPropertyTag));
-        new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(), managedSemanticTagProviderMock);
+        new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(), managedSemanticTagProviderMock, readyServiceMock);
 
         roomTagClass = SemanticTags.getById("Location_Indoor_Room");
         bathroomTagClass = SemanticTags.getById("Location_Indoor_Room_Bathroom");

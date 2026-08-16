@@ -16,7 +16,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -27,7 +26,6 @@ import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
-import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 
@@ -53,19 +51,22 @@ public class TestCachedValuesPersistenceService implements ModifiablePersistence
 
     @Override
     public void store(Item item) {
+        store(item, null);
     }
 
     @Override
     public void store(Item item, @Nullable String alias) {
+        store(item, ZonedDateTime.now(), item.getState(), alias);
     }
 
     @Override
     public void store(Item item, ZonedDateTime date, State state) {
-        historicItems.add(new CachedHistoricItem(date, state, item.getName()));
+        store(item, date, state, null);
     }
 
     @Override
     public void store(Item item, ZonedDateTime date, State state, @Nullable String alias) {
+        historicItems.add(new CachedHistoricItem(date, state, alias != null ? alias : item.getName()));
     }
 
     @Override
@@ -111,11 +112,6 @@ public class TestCachedValuesPersistenceService implements ModifiablePersistence
         }
 
         return stream.toList();
-    }
-
-    @Override
-    public Set<PersistenceItemInfo> getItemInfo() {
-        return Set.of();
     }
 
     @Override

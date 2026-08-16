@@ -70,6 +70,14 @@ public interface SemanticTagRegistry extends Registry<SemanticTag, String> {
     boolean isEditable(SemanticTag tag);
 
     /**
+     * Indicates if a tag is a default tag.
+     *
+     * @param tag a tag in the registry
+     * @return true if the provided tag is a default tag, false if not
+     */
+    boolean isDefault(SemanticTag tag);
+
+    /**
      * Removes the provided tag and all tags having the provided tag as ancestor.
      *
      * Only removable (managed) tags are removed.

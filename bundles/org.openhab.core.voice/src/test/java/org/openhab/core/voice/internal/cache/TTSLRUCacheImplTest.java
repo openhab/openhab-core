@@ -51,7 +51,7 @@ public class TTSLRUCacheImplTest {
 
     private @TempDir @NonNullByDefault({}) Path tempDir;
 
-    private @NonNullByDefault({}) @Mock Voice voiceMock;
+    private @Mock @NonNullByDefault({}) Voice voiceMock;
 
     private @Mock @NonNullByDefault({}) CachedTTSService ttsServiceMock;
 

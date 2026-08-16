@@ -31,6 +31,10 @@ public class StringsCompleter implements ConsoleCommandCompleter {
     private final SortedSet<String> strings;
     private final boolean caseSensitive;
 
+    /**
+     * Creates a case-insensitive StringsCompleter with an empty set of strings.
+     * Strings can be added later by modifying the set returned from {@link #getStrings()}.
+     */
     public StringsCompleter() {
         this(List.of(), false);
     }

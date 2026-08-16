@@ -28,6 +28,7 @@ import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
+import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.actions.BusEvent;
 import org.openhab.core.model.script.actions.CoreUtil;
 import org.openhab.core.model.script.actions.Exec;
@@ -39,7 +40,9 @@ import org.openhab.core.model.script.actions.Transformation;
 import org.openhab.core.model.script.engine.IActionServiceProvider;
 import org.openhab.core.model.script.engine.IThingActionsProvider;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.model.script.lib.ItemExtensions;
 import org.openhab.core.model.script.lib.NumberExtensions;
+import org.openhab.core.model.script.lib.RuleExtensions;
 import org.openhab.core.thing.binding.ThingActions;
 
 import com.google.inject.Inject;
@@ -55,8 +58,6 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
-
-    private List<Class<?>> actionClasses = null;
 
     @Inject
     IActionServiceProvider actionServiceProvider;
@@ -76,6 +77,8 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(Ping.class);
         result.add(Transformation.class);
         result.add(ScriptExecution.class);
+        result.add(ItemExtensions.class);
+        result.add(RuleExtensions.class);
         result.add(URLEncoder.class);
 
         result.addAll(getActionClasses());
@@ -92,6 +95,7 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(Ping.class);
         result.add(Transformation.class);
         result.add(ScriptExecution.class);
+        result.add(ScriptServiceUtil.class);
         result.add(URLEncoder.class);
         result.add(CoreUtil.class);
 
@@ -114,23 +118,22 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
     }
 
     protected List<Class<?>> getActionClasses() {
-        List<Class<?>> localActionClasses = new ArrayList<>();
+        List<Class<?>> actionClasses = new ArrayList<>();
 
         List<ActionService> services = actionServiceProvider.get();
         if (services != null) {
             for (ActionService actionService : services) {
-                localActionClasses.add(actionService.getActionClass());
+                actionClasses.add(actionService.getActionClass());
             }
         }
 
         List<ThingActions> actions = thingActionsProvider.get();
         if (actions != null) {
             for (ThingActions thingActions : actions) {
-                localActionClasses.add(thingActions.getClass());
+                actionClasses.add(thingActions.getClass());
             }
         }
 
-        actionClasses = localActionClasses;
         return actionClasses;
     }
 }

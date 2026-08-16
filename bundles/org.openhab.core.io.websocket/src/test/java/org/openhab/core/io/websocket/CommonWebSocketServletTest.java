@@ -13,6 +13,7 @@
 package org.openhab.core.io.websocket;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,11 +44,10 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.io.rest.auth.AnonymousUserSecurityContext;
 import org.openhab.core.io.rest.auth.AuthFilter;
-import org.openhab.core.io.websocket.event.EventWebSocket;
 import org.osgi.service.http.NamespaceException;
 
 /**
- * The {@link CommonWebSocketServletTest} contains tests for the {@link EventWebSocket}
+ * The {@link CommonWebSocketServletTest} contains tests for the {@link CommonWebSocketServlet}
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -86,13 +86,13 @@ public class CommonWebSocketServletTest {
     public void createWebsocketUsingDefaultAdapterPath() throws URISyntaxException {
         when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws"));
         webSocketCreatorAC.getValue().createWebSocket(request, response);
-        verify(testDefaultWsAdapter, times(1)).createWebSocket(request, response);
+        verify(testDefaultWsAdapter, times(1)).createWebSocket(eq(request), eq(response), any());
     }
 
     @Test
     public void createWebsocketUsingAdapterPath() throws URISyntaxException {
         when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws/" + testAdapterId));
         webSocketCreatorAC.getValue().createWebSocket(request, response);
-        verify(testWsAdapter, times(1)).createWebSocket(request, response);
+        verify(testWsAdapter, times(1)).createWebSocket(eq(request), eq(response), any());
     }
 }

@@ -90,8 +90,11 @@ public class ScriptTransformationServiceFactory {
         }
     }
 
-    private void unregisterService(ComponentInstance<ScriptTransformationService> instance) {
-        instance.getInstance().deactivate();
+    private @NonNullByDefault({}) void unregisterService(ComponentInstance<ScriptTransformationService> instance) {
+        ScriptTransformationService service = instance.getInstance();
+        if (service != null) {
+            service.deactivate();
+        }
         instance.dispose();
     }
 }

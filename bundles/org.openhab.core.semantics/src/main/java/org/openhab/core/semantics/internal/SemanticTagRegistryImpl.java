@@ -13,6 +13,7 @@
 package org.openhab.core.semantics.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.semantics.Tag;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.service.ReadyService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -58,17 +60,20 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
 
     private final DefaultSemanticTagProvider defaultSemanticTagProvider;
     private final ManagedSemanticTagProvider managedProvider;
+    private final Collection<SemanticTag> defaultTags;
 
     @Activate
     public SemanticTagRegistryImpl(@Reference DefaultSemanticTagProvider defaultSemanticTagProvider,
-            @Reference ManagedSemanticTagProvider managedProvider) {
+            @Reference ManagedSemanticTagProvider managedProvider, @Reference ReadyService readyService) {
         super(SemanticTagProvider.class);
         this.defaultSemanticTagProvider = defaultSemanticTagProvider;
         this.managedProvider = managedProvider;
+        this.defaultTags = defaultSemanticTagProvider.getAll();
         // Add the default semantic tags provider first, before all others
         super.addProvider(defaultSemanticTagProvider);
-        super.addProvider(managedProvider);
+        super.setReadyService(readyService);
         setManagedProvider(managedProvider);
+        super.addProvider(managedProvider);
     }
 
     @Override
@@ -128,7 +133,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
         // and is either a default tag or a managed tag
         // Check also that a semantic tag class with the same name does not already exist
         return name.matches("[A-Z][a-zA-Z0-9]+") && parent != null
-                && (managedProvider.get(parentId) != null || defaultSemanticTagProvider.getAll().contains(parent))
+                && (managedProvider.get(parentId) != null || defaultTags.contains(parent))
                 && getTagClassById(name) == null;
     }
 
@@ -150,6 +155,11 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     @Override
     public boolean isEditable(SemanticTag tag) {
         return managedProvider.get(tag.getUID()) != null;
+    }
+
+    @Override
+    public boolean isDefault(SemanticTag tag) {
+        return defaultTags.contains(tag);
     }
 
     @Override

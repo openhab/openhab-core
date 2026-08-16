@@ -38,6 +38,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.CalorificValue;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.types.QuantityType;
@@ -113,6 +114,17 @@ public class UnitsTest {
     public void testMmHgUnitSymbol() {
         assertThat(Units.MILLIMETRE_OF_MERCURY.getSymbol(), is("mmHg"));
         assertThat(Units.MILLIMETRE_OF_MERCURY.toString(), is("mmHg"));
+    }
+
+    @Test
+    public void testKiloWattHourPerCubicMetreUnitSymbolAndConversion() {
+        assertThat(Units.KILOWATT_HOUR_PER_CUBICMETRE.toString(), is("kWh/m³"));
+
+        Quantity<CalorificValue> calorificValue = Quantities.getQuantity(new BigDecimal("10.183"),
+                Units.KILOWATT_HOUR_PER_CUBICMETRE);
+        Quantity<Volume> volume = Quantities.getQuantity(new BigDecimal("100"), SIUnits.CUBIC_METRE);
+        Quantity<?> energy = volume.multiply(calorificValue);
+        assertThat(energy.getUnit(), is(Units.KILOWATT_HOUR));
     }
 
     @Test

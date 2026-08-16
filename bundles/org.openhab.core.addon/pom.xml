@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.bundles</groupId>
     <artifactId>org.openhab.core.reactor.bundles</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>5.3.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.addon</artifactId>
@@ -26,5 +26,17 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jvnet.jaxb2.maven2</groupId>
+        <artifactId>maven-jaxb2-plugin</artifactId>
+        <configuration>
+          <catalog>schema/catalog.cat</catalog>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

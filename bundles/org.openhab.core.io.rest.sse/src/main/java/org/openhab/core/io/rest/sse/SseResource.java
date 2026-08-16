@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -222,6 +223,7 @@ public class SseResource implements RESTResource, SsePublisher {
      */
     @POST
     @Path("/states/{connectionId}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(operationId = "updateItemListForStateUpdates", summary = "Changes the list of items a SSE connection will receive state updates to.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Unknown connectionId") })

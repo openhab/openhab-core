@@ -95,6 +95,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
                 { "{repeatPasswordPlaceholder}", "auth.placeholder.repeatpassword" },
                 { "{tokenNamePlaceholder}", "auth.placeholder.tokenname" },
                 { "{tokenScopePlaceholder}", "auth.placeholder.tokenscope" },
+                { "{cancelButtonLabel}", "auth.button.cancel" }, //
                 { "{returnButtonLabel}", "auth.button.return" } //
         }) {
             template = template.replace(replace[0], getLocalizedMessage(replace[1]));

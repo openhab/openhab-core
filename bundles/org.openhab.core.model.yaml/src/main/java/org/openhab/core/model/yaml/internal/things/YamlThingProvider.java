@@ -14,6 +14,7 @@ package org.openhab.core.model.yaml.internal.things;
 
 import static org.openhab.core.model.yaml.YamlModelUtils.isIsolatedModel;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,7 +44,6 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
-import org.openhab.core.service.StartLevelService;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -103,32 +103,38 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     private final Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap<>();
 
     private final List<QueueContent> queue = new CopyOnWriteArrayList<>();
+    private final Object queueLock = new Object();
 
     private final Runnable lazyRetryRunnable = new Runnable() {
         @Override
         public void run() {
+            threadStopping = false;
             logger.debug("Starting lazy retry thread");
-            while (!queue.isEmpty()) {
-                for (QueueContent qc : queue) {
-                    if (retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration, qc.thingUID,
-                            qc.bridgeUID)) {
-                        queue.remove(qc);
+            boolean stop = false;
+            do {
+                // Wait 1s before retrying
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    stop = true;
+                    threadStopping = true;
+                }
+                if (!stop) {
+                    synchronized (queueLock) {
+                        queue.removeIf(qc -> retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration,
+                                qc.thingUID, qc.bridgeUID));
+                        stop = queue.isEmpty();
+                        threadStopping = stop == true;
                     }
                 }
-                if (!queue.isEmpty()) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
+            } while (!stop);
             logger.debug("Lazy retry thread ran out of work. Good bye.");
         }
     };
 
-    private boolean modelLoaded = false;
-
-    private @Nullable Thread lazyRetryThread;
+    protected @Nullable Thread lazyRetryThread;
+    private boolean threadStopping;
 
     private record QueueContent(ThingHandlerFactory thingHandlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
@@ -149,7 +155,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Deactivate
     public void deactivate() {
-        queue.clear();
+        synchronized (queueLock) {
+            queue.clear();
+        }
         thingsMap.clear();
         loadedXmlThingTypes.clear();
     }
@@ -162,7 +170,8 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     public Collection<Thing> getAllFromModel(String modelName) {
-        return thingsMap.getOrDefault(modelName, List.of());
+        Collection<Thing> things = thingsMap.get(modelName);
+        return things == null ? List.of() : List.copyOf(things);
     }
 
     @Override
@@ -198,6 +207,11 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     @Override
     public void updatedModel(String modelName, Collection<YamlThingDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
+        if (!isolated) {
+            elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
+                removeFromRetryQueue(uid);
+            });
+        }
         List<Thing> updated = elements.stream().map(t -> mapThing(t, isolated)).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = Objects
                 .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
@@ -222,8 +236,11 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     @Override
     public void removedModel(String modelName, Collection<YamlThingDTO> elements) {
         boolean isolated = isIsolatedModel(modelName);
-        Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, List.of());
+        Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, new ArrayList<>());
         elements.stream().map(this::buildThingUID).filter(Objects::nonNull).forEach(uid -> {
+            if (!isolated) {
+                removeFromRetryQueue(uid);
+            }
             modelThings.stream().filter(th -> th.getUID().equals(uid)).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
                 logger.debug("model {} removed thing {}", modelName, uid);
@@ -259,10 +276,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        String type = readyMarker.getType();
-        if (StartLevelService.STARTLEVEL_MARKER_TYPE.equals(type)) {
-            modelLoaded = Integer.parseInt(readyMarker.getIdentifier()) >= StartLevelService.STARTLEVEL_MODEL;
-        } else if (XML_THING_TYPE.equals(type)) {
+        if (XML_THING_TYPE.equals(readyMarker.getType())) {
             String bsn = readyMarker.getIdentifier();
             loadedXmlThingTypes.add(bsn);
             thingHandlerFactories.stream().filter(factory -> bsn.equals(getBundleName(factory))).forEach(factory -> {
@@ -544,8 +558,21 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     private void queueRetryThingCreation(ThingHandlerFactory handlerFactory, ThingTypeUID thingTypeUID,
             Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
-        queue.add(new QueueContent(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID));
+        synchronized (queueLock) {
+            queue.add(new QueueContent(handlerFactory, thingTypeUID, configuration, thingUID, bridgeUID));
+        }
         Thread thread = lazyRetryThread;
+        boolean stopping = threadStopping;
+        if (thread != null && thread.isAlive() && stopping) {
+            // Wait for the thread to terminate
+            while (thread.isAlive()) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
         if (thread == null || !thread.isAlive()) {
             thread = new Thread(lazyRetryRunnable);
             lazyRetryThread = thread;
@@ -553,63 +580,97 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         }
     }
 
+    private void removeFromRetryQueue(ThingUID thingUID) {
+        synchronized (queueLock) {
+            queue.removeIf(qc -> thingUID.equals(qc.thingUID));
+        }
+    }
+
+    public int getRetryQueueSize() {
+        return queue.size();
+    }
+
     private Configuration processThingConfiguration(ThingTypeUID thingTypeUID, ThingUID thingUID,
             Configuration configuration) {
-        Set<String> thingStringParams = !configuration.keySet().isEmpty()
-                ? getThingConfigStringParameters(thingTypeUID, thingUID)
+        Set<String> thingTextParams = !configuration.keySet().isEmpty()
+                ? getThingConfigTextParameters(thingTypeUID, thingUID)
                 : Set.of();
-        return processConfiguration(thingUID, configuration, thingStringParams);
+        return processConfiguration(thingUID, configuration, thingTextParams);
     }
 
     private Configuration processChannelConfiguration(@Nullable ChannelTypeUID channelTypeUID, ChannelUID channelUID,
             Configuration configuration) {
-        Set<String> channelStringParams = !configuration.keySet().isEmpty()
-                ? getChannelConfigStringParameters(channelTypeUID, channelUID)
+        Set<String> channelTextParams = !configuration.keySet().isEmpty()
+                ? getChannelConfigTextParameters(channelTypeUID, channelUID)
                 : Set.of();
-        return processConfiguration(channelUID, configuration, channelStringParams);
+        return processConfiguration(channelUID, configuration, channelTextParams);
     }
 
-    private Configuration processConfiguration(UID uid, Configuration configuration, Set<String> stringParameters) {
-        Map<String, Object> params = new HashMap<>();
-
-        configuration.keySet().forEach(name -> {
-            Object valueIn = configuration.get(name);
-            Object valueOut = valueIn;
-            // For configuration parameter of type text only
-            if (stringParameters.contains(name)) {
-                if (valueIn != null && !(valueIn instanceof String)) {
-                    logger.info(
-                            "\"{}\": the value of the configuration TEXT parameter \"{}\" is not interpreted as a string and will be automatically converted. Enclose your value in double quotes to prevent conversion.",
-                            uid, name);
+    private Object processSingleTextParam(UID uid, String name, Object param) {
+        if (param instanceof Number || param instanceof Boolean) {
+            logger.info(
+                    "\"{}\": the value of TEXT configuration parameter \"{}\" has been interpreted as a {}, and will "
+                            + "be converted to a string. Enclose your value in double quotes to prevent conversion.",
+                    uid, name, param instanceof Boolean ? "boolean" : "number");
+            // if the value in YAML is an unquoted number, the value resulting of the parsing can then be
+            // of type BigDecimal or BigInteger.
+            // If the value is of type BigDecimal, we convert it into a String. If there is no decimal,
+            // we convert it to an integer and return a String from that integer.
+            // - Value 1 in YAML is converted into String "1"
+            // - Value 1.0 in YAML is converted into String "1"
+            // - Value 1.5 in YAML is converted into String "1.5"
+            // If the value is not of type BigDecimal, it is kept unchanged. Conversion to a String will
+            // be applied at a next step during configuration normalization.
+            if (param instanceof BigDecimal bigDecimalValue) {
+                try {
+                    Object result = bigDecimalValue.stripTrailingZeros().scale() <= 0
+                            ? String.valueOf(bigDecimalValue.toBigIntegerExact().longValue())
+                            : bigDecimalValue.toString();
+                    logger.trace("config param {}: {} ({}) converted into {} ({})", name, param,
+                            param.getClass().getSimpleName(), result, result.getClass().getSimpleName());
+                    return result;
+                } catch (ArithmeticException e) {
+                    // Ignore error and return the original value
                 }
-                // if the value in YAML is an unquoted number, the value resulting of the parsing can then be
-                // of type BigDecimal or BigInteger.
-                // If the value is of type BigDecimal, we convert it into a String. If there is no decimal,
-                // we convert it to an integer and return a String from that integer.
-                // - Value 1 in YAML is converted into String "1"
-                // - Value 1.0 in YAML is converted into String "1"
-                // - Value 1.5 in YAML is converted into String "1.5"
-                // If the value is not of type BigDecimal, it is kept unchanged. Conversion to a String will
-                // be applied at a next step during configuration normalization.
-                if (valueIn instanceof BigDecimal bigDecimalValue) {
-                    try {
-                        valueOut = bigDecimalValue.stripTrailingZeros().scale() <= 0
-                                ? String.valueOf(bigDecimalValue.toBigIntegerExact().longValue())
-                                : bigDecimalValue.toString();
-                        logger.trace("config param {}: {} ({}) converted into {} ({})", name, valueIn,
-                                valueIn.getClass().getSimpleName(), valueOut, valueOut.getClass().getSimpleName());
-                    } catch (ArithmeticException e) {
-                        // Ignore error and return the original value
+            } else if (param instanceof Boolean bool) {
+                return bool.booleanValue() ? "true" : "false";
+            }
+        }
+        return param;
+    }
+
+    private Configuration processConfiguration(UID uid, Configuration configuration, Set<String> textParameters) {
+        Map<String, Object> params = new HashMap<>();
+        Object value;
+        String name;
+        for (Entry<String, Object> entry : configuration.getProperties().entrySet()) {
+            name = entry.getKey();
+            value = entry.getValue();
+            if (textParameters.contains(name)) {
+                if (value instanceof Iterable<?> iterable) {
+                    List<Object> elements = new ArrayList<>();
+                    for (Object element : iterable) {
+                        elements.add(processSingleTextParam(uid, name, element));
                     }
+                    value = elements;
+                } else if (value instanceof Object && value.getClass().isArray()) {
+                    List<Object> elements = new ArrayList<>();
+                    int length = Array.getLength(value);
+                    for (int i = 0; i < length; i++) {
+                        elements.add(processSingleTextParam(uid, name, Array.get(value, i)));
+                    }
+                    value = elements;
+                } else {
+                    value = processSingleTextParam(uid, name, value);
                 }
             }
-            params.put(name, valueOut);
-        });
+            params.put(name, value);
+        }
 
         return new Configuration(params);
     }
 
-    private Set<String> getThingConfigStringParameters(ThingTypeUID thingTypeUID, ThingUID thingUID) {
+    private Set<String> getThingConfigTextParameters(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         Set<String> params = new HashSet<>();
 
         ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
@@ -619,10 +680,10 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
         URI descURI = thingType.getConfigDescriptionURI();
         if (descURI != null) {
-            params.addAll(getStringParameters(descURI));
+            params.addAll(getTextParameters(descURI));
         }
         try {
-            params.addAll(getStringParameters(new URI("thing:" + thingUID)));
+            params.addAll(getTextParameters(new URI("thing:" + thingUID)));
         } catch (URISyntaxException e) {
             // Ignore exception, this will never happen with a valid thing UID
         }
@@ -630,8 +691,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         return params;
     }
 
-    private Set<String> getChannelConfigStringParameters(@Nullable ChannelTypeUID channelTypeUID,
-            ChannelUID channelUID) {
+    private Set<String> getChannelConfigTextParameters(@Nullable ChannelTypeUID channelTypeUID, ChannelUID channelUID) {
         Set<String> params = new HashSet<>();
 
         ChannelType channelType = channelTypeUID == null ? null : channelTypeRegistry.getChannelType(channelTypeUID);
@@ -641,10 +701,10 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
         URI descURI = channelType.getConfigDescriptionURI();
         if (descURI != null) {
-            params.addAll(getStringParameters(descURI));
+            params.addAll(getTextParameters(descURI));
         }
         try {
-            params.addAll(getStringParameters(new URI("channel:" + channelUID)));
+            params.addAll(getTextParameters(new URI("channel:" + channelUID)));
         } catch (URISyntaxException e) {
             // Ignore exception, this will never happen with a valid channel UID
         }
@@ -652,7 +712,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         return params;
     }
 
-    private Set<String> getStringParameters(URI uri) {
+    private Set<String> getTextParameters(URI uri) {
         Set<String> params = new HashSet<>();
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(uri);
         if (configDescription != null) {

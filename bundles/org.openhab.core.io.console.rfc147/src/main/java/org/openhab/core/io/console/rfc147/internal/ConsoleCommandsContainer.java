@@ -18,11 +18,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 
 /**
+ * Container interface for accessing registered console command extensions.
+ * This interface provides access to all console commands that are currently registered
+ * in the OSGi RFC 147 console support.
  *
  * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public interface ConsoleCommandsContainer {
 
+    /**
+     * Gets all registered console command extensions.
+     *
+     * @return a collection of all console command extensions currently registered
+     */
     Collection<ConsoleCommandExtension> getConsoleCommandExtensions();
 }

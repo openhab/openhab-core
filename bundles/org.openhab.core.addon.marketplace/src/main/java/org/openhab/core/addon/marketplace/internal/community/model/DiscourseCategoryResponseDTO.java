@@ -53,7 +53,7 @@ public class DiscourseCategoryResponseDTO {
         public Integer id;
         public String title;
         public String slug;
-        public String[] tags;
+        public TagDTO[] tags;
         @SerializedName("posts_count")
         public Integer postsCount;
         @SerializedName("image_url")

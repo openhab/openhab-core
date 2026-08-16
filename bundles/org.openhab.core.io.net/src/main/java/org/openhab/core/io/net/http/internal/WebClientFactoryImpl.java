@@ -177,12 +177,24 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         return commonWebSocketClient;
     }
 
+    private int calculateDefaultMaxThreads(int base, int max, int cpuFactor) {
+        int cpus = Runtime.getRuntime().availableProcessors();
+
+        // scale a bit with CPU count
+        int cpuBased = Math.max(base, cpus * cpuFactor);
+
+        // keep a sane upper bound for small clients
+        return Math.min(cpuBased, max);
+    }
+
     private void getConfigParameters(Map<String, Object> parameters) {
         minThreadsShared = getConfigParameter(parameters, CONFIG_MIN_THREADS_SHARED, 10);
-        maxThreadsShared = getConfigParameter(parameters, CONFIG_MAX_THREADS_SHARED, 40);
+        maxThreadsShared = getConfigParameter(parameters, CONFIG_MAX_THREADS_SHARED,
+                calculateDefaultMaxThreads(40, 80, 3));
         keepAliveTimeoutShared = getConfigParameter(parameters, CONFIG_KEEP_ALIVE_SHARED, 300);
         minThreadsCustom = getConfigParameter(parameters, CONFIG_MIN_THREADS_CUSTOM, 5);
-        maxThreadsCustom = getConfigParameter(parameters, CONFIG_MAX_THREADS_CUSTOM, 10);
+        maxThreadsCustom = getConfigParameter(parameters, CONFIG_MAX_THREADS_CUSTOM,
+                calculateDefaultMaxThreads(10, 32, 2));
         keepAliveTimeoutCustom = getConfigParameter(parameters, CONFIG_KEEP_ALIVE_CUSTOM, 300);
     }
 

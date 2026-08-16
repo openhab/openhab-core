@@ -35,7 +35,8 @@ import org.osgi.service.component.annotations.Reference;
  * @author Christoph Weitkamp - factored out common aspects into ThingTypeI18nLocalizationService
  */
 @NonNullByDefault
-@Component(property = { "openhab.scope=core.xml.channelGroups" })
+@Component(service = { ChannelGroupTypeProvider.class, XmlChannelGroupTypeProvider.class }, property = {
+        "openhab.scope=core.xml.channelGroups" })
 public class XmlChannelGroupTypeProvider extends AbstractXmlBasedProvider<UID, ChannelGroupType>
         implements ChannelGroupTypeProvider {
 

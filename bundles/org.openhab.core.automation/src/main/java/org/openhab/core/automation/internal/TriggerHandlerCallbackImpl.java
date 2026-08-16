@@ -119,8 +119,19 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     }
 
     @Override
-    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context) {
+    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, @Nullable Object> context) {
         re.runNow(uid, considerConditions, context);
+    }
+
+    @Override
+    public Future<Map<String, @Nullable Object>> runAsync(String ruleUID) {
+        return re.runAsync(ruleUID);
+    }
+
+    @Override
+    public Future<Map<String, @Nullable Object>> runAsync(String ruleUID, boolean considerConditions,
+            @Nullable Map<String, @Nullable Object> context) {
+        return re.runAsync(ruleUID, considerConditions, context);
     }
 
     @Override

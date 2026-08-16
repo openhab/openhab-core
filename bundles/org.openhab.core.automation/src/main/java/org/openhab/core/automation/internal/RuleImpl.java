@@ -49,7 +49,7 @@ public class RuleImpl implements Rule {
     protected Configuration configuration;
     protected List<ConfigDescriptionParameter> configDescriptions;
     protected @Nullable String templateUID;
-    protected TemplateState templateStatus;
+    protected TemplateState templateState;
     protected String uid;
     protected @Nullable String name;
     protected Set<String> tags;
@@ -87,12 +87,13 @@ public class RuleImpl implements Rule {
      * @param templateUID the {@link RuleTemplate} identifier of the template that will be used by the
      *            {@link RuleRegistry} to validate the {@link Rule}'s configuration, as well as to create and configure
      *            the {@link Rule}'s modules, or null if the {@link Rule} should not be created from a template.
+     * @param templateState the {@link TemplateState} of the {@link Rule}.
      * @param visibility the {@link Rule}'s visibility
      */
     public RuleImpl(@Nullable String uid, final @Nullable String name, final @Nullable String description,
             final @Nullable Set<String> tags, @Nullable List<Trigger> triggers, @Nullable List<Condition> conditions,
             @Nullable List<Action> actions, @Nullable List<ConfigDescriptionParameter> configDescriptions,
-            @Nullable Configuration configuration, @Nullable String templateUID, TemplateState templateStatus,
+            @Nullable Configuration configuration, @Nullable String templateUID, TemplateState templateState,
             @Nullable Visibility visibility) {
         this.uid = uid == null ? UUID.randomUUID().toString() : uid;
         this.name = name;
@@ -105,7 +106,7 @@ public class RuleImpl implements Rule {
         this.configuration = configuration == null ? new Configuration()
                 : new Configuration(configuration.getProperties());
         this.templateUID = templateUID;
-        this.templateStatus = templateStatus;
+        this.templateState = templateState;
         this.visibility = visibility == null ? Visibility.VISIBLE : visibility;
     }
 
@@ -130,7 +131,7 @@ public class RuleImpl implements Rule {
 
     @Override
     public TemplateState getTemplateState() {
-        return templateStatus;
+        return templateState;
     }
 
     /**
@@ -138,8 +139,8 @@ public class RuleImpl implements Rule {
      *
      * @param templateState the {@link TemplateState} to set.
      */
-    public void setTemplateStatus(TemplateState templateState) {
-        this.templateStatus = Objects.requireNonNull(templateState);
+    public void setTemplateState(TemplateState templateState) {
+        this.templateState = Objects.requireNonNull(templateState);
     }
 
     @Override

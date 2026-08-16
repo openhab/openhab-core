@@ -12,6 +12,11 @@
  */
 package org.openhab.core.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,6 +34,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.system.StartlevelEvent;
@@ -56,15 +62,17 @@ import org.slf4j.LoggerFactory;
  *
  * Start levels are defined as values between 0 and 100. They carry the following semantics:
  *
- * 00 - OSGi framework has been started.
- * 10 - OSGi application start level has been reached, i.e. bundles are activated.
- * 20 - Model entities (items, things, links, persist config) have been loaded, both from db as well as files.
- * 30 - Item states have been restored from persistence service, where applicable.
- * 40 - Rules from db, dsl and script files are loaded and parsed, script engine factories are available.
- * 50 - Rule engine has executed all "system started" rules and is active.
- * 70 - User interface is up and running.
- * 80 - All things have been initialized.
- * 100 - Startup is fully complete.
+ * <ul>
+ * <li>00 - OSGi framework has been started.</li>
+ * <li>10 - OSGi application start level has been reached, i.e. bundles are activated.</li>
+ * <li>20 - Model entities (items, things, links, persist config) have been loaded, both from db as well as files.</li>
+ * <li>30 - Item states have been restored from persistence service, where applicable.</li>
+ * <li>40 - Rules from db, dsl and script files are loaded and parsed, script engine factories are available.</li>
+ * <li>50 - Rule engine has executed all "system started" rules and is active.</li>
+ * <li>70 - User interface is up and running.</li>
+ * <li>80 - All things have been initialized.</li>
+ * <li>100 - Startup is fully complete.</li>
+ * </ul>
  *
  * @author Kai Kreuzer - Initial contribution
  *
@@ -83,6 +91,8 @@ public class StartLevelService {
     public static final int STARTLEVEL_UI = 70;
     public static final int STARTLEVEL_THINGS = 80;
     public static final int STARTLEVEL_COMPLETE = 100;
+
+    private static final String STARTLEVEL_FILE = "openhab-start-level";
 
     private final Logger logger = LoggerFactory.getLogger(StartLevelService.class);
 
@@ -246,6 +256,7 @@ public class StartLevelService {
         if (job != null) {
             job.cancel(true);
         }
+        atomicSaveFile(0);
     }
 
     private void setStartLevel(int level) {
@@ -255,9 +266,39 @@ public class StartLevelService {
         }
         openHABStartLevel = level;
         scheduler.submit(() -> {
+            atomicSaveFile(level);
             StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level);
             eventPublisher.post(startlevelEvent);
             logger.debug("Reached start level {}", level);
         });
+    }
+
+    /**
+     * Saves the given start level to a specific file in the openHAB data directory. Uses
+     * atomic file operations to ensure that the file is written fully or not at all.
+     */
+    private void atomicSaveFile(int level) {
+        try {
+            String userDataPath = OpenHAB.getUserDataFolder();
+            Path path = Path.of(userDataPath);
+            if (!Files.isDirectory(path)) {
+                throw new IllegalArgumentException("User data path is not a directory: " + userDataPath);
+            }
+            Path file = path.resolve(STARTLEVEL_FILE);
+            Path temp = Files.createTempFile(path, STARTLEVEL_FILE, ".tmp");
+            try {
+                Files.writeString(temp, Integer.toString(level), StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE);
+                Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (IOException e) {
+                try {
+                    Files.deleteIfExists(temp);
+                } catch (IOException ignore) {
+                }
+                throw e;
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            logger.debug("Unable to write openHAB start level marker file", e);
+        }
     }
 }

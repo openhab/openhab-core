@@ -15,7 +15,7 @@ package org.openhab.core.ui.items;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
-import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.sitemap.Widget;
 
 /**
  * This interface describes the methods that need to be implemented by a provider that

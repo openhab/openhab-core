@@ -17,21 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketImpl;
-import java.net.SocketImplFactory;
-import java.net.SocketOption;
-import java.net.StandardSocketOptions;
 import java.util.BitSet;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,14 +61,6 @@ public class SmokeTest extends IntegrationTestSupport {
     private static final int DISCRETE_EVERY_N_TRUE = 3;
     private static final int HOLDING_REGISTER_MULTIPLIER = 1;
     private static final int INPUT_REGISTER_MULTIPLIER = 10;
-    private static final SpyingSocketFactory SOCKET_SPY = new SpyingSocketFactory();
-    static {
-        try {
-            Socket.setSocketImplFactory(SOCKET_SPY);
-        } catch (IOException e) {
-            fail("Could not install socket spy in SmokeTest");
-        }
-    }
 
     /**
      * Whether tests are run in Continuous Integration environment, i.e. Jenkins or Travis CI
@@ -138,8 +117,8 @@ public class SmokeTest extends IntegrationTestSupport {
     }
 
     @BeforeEach
-    public void setUpSocketSpy() throws IOException {
-        SOCKET_SPY.sockets.clear();
+    public void setUpSocketSpy() {
+        ((TCPSlaveConnectionFactoryImpl) tcpConnectionFactory).clearAcceptedSockets();
     }
 
     /**
@@ -844,7 +823,7 @@ public class SmokeTest extends IntegrationTestSupport {
         config.setReconnectAfterMillis(9_000_000);
 
         // 1. capture open connections at this point
-        long openSocketsBefore = getNumberOfOpenClients(SOCKET_SPY);
+        long openSocketsBefore = getNumberOfOpenClients();
         assertThat(openSocketsBefore, is(equalTo(0L)));
 
         // 2. make poll, binding opens the tcp connection
@@ -861,7 +840,7 @@ public class SmokeTest extends IntegrationTestSupport {
             }
             waitForAssert(() -> {
                 // 3. ensure one open connection
-                long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
+                long openSocketsAfter = getNumberOfOpenClients();
                 assertThat(openSocketsAfter, is(equalTo(1L)));
             });
             try (ModbusCommunicationInterface ignored = modbusManager.newModbusCommunicationInterface(endpoint,
@@ -876,20 +855,20 @@ public class SmokeTest extends IntegrationTestSupport {
                             });
                     assertTrue(latch.await(60, TimeUnit.SECONDS));
                 }
-                assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
+                assertThat(getNumberOfOpenClients(), is(equalTo(1L)));
                 // wait for moment (to check that no connections are closed)
                 Thread.sleep(1000);
                 // no more than 1 connection, even though requests are going through
-                assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
+                assertThat(getNumberOfOpenClients(), is(equalTo(1L)));
             }
             Thread.sleep(1000);
             // Still one connection open even after closing second connection
-            assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
+            assertThat(getNumberOfOpenClients(), is(equalTo(1L)));
         } // 4. close (the last) comms
           // ensure that open connections are closed
           // (despite huge "reconnect after millis")
         waitForAssert(() -> {
-            long openSocketsAfterClose = getNumberOfOpenClients(SOCKET_SPY);
+            long openSocketsAfterClose = getNumberOfOpenClients();
             assertThat(openSocketsAfterClose, is(equalTo(0L)));
         });
     }
@@ -908,7 +887,7 @@ public class SmokeTest extends IntegrationTestSupport {
         config.setReconnectAfterMillis(2_000);
 
         // 1. capture open connections at this point
-        long openSocketsBefore = getNumberOfOpenClients(SOCKET_SPY);
+        long openSocketsBefore = getNumberOfOpenClients();
         assertThat(openSocketsBefore, is(equalTo(0L)));
 
         // 2. make poll, binding opens the tcp connection
@@ -926,119 +905,20 @@ public class SmokeTest extends IntegrationTestSupport {
             // Right after the poll we should have one connection open
             waitForAssert(() -> {
                 // 3. ensure one open connection
-                long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
+                long openSocketsAfter = getNumberOfOpenClients();
                 assertThat(openSocketsAfter, is(equalTo(1L)));
             });
             // 4. Connection should close itself by the commons pool eviction policy (checking for old idle connection
             // every now and then)
             waitForAssert(() -> {
                 // 3. ensure one open connection
-                long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
+                long openSocketsAfter = getNumberOfOpenClients();
                 assertThat(openSocketsAfter, is(equalTo(0L)));
             }, 60_000, 50);
         }
     }
 
-    private long getNumberOfOpenClients(SpyingSocketFactory socketSpy) {
-        localAddress();
-        return socketSpy.sockets.stream().filter(this::isConnectedToTestServer).count();
-    }
-
-    /**
-     * Spy all sockets that are created
-     *
-     * @author Sami Salonen
-     *
-     */
-    private static class SpyingSocketFactory implements SocketImplFactory {
-
-        Queue<SocketImpl> sockets = new ConcurrentLinkedQueue<>();
-
-        @Override
-        public SocketImpl createSocketImpl() {
-            SocketImpl socket = newSocksSocketImpl();
-            sockets.add(socket);
-            return socket;
-        }
-    }
-
-    private static SocketImpl newSocksSocketImpl() {
-        try {
-            Class<?> socksSocketImplClass = Class.forName("java.net.SocksSocketImpl");
-            Class<?> socketImplClass = SocketImpl.class;
-
-            // // For Debugging
-            // for (Method method : socketImplClass.getDeclaredMethods()) {
-            // LoggerFactory.getLogger("foobar")
-            // .error("SocketImpl." + method.getName() + Arrays.toString(method.getParameters()));
-            // }
-            // for (Constructor constructor : socketImplClass.getDeclaredConstructors()) {
-            // LoggerFactory.getLogger("foobar")
-            // .error("SocketImpl." + constructor.getName() + Arrays.toString(constructor.getParameters()));
-            // }
-            // for (Method method : socksSocketImplClass.getDeclaredMethods()) {
-            // LoggerFactory.getLogger("foobar")
-            // .error("SocksSocketImpl." + method.getName() + Arrays.toString(method.getParameters()));
-            // }
-            // for (Constructor constructor : socksSocketImplClass.getDeclaredConstructors()) {
-            // LoggerFactory.getLogger("foobar").error(
-            // "SocksSocketImpl." + constructor.getName() + Arrays.toString(constructor.getParameters()));
-            // }
-
-            try {
-                Constructor<?> constructor = socksSocketImplClass.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                return (SocketImpl) Objects.requireNonNull(constructor.newInstance());
-            } catch (NoSuchMethodException e) {
-                // Newer Javas (Java 14->) do not have default constructor 'SocksSocketImpl()'
-                // Instead we use "static SocketImpl.createPlatformSocketImpl" and "SocksSocketImpl(SocketImpl)
-                Method socketImplCreateMethod = socketImplClass.getDeclaredMethod("createPlatformSocketImpl",
-                        boolean.class);
-                socketImplCreateMethod.setAccessible(true);
-                Object socketImpl = socketImplCreateMethod
-                        .invoke(/* null since we deal with static method */ giveNull(), /* server */false);
-
-                Constructor<?> socksSocketImplConstructor = socksSocketImplClass
-                        .getDeclaredConstructor(socketImplClass);
-                socksSocketImplConstructor.setAccessible(true);
-                return (SocketImpl) Objects.requireNonNull(socksSocketImplConstructor.newInstance(socketImpl));
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private boolean isConnectedToTestServer(SocketImpl impl) {
-        final InetAddress testServerAddress = localAddress();
-
-        final int port;
-        boolean connected = true;
-        final InetAddress address;
-        try {
-            Method getPort = SocketImpl.class.getDeclaredMethod("getPort");
-            getPort.setAccessible(true);
-            port = (int) getPort.invoke(impl);
-
-            Method getInetAddressMethod = SocketImpl.class.getDeclaredMethod("getInetAddress");
-            getInetAddressMethod.setAccessible(true);
-            address = (InetAddress) getInetAddressMethod.invoke(impl);
-
-            // hacky (but java8-14 compatible) way to know if socket is open
-            // SocketImpl.getOption throws IOException when socket is closed
-            Method getOption = SocketImpl.class.getDeclaredMethod("getOption", SocketOption.class);
-            getOption.setAccessible(true);
-            try {
-                getOption.invoke(impl, StandardSocketOptions.SO_KEEPALIVE);
-            } catch (InvocationTargetException e) {
-                if (e.getTargetException() instanceof IOException) {
-                    connected = false;
-                } else {
-                    throw e;
-                }
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        return port == tcpModbusPort && connected && address.equals(testServerAddress);
+    private long getNumberOfOpenClients() {
+        return ((TCPSlaveConnectionFactoryImpl) tcpConnectionFactory).countOpenSockets();
     }
 }

@@ -36,7 +36,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * The {@link ScriptProfileFactory} creates {@link ScriptProfile} instances
+ * The {@link ScriptProfileFactory} creates {@link ScriptProfile} instances.
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -51,8 +51,10 @@ public class ScriptProfileFactory implements ProfileFactory, ProfileTypeProvider
     public @Nullable Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback,
             ProfileContext profileContext) {
         String serviceId = profileTypeUID.getId();
-        ScriptTransformationService transformationService = services.get(serviceId).service();
-        return new ScriptProfile(profileTypeUID, callback, profileContext, transformationService);
+        return new ScriptProfile(profileTypeUID, callback, profileContext, () -> {
+            ServiceRecord record = services.get(serviceId);
+            return record != null ? record.service() : null;
+        });
     }
 
     @Override

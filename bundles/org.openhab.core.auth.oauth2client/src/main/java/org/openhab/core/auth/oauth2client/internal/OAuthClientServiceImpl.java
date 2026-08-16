@@ -458,10 +458,13 @@ public class OAuthClientServiceImpl implements OAuthClientService {
      */
     @Override
     public void addExtraAuthField(String key, String value) {
-        if (extraAuthFields == null) {
-            extraAuthFields = new Fields();
+        Fields lcExtraAuthFields = extraAuthFields;
+        if (lcExtraAuthFields == null) {
+            lcExtraAuthFields = new Fields();
+            extraAuthFields = lcExtraAuthFields;
         }
-        extraAuthFields.add(key, value);
+
+        lcExtraAuthFields.add(key, value);
     }
 
     @Override

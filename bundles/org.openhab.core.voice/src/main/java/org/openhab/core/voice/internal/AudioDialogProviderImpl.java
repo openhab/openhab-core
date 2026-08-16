@@ -25,11 +25,10 @@ import org.openhab.core.voice.DTService;
 import org.openhab.core.voice.DTServiceHandle;
 import org.openhab.core.voice.DTTriggeredEvent;
 import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.interpreter.llm.LLMToolRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Allows the audio bundle to register a dialog that can be triggered programmatically.
@@ -39,12 +38,13 @@ import org.slf4j.LoggerFactory;
 @Component(service = AudioDialogProvider.class)
 @NonNullByDefault
 public class AudioDialogProviderImpl implements AudioDialogProvider {
-    private final Logger logger = LoggerFactory.getLogger(AudioDialogProviderImpl.class);
     private final VoiceManager voiceManager;
+    private final LLMToolRegistry llmToolRegistry;
 
     @Activate
-    public AudioDialogProviderImpl(@Reference VoiceManager voiceManager) {
+    public AudioDialogProviderImpl(@Reference VoiceManager voiceManager, @Reference LLMToolRegistry llmToolRegistry) {
         this.voiceManager = voiceManager;
+        this.llmToolRegistry = llmToolRegistry;
     }
 
     @Override
@@ -58,6 +58,7 @@ public class AudioDialogProviderImpl implements AudioDialogProvider {
                         .withLocationItem(locationItem) //
                         .withListeningItem(listeningItem) //
                         .withDT(dt) //
+                        .withLLMTools(llmToolRegistry.getAll()) //
                         .build() //
         );
         if (triggerHandle == null) {
@@ -106,8 +107,9 @@ public class AudioDialogProviderImpl implements AudioDialogProvider {
 
         @Override
         public void abort() {
-            if (this.abortCallback != null) {
-                this.abortCallback.run();
+            var abortCallback = this.abortCallback;
+            if (abortCallback != null) {
+                abortCallback.run();
                 this.abortCallback = null;
             }
         }

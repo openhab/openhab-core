@@ -38,6 +38,7 @@ import org.openhab.core.semantics.ManagedSemanticTagProvider;
 import org.openhab.core.semantics.Tag;
 import org.openhab.core.semantics.internal.SemanticTagRegistryImpl;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.service.ReadyService;
 
 /**
  * This are tests for {@link Semantics} actions.
@@ -52,6 +53,7 @@ public class SemanticsTest {
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
     private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
 
     private @NonNullByDefault({}) GroupItem indoorLocationItem;
     private @NonNullByDefault({}) GroupItem bathroomLocationItem;
@@ -107,7 +109,7 @@ public class SemanticsTest {
 
         when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of());
         SemanticTagRegistryImpl semanticTagRegistryImpl = new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(),
-                managedSemanticTagProviderMock);
+                managedSemanticTagProviderMock, readyServiceMock);
 
         indoorTagClass = semanticTagRegistryImpl.getTagClassById("Location_Indoor");
         bathroomTagClass = semanticTagRegistryImpl.getTagClassById("Location_Indoor_Room_Bathroom");

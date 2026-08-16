@@ -24,7 +24,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(name = "PersistenceCronStrategy")
 @NonNullByDefault
-public class PersistenceCronStrategyDTO {
-    public String name = "";
+public class PersistenceCronStrategyDTO extends PersistenceStrategyDTO {
     public String cronExpression = "";
+
+    // do not remove - needed by GSON
+    public PersistenceCronStrategyDTO() {
+        this("", "");
+    }
+
+    public PersistenceCronStrategyDTO(String name, String cronExpression) {
+        super(name);
+        this.cronExpression = cronExpression;
+    }
 }

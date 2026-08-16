@@ -50,6 +50,7 @@ import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
 import org.openhab.core.model.yaml.test.FirstTypeDTO;
 import org.openhab.core.model.yaml.test.SecondTypeDTO;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
 import org.yaml.snakeyaml.Yaml;
 
@@ -70,6 +71,7 @@ public class YamlModelRepositoryImplTest {
     private static final Path MODEL_PATH = Path.of(MODEL_NAME);
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
     private @TempDir @NonNullByDefault({}) Path watchPath;
     private @NonNullByDefault({}) Path fullModelPath;
 
@@ -101,7 +103,7 @@ public class YamlModelRepositoryImplTest {
     public void testFileAddedAfterListeners() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.addYamlModelListener(secondTypeListener2);
@@ -142,7 +144,7 @@ public class YamlModelRepositoryImplTest {
     public void testFileAddedBeforeListeners() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
@@ -182,7 +184,7 @@ public class YamlModelRepositoryImplTest {
 
     @Test
     public void testFileUpdated() throws IOException {
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         Files.copy(SOURCE_PATH.resolve("modelFileUpdatePost.yaml"), fullModelPath);
@@ -219,7 +221,7 @@ public class YamlModelRepositoryImplTest {
             "modelFileUpdateRemovedVersion.yaml" //
     })
     public void testFileRemovedElements(String file) throws IOException {
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         Files.copy(SOURCE_PATH.resolve("modelFileUpdatePost.yaml"), fullModelPath);
@@ -240,7 +242,7 @@ public class YamlModelRepositoryImplTest {
 
     @Test
     public void testFileRemoved() throws IOException {
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
 
         modelRepository.addYamlModelListener(firstTypeListener);
 
@@ -269,7 +271,7 @@ public class YamlModelRepositoryImplTest {
     public void testAddElementToModel() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
@@ -307,7 +309,7 @@ public class YamlModelRepositoryImplTest {
     public void testUpdateElementInModel() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
@@ -334,7 +336,7 @@ public class YamlModelRepositoryImplTest {
     public void testRemoveElementFromModel() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         FirstTypeDTO removed = new FirstTypeDTO("element1", "description1");
@@ -361,7 +363,7 @@ public class YamlModelRepositoryImplTest {
     public void testReadOnlyModelNotUpdated() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         FirstTypeDTO added = new FirstTypeDTO("element3", "description3");
@@ -388,7 +390,7 @@ public class YamlModelRepositoryImplTest {
 
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
@@ -411,7 +413,7 @@ public class YamlModelRepositoryImplTest {
 
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
@@ -434,7 +436,7 @@ public class YamlModelRepositoryImplTest {
 
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
@@ -455,7 +457,7 @@ public class YamlModelRepositoryImplTest {
 
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.addYamlModelListener(secondTypeListener2);
 
@@ -478,7 +480,7 @@ public class YamlModelRepositoryImplTest {
     public void testObjectFormMetadataLoadingAndGeneration() throws IOException {
         Files.copy(SOURCE_PATH_ITEMS.resolve("itemWithObjectFormMetadata.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
 
         @SuppressWarnings("unchecked")
         YamlModelListener<YamlItemDTO> itemListener = mock(YamlModelListener.class);
@@ -522,7 +524,7 @@ public class YamlModelRepositoryImplTest {
     @Test
     public void testShortFormMetadataLoadingAndGeneration() throws IOException {
         Files.copy(SOURCE_PATH_ITEMS.resolve("itemWithShortFormMetadata.yaml"), fullModelPath);
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
 
         @SuppressWarnings("unchecked")
         YamlModelListener<YamlItemDTO> itemListener = mock(YamlModelListener.class);
@@ -566,7 +568,7 @@ public class YamlModelRepositoryImplTest {
     public void testMixedFormMetadataLoadingAndGeneration() throws IOException {
         Files.copy(SOURCE_PATH_ITEMS.resolve("itemWithMixedFormMetadata.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
 
         @SuppressWarnings("unchecked")
         YamlModelListener<YamlItemDTO> itemListener = mock(YamlModelListener.class);

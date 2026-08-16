@@ -35,6 +35,7 @@ import org.openhab.core.semantics.SemanticTagImpl;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.Tag;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.service.ReadyService;
 
 /**
  * @author Laurent Garnier - Initial contribution
@@ -44,6 +45,7 @@ import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 public class SemanticTagRegistryImplTest {
 
     private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
     private @NonNullByDefault({}) SemanticTagRegistry semanticTagRegistry;
 
     private @NonNullByDefault({}) SemanticTag userLocationTag;
@@ -62,7 +64,7 @@ public class SemanticTagRegistryImplTest {
         userSubLocationTag = new SemanticTagImpl("Location_UserLocation_UserSubLocation", null, null, List.of());
         when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of(userLocationTag, userSubLocationTag));
         semanticTagRegistry = new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(),
-                managedSemanticTagProviderMock);
+                managedSemanticTagProviderMock, readyServiceMock);
 
         roomTagClass = semanticTagRegistry.getTagClassById("Location_Indoor_Room");
         bathroomTagClass = semanticTagRegistry.getTagClassById("Location_Indoor_Room_Bathroom");

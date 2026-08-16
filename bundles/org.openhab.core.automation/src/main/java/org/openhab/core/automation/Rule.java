@@ -59,11 +59,10 @@ public interface Rule extends Identifiable<String> {
      * This method is used to obtain the {@link RuleTemplate} identifier of the template the {@link Rule} was created
      * from. It will be used by the {@link RuleRegistry} to resolve the {@link Rule}: to validate the {@link Rule}'s
      * configuration, as well as to create and configure the {@link Rule}'s modules. If a {@link Rule} has not been
-     * created from a template, or has been successfully resolved by the {@link RuleRegistry}, this method will return
-     * {@code null}.
+     * created from a template, this method will return {@code null}.
      *
      * @return the identifier of the {@link Rule}'s {@link RuleTemplate}, or {@code null} if the {@link Rule} has not
-     *         been created from a template, or has been successfully resolved by the {@link RuleRegistry}.
+     *         been created from a template.
      */
     @Nullable
     String getTemplateUID();
@@ -167,6 +166,20 @@ public interface Rule extends Identifiable<String> {
         }
         return null;
     }
+
+    /**
+     * The "magic key" used for the source code string itself when storing {@link Rule}'s source code in its
+     * {@link Configuration}. A {@link Rule} can only have a source code if it is created by a script. The payload
+     * is a string containing the whole source code.
+     */
+    static String SOURCE = "source";
+
+    /**
+     * The "magic key" used for the source code type when storing {@link Rule}'s source code in its
+     * {@link Configuration}. A {@link Rule} can only have a source code if it is created by a script. The payload
+     * is a string containing OH's "quasi MIME-type" for the scripting language of the source code.
+     */
+    static String SOURCE_TYPE = "sourceType";
 
     /**
      * This enum represent the different states a rule can have in respect to rule templates.

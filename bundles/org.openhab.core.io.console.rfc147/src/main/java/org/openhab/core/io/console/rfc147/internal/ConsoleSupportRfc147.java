@@ -73,11 +73,21 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
     private final Map<ConsoleCommandExtension, @Nullable ServiceRegistration<?>> commands = Collections
             .synchronizedMap(new HashMap<>());
 
+    /**
+     * Constructs a new RFC 147 console support instance.
+     * Initializes the commands map and registers the built-in help command.
+     */
     public ConsoleSupportRfc147() {
         // Add our custom help console command extensions.
         commands.put(helpCommand, null);
     }
 
+    /**
+     * Activates this OSGi component.
+     * Registers all pending console command extensions as OSGi services and activates the help command.
+     *
+     * @param ctx the component context provided by OSGi
+     */
     @Activate
     public void activate(ComponentContext ctx) {
         // Save bundle context to register services.
@@ -97,6 +107,10 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
         helpCommand.setConsoleCommandsContainer(this);
     }
 
+    /**
+     * Deactivates this OSGi component.
+     * Unregisters all console command extensions and clears the help command reference.
+     */
     @Deactivate
     public void deactivate() {
         // If we get deactivated, remove from help command (so GC could do their work).
@@ -117,6 +131,13 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
         this.bundleContext = null;
     }
 
+    /**
+     * Adds a console command extension to the registry.
+     * This method is called dynamically by OSGi when a new console command extension is registered.
+     * The command is immediately registered as an OSGi service if the component is active.
+     *
+     * @param consoleCommandExtension the console command extension to add
+     */
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addConsoleCommandExtension(ConsoleCommandExtension consoleCommandExtension) {
         final ServiceRegistration<?> old;
@@ -127,6 +148,13 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
         }
     }
 
+    /**
+     * Removes a console command extension from the registry.
+     * This method is called dynamically by OSGi when a console command extension is unregistered.
+     * The command's OSGi service registration is also removed.
+     *
+     * @param consoleCommandExtension the console command extension to remove
+     */
     public void removeConsoleCommandExtension(ConsoleCommandExtension consoleCommandExtension) {
         final ServiceRegistration<?> old;
 
@@ -136,6 +164,11 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
         }
     }
 
+    /**
+     * Creates an empty properties dictionary for OSGi service registration.
+     *
+     * @return an empty dictionary that can be used to store service properties
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Dictionary<String, Object> createProperties() {
         return (Dictionary) new Properties();

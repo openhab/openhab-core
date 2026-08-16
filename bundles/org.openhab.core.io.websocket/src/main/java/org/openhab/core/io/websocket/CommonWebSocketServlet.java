@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.ws.rs.core.SecurityContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -137,7 +138,10 @@ public class CommonWebSocketServlet extends WebSocketServlet {
                 }
             }
 
-            if (accessToken != null ? isAuthorizedRequest(accessToken) : isAuthorizedRequest(servletUpgradeRequest)) {
+            SecurityContext securityContext = accessToken != null ? getSecurityContext(accessToken)
+                    : getSecurityContext(servletUpgradeRequest);
+
+            if (isAuthorizedRequest(securityContext)) {
                 String requestPath = servletUpgradeRequest.getRequestURI().getPath();
                 String pathPrefix = SERVLET_PATH + "/";
                 boolean useDefaultAdapter = requestPath.equals(pathPrefix) || !requestPath.startsWith(pathPrefix);
@@ -157,7 +161,7 @@ public class CommonWebSocketServlet extends WebSocketServlet {
                     }
                 }
                 logger.debug("New connection handled by {}", wsAdapter.getId());
-                return wsAdapter.createWebSocket(servletUpgradeRequest, servletUpgradeResponse);
+                return wsAdapter.createWebSocket(servletUpgradeRequest, servletUpgradeResponse, securityContext);
             } else {
                 logger.warn("Unauthenticated request to create a websocket from {}.",
                         servletUpgradeRequest.getRemoteAddress());
@@ -165,26 +169,26 @@ public class CommonWebSocketServlet extends WebSocketServlet {
             return null;
         }
 
-        private boolean isAuthorizedRequest(String bearerToken) {
+        private boolean isAuthorizedRequest(@Nullable SecurityContext securityContext) {
+            return securityContext != null
+                    && (securityContext.isUserInRole(Role.USER) || securityContext.isUserInRole(Role.ADMIN));
+        }
+
+        private @Nullable SecurityContext getSecurityContext(String bearerToken) {
             try {
-                var securityContext = authFilter.getSecurityContext(bearerToken);
-                return securityContext != null
-                        && (securityContext.isUserInRole(Role.USER) || securityContext.isUserInRole(Role.ADMIN));
+                return authFilter.getSecurityContext(bearerToken);
             } catch (AuthenticationException e) {
                 logger.warn("Error handling WebSocket authorization", e);
-                return false;
+                return null;
             }
         }
 
-        private boolean isAuthorizedRequest(ServletUpgradeRequest servletUpgradeRequest) {
+        private @Nullable SecurityContext getSecurityContext(ServletUpgradeRequest servletUpgradeRequest) {
             try {
-                var securityContext = authFilter.getSecurityContext(servletUpgradeRequest.getHttpServletRequest(),
-                        true);
-                return securityContext != null
-                        && (securityContext.isUserInRole(Role.USER) || securityContext.isUserInRole(Role.ADMIN));
+                return authFilter.getSecurityContext(servletUpgradeRequest.getHttpServletRequest(), true);
             } catch (AuthenticationException | IOException e) {
                 logger.warn("Error handling WebSocket authorization", e);
-                return false;
+                return null;
             }
         }
     }

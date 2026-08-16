@@ -63,6 +63,7 @@ import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
+import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.TypeParser;
 import org.osgi.framework.ServiceReference;
@@ -88,9 +89,11 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         when(startLevelService.getStartLevel()).thenReturn(100);
         registerService(startLevelService, StartLevelService.class.getName());
         EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
+        ThingRegistry thingRegistry = Objects.requireNonNull(getService(ThingRegistry.class));
         ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
-                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+                eventPublisher, thingRegistry, itemRegistry, mock(TimeZoneProvider.class),
+                mock(StartLevelService.class));
         mock(CoreModuleHandlerFactory.class);
         registerService(coreModuleHandlerFactory);
 

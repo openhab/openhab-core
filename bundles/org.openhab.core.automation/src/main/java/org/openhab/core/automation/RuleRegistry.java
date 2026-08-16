@@ -63,8 +63,8 @@ public interface RuleRegistry extends Registry<Rule, String> {
      *
      * @param rule a {@link Rule} instance which have to be added into the {@link RuleRegistry}.
      * @return a copy of the added {@link Rule}
-     * @throws IllegalArgumentException when a rule with the same UID already exists or some of the conditions or
-     *             actions has wrong format of input reference.
+     * @throws IllegalArgumentException if the rule UID is invalid, a rule with the same UID already exists, or some
+     *             of the conditions or actions has an invalid input reference.
      * @throws IllegalStateException when the RuleManagedProvider is unavailable.
      */
     @Override

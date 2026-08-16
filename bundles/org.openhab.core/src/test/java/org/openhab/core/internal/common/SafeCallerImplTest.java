@@ -81,8 +81,8 @@ public class SafeCallerImplTest extends JavaTest {
     private @NonNullByDefault({}) QueueingThreadPoolExecutor scheduler;
     private @NonNullByDefault({}) TestInfo testInfo;
 
-    private @NonNullByDefault({}) @Mock Runnable timeoutHandlerMock;
-    private @NonNullByDefault({}) @Mock Consumer<Throwable> errorHandlerMock;
+    private @Mock @NonNullByDefault({}) Runnable timeoutHandlerMock;
+    private @Mock @NonNullByDefault({}) Consumer<Throwable> errorHandlerMock;
 
     @FunctionalInterface
     public interface ITarget {

@@ -24,6 +24,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.core.SecurityContext;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
@@ -98,8 +100,8 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     }
 
     @Override
-    public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
-            ServletUpgradeResponse servletUpgradeResponse) {
+    public @Nullable Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
+            ServletUpgradeResponse servletUpgradeResponse, SecurityContext securityContext) {
         logger.debug("creating connection");
         return new PCMWebSocketConnection(this, executor);
     }

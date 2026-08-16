@@ -13,7 +13,10 @@
 package org.openhab.core.model.script.actions;
 
 import org.openhab.core.model.script.internal.engine.action.ThingActionService;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingActions;
 
 /**
@@ -44,5 +47,31 @@ public class Things {
      */
     public static ThingActions getActions(String scope, String thingUid) {
         return ThingActionService.getActions(scope, thingUid);
+    }
+
+    /**
+     * Gets the actions instance of a certain scope for a given {@link Thing}.
+     *
+     * @param thing the {@link Thing}.
+     * @param scope the action scope.
+     *
+     * @return The {@link ThingActions} instance or {@code null}.
+     */
+    public static ThingActions getActions(Thing thing, String scope) {
+        return ThingActionService.getActions(thing, scope);
+    }
+
+    /**
+     * Get a {@link Thing} from the {@link ThingRegistry}.
+     *
+     * @param registry the {@link ThingRegistry}.
+     * @param thingUid the Thing UID string.
+     * @return The {@link Thing} instance of {@code null}.
+     */
+    public static Thing get(ThingRegistry registry, String thingUid) {
+        if (registry == null || thingUid == null) {
+            return null;
+        }
+        return registry.get(new ThingUID(thingUid));
     }
 }

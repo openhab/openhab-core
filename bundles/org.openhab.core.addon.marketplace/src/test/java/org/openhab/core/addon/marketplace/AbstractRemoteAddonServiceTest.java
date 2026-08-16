@@ -128,7 +128,7 @@ public class AbstractRemoteAddonServiceTest {
     }
 
     @Test
-    public void testInstalledAddonIsStillPresentAfterRemoteIsDisabledOrMissing() {
+    public void testInstalledAddonIsStillPresentAfterRemoteIsDisabledOrMissingAfterRefresh() {
         addonService.setInstalled(TEST_ADDON);
         addonService.addToStorage(TEST_ADDON);
 
@@ -138,6 +138,9 @@ public class AbstractRemoteAddonServiceTest {
 
         // disable remote repo
         properties.put(CONFIG_REMOTE_ENABLED, false);
+
+        // force refresh after changing settings
+        addonService.refreshSource();
 
         // check only the installed addon is present
         addons = addonService.getAddons(null);

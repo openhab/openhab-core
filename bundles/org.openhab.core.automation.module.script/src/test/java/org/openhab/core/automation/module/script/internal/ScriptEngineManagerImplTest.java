@@ -16,8 +16,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 import static org.openhab.core.automation.module.script.ScriptEngineFactory.CONTEXT_KEY_DEPENDENCY_LISTENER;
 
 import java.io.ByteArrayInputStream;
@@ -26,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.script.Invocable;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
@@ -102,5 +105,29 @@ public class ScriptEngineManagerImplTest {
         // verify tracking is stopped when script engine is removed
         scriptEngineManager.removeEngine(engineIdentifier);
         verify(scriptDependencyTrackerMock).removeTracking(eq(engineIdentifier));
+    }
+
+    @Test
+    public void testRemoveEngineContinuesRemovalOnRuntimeExceptionFromScriptUnloaded() throws Exception {
+        String engineIdentifier = "testIdentifier";
+
+        // Create a mock script engine that implements Invocable
+        ScriptEngine invocableEngine = mock(ScriptEngine.class, withSettings().extraInterfaces(Invocable.class));
+        when(invocableEngine.getFactory()).thenReturn(internalScriptEngineFactoryMock);
+        when(invocableEngine.getContext()).thenReturn(scriptContextMock);
+
+        // Configure the factory to return our invocableEngine
+        when(scriptEngineFactoryMock.createScriptEngine(SUPPORTED_SCRIPT_TYPE)).thenReturn(invocableEngine);
+
+        // Set up the mock to throw RuntimeException when scriptUnloaded is called
+        Invocable invocable = (Invocable) invocableEngine;
+        when(invocable.invokeFunction("scriptUnloaded")).thenThrow(new RuntimeException("Test Exception"));
+
+        scriptEngineManager.createScriptEngine(SUPPORTED_SCRIPT_TYPE, engineIdentifier);
+
+        // Remove engine and verify scriptExtensionManager.dispose is still called
+        scriptEngineManager.removeEngine(engineIdentifier);
+
+        verify(scriptExtensionManagerMock).dispose(eq(engineIdentifier));
     }
 }

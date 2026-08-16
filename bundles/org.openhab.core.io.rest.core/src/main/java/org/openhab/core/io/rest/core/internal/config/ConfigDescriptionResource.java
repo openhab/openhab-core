@@ -33,13 +33,13 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
-import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.core.config.EnrichedConfigDescriptionDTOMapper;
+import org.openhab.core.io.rest.core.config.dto.EnrichedConfigDescriptionDTO;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -96,7 +96,7 @@ public class ConfigDescriptionResource implements RESTResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getConfigDescriptions", summary = "Gets all available config descriptions.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigDescriptionDTO.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedConfigDescriptionDTO.class)))) })
     public Response getAll(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language, //
             @QueryParam("scheme") @Parameter(description = "scheme filter") @Nullable String scheme) {
@@ -111,7 +111,7 @@ public class ConfigDescriptionResource implements RESTResource {
     @Path("/{uri}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getConfigDescriptionByURI", summary = "Gets a config description by URI.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigDescriptionDTO.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedConfigDescriptionDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid URI syntax"),
             @ApiResponse(responseCode = "404", description = "Not found") })
     public Response getByURI(

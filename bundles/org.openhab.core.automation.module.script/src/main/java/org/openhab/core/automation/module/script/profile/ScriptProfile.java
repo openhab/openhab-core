@@ -14,6 +14,7 @@ package org.openhab.core.automation.module.script.profile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.script.ScriptException;
 
@@ -36,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link ScriptProfile} is generic profile for managing values with scripts
+ * The {@link ScriptProfile} is generic profile for managing values with scripts.
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -51,7 +52,14 @@ public class ScriptProfile implements TimeSeriesProfile {
     private final Logger logger = LoggerFactory.getLogger(ScriptProfile.class);
 
     private final ProfileCallback callback;
-    private final TransformationService transformationService;
+    /**
+     * A supplier providing access to the current OSGi service instance of the {@link TransformationService}.
+     *
+     * <p>
+     * A normal reference to {@link TransformationService} would point to the old, disposed instance of the
+     * {@link TransformationService} after its restart.
+     */
+    private final Supplier<@Nullable TransformationService> transformationServiceSupplier;
 
     private final List<Class<? extends State>> acceptedDataTypes;
     private final List<Class<? extends Command>> acceptedCommandTypes;
@@ -65,10 +73,10 @@ public class ScriptProfile implements TimeSeriesProfile {
     private final boolean isConfigured;
 
     public ScriptProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback, ProfileContext profileContext,
-            TransformationService transformationService) {
+            Supplier<@Nullable TransformationService> transformationServiceSupplier) {
         this.profileTypeUID = profileTypeUID;
         this.callback = callback;
-        this.transformationService = transformationService;
+        this.transformationServiceSupplier = transformationServiceSupplier;
 
         this.acceptedCommandTypes = profileContext.getAcceptedCommandTypes();
         this.acceptedDataTypes = profileContext.getAcceptedDataTypes();
@@ -181,6 +189,12 @@ public class ScriptProfile implements TimeSeriesProfile {
 
     private @Nullable String executeScript(String script, Type input) {
         if (!script.isBlank()) {
+            TransformationService transformationService = transformationServiceSupplier.get();
+            if (transformationService == null) {
+                logger.error("Failed to process script '{}' in link '{}': transformation service is not available.",
+                        script, callback.getItemChannelLink());
+                return null;
+            }
             try {
                 return transformationService.transform(script, input.toFullString());
             } catch (TransformationException e) {

@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Schema(name = "Page")
+@Schema(name = "SitemapPage")
 public class PageDTO {
 
     public String id;

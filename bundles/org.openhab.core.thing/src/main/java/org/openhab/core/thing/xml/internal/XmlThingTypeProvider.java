@@ -21,9 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
-import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.core.xml.AbstractXmlBasedProvider;
-import org.openhab.core.config.core.xml.AbstractXmlConfigDescriptionProvider;
 import org.openhab.core.config.core.xml.osgi.XmlDocumentBundleTracker;
 import org.openhab.core.config.core.xml.osgi.XmlDocumentProvider;
 import org.openhab.core.config.core.xml.osgi.XmlDocumentProviderFactory;
@@ -33,8 +31,6 @@ import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.UID;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.i18n.ThingTypeI18nLocalizationService;
-import org.openhab.core.thing.type.ChannelGroupTypeProvider;
-import org.openhab.core.thing.type.ChannelTypeProvider;
 import org.openhab.core.thing.type.ThingType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -66,7 +62,7 @@ public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingTyp
     private final ThingTypeI18nLocalizationService thingTypeI18nLocalizationService;
     private final XmlChannelTypeProvider channelTypeProvider;
     private final XmlChannelGroupTypeProvider channelGroupTypeProvider;
-    private final AbstractXmlConfigDescriptionProvider configDescriptionProvider;
+    private final ThingXmlConfigDescriptionProvider configDescriptionProvider;
     private @Nullable XmlDocumentBundleTracker<List<?>> thingTypeTracker;
     private final ReadyService readyService;
     private final ScheduledExecutorService scheduler = ThreadPoolManager
@@ -75,14 +71,14 @@ public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingTyp
 
     @Activate
     public XmlThingTypeProvider(
-            final @Reference(target = "(openhab.scope=core.xml.channelGroups)") ChannelGroupTypeProvider channelGroupTypeProvider,
-            final @Reference(target = "(openhab.scope=core.xml.channels)") ChannelTypeProvider channelTypeProvider,
-            final @Reference(target = "(openhab.scope=core.xml.thing)") ConfigDescriptionProvider configDescriptionProvider,
+            final @Reference(target = "(openhab.scope=core.xml.channelGroups)") XmlChannelGroupTypeProvider channelGroupTypeProvider,
+            final @Reference(target = "(openhab.scope=core.xml.channels)") XmlChannelTypeProvider channelTypeProvider,
+            final @Reference(target = "(openhab.scope=core.xml.thing)") ThingXmlConfigDescriptionProvider configDescriptionProvider,
             final @Reference ReadyService readyService,
             final @Reference ThingTypeI18nLocalizationService thingTypeI18nLocalizationService) {
-        this.channelGroupTypeProvider = (XmlChannelGroupTypeProvider) channelGroupTypeProvider;
-        this.channelTypeProvider = (XmlChannelTypeProvider) channelTypeProvider;
-        this.configDescriptionProvider = (AbstractXmlConfigDescriptionProvider) configDescriptionProvider;
+        this.channelGroupTypeProvider = channelGroupTypeProvider;
+        this.channelTypeProvider = channelTypeProvider;
+        this.configDescriptionProvider = configDescriptionProvider;
         this.readyService = readyService;
         this.thingTypeI18nLocalizationService = thingTypeI18nLocalizationService;
     }

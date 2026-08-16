@@ -14,6 +14,7 @@ package org.openhab.core.config.core;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -104,6 +105,118 @@ public class ConfigParserTest {
     public void valueAsDefaultTest() {
         Object result = ConfigParser.valueAsOrElse(null, String.class, "foo");
         Assertions.assertEquals("foo", result);
+    }
+
+    @Test
+    public void configurationAsRecordWithMissingFieldsTest() {
+        Map<String, @Nullable Object> properties = Map.of("first", "one");
+
+        TestRecord result = ConfigParser.configurationAs(properties, TestRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("one", result.first());
+        Assertions.assertNull(result.second());
+        Assertions.assertNull(result.third());
+    }
+
+    @Test
+    public void configurationAsRecordWithAllFieldsOutOfOrderTest() {
+        Map<String, @Nullable Object> properties = Map.of("third", "three", "second", "two", "first", "one");
+
+        TestRecord result = ConfigParser.configurationAs(properties, TestRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("one", result.first());
+        Assertions.assertEquals("two", result.second());
+        Assertions.assertEquals("three", result.third());
+    }
+
+    /**
+     * Note: This test does not guarantee failure without proper constructor resolution,
+     * as JVM constructor ordering is unspecified but often stable in practice.
+     * The implementation must explicitly resolve the canonical constructor.
+     */
+    @Test
+    public void configurationAsRecordUsesCanonicalConstructorTest() {
+        Map<String, @Nullable Object> properties = Map.of("a", "a", "b", "b");
+
+        TestCustomConstructorRecord result = ConfigParser.configurationAs(properties,
+                TestCustomConstructorRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("a", result.a());
+        Assertions.assertEquals("b", result.b());
+    }
+
+    @Test
+    public void configurationAsRecordWithCollectionConversionTest() {
+        Map<String, @Nullable Object> properties = Map.of("listField", List.of("1", "2", "3"), "setField",
+                List.of("4", "5", "6"));
+
+        TestCollectionRecord result = ConfigParser.configurationAs(properties, TestCollectionRecord.class);
+
+        Assertions.assertNotNull(result);
+
+        Assertions.assertEquals(List.of(1, 2, 3), result.listField());
+        Assertions.assertEquals(Set.of(4, 5, 6), result.setField());
+    }
+
+    @Test
+    public void configurationAsRecordWithPrimitiveDefaultsTest() {
+        Map<String, @Nullable Object> properties = Map.of();
+
+        TestPrimitiveRecord result = ConfigParser.configurationAs(properties, TestPrimitiveRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.booleanField());
+        Assertions.assertEquals(0, result.byteField());
+        Assertions.assertEquals(0, result.shortField());
+        Assertions.assertEquals(0, result.intField());
+        Assertions.assertEquals(0L, result.longField());
+        Assertions.assertEquals(0f, result.floatField());
+        Assertions.assertEquals(0d, result.doubleField());
+        Assertions.assertEquals('\u0000', result.charField());
+    }
+
+    @Test
+    public void configurationAsRecordWithInvalidPrimitiveValueFallsBackToDefaultTest() {
+        Map<String, @Nullable Object> properties = Map.of("intField", "not-a-number");
+
+        TestPrimitiveRecord result = ConfigParser.configurationAs(properties, TestPrimitiveRecord.class);
+
+        // Expected: fallback to default
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(0, result.intField());
+    }
+
+    @Test
+    public void configurationAsRecordWithNestedListTest() {
+        Map<String, @Nullable Object> properties = Map.of("nested", List.of(List.of("a", "b"), List.of("c", "d")));
+
+        TestNestedListRecord result = ConfigParser.configurationAs(properties, TestNestedListRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertNull(result.nested(), "Nested lists should result in null when inner type is not supported");
+    }
+
+    private record TestRecord(String first, String second, String third) {
+    }
+
+    private record TestCustomConstructorRecord(String a, String b) {
+        @SuppressWarnings("unused")
+        public TestCustomConstructorRecord(String a) {
+            this(a, "not b");
+        }
+    }
+
+    private record TestCollectionRecord(List<Integer> listField, Set<Integer> setField) {
+    }
+
+    private record TestPrimitiveRecord(boolean booleanField, byte byteField, short shortField, int intField,
+            long longField, float floatField, double doubleField, char charField) {
+    }
+
+    private record TestNestedListRecord(List<List<String>> nested) {
     }
 
     private enum TestEnum {

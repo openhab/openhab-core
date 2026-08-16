@@ -1,0 +1,9 @@
+version: 1
+
+tags:
+  Tag_uid:
+    label: TagLabel
+    description: Some description
+    synonyms:
+      - syn1
+      - syn2
