@@ -320,15 +320,16 @@ public class YamlWidgetDTO {
                     }
                 } else if (r instanceof YamlRuleWithUniqueConditionDTO rule) {
                     ok &= rule.isValid(ruleErrors, ruleWarnings);
-                    if (rule.item == null && rule.operator == null && rule.argument == null) {
-                        addToList(errors,
-                                "invalid rule in \"%s\" field: \"argument\" field missing while mandatory in condition"
-                                        .formatted(parameterName));
-                        ok = false;
-                    }
-                    if (ignoreValue && rule.value != null) {
-                        addToList(warnings,
-                                "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
+                    if (ignoreValue) {
+                        if (rule.item == null && rule.operator == null && rule.argument == null) {
+                            addToList(errors,
+                                    "invalid rule in \"%s\" field: \"argument\" field missing while mandatory in condition"
+                                            .formatted(parameterName));
+                            ok = false;
+                        } else if (rule.value != null) {
+                            addToList(warnings, "rule in \"%s\" field: unexpected \"value\" field is ignored"
+                                    .formatted(parameterName));
+                        }
                     }
                 } else {
                     addToList(errors, "invalid type for rule in \"%s\" field".formatted(parameterName));
@@ -343,15 +344,17 @@ public class YamlWidgetDTO {
             }
         } else if (parameter instanceof YamlRuleWithUniqueConditionDTO rule) {
             ok &= rule.isValid(ruleErrors, ruleWarnings);
-            if (rule.item == null && rule.operator == null && rule.argument == null) {
-                addToList(errors,
-                        "invalid rule in \"%s\" field: \"argument\" field missing while mandatory in condition"
-                                .formatted(parameterName));
-                ok = false;
-            }
-            if (ignoreValue && rule.value != null) {
-                addToList(warnings,
-                        "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
+            if (ignoreValue) {
+                if (rule.item == null && rule.operator == null && rule.argument == null) {
+                    addToList(errors,
+                            "invalid rule in \"%s\" field: \"argument\" field missing while mandatory in condition"
+                                    .formatted(parameterName));
+                    ok = false;
+                }
+                if (rule.value != null) {
+                    addToList(warnings,
+                            "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
+                }
             }
         }
         ruleErrors.forEach(error -> {
