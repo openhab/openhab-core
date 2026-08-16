@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - Refactored to match ThingStatusInfo implementation
+ * @author Robert Delbrück - add duration property
  */
 @NonNullByDefault
 public class RuleStatusInfo {
@@ -28,6 +29,7 @@ public class RuleStatusInfo {
     private @NonNullByDefault({}) RuleStatus status;
     private @NonNullByDefault({}) RuleStatusDetail statusDetail;
     private @Nullable String description;
+    private @Nullable Long duration;
 
     /**
      * Default constructor for deserialization e.g. by Gson.
@@ -62,9 +64,24 @@ public class RuleStatusInfo {
      * @param description the description of the status
      */
     public RuleStatusInfo(RuleStatus status, RuleStatusDetail statusDetail, @Nullable String description) {
+        this(status, statusDetail, description, null);
+    }
+
+    /**
+     * Constructs a status info.
+     *
+     * @param status the status
+     * @param statusDetail the detail of the status
+     * @param description the description of the status
+     * @param duration the duration of the rule execution in milliseconds that led to this status, or {@code null}
+     *            if not applicable
+     */
+    public RuleStatusInfo(RuleStatus status, RuleStatusDetail statusDetail, @Nullable String description,
+            @Nullable Long duration) {
         this.status = status;
         this.statusDetail = statusDetail;
         this.description = description;
+        this.duration = duration;
     }
 
     /**
@@ -94,6 +111,15 @@ public class RuleStatusInfo {
         return description;
     }
 
+    /**
+     * Gets the duration of the rule execution that led to this status.
+     *
+     * @return the duration in milliseconds, or {@code null} if not applicable
+     */
+    public @Nullable Long getDuration() {
+        return duration;
+    }
+
     @Override
     public String toString() {
         boolean hasDescription = getDescription() != null && !getDescription().isEmpty();
@@ -106,6 +132,7 @@ public class RuleStatusInfo {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((duration == null) ? 0 : duration.hashCode());
         result = prime * result + ((status == null) ? 0 : status.hashCode());
         result = prime * result + ((statusDetail == null) ? 0 : statusDetail.hashCode());
         return result;
@@ -128,6 +155,13 @@ public class RuleStatusInfo {
                 return false;
             }
         } else if (!description.equals(other.description)) {
+            return false;
+        }
+        if (duration == null) {
+            if (other.duration != null) {
+                return false;
+            }
+        } else if (!duration.equals(other.duration)) {
             return false;
         }
         if (status != other.status) {
