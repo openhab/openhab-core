@@ -82,6 +82,15 @@ class SitemapValidator extends AbstractSitemapValidator {
     }
 
     @Check
+    def checkSitemapName(ModelSitemap sitemap) {
+        val name = sitemap.name
+        if (name.contains("-") || name.substring(0, 1).matches("[0-9]")) {
+            error(buildMsgWithLineNb("Sitemap name must not contain dash and must not start with a number", sitemap, null, null),
+                SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_SITEMAP__NAME))
+        }
+    }
+    
+    @Check
     def void checkAtLeastOneWidget(ModelSitemap sitemap) {
         if (sitemap.children === null || sitemap.children.size === 0) {
             warning(buildMsgWithLineNb("Sitemap should have at least one widget", sitemap, null, null),
@@ -116,6 +125,18 @@ class SitemapValidator extends AbstractSitemapValidator {
         }
     }
 
+    @Check
+    def checkWidgetItemName(ModelWidget w) {
+        val item = w.item
+        if (item === null) {
+            return
+        }
+        if (item.contains("-") || item.substring(0, 1).matches("[0-9]")) {
+            error(buildMsgWithLineNb(getWidgetType(w) + " widget item name must not contain dash and must not start with a number", w, null, null),
+                SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_WIDGET__ITEM))
+        }
+    }
+    
     @Check
     def void checkWidgetIcon(ModelWidget w) {
         val className = getWidgetType(w)

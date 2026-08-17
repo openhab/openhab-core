@@ -235,10 +235,10 @@ Icon returns ecore::EString:
 
 // Allow hyphen inside an icon segment
 IconSegment:
-    (ID '-')* ID;
+    INT | ID;
 
 Period:
-    (ID '-')? ID;
+    STRING | ('-'? ID);
 
 Command returns ecore::EString:
     Number | ID | STRING;
@@ -251,8 +251,8 @@ XState returns ecore::EString:
 
 @Override 
 terminal ID:
-    ('^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*) |
-    (('0'..'9')+ ('a'..'z' | 'A'..'Z' | '_') ('0'..'9' | 'a'..'z' | 'A'..'Z' | '_')*);
+    ('^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '-' | '0'..'9')*) |
+    (('0'..'9')+ ('a'..'z' | 'A'..'Z' | '_' | '-') ('a'..'z' | 'A'..'Z' | '_' | '-' | '0'..'9')*);
 
 terminal FLOAT returns ecore::EBigDecimal:
     INT '.' INT;
