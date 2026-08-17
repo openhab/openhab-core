@@ -40,7 +40,7 @@ ModelText:
     ('visibility=' visibility=ModelVisibilityRuleList))*;
 
 ModelGroup:
-    'Group' (('item=' item=GroupItemRef) | ('label=' label=(ID | STRING)) |
+    'Group' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
     ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -222,12 +222,9 @@ ModelVisibilityRule:
     conditions+=ModelCondition ('AND' conditions+=ModelCondition)*;
 
 ModelCondition:
-    (item=ID)? (condition=('==' | '>' | '<' | '>=' | '<=' | '!='))? (sign=('-' | '+'))? (state=XState);
+    (item=ItemRef)? (condition=('==' | '>' | '<' | '>=' | '<=' | '!='))? (sign=('-' | '+'))? (state=XState);
 
 ItemRef:
-    ID;
-
-GroupItemRef:
     ID;
 
 Icon returns ecore::EString:

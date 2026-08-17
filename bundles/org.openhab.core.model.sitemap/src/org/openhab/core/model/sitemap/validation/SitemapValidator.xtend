@@ -38,6 +38,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelWebview
 import org.openhab.core.model.sitemap.sitemap.ModelVideo
 import org.openhab.core.model.sitemap.sitemap.ModelWidget
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage
+import org.openhab.core.model.sitemap.sitemap.ModelCondition
 
 /**
  * Custom validation rules.
@@ -86,7 +87,7 @@ class SitemapValidator extends AbstractSitemapValidator {
         val name = sitemap.name
         if (name.contains("-") || name.substring(0, 1).matches("[0-9]")) {
             error(buildMsgWithLineNb("Sitemap name must not contain dash and must not start with a number", sitemap, null, null),
-                SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_SITEMAP__NAME))
+                SitemapPackage.Literals.MODEL_SITEMAP.getEStructuralFeature(SitemapPackage.MODEL_SITEMAP__NAME))
         }
     }
     
@@ -125,18 +126,34 @@ class SitemapValidator extends AbstractSitemapValidator {
         }
     }
 
+    private def boolean isInvalidItemName(String name) {
+        return !name.isEmpty && (name.contains("-") || name.substring(0, 1).matches("[0-9]"))
+    }
+
     @Check
     def checkWidgetItemName(ModelWidget w) {
         val item = w.item
         if (item === null) {
             return
         }
-        if (item.contains("-") || item.substring(0, 1).matches("[0-9]")) {
+        if (isInvalidItemName(item)) {
             error(buildMsgWithLineNb(getWidgetType(w) + " widget item name must not contain dash and must not start with a number", w, null, null),
                 SitemapPackage.Literals.MODEL_WIDGET.getEStructuralFeature(SitemapPackage.MODEL_WIDGET__ITEM))
         }
     }
     
+    @Check
+    def checkConditionItemName(ModelCondition c) {
+        val item = c.item
+        if (item === null || item.isEmpty) {
+            return
+        }
+        if (isInvalidItemName(item)) {
+            error(buildMsgWithLineNb("Item name must not contain dash and must not start with a number", c, null, null),
+                SitemapPackage.Literals.MODEL_CONDITION.getEStructuralFeature(SitemapPackage.MODEL_CONDITION__ITEM))
+        }
+    }
+
     @Check
     def void checkWidgetIcon(ModelWidget w) {
         val className = getWidgetType(w)

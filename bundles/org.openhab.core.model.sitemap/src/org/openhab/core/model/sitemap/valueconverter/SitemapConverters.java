@@ -24,7 +24,7 @@ import org.eclipse.xtext.nodemodel.INode;
 public class SitemapConverters extends DefaultTerminalConverters {
 
     private static final Pattern ID_PATTERN = Pattern
-            .compile("(?:[A-Za-z_\\-][A-Za-z_\\-0-9]*|[0-9]+[A-Za-z_\\-][A-Za-z_\\-0-9]*)");
+            .compile("(?:[A-Za-z_][A-Za-z_\\-0-9]*|[0-9]+[A-Za-z_\\-][A-Za-z_\\-0-9]*)");
     private static final Pattern INT_PATTERN = Pattern.compile("(?:[0-9]+)");
     private static final Pattern ICON_SEGMENT_PATTERN = Pattern.compile("(?:[A-Za-z_0-9][A-Za-z_0-9\\-]*)");
     private static final Pattern PERIOD_PATTERN = Pattern.compile("""
