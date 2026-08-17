@@ -330,6 +330,12 @@ public class YamlWidgetDTO {
                             addToList(warnings, "rule in \"%s\" field: unexpected \"value\" field is ignored"
                                     .formatted(parameterName));
                         }
+                    } else if (rule.item == null && rule.operator == null && rule.argument == null
+                            && rule.value == null) {
+                        addToList(errors,
+                                "invalid rule in \"%s\" field: \"argument\" field and \"value\" field should not both be empty"
+                                        .formatted(parameterName));
+                        ok = false;
                     }
                 } else {
                     addToList(errors, "invalid type for rule in \"%s\" field".formatted(parameterName));
@@ -355,6 +361,11 @@ public class YamlWidgetDTO {
                     addToList(warnings,
                             "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
                 }
+            } else if (rule.item == null && rule.operator == null && rule.argument == null && rule.value == null) {
+                addToList(errors,
+                        "invalid rule in \"%s\" field: \"argument\" field and \"value\" field should not both be empty"
+                                .formatted(parameterName));
+                ok = false;
             }
         }
         ruleErrors.forEach(error -> {
