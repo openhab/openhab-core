@@ -24,11 +24,13 @@ import org.eclipse.xtext.nodemodel.INode;
 public class SitemapConverters extends DefaultTerminalConverters {
 
     private static final Pattern ID_PATTERN = Pattern
-            .compile("(?:[A-Za-z_][A-Za-z_0-9]*|[0-9]+[A-Za-z_][A-Za-z_0-9]*)");
-    // allow for ^ prefix when parsing DSL to escape reserved names
-    private static final Pattern ID_EXT_PATTERN = Pattern
-            .compile("(?:\\^?[A-Za-z_][A-Za-z_0-9]*|[0-9]+[A-Za-z_][A-Za-z_0-9]*)");
-    private static final Pattern INT_PATTERN = Pattern.compile("[0-9]+");
+            .compile("(?:[A-Za-z_\\-][A-Za-z_\\-0-9]*|[0-9]+[A-Za-z_\\-][A-Za-z_\\-0-9]*)");
+    private static final Pattern INT_PATTERN = Pattern.compile("(?:[0-9]+)");
+    private static final Pattern ICON_SEGMENT_PATTERN = Pattern.compile("(?:[A-Za-z_0-9][A-Za-z_0-9\\-]*)");
+    private static final Pattern PERIOD_PATTERN = Pattern.compile("""
+            (?:(P(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(\\d+H)?(\\d+M)?(\\d+S)?)?|\\d*[YMWDh])-)?\
+            -?((P(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(\\d+H)?(\\d+M)?(\\d+S)?)?|\\d*[YMWDh])?)\
+            """);
 
     @ValueConverter(rule = "Icon")
     public IValueConverter<String> Icon() {
@@ -60,17 +62,13 @@ public class SitemapConverters extends DefaultTerminalConverters {
                                 ? segment.substring(0, lastDotIndex)
                                 : segment;
                     }
-                    String[] parts = segment.split("-", -1);
-                    for (int j = 0; j < parts.length; j++) {
-                        if (j != 0) {
-                            sb.append("-");
-                        }
-                        if (!ID_EXT_PATTERN.matcher(parts[j]).matches()) {
-                            throw new ValueConverterException(
-                                    "Icon name segment '" + segments[i] + "' is not a valid identifier", node, null);
-                        }
-                        sb.append(ID().toValue(parts[j], node));
+                    // allow for ^ prefix when parsing DSL to escape reserved names
+                    segment = segment.startsWith("^") ? segment.substring(1) : segment;
+                    if (!ICON_SEGMENT_PATTERN.matcher(segment).matches()) {
+                        throw new ValueConverterException(
+                                "Icon name segment '" + segment + "' is not a valid identifier", node, null);
                     }
+                    sb.append(segment);
                 }
                 return sb.toString();
             }
@@ -86,16 +84,10 @@ public class SitemapConverters extends DefaultTerminalConverters {
                     if (i != 0) {
                         sb.append(":");
                     }
-                    String[] parts = segments[i].split("-", -1);
-                    for (int j = 0; j < parts.length; j++) {
-                        if (j != 0) {
-                            sb.append("-");
-                        }
-                        if (!ID_PATTERN.matcher(parts[j]).matches()) {
-                            return STRING().toString(value);
-                        }
-                        sb.append(ID().toString(parts[j]));
+                    if (!ICON_SEGMENT_PATTERN.matcher(segments[i]).matches()) {
+                        return STRING().toString(value);
                     }
+                    sb.append(ID().toString(segments[i]));
                 }
                 return sb.toString();
             }
@@ -112,7 +104,9 @@ public class SitemapConverters extends DefaultTerminalConverters {
                         || (string.startsWith("\"") && string.endsWith("\""))) {
                     return STRING().toValue(string, node);
                 }
-                if (ID_EXT_PATTERN.matcher(string).matches()) {
+                // allow for ^ prefix when parsing DSL to escape reserved names
+                String trimmedString = string.startsWith("^") ? string.substring(1) : string;
+                if (ID_PATTERN.matcher(trimmedString).matches()) {
                     return ID().toValue(string, node);
                 }
                 // Don't interpret each part as INT() to preserve leading zeros, but validate that they are numbers
@@ -162,6 +156,43 @@ public class SitemapConverters extends DefaultTerminalConverters {
             @Override
             protected String internalToString(String value) throws ValueConverterException {
                 if (ID_PATTERN.matcher(value).matches()) {
+                    return ID().toString(value);
+                } else {
+                    return STRING().toString(value);
+                }
+            }
+        };
+    }
+
+    @ValueConverter(rule = "Period")
+    public IValueConverter<String> Period() {
+        return new AbstractNullSafeConverter<>() {
+            @Override
+            protected String internalToValue(String string, INode node) throws ValueConverterException {
+                boolean isQuoted = (string.startsWith("'") && string.endsWith("'"))
+                        || (string.startsWith("\"") && string.endsWith("\""));
+                boolean startsWithDash = false;
+                String trimmedString = isQuoted ? STRING().toValue(string, node) : string;
+                if (trimmedString.startsWith("-")) {
+                    startsWithDash = true;
+                    trimmedString = trimmedString.substring(1);
+                }
+                // allow for ^ prefix when parsing DSL to escape reserved names
+                trimmedString = trimmedString.startsWith("^") ? trimmedString.substring(1) : trimmedString;
+                if (!PERIOD_PATTERN.matcher(trimmedString).matches()) {
+                    throw new ValueConverterException("Period value '" + trimmedString
+                            + "' is not a valid period format, should be ISO 8601 'PnYnMnDTnHnMnS-PnYnMnDTnHnMnS'",
+                            node, null);
+                }
+                if (isQuoted) {
+                    return STRING().toValue(string, node);
+                }
+                return (startsWithDash ? "-" : "") + trimmedString;
+            }
+
+            @Override
+            protected String internalToString(String value) throws ValueConverterException {
+                if (PERIOD_PATTERN.matcher(value).matches()) {
                     return ID().toString(value);
                 } else {
                     return STRING().toString(value);
