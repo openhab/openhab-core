@@ -241,7 +241,8 @@ public class HttpUtil {
         }
 
         // add content if a valid method is given ...
-        if (content != null && (HttpMethod.POST.equals(method) || HttpMethod.PUT.equals(method))) {
+        if (content != null && (HttpMethod.POST.equals(method) || HttpMethod.PUT.equals(method)
+                || HttpMethod.PATCH.equals(method))) {
             // Close this outmost stream again after use!
             try (final InputStreamContentProvider inputStreamContentProvider = new InputStreamContentProvider(
                     content)) {
@@ -341,12 +342,12 @@ public class HttpUtil {
      *
      * @param httpMethodString the name of the {@link HttpMethod} to create
      * @throws IllegalArgumentException if <code>httpMethod</code> is none of <code>GET</code>, <code>PUT</code>,
-     *             <code>POST</POST> or <code>DELETE</code>
+     *             <code>POST</code>, <code>PATCH</code>, or <code>DELETE</code>
      */
     public static HttpMethod createHttpMethod(String httpMethodString) {
         // @formatter:off
         return Optional.ofNullable(HttpMethod.fromString(httpMethodString))
-                .filter(m -> m == GET || m == POST || m == PUT || m == DELETE)
+                .filter(m -> m == GET || m == POST || m == PUT || m == PATCH || m == DELETE)
                 .orElseThrow(() -> new IllegalArgumentException("Given HTTP Method '" + httpMethodString + "' is unknown"));
         // @formatter:on
     }
