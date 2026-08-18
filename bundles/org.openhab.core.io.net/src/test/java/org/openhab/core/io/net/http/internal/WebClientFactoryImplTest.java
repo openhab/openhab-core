@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -36,6 +37,7 @@ import javax.net.ssl.SSLHandshakeException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,12 +70,26 @@ public class WebClientFactoryImplTest {
 
     @AfterEach
     public void tearDown() throws InterruptedException {
-        // Sometimes a java.nio.channels.ClosedSelectorException occurs when the commonWebSocketClient
-        // is stopped while its threads are still starting. This would cause webClientFactory.deactivate()
-        // to block forever so continue if it has not completed after 2 seconds.
-        Thread deactivateThread = new Thread(() -> webClientFactory.deactivate());
+        // Regression check for the former shutdown hang: stopping the common HTTP client used to
+        // tear down the shared thread pool underneath the common WebSocketClient, whose selector
+        // then died with a ClosedSelectorException and deactivate() blocked forever.
+        // Deactivation must always complete.
+        deactivateWithTimeout();
+    }
+
+    private void deactivateWithTimeout() throws InterruptedException {
+        Thread deactivateThread = new Thread(() -> webClientFactory.deactivate(), "webClientFactory-deactivate");
+        deactivateThread.setDaemon(true);
         deactivateThread.start();
-        deactivateThread.join(2000);
+        deactivateThread.join(10_000);
+
+        // Capture the verdict before interrupting: the interrupt is cleanup, so an interrupt that
+        // happens to unblock the deactivation must not turn an observed timeout into a pass.
+        boolean timedOut = deactivateThread.isAlive();
+        if (timedOut) {
+            deactivateThread.interrupt();
+        }
+        assertThat("deactivate() did not complete", timedOut, is(false));
     }
 
     @Test
@@ -83,6 +99,26 @@ public class WebClientFactoryImplTest {
 
         assertThat(httpClient, is(notNullValue()));
         assertThat(webSocketClient, is(notNullValue()));
+    }
+
+    @Test
+    public void testSharedThreadPoolIsUnmanagedAndStoppedByDeactivate() throws Exception {
+        HttpClient httpClient = webClientFactory.getCommonHttpClient();
+        WebSocketClient webSocketClient = webClientFactory.getCommonWebSocketClient();
+
+        Executor executor = httpClient.getExecutor();
+        assertThat(executor, is(instanceOf(QueuedThreadPool.class)));
+        QueuedThreadPool sharedPool = (QueuedThreadPool) executor;
+
+        // both clients use the same pool, but neither container manages its lifecycle
+        assertThat(webSocketClient.getHttpClient().getExecutor(), is(sameInstance(executor)));
+        assertThat(httpClient.isManaged(sharedPool), is(false));
+        assertThat(webSocketClient.getHttpClient().isManaged(sharedPool), is(false));
+        assertThat(sharedPool.isRunning(), is(true));
+
+        // deactivation stops the pool itself, after both clients
+        deactivateWithTimeout();
+        assertThat(sharedPool.isRunning(), is(false));
     }
 
     @Disabled("connecting to the outside world makes this test flaky")
