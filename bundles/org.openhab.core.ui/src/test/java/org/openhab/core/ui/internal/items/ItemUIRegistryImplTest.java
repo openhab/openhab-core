@@ -1880,6 +1880,72 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
+    public void nestedSitemapCycleAcrossMultipleLevelsIsDetected() throws ItemNotFoundException {
+        // Use a real SitemapFactoryImpl so parent/child relationships work as expected
+        SitemapFactoryImpl sitemapFactory = new SitemapFactoryImpl();
+
+        when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
+
+        doAnswer(invocation -> {
+            String type = invocation.getArgument(0);
+            return sitemapFactory.createWidget(type);
+        }).when(sitemapFactoryMock).createWidget(anyString());
+
+        // a -> b -> c -> b : cycle entirely below the root "a"
+        Sitemap sitemapA = sitemapFactory.createSitemap("a");
+        NestedSitemap nestedB = (NestedSitemap) sitemapFactory.createWidget(SitemapFactory.SITEMAP, sitemapA);
+        assertNotNull(nestedB);
+        nestedB.setName("b");
+        nestedB.setLabel("B");
+        sitemapA.setWidgets(new ArrayList<>(List.of(nestedB)));
+
+        Sitemap sitemapB = sitemapFactory.createSitemap("b");
+        NestedSitemap nestedC = (NestedSitemap) sitemapFactory.createWidget(SitemapFactory.SITEMAP, sitemapB);
+        assertNotNull(nestedC);
+        nestedC.setName("c");
+        nestedC.setLabel("C");
+        sitemapB.setWidgets(new ArrayList<>(List.of(nestedC)));
+
+        Sitemap sitemapC = sitemapFactory.createSitemap("c");
+        NestedSitemap nestedBackToB = (NestedSitemap) sitemapFactory.createWidget(SitemapFactory.SITEMAP, sitemapC);
+        assertNotNull(nestedBackToB);
+        nestedBackToB.setName("b");
+        nestedBackToB.setLabel("Back to B");
+        sitemapC.setWidgets(new ArrayList<>(List.of(nestedBackToB)));
+
+        when(sitemapRegistryMock.get("a")).thenReturn(sitemapA);
+        when(sitemapRegistryMock.get("b")).thenReturn(sitemapB);
+        when(sitemapRegistryMock.get("c")).thenReturn(sitemapC);
+
+        List<Widget> aChildren = uiRegistry.getChildren(sitemapA);
+        assertThat(aChildren, hasSize(1));
+        Widget resolvedB = aChildren.getFirst();
+        assertThat(resolvedB, is(instanceOf(Text.class)));
+        assertEquals("B", resolvedB.getLabel());
+
+        List<Widget> bChildren = uiRegistry.getChildren((Parent) resolvedB);
+        assertThat(bChildren, hasSize(1));
+        Widget resolvedC = bChildren.getFirst();
+        assertThat(resolvedC, is(instanceOf(Text.class)));
+        assertEquals("C", resolvedC.getLabel());
+
+        List<Widget> cChildren = uiRegistry.getChildren((Parent) resolvedC);
+        assertThat(cChildren, hasSize(1));
+        Widget resolvedBackToB = cChildren.getFirst();
+        assertThat(resolvedBackToB, is(instanceOf(Text.class)));
+        assertEquals("Back to B", resolvedBackToB.getLabel());
+
+        // It must resolve to the empty placeholder (no real recursive expansion of "b"), proving
+        // the cycle was caught rather than re-entering b -> c -> b -> ...
+        Text placeholder = (Text) resolvedBackToB;
+        assertThat(placeholder.getWidgets(), hasSize(1));
+        Widget widget = placeholder.getWidgets().getFirst();
+        assertThat(widget, is(instanceOf(Text.class)));
+        Text text = (Text) widget;
+        assertThat(text.getWidgets(), hasSize(0));
+    }
+
+    @Test
     public void testRemovingNestedSitemapRecreatesWidgetAndId() throws Exception {
         // Use a real SitemapFactoryImpl to create real widget instances for the target sitemap, so that parent/child
         // relationships work as expected

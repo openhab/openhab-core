@@ -167,10 +167,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<NestedSitemap, Map<String, Text>> nestedSitemapWidgetsCache = new ConcurrentHashMap<>();
     private final Map<NestedSitemap, Text> defaultNestedSitemapWidgetsCache = new ConcurrentHashMap<>();
+    private final Map<Text, String> nestedSitemapOrigin = new ConcurrentHashMap<>();
 
     private String groupMembersSorting = DEFAULT_SORTING;
 
-    private Object cacheLock = new Object(); // Make sure nested sitemap cache updates and removals are synchronized
+    private final Object cacheLock = new Object(); // Make sure nested sitemap cache updates and removals are
+                                                   // synchronized
 
     private static class WidgetLabelWithSource {
         public final String label;
@@ -200,6 +202,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
         defaultWidgets.clear();
         nestedSitemapWidgetsCache.clear();
         defaultNestedSitemapWidgetsCache.clear();
+        nestedSitemapOrigin.clear();
         sitemapRegistry.removeRegistryChangeListener(this);
     }
 
@@ -238,7 +241,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
             final String sitemapName = element.getName();
 
             // Seed: Texts that are themselves the cached resolution of the removed/updated sitemap
-            Set<Text> removedTexts = ConcurrentHashMap.newKeySet();
+            Set<Text> removedTexts = new HashSet<>();
             nestedSitemapWidgetsCache.values().forEach(innerMap -> {
                 Text t = innerMap.get(sitemapName);
                 if (t != null) {
@@ -294,6 +297,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
             } while (changed);
 
             nestedSitemapWidgetsCache.entrySet().removeIf(e -> e.getValue().isEmpty());
+            removedTexts.forEach(nestedSitemapOrigin::remove);
         }
     }
 
@@ -956,20 +960,31 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                     }
                 }
             }
-            // Avoid linking back to the root sitemap to prevent loops
-            if (sitemapName != null) {
-                Parent parent = nestedSitemap.getParent();
-                while (parent instanceof LinkableWidget linkableParent) {
-                    parent = linkableParent.getParent();
-                }
-                if (parent instanceof Sitemap parentSitemap && parentSitemap.getName().equals(sitemapName)) {
-                    logger.warn(
-                            "Nested sitemap widget with sitemap name '{}' links to the root sitemap, which is not supported to avoid loops",
-                            sitemapName);
-                    sitemapName = null;
-                }
-            }
+            // Avoid linking back to a parent sitemap to prevent loops
             synchronized (cacheLock) {
+                if (sitemapName != null) {
+                    List<String> visitedSitemapNames = new ArrayList<>();
+                    Parent parent = nestedSitemap.getParent();
+                    while (parent instanceof LinkableWidget linkableParent) {
+                        if (linkableParent instanceof Text text) {
+                            String origin = nestedSitemapOrigin.get(text);
+                            if (origin != null) {
+                                visitedSitemapNames.add(origin);
+                            }
+                        }
+                        parent = linkableParent.getParent();
+                    }
+                    if (parent instanceof Sitemap rootSitemap) {
+                        visitedSitemapNames.add(rootSitemap.getName());
+                    }
+                    if (visitedSitemapNames.contains(sitemapName)) {
+                        visitedSitemapNames.add(sitemapName);
+                        logger.warn(
+                                "Nested sitemap widget with sitemap name '{}' would create a cycle {}, which is not supported",
+                                sitemapName, visitedSitemapNames);
+                        sitemapName = null;
+                    }
+                }
                 Sitemap sitemap = sitemapName != null ? sitemapRegistry.get(sitemapName) : null;
                 if (sitemap != null && sitemapName != null) {
                     Map<String, Text> sitemapWidgets = nestedSitemapWidgetsCache.computeIfAbsent(nestedSitemap,
@@ -991,6 +1006,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                             text.setParent(parent);
                         }
                         text.setWidgets(copyWidgets(sitemap.getWidgets(), text));
+                        nestedSitemapOrigin.put(text, sn);
                         return text;
                     });
                 } else {
