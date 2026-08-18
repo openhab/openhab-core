@@ -60,6 +60,10 @@ public enum OnOffType implements PrimitiveType, State, Command {
         return super.toString();
     }
 
+    public OnOffType toggle() {
+        return this == ON ? OFF : ON;
+    }
+
     @Override
     public <T extends State> @Nullable T as(@Nullable Class<T> target) {
         if (target == DecimalType.class) {
