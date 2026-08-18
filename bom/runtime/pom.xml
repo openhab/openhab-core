@@ -19,8 +19,6 @@
     <californium.version>4.0.0-M2</californium.version>
     <!-- cxf can be updated independently of karaf, only used in karaf tests -->
     <cxf.version>3.6.10</cxf.version>
-    <jackson.annotations.version>2.21</jackson.annotations.version>
-    <jackson.version>2.21.4</jackson.version>
     <jetty.version>9.4.58.v20250814</jetty.version>
     <pax.logging.version>2.3.3</pax.logging.version>
     <pax.web.version>8.0.35</pax.web.version>
@@ -181,6 +179,13 @@
       <groupId>com.fasterxml.woodstox</groupId>
       <artifactId>woodstox-core</artifactId>
       <version>6.6.2</version>
+    </dependency>
+    <!-- pin stax2-api explicitly, otherwise woodstox-core's older transitive version wins
+         mediation over jackson-dataformat-xml's required ${jackson.version.dep.stax2-api} -->
+    <dependency>
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>stax2-api</artifactId>
+      <version>4.3.0</version>
     </dependency>
 
     <!-- JAX-RS 2.1 API with contract -->

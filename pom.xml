@@ -76,6 +76,8 @@
     <bouncycastle.version>1.85</bouncycastle.version>
     <commons.net.version>3.13.0</commons.net.version>
     <eea.version>2.4.0</eea.version>
+    <jackson.annotations.version>2.22</jackson.annotations.version>
+    <jackson.version>2.22.2</jackson.version>
     <karaf.compile.version>4.4.11</karaf.compile.version>
     <karaf.tooling.version>4.4.11</karaf.tooling.version>
     <sat.version>0.18.0</sat.version>
