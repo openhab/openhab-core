@@ -468,13 +468,10 @@ public class PersistenceResource implements RESTResource {
             return false;
         }
         // An entry carrying an exclude selector cannot be proven to cover anything, because appliesToItem()
-        // drops the entire entry for the excluded items. Neither can an entry carrying filters: coverage must be
-        // provable from the configuration alone, and a filter can veto every write at runtime (e.g. a
-        // PersistenceEqualsFilter whose values the item never takes).
+        // drops the entire entry for the excluded items.
         List<PersistenceItemConfiguration> storing = configs.stream().filter(other -> !other.equals(config))
                 .filter(PersistenceResource::hasStoreStrategy)
-                .filter(other -> other.items().stream().noneMatch(PersistenceResource::isExcludeSelector))
-                .filter(other -> other.filters().isEmpty()).toList();
+                .filter(other -> other.items().stream().noneMatch(PersistenceResource::isExcludeSelector)).toList();
         if (storing.stream()
                 .anyMatch(other -> other.items().stream().anyMatch(PersistenceAllConfig.class::isInstance))) {
             return true;
