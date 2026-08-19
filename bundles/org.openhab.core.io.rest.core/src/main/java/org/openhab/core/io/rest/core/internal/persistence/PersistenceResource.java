@@ -459,19 +459,25 @@ public class PersistenceResource implements RESTResource {
      */
     private static boolean isStoredByAnotherConfig(PersistenceItemConfiguration config,
             List<PersistenceItemConfiguration> configs) {
-        // An entry carrying an exclude selector cannot be proven to cover anything, because appliesToItem()
-        // drops the entire entry for the excluded items.
-        List<PersistenceItemConfiguration> storing = configs.stream().filter(other -> !other.equals(config))
-                .filter(PersistenceResource::hasStoreStrategy)
-                .filter(other -> other.items().stream().noneMatch(PersistenceResource::isExcludeSelector)).toList();
-        if (storing.stream()
-                .anyMatch(other -> other.items().stream().anyMatch(PersistenceAllConfig.class::isInstance))) {
-            return true;
-        }
+        // An entry that selects nothing positively (only excludes) covers no items, so it can never be stored by
+        // another entry. This must be checked before the all-items shortcut below, otherwise a '*' store entry
+        // would vacuously suppress the warning for such an entry.
         List<PersistenceConfig> selectors = config.items().stream().filter(selector -> !isExcludeSelector(selector))
                 .toList();
         if (selectors.isEmpty()) {
             return false;
+        }
+        // An entry carrying an exclude selector cannot be proven to cover anything, because appliesToItem()
+        // drops the entire entry for the excluded items. Neither can an entry carrying filters: coverage must be
+        // provable from the configuration alone, and a filter can veto every write at runtime (e.g. a
+        // PersistenceEqualsFilter whose values the item never takes).
+        List<PersistenceItemConfiguration> storing = configs.stream().filter(other -> !other.equals(config))
+                .filter(PersistenceResource::hasStoreStrategy)
+                .filter(other -> other.items().stream().noneMatch(PersistenceResource::isExcludeSelector))
+                .filter(other -> other.filters().isEmpty()).toList();
+        if (storing.stream()
+                .anyMatch(other -> other.items().stream().anyMatch(PersistenceAllConfig.class::isInstance))) {
+            return true;
         }
         // Coverage is additive too: a selector only has to be found in SOME storing entry, not all of them in
         // the same one, so "ItemA, ItemB" is covered by two entries storing ItemA and ItemB separately.

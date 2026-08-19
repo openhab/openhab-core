@@ -72,6 +72,7 @@ import org.openhab.core.persistence.config.PersistenceItemConfig;
 import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
+import org.openhab.core.persistence.filter.PersistenceEqualsFilter;
 import org.openhab.core.persistence.internal.PersistenceManagerImpl;
 import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
@@ -646,6 +647,39 @@ public class PersistenceResourceTest {
         PersistenceItemConfiguration storeItemA = itemConfiguration(List.of(PersistenceStrategy.Globals.CHANGE),
                 new PersistenceItemConfig("ItemA"));
         mockServiceConfiguration(PERSISTENCE_SERVICE_ID, restoreTwoItems, storeItemA);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(1L));
+    }
+
+    @Test
+    public void testHealthCoveredOnlyByFilteredEntryStillReported() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        // Coverage must be provable from the configuration alone. A filtered store entry cannot prove it: the
+        // filter can veto every single write at runtime, e.g. an equals filter whose values the item never takes.
+        PersistenceItemConfiguration everyChangeAllFiltered = new PersistenceItemConfiguration(
+                List.of(new PersistenceAllConfig()), List.of(PersistenceStrategy.Globals.CHANGE),
+                List.of(new PersistenceEqualsFilter("onlyOn", List.of("ON"), false)));
+        PersistenceItemConfiguration restoreOnlyGroup = itemConfiguration(List.of(PersistenceStrategy.Globals.RESTORE),
+                new PersistenceGroupConfig(RESTORE_ONLY_GROUP));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, everyChangeAllFiltered, restoreOnlyGroup);
+
+        List<PersistenceServiceProblem> problems = getPersistenceProblems();
+
+        assertThat(countNoStoreStrategyProblems(problems, PERSISTENCE_SERVICE_ID), is(1L));
+    }
+
+    @Test
+    public void testHealthExcludeOnlyEntryStillReportedDespiteAllStoreEntry() throws IOException {
+        when(persistenceServiceRegistryMock.getAll()).thenReturn(Set.of(pServiceMock));
+        // An entry that selects nothing positively covers no items; even an all-items store entry must not
+        // suppress its warning.
+        PersistenceItemConfiguration everyChangeAll = itemConfiguration(List.of(PersistenceStrategy.Globals.CHANGE),
+                new PersistenceAllConfig());
+        PersistenceItemConfiguration restoreExcludeOnly = itemConfiguration(
+                List.of(PersistenceStrategy.Globals.RESTORE), new PersistenceItemExcludeConfig("excludedItem"));
+        mockServiceConfiguration(PERSISTENCE_SERVICE_ID, everyChangeAll, restoreExcludeOnly);
 
         List<PersistenceServiceProblem> problems = getPersistenceProblems();
 
