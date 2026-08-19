@@ -178,10 +178,10 @@ public class YamlWidgetDTO {
                     .formatted(minValue.doubleValue(), maxValue.doubleValue()));
         }
 
-        ok &= isValidRule(errors, warnings, visibility, "visibility", true);
+        ok &= isValidRules(errors, warnings, visibility, "visibility", true);
         ok &= isValidField("confirmCmd", confirmCmd, errors, warnings); // Check if field is allowed for the widget type
         if (!(confirmCmd instanceof Boolean)) {
-            ok &= isValidRule(errors, warnings, confirmCmd, "confirmCmd", false); // Check if valid rule
+            ok &= isValidRules(errors, warnings, confirmCmd, "confirmCmd", false); // Check if valid rule
         }
 
         if (widgets != null) {
@@ -305,68 +305,64 @@ public class YamlWidgetDTO {
         return ok;
     }
 
-    private boolean isValidRule(@NonNull List<@NonNull String> errors, @NonNull List<@NonNull String> warnings,
+    private boolean isValidRules(@NonNull List<@NonNull String> errors, @NonNull List<@NonNull String> warnings,
             Object parameter, String parameterName, boolean ignoreValue) {
+        boolean ok = true;
+        if (parameter instanceof List<?> rules) {
+            for (Object r : rules) {
+                ok &= isValidRule(errors, warnings, r, parameterName, ignoreValue);
+            }
+        } else {
+            ok &= isValidRule(errors, warnings, parameter, parameterName, ignoreValue);
+        }
+        return ok;
+    }
+
+    private boolean isValidRule(List<@NonNull String> errors, List<@NonNull String> warnings, Object rule,
+            String parameterName, boolean ignoreValue) {
         boolean ok = true;
         List<String> ruleErrors = new ArrayList<>();
         List<String> ruleWarnings = new ArrayList<>();
-        if (parameter instanceof List<?> rules) {
-            for (Object r : rules) {
-                if (r instanceof YamlRuleWithAndConditionsDTO rule) {
-                    ok &= rule.isValid(ruleErrors, ruleWarnings);
-                    if (ignoreValue && rule.value != null) {
-                        addToList(warnings,
-                                "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
-                    }
-                } else if (r instanceof YamlRuleWithUniqueConditionDTO rule) {
-                    ok &= rule.isValid(ruleErrors, ruleWarnings);
-                    if (ignoreValue) {
-                        if (rule.item == null && rule.operator == null && rule.argument == null) {
-                            addToList(errors,
-                                    "invalid rule in \"%s\" field: \"argument\" field missing while mandatory in condition"
-                                            .formatted(parameterName));
-                            ok = false;
-                        } else if (rule.value != null) {
-                            addToList(warnings, "rule in \"%s\" field: unexpected \"value\" field is ignored"
-                                    .formatted(parameterName));
-                        }
-                    } else if (rule.item == null && rule.operator == null && rule.argument == null
-                            && rule.value == null) {
-                        addToList(errors,
-                                "invalid rule in \"%s\" field: \"argument\" field and \"value\" field should not both be empty"
-                                        .formatted(parameterName));
-                        ok = false;
-                    }
-                } else {
-                    addToList(errors, "invalid type for rule in \"%s\" field".formatted(parameterName));
-                    ok = false;
-                }
-            }
-        } else if (parameter instanceof YamlRuleWithAndConditionsDTO rule) {
-            ok &= rule.isValid(ruleErrors, ruleWarnings);
-            if (ignoreValue && rule.value != null) {
-                addToList(warnings,
-                        "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
-            }
-        } else if (parameter instanceof YamlRuleWithUniqueConditionDTO rule) {
-            ok &= rule.isValid(ruleErrors, ruleWarnings);
+        if (rule instanceof YamlRuleWithAndConditionsDTO andConditionRule) {
+            ok &= andConditionRule.isValid(ruleErrors, ruleWarnings);
             if (ignoreValue) {
-                if (rule.item == null && rule.operator == null && rule.argument == null) {
+                if (andConditionRule.and == null || andConditionRule.and.isEmpty()) {
+                    addToList(errors,
+                            "invalid rule in \"%s\" field: \"and\" empty, no conditions defined while mandatory in condition"
+                                    .formatted(parameterName));
+                    ok = false;
+                } else if (andConditionRule.value != null) {
+                    addToList(warnings,
+                            "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
+                }
+            } else if ((andConditionRule.and == null || andConditionRule.and.isEmpty())
+                    && andConditionRule.value == null) {
+                addToList(errors,
+                        "invalid rule in \"%s\" field: \"and\" field and \"value\" field should not both be empty"
+                                .formatted(parameterName));
+                ok = false;
+            }
+        } else if (rule instanceof YamlRuleWithUniqueConditionDTO uniqueCondtionRule) {
+            ok &= uniqueCondtionRule.isValid(ruleErrors, ruleWarnings);
+            if (ignoreValue) {
+                if (uniqueCondtionRule.argument == null) {
                     addToList(errors,
                             "invalid rule in \"%s\" field: \"argument\" field missing while mandatory in condition"
                                     .formatted(parameterName));
                     ok = false;
-                }
-                if (rule.value != null) {
+                } else if (uniqueCondtionRule.value != null) {
                     addToList(warnings,
                             "rule in \"%s\" field: unexpected \"value\" field is ignored".formatted(parameterName));
                 }
-            } else if (rule.item == null && rule.operator == null && rule.argument == null && rule.value == null) {
+            } else if (uniqueCondtionRule.argument == null && uniqueCondtionRule.value == null) {
                 addToList(errors,
                         "invalid rule in \"%s\" field: \"argument\" field and \"value\" field should not both be empty"
                                 .formatted(parameterName));
                 ok = false;
             }
+        } else {
+            addToList(errors, "invalid type for rule in \"%s\" field".formatted(parameterName));
+            ok = false;
         }
         ruleErrors.forEach(error -> {
             addToList(errors, "invalid rule in \"%s\" field: %s".formatted(parameterName, error));
