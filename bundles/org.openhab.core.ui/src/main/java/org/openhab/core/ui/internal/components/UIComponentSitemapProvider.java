@@ -423,8 +423,8 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         String strippedRule = null;
         int lastEqualsIndex = rule.lastIndexOf("=");
         String charBeforeEquals = lastEqualsIndex > 0 ? rule.substring(lastEqualsIndex - 1, lastEqualsIndex) : null;
-        if (!("=".equals(charBeforeEquals) && "!".equals(charBeforeEquals) && "<".equals(charBeforeEquals)
-                && ">".equals(charBeforeEquals))) {
+        if (!("=".equals(charBeforeEquals) || "!".equals(charBeforeEquals) || "<".equals(charBeforeEquals)
+                || ">".equals(charBeforeEquals))) {
             strippedRule = stripQuotes(rule.substring(lastEqualsIndex + 1).trim());
         }
         return strippedRule;
