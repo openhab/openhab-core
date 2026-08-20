@@ -214,7 +214,7 @@ public class PersistenceManagerTest {
 
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
 
-        verify(persistenceServiceMock).store(TEST_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
         verifyNoMoreInteractions(persistenceServiceMock);
     }
 
@@ -235,7 +235,7 @@ public class PersistenceManagerTest {
 
         manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
 
-        verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_GROUP_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
         verifyNoMoreInteractions(persistenceServiceMock);
     }
 
@@ -246,7 +246,7 @@ public class PersistenceManagerTest {
 
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
 
-        verify(persistenceServiceMock).store(TEST_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
         verifyNoMoreInteractions(persistenceServiceMock);
     }
 
@@ -270,9 +270,9 @@ public class PersistenceManagerTest {
         manager.stateUpdated(TEST_ITEM2, TEST_STATE);
         manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
 
-        verify(persistenceServiceMock).store(TEST_ITEM, null);
-        verify(persistenceServiceMock).store(TEST_ITEM2, null);
-        verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
+        verify(persistenceServiceMock).store(eq(TEST_ITEM2), any(ZonedDateTime.class), any(State.class), eq(null));
+        verify(persistenceServiceMock).store(eq(TEST_GROUP_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
 
         verifyNoMoreInteractions(persistenceServiceMock);
     }
@@ -297,8 +297,8 @@ public class PersistenceManagerTest {
         manager.stateUpdated(TEST_ITEM2, TEST_STATE);
         manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
 
-        verify(persistenceServiceMock).store(TEST_ITEM2, null);
-        verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_ITEM2), any(ZonedDateTime.class), any(State.class), eq(null));
+        verify(persistenceServiceMock).store(eq(TEST_GROUP_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
 
         verifyNoMoreInteractions(persistenceServiceMock);
     }
@@ -313,8 +313,8 @@ public class PersistenceManagerTest {
         manager.stateUpdated(TEST_ITEM2, TEST_STATE);
         manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
 
-        verify(persistenceServiceMock).store(TEST_ITEM2, null);
-        verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_ITEM2), any(ZonedDateTime.class), any(State.class), eq(null));
+        verify(persistenceServiceMock).store(eq(TEST_GROUP_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
 
         verifyNoMoreInteractions(persistenceServiceMock);
     }
@@ -331,8 +331,8 @@ public class PersistenceManagerTest {
         manager.stateUpdated(TEST_ITEM3, DecimalType.ZERO);
         manager.stateUpdated(TEST_GROUP_ITEM2, DecimalType.ZERO);
 
-        verify(persistenceServiceMock).store(TEST_ITEM2, null);
-        verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_ITEM2), any(ZonedDateTime.class), any(State.class), eq(null));
+        verify(persistenceServiceMock).store(eq(TEST_GROUP_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
 
         verifyNoMoreInteractions(persistenceServiceMock);
     }
@@ -345,7 +345,8 @@ public class PersistenceManagerTest {
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
 
-        verify(persistenceServiceMock, times(2)).store(TEST_ITEM, null);
+        verify(persistenceServiceMock, times(2)).store(eq(TEST_ITEM), any(ZonedDateTime.class), any(State.class),
+                eq(null));
 
         verifyNoMoreInteractions(persistenceServiceMock);
     }
@@ -366,7 +367,7 @@ public class PersistenceManagerTest {
 
         manager.stateChanged(TEST_ITEM, UnDefType.UNDEF, TEST_STATE);
 
-        verify(persistenceServiceMock).store(TEST_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
         verifyNoMoreInteractions(persistenceServiceMock);
     }
 
@@ -485,7 +486,7 @@ public class PersistenceManagerTest {
         assertThat(lastStateChange.toInstant(), is(firstEntry.timestamp()));
 
         // Check if other persistence services got updated
-        verify(persistenceServiceMock).store(TEST_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
         verify(persistenceServiceMock, atLeast(0)).getId();
         verifyNoMoreInteractions(persistenceServiceMock);
 
@@ -539,7 +540,7 @@ public class PersistenceManagerTest {
         manager.handleExternalPersistenceDataChange(queryablePersistenceServiceMock, TEST_ITEM);
         verify(queryablePersistenceServiceMock).persistedItem(eq(TEST_ITEM_NAME), any());
         assertEquals(TEST_STATE, TEST_ITEM.getState());
-        verify(persistenceServiceMock).store(TEST_ITEM, null);
+        verify(persistenceServiceMock).store(eq(TEST_ITEM), any(ZonedDateTime.class), any(State.class), eq(null));
     }
 
     @Test
@@ -568,9 +569,11 @@ public class PersistenceManagerTest {
         verify(cronSchedulerMock, times(2)).schedule(any(), any());
         verify(scheduledFutureMock, times(2)).cancel(true);
         // no filter - persist everything
-        verify(persistenceServiceMock, times(2)).store(TEST_ITEM3, null);
+        verify(persistenceServiceMock, times(2)).store(eq(TEST_ITEM3), any(ZonedDateTime.class), any(State.class),
+                eq(null));
         // filter - persist filtered value
-        verify(queryablePersistenceServiceMock, times(1)).store(TEST_ITEM3, null);
+        verify(queryablePersistenceServiceMock, times(1)).store(eq(TEST_ITEM3), any(ZonedDateTime.class),
+                any(State.class), eq(null));
     }
 
     @Test
@@ -600,7 +603,8 @@ public class PersistenceManagerTest {
         manager.stateUpdated(TEST_ITEM3, DecimalType.ZERO);
         manager.stateUpdated(TEST_ITEM3, DecimalType.ZERO);
 
-        verify(persistenceServiceMock, times(1)).store(TEST_ITEM3, null);
+        verify(persistenceServiceMock, times(1)).store(eq(TEST_ITEM3), any(ZonedDateTime.class), any(State.class),
+                eq(null));
 
         verifyNoMoreInteractions(persistenceServiceMock);
     }
