@@ -118,6 +118,7 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - use a managed rule
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field
  * @author Florian Hotze - add support for script condition/action compilation
+ * @author Robert Delbrück - add support for rule execution duration
  */
 @Component(immediate = true, service = { RuleManager.class }, configurationPid = RuleEngineImpl.SERVICE_PID)
 @NonNullByDefault
@@ -1126,6 +1127,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             // change state to RUNNING
             setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
         }
+        long startTime = System.nanoTime();
         try {
             clearContext(ruleUID);
 
@@ -1144,10 +1146,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             logger.error("Failed to execute rule '{}': {}", ruleUID, t.getMessage());
             logger.debug("", t);
         }
+        long duration = (System.nanoTime() - startTime) / 1_000_000;
         // change state to IDLE only if the rule has not been DISABLED.
         synchronized (this) {
             if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
-                setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
+                setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE, RuleStatusDetail.NONE, null, duration));
             }
         }
     }
@@ -1818,6 +1821,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 // change state to RUNNING
                 setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
             }
+            long startTime = System.nanoTime();
             try {
                 clearContext(ruleUID);
                 Map<String, @Nullable Object> context = this.context;
@@ -1833,9 +1837,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 logger.error("Failed to execute rule '{}': ", ruleUID, t);
             } finally {
                 // change state to IDLE only if the rule has not been DISABLED.
+                long duration = (System.nanoTime() - startTime) / 1_000_000;
                 synchronized (RuleEngineImpl.this) {
                     if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
-                        setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
+                        setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE, RuleStatusDetail.NONE, null, duration));
                     }
                 }
             }
