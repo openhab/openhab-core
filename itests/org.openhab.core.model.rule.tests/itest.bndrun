@@ -128,3 +128,4 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.22.2,2.22.3)',\
 	com.fasterxml.jackson.dataformat.jackson-dataformat-yaml;version='[2.22.2,2.22.3)',\
 	org.yaml.snakeyaml;version='[2.5.0,2.5.1)'
+
