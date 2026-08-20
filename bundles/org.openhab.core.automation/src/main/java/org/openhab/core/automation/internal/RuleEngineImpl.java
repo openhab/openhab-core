@@ -1127,7 +1127,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             // change state to RUNNING
             setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
         }
-        long startTime = System.currentTimeMillis();
+        long startTime = System.nanoTime();
         try {
             clearContext(ruleUID);
 
@@ -1146,7 +1146,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             logger.error("Failed to execute rule '{}': {}", ruleUID, t.getMessage());
             logger.debug("", t);
         }
-        long duration = System.currentTimeMillis() - startTime;
+        long duration = (System.nanoTime() - startTime) / 1_000_000;
         // change state to IDLE only if the rule has not been DISABLED.
         synchronized (this) {
             if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
@@ -1821,7 +1821,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 // change state to RUNNING
                 setStatus(ruleUID, new RuleStatusInfo(RuleStatus.RUNNING));
             }
-            long startTime = System.currentTimeMillis();
+            long startTime = System.nanoTime();
             try {
                 clearContext(ruleUID);
                 Map<String, @Nullable Object> context = this.context;
@@ -1837,7 +1837,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 logger.error("Failed to execute rule '{}': ", ruleUID, t);
             } finally {
                 // change state to IDLE only if the rule has not been DISABLED.
-                long duration = System.currentTimeMillis() - startTime;
+                long duration = (System.nanoTime() - startTime) / 1_000_000;
                 synchronized (RuleEngineImpl.this) {
                     if (getRuleStatus(ruleUID) == RuleStatus.RUNNING) {
                         setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE, RuleStatusDetail.NONE, null, duration));

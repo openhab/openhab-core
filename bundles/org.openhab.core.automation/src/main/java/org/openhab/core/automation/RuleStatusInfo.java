@@ -17,7 +17,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * This class is used to present status of a rule. The status consists of three parts:
- * The main status, a status detail and a string description.
+ * The main status, a status detail, a string description and the duration (in ms).
  *
  * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - Refactored to match ThingStatusInfo implementation
