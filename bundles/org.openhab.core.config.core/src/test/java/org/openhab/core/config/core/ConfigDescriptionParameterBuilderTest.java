@@ -55,6 +55,7 @@ public class ConfigDescriptionParameterBuilderTest {
         boolean advanced = false;
         boolean limitToOptions = true;
         Integer multipleLimit = Integer.valueOf(17);
+        boolean dynamic = true;
 
         //@formatter:off
         ConfigDescriptionParameter param = ConfigDescriptionParameterBuilder.create(name, type)
@@ -78,6 +79,7 @@ public class ConfigDescriptionParameterBuilderTest {
                 .withUnit(unit)
                 .withUnitLabel(unitLabel)
                 .withVerify(verify)
+                .withDynamic(dynamic)
                 .build();
         //@formatter:on
 
@@ -101,6 +103,7 @@ public class ConfigDescriptionParameterBuilderTest {
         assertTrue(param.isVerifyable());
         assertFalse(param.isAdvanced());
         assertTrue(param.getLimitToOptions());
+        assertTrue(param.isDynamic());
 
         param = ConfigDescriptionParameterBuilder.create(name, type).withUnitLabel(unitLabel).build();
         assertThat(param.getUnitLabel(), is(unitLabel));
@@ -130,6 +133,7 @@ public class ConfigDescriptionParameterBuilderTest {
                 .withMultipleLimit(null)
                 .withUnit(null)
                 .withUnitLabel(null)
+                .withDynamic(null)
                 .build();
         //@formatter:on
 
@@ -155,6 +159,7 @@ public class ConfigDescriptionParameterBuilderTest {
         assertFalse(param.isMultiple());
         assertFalse(param.isAdvanced());
         assertTrue(param.getLimitToOptions());
+        assertTrue(param.isDynamic());
 
         ConfigDescriptionParameter param2 = ConfigDescriptionParameterBuilder.create("Dummy", Type.BOOLEAN).build();
         assertFalse(param2.isRequired());
@@ -164,6 +169,7 @@ public class ConfigDescriptionParameterBuilderTest {
         assertTrue(param2.getLimitToOptions());
         assertTrue(param2.getFilterCriteria().isEmpty());
         assertTrue(param2.getOptions().isEmpty());
+        assertTrue(param.isDynamic());
     }
 
     @Test
