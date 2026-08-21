@@ -332,6 +332,9 @@ public class YamlWidgetDTO {
                 if (andConditionRule.value != null) {
                     addToList(ruleWarnings, "unexpected \"value\" field is ignored");
                 }
+            } else if (andConditionRule.and == null || andConditionRule.and.isEmpty()) {
+                addToList(ruleErrors, "\"and\" field missing while mandatory in rules");
+                ok = false;
             }
         } else if (rule instanceof YamlRuleWithUniqueConditionDTO uniqueConditionRule) {
             ok &= uniqueConditionRule.isValid(ruleErrors, ruleWarnings);
