@@ -90,6 +90,7 @@ public class SitemapResourceTest extends JavaTest {
     private static final String VALUE_COLOR_ITEM_NAME = "valueColorItemName";
     private static final String ICON_COLOR_ITEM_NAME = "iconColorItemName";
     private static final String ICON_ITEM_NAME = "iconItemName";
+    private static final String CONFIRM_CMD_ITEM_NAME = "confirmCmdItemName";
     private static final String WIDGET1_LABEL = "widget 1";
     private static final String WIDGET3_LABEL = "widget 3";
     private static final String GROUP_LABEL = "frame";
@@ -114,6 +115,7 @@ public class SitemapResourceTest extends JavaTest {
     private @NonNullByDefault({}) GenericItem valueColorItem;
     private @NonNullByDefault({}) GenericItem iconColorItem;
     private @NonNullByDefault({}) GenericItem iconItem;
+    private @NonNullByDefault({}) GenericItem confirmCmdItem;
 
     private @Mock @NonNullByDefault({}) HttpHeaders headersMock;
     private @Mock @NonNullByDefault({}) Sitemap defaultSitemapMock;
@@ -150,6 +152,7 @@ public class SitemapResourceTest extends JavaTest {
         valueColorItem = new TestItem(VALUE_COLOR_ITEM_NAME);
         iconColorItem = new TestItem(ICON_COLOR_ITEM_NAME);
         iconItem = new TestItem(ICON_ITEM_NAME);
+        confirmCmdItem = new TestItem(CONFIRM_CMD_ITEM_NAME);
 
         when(localeServiceMock.getLocale(null)).thenReturn(Locale.US);
 
@@ -406,6 +409,22 @@ public class SitemapResourceTest extends JavaTest {
         assertThat(pageDTO.timeout, is(false));
     }
 
+    @Test
+    public void whenLongPollingShouldObserveItemsFromConfirmCmdConditions() {
+        ItemEvent itemEvent = mock(ItemEvent.class);
+        when(itemEvent.getItemName()).thenReturn(confirmCmdItem.getName());
+        executeWithDelay(() -> sitemapResource.receive(itemEvent));
+
+        // non-null is sufficient here.
+        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
+
+        Response response = sitemapResource.getPageData(headersMock, null, SITEMAP_NAME, SITEMAP_NAME, null, false);
+
+        PageDTO pageDTO = (PageDTO) response.getEntity();
+        // assert that the item state change did trigger the blocking method to return
+        assertThat(pageDTO.timeout, is(false));
+    }
+
     private static void executeWithDelay(Runnable executionWithDelay) {
         new Thread(() -> {
             try {
@@ -515,6 +534,7 @@ public class SitemapResourceTest extends JavaTest {
         when(itemUIRegistryMock.getItem(VALUE_COLOR_ITEM_NAME)).thenReturn(valueColorItem);
         when(itemUIRegistryMock.getItem(ICON_COLOR_ITEM_NAME)).thenReturn(iconColorItem);
         when(itemUIRegistryMock.getItem(ICON_ITEM_NAME)).thenReturn(iconItem);
+        when(itemUIRegistryMock.getItem(CONFIRM_CMD_ITEM_NAME)).thenReturn(confirmCmdItem);
     }
 
     private void configureWidgetStatesPage1(State state1, State state2) {
@@ -560,73 +580,84 @@ public class SitemapResourceTest extends JavaTest {
         // add icon rules to the mock widget:
         Class<Rule> classToMock = Rule.class;
         Rule iconRule = mock(classToMock);
-        Condition conditon0 = mock(Condition.class);
-        when(conditon0.getItem()).thenReturn(ICON_ITEM_NAME);
+        Condition condition0 = mock(Condition.class);
+        when(condition0.getItem()).thenReturn(ICON_ITEM_NAME);
         List<Condition> conditions0 = new ArrayList<>();
-        conditions0.add(conditon0);
+        conditions0.add(condition0);
         when(iconRule.getConditions()).thenReturn(conditions0);
         List<Rule> iconRulesW1 = new ArrayList<>();
         iconRulesW1.add(iconRule);
 
         // add visibility rules to the mock widget:
         Rule visibilityRule = mock(Rule.class);
-        Condition conditon = mock(Condition.class);
-        when(conditon.getItem()).thenReturn(VISIBILITY_RULE_ITEM_NAME);
+        Condition condition = mock(Condition.class);
+        when(condition.getItem()).thenReturn(VISIBILITY_RULE_ITEM_NAME);
         List<Condition> conditions = new ArrayList<>();
-        conditions.add(conditon);
+        conditions.add(condition);
         when(visibilityRule.getConditions()).thenReturn(conditions);
         List<Rule> visibilityRulesW1 = new ArrayList<>(1);
         visibilityRulesW1.add(visibilityRule);
 
         // add label color conditions to the item:
         Rule labelColor = mock(Rule.class);
-        Condition conditon1 = mock(Condition.class);
-        when(conditon1.getItem()).thenReturn(LABEL_COLOR_ITEM_NAME);
+        Condition condition1 = mock(Condition.class);
+        when(condition1.getItem()).thenReturn(LABEL_COLOR_ITEM_NAME);
         List<Condition> conditions1 = new ArrayList<>();
-        conditions1.add(conditon1);
+        conditions1.add(condition1);
         when(labelColor.getConditions()).thenReturn(conditions1);
         List<Rule> labelColorsW1 = new ArrayList<>();
         labelColorsW1.add(labelColor);
 
         // add value color conditions to the item:
         Rule valueColor = mock(Rule.class);
-        Condition conditon2 = mock(Condition.class);
-        when(conditon2.getItem()).thenReturn(VALUE_COLOR_ITEM_NAME);
+        Condition condition2 = mock(Condition.class);
+        when(condition2.getItem()).thenReturn(VALUE_COLOR_ITEM_NAME);
         List<Condition> conditions2 = new ArrayList<>();
-        conditions2.add(conditon2);
+        conditions2.add(condition2);
         when(valueColor.getConditions()).thenReturn(conditions2);
         List<Rule> valueColorsW1 = new ArrayList<>();
         valueColorsW1.add(valueColor);
 
         // add icon color conditions to the item:
         Rule iconColor = mock(Rule.class);
-        Condition conditon3 = mock(Condition.class);
-        when(conditon3.getItem()).thenReturn(ICON_COLOR_ITEM_NAME);
+        Condition condition3 = mock(Condition.class);
+        when(condition3.getItem()).thenReturn(ICON_COLOR_ITEM_NAME);
         List<Condition> conditions3 = new ArrayList<>();
-        conditions3.add(conditon3);
+        conditions3.add(condition3);
         when(iconColor.getConditions()).thenReturn(conditions3);
         List<Rule> iconColorsW1 = new ArrayList<>();
         iconColorsW1.add(iconColor);
 
+        // add confirm command conditions to the item:
+        Rule confirmCmd = mock(Rule.class);
+        Condition conditon4 = mock(Condition.class);
+        when(conditon4.getItem()).thenReturn(CONFIRM_CMD_ITEM_NAME);
+        List<Condition> conditions4 = new ArrayList<>();
+        conditions4.add(conditon4);
+        when(confirmCmd.getConditions()).thenReturn(conditions4);
+        List<Rule> confirmCmdRulesW1 = new ArrayList<>();
+        confirmCmdRulesW1.add(confirmCmd);
+
         String sliderType = "Slider";
 
-        Widget w1 = mockWidget(iconRulesW1, visibilityRulesW1, labelColorsW1, valueColorsW1, iconColorsW1, sliderType,
-                WIDGET1_LABEL, null, false);
+        Widget w1 = mockWidget(iconRulesW1, visibilityRulesW1, labelColorsW1, valueColorsW1, iconColorsW1,
+                confirmCmdRulesW1, sliderType, WIDGET1_LABEL, null, false);
 
         List<Rule> iconRules = new ArrayList<>();
         List<Rule> visibilityRules = new ArrayList<>();
         List<Rule> labelColors = new ArrayList<>();
         List<Rule> valueColors = new ArrayList<>();
         List<Rule> iconColors = new ArrayList<>();
+        List<Rule> confirmCmdRules = new ArrayList<>();
 
         String switchType = "Switch";
 
-        Widget w2 = mockWidget(iconRules, visibilityRules, labelColors, valueColors, iconColors, switchType, null,
-                WIDGET2_ICON, false);
+        Widget w2 = mockWidget(iconRules, visibilityRules, labelColors, valueColors, iconColors, confirmCmdRules,
+                switchType, null, WIDGET2_ICON, false);
         mock(Widget.class);
 
-        Widget w3 = mockWidget(iconRules, visibilityRules, labelColors, valueColors, iconColors, switchType,
-                WIDGET3_LABEL, WIDGET3_ICON, true);
+        Widget w3 = mockWidget(iconRules, visibilityRules, labelColors, valueColors, iconColors, confirmCmdRules,
+                switchType, WIDGET3_LABEL, WIDGET3_ICON, true);
 
         List<Widget> widgets = new ArrayList<>(3);
         widgets.add(w1);
@@ -645,17 +676,18 @@ public class SitemapResourceTest extends JavaTest {
         List<Rule> labelColors = new ArrayList<>();
         List<Rule> valueColors = new ArrayList<>();
         List<Rule> iconColors = new ArrayList<>();
+        List<Rule> confirmCmdRules = new ArrayList<>();
 
-        Widget group1 = mockGroup(iconRules, visibilityRules, labelColors, valueColors, iconColors, groupType,
-                GROUP_LABEL, GROUP_ICON, true, baseWidgets);
+        Widget group1 = mockGroup(iconRules, visibilityRules, labelColors, valueColors, iconColors, confirmCmdRules,
+                groupType, GROUP_LABEL, GROUP_ICON, true, baseWidgets);
 
         String switchType = "Switch";
 
-        Widget w4 = mockWidget(iconRules, visibilityRules, labelColors, valueColors, iconColors, switchType,
-                WIDGET4_LABEL, WIDGET4_ICON, true);
+        Widget w4 = mockWidget(iconRules, visibilityRules, labelColors, valueColors, iconColors, confirmCmdRules,
+                switchType, WIDGET4_LABEL, WIDGET4_ICON, true);
 
-        Widget group2 = mockGroup(iconRules, visibilityRules, labelColors, valueColors, iconColors, groupType,
-                GROUP_LABEL, GROUP_ICON, true, new ArrayList<>(List.of(w4)));
+        Widget group2 = mockGroup(iconRules, visibilityRules, labelColors, valueColors, iconColors, confirmCmdRules,
+                groupType, GROUP_LABEL, GROUP_ICON, true, new ArrayList<>(List.of(w4)));
 
         List<Widget> allWidgets = new ArrayList<>();
         allWidgets.add(group1);
@@ -666,28 +698,28 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     private static Widget mockWidget(List<Rule> iconRules1, List<Rule> visibilityRules1, List<Rule> labelColors1,
-            List<Rule> valueColors1, List<Rule> iconColors1, String widgetType, String widgetLabel, String widgetIcon,
-            boolean widgetStaticIcon) {
+            List<Rule> valueColors1, List<Rule> iconColors1, List<Rule> confirmCmdRules1, String widgetType,
+            String widgetLabel, String widgetIcon, boolean widgetStaticIcon) {
         Widget w = mock(Widget.class);
-        mockWidgetMethods(iconRules1, visibilityRules1, labelColors1, valueColors1, iconColors1, widgetType,
-                widgetLabel, widgetIcon, widgetStaticIcon, w);
+        mockWidgetMethods(iconRules1, visibilityRules1, labelColors1, valueColors1, iconColors1, confirmCmdRules1,
+                widgetType, widgetLabel, widgetIcon, widgetStaticIcon, w);
         when(w.getItem()).thenReturn(ITEM_NAME);
         return w;
     }
 
     private static Group mockGroup(List<Rule> iconRules1, List<Rule> visibilityRules1, List<Rule> labelColors1,
-            List<Rule> valueColors1, List<Rule> iconColors1, String widgetType, String widgetLabel, String widgetIcon,
-            boolean widgetStaticIcon, List<Widget> children) {
+            List<Rule> valueColors1, List<Rule> iconColors1, List<Rule> confirmCmdRules1, String widgetType,
+            String widgetLabel, String widgetIcon, boolean widgetStaticIcon, List<Widget> children) {
         Group w = mock(Group.class);
-        mockWidgetMethods(iconRules1, visibilityRules1, labelColors1, valueColors1, iconColors1, widgetType,
-                widgetLabel, widgetIcon, widgetStaticIcon, w);
+        mockWidgetMethods(iconRules1, visibilityRules1, labelColors1, valueColors1, iconColors1, confirmCmdRules1,
+                widgetType, widgetLabel, widgetIcon, widgetStaticIcon, w);
         when(w.getWidgets()).thenReturn(children);
         return w;
     }
 
     private static void mockWidgetMethods(List<Rule> iconRules1, List<Rule> visibilityRules1, List<Rule> labelColors1,
-            List<Rule> valueColors1, List<Rule> iconColors1, String widgetType, String widgetLabel, String widgetIcon,
-            boolean widgetStaticIcon, Widget w) {
+            List<Rule> valueColors1, List<Rule> iconColors1, List<Rule> confirmCmdRules1, String widgetType,
+            String widgetLabel, String widgetIcon, boolean widgetStaticIcon, Widget w) {
         when(w.getWidgetType()).thenReturn(widgetType);
         when(w.getLabel()).thenReturn(widgetLabel);
         when(w.getIcon()).thenReturn(widgetIcon);
@@ -697,6 +729,7 @@ public class SitemapResourceTest extends JavaTest {
         when(w.getLabelColor()).thenReturn(labelColors1);
         when(w.getValueColor()).thenReturn(valueColors1);
         when(w.getIconColor()).thenReturn(iconColors1);
+        when(w.getConfirmCmdRules()).thenReturn(confirmCmdRules1);
     }
 
     private void configureSitemapMock() {

@@ -1388,6 +1388,48 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
+    public void getConfirmCmd() {
+        when(widgetMock.getConfirmCmd()).thenReturn(true);
+        assertEquals(ItemUIRegistryImpl.DEFAULT_CONFIRM_CMD_MESSAGE, uiRegistry.getConfirmCmdMessage(widgetMock));
+
+        when(widgetMock.getConfirmCmd()).thenReturn(false);
+        assertNull(uiRegistry.getConfirmCmdMessage(widgetMock));
+
+        String message = "Are you absolutely sure?";
+        Rule rule = mock(Rule.class);
+        List<Rule> rules = new ArrayList<>();
+        rules.add(rule);
+        List<Condition> conditions = new ArrayList<>();
+        when(rule.getConditions()).thenReturn(conditions);
+        when(rule.getArgument()).thenReturn(message);
+        when(widgetMock.getConfirmCmdRules()).thenReturn(rules);
+        assertEquals(message, uiRegistry.getConfirmCmdMessage(widgetMock));
+
+        Condition condition = mock(Condition.class);
+        when(condition.getValue()).thenReturn("21");
+        when(condition.getCondition()).thenReturn(">=");
+        Condition condition2 = mock(Condition.class);
+        when(condition2.getValue()).thenReturn("24");
+        when(condition2.getCondition()).thenReturn("<");
+        conditions.add(condition);
+        conditions.add(condition2);
+        when(rule.getArgument()).thenReturn(null);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(20.9));
+        assertNull(uiRegistry.getConfirmCmdMessage(mapviewMock));
+
+        when(itemMock.getState()).thenReturn(new DecimalType(21.0));
+        assertEquals(ItemUIRegistryImpl.DEFAULT_CONFIRM_CMD_MESSAGE, uiRegistry.getConfirmCmdMessage(widgetMock));
+
+        when(rule.getArgument()).thenReturn(message);
+        when(itemMock.getState()).thenReturn(new DecimalType(23.5));
+        assertEquals(message, uiRegistry.getConfirmCmdMessage(widgetMock));
+
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
+        assertNull(uiRegistry.getConfirmCmdMessage(widgetMock));
+    }
+
+    @Test
     public void getCategoryWhenIconSetWithoutRules() {
         when(widgetMock.getWidgetType()).thenReturn("Text");
         when(widgetMock.getIcon()).thenReturn("temperature");
