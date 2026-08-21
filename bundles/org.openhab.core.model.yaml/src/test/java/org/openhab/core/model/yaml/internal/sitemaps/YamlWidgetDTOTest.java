@@ -298,9 +298,17 @@ public class YamlWidgetDTOTest {
 
         rule2 = new YamlRuleWithAndConditionsDTO();
         widget.confirmCmd = rule2;
-        assertTrue(widget.isValid(err, warn));
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: \"and\" field missing while mandatory in rules",
+                err.getFirst());
+        err.clear();
         rule2.and = List.of();
-        assertTrue(widget.isValid(err, warn));
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: \"and\" field missing while mandatory in rules",
+                err.getFirst());
+        err.clear();
         condition = new YamlConditionDTO();
         rule2.and = List.of(condition);
         assertFalse(widget.isValid(err, warn));
