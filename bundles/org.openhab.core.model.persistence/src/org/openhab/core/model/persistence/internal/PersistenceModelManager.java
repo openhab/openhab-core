@@ -185,7 +185,9 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
     private List<PersistenceStrategy> mapStrategies(List<Strategy> strategies) {
         final List<PersistenceStrategy> lst = new LinkedList<>();
         for (final Strategy strategy : strategies) {
-            lst.add(mapStrategy(strategy));
+            if (!(strategy.getName() == null || strategy.getName().isEmpty())) {
+                lst.add(mapStrategy(strategy));
+            }
         }
         return lst;
     }
@@ -201,7 +203,9 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
     private List<PersistenceFilter> mapFilters(List<Filter> filters) {
         final List<PersistenceFilter> lst = new LinkedList<>();
         for (final Filter filter : filters) {
-            lst.add(mapFilter(filter));
+            if (!(filter.getName() == null || filter.getName().isEmpty())) {
+                lst.add(mapFilter(filter));
+            }
         }
         return lst;
     }
