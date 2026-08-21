@@ -68,8 +68,12 @@ public interface MDNSClient {
     /**
      * Unregister all services
      *
+     * @deprecated Should never be called.
      */
-    void unregisterAllServices();
+    @Deprecated
+    default void unregisterAllServices() {
+        throw new UnsupportedOperationException("unregisterAllServices() not supported");
+    }
 
     /**
      * Returns a list of service infos of the specified type
@@ -91,6 +95,10 @@ public interface MDNSClient {
     /**
      * Close properly JmDNS instances
      *
+     * @deprecated Should never be called.
      */
-    void close();
+    @Deprecated
+    default void close() {
+        throw new UnsupportedOperationException("close() not supported");
+    };
 }
