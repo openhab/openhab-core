@@ -31,6 +31,7 @@ import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.common.Version;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -153,7 +154,7 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
     private Addon toAddon(Bundle bundle, AddonInfo addonInfo) {
         String uid = ADDON_ID_PREFIX + addonInfo.getUID();
         return Addon.create(uid).withId(addonInfo.getId()).withType(addonInfo.getType()).withInstalled(true)
-                .withVersion(bundle.getVersion().toString()).withLabel(addonInfo.getName())
+                .withVersion(Version.valueOf(bundle.getVersion())).withLabel(addonInfo.getName())
                 .withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
                 .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI())
                 .withDescription(Objects.requireNonNullElse(addonInfo.getDescription(), bundle.getSymbolicName()))

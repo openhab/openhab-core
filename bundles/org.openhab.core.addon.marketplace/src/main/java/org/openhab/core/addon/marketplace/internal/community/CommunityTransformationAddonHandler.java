@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
@@ -79,7 +80,7 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
     }
 
     @Override
-    public boolean supports(String type, String contentType) {
+    public boolean supports(String type, @Nullable String contentType) {
         return "transformation".equals(type) && TRANSFORMATIONS_CONTENT_TYPE.equals(contentType);
     }
 
