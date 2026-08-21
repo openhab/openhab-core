@@ -120,14 +120,14 @@ sitemaps:
             max: 22.5
             step: 0.5
             confirmCmd:
-                operator: ">"
-                argument: 20
-                value: "Should I change the setpoint value?"
+              operator: ">"
+              argument: 20
+              value: "Should I change the setpoint value?"
           - type: Colorpicker
             item: DemoColor
             label: Test Colorpicker
             confirmCmd:
-                value: "true"
+              value: "true"
           - type: Colortemperaturepicker
             item: DemoColorTemp
             label: Test Colortemperaturepicker
