@@ -14,6 +14,7 @@ package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
 import java.io.Serial;
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.Servlet;
@@ -94,12 +95,12 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
             removeCsrfToken(params.get("csrf_token")[0]);
 
             String username = params.get("username")[0];
-            String password = params.get("password")[0];
+            char[] password = params.get("password")[0].toCharArray();
             String tokenName = params.get("token_name")[0];
             String tokenScope = params.get("token_scope")[0];
 
             User user = login(username, password);
-            String newApiToken;
+            char[] newApiToken;
 
             if (user instanceof AuthenticatedUser authenticatedUser) {
                 if (authenticatedUser.getApiTokens().stream()
@@ -123,12 +124,13 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
                 throw new AuthenticationException("User authentication is not managed by openHAB");
             }
 
-            String resultMessage = getLocalizedMessage("auth.createapitoken.success") + "<br /><br /><code>"
-                    + newApiToken + "</code>";
-            resultMessage += "<br /><br /><small>" + getLocalizedMessage("auth.createapitoken.success.footer")
-                    + "</small>";
+            StringBuilder resultMessage = new StringBuilder(250);
+            resultMessage.append(getLocalizedMessage("auth.createapitoken.success")).append("<br /><br /><code>")
+                    .append(newApiToken).append("</code>").append("<br /><br /><small>")
+                    .append(getLocalizedMessage("auth.createapitoken.success.footer")).append("</small>");
+            Arrays.fill(newApiToken, Character.MIN_VALUE);
             resp.setContentType("text/html;charset=UTF-8");
-            resp.getWriter().append(getResultPageBody(params, resultMessage));
+            resp.getWriter().append(getResultPageBody(params, resultMessage.toString()));
             resp.getWriter().close();
         } catch (AuthenticationException e) {
             processFailedLogin(resp, req.getRemoteAddr(), params, e.getMessage());

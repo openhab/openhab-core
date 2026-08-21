@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.auth.internal;
+package org.openhab.core.io.rest.auth;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -75,7 +75,11 @@ public class JwtHelper {
         RsaJsonWebKey newKey = RsaJwkGenerator.generateJwk(2048);
 
         File file = new File(KEY_FILE_PATH);
-        file.getParentFile().mkdirs();
+        File parent = file.getParentFile();
+        if (parent == null) {
+            throw new IOException(file.getAbsolutePath() + " has no parent");
+        }
+        parent.mkdirs();
 
         String keyJson = newKey.toJson(OutputControlLevel.INCLUDE_PRIVATE);
 

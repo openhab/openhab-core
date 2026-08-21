@@ -12,6 +12,8 @@
  */
 package org.openhab.core.auth;
 
+import java.util.Arrays;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -24,7 +26,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class UsernamePasswordCredentials implements Credentials {
 
     private final String username;
-    private final String password;
+
+    // All access must be guarded by "this"
+    private final char[] password;
 
     /**
      * Creates a new instance
@@ -32,7 +36,7 @@ public class UsernamePasswordCredentials implements Credentials {
      * @param username name of the user
      * @param password password of the user
      */
-    public UsernamePasswordCredentials(String username, String password) {
+    public UsernamePasswordCredentials(String username, char[] password) {
         this.username = username;
         this.password = password;
     }
@@ -51,12 +55,17 @@ public class UsernamePasswordCredentials implements Credentials {
      *
      * @return the password
      */
-    public String getPassword() {
+    public synchronized char[] getPassword() {
         return password;
     }
 
     @Override
+    public synchronized void dispose() {
+        Arrays.fill(password, Character.MIN_VALUE);
+    }
+
+    @Override
     public String toString() {
-        return username + ":" + password.replaceAll(".", "*");
+        return username + ":" + "********";
     }
 }
