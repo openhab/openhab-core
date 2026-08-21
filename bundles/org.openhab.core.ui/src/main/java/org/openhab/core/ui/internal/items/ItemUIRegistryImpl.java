@@ -137,7 +137,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected static final String SEMANTICS_LOCATION = "Location";
     protected static final String SEMANTICS_PARENT_LOCATION_CONFIG = "isPartOf";
 
-    private static final String DEFAULT_CONFIRM_CMD_MESSAGE = "Are you sure?";
+    protected static final String DEFAULT_CONFIRM_CMD_MESSAGE = "Are you sure?";
 
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
@@ -1267,9 +1267,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return matched;
     }
 
-    private @Nullable String processColorDefinition(Widget w, @Nullable List<Rule> colorList, String colorType) {
+    private @Nullable String processColorDefinition(Widget w, List<Rule> colorList, String colorType) {
         // Sanity check
-        if (colorList == null || colorList.isEmpty()) {
+        if (colorList.isEmpty()) {
             return null;
         }
 
@@ -1394,9 +1394,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return icon;
     }
 
-    private boolean allConditionsOk(@Nullable List<org.openhab.core.sitemap.Condition> conditions, Widget w) {
+    private boolean allConditionsOk(List<org.openhab.core.sitemap.Condition> conditions, Widget w) {
         boolean allConditionsOk = true;
-        if (conditions != null) {
+        if (!conditions.isEmpty()) {
             State defaultState = getState(w);
 
             // Go through all AND conditions

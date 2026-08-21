@@ -293,6 +293,9 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
 
     private @NonNull Object toRuleDto(@NonNull JsonNode ruleNode) throws SerializationException {
         JsonNode conditionsNode, conditionNode;
+        if (ruleNode.isTextual()) {
+            return ruleNode.asText();
+        }
         if (!ruleNode.isObject()) {
             throw new SerializationException("Expected rule to be an object node");
         }
