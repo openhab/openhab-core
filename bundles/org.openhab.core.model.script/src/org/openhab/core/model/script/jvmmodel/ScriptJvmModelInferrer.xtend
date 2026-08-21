@@ -91,6 +91,11 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     /** Variable name for the cache */
     public static final String VAR_PRIVATE_CACHE = "privateCache";
     public static final String VAR_SHARED_CACHE = "sharedCache";
+    
+    /** Variable names for the context objects */
+    public static final String VAR_EVENT_OBJECT = "eventObject";
+    public static final String VAR_CTX = "ctx";
+    public static final String VAR_INPUTS = "inputs";
 
     /**
      * convenience API to build and initialize JvmTypes and their members.
@@ -139,9 +144,9 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
             members += script.toMethod("_script", null) [
                 static = true
-                parameters += script.toParameter("eventObject", typeRef(Event))
-                parameters += script.toParameter("ctx", typeRef(Map, typeRef(String), typeRef(Object)))
-                parameters += script.toParameter("inputs", typeRef(Map, typeRef(String), typeRef(Map, typeRef(String), typeRef(Object))))
+                parameters += script.toParameter(VAR_EVENT_OBJECT, typeRef(Event))
+                parameters += script.toParameter(VAR_CTX, typeRef(Map, typeRef(String), typeRef(Object)))
+                parameters += script.toParameter(VAR_INPUTS, typeRef(Map, typeRef(String), typeRef(Map, typeRef(String), typeRef(Object))))
                 val inputTypeRef = typeRef(String)
                 parameters += script.toParameter(VAR_INPUT, inputTypeRef)
                 val groupTypeRef = typeRef(Item)

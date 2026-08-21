@@ -208,9 +208,9 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
                 }
             }
         }
-        evalContext.newValue(QualifiedName.create("ctx"), ctx);
-        evalContext.newValue(QualifiedName.create("eventObject"), eventObject);
-        evalContext.newValue(QualifiedName.create("inputs"), inputs);
+        evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_CTX), ctx);
+        evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_EVENT_OBJECT), eventObject);
+        evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_INPUTS), inputs);
 
         Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache",
                 (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
