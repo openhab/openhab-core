@@ -114,6 +114,11 @@ public class YamlItemConverter extends AbstractItemSerializer implements ItemPar
             dto.label = item.getLabel();
         }
 
+        String defaultPattern = getDefaultStatePattern(item);
+        if (stateFormatter != null && !stateFormatter.equals(defaultPattern)) {
+            dto.format = stateFormatter;
+        }
+
         dto.type = item.getType();
         String mainType = ItemUtil.getMainItemType(item.getType());
         String dimension = ItemUtil.getItemTypeExtension(item.getType());
@@ -180,6 +185,8 @@ public class YamlItemConverter extends AbstractItemSerializer implements ItemPar
         for (Metadata md : metadata) {
             String namespace = md.getUID().getNamespace();
             String value = md.getValue();
+            String adoptedPattern = null;
+
             if ("autoupdate".equals(namespace)) {
                 // When autoupdate value is an empty string, treat it as not set since dto.autoupdate only accepts
                 // true/false
@@ -199,27 +206,48 @@ public class YamlItemConverter extends AbstractItemSerializer implements ItemPar
                 continue;
             }
 
-            if ("stateDescription".equals(namespace) && (value == null || value.isBlank())) {
+            if ("stateDescription".equals(namespace)) {
                 Map<String, Object> config = md.getConfiguration();
+                boolean isValueEmpty = value == null || value.isEmpty();
 
-                String defaultPattern = getDefaultStatePattern(item);
-                if (config.isEmpty() && stateFormatter != null && !stateFormatter.equals(defaultPattern)) {
-                    dto.format = stateFormatter;
-                    continue;
+                String pattern = config.get("pattern") instanceof String p && !p.isEmpty() ? p : null;
+                boolean hasPattern = pattern != null;
+                boolean hasOnlyPattern = hasPattern && config.size() == 1;
+
+                // Rule 1: Special early exit path when ONLY config.pattern is present
+                if (hasOnlyPattern && isValueEmpty) {
+                    if (!pattern.equals(defaultPattern)) {
+                        dto.format = pattern;
+                    } else {
+                        dto.format = null;
+                    }
+                    continue; // Skip adding to dto.metadata
                 }
 
-                if (config.get("pattern") instanceof String pattern && !pattern.isBlank() && config.size() == 1) {
-                    dto.format = pattern;
-                    continue;
+                // Rule 2: Note if we need to adopt dto.format before clearing it
+                if (!hasPattern) {
+                    adoptedPattern = dto.format;
                 }
+
+                // Rule 3: Clear dto.format (stateDescription metadata takes precedence)
+                dto.format = null;
+
+                // FALL THROUGH to common YamlMetadataDTO construction below...
             }
 
+            // --- Single shared YamlMetadataDTO creation block ---
             YamlMetadataDTO mdDto = new YamlMetadataDTO();
             mdDto.value = value;
             Map<String, Object> configuration = new LinkedHashMap<>();
             for (ConfigParameter param : getConfigurationParameters(md)) {
                 configuration.put(param.name(), param.value());
             }
+
+            // Inject adopted pattern if Rule 2 was triggered
+            if (adoptedPattern != null) {
+                configuration.put("pattern", adoptedPattern);
+            }
+
             mdDto.config = configuration.isEmpty() ? null : configuration;
             metadataDto.put(namespace, mdDto);
         }
