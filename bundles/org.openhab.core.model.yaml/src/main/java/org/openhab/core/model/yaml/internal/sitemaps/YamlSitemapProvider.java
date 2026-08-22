@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
  * These sitemaps are automatically exposed to the {@link SitemapRegistry}.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapProvider.class, YamlSitemapProvider.class, YamlModelListener.class })
@@ -239,6 +240,12 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
 
             addWidgetRules(widget.getVisibility(), widgetDTO.visibility, true);
 
+            if (widgetDTO.confirmCmd instanceof Boolean confirmCmd) {
+                widget.setConfirmCmd(confirmCmd);
+            } else {
+                addWidgetRules(widget.getConfirmCmdRules(), widgetDTO.confirmCmd, false);
+            }
+
             switch (widget) {
                 case Image imageWidget:
                     imageWidget.setUrl(widgetDTO.url);
@@ -331,11 +338,11 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
 
     private void addWidgetRules(List<Rule> rules, @Nullable Object rulesDTO, boolean ignoreValue) {
         if (rulesDTO instanceof String value) {
-            Rule rule = sitemapFactory.createRule();
             if (!ignoreValue) {
+                Rule rule = sitemapFactory.createRule();
                 rule.setArgument(value);
+                rules.add(rule);
             }
-            rules.add(rule);
         } else if (rulesDTO instanceof YamlRuleWithAndConditionsDTO ruleDTO) {
             Rule rule = sitemapFactory.createRule();
             addRuleConditions(rule.getConditions(), ruleDTO.and);
@@ -378,6 +385,9 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
     private void addRuleConditions(List<Condition> conditions, @Nullable List<YamlConditionDTO> conditionsDTO) {
         if (conditionsDTO != null) {
             conditionsDTO.forEach(dto -> {
+                if (dto.item == null && dto.operator == null && dto.argument == null) {
+                    return; // empty condition is ignored
+                }
                 Condition condition = sitemapFactory.createCondition();
                 condition.setItem(dto.item);
                 condition.setCondition(dto.operator);

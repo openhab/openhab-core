@@ -33,6 +33,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Laurent Garnier - Remove field columns
  * @author Laurent Garnier - New fields row, column, command, releaseCommand and stateless for Button element
  * @author Mark Herwege - Extends abstract widget DTO
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @Schema(name = "SitemapWidget")
 public class WidgetDTO extends AbstractWidgetDTO {
@@ -44,6 +45,7 @@ public class WidgetDTO extends AbstractWidgetDTO {
     public String labelcolor;
     public String valuecolor;
     public String iconcolor;
+    public String confirmCmdMessage;
 
     public String pattern;
     public String unit;
