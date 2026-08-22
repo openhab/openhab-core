@@ -86,8 +86,10 @@ import org.openhab.core.items.dto.GroupItemDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.items.dto.MetadataDTO;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.items.DateTimeItem;
 import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.UpDownType;
@@ -404,6 +406,12 @@ public class ItemResource implements RESTResource {
 
         // if it exists
         if (item != null) {
+            if (item instanceof DateTimeItem dateTimeItem) {
+                DateTimeType dateTime = dateTimeItem.getStateAs(DateTimeType.class);
+                if (dateTime != null) {
+                    return Response.ok(dateTime.toFullString(timeZoneProvider.getTimeZone())).build();
+                }
+            }
             // we cannot use JSONResponse.createResponse() bc. MediaType.TEXT_PLAIN
             // return JSONResponse.createResponse(Status.OK, item.getState().toString(), null);
             return Response.ok(item.getState().toFullString()).build();
