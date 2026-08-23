@@ -40,7 +40,7 @@ but also compatible to [Apiary](apiary.com) for automatic doc generation and API
                 + `info`
                 + `debug`
 
-        + url (string, optional) - The URL where the log event ocurred.
+        + url (string, optional) - The URL where the log event occurred.
         + message (string, optional) - The message to log.
 
     + Body
