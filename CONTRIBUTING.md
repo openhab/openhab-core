@@ -128,7 +128,7 @@ By making a contribution to this project, I certify that:
 
 then you just add a line to every git commit message:
 
-    Signed-off-by: Joe Smith <joe.smith@email.com> (github: github_handle)
+    Signed-off-by: Joe Smith <joe.smith@email.com>
 
 using your real name (sorry, no pseudonyms or anonymous contributions.)
 
