@@ -1,0 +1,8 @@
+version: 1
+things:
+  ntp:ntp:local:
+    channels:
+      string:
+        type: string-channel
+      date-only-string:
+        type: string-channel

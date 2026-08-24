@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -95,7 +95,6 @@ public class JsonAddonService extends AbstractRemoteAddonService {
             String urls = ConfigParser.valueAsOrElse(config.get(CONFIG_URLS), String.class, "");
             addonServiceUrls = Arrays.asList(urls.split("\\|")).stream().filter(this::isValidUrl).toList();
             showUnstable = ConfigParser.valueAsOrElse(config.get(CONFIG_SHOW_UNSTABLE), Boolean.class, false);
-            cachedRemoteAddons.invalidateValue();
             refreshSource();
         }
     }
@@ -209,7 +208,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
                 .withDetailedDescription(addonEntry.description).withContentType(addonEntry.contentType)
                 .withAuthor(addonEntry.author).withVersion(addonEntry.version).withLabel(addonEntry.title)
                 .withCompatible(compatible).withMaturity(addonEntry.maturity).withProperties(properties)
-                .withLink(addonEntry.link).withImageLink(addonEntry.imageUrl)
+                .withLink(addonEntry.link).withImageLink(addonEntry.imageUrl).withKeywords(addonEntry.keywords)
                 .withConfigDescriptionURI(addonEntry.configDescriptionURI).withLoggerPackages(addonEntry.loggerPackages)
                 .withConnection(addonEntry.connection).withCountries(addonEntry.countries).build();
     }

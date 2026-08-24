@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -49,6 +49,7 @@ public class YamlItemDTO implements YamlElement, Cloneable {
     public String icon;
     public String format;
     public String unit;
+    public String expire;
     public Boolean autoupdate;
     public List<@NonNull String> groups;
     public Set<@NonNull String> tags;
@@ -132,12 +133,11 @@ public class YamlItemDTO implements YamlElement, Cloneable {
                         "item \"%s\": \"dimension\" field ignored as type is not Number".formatted(name, dimension));
             }
         }
-        if (icon != null) {
-            subErrors.clear();
-            ok &= isValidIcon(icon, subErrors);
-            subErrors.forEach(error -> {
-                addToList(errors, "invalid item \"%s\": %s".formatted(name, error));
-            });
+        if (icon != null && !YamlElementUtils.isValidIcon(icon)) {
+            addToList(errors,
+                    "invalid item \"%s\": invalid value \"%s\" for \"icon\" field; it must contain a maximum of 3 segments separated by a colon, each segment matching pattern [a-zA-Z0-9_][a-zA-Z0-9_-]*"
+                            .formatted(name, icon));
+            ok = false;
         }
         if (groups != null) {
             for (String gr : groups) {
@@ -195,25 +195,11 @@ public class YamlItemDTO implements YamlElement, Cloneable {
                         "item \"%s\": \"format\" field is redundant with pattern in \"stateDescription\" metadata; \"%s\" will be considered"
                                 .formatted(name, pattern));
             }
-        }
-        return ok;
-    }
-
-    private boolean isValidIcon(String icon, List<@NonNull String> errors) {
-        boolean ok = true;
-        String[] segments = icon.split(AbstractUID.SEPARATOR);
-        int nb = segments.length;
-        if (nb > 3) {
-            errors.add("too many segments in value \"%s\" for \"icon\" field; maximum 3 is expected".formatted(icon));
-            ok = false;
-            nb = 3;
-        }
-        for (int i = 0; i < nb; i++) {
-            String segment = segments[i];
-            if (!ICON_SEGMENT_PATTERN.matcher(segment).matches()) {
-                errors.add("segment \"%s\" in \"icon\" field not matching the expected syntax %s".formatted(segment,
-                        ICON_SEGMENT_PATTERN.pattern()));
-                ok = false;
+            md = metadata.get("expire");
+            if (md != null && expire != null) {
+                addToList(warnings,
+                        "item \"%s\": \"expire\" field is redundant with \"expire\" metadata; value \"%s\" will be considered"
+                                .formatted(name, md.getValue()));
             }
         }
         return ok;
@@ -266,8 +252,8 @@ public class YamlItemDTO implements YamlElement, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, getType(), group, label, icon, format, unit, autoupdate, getGroups(), getTags(),
-                channel);
+        return Objects.hash(name, getType(), group, label, icon, format, unit, expire, autoupdate, getGroups(),
+                getTags(), channel, channels, metadata);
     }
 
     @Override
@@ -281,36 +267,9 @@ public class YamlItemDTO implements YamlElement, Cloneable {
         return Objects.equals(name, other.name) && Objects.equals(getType(), other.getType())
                 && Objects.equals(group, other.group) && Objects.equals(label, other.label)
                 && Objects.equals(icon, other.icon) && Objects.equals(format, other.format)
-                && Objects.equals(unit, other.unit) && Objects.equals(autoupdate, other.autoupdate)
-                && Objects.equals(getGroups(), other.getGroups()) && Objects.equals(getTags(), other.getTags())
-                && Objects.equals(channel, other.channel) && equalsChannels(channels, other.channels)
-                && equalsMetadata(metadata, other.metadata);
-    }
-
-    private boolean equalsChannels(@Nullable Map<@NonNull String, @NonNull Map<@NonNull String, @NonNull Object>> first,
-            @Nullable Map<@NonNull String, @NonNull Map<@NonNull String, @NonNull Object>> second) {
-        if (first != null && second != null) {
-            if (first.size() != second.size()) {
-                return false;
-            } else {
-                return first.entrySet().stream()
-                        .allMatch(e -> YamlElementUtils.equalsConfig(e.getValue(), second.get(e.getKey())));
-            }
-        } else {
-            return first == null && second == null;
-        }
-    }
-
-    private boolean equalsMetadata(@Nullable Map<@NonNull String, @NonNull YamlMetadataDTO> first,
-            @Nullable Map<@NonNull String, @NonNull YamlMetadataDTO> second) {
-        if (first != null && second != null) {
-            if (first.size() != second.size()) {
-                return false;
-            } else {
-                return first.entrySet().stream().allMatch(e -> e.getValue().equals(second.get(e.getKey())));
-            }
-        } else {
-            return first == null && second == null;
-        }
+                && Objects.equals(unit, other.unit) && Objects.equals(expire, other.expire)
+                && Objects.equals(autoupdate, other.autoupdate) && Objects.equals(getGroups(), other.getGroups())
+                && Objects.equals(getTags(), other.getTags()) && Objects.equals(channel, other.channel)
+                && Objects.equals(channels, other.channels) && Objects.equals(metadata, other.metadata);
     }
 }

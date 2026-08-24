@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -155,19 +155,36 @@ public class AddonResource implements RESTResource {
             @ApiResponse(responseCode = "404", description = "Service not found") })
     public Response getAddon(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
-            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
+            @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId,
+            @QueryParam("installedOnly") @Parameter(description = "true to return only installed add-ons") @Nullable Boolean installedOnly,
+            @QueryParam("refresh") @Parameter(description = "true to refresh add-ons before returning them") @Nullable Boolean refresh) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
 
         final Locale locale = localeService.getLocale(language);
+        boolean forceRefresh = Boolean.TRUE.equals(refresh);
+
+        Stream<Addon> addons;
         if ("all".equals(serviceId)) {
-            return Response.ok(new Stream2JSONInputStream(getAllAddons(locale))).build();
+            if (forceRefresh) {
+                addonServices.forEach(AddonService::refreshSource);
+            }
+            addons = getAllAddons(locale);
         } else {
             AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
             if (addonService == null) {
                 return Response.status(HttpStatus.NOT_FOUND_404).build();
             }
-            return Response.ok(new Stream2JSONInputStream(addonService.getAddons(locale).stream())).build();
+            if (forceRefresh) {
+                addonService.refreshSource();
+            }
+            addons = addonService.getAddons(locale).stream();
         }
+
+        if (Boolean.TRUE.equals(installedOnly)) {
+            addons = addons.filter(Addon::isInstalled);
+        }
+
+        return Response.ok(new Stream2JSONInputStream(addons)).build();
     }
 
     @GET

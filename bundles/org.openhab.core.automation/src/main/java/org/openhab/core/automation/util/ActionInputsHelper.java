@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,14 +13,16 @@
 package org.openhab.core.automation.util;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,8 +179,9 @@ public class ActionInputsHelper {
                 .create(input.getName(), parameterType).withLabel(input.getLabel())
                 .withDescription(input.getDescription()).withReadOnly(false)
                 .withRequired(required || input.isRequired()).withContext(context);
-        if (input.getDefaultValue() != null && !input.getDefaultValue().isEmpty()) {
-            builder = builder.withDefault(input.getDefaultValue());
+        String inputDefaultValue = input.getDefaultValue();
+        if (inputDefaultValue != null && !inputDefaultValue.isEmpty()) {
+            builder = builder.withDefault(inputDefaultValue);
         } else if (defaultValue != null) {
             builder = builder.withDefault(defaultValue);
         }
@@ -289,14 +292,32 @@ public class ActionInputsHelper {
                             // Accepted format is: 2007-12-03T10:15:30
                             LocalDateTime.parse(valueString);
                         case "java.util.Date" ->
-                            // Accepted format is: 2007-12-03T10:15:30
-                            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(valueString);
+                            /*
+                             * Accepted format is one of:
+                             * - 2007-12-03T10:15:30
+                             * - 2007-12-03T09:15:30Z
+                             * - 2007-12-03T10:15:30+01:00
+                             * - 2007-12-03T10:15:30+01:00[Europe/Paris]
+                             */
+                            Date.from(parseAsIsoDateTime(valueString).toInstant());
                         case "java.time.ZonedDateTime" ->
-                            // Accepted format is: 2007-12-03T10:15:30
-                            LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone());
+                            /*
+                             * Accepted format is one of:
+                             * - 2007-12-03T10:15:30
+                             * - 2007-12-03T09:15:30Z
+                             * - 2007-12-03T10:15:30+01:00
+                             * - 2007-12-03T10:15:30+01:00[Europe/Paris]
+                             */
+                            parseAsIsoDateTime(valueString);
                         case "java.time.Instant" ->
-                            // Accepted format is: 2007-12-03T10:15:30
-                            LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone()).toInstant();
+                            /*
+                             * Accepted format is one of:
+                             * - 2007-12-03T10:15:30
+                             * - 2007-12-03T09:15:30Z
+                             * - 2007-12-03T10:15:30+01:00
+                             * - 2007-12-03T10:15:30+01:00[Europe/Paris]
+                             */
+                            parseAsIsoDateTime(valueString).toInstant();
                         case "java.time.Duration" ->
                             // Accepted format is: P2DT17H25M30.5S
                             Duration.parse(valueString);
@@ -305,7 +326,7 @@ public class ActionInputsHelper {
                 }
             }
             return argument;
-        } catch (IllegalArgumentException | DateTimeParseException | ParseException e) {
+        } catch (IllegalArgumentException | DateTimeParseException e) {
             throw new IllegalArgumentException("Input parameter '" + input.getName() + "': converting value '"
                     + argument.toString() + "' into type " + input.getType() + " failed!");
         }
@@ -317,5 +338,14 @@ public class ActionInputsHelper {
             throw new IllegalArgumentException("Unknown dimension " + dimensionName);
         }
         return unitProvider.getUnit((Class<? extends Quantity>) dimension);
+    }
+
+    private ZonedDateTime parseAsIsoDateTime(String valueString) {
+        TemporalAccessor dt = DateTimeFormatter.ISO_DATE_TIME.parseBest(valueString, ZonedDateTime::from,
+                LocalDateTime::from);
+        if (dt instanceof ZonedDateTime zdt) {
+            return zdt;
+        }
+        return ((LocalDateTime) dt).atZone(timeZoneProvider.getTimeZone());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
  * for the separation of {@code toHandlerScript} into
  * {@code commandFromItemScript} and {@code stateFromItemScript}.
  * See <a href="https://github.com/openhab/openhab-core/pull/4058">openhab/openhab-core#4058</a>.
+ *
+ * @since 4.2.0
  *
  * @author Florian Hotze - Initial contribution
  * @author Jimmy Tanagra - Refactored into a separate class

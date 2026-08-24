@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -136,6 +136,13 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             commonWebSocketClient = null;
             logger.debug("Jetty shared web socket client stopped");
         }
+        if (threadPool != null) {
+            try {
+                threadPool.stop();
+            } catch (Exception e) {
+                logger.error("error while stopping shared Jetty thread pool", e);
+            }
+        }
         threadPool = null;
     }
 
@@ -177,12 +184,24 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         return commonWebSocketClient;
     }
 
+    private int calculateDefaultMaxThreads(int base, int max, int cpuFactor) {
+        int cpus = Runtime.getRuntime().availableProcessors();
+
+        // scale a bit with CPU count
+        int cpuBased = Math.max(base, cpus * cpuFactor);
+
+        // keep a sane upper bound for small clients
+        return Math.min(cpuBased, max);
+    }
+
     private void getConfigParameters(Map<String, Object> parameters) {
         minThreadsShared = getConfigParameter(parameters, CONFIG_MIN_THREADS_SHARED, 10);
-        maxThreadsShared = getConfigParameter(parameters, CONFIG_MAX_THREADS_SHARED, 40);
+        maxThreadsShared = getConfigParameter(parameters, CONFIG_MAX_THREADS_SHARED,
+                calculateDefaultMaxThreads(40, 80, 3));
         keepAliveTimeoutShared = getConfigParameter(parameters, CONFIG_KEEP_ALIVE_SHARED, 300);
         minThreadsCustom = getConfigParameter(parameters, CONFIG_MIN_THREADS_CUSTOM, 5);
-        maxThreadsCustom = getConfigParameter(parameters, CONFIG_MAX_THREADS_CUSTOM, 10);
+        maxThreadsCustom = getConfigParameter(parameters, CONFIG_MAX_THREADS_CUSTOM,
+                calculateDefaultMaxThreads(10, 32, 2));
         keepAliveTimeoutCustom = getConfigParameter(parameters, CONFIG_KEEP_ALIVE_CUSTOM, 300);
     }
 
@@ -215,15 +234,26 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         try {
             if (threadPool == null) {
                 threadPool = createThreadPool("common", minThreadsShared, maxThreadsShared, keepAliveTimeoutShared);
+                // The pool is shared between the http client and the web socket client. Start it
+                // ourselves so both Jetty containers treat it as an unmanaged bean and neither
+                // stops it while the other client is still using it (see the shared-bean rule in
+                // Jetty's ContainerLifeCycle javadoc). It is stopped explicitly in deactivate().
+                try {
+                    threadPool.start();
+                    // Set the stop timeout right after starting the pool we now own. We need the
+                    // stop timeout in order to prevent blocking the deactivation of this
+                    // component, see https://github.com/eclipse/smarthome/issues/6632
+                    threadPool.setStopTimeout(0);
+                } catch (Exception e) {
+                    // roll back so a later initialize() retry recreates the pool
+                    // instead of reusing a dead one
+                    threadPool = null;
+                    throw e;
+                }
             }
 
             if (commonHttpClient == null) {
                 commonHttpClient = createHttpClientInternal("common", null, true, threadPool);
-                // we need to set the stop timeout AFTER the client has been started, because
-                // otherwise the Jetty client sets it back to the default value.
-                // We need the stop timeout in order to prevent blocking the deactivation of this
-                // component, see https://github.com/eclipse/smarthome/issues/6632
-                threadPool.setStopTimeout(0);
                 logger.debug("Jetty shared http client created");
             }
 

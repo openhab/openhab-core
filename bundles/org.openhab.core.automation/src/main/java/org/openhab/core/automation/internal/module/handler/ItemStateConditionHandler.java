@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class ItemStateConditionHandler extends BaseConditionModuleHandler implements EventSubscriber {
 
     /**
-     * Constants for Config-Parameters corresponding to Definition in ItemModuleTypeDefinition.json
+     * Constants for Config-Parameters corresponding to Definition in ItemConditions.json
      */
     public static final String ITEM_NAME = "itemName";
     public static final String OPERATOR = "operator";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script.rulesupport.internal.delegates;
 
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -79,7 +80,18 @@ public class SimpleTriggerHandlerCallbackDelegate implements SimpleTriggerHandle
     }
 
     @Override
-    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context) {
+    public void runNow(String uid, boolean considerConditions, @Nullable Map<String, @Nullable Object> context) {
         callback.runNow(uid, considerConditions, context);
+    }
+
+    @Override
+    public Future<Map<String, @Nullable Object>> runAsync(String ruleUID) {
+        return callback.runAsync(ruleUID);
+    }
+
+    @Override
+    public Future<Map<String, @Nullable Object>> runAsync(String ruleUID, boolean considerConditions,
+            @Nullable Map<String, @Nullable Object> context) {
+        return callback.runAsync(ruleUID, considerConditions, context);
     }
 }

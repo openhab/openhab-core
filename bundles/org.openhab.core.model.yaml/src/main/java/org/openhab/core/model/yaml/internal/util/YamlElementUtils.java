@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,12 +12,11 @@
  */
 package org.openhab.core.model.yaml.internal.util;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.AbstractUID;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.types.util.UnitUtils;
 import org.openhab.core.util.StringUtils;
@@ -30,20 +29,7 @@ import org.openhab.core.util.StringUtils;
 @NonNullByDefault
 public class YamlElementUtils {
 
-    public static boolean equalsConfig(@Nullable Map<String, Object> first, @Nullable Map<String, Object> second) {
-        if (first != null && second != null) {
-            return first.size() != second.size() ? false
-                    : first.entrySet().stream().allMatch(e -> equalsConfigValue(e.getValue(), second.get(e.getKey())));
-        } else {
-            return first == null && second == null;
-        }
-    }
-
-    private static boolean equalsConfigValue(Object first, @Nullable Object second) {
-        return (first instanceof List firstList && second instanceof List secondList)
-                ? Arrays.equals(firstList.toArray(), secondList.toArray())
-                : first.equals(second);
-    }
+    private static final Pattern ICON_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
     public static @Nullable String getAdjustedItemType(@Nullable String type) {
         return type == null ? null : StringUtils.capitalize(type);
@@ -78,5 +64,19 @@ public class YamlElementUtils {
         String adjustedType = getAdjustedItemType(type);
         String adjustedDimension = getAdjustedItemDimension(dimension);
         return adjustedType != null ? adjustedType + (adjustedDimension == null ? "" : ":" + adjustedDimension) : null;
+    }
+
+    public static boolean isValidIcon(String icon) {
+        String[] segments = icon.split(AbstractUID.SEPARATOR, -1);
+        int nb = segments.length;
+        if (nb > 3) {
+            return false;
+        }
+        for (int i = 0; i < nb; i++) {
+            if (!ICON_SEGMENT_PATTERN.matcher(segments[i]).matches()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

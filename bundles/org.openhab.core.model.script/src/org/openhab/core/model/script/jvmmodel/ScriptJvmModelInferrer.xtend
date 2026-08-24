@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,6 +27,8 @@ import org.openhab.core.items.Item
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
+import java.util.Map
+import org.openhab.core.events.Event
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -98,9 +100,6 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     @Inject
     ItemRegistry itemRegistry
 
-    @Inject
-    StateAndCommandProvider stateAndCommandProvider
-
     /**
      * Is called for each instance of the first argument's type contained in a resource.
      * 
@@ -116,8 +115,7 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
             val Set<String> fieldNames = newHashSet()
 
-            val types = stateAndCommandProvider.allTypes
-            types.forEach [ type |
+            StateAndCommandProvider::allTypes.forEach [ type |
                 val name = type.toString
                 if (fieldNames.add(name)) {
                     members += script.toField(name, typeRef(type.class)) [
@@ -141,6 +139,9 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
             members += script.toMethod("_script", null) [
                 static = true
+                parameters += script.toParameter("eventObject", typeRef(Event))
+                parameters += script.toParameter("ctx", typeRef(Map, typeRef(String), typeRef(Object)))
+                parameters += script.toParameter("inputs", typeRef(Map, typeRef(String), typeRef(Map, typeRef(String), typeRef(Object))))
                 val inputTypeRef = typeRef(String)
                 parameters += script.toParameter(VAR_INPUT, inputTypeRef)
                 val groupTypeRef = typeRef(Item)

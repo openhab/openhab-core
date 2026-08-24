@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -213,7 +213,7 @@ public class RuleResource implements RESTResource {
                 .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider)); // map matching rules
         if (summary != null && summary) {
             rules = dtoMapper.limitToFields(rules,
-                    "uid,templateUID,templateState,name,visibility,description,status,tags,editable");
+                    "uid,templateUID,templateState,name,visibility,description,status,tags,configuration,editable");
         }
 
         return Response.ok(new Stream2JSONInputStream(rules)).build();
@@ -386,7 +386,7 @@ public class RuleResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID was not found.") })
     public Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
-            @Nullable @Parameter(description = "the context for running this rule", allowEmptyValue = true) Map<String, Object> context)
+            @Nullable @Parameter(description = "the context for running this rule", allowEmptyValue = true) Map<String, @Nullable Object> context)
             throws IOException {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -83,7 +83,8 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
     }
 
     public Collection<Item> getAllFromModel(String modelName) {
-        return itemsMap.getOrDefault(modelName, List.of());
+        Collection<Item> items = itemsMap.get(modelName);
+        return items == null ? List.of() : List.copyOf(items);
     }
 
     @Override
@@ -161,11 +162,8 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
 
     @Override
     public void removedModel(String modelName, Collection<YamlItemDTO> elements) {
-        List<Item> removed = elements.stream().map(elt -> mapItem(elt)).filter(Objects::nonNull).toList();
-
-        Collection<Item> modelItems = itemsMap.getOrDefault(modelName, List.of());
-        removed.forEach(item -> {
-            String name = item.getName();
+        Collection<Item> modelItems = itemsMap.getOrDefault(modelName, new ArrayList<>());
+        elements.stream().map(elt -> elt.name).forEach(name -> {
             modelItems.stream().filter(i -> i.getName().equals(name)).findFirst().ifPresentOrElse(oldItem -> {
                 modelItems.remove(oldItem);
                 logger.debug("model {} removed item {}", modelName, name);
@@ -264,6 +262,7 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
             boolean hasAutoUpdateMetadata = false;
             boolean hasUnitMetadata = false;
             boolean hasStateDescriptionMetadata = false;
+            boolean hasExpireMetadata = false;
             if (itemDTO.metadata != null) {
                 for (Map.Entry<String, YamlMetadataDTO> entry : itemDTO.metadata.entrySet()) {
                     if ("autoupdate".equals(entry.getKey())) {
@@ -272,6 +271,8 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
                         hasUnitMetadata = true;
                     } else if ("stateDescription".equals(entry.getKey())) {
                         hasStateDescriptionMetadata = true;
+                    } else if ("expire".equals(entry.getKey())) {
+                        hasExpireMetadata = true;
                     }
                     Map<String, Object> config = entry.getValue().config;
                     if (itemDTO.format != null && "stateDescription".equals(entry.getKey())
@@ -304,6 +305,11 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
                 YamlMetadataDTO mdDTO = new YamlMetadataDTO();
                 mdDTO.config = Map.of("pattern", itemDTO.format);
                 metadata.put("stateDescription", mdDTO);
+            }
+            if (!hasExpireMetadata && itemDTO.expire != null) {
+                YamlMetadataDTO mdDTO = new YamlMetadataDTO();
+                mdDTO.value = itemDTO.expire;
+                metadata.put("expire", mdDTO);
             }
         }
         metaDataProvider.updateMetadata(modelName, itemName, metadata);

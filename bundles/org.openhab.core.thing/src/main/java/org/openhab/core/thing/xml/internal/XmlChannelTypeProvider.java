@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,7 +38,8 @@ import org.osgi.service.component.annotations.Reference;
  * @author Christoph Weitkamp - factored out common aspects into ThingTypeI18nLocalizationService
  */
 @NonNullByDefault
-@Component(property = { "openhab.scope=core.xml.channels" })
+@Component(service = { ChannelTypeProvider.class, XmlChannelTypeProvider.class }, property = {
+        "openhab.scope=core.xml.channels" })
 public class XmlChannelTypeProvider extends AbstractXmlBasedProvider<UID, ChannelType> implements ChannelTypeProvider {
 
     private final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;

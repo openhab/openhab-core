@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,18 +15,25 @@ package org.openhab.core.model.yaml.internal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.contains;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,8 +47,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.model.yaml.YamlModelListener;
+import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
 import org.openhab.core.model.yaml.test.FirstTypeDTO;
 import org.openhab.core.model.yaml.test.SecondTypeDTO;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
 import org.yaml.snakeyaml.Yaml;
 
@@ -57,10 +66,12 @@ import org.yaml.snakeyaml.Yaml;
 @NonNullByDefault
 public class YamlModelRepositoryImplTest {
     private static final Path SOURCE_PATH = Path.of("src/test/resources/model");
+    private static final Path SOURCE_PATH_ITEMS = Path.of("src/test/resources/model/items");
     private static final String MODEL_NAME = "model.yaml";
     private static final Path MODEL_PATH = Path.of(MODEL_NAME);
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
     private @TempDir @NonNullByDefault({}) Path watchPath;
     private @NonNullByDefault({}) Path fullModelPath;
 
@@ -92,7 +103,7 @@ public class YamlModelRepositoryImplTest {
     public void testFileAddedAfterListeners() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.addYamlModelListener(secondTypeListener2);
@@ -133,7 +144,7 @@ public class YamlModelRepositoryImplTest {
     public void testFileAddedBeforeListeners() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
@@ -173,7 +184,7 @@ public class YamlModelRepositoryImplTest {
 
     @Test
     public void testFileUpdated() throws IOException {
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         Files.copy(SOURCE_PATH.resolve("modelFileUpdatePost.yaml"), fullModelPath);
@@ -210,7 +221,7 @@ public class YamlModelRepositoryImplTest {
             "modelFileUpdateRemovedVersion.yaml" //
     })
     public void testFileRemovedElements(String file) throws IOException {
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         Files.copy(SOURCE_PATH.resolve("modelFileUpdatePost.yaml"), fullModelPath);
@@ -231,7 +242,7 @@ public class YamlModelRepositoryImplTest {
 
     @Test
     public void testFileRemoved() throws IOException {
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
 
         modelRepository.addYamlModelListener(firstTypeListener);
 
@@ -260,7 +271,7 @@ public class YamlModelRepositoryImplTest {
     public void testAddElementToModel() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
@@ -298,7 +309,7 @@ public class YamlModelRepositoryImplTest {
     public void testUpdateElementInModel() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
@@ -325,7 +336,7 @@ public class YamlModelRepositoryImplTest {
     public void testRemoveElementFromModel() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         FirstTypeDTO removed = new FirstTypeDTO("element1", "description1");
@@ -352,7 +363,7 @@ public class YamlModelRepositoryImplTest {
     public void testReadOnlyModelNotUpdated() throws IOException {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         FirstTypeDTO added = new FirstTypeDTO("element3", "description3");
@@ -379,7 +390,7 @@ public class YamlModelRepositoryImplTest {
 
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
@@ -402,7 +413,7 @@ public class YamlModelRepositoryImplTest {
 
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
@@ -425,7 +436,7 @@ public class YamlModelRepositoryImplTest {
 
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
@@ -446,7 +457,7 @@ public class YamlModelRepositoryImplTest {
 
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
-        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.addYamlModelListener(secondTypeListener2);
 
@@ -463,5 +474,166 @@ public class YamlModelRepositoryImplTest {
         Collection<SecondTypeDTO> secondTypeElements = secondTypeCaptor1.getValue();
         assertThat(secondTypeElements, hasSize(1));
         assertThat(secondTypeElements, contains(new SecondTypeDTO("Second1", "Label1")));
+    }
+
+    @Test
+    public void testObjectFormMetadataLoadingAndGeneration() throws IOException {
+        Files.copy(SOURCE_PATH_ITEMS.resolve("itemWithObjectFormMetadata.yaml"), fullModelPath);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
+
+        @SuppressWarnings("unchecked")
+        YamlModelListener<YamlItemDTO> itemListener = mock(YamlModelListener.class);
+        when(itemListener.getElementClass()).thenReturn(YamlItemDTO.class);
+        when(itemListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(itemListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(itemListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        // Verify the listener was called
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<YamlItemDTO>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(itemListener).addedModel(eq(MODEL_NAME), captor.capture());
+
+        // Verify that the valid item with object-form metadata was loaded
+        Collection<YamlItemDTO> items = captor.getValue();
+        assertThat(items, hasSize(1));
+
+        YamlItemDTO item = items.iterator().next();
+        assertThat(item.name, is("ValidItem"));
+        assertThat(item.metadata, is(notNullValue()));
+        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit"));
+        assertThat(item.metadata.get("alexa").value, is("Switchable"));
+        assertThat(item.metadata.get("alexa").config, is(Map.of("setting1", "value1")));
+        assertThat(item.metadata.get("homekit").value, is("Lighting"));
+        assertThat(item.metadata.get("homekit").config, is(nullValue()));
+
+        // Verify YAML output contains object form metadata
+        modelRepository.addElementsToBeGenerated("items", List.copyOf(items));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        modelRepository.generateFileFormat("items", out);
+        String yaml = out.toString();
+        // Should contain object form metadata for 'alexa'
+        assertThat(yaml, containsString("alexa:"));
+        assertThat(yaml, containsString("value: Switchable"));
+        assertThat(yaml, containsOnlyOnce("config:"));
+        assertThat(yaml, containsString("setting1: value1"));
+    }
+
+    @Test
+    public void testShortFormMetadataLoadingAndGeneration() throws IOException {
+        Files.copy(SOURCE_PATH_ITEMS.resolve("itemWithShortFormMetadata.yaml"), fullModelPath);
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
+
+        @SuppressWarnings("unchecked")
+        YamlModelListener<YamlItemDTO> itemListener = mock(YamlModelListener.class);
+        when(itemListener.getElementClass()).thenReturn(YamlItemDTO.class);
+        when(itemListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(itemListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(itemListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        // Verify the listener was called
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<YamlItemDTO>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(itemListener).addedModel(eq(MODEL_NAME), captor.capture());
+        // Verify items were loaded with short-form metadata
+        Collection<YamlItemDTO> items = captor.getValue();
+        assertThat(items, hasSize(1));
+
+        YamlItemDTO item = items.iterator().next();
+        assertThat(item.metadata, is(notNullValue()));
+        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit"));
+        // deserializer converts short-form to value field
+        assertThat(item.metadata.get("alexa").value, is("Switchable"));
+        assertThat(item.metadata.get("alexa").config, is(nullValue()));
+        assertThat(item.metadata.get("homekit").value, is("Lighting"));
+        assertThat(item.metadata.get("homekit").config, is(nullValue()));
+
+        // Verify YAML output contains short form metadata
+        modelRepository.addElementsToBeGenerated("items", List.copyOf(items));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        modelRepository.generateFileFormat("items", out);
+        String yaml = out.toString();
+        assertThat(yaml, containsString("alexa: Switchable"));
+        assertThat(yaml, containsString("homekit: Lighting"));
+        // Should not contain object form keys
+        assertThat(yaml, not(containsString("value:")));
+        assertThat(yaml, not(containsString("config:")));
+    }
+
+    @Test
+    public void testMixedFormMetadataLoadingAndGeneration() throws IOException {
+        Files.copy(SOURCE_PATH_ITEMS.resolve("itemWithMixedFormMetadata.yaml"), fullModelPath);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock, readyServiceMock);
+
+        @SuppressWarnings("unchecked")
+        YamlModelListener<YamlItemDTO> itemListener = mock(YamlModelListener.class);
+        when(itemListener.getElementClass()).thenReturn(YamlItemDTO.class);
+        when(itemListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(itemListener.isDeprecated()).thenReturn(false);
+
+        modelRepository.addYamlModelListener(itemListener);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+
+        // Verify the listener was called
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<YamlItemDTO>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(itemListener).addedModel(eq(MODEL_NAME), captor.capture());
+
+        // Verify that the valid item with mixed-form metadata was loaded
+        Collection<YamlItemDTO> items = captor.getValue();
+        assertThat(items, hasSize(1));
+
+        YamlItemDTO item = items.iterator().next();
+        assertThat(item.name, is("ValidItem"));
+        assertThat(item.metadata, is(notNullValue()));
+        assertThat(item.metadata.keySet(), containsInAnyOrder("alexa", "homekit", "matter"));
+        assertThat(item.metadata.get("alexa").value, is("Switchable"));
+        assertThat(item.metadata.get("alexa").config, is(Map.of("setting1", "value1")));
+        assertThat(item.metadata.get("homekit").value, is("Lighting"));
+        assertThat(item.metadata.get("homekit").config, is(nullValue()));
+        assertThat(item.metadata.get("matter").value, is("OnOffLight"));
+        assertThat(item.metadata.get("matter").config, is(nullValue()));
+
+        // Verify YAML output contains metadata in both forms
+        modelRepository.addElementsToBeGenerated("items", List.copyOf(items));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        modelRepository.generateFileFormat("items", out);
+        String yaml = out.toString();
+        // Should contain object form metadata for 'alexa'
+        assertThat(yaml, containsString("alexa:"));
+        assertThat(yaml, containsString("value: Switchable"));
+        assertThat(yaml, containsOnlyOnce("config:"));
+        assertThat(yaml, containsString("setting1: value1"));
+
+        // Should contain short form metadata for 'homekit' and 'matter'
+        assertThat(yaml, containsString("homekit: Lighting"));
+        assertThat(yaml, containsString("matter: OnOffLight"));
+    }
+
+    private static Matcher<String> containsOnlyOnce(String substring) {
+        return new TypeSafeMatcher<String>() {
+            @Override
+            protected boolean matchesSafely(String item) {
+                return StringUtils.countMatches(item, substring) == 1;
+            }
+
+            @Override
+            @NonNullByDefault({})
+            public void describeTo(Description description) {
+                description.appendText("string appearing exactly once: ").appendValue(substring);
+            }
+
+            @Override
+            @NonNullByDefault({})
+            protected void describeMismatchSafely(String item, Description mismatchDescription) {
+                int count = StringUtils.countMatches(item, substring);
+                mismatchDescription.appendText("was found ").appendValue(count).appendText(" times");
+            }
+        };
     }
 }

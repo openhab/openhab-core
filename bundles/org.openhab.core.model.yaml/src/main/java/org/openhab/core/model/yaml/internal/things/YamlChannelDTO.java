@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,9 +18,12 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 /**
  * The {@link YamlChannelDTO} is a data transfer object used to serialize a channel in a YAML configuration file.
@@ -35,6 +38,7 @@ public class YamlChannelDTO {
     public String itemDimension;
     public String label;
     public String description;
+    @JsonAlias("configuration")
     public Map<@NonNull String, @NonNull Object> config;
 
     public YamlChannelDTO() {
@@ -42,6 +46,14 @@ public class YamlChannelDTO {
 
     public boolean isValid(@NonNull List<@NonNull String> errors, @NonNull List<@NonNull String> warnings) {
         boolean ok = true;
+        if (config != null) {
+            try {
+                new Configuration(config);
+            } catch (IllegalArgumentException e) {
+                errors.add("invalid data in \"config\" field: %s".formatted(e.getMessage()));
+                ok = false;
+            }
+        }
         if (type != null) {
             try {
                 new ChannelTypeUID("dummy", type);
@@ -99,7 +111,7 @@ public class YamlChannelDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, getKind(), getItemType(), label, description);
+        return Objects.hash(type, getKind(), getItemType(), label, description, config);
     }
 
     @Override
@@ -112,7 +124,6 @@ public class YamlChannelDTO {
         YamlChannelDTO other = (YamlChannelDTO) obj;
         return Objects.equals(type, other.type) && getKind() == other.getKind()
                 && Objects.equals(getItemType(), other.getItemType()) && Objects.equals(label, other.label)
-                && Objects.equals(description, other.description)
-                && YamlElementUtils.equalsConfig(config, other.config);
+                && Objects.equals(description, other.description) && Objects.equals(config, other.config);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -154,5 +154,20 @@ public abstract class ModuleImpl implements Module {
      */
     public void setConfiguration(Configuration configuration) {
         this.configuration = new Configuration(configuration);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(60);
+        sb.append(getClass().getSimpleName()).append(" [").append("id=").append(id).append(", ").append("typeUID=")
+                .append(typeUID).append(", ");
+        if (label != null) {
+            sb.append("label=").append(label).append(", ");
+        }
+        if (description != null) {
+            sb.append("description=").append(description).append(", ");
+        }
+        sb.append("configuration=").append(configuration).append("]");
+        return sb.toString();
     }
 }

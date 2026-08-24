@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,11 +19,13 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
-import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ThingUID;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 /**
  * The {@link YamlThingDTO} is a data transfer object used to serialize a thing in a YAML configuration file.
@@ -38,6 +40,7 @@ public class YamlThingDTO implements YamlElement, Cloneable {
     public String bridge;
     public String label;
     public String location;
+    @JsonAlias("configuration")
     public Map<@NonNull String, @NonNull Object> config;
     public Map<@NonNull String, @NonNull YamlChannelDTO> channels;
 
@@ -92,6 +95,15 @@ public class YamlThingDTO implements YamlElement, Cloneable {
                 ok = false;
             }
         }
+        if (config != null) {
+            try {
+                new Configuration(config);
+            } catch (IllegalArgumentException e) {
+                addToList(errors,
+                        "invalid thing \"%s\": invalid data in \"config\" field: %s".formatted(uid, e.getMessage()));
+                ok = false;
+            }
+        }
         if (channels != null) {
             for (Map.Entry<@NonNull String, @NonNull YamlChannelDTO> entry : channels.entrySet()) {
                 String channelId = entry.getKey();
@@ -133,7 +145,7 @@ public class YamlThingDTO implements YamlElement, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(uid, isBridge(), bridge, label, location);
+        return Objects.hash(uid, isBridge(), bridge, label, location, config, channels);
     }
 
     @Override
@@ -146,19 +158,6 @@ public class YamlThingDTO implements YamlElement, Cloneable {
         YamlThingDTO other = (YamlThingDTO) obj;
         return Objects.equals(uid, other.uid) && isBridge() == other.isBridge() && Objects.equals(bridge, other.bridge)
                 && Objects.equals(label, other.label) && Objects.equals(location, other.location)
-                && YamlElementUtils.equalsConfig(config, other.config) && equalsChannels(channels, other.channels);
-    }
-
-    private boolean equalsChannels(@Nullable Map<@NonNull String, @NonNull YamlChannelDTO> first,
-            @Nullable Map<@NonNull String, @NonNull YamlChannelDTO> second) {
-        if (first != null && second != null) {
-            if (first.size() != second.size()) {
-                return false;
-            } else {
-                return first.entrySet().stream().allMatch(e -> e.getValue().equals(second.get(e.getKey())));
-            }
-        } else {
-            return first == null && second == null;
-        }
+                && Objects.equals(config, other.config) && Objects.equals(channels, other.channels);
     }
 }

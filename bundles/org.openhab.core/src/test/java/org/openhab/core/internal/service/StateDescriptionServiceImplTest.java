@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -102,6 +102,26 @@ public class StateDescriptionServiceImplTest {
         assertThat(stateDescription.getMaximum(), is(stateDescriptionFragment1.getMaximum()));
         assertThat(stateDescription.getStep(), is(stateDescriptionFragment1.getStep()));
         assertThat(stateDescription.getPattern(), is(stateDescriptionFragment1.getPattern()));
+    }
+
+    @Test
+    public void testMinValueMaxValueStepMergedWithPatternTwoDescriptionProviders() {
+        StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create()
+                .withMinimum(new BigDecimal(-1)) //
+                .withMaximum(new BigDecimal(-1)) //
+                .withStep(new BigDecimal(-1)).build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
+
+        StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create()
+                .withPattern("pattern2").build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
+
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
+
+        assertThat(stateDescription.getMinimum(), is(stateDescriptionFragment1.getMinimum()));
+        assertThat(stateDescription.getMaximum(), is(stateDescriptionFragment1.getMaximum()));
+        assertThat(stateDescription.getStep(), is(stateDescriptionFragment1.getStep()));
+        assertThat(stateDescription.getPattern(), is(stateDescriptionFragment2.getPattern()));
     }
 
     @Test

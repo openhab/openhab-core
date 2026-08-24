@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,16 +14,22 @@ package org.openhab.core.automation.dto;
 
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize the respective class.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@Schema(name = "Module")
 public class ModuleDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String id;
     public String label;
     public String description;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Map<String, Object> configuration;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String type;
 }

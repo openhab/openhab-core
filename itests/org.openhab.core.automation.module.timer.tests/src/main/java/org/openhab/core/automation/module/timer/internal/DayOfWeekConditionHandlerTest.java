@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,9 +16,8 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
-import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,6 +36,7 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.service.StartLevelService;
+import org.openhab.core.thing.ThingRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +49,10 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
 
+    private static final DateTimeFormatter DOW_FORMATTER = DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH);
+
     private final Logger logger = LoggerFactory.getLogger(DayOfWeekConditionHandlerTest.class);
-    private SimpleDateFormat sdf = new SimpleDateFormat("EEE", Locale.ENGLISH);
-    private String dayOfWeek = sdf.format(Date.from(ZonedDateTime.now().toInstant())).toUpperCase();
+    private String dayOfWeek = ZonedDateTime.now().format(DOW_FORMATTER).toUpperCase(Locale.ENGLISH);
 
     public DayOfWeekConditionHandlerTest() {
         logger.info("Today is {}", dayOfWeek);
@@ -60,9 +61,11 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
     @BeforeEach
     public void before() {
         EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
+        ThingRegistry thingRegistry = Objects.requireNonNull(getService(ThingRegistry.class));
         ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
-                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+                eventPublisher, thingRegistry, itemRegistry, mock(TimeZoneProvider.class),
+                mock(StartLevelService.class));
         mock(CoreModuleHandlerFactory.class);
         registerService(coreModuleHandlerFactory);
     }

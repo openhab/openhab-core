@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,6 +22,8 @@ import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.io.rest.RESTConstants;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a java bean that is used to define the root entry
  * page of the REST interface.
@@ -36,6 +38,7 @@ public class RootBean {
 
     public final String locale;
 
+    @Schema(allowableValues = { "SI", "US" })
     public final String measurementSystem;
 
     public final String timezone;

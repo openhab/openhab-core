@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -155,8 +155,11 @@ public class ConfigurationService {
      * @return old config or null if no old config existed
      * @throws IOException if configuration can not be removed
      */
-    public Configuration delete(String configId) throws IOException {
+    public @Nullable Configuration delete(String configId) throws IOException {
         org.osgi.service.cm.Configuration serviceConfiguration = configurationAdmin.getConfiguration(configId, null);
+        if (serviceConfiguration == null) {
+            return null;
+        }
         Configuration oldConfiguration = toConfiguration(serviceConfiguration.getProperties());
         serviceConfiguration.delete();
         return oldConfiguration;

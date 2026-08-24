@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,6 +26,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.LongSupplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -309,9 +311,20 @@ public class IntegrationTestSupport extends JavaTest {
 
     public class TCPSlaveConnectionFactoryImpl implements TCPSlaveConnectionFactory {
 
+        private final Queue<Socket> acceptedSockets = new ConcurrentLinkedQueue<>();
+
         @Override
         public TCPSlaveConnection create(@NonNullByDefault({}) Socket socket) {
+            acceptedSockets.add(socket);
             return new TCPSlaveConnection(socket, new SpyingModbusTCPTransportFactory());
+        }
+
+        public long countOpenSockets() {
+            return acceptedSockets.stream().filter(s -> !s.isClosed()).count();
+        }
+
+        public void clearAcceptedSockets() {
+            acceptedSockets.clear();
         }
     }
 

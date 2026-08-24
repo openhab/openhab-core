@@ -1,0 +1,7 @@
+version: 1
+items:
+  TestSwitch:
+    type: Switch
+    metadata:
+      alexa: Switchable
+      homekit: Lighting

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -61,7 +61,7 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private static final String ITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/{itemName}/statechanged";
 
-    private static final String GROUP_STATE_EVENT_TOPIC = "openhab/items/{itemName}/{memberName}/stateupdated";
+    private static final String GROUPITEM_STATE_UPDATED_EVENT_TOPIC = "openhab/items/{itemName}/{memberName}/stateupdated";
 
     private static final String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/{itemName}/{memberName}/statechanged";
 
@@ -387,7 +387,7 @@ public class ItemEventFactory extends AbstractEventFactory {
     public static GroupStateUpdatedEvent createGroupStateUpdatedEvent(String groupName, String member, State state,
             @Nullable ZonedDateTime lastStateUpdate, @Nullable String source) {
         assertValidArguments(groupName, member, state, "state");
-        String topic = buildGroupTopic(GROUP_STATE_EVENT_TOPIC, groupName, member);
+        String topic = buildGroupTopic(GROUPITEM_STATE_UPDATED_EVENT_TOPIC, groupName, member);
         ItemStateUpdatedEventPayloadBean bean = new ItemStateUpdatedEventPayloadBean(getStateType(state),
                 state.toFullString(), lastStateUpdate);
         String payload = serializePayload(bean);

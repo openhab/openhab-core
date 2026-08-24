@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,13 +18,12 @@ org.openhab.core.model.rule
 
 import com.google.inject.Binder
 import com.google.inject.name.Names
-import org.openhab.core.model.rule.scoping.RulesImplicitlyImportedTypes
 import org.openhab.core.model.rule.scoping.RulesJavaReflectAccess
 import org.openhab.core.model.script.interpreter.ScriptInterpreter
 import org.openhab.core.model.script.jvmmodel.ScriptTypeComputer
 import org.openhab.core.model.script.scoping.ActionClassLoader
+import org.openhab.core.model.script.scoping.ScriptImplicitlyImportedTypes
 import org.openhab.core.model.script.scoping.ScriptImportSectionNamespaceScopeProvider
-import org.openhab.core.model.script.scoping.StateAndCommandProvider
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeProviderFactory
 import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeScopeProvider
@@ -38,6 +37,8 @@ import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
 import org.eclipse.xtext.xbase.interpreter.IExpressionInterpreter
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
+import org.eclipse.xtext.formatting.IFormatter
+import org.openhab.core.model.rule.formatting.RulesFormatter
 
 /** 
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -54,11 +55,11 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
     }
 
     def Class<? extends ImplicitlyImportedFeatures> bindImplicitlyImportedTypes() {
-        return RulesImplicitlyImportedTypes
+        return ScriptImplicitlyImportedTypes
     }
 
-    def Class<StateAndCommandProvider> bindStateAndCommandProvider() {
-        return StateAndCommandProvider
+    override Class<? extends IFormatter> bindIFormatter() {
+        return RulesFormatter;
     }
 
     override Class<? extends IGenerator> bindIGenerator() {

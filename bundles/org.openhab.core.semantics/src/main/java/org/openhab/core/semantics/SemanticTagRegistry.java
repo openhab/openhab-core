@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -68,6 +68,14 @@ public interface SemanticTagRegistry extends Registry<SemanticTag, String> {
      * @return true if the provided tag is editable, false if not
      */
     boolean isEditable(SemanticTag tag);
+
+    /**
+     * Indicates if a tag is a default tag.
+     *
+     * @param tag a tag in the registry
+     * @return true if the provided tag is a default tag, false if not
+     */
+    boolean isDefault(SemanticTag tag);
 
     /**
      * Removes the provided tag and all tags having the provided tag as ancestor.

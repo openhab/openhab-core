@@ -97,6 +97,7 @@ Property,RSSI,SignalStrength,RSSI,Received Signal Strength Indication,
 Property,Smoke,,Smoke,,Smoke detection
 Property,SoundVolume,,Sound Volume,,Sound volume level
 Property,Speed,,Speed,,
+Property,StateOfCharge,,State of Charge,BatteryLevel,
 Property,Tampered,,Tampered,,Tampering detected
 Property,Temperature,,Temperature,Temperatures,
 Property,Tilt,,Tilt,,"Tilt of a blind, shade or shutter"

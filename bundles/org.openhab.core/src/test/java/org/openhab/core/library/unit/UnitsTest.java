@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
 
 import javax.measure.Quantity;
+import javax.measure.quantity.Area;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
@@ -37,6 +38,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.CalorificValue;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.types.QuantityType;
@@ -112,6 +114,17 @@ public class UnitsTest {
     public void testMmHgUnitSymbol() {
         assertThat(Units.MILLIMETRE_OF_MERCURY.getSymbol(), is("mmHg"));
         assertThat(Units.MILLIMETRE_OF_MERCURY.toString(), is("mmHg"));
+    }
+
+    @Test
+    public void testKiloWattHourPerCubicMetreUnitSymbolAndConversion() {
+        assertThat(Units.KILOWATT_HOUR_PER_CUBICMETRE.toString(), is("kWh/m³"));
+
+        Quantity<CalorificValue> calorificValue = Quantities.getQuantity(new BigDecimal("10.183"),
+                Units.KILOWATT_HOUR_PER_CUBICMETRE);
+        Quantity<Volume> volume = Quantities.getQuantity(new BigDecimal("100"), SIUnits.CUBIC_METRE);
+        Quantity<?> energy = volume.multiply(calorificValue);
+        assertThat(energy.getUnit(), is(Units.KILOWATT_HOUR));
     }
 
     @Test
@@ -382,6 +395,28 @@ public class UnitsTest {
     public void testPpm() {
         QuantityType<Dimensionless> ppm = new QuantityType<>("500 ppm");
         assertEquals("0.05 %", ppm.toUnit(Units.PERCENT).toString());
+    }
+
+    @Test
+    public void testSquareCmConversion() {
+        QuantityType<Area> m2 = new QuantityType<>("1 m²");
+        QuantityType<Area> mm2 = new QuantityType<>("100 mm²");
+        QuantityType<Area> km2 = new QuantityType<>("1 km²");
+
+        assertEquals(10000.0, m2.toUnit("cm²").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1.0, mm2.toUnit("cm²").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1000000.0, km2.toUnit("m²").doubleValue(), DEFAULT_ERROR);
+    }
+
+    @Test
+    public void testCubicCmConversion() {
+        QuantityType<Volume> l = new QuantityType<>("1 l");
+        QuantityType<Volume> cm3 = new QuantityType<>("1000 cm³");
+        QuantityType<Volume> mm3 = new QuantityType<>("1000 mm³");
+
+        assertEquals(1.0, l.toUnit("dm³").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1.0, cm3.toUnit("l").doubleValue(), DEFAULT_ERROR);
+        assertEquals(1.0, mm3.toUnit("cm³").doubleValue(), DEFAULT_ERROR);
     }
 
     @Test

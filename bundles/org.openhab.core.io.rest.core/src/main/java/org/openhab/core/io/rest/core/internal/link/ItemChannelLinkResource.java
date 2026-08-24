@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -321,8 +321,9 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Path("/orphans")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getOrphanLinks", summary = "Get orphan links between items and broken/non-existent thing channels", responses = {
-            @ApiResponse(responseCode = "200", description = "List of broken links") })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BrokenItemChannelLinkDTO.class)))) })
     public Response getOrphanLinks() {
         Map<ItemChannelLink, ItemChannelLinkProblem> orphanLinks = itemChannelLinkRegistry.getOrphanLinks();
         List<BrokenItemChannelLinkDTO> brokenLinks = orphanLinks.entrySet().stream()
@@ -330,6 +331,6 @@ public class ItemChannelLinkResource implements RESTResource {
                         managedItemChannelLinkProvider.get(e.getKey().getUID()) != null), e.getValue()))
                 .toList();
 
-        return Response.ok(brokenLinks).build();
+        return JSONResponse.createResponse(Status.OK, brokenLinks, null);
     }
 }

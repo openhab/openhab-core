@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,11 +17,14 @@ import org.openhab.core.items.dto.GroupItemDTO;
 import org.openhab.core.items.dto.ItemDTO;
 import org.openhab.core.types.StateDescription;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is an enriched data transfer object that is used to serialize group items.
  *
  * @author Dennis Nobel - Initial contribution
  */
+@Schema(name = "EnrichedGroupItem")
 public class EnrichedGroupItemDTO extends EnrichedItemDTO {
 
     public EnrichedGroupItemDTO(ItemDTO itemDTO, EnrichedItemDTO[] members, String link, String state, String lastState,

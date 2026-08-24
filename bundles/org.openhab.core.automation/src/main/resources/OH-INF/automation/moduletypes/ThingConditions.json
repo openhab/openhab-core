@@ -1,0 +1,76 @@
+{
+	"conditions": [
+		{
+			"uid": "core.ThingStatusCondition",
+			"label": "a thing has a given status",
+			"description": "Compares the thing status with the given value",
+			"configDescriptions": [
+				{
+					"name": "thingUID",
+					"type": "TEXT",
+					"context": "thing",
+					"label": "Thing",
+					"description": "The UID of the thing.",
+					"required": true
+				},
+				{
+					"name": "operator",
+					"type": "TEXT",
+					"label": "Operator",
+					"description": "The compare operator (= or !=)",
+					"required": false,
+					"limitToOptions": true,
+					"options": [
+						{
+							"label": "=",
+							"value": "="
+						},
+						{
+							"label": "!=",
+							"value": "!="
+						}
+					],
+					"default": "="
+				},
+				{
+					"name": "status",
+					"type": "TEXT",
+					"label": "Status",
+					"description": "The status of the thing.",
+					"required": true,
+					"limitToOptions": true,
+					"options": [
+						{
+							"label": "UNINITIALIZED",
+							"value": "UNINITIALIZED"
+						},
+						{
+							"label": "INITIALIZING",
+							"value": "INITIALIZING"
+						},
+						{
+							"label": "UNKNOWN",
+							"value": "UNKNOWN"
+						},
+						{
+							"label": "ONLINE",
+							"value": "ONLINE"
+						},
+						{
+							"label": "OFFLINE",
+							"value": "OFFLINE"
+						},
+						{
+							"label": "REMOVING",
+							"value": "REMOVING"
+						},
+						{
+							"label": "REMOVED",
+							"value": "REMOVED"
+						}
+					]
+				}
+			]
+		}
+	]
+}

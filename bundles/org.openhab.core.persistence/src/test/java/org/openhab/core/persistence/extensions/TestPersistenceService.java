@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -39,7 +38,6 @@ import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
-import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.extensions.PersistenceExtensions.RiemannType;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
@@ -51,6 +49,7 @@ import org.openhab.core.types.State;
  * @author Kai Kreuzer - Initial contribution
  * @author Mark Herwege - Allow future values
  * @author Mark Herwege - Adapt test expected value logic for Riemann sums
+ * @author Mark Herwege - use base unit for calculations and results
  */
 @NonNullByDefault
 public class TestPersistenceService implements QueryablePersistenceService {
@@ -89,8 +88,6 @@ public class TestPersistenceService implements QueryablePersistenceService {
     static final int FUTURE_END = BASE_VALUE + 75; // 2100
     static final int AFTER_END = BASE_VALUE + 85; // 2110
     static final DecimalType STATE = new DecimalType(HISTORIC_END);
-
-    static final double KELVIN_OFFSET = 273.15;
 
     private final ItemRegistry itemRegistry;
 
@@ -221,17 +218,12 @@ public class TestPersistenceService implements QueryablePersistenceService {
     }
 
     @Override
-    public Set<PersistenceItemInfo> getItemInfo() {
-        return Set.of();
-    }
-
-    @Override
     public String getLabel(@Nullable Locale locale) {
         return "Test Label";
     }
 
     @Override
-    public List<PersistenceStrategy> getDefaultStrategies() {
+    public List<PersistenceStrategy> getSuggestedStrategies() {
         return List.of();
     }
 
@@ -241,33 +233,20 @@ public class TestPersistenceService implements QueryablePersistenceService {
     }
 
     static DecimalType value(long year) {
-        return value(year, false);
-    }
-
-    private static DecimalType value(long year, boolean kelvinOffset) {
         if (year < HISTORIC_START) {
             return DecimalType.ZERO;
         } else if (year <= HISTORIC_END) {
-            return new DecimalType(year + (kelvinOffset ? KELVIN_OFFSET : 0));
+            return new DecimalType(year);
         } else if (year < FUTURE_START) {
-            return new DecimalType(HISTORIC_END + (kelvinOffset ? KELVIN_OFFSET : 0));
+            return new DecimalType(HISTORIC_END);
         } else if (year <= FUTURE_END) {
-            return new DecimalType(year + (kelvinOffset ? KELVIN_OFFSET : 0));
+            return new DecimalType(year);
         } else {
-            return new DecimalType(FUTURE_END + (kelvinOffset ? KELVIN_OFFSET : 0));
+            return new DecimalType(FUTURE_END);
         }
     }
 
     static double testRiemannSum(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type) {
-        return testRiemannSum(beginYear, endYear, type, false);
-    }
-
-    static double testRiemannSumCelsius(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type) {
-        return testRiemannSum(beginYear, endYear, type, true);
-    }
-
-    private static double testRiemannSum(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type,
-            boolean kelvinOffset) {
         ZonedDateTime now = ZonedDateTime.now();
         int begin = beginYear != null ? (beginYear < HISTORIC_START ? HISTORIC_START : beginYear) : now.getYear() + 1;
         int end = endYear != null ? endYear : now.getYear();
@@ -284,7 +263,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                 }
                 while (index < end) {
                     int bucketStart = index;
-                    double value = value(index, kelvinOffset).doubleValue();
+                    double value = value(index).doubleValue();
                     while ((index < end - 1) && (value(index).longValue() == value(index + 1).longValue())) {
                         index++;
                     }
@@ -314,7 +293,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                         index++;
                     }
                     index++;
-                    double value = value(index, kelvinOffset).doubleValue();
+                    double value = value(index).doubleValue();
                     duration += Duration
                             .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
                                     ZonedDateTime.of(index, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
@@ -336,12 +315,12 @@ public class TestPersistenceService implements QueryablePersistenceService {
                 }
                 while (index < end) {
                     int bucketStart = index;
-                    double value = value(index, kelvinOffset).doubleValue();
+                    double value = value(index).doubleValue();
                     while ((index < end - 1) && (value(index).longValue() == value(index + 1).longValue())) {
                         index++;
                     }
                     index++;
-                    value = (value + value(index, kelvinOffset).doubleValue()) / 2.0;
+                    value = (value + value(index).doubleValue()) / 2.0;
                     duration += Duration
                             .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
                                     ZonedDateTime.of(index, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
@@ -358,7 +337,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
             case MIDPOINT:
                 int nextIndex = begin;
                 boolean startBucket = true;
-                double startValue = value(begin, kelvinOffset).doubleValue();
+                double startValue = value(begin).doubleValue();
                 if (beginYear == null) {
                     duration = Duration.between(now, ZonedDateTime.of(begin, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
                             .toSeconds();
@@ -369,7 +348,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                         index++;
                     }
                     index++;
-                    double value = value(index, kelvinOffset).doubleValue();
+                    double value = value(index).doubleValue();
                     duration += Duration
                             .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
                                     ZonedDateTime.of(index, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
@@ -397,7 +376,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                     sum += value * (duration + nextDuration) / 2.0;
                     duration = 0;
                 }
-                double endValue = value(end, kelvinOffset).doubleValue();
+                double endValue = value(end).doubleValue();
                 long endDuration = nextDuration;
                 sum += endValue * endDuration / 2.0;
                 break;

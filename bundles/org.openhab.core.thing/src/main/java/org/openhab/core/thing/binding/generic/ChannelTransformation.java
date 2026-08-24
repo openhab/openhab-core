@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -167,7 +169,11 @@ public class ChannelTransformation {
                 try {
                     return Optional.ofNullable(service.transform(function, value));
                 } catch (TransformationException e) {
-                    logger.debug("Applying {} failed: {}", this, e.getMessage());
+                    if (e.getCause() instanceof ScriptException ex) {
+                        logger.error("Applying {} failed: {}", this, ex.getMessage());
+                    } else {
+                        logger.debug("Applying {} failed: {}", this, e.getMessage());
+                    }
                 }
             } else {
                 logger.warn("Failed to use {}, service not found", this);

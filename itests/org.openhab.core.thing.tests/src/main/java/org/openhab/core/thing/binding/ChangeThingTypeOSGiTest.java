@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -163,7 +163,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         ThingTypeRegistry thingTypeRegistry = mock(ThingTypeRegistry.class);
         when(thingTypeRegistry.getThingType(any(), any()))
                 .thenAnswer(invocation -> thingTypes.get(invocation.getArgument(0)));
-        registerService(thingTypeRegistry);
+        registerService(thingTypeRegistry, ThingTypeRegistry.class.getName());
 
         ConfigDescriptionProvider configDescriptionProvider = mock(ConfigDescriptionProvider.class);
         when(configDescriptionProvider.getConfigDescription(any(), any()))

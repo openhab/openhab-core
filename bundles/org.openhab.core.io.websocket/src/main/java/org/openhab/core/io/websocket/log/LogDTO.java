@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -45,6 +45,6 @@ public class LogDTO implements Comparable<LogDTO> {
 
     @Override
     public int compareTo(LogDTO o) {
-        return (int) (sequence - o.sequence);
+        return Long.compare(sequence, o.sequence);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -45,10 +45,10 @@ import org.osgi.framework.BundleContext;
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
 public class DateTimeTriggerHandlerTest {
-    private @NonNullByDefault({}) @Mock Trigger mockTrigger;
-    private @NonNullByDefault({}) @Mock ItemRegistry mockItemRegistry;
-    private @NonNullByDefault({}) @Mock BundleContext mockBundleContext;
-    private @NonNullByDefault({}) @Mock CronScheduler mockScheduler;
+    private @Mock @NonNullByDefault({}) Trigger mockTrigger;
+    private @Mock @NonNullByDefault({}) ItemRegistry mockItemRegistry;
+    private @Mock @NonNullByDefault({}) BundleContext mockBundleContext;
+    private @Mock @NonNullByDefault({}) CronScheduler mockScheduler;
 
     private static final String ITEM_NAME = "myItem";
     private final DateTimeItem item = new DateTimeItem(ITEM_NAME);

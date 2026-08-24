@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,8 +14,10 @@ package org.openhab.core.voice.internal;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.stream.Stream;
@@ -59,6 +61,11 @@ import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.conversation.Conversation;
+import org.openhab.core.voice.text.conversation.ConversationException;
+import org.openhab.core.voice.text.conversation.ConversationRole;
+import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -358,17 +365,31 @@ public class DialogProcessor implements KSListener, STTListener {
                 logger.debug("Text recognized: {}", question);
                 toggleProcessing(false);
                 eventListener.onBeforeDialogInterpretation(dialogContext);
-                String answer = "";
+                Conversation conversation = dialogContext.conversation();
                 String error = null;
-                for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
-                    try {
-                        answer = interpreter.interpret(dialogContext.locale(), question, dialogContext);
-                        logger.debug("Interpretation result: {}", answer);
-                        error = null;
-                        break;
-                    } catch (InterpretationException e) {
-                        logger.debug("Interpretation exception: {}", e.getMessage());
-                        error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
+                String answer = "";
+                try {
+                    conversation.addMessage(ConversationRole.USER, question);
+                } catch (ConversationException e) {
+                    logger.debug("Unable to add message to conversation: {}", e.getMessage(), e);
+                    error = "Unable to add message to conversation: " + e.getMessage();
+                }
+                if (error == null) {
+                    Collection<LLMTool> tools = dialogContext.llmTools();
+                    InterpreterContext interpreterContext = new InterpreterContext(conversation, tools,
+                            dialogContext.locationItem(),
+                            eventListener.enrichSystemPrompt(dialogContext.systemPrompt(), dialogContext.locale()));
+                    for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
+                        try {
+                            answer = interpreter.interpret(dialogContext.locale(), interpreterContext);
+                            error = null;
+                            logger.debug("Interpretation result from interpreter '{}': {}", interpreter.getId(),
+                                    answer);
+                            break;
+                        } catch (InterpretationException e) {
+                            logger.debug("Interpretation exception: {}", e.getMessage());
+                            error = Objects.requireNonNullElse(e.getMessage(), "Unexpected error");
+                        }
                     }
                 }
                 say(error != null ? error : answer);
@@ -512,5 +533,14 @@ public class DialogProcessor implements KSListener, STTListener {
          * @param context used by the dialog processor
          */
         void onDialogStopped(DialogContext context);
+
+        /**
+         * Enriches the system prompt with additional context, e.g., available items.
+         *
+         * @param baseSystemPrompt the base system prompt
+         * @param locale the locale to use for command options localization
+         * @return the system prompt with the additional context
+         */
+        String enrichSystemPrompt(@Nullable String baseSystemPrompt, @Nullable Locale locale);
     }
 }

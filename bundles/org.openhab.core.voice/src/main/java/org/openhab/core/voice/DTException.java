@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,7 +31,6 @@ public class DTException extends Exception {
      * Constructs a new exception with null as its detail message.
      */
     public DTException() {
-        super();
     }
 
     /**

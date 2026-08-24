@@ -1,0 +1,13 @@
+version: 1
+items:
+  # This item has metadata in both short and object forms
+  ValidItem:
+    type: Switch
+    metadata:
+      alexa:
+        value: Switchable
+        config:
+          setting1: value1
+      homekit:
+        value: Lighting
+      matter: OnOffLight

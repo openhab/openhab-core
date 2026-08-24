@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.providersupport.internal.ProviderRegistry;
+import org.openhab.core.automation.module.script.providersupport.ProviderRegistry;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;

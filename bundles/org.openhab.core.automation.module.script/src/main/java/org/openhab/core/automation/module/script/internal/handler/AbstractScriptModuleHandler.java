@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.automation.module.script.internal.handler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.script.Compilable;
@@ -46,7 +45,8 @@ import org.slf4j.LoggerFactory;
  * @param <T> the type of module the concrete handler can handle
  */
 @NonNullByDefault
-public abstract class AbstractScriptModuleHandler<T extends Module> extends BaseModuleHandler<T> {
+public abstract class AbstractScriptModuleHandler<T extends Module> extends BaseModuleHandler<T>
+        implements ScriptEngineManager.FactoryChangeListener {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractScriptModuleHandler.class);
 
@@ -65,8 +65,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     private final String engineIdentifier;
 
-    private Optional<ScriptEngine> scriptEngine = Optional.empty();
-    private Optional<CompiledScript> compiledScript = Optional.empty();
+    private @Nullable ScriptEngine scriptEngine = null;
+    private @Nullable CompiledScript compiledScript = null;
     private final String type;
     protected final String script;
 
@@ -80,6 +80,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
         this.type = getValidConfigParameter(CONFIG_SCRIPT_TYPE, module.getConfiguration(), module.getId(), false);
         this.script = getValidConfigParameter(CONFIG_SCRIPT, module.getConfiguration(), module.getId(), true);
+
+        scriptEngineManager.addFactoryChangeListener(this);
     }
 
     private static String getValidConfigParameter(String parameter, Configuration config, String moduleId,
@@ -98,7 +100,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
      * {@link Compilable}.
      */
     protected void compileScript() throws ScriptException {
-        if (compiledScript.isPresent() || script.isEmpty()) {
+        if (compiledScript != null || script.isEmpty()) {
             return;
         }
         if (!scriptEngineManager.isSupported(type)) {
@@ -107,18 +109,18 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
                     type, engineIdentifier);
             return;
         }
-        Optional<ScriptEngine> engine = getScriptEngine();
-        if (engine.isPresent()) {
-            ScriptEngine scriptEngine = engine.get();
-            if (scriptEngine instanceof Compilable compilable) {
+        ScriptEngine engine = getScriptEngine();
+        if (engine != null) {
+            if (engine instanceof Compilable compilable) {
                 logger.debug("Pre-compiling script of rule with UID '{}'", ruleUID);
-                compiledScript = Optional.ofNullable(compilable.compile(script));
+                compiledScript = compilable.compile(script);
             }
         }
     }
 
     @Override
     public void dispose() {
+        scriptEngineManager.removeFactoryChangeListener(this);
         scriptEngineManager.removeEngine(engineIdentifier);
     }
 
@@ -127,8 +129,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
      */
     public synchronized void resetScriptEngine() {
         scriptEngineManager.removeEngine(engineIdentifier);
-        scriptEngine = Optional.empty();
-        compiledScript = Optional.empty();
+        scriptEngine = null;
+        compiledScript = null;
     }
 
     /**
@@ -159,22 +161,22 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     /**
      * Get the script engine instance used by this module handler.
      *
-     * @return the script engine instance if available, otherwise Optional.empty()
+     * @return the script engine instance if available, otherwise null
      */
-    protected Optional<ScriptEngine> getScriptEngine() {
-        return scriptEngine.isPresent() ? scriptEngine : createScriptEngine();
+    protected @Nullable ScriptEngine getScriptEngine() {
+        return scriptEngine != null ? scriptEngine : createScriptEngine();
     }
 
     /**
      * Creates a new script engine for the type defined in the module configuration.
      *
-     * @return the script engine if available, otherwise Optional.empty()
+     * @return the script engine if available, otherwise null
      */
-    private Optional<ScriptEngine> createScriptEngine() {
+    private @Nullable ScriptEngine createScriptEngine() {
         ScriptEngineContainer container = scriptEngineManager.createScriptEngine(type, engineIdentifier);
 
         if (container != null) {
-            scriptEngine = Optional.ofNullable(container.getScriptEngine());
+            scriptEngine = container.getScriptEngine();
             // Inject the module type id into the script context early, so engines can access it before script
             // invocation.
             ScriptContext scriptContext = container.getScriptEngine().getContext();
@@ -188,7 +190,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             return scriptEngine;
         } else {
             logger.debug("No engine available for script type '{}' in action '{}'.", type, module.getId());
-            return Optional.empty();
+            return null;
         }
     }
 
@@ -204,8 +206,14 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
         // Add the rule's UID to the context and make it available as "ctx".
         // Note: We don't use "context" here as it doesn't work on all JVM versions!
-        final Map<String, Object> contextNew = new HashMap<>();
-        // add the single context entries without their prefix to contextNew
+        final Map<String, Object> contextNew = new HashMap<>(context);
+        contextNew.put("ruleUID", this.ruleUID);
+        executionContext.setAttribute("ctx", contextNew, ScriptContext.ENGINE_SCOPE);
+
+        // Add the rule's UID to the global namespace.
+        executionContext.setAttribute("ruleUID", this.ruleUID, ScriptContext.ENGINE_SCOPE);
+
+        // add the single context entries without their prefix to the scope
         for (Entry<String, ?> entry : context.entrySet()) {
             Object value = entry.getValue();
             String key = entry.getKey();
@@ -213,15 +221,6 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             if (dotIndex != -1) {
                 key = key.substring(dotIndex + 1);
             }
-            contextNew.put(key, value);
-        }
-        contextNew.put("ruleUID", this.ruleUID);
-        executionContext.setAttribute("ctx", contextNew, ScriptContext.ENGINE_SCOPE);
-
-        // add the single contextNew entries to the scope
-        for (Entry<String, ?> entry : contextNew.entrySet()) {
-            Object value = entry.getValue();
-            String key = entry.getKey();
             executionContext.setAttribute(key, value, ScriptContext.ENGINE_SCOPE);
         }
     }
@@ -257,9 +256,9 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             return null;
         }
         try {
-            if (compiledScript.isPresent()) {
+            if (compiledScript != null) {
                 logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);
-                return compiledScript.get().eval(engine.getContext());
+                return compiledScript.eval(engine.getContext());
             }
             logger.debug("Executing script of rule with UID '{}'", ruleUID);
             return engine.eval(script);
@@ -268,5 +267,21 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
                     logger.isDebugEnabled() ? e : null);
         }
         return null;
+    }
+
+    @Override
+    public void factoryAdded(String scriptType) {
+        // we don't need to process this, but could attempt to compile the script here
+    }
+
+    @Override
+    public void factoryRemoved(String scriptType) {
+        if (!type.equals(scriptType)) {
+            return;
+        }
+        logger.debug(
+                "ScriptEngineFactory for script type '{}' has been added, resetting ScriptEngine of rule with UID '{}'.",
+                type, ruleUID);
+        resetScriptEngine();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -362,9 +362,12 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     public @Nullable Item remove(String itemName, boolean recursive) {
-        return ((ManagedItemProvider) getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available")))
-                .remove(itemName, recursive);
+        @Nullable
+        ManagedItemProvider mp = (ManagedItemProvider) getManagedProvider();
+        if (mp == null) {
+            throw new IllegalStateException("ManagedProvider is not available");
+        }
+        return mp.remove(itemName, recursive);
     }
 
     @Override

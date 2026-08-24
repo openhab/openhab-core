@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,13 +12,17 @@
  */
 package org.openhab.core.items.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize group functions.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Schema(name = "GroupFunction")
 public class GroupFunctionDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String name;
     public String[] params;
 }

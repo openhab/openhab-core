@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,12 +26,30 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public interface Console {
 
+    /**
+     * Prints formatted output to the console.
+     * This method formats the given string using the specified arguments and prints it to the console
+     * without appending a newline.
+     *
+     * @param format the format string (following {@link String#format} syntax)
+     * @param args the arguments referenced by the format specifiers in the format string
+     */
     default void printf(String format, Object... args) {
         print(String.format(format, args));
     }
 
+    /**
+     * Prints a string to the console without appending a newline.
+     *
+     * @param s the string to print
+     */
     void print(String s);
 
+    /**
+     * Prints a string to the console followed by a newline.
+     *
+     * @param s the string to print
+     */
     void println(String s);
 
     /**

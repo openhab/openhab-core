@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -266,6 +266,6 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
         ThingTypeRegistry thingTypeRegistry = mock(ThingTypeRegistry.class);
         when(thingTypeRegistry.getThingType(any(ThingTypeUID.class))).thenReturn(thingType);
-        registerService(thingTypeRegistry);
+        registerService(thingTypeRegistry, ThingTypeRegistry.class.getName());
     }
 }

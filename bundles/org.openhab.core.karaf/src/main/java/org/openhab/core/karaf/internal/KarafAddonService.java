@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -135,6 +136,7 @@ public class KarafAddonService implements AddonService {
 
         if (addonInfo != null) {
             addon = addon.withLabel(addonInfo.getName()).withDescription(addonInfo.getDescription())
+                    .withKeywords(Objects.requireNonNullElse(addonInfo.getKeywords(), ""))
                     .withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
                     .withLink(getDefaultDocumentationLink(type, name))
                     .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI());

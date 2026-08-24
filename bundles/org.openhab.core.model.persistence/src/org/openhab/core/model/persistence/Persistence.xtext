@@ -6,9 +6,7 @@ generate persistence "https://openhab.org/model/Persistence"
 
 PersistenceModel:
 	{PersistenceModel}
-	('Strategies' '{' strategies+=Strategy*
-		('default' '=' defaults+=[Strategy|ID] (',' defaults+=[Strategy|ID])*)?
-	'}')?
+	('Strategies' '{' strategies+=Strategy* '}')?
 	('Filters' '{' filters+=Filter* '}')?
 	('Items' '{' configs+=PersistenceConfiguration* '}')?
 	('Aliases' '{' aliases+=AliasConfiguration* '}')?
@@ -59,9 +57,8 @@ NotIncludeFilter:
 PersistenceConfiguration:
 	items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig)
 		(',' items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig))* 
-	((':' ('strategy' '=' strategies+=[Strategy|ID] (',' strategies+=[Strategy|ID])*)? 
+	(':' ('strategy' '=' strategies+=[Strategy|ID] (',' strategies+=[Strategy|ID])*)
 			('filter' '=' filters+=[Filter|ID] (',' filters+=[Filter|ID])*)?) 
-		| ';')
 ;
 
 AllConfig:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,7 +27,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.audio.*;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.FixedLengthAudioStream;
+import org.openhab.core.audio.PipedAudioStream;
+import org.openhab.core.audio.SizeableAudioStream;
+import org.openhab.core.audio.UnsupportedAudioFormatException;
+import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.openhab.core.library.types.PercentType;
 import org.slf4j.Logger;

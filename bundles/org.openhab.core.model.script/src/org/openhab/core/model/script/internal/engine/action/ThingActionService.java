@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -56,8 +56,12 @@ public class ThingActionService implements ActionService {
     }
 
     public static @Nullable ThingStatusInfo getThingStatusInfo(String thingUid) {
+        ThingRegistry registry = thingRegistry;
+        if (registry == null) {
+            return null;
+        }
         ThingUID uid = new ThingUID(thingUid);
-        Thing thing = thingRegistry.get(uid);
+        Thing thing = registry.get(uid);
 
         if (thing != null) {
             return thing.getStatusInfo();
@@ -75,12 +79,34 @@ public class ThingActionService implements ActionService {
      * @return actions the actions instance or null, if not available
      */
     public static @Nullable ThingActions getActions(String scope, String thingUid) {
+        ThingRegistry registry = thingRegistry;
+        if (registry == null) {
+            return null;
+        }
         ThingUID uid = new ThingUID(thingUid);
-        Thing thing = thingRegistry.get(uid);
+        Thing thing = registry.get(uid);
         if (thing != null) {
             ThingHandler handler = thing.getHandler();
             if (handler != null) {
                 return THING_ACTIONS_MAP.get(getKey(scope, thingUid));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets an actions instance of a certain scope for a given {@link Thing}.
+     *
+     * @param thing the {@link Thing}.
+     * @param scope the action scope.
+     *
+     * @return actions the actions instance or null, if not available.
+     */
+    public static @Nullable ThingActions getActions(@Nullable Thing thing, String scope) {
+        if (thing != null) {
+            ThingHandler handler = thing.getHandler();
+            if (handler != null) {
+                return THING_ACTIONS_MAP.get(getKey(scope, thing.getUID().getAsString()));
             }
         }
         return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,6 +31,10 @@ public class StringsCompleter implements ConsoleCommandCompleter {
     private final SortedSet<String> strings;
     private final boolean caseSensitive;
 
+    /**
+     * Creates a case-insensitive StringsCompleter with an empty set of strings.
+     * Strings can be added later by modifying the set returned from {@link #getStrings()}.
+     */
     public StringsCompleter() {
         this(List.of(), false);
     }

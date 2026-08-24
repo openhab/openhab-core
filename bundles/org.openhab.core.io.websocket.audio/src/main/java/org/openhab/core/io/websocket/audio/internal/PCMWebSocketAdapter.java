@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.core.SecurityContext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -98,8 +100,8 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     }
 
     @Override
-    public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
-            ServletUpgradeResponse servletUpgradeResponse) {
+    public @Nullable Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
+            ServletUpgradeResponse servletUpgradeResponse, SecurityContext securityContext) {
         logger.debug("creating connection");
         return new PCMWebSocketConnection(this, executor);
     }

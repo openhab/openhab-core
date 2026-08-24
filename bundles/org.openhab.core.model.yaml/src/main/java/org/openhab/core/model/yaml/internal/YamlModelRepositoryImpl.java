@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,13 +38,23 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.dto.ModularDTO;
+import org.openhab.core.io.dto.SerializationException;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
+import org.openhab.core.model.yaml.internal.rules.YamlRuleDTO;
+import org.openhab.core.model.yaml.internal.rules.YamlRuleTemplateDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
+import org.openhab.core.model.yaml.internal.sitemaps.YamlSitemapDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
+import org.openhab.core.model.yaml.internal.uicomponents.YamlBlocksDTO;
+import org.openhab.core.model.yaml.internal.uicomponents.YamlPageDTO;
+import org.openhab.core.model.yaml.internal.uicomponents.YamlWidgetDTO;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.service.component.annotations.Activate;
@@ -81,6 +91,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Laurent Garnier - new parameters to retrieve errors and warnings when loading a file
  * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createIsolatedModel and
  *         removeIsolatedModel
+ * @author Jimmy Tanagra - Add YamlPageDTO and YamlWidgetDTO
+ * @author Laurent Garnier - Add YamlSitemapDTO
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -89,21 +101,29 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
+            getElementName(YamlRuleDTO.class), // "rules"
+            getElementName(YamlRuleTemplateDTO.class), // "ruleTemplates"
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
-            getElementName(YamlItemDTO.class) // "items"
+            getElementName(YamlItemDTO.class), // "items"
+            getElementName(YamlPageDTO.class), // "pages"
+            getElementName(YamlWidgetDTO.class), // "widgets"
+            getElementName(YamlSitemapDTO.class), // "sitemaps"
+            getElementName(YamlBlocksDTO.class) // "blocks"
     );
 
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
     private static final String UNWANTED_EXCEPTION_TEXT2 = "\\n \\(through reference chain: .*";
 
-    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "yaml").map(Path::of).toList();
+    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "sitemaps", "rules", "yaml")
+            .map(Path::of).toList();
 
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
     private final WatchService watchService;
     private final Path mainWatchPath;
     private final ObjectMapper objectMapper;
+    private final ReadyService readyService;
 
     private final Map<String, List<YamlModelListener<?>>> elementListeners = new ConcurrentHashMap<>();
     // all model nodes, ordered by model name (full path as string) and type
@@ -111,26 +131,32 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private final Map<String, List<YamlElement>> elementsToGenerate = new ConcurrentHashMap<>();
 
+    private boolean allFilesVisited;
     private int counter;
 
     @Activate
-    public YamlModelRepositoryImpl(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
+    public YamlModelRepositoryImpl(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService,
+            final @Reference ReadyService readyService) {
         YAMLFactory yamlFactory = YAMLFactory.builder() //
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER) // omit "---" at file start
                 .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
                 .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
                 .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
+                .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as
+                                                                               // strings
                 .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build(); // do not parse ON/OFF/... as
                                                                                          // booleans
         this.objectMapper = new ObjectMapper(yamlFactory);
         objectMapper.findAndRegisterModules();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
+        objectMapper.setDefaultPropertyInclusion(Include.NON_NULL);
         objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
 
         this.watchService = watchService;
         this.mainWatchPath = watchService.getWatchPath();
+        this.readyService = readyService;
+        this.allFilesVisited = false;
 
         watchService.registerListener(this, WATCHED_PATHS);
 
@@ -171,6 +197,14 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             } catch (IOException e) {
                 logger.warn("Could not list YAML files in '{}', models might be missing: {}", watchPath,
                         e.getMessage());
+            }
+        });
+
+        this.allFilesVisited = true;
+
+        KNOWN_ELEMENTS.forEach(elementName -> {
+            if (!getElementListeners(elementName).isEmpty()) {
+                markReady(elementName);
             }
         });
     }
@@ -229,9 +263,17 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return false;
         }
         if (kind == Kind.CREATE) {
-            logger.info("Adding YAML model {}", modelName);
+            if (isIsolatedModel(modelName)) {
+                logger.debug("Adding YAML model {}", modelName);
+            } else {
+                logger.info("Adding YAML model {}", modelName);
+            }
         } else {
-            logger.info("Updating YAML model {}", modelName);
+            if (isIsolatedModel(modelName)) {
+                logger.debug("Updating YAML model {}", modelName);
+            } else {
+                logger.info("Updating YAML model {}", modelName);
+            }
         }
         JsonNode readOnlyNode = fileContent.get(READ_ONLY);
         boolean readOnly = readOnlyNode == null || readOnlyNode.asBoolean(false);
@@ -243,7 +285,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
         List<String> newElementNames = new ArrayList<>();
         // get sub-elements
-        Iterator<Map.Entry<String, JsonNode>> it = fileContent.fields();
+        Iterator<Map.Entry<String, JsonNode>> it = fileContent.properties().iterator();
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> element = it.next();
             String elementName = element.getKey();
@@ -337,7 +379,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         if (removedModel == null) {
             return;
         }
-        logger.info("Removing YAML model {}", modelName);
+        if (isIsolatedModel(modelName)) {
+            logger.debug("Removing YAML model {}", modelName);
+        } else {
+            logger.info("Removing YAML model {}", modelName);
+        }
         int version = removedModel.getVersion();
         for (Map.Entry<String, @Nullable JsonNode> modelEntry : removedModel.getNodes().entrySet()) {
             String elementName = modelEntry.getKey();
@@ -386,6 +432,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 logger.info("YAML model {}: {}", modelName, warning);
             });
         });
+
+        if (allFilesVisited) {
+            markReady(elementName);
+        }
     }
 
     public void removeYamlModelListener(YamlModelListener<? extends YamlElement> listener) {
@@ -394,6 +444,12 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             v.remove(listener);
             return v.isEmpty() ? null : v;
         });
+    }
+
+    private void markReady(String elementName) {
+        ReadyMarker marker = new ReadyMarker("yaml", elementName.toLowerCase());
+        logger.debug("Create ready marker {}", marker);
+        readyService.markReady(marker);
     }
 
     private void checkElementNames(String modelName, YamlModelWrapper model, List<String> warnings) {
@@ -593,7 +649,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             errors.add("Failed to process model: %s".formatted(e.getMessage()));
             valid = false;
         }
-        return valid ? modelName : null;
+        if (!valid) {
+            removeModel(modelName);
+            return null;
+        }
+        return modelName;
     }
 
     @Override
@@ -673,21 +733,24 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 @Nullable
                 T elt = null;
                 JsonNode node = mapNode.get(id);
-                if (node.isEmpty()) {
-                    try {
-                        elt = elementClass.getDeclaredConstructor().newInstance();
+                if ((node.isContainerNode() && node.isEmpty()) || node.isNull()
+                        || (node.isTextual() && node.asText().isBlank())) {
+                    elt = createElement(elementClass, errors);
+                    if (elt != null) {
                         elt.setId(id);
-                    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                            | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                        if (errors != null) {
-                            errors.add("could not create new instance of %s".formatted(elementClass.getSimpleName()));
-                        }
                     }
                 } else {
                     try {
-                        elt = objectMapper.treeToValue(node, elementClass);
-                        elt.setId(id);
-                    } catch (JsonProcessingException e) {
+                        if (ModularDTO.class.isAssignableFrom(elementClass)) {
+                            elt = modularToDto(node, elementClass, errors);
+                            if (elt != null) {
+                                elt.setId(id);
+                            }
+                        } else {
+                            elt = objectMapper.treeToValue(node, elementClass);
+                            elt.setId(id);
+                        }
+                    } catch (JsonProcessingException | SerializationException e) {
                         if (errors != null) {
                             String msg = e.getMessage();
                             errors.add("could not parse element with ID %s to %s: %s".formatted(id,
@@ -704,5 +767,30 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             }
         }
         return elements;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends YamlElement> @Nullable T modularToDto(JsonNode node, Class<T> elementClass,
+            @Nullable List<String> errors) throws SerializationException {
+        @Nullable
+        T result = createElement(elementClass, errors);
+        if (result != null) {
+            result = (T) ((ModularDTO<?, ObjectMapper, JsonNode>) result).toDto(node, objectMapper);
+        }
+        return result;
+    }
+
+    private <T extends YamlElement> @Nullable T createElement(Class<T> elementClass, @Nullable List<String> errors) {
+        @Nullable
+        T result = null;
+        try {
+            result = elementClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            if (errors != null) {
+                errors.add("could not create new instance of %s".formatted(elementClass.getSimpleName()));
+            }
+        }
+        return result;
     }
 }

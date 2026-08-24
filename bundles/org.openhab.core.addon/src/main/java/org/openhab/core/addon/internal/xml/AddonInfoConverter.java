@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -87,6 +87,8 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
                 "Add-on description is null or empty");
 
         AddonInfo.Builder addonInfo = AddonInfo.builder(id, type).withName(name).withDescription(description);
+
+        addonInfo.withKeywords((String) nodeIterator.nextValue("keywords", false));
         addonInfo.withConnection((String) nodeIterator.nextValue("connection", false));
         addonInfo.withCountries((String) nodeIterator.nextValue("countries", false));
         addonInfo.withServiceId((String) nodeIterator.nextValue("service-id", false));

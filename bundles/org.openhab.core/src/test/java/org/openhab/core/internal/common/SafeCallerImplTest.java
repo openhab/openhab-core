@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -81,8 +81,8 @@ public class SafeCallerImplTest extends JavaTest {
     private @NonNullByDefault({}) QueueingThreadPoolExecutor scheduler;
     private @NonNullByDefault({}) TestInfo testInfo;
 
-    private @NonNullByDefault({}) @Mock Runnable timeoutHandlerMock;
-    private @NonNullByDefault({}) @Mock Consumer<Throwable> errorHandlerMock;
+    private @Mock @NonNullByDefault({}) Runnable timeoutHandlerMock;
+    private @Mock @NonNullByDefault({}) Consumer<Throwable> errorHandlerMock;
 
     @FunctionalInterface
     public interface ITarget {

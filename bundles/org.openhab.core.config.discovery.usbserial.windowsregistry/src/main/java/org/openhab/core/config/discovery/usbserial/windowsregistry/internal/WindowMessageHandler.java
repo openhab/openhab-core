@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -138,7 +138,7 @@ public class WindowMessageHandler implements Runnable, WindowProc {
             HANDLE[] handles = new HANDLE[] { terminateEvent };
             boolean running = true;
             while (running) {
-                switch (user32.MsgWaitForMultipleObjects(handles.length, handles, false, WinBase.INFINITE,
+                switch (user32.msgWaitForMultipleObjects(handles.length, handles, false, WinBase.INFINITE,
                         User32Ex.QS_ALLINPUT)) {
                     case User32Ex.WAIT_OBJECT_0:
                         // terminateEvent was triggered, terminate
@@ -227,18 +227,14 @@ public class WindowMessageHandler implements Runnable, WindowProc {
 
     @Nullable
     private LRESULT onDeviceChange(WPARAM wParam, LPARAM lParam) {
-        switch (wParam.intValue()) {
-            case DBT.DBT_DEVICEARRIVAL:
-                return onDeviceAddedOrRemoved(lParam, true);
-            case DBT.DBT_DEVICEREMOVECOMPLETE:
-                return onDeviceAddedOrRemoved(lParam, false);
-            case DBT.DBT_DEVNODES_CHANGED:
-                // LRESULT(1) aka TRUE means that the message was processed. This message is non-specific
-                // (basically means "something changed"), so we don't want to take any action.
-                return new LRESULT(1);
-            default:
-                return null;
-        }
+        return switch (wParam.intValue()) {
+            case DBT.DBT_DEVICEARRIVAL -> onDeviceAddedOrRemoved(lParam, true);
+            case DBT.DBT_DEVICEREMOVECOMPLETE -> onDeviceAddedOrRemoved(lParam, false);
+            // LRESULT(1) aka TRUE means that the message was processed. This message is non-specific
+            // (basically means "something changed"), so we don't want to take any action.
+            case DBT.DBT_DEVNODES_CHANGED -> new LRESULT(1);
+            default -> null;
+        };
     }
 
     @Nullable

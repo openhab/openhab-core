@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,24 +12,14 @@
  */
 package org.openhab.core.automation.module.script.profile;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_COMMAND_FROM_ITEM_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_STATE_FROM_ITEM_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_HANDLER_SCRIPT;
-import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_ITEM_SCRIPT;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.openhab.core.automation.module.script.profile.ScriptProfile.*;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,8 +73,7 @@ public class ScriptProfileTest extends JavaTest {
 
         setupInterceptedLogger(ScriptProfile.class, LogLevel.ERROR);
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(OnOffType.ON);
         scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
@@ -116,8 +105,7 @@ public class ScriptProfileTest extends JavaTest {
 
         setupInterceptedLogger(ScriptProfile.class, LogLevel.WARN);
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
@@ -141,8 +129,7 @@ public class ScriptProfileTest extends JavaTest {
         when(transformationServiceMock.transform(any(), any()))
                 .thenThrow(new TransformationException("intentional failure"));
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(OnOffType.ON);
         scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
@@ -164,8 +151,7 @@ public class ScriptProfileTest extends JavaTest {
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(null);
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(OnOffType.ON);
         scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
@@ -189,8 +175,7 @@ public class ScriptProfileTest extends JavaTest {
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
@@ -215,8 +200,7 @@ public class ScriptProfileTest extends JavaTest {
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
@@ -241,8 +225,7 @@ public class ScriptProfileTest extends JavaTest {
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
@@ -265,8 +248,7 @@ public class ScriptProfileTest extends JavaTest {
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
@@ -290,8 +272,7 @@ public class ScriptProfileTest extends JavaTest {
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
@@ -314,8 +295,7 @@ public class ScriptProfileTest extends JavaTest {
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
@@ -339,8 +319,7 @@ public class ScriptProfileTest extends JavaTest {
         when(transformationServiceMock.transform(any(), eq("0"))).thenReturn(OnOffType.OFF.toString());
         when(transformationServiceMock.transform(any(), eq("1"))).thenReturn(null);
 
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
+        ScriptProfile scriptProfile = createScriptProfile(profileContext);
 
         TimeSeries timeSeries = createTimeSeries(DecimalType.ZERO, DecimalType.valueOf("1"), DecimalType.ZERO);
         scriptProfile.onTimeSeriesFromHandler(timeSeries);
@@ -354,6 +333,47 @@ public class ScriptProfileTest extends JavaTest {
             }
         });
         verify(profileCallback).sendTimeSeries(transformedTimeSeries);
+    }
+
+    @Test
+    public void scriptNotExecutedIfTransformationServiceSupplierReturnsNull() throws TransformationException {
+        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
+                .withToHandlerScript("outScript").withCommandFromItemScript("itemCommandScript")
+                .withStateFromItemScript("itemStateScript").withAcceptedCommandTypes(List.of(OnOffType.class))
+                .withAcceptedDataTypes(List.of(OnOffType.class))
+                .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
+
+        ItemChannelLink link = new ItemChannelLink("DummyItem", new ChannelUID("foo:bar:baz:qux"));
+        when(profileCallback.getItemChannelLink()).thenReturn(link);
+
+        setupInterceptedLogger(ScriptProfile.class, LogLevel.ERROR);
+
+        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
+                () -> null);
+
+        scriptProfile.onCommandFromHandler(OnOffType.ON);
+        scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
+        scriptProfile.onTimeSeriesFromHandler(createTimeSeries(OnOffType.ON));
+        scriptProfile.onCommandFromItem(OnOffType.ON);
+        scriptProfile.onStateUpdateFromItem(OnOffType.ON);
+
+        verify(transformationServiceMock, never()).transform(any(), any());
+        verify(profileCallback, never()).handleCommand(any());
+        verify(profileCallback, never()).sendTimeSeries(any());
+        verify(profileCallback, never()).sendUpdate(any());
+        verify(profileCallback, never()).sendCommand(any());
+
+        assertLogMessage(ScriptProfile.class, LogLevel.ERROR,
+                "Failed to process script 'inScript' in link '" + link + "': transformation service is not available.");
+        assertLogMessage(ScriptProfile.class, LogLevel.ERROR, "Failed to process script 'itemCommandScript' in link '"
+                + link + "': transformation service is not available.");
+        assertLogMessage(ScriptProfile.class, LogLevel.ERROR, "Failed to process script 'itemStateScript' in link '"
+                + link + "': transformation service is not available.");
+    }
+
+    private ScriptProfile createScriptProfile(ProfileContext profileContext) {
+        return new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
+                () -> transformationServiceMock);
     }
 
     private TimeSeries createTimeSeries(State... states) {
@@ -419,32 +439,12 @@ public class ScriptProfileTest extends JavaTest {
         }
 
         public ProfileContext build() {
-            return new ProfileContext() {
-                @Override
-                public Configuration getConfiguration() {
-                    return new Configuration(configuration);
-                }
-
-                @Override
-                public ScheduledExecutorService getExecutorService() {
-                    throw new IllegalStateException();
-                }
-
-                @Override
-                public List<Class<? extends State>> getAcceptedDataTypes() {
-                    return acceptedDataTypes;
-                }
-
-                @Override
-                public List<Class<? extends Command>> getAcceptedCommandTypes() {
-                    return acceptedCommandTypes;
-                }
-
-                @Override
-                public List<Class<? extends Command>> getHandlerAcceptedCommandTypes() {
-                    return handlerAcceptedCommandTypes;
-                }
-            };
+            ProfileContext mockedProfileContext = mock(ProfileContext.class);
+            when(mockedProfileContext.getConfiguration()).thenReturn(new Configuration(configuration));
+            when(mockedProfileContext.getAcceptedDataTypes()).thenReturn(acceptedDataTypes);
+            when(mockedProfileContext.getAcceptedCommandTypes()).thenReturn(acceptedCommandTypes);
+            when(mockedProfileContext.getHandlerAcceptedCommandTypes()).thenReturn(handlerAcceptedCommandTypes);
+            return mockedProfileContext;
         }
     }
 }

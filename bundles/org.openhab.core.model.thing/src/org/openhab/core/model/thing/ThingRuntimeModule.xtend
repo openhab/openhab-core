@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,10 +26,6 @@ import org.eclipse.xtext.linking.lazy.LazyURIEncoder
 @SuppressWarnings("restriction") class ThingRuntimeModule extends org.openhab.core.model.thing.AbstractThingRuntimeModule {
     override Class<? extends IValueConverterService> bindIValueConverterService() {
         return ThingValueConverters
-    }
-
-    override Class<? extends org.eclipse.xtext.serializer.sequencer.ISyntacticSequencer> bindISyntacticSequencer() {
-        return org.openhab.core.model.thing.serializer.ThingSyntacticSequencerExtension
     }
 
     override Class<? extends IFormatter> bindIFormatter() {

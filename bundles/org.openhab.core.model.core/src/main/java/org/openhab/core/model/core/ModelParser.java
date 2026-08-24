@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,7 +25,7 @@ public interface ModelParser {
     /**
      * Returns the file extensions of the models this parser registers for.
      *
-     * @return file extension of model files
+     * @return file extensions of model files as a comma-separated list
      */
     String getExtension();
 }

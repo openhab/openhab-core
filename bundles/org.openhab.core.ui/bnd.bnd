@@ -3,6 +3,7 @@ Bundle-Activator: org.openhab.core.ui.internal.UIActivator
 Private-Package: \
   org.knowm.xchart.*
 Import-Package: \
+  io.swagger.v3.oas.annotations.*;resolution:=optional,\
   de.erichseifert.vectorgraphics2d.*;resolution:=optional,\
   de.rototor.pdfbox.*;resolution:=optional,\
   com.madgag.*;resolution:=optional,\

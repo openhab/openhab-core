@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,26 +16,31 @@ import java.util.List;
 
 import org.openhab.core.semantics.SemanticTag;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO representing a {@link SemanticTag}.
  *
  * @author Jimmy Tanagra - initial contribution
  * @author Laurent Garnier - Class renamed and members uid, description and editable added
  */
+@Schema(name = "EnrichedSemanticTag")
 public class EnrichedSemanticTagDTO {
-    String uid;
-    String name;
-    String label;
-    String description;
-    List<String> synonyms;
-    boolean editable;
+    public String uid;
+    public String name;
+    public String label;
+    public String description;
+    public List<String> synonyms;
+    public boolean editable;
+    public boolean defaultTag;
 
-    public EnrichedSemanticTagDTO(SemanticTag tag, boolean editable) {
+    public EnrichedSemanticTagDTO(SemanticTag tag, boolean editable, boolean defaultTag) {
         this.uid = tag.getUID();
         this.name = tag.getUID().substring(tag.getUID().lastIndexOf("_") + 1);
         this.label = tag.getLabel();
         this.description = tag.getDescription();
         this.synonyms = tag.getSynonyms();
         this.editable = editable;
+        this.defaultTag = defaultTag;
     }
 }

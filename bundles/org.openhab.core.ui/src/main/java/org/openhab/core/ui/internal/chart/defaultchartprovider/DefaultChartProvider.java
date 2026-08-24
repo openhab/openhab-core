@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -328,10 +328,11 @@ public class DefaultChartProvider implements ChartProvider {
 
         // Get the item label
         String label = itemUIRegistry.getLabel(item.getName());
-        if (label == null) {
-            label = item.getName();
-        } else if (label.contains("[") && label.contains("]")) {
+        if (label != null && label.contains("[") && label.contains("]")) {
             label = label.substring(0, label.indexOf('['));
+        }
+        if (label == null || label.isEmpty()) {
+            label = item.getName();
         }
 
         Iterable<HistoricItem> result;

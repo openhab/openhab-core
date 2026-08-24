@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,6 +19,8 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize parameter of a configuration description.
  *
@@ -27,18 +29,23 @@ import com.google.gson.annotations.SerializedName;
  * @author Chris Jackson - Added group, advanced, limitToOptions, multipleLimit, verify attributes
  * @author Thomas Höfer - Added unit
  */
+@Schema(name = "ConfigDescriptionParameter")
 public class ConfigDescriptionParameterDTO {
 
     public String context;
+    @Schema(name = "default")
     @SerializedName(value = "default", alternate = "defaultValue")
     public String defaultValue;
     public String description;
     public String label;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String name;
     public boolean required;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Type type;
     public BigDecimal min;
     public BigDecimal max;
+    @Schema(name = "step")
     @SerializedName(value = "step", alternate = "stepsize")
     public BigDecimal stepsize;
     public String pattern;

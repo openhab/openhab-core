@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -75,7 +75,7 @@ public class CertificateGenerator implements BundleActivator {
     private static final String KEY_FACTORY_TYPE = "EC";
     private static final String CONTENT_SIGNER_ALGORITHM = "SHA256withECDSA";
     private static final String CERTIFICATE_X509_TYPE = "X.509";
-    private static final String X500_NAME = "CN=openhab.org, OU=None, O=None, L=None, C=None";
+    private static final String X500_NAME = "CN=openhab.org, OU=None, O=None, L=None";
 
     private Logger logger;
 
@@ -110,6 +110,10 @@ public class CertificateGenerator implements BundleActivator {
      */
     private KeyStore ensureKeystore() throws KeyStoreException {
         String keystorePath = System.getProperty(JETTY_KEYSTORE_PATH_PROPERTY);
+        if (keystorePath == null || keystorePath.isEmpty()) {
+            throw new KeyStoreException(
+                    "Keystore path system property '" + JETTY_KEYSTORE_PATH_PROPERTY + "' is not set.");
+        }
         keystoreFile = new File(keystorePath);
         KeyStore keyStore = KeyStore.getInstance(KEYSTORE_JKS_TYPE);
         if (!keystoreFile.exists()) {
@@ -184,7 +188,7 @@ public class CertificateGenerator implements BundleActivator {
             X500Name subjectDN = new X500Name(X500_NAME);
             byte[] publickeyb = publicKey.getEncoded();
             ASN1Sequence sequence = (ASN1Sequence) ASN1Primitive.fromByteArray(publickeyb);
-            SubjectPublicKeyInfo subPubKeyInfo = new SubjectPublicKeyInfo(sequence);
+            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(sequence);
             X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(issuerDN, serialNumber, notBefore,
                     notAfter, subjectDN, subPubKeyInfo);
 

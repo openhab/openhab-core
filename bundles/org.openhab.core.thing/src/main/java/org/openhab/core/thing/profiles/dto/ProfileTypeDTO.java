@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,19 @@
 package org.openhab.core.thing.profiles.dto;
 
 import java.util.Collection;
+import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * DTO for profile types
  *
  * @author Stefan Triller - Initial contribution
  */
+@Schema(name = "ProfileType")
+@NonNullByDefault
 public class ProfileTypeDTO {
 
     public String uid;
@@ -26,7 +33,9 @@ public class ProfileTypeDTO {
     public String kind;
     public Collection<String> supportedItemTypes;
 
+    // do not remove - needed by GSON
     public ProfileTypeDTO() {
+        this("", "", "", Set.of());
     }
 
     public ProfileTypeDTO(String uid, String label, String kind, Collection<String> supportedItemTypes) {

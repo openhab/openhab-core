@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,10 +13,15 @@
 package org.openhab.core.io.net.http;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -65,6 +70,7 @@ public class HttpUtilTest extends BaseHttpUtilTest {
         assertEquals(HttpMethod.GET, HttpUtil.createHttpMethod("GET"));
         assertEquals(HttpMethod.PUT, HttpUtil.createHttpMethod("PUT"));
         assertEquals(HttpMethod.POST, HttpUtil.createHttpMethod("POST"));
+        assertEquals(HttpMethod.PATCH, HttpUtil.createHttpMethod("PATCH"));
         assertEquals(HttpMethod.DELETE, HttpUtil.createHttpMethod("DELETE"));
     }
 
@@ -80,5 +86,22 @@ public class HttpUtilTest extends BaseHttpUtilTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> HttpUtil.createHttpMethod("TRACE"));
         assertEquals("Given HTTP Method 'TRACE' is unknown", exception.getMessage());
+    }
+
+    @Test
+    public void testPatchWithContent() throws Exception {
+        mockResponse(HttpStatus.OK_200);
+        String payload = "test payload";
+        InputStream contentStream = new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8));
+
+        String result = HttpUtil.executeUrl("PATCH", URL, contentStream, "text/plain", 500);
+
+        assertEquals("Some content", result);
+
+        verify(httpClientMock).newRequest(URI.create(URL));
+        verify(requestMock).method(HttpMethod.PATCH);
+        verify(requestMock).timeout(500, TimeUnit.MILLISECONDS);
+        verify(requestMock).content(any(), eq("text/plain"));
+        verify(requestMock).send();
     }
 }

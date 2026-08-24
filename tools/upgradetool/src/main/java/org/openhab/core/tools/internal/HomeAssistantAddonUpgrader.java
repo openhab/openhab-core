@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,6 +19,8 @@ import org.openhab.core.tools.ExtractedAddonUpgrader;
  * The {@link HomeAssistantAddonUpgrader} checks if the MQTT addon was previously
  * installed, and if Home Assistant things exist, and if so installs the
  * Home Assistant addon.
+ *
+ * @since 5.1.0
  *
  * @author Cody Cutrer - Initial contribution
  */

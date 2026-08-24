@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -89,6 +89,10 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery, WindowMess
 
     // registry accessor strings
     private static final String KEY_SERIAL_PORT = "PortName";
+
+    private static final GUID GUID_DEVINTERFACE_USB_DEVICE = new GUID("A5DCBF10-6530-11D2-901F-00C04FB951ED");
+    private static final int SPDRP_FRIENDLYNAME = 0x0000000C;
+    private static final int SPDRP_MFG = 0x0000000B;
 
     private final Logger logger = LoggerFactory.getLogger(WindowsUsbSerialDiscovery.class);
     private final Set<UsbSerialDiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
@@ -230,10 +234,6 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery, WindowMess
             return Set.of();
         }
 
-        GUID GUID_DEVINTERFACE_USB_DEVICE = new GUID("A5DCBF10-6530-11D2-901F-00C04FB951ED");
-        int SPDRP_FRIENDLYNAME = 0x0000000C;
-        int SPDRP_MFG = 0x0000000B;
-
         SetupApi apiInst = SetupApi.INSTANCE;
 
         Set<UsbSerialDeviceInformation> result = new HashSet<>();
@@ -249,7 +249,6 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery, WindowMess
                 int devIdx = 0;
                 int intIdx;
                 while (apiInst.SetupDiEnumDeviceInfo(deviceInfoSet, devIdx, deviceInfoData)) {
-
                     String name;
                     String friendlyName;
                     String mfg;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,4 +24,14 @@ import org.openhab.core.common.registry.Registry;
 @NonNullByDefault
 public interface UIComponentRegistry extends Registry<RootUIComponent, String> {
 
+    /**
+     * Checks whether the component with the given UID is managed (i.e. editable via the REST API).
+     * File-based components (e.g. loaded from YAML configuration files) are not managed and therefore read-only.
+     *
+     * @param uid the UID of the component
+     * @return {@code true} if the component exists in the managed (jsondb) provider, {@code false} otherwise
+     */
+    default boolean isEditable(String uid) {
+        return false;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -95,6 +95,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
                 { "{repeatPasswordPlaceholder}", "auth.placeholder.repeatpassword" },
                 { "{tokenNamePlaceholder}", "auth.placeholder.tokenname" },
                 { "{tokenScopePlaceholder}", "auth.placeholder.tokenscope" },
+                { "{cancelButtonLabel}", "auth.button.cancel" }, //
                 { "{returnButtonLabel}", "auth.button.return" } //
         }) {
             template = template.replace(replace[0], getLocalizedMessage(replace[1]));

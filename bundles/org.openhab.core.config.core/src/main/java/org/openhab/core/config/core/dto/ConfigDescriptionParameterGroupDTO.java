@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,16 +12,21 @@
  */
 package org.openhab.core.config.core.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize options of a
  * parameter group.
  *
  * @author Chris Jackson - Initial contribution
  */
+@Schema(name = "ConfigDescriptionParameterGroup")
 public class ConfigDescriptionParameterGroupDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String name;
     public String context;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public Boolean advanced;
     public String label;
     public String description;

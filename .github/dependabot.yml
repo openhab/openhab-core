@@ -29,7 +29,6 @@ updates:
     registries: "*"
     allow:
       - dependency-name: "*"
-      - dependency-name: "org.openhab.core.tools:i18n-maven-plugin"
     ignore:
     # some manually generated entries, mostly plugins handled together with other upgrades
       - dependency-name: "com.diffplug.spotless:spotless-maven-plugin" # done with SAT
@@ -38,6 +37,10 @@ updates:
     #
     # to generate this list: bash
     # mvn dependency:tree |grep -v "from "|grep -e "[a-zA-Z\0-9-]\+\:[a-zA-Z\-]\+"|grep -v "dependency:.*:tree"|sed "s/\[[A-Z]*\][|\ +-]*//g"|sed "s/\[INFO\]//"|sed "s/:jar:.*//"|grep -v "The POM"|sort -u|grep -v openhab.core.|grep -v ecj|sed "s/^/      - dependency-name: \"/"|sed "s/$/\"/" >> .github/dependabot.yml
+    #
+    # Reminder: do not exclude
+    # - org.apache.maven:maven-artifact
+    # - org.bouncycastle
     #
       - dependency-name: "aopalliance:aopalliance"
       - dependency-name: "biz.aQute.bnd:biz.aQute.tester.junit-platform"
@@ -207,9 +210,7 @@ updates:
       - dependency-name: "org.apache.maven.resolver:maven-resolver-named-locks"
       - dependency-name: "org.apache.maven.resolver:maven-resolver-spi"
       - dependency-name: "org.apache.maven.resolver:maven-resolver-util"
-      - dependency-name: "org.apache.maven:maven-artifact"
       - dependency-name: "org.apache.maven:maven-model"
-      - dependency-name: "org.apache.maven:maven-plugin-api"
       - dependency-name: "org.apache.mina:mina-core"
       - dependency-name: "org.apache.pdfbox:fontbox"
       - dependency-name: "org.apache.pdfbox:pdfbox"
@@ -234,9 +235,6 @@ updates:
       - dependency-name: "org.apache.xbean:xbean-finder"
       - dependency-name: "org.apiguardian:apiguardian-api"
       - dependency-name: "org.bitbucket.b_c:jose4j"
-      - dependency-name: "org.bouncycastle:bcpkix-jdk18on"
-      - dependency-name: "org.bouncycastle:bcprov-jdk18on"
-      - dependency-name: "org.bouncycastle:bcutil-jdk18on"
       - dependency-name: "org.checkerframework:checker-qual"
       - dependency-name: "org.codehaus.mojo:animal-sniffer-annotations"
       - dependency-name: "org.codehaus.plexus:plexus-classworlds"

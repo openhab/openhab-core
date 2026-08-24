@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -458,10 +458,13 @@ public class OAuthClientServiceImpl implements OAuthClientService {
      */
     @Override
     public void addExtraAuthField(String key, String value) {
-        if (extraAuthFields == null) {
-            extraAuthFields = new Fields();
+        Fields lcExtraAuthFields = extraAuthFields;
+        if (lcExtraAuthFields == null) {
+            lcExtraAuthFields = new Fields();
+            extraAuthFields = lcExtraAuthFields;
         }
-        extraAuthFields.add(key, value);
+
+        lcExtraAuthFields.add(key, value);
     }
 
     @Override

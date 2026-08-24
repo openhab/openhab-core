@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,6 +44,7 @@ import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
+import org.openhab.core.io.rest.ui.EnrichedRootUIComponent;
 import org.openhab.core.io.rest.ui.TileDTO;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponentRegistry;
@@ -112,6 +113,7 @@ public class UIResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/tiles")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getUITiles", summary = "Get all registered UI tiles.", responses = {
@@ -122,21 +124,24 @@ public class UIResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getRegisteredUIComponentsInNamespace", summary = "Get all registered UI components in the specified namespace.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RootUIComponent.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedRootUIComponent.class)))) })
     public Response getAllComponents(@Context Request request, @PathParam("namespace") String namespace,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
-        Stream<RootUIComponent> components = registry.getAll().stream();
+        Stream<EnrichedRootUIComponent> components = registry.getAll().stream()
+                .map(c -> new EnrichedRootUIComponent(c, registry.isEditable(c.getUID())));
         if (summary != null && summary) {
             components = components.map(c -> {
-                RootUIComponent component = new RootUIComponent(c.getUID(), c.getType());
+                EnrichedRootUIComponent component = new EnrichedRootUIComponent(
+                        new RootUIComponent(c.getUID(), c.getType()), c.editable);
                 @Nullable
                 Set<String> tags = c.getTags();
                 if (tags != null) {
-                    component.addTags(c.getTags());
+                    component.addTags(tags);
                 }
                 @Nullable
                 Date timestamp = c.getTimestamp();
@@ -172,10 +177,11 @@ public class UIResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getUIComponentInNamespace", summary = "Get a specific UI component in the specified namespace.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedRootUIComponent.class))),
             @ApiResponse(responseCode = "404", description = "Component not found") })
     public Response getComponentByUID(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID) {
@@ -184,7 +190,7 @@ public class UIResource implements RESTResource {
         if (component == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        return Response.ok(component).build();
+        return Response.ok(new EnrichedRootUIComponent(component, registry.isEditable(componentUID))).build();
     }
 
     @POST
@@ -194,12 +200,12 @@ public class UIResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "addUIComponentToNamespace", summary = "Add a UI component in the specified namespace.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))) })
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedRootUIComponent.class))) })
     public Response addComponent(@PathParam("namespace") String namespace, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         component.updateTimestamp();
         RootUIComponent createdComponent = registry.add(component);
-        return Response.ok(createdComponent).build();
+        return Response.ok(new EnrichedRootUIComponent(createdComponent, true)).build();
     }
 
     @PUT
@@ -209,8 +215,9 @@ public class UIResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "updateUIComponentInNamespace", summary = "Update a specific UI component in the specified namespace.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
-                    @ApiResponse(responseCode = "404", description = "Component not found") })
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedRootUIComponent.class))),
+                    @ApiResponse(responseCode = "404", description = "Component not found"),
+                    @ApiResponse(responseCode = "405", description = "Component is not editable.") })
     public Response updateComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
@@ -218,13 +225,17 @@ public class UIResource implements RESTResource {
         if (existingComponent == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
+        if (!registry.isEditable(componentUID)) {
+            return Response.status(Status.METHOD_NOT_ALLOWED)
+                    .entity("Cannot update component " + componentUID + " as it is not editable.").build();
+        }
         if (!componentUID.equals(component.getUID())) {
             throw new InvalidParameterException(
                     "The component UID in the body of the request should match the UID in the URL");
         }
         component.updateTimestamp();
         registry.update(component);
-        return Response.ok(component).build();
+        return Response.ok(new EnrichedRootUIComponent(component, true)).build();
     }
 
     @DELETE
@@ -234,13 +245,18 @@ public class UIResource implements RESTResource {
     @Operation(operationId = "removeUIComponentFromNamespace", summary = "Remove a specific UI component in the specified namespace.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Component not found") })
+                    @ApiResponse(responseCode = "404", description = "Component not found"),
+                    @ApiResponse(responseCode = "405", description = "Component is not editable.") })
     public Response deleteComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         RootUIComponent component = registry.get(componentUID);
         if (component == null) {
             return Response.status(Status.NOT_FOUND).build();
+        }
+        if (!registry.isEditable(componentUID)) {
+            return Response.status(Status.METHOD_NOT_ALLOWED)
+                    .entity("Cannot delete component " + componentUID + " as it is not editable.").build();
         }
         registry.remove(componentUID);
         return Response.ok().build();

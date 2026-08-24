@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -271,6 +271,9 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
                     return null;
                 });
+            } catch (Throwable t) {
+                logger.error("Exception occurred while unloading script '{}'", scriptIdentifier, t);
+                throw t; // Re-throw to propagate it to the CompletableFuture
             } finally {
                 if (scriptMap.containsKey(scriptIdentifier)) {
                     logger.warn("Failed to unload script '{}'", scriptIdentifier);

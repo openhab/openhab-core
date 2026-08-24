@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,14 +14,26 @@ package org.openhab.core.persistence.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * The {@link PersistenceCronStrategyDTO} is used for transferring persistence cron
  * strategies
  *
  * @author Jan N. Klug - Initial contribution
  */
+@Schema(name = "PersistenceCronStrategy")
 @NonNullByDefault
-public class PersistenceCronStrategyDTO {
-    public String name = "";
+public class PersistenceCronStrategyDTO extends PersistenceStrategyDTO {
     public String cronExpression = "";
+
+    // do not remove - needed by GSON
+    public PersistenceCronStrategyDTO() {
+        this("", "");
+    }
+
+    public PersistenceCronStrategyDTO(String name, String cronExpression) {
+        super(name);
+        this.cronExpression = cronExpression;
+    }
 }

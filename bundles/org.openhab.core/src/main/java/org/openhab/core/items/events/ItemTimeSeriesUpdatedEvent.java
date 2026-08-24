@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -60,6 +60,6 @@ public class ItemTimeSeriesUpdatedEvent extends ItemEvent {
 
     @Override
     public String toString() {
-        return String.format("Item '%s' updated timeseries with %d values.", itemName, timeSeries.size());
+        return String.format("Item '%s' updated time series with %d values.", itemName, timeSeries.size());
     }
 }

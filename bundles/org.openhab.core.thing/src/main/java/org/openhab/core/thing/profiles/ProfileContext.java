@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,6 +37,14 @@ public interface ProfileContext {
      * @return the configuration
      */
     Configuration getConfiguration();
+
+    /**
+     * Returns the configuration of the profile and transforms it to the given class.
+     *
+     * @param configurationClass configuration class
+     * @return configuration of profile in form of the given class
+     */
+    <T> T getConfigurationAs(Class<T> configurationClass);
 
     /**
      * Get a scheduler to be used within profiles (if needed at all)

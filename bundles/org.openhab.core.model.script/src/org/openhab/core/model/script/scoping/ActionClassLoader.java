@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,7 +31,11 @@ public final class ActionClassLoader extends ClassLoader {
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         try {
-            return getParent().loadClass(name);
+            ClassLoader parent = getParent();
+            if (parent == null) {
+                throw new ClassNotFoundException("Unable to load '" + name + "' because parent is null");
+            }
+            return parent.loadClass(name);
         } catch (ClassNotFoundException e) {
             for (ActionService actionService : ScriptServiceUtil.getActionServices()) {
                 if (actionService.getActionClassName().equals(name)) {
@@ -43,7 +47,7 @@ public final class ActionClassLoader extends ClassLoader {
                     return actions.getClass();
                 }
             }
+            throw e;
         }
-        throw new ClassNotFoundException();
     }
 }

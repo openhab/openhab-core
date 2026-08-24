@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,19 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
+import org.openhab.core.sitemap.dto.AbstractSitemapDTO;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object that is used to serialize sitemaps.
- * 
+ *
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
+ * @author Mark Herwege - Moved to abstract class and extend
  */
-public class SitemapDTO {
-
-    public String name;
-    public String icon;
-    public String label;
+@Schema(name = "Sitemap")
+public class SitemapDTO extends AbstractSitemapDTO {
 
     public String link;
 

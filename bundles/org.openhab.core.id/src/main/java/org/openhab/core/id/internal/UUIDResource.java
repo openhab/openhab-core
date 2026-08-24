@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -55,6 +55,13 @@ public class UUIDResource implements RESTResource {
 
     public static final String PATH_UUID = "uuid";
 
+    /**
+     * Retrieves the instance UUID via REST endpoint.
+     * This method exposes the unique instance identifier through a REST API endpoint.
+     * The UUID is generated once and persisted, remaining constant across restarts.
+     *
+     * @return a Response containing the instance UUID as plain text, or null if the UUID cannot be retrieved
+     */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "getUUID", summary = "A unified unique id.", responses = {

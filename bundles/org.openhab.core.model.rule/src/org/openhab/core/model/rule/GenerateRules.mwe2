@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ var rootPath = ".."
 var fileExtensions = "rules"
 var projectName = "org.openhab.core.model.rule"
 var languageName = "org.openhab.core.model.rule.Rules"
-var generateXtendStub = true
 var encoding = "UTF-8"
 
 Workflow {
@@ -52,8 +51,14 @@ Workflow {
       fileExtensions = fileExtensions
       referencedResource = "platform:/resource/org.openhab.core.model.script/model/generated/Script.ecore"
       referencedResource = "platform:/resource/org.openhab.core.model.script/model/generated/Script.genmodel"
+      scopeProvider = {
+        generateStub = false
+      }
       serializer = {
-        generateStub = generateXtendStub
+        generateStub = false
+      }
+      validator = {
+        generateXtendStub = false
       }
     }
   }

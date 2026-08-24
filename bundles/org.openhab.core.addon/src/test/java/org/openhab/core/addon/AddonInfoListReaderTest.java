@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,6 +37,7 @@ class AddonInfoListReaderTest {
             + "    <type>automation</type>"
             + "    <name>Groovy Scripting</name>"
             + "    <description>This adds a Groovy script engine.</description>"
+            + "    <keywords>The,quick,brown,fox</keywords>"
             + "    <connection>none</connection>"
             + "    <discovery-methods>"
             + "      <discovery-method>"
@@ -86,6 +87,7 @@ class AddonInfoListReaderTest {
         assertEquals(1, addonsInfos.size());
         AddonInfo addon = addonsInfos.getFirst();
         assertNotNull(addon);
+        assertEquals("The,quick,brown,fox", addon.getKeywords());
         List<AddonDiscoveryMethod> discoveryMethods = addon.getDiscoveryMethods();
         assertNotNull(discoveryMethods);
         assertEquals(2, discoveryMethods.size());

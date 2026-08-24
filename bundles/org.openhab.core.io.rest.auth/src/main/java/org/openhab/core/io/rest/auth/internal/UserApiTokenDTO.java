@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,11 +14,14 @@ package org.openhab.core.io.rest.auth.internal;
 
 import java.util.Date;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO representing a user API token, without the sensible information.
  *
  * @author Yannick Schaus - initial contribution
  */
+@Schema(name = "UserApiToken")
 public class UserApiTokenDTO {
     public String name;
     public Date createdTime;

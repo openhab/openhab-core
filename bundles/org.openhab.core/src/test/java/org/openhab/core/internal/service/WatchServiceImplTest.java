@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -55,7 +55,7 @@ public class WatchServiceImplTest extends JavaTest {
     public @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
 
     private @NonNullByDefault({}) WatchServiceImpl watchService;
-    private @NonNullByDefault({}) @TempDir Path rootPath;
+    private @TempDir @NonNullByDefault({}) Path rootPath;
     private @NonNullByDefault({}) TestWatchEventListener listener;
 
     @BeforeEach

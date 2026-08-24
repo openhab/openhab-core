@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -580,10 +580,7 @@ public abstract class GenericItem implements ActiveItem {
 
     protected @Nullable CommandDescription getCommandOptions(@Nullable Locale locale) {
         if (commandDescriptionService instanceof CommandDescriptionService service) {
-            CommandDescription commandDescription = service.getCommandDescription(this.name, locale);
-            if (commandDescription != null) {
-                return commandDescription;
-            }
+            return service.getCommandDescription(this.name, locale);
         }
 
         return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,8 @@ package org.openhab.core.automation.integration.test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -82,6 +84,7 @@ import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.thing.ThingRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,10 +99,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(AutomationIntegrationTest.class);
     private @Nullable EventPublisher eventPublisher;
+    private @Nullable ThingRegistry thingRegistry;
     private @Nullable ItemRegistry itemRegistry;
     private @NonNullByDefault({}) StartLevelService startLevelService;
-    private @Nullable RuleRegistry ruleRegistry;
-    private @Nullable RuleManager ruleEngine;
+    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    private @NonNullByDefault({}) RuleManager ruleEngine;
     private @Nullable ManagedRuleProvider managedRuleProvider;
     private @Nullable ModuleTypeRegistry moduleTypeRegistry;
     private @Nullable TemplateRegistry<RuleTemplate> templateRegistry;
@@ -112,14 +116,15 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         logger.info("@Before.begin");
 
         eventPublisher = getService(EventPublisher.class);
+        thingRegistry = getService(ThingRegistry.class);
         itemRegistry = getService(ItemRegistry.class);
         startLevelService = mock(StartLevelService.class);
         when(startLevelService.getStartLevel()).thenReturn(100);
         registerService(startLevelService, StartLevelService.class.getName());
 
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
-                Objects.requireNonNull(eventPublisher), Objects.requireNonNull(itemRegistry),
-                mock(TimeZoneProvider.class), startLevelService);
+                Objects.requireNonNull(eventPublisher), Objects.requireNonNull(thingRegistry),
+                Objects.requireNonNull(itemRegistry), mock(TimeZoneProvider.class), startLevelService);
         mock(CoreModuleHandlerFactory.class);
         registerService(coreModuleHandlerFactory);
 
@@ -159,8 +164,14 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
         };
 
+        int expectedItemCount = itemProvider.getAll().size();
         registerService(itemProvider);
         registerVolatileStorageService();
+
+        waitForAssert(() -> {
+            ItemRegistry registry = getService(ItemRegistry.class);
+            assertThat(registry.getAll(), hasSize(greaterThanOrEqualTo(expectedItemCount)));
+        }, 5000, 100);
 
         StorageService storageService = getService(StorageService.class);
         ruleRegistry = getService(RuleRegistry.class);
@@ -415,7 +426,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     }
 
     @Test
-    public void assertThatRuleNowMethodExecutesActionsOfTheRule() throws ItemNotFoundException {
+    public void assertThatRunNowMethodExecutesActionsOfTheRule() throws ItemNotFoundException {
         Configuration triggerConfig = new Configuration(Map.of("topic", "runNowEventTopic/*"));
         Map<String, Object> params = new HashMap<>();
         params.put("itemName", "myLampItem3");
@@ -467,6 +478,69 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         registerService(itemEventHandler);
 
         ruleEngine.runNow(rule.getUID());
+        waitForAssert(() -> {
+            assertThat(itemEvent, is(notNullValue()));
+        }, 3000, 100);
+        waitForAssert(() -> {
+            assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
+        }, 3000, 100);
+
+        ruleRegistry.remove(rule.getUID());
+    }
+
+    @Test
+    public void assertThatRunAsyncMethodExecutesActionsOfTheRule() throws ItemNotFoundException {
+        Configuration triggerConfig = new Configuration(Map.of("topic", "runNowEventTopic/*"));
+        Map<String, Object> params = new HashMap<>();
+        params.put("itemName", "myLampItem3");
+        params.put("command", "TOGGLE");
+        Configuration actionConfig = new Configuration(params);
+        params = new HashMap<>();
+        params.put("itemName", "myLampItem3");
+        params.put("command", "ON");
+        Configuration actionConfig2 = new Configuration(params);
+        params = new HashMap<>();
+        params.put("itemName", "myLampItem3");
+        params.put("command", "OFFF");
+        Configuration actionConfig3 = new Configuration(params);
+        List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("GenericEventTriggerId")
+                .withTypeUID("core.GenericEventTrigger").withConfiguration(triggerConfig).build());
+        List<Action> actions = List.of(
+                ModuleBuilder.createAction().withId("ItemPostCommandActionId").withTypeUID("core.ItemCommandAction")
+                        .withConfiguration(actionConfig).build(),
+                ModuleBuilder.createAction().withId("ItemPostCommandActionId2").withTypeUID("core.ItemCommandAction")
+                        .withConfiguration(actionConfig2).build(),
+                ModuleBuilder.createAction().withId("ItemPostCommandActionId3").withTypeUID("core.ItemCommandAction")
+                        .withConfiguration(actionConfig3).build());
+
+        Rule rule = RuleBuilder.create("runNowRule" + new Random().nextInt()).withTriggers(triggers)
+                .withActions(actions).build();
+        logger.info("Rule created: {}", rule.getUID());
+
+        ruleRegistry.add(rule);
+
+        // TEST RULE
+        waitForAssert(() -> {
+            assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.IDLE));
+        }, 3000, 100);
+
+        EventSubscriber itemEventHandler = new EventSubscriber() {
+            @Override
+            public Set<String> getSubscribedEventTypes() {
+                return Set.of(ItemCommandEvent.TYPE);
+            }
+
+            @Override
+            public void receive(Event e) {
+                logger.info("Event: {}", e.getTopic());
+                if (e.getTopic().contains("myLampItem3")) {
+                    itemEvent = e;
+                }
+            }
+        };
+        registerService(itemEventHandler);
+
+        ruleEngine.runAsync(rule.getUID());
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
         }, 3000, 100);

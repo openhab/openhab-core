@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -137,6 +137,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.SMOKE);
         defaultTags.add(DefaultSemanticTags.Property.SOUND_VOLUME);
         defaultTags.add(DefaultSemanticTags.Property.SPEED);
+        defaultTags.add(DefaultSemanticTags.Property.STATE_OF_CHARGE);
         defaultTags.add(DefaultSemanticTags.Property.TAMPERED);
         defaultTags.add(DefaultSemanticTags.Property.TEMPERATURE);
         defaultTags.add(DefaultSemanticTags.Property.TILT);

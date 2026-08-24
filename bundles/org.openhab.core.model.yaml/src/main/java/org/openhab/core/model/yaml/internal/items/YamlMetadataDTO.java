@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,14 +17,19 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * The {@link YamlMetadataDTO} is a data transfer object used to serialize a metadata for a particular namespace
  * in a YAML configuration file.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Jimmy Tanagra - Support scalar metadata namespace
  */
+@JsonSerialize(using = YamlMetadataDTOSerializer.class)
+@JsonDeserialize(using = YamlMetadataDTODeserializer.class)
 public class YamlMetadataDTO {
 
     public String value;
@@ -39,7 +44,7 @@ public class YamlMetadataDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getValue());
+        return Objects.hash(getValue(), config);
     }
 
     @Override
@@ -50,6 +55,6 @@ public class YamlMetadataDTO {
             return false;
         }
         YamlMetadataDTO other = (YamlMetadataDTO) obj;
-        return Objects.equals(getValue(), other.getValue()) && YamlElementUtils.equalsConfig(config, other.config);
+        return Objects.equals(getValue(), other.getValue()) && Objects.equals(config, other.config);
     }
 }

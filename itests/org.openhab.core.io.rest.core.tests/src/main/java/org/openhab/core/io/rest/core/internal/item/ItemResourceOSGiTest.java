@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayOutputStream;
@@ -288,8 +289,13 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     public void testMetadata() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "some value";
+
         assertEquals(201, itemResource.addMetadata(ITEM_NAME1, "namespace", dto).getStatus());
         assertEquals(200, itemResource.removeMetadata(ITEM_NAME1, "namespace").getStatus());
+        assertEquals(404, itemResource.removeMetadata(ITEM_NAME1, "namespace").getStatus());
+
+        assertEquals(201, itemResource.addMetadata(ITEM_NAME1, "namespace", dto).getStatus());
+        assertEquals(200, itemResource.removeAllMetadata(ITEM_NAME1).getStatus());
         assertEquals(404, itemResource.removeMetadata(ITEM_NAME1, "namespace").getStatus());
     }
 
@@ -306,7 +312,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "";
         Response response = itemResource.addMetadata(ITEM_NAME1, "foo", dto);
-        assertEquals(400, response.getStatus());
+        assertEquals(201, response.getStatus());
     }
 
     @Test
@@ -314,7 +320,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         MetadataDTO dto = new MetadataDTO();
         dto.value = null;
         Response response = itemResource.addMetadata(ITEM_NAME1, "foo", dto);
-        assertEquals(400, response.getStatus());
+        assertEquals(201, response.getStatus());
     }
 
     @Test
@@ -325,6 +331,26 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         MetadataDTO dto2 = new MetadataDTO();
         dto2.value = "new value";
         assertEquals(200, itemResource.addMetadata(ITEM_NAME1, "namespace", dto2).getStatus());
+    }
+
+    @Test
+    public void testAddMetadataUnmanagedReservedNamespace() {
+        MetadataDTO dto = new MetadataDTO();
+        dto.value = "some value";
+
+        MetadataProvider provider = mock(MetadataProvider.class);
+        when(provider.getReservedNamespaces()).thenReturn(Set.of("semantics"));
+        when(provider.getAll())
+                .thenReturn(Set.of(new Metadata(new MetadataKey("semantics", ITEM_NAME1), "some value", null)));
+        registerService(provider);
+
+        assertEquals(405, itemResource.addMetadata(ITEM_NAME1, "semantics", dto).getStatus());
+    }
+
+    @Test
+    public void testRemoveAllMetadataNonExistingItem() {
+        Response response = itemResource.removeAllMetadata("nonExisting");
+        assertEquals(404, response.getStatus());
     }
 
     @Test
@@ -347,7 +373,18 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         registerService(provider);
 
         Response response = itemResource.removeMetadata(ITEM_NAME1, "namespace");
-        assertEquals(409, response.getStatus());
+        assertEquals(405, response.getStatus());
+    }
+
+    @Test
+    public void testRemoveMetadataUnmanagedReservedNamespace() {
+        MetadataProvider provider = mock(MetadataProvider.class);
+        when(provider.getReservedNamespaces()).thenReturn(Set.of("semantics"));
+        when(provider.getAll())
+                .thenReturn(Set.of(new Metadata(new MetadataKey("semantics", ITEM_NAME1), "some value", null)));
+        registerService(provider);
+
+        assertEquals(405, itemResource.removeMetadata(ITEM_NAME1, "semantics").getStatus());
     }
 
     @SuppressWarnings("unused")

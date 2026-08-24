@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -69,5 +69,11 @@ public class ChannelUIDTest {
         assertEquals(CHANNEL_ID, channelUID.getIdWithoutGroup());
         assertEquals(GROUP_ID, channelUID.getGroupId());
         assertEquals(THING_UID, channelUID.getThingUID());
+    }
+
+    @Test
+    public void testThingUIDPart() {
+        assertThrows(IllegalArgumentException.class, () -> new ChannelUID("binding:thing-type::channel"));
+        assertThrows(IllegalArgumentException.class, () -> new ChannelUID("binding:thing-type:bridge::channel"));
     }
 }

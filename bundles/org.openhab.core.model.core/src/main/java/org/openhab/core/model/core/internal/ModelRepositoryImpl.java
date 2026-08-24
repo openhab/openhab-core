@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,6 +23,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
+import org.eclipse.xtext.validation.AbstractValidationDiagnostic;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -111,7 +113,11 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream, @Nullable List<String> errors,
             @Nullable List<String> warnings) {
-        logger.info("Loading DSL model '{}'", name);
+        if (isIsolatedModel(name)) {
+            logger.debug("Loading DSL model '{}'", name);
+        } else {
+            logger.info("Loading DSL model '{}'", name);
+        }
         Resource resource = null;
         byte[] bytes;
         try (InputStream inputStream = originalInputStream) {
@@ -127,7 +133,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             }
             if (!valid) {
                 logger.warn("DSL model '{}' has errors, therefore ignoring it: {}", name, String.join("\n", newErrors));
-                removeModel(name);
+                removeResource(name);
                 return false;
             }
             if (!newWarnings.isEmpty()) {
@@ -183,7 +189,15 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean removeModel(String name) {
-        logger.info("Unloading DSL model '{}'", name);
+        if (isIsolatedModel(name)) {
+            logger.debug("Unloading DSL model '{}'", name);
+        } else {
+            logger.info("Unloading DSL model '{}'", name);
+        }
+        return removeResource(name);
+    }
+
+    private boolean removeResource(String name) {
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
@@ -213,6 +227,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public void reloadAllModelsOfType(final String modelType) {
+        logger.debug("reloadAllModelsOfType {}", modelType);
         synchronized (resourceSet) {
             // Make a copy to avoid ConcurrentModificationException
             List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
@@ -331,13 +346,30 @@ public class ModelRepositoryImpl implements ModelRepository {
 
                 // Check for validation errors, but log them only
                 try {
+                    String modelType = resource.getURI().fileExtension().toLowerCase(Locale.ROOT);
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
-                        if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR) {
-                            errors.add(d.getMessage());
-                        } else {
-                            warnings.add(d.getMessage());
+                        switch (modelType) {
+                            case "rules":
+                                if (d instanceof AbstractValidationDiagnostic vd
+                                        && d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR
+                                        && ("uid".equals(vd.getIssueCode()) || "time".equals(vd.getIssueCode()))) {
+                                    errors.add(d.getMessage());
+                                } else {
+                                    warnings.add(d.getMessage());
+                                }
+                                break;
+                            case "script":
+                                warnings.add(d.getMessage());
+                                break;
+                            default:
+                                if (d.getSeverity() == org.eclipse.emf.common.util.Diagnostic.ERROR) {
+                                    errors.add(d.getMessage());
+                                } else {
+                                    warnings.add(d.getMessage());
+                                }
+                                break;
                         }
                     }
                     if (!errors.isEmpty()) {

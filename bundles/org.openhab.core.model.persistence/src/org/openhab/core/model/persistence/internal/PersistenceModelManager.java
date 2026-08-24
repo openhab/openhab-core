@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -116,8 +116,7 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
                 if (model != null) {
                     PersistenceServiceConfiguration newConfiguration = new PersistenceServiceConfiguration(serviceName,
                             mapConfigs(model.getConfigs()), mapAliases(model.getAliases()),
-                            mapStrategies(model.getDefaults()), mapStrategies(model.getStrategies()),
-                            mapFilters(model.getFilters()));
+                            mapStrategies(model.getStrategies()), mapFilters(model.getFilters()));
                     PersistenceServiceConfiguration oldConfiguration = configurations.put(serviceName,
                             newConfiguration);
                     if (oldConfiguration == null) {

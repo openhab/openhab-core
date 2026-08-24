@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,11 +14,14 @@ package org.openhab.core.io.rest.voice.internal;
 
 import org.openhab.core.voice.Voice;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A DTO that is used on the REST API to provide infos about {@link Voice} to UIs.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "Voice")
 public class VoiceDTO {
     public String id;
     public String label;

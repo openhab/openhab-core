@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -204,9 +204,9 @@ public class ItemStateConditionHandlerTest extends JavaTest {
 
     private @NonNullByDefault({}) Item item;
 
-    private @NonNullByDefault({}) @Mock ItemRegistry mockItemRegistry;
-    private @NonNullByDefault({}) @Mock BundleContext mockBundleContext;
-    private @NonNullByDefault({}) @Mock TimeZoneProvider mockTimeZoneProvider;
+    private @Mock @NonNullByDefault({}) ItemRegistry mockItemRegistry;
+    private @Mock @NonNullByDefault({}) BundleContext mockBundleContext;
+    private @Mock @NonNullByDefault({}) TimeZoneProvider mockTimeZoneProvider;
 
     @BeforeEach
     public void setup() throws ItemNotFoundException {

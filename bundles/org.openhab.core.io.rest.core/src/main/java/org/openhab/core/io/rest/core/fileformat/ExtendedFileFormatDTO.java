@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025 Contributors to the openHAB project
+ * Copyright (c) 2010-2026 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,13 +14,17 @@ package org.openhab.core.io.rest.core.fileformat;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * This is a data transfer object to serialize the different components that can be contained
  * in a file format (items, things, ...) including an optional list of warnings.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@Schema(name = "ExtendedFileFormat")
 public class ExtendedFileFormatDTO extends FileFormatDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     public List<String> warnings;
 }

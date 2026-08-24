@@ -1,0 +1,27 @@
+version: 1
+things:
+  ntp:ntp:local:
+    label: NTP Local Server
+    location: Paris
+    config:
+      hostname: 0.fr.pool.ntp.org
+      timeZone: Europe/Paris
+      serverPort: 123 # default value
+      other: A parameter that is not in the thing config description.
+    channels:
+      string:
+        type: string-channel
+        # label and description are ignored because this is an original channel defined in the thing type
+        label: Date And Time
+        description: Format with date and time.
+        config:
+          DateTimeFormat: dd-MM-yyyy HH:mm
+          other: A parameter that is not in the channel config description.
+      date-only-string:
+        type: string-channel
+        # label and description are considered because this is an added channel
+        label: Date Only
+        description: Format with date only.
+        config:
+          DateTimeFormat: dd-MM-yyyy
+          other: A parameter that is not in the channel config description.
