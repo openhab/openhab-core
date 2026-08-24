@@ -45,7 +45,9 @@ import org.openhab.core.types.CommandOption;
  * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-public class LLMItemSerializer {
+public final class LLMItemSerializer {
+    private LLMItemSerializer() {
+    }
 
     private static final Comparator<Item> ITEM_COMPARATOR = Comparator.comparing(Item::getName);
 
