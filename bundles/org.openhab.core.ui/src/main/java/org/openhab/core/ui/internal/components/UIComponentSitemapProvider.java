@@ -362,7 +362,16 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         return deprecated;
     }
 
-    private void addWidgetRules(List<Rule> rules, UIComponent component, String key) {
+    /**
+     * Add rules of a specific type to a widget.
+     * This method is package-private for testing purposes, to allow testing adding rules to a widget without having to
+     * mock the whole widget building process.
+     *
+     * @param rules
+     * @param component
+     * @param key
+     */
+    void addWidgetRules(List<Rule> rules, UIComponent component, String key) {
         if (component.getConfig() != null && component.getConfig().containsKey(key)) {
             Object sourceRules = component.getConfig().get(key);
             if (sourceRules instanceof Collection<?> sourceRulesCollection) {
@@ -420,14 +429,24 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     private @Nullable String getRuleArgument(String rule) {
-        String strippedRule = null;
-        int lastEqualsIndex = rule.lastIndexOf("=");
-        String charBeforeEquals = lastEqualsIndex > 0 ? rule.substring(lastEqualsIndex - 1, lastEqualsIndex) : null;
-        if (!("=".equals(charBeforeEquals) || "!".equals(charBeforeEquals) || "<".equals(charBeforeEquals)
-                || ">".equals(charBeforeEquals))) {
-            strippedRule = stripQuotes(rule.substring(lastEqualsIndex + 1).trim());
+        String argument = null;
+        String trimmedRule = rule.trim();
+        String strippedRule = trimmedRule;
+        if (strippedRule.endsWith("\"")) {
+            for (int i = strippedRule.length() - 2; i >= 0; i--) {
+                if (strippedRule.charAt(i) == '"') {
+                    strippedRule = i > 0 ? rule.substring(0, i) : "";
+                    break;
+                }
+            }
         }
-        return strippedRule;
+        int lastEqualsIndex = strippedRule.lastIndexOf("=");
+        String charBeforeEquals = lastEqualsIndex > 0 ? rule.substring(lastEqualsIndex - 1, lastEqualsIndex) : null;
+        if (!(lastEqualsIndex == -1 || "=".equals(charBeforeEquals) || "!".equals(charBeforeEquals)
+                || "<".equals(charBeforeEquals) || ">".equals(charBeforeEquals))) {
+            argument = stripQuotes(trimmedRule.substring(lastEqualsIndex + 1).trim());
+        }
+        return argument;
     }
 
     private List<String> getRuleConditions(String rule, @Nullable String argument) {
