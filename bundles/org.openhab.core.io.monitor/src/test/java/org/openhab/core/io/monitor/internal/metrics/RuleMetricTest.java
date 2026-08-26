@@ -44,6 +44,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
  *
  * @author Robert Delbrück - Initial contribution
  */
+@NonNullByDefault
 @ExtendWith(MockitoExtension.class)
 class RuleMetricTest {
 
@@ -195,13 +196,13 @@ class RuleMetricTest {
         assertEquals(size, durationMeters.size());
     }
 
-    private static @NonNullByDefault List<Timer> getDurationMeters(SimpleMeterRegistry meterRegistry) {
+    private static List<Timer> getDurationMeters(SimpleMeterRegistry meterRegistry) {
         List<Meter> meters = meterRegistry.getMeters();
         return meters.stream().filter(m -> m.getId().getName().equals(METRIC_DURATION_NAME)).map(m -> (Timer) m)
                 .toList();
     }
 
-    private static @NonNullByDefault List<Counter> getCounterMeters(SimpleMeterRegistry meterRegistry) {
+    private static List<Counter> getCounterMeters(SimpleMeterRegistry meterRegistry) {
         List<Meter> meters = meterRegistry.getMeters();
         return meters.stream().filter(m -> m.getId().getName().equals(METRIC_NAME)).map(m -> (Counter) m).toList();
     }
