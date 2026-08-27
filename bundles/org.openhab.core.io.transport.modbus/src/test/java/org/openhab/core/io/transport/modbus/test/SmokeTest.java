@@ -222,6 +222,40 @@ public class SmokeTest extends IntegrationTestSupport {
         }
     }
 
+    /**
+     * Have slow connection response, within the receive timeout since we have set it higher than the artificial server
+     * wait. Thus the request succeeds, unlike in testIOError where the default timeout is exceeded.
+     */
+    @Test
+    public void testReceiveTimeout() throws Exception {
+        artificialServerWait = 5000;
+        generateData();
+        ModbusSlaveEndpoint endpoint = getEndpoint();
+
+        AtomicInteger okCount = new AtomicInteger();
+        AtomicInteger errorCount = new AtomicInteger();
+        CountDownLatch callbackCalled = new CountDownLatch(1);
+        AtomicReference<Exception> lastError = new AtomicReference<>();
+        EndpointPoolConfiguration endpointConfig = new EndpointPoolConfiguration();
+        endpointConfig.setReceiveTimeoutMillis(20000);
+        try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint,
+                endpointConfig)) {
+            comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
+                    ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 0, 5, 1), result -> {
+                        assertTrue(result.getRegisters().isPresent());
+                        okCount.incrementAndGet();
+                        callbackCalled.countDown();
+                    }, failure -> {
+                        errorCount.incrementAndGet();
+                        lastError.set(failure.getCause());
+                        callbackCalled.countDown();
+                    });
+            assertTrue(callbackCalled.await(15, TimeUnit.SECONDS));
+            assertThat(okCount.get(), is(equalTo(1)));
+            assertThat(lastError.toString(), errorCount.get(), is(equalTo(0)));
+        }
+    }
+
     public void testOneOffReadWithDiscreteOrCoils(ModbusReadFunctionCode functionCode, int count) throws Exception {
         assertThat(functionCode, is(anyOf(equalTo(ModbusReadFunctionCode.READ_INPUT_DISCRETES),
                 equalTo(ModbusReadFunctionCode.READ_COILS))));

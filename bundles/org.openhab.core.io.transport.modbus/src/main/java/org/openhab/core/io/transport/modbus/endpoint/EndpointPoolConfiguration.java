@@ -67,8 +67,8 @@ public class EndpointPoolConfiguration {
     private int connectTimeoutMillis;
 
     /**
-     * How long we keep the connection open, trying to send or receive data until we time out
-     * Keeping the default as defined in @see net.wimpi.modbus.net.TCPMasterConnection.m_Timeout
+     * Maximum time to wait for data to be received, in milliseconds. A value of zero disables the timeout.
+     * Defaults to {@link Modbus#DEFAULT_TIMEOUT}.
      */
     private int receiveTimeoutMillis = Modbus.DEFAULT_TIMEOUT;
 
