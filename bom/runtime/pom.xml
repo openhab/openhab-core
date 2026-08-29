@@ -209,14 +209,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- JAX-WS 2.3 API -->
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxws-api-2.3</artifactId>
-      <version>2.3_3</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- SAAJ 1.4 API -->
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
