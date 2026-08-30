@@ -27,10 +27,7 @@ import jakarta.ws.rs.core.Application;
  *
  * @author Markus Rathgeb - Initial contribution
  */
-@Component(service = Application.class, property = {
-        // https://lists.apache.org/thread.html/
-        // r1379789bd90c6b7e3971d5ffeedb2e0d1e1c9103fd2392cb95458596%40%3Cuser.aries.apache.org%3E
-        "servlet.init.hide-service-list-page=true" })
+@Component(service = Application.class)
 @JakartarsName(RESTConstants.JAX_RS_NAME)
 @JakartarsApplicationBase("rest")
 @NonNullByDefault
@@ -39,8 +36,10 @@ public class RESTApplicationImpl extends Application {
     @Override
     @NonNullByDefault({})
     public Map<String, Object> getProperties() {
-        // Silence "JAXBContext implementation could not be found. WADL feature is disabled." - WADL is superseded by
-        // OpenAPI
+        // Disabling WADL takes over the role of the servlet.init.hide-service-list-page property that used to be set
+        // for the Apache Aries JAX-RS Whiteboard: it keeps the resources from being listed publicly. It also silences
+        // "JAXBContext implementation could not be found. WADL feature is disabled." on startup. The API is described
+        // by OpenAPI instead.
         return Map.of("jersey.config.server.wadl.disableWadl", true);
     }
 }
