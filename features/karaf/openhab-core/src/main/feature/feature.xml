@@ -127,6 +127,11 @@
 		<feature dependency="true">openhab-core-ui</feature>
 	</feature>
 
+	<feature name="openhab-core-auth-authorization" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.authorization/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-auth-jaas" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.jaas/${project.version}</bundle>
