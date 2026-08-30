@@ -13,25 +13,80 @@
 package org.openhab.core.ui.internal.proxy;
 
 import java.io.Serial;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * This version of the proxy servlet uses the blocking proxy implementation.
- * The Jetty 12 async proxy servlet API is not available as an EE10 servlet;
- * this class is retained for API compatibility and delegates to {@link BlockingProxyServlet}.
+ * This version of the proxy servlet uses asynchronous I/O and request processing, and is based on Jetty's proxy
+ * servlets. It depends on Servlet API 3.0 or later.
  *
  * @author John Cocula - Initial contribution
  */
-public class AsyncProxyServlet extends BlockingProxyServlet {
+public class AsyncProxyServlet extends org.eclipse.jetty.ee10.proxy.AsyncProxyServlet {
 
     @Serial
     private static final long serialVersionUID = -4716754591953017795L;
 
+    private final ProxyServletService service;
+
     AsyncProxyServlet(ProxyServletService service) {
-        super(service);
+        this.service = service;
     }
 
     @Override
     public String getServletInfo() {
         return "Proxy (async)";
+    }
+
+    /**
+     * Override <code>newHttpClient</code> so we can proxy to HTTPS URIs.
+     */
+    @Override
+    protected HttpClient newHttpClient() {
+        HttpClient httpClient = new HttpClient();
+        httpClient.setSslContextFactory(new SslContextFactory.Client());
+        return httpClient;
+    }
+
+    @Override
+    protected void sendProxyRequest(HttpServletRequest clientRequest, HttpServletResponse proxyResponse,
+            Request proxyRequest) {
+        if (service.proxyingVideoWidget(clientRequest)) {
+            // We disable the timeout for video
+            proxyRequest.timeout(0, TimeUnit.MILLISECONDS);
+
+            // We request the browser to not cache the video
+            proxyResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            proxyResponse.setHeader("Pragma", "no-cache");
+            proxyResponse.setHeader("Expires", "0");
+        }
+        super.sendProxyRequest(clientRequest, proxyResponse, proxyRequest);
+    }
+
+    /**
+     * Add Basic Authentication header to request if user and password are specified in URI.
+     */
+    @Override
+    protected void copyRequestHeaders(HttpServletRequest clientRequest, Request proxyRequest) {
+        super.copyRequestHeaders(clientRequest, proxyRequest);
+
+        service.maybeAppendAuthHeader(service.uriFromRequest(clientRequest), proxyRequest);
+    }
+
+    @Override
+    protected String rewriteTarget(HttpServletRequest request) {
+        return Objects.toString(service.uriFromRequest(request), null);
+    }
+
+    @Override
+    protected void onProxyRewriteFailed(HttpServletRequest request, HttpServletResponse response) {
+        service.sendError(request, response);
     }
 }

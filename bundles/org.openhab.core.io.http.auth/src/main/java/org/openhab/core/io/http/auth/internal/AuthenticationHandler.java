@@ -167,7 +167,7 @@ public class AuthenticationHandler implements Handler {
         this.authenticationManager = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, target = "(context=javax.servlet.http.HttpServletRequest)")
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, target = "(context=jakarta.servlet.http.HttpServletRequest)")
     public void addCredentialsExtractor(CredentialsExtractor<HttpServletRequest> extractor) {
         this.extractors.add(extractor);
     }
