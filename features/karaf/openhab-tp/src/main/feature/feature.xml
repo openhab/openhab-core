@@ -84,6 +84,9 @@
 			pax-web-jetty-websockets) and jetty-compression-gzip; pax-web-features does not ship
 			the latter, so it must be added explicitly here. -->
 		<bundle>mvn:org.eclipse.jetty.compression/jetty-compression-gzip/${jetty.version}</bundle>
+		<!-- servlet-based proxy used by org.openhab.core.ui; the core jetty-proxy bundle only
+			provides the Handler-based ProxyHandler since Jetty 12. -->
+		<bundle>mvn:org.eclipse.jetty.ee10/jetty-ee10-proxy/${jetty.version}</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
