@@ -75,7 +75,7 @@
     <dependency>
       <groupId>org.eclipse.osgi-technology.rest</groupId>
       <artifactId>org.eclipse.osgitech.rest</artifactId>
-      <version>1.2.3</version>
+      <version>${osgitech.rest.version}</version>
     </dependency>
   </dependencies>
 
