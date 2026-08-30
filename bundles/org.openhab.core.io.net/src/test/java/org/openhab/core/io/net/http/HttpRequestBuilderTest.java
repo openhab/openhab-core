@@ -13,18 +13,19 @@
 package org.openhab.core.io.net.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.io.Content;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -63,7 +64,9 @@ public class HttpRequestBuilderTest extends BaseHttpUtilTest {
         assertEquals("Some content", result);
 
         // verify the headers to be added to the request
-        verify(requestMock, times(2)).headers(any());
+        HttpFields headers = capturedHeaders();
+        assertEquals("Bearer sometoken", headers.get("Authorization"));
+        assertEquals("test", headers.get("X-Token"));
     }
 
     @Test
@@ -91,7 +94,7 @@ public class HttpRequestBuilderTest extends BaseHttpUtilTest {
         // verify the content to be added to the request
         verify(requestMock).body(argumentCaptor.capture());
 
-        assertEquals("application/octet-stream", argumentCaptor.getValue().getContentType());
+        assertEquals("{json: true}", Content.Source.asString(argumentCaptor.getValue(), StandardCharsets.UTF_8));
     }
 
     @Test
