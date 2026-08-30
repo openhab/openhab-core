@@ -245,26 +245,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- OSGi Transaction Control -->
-    <dependency>
-      <groupId>org.apache.aries.tx-control</groupId>
-      <artifactId>tx-control-service-xa</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.aries.tx-control</groupId>
-      <artifactId>tx-control-provider-jdbc-xa</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.aries.tx-control</groupId>
-      <artifactId>tx-control-provider-jpa-xa</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- OSGi Configurator -->
     <dependency>
       <groupId>org.apache.felix</groupId>
