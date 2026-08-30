@@ -158,19 +158,19 @@
     <dependency>
       <groupId>org.eclipse.osgi-technology.rest</groupId>
       <artifactId>org.eclipse.osgitech.rest</artifactId>
-      <version>1.2.3</version>
+      <version>${osgitech.rest.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.osgi-technology.rest</groupId>
       <artifactId>org.eclipse.osgitech.rest.servlet.whiteboard</artifactId>
-      <version>1.2.3</version>
+      <version>${osgitech.rest.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.osgi-technology.rest</groupId>
       <artifactId>org.eclipse.osgitech.rest.sse</artifactId>
-      <version>1.2.3</version>
+      <version>${osgitech.rest.version}</version>
       <scope>compile</scope>
     </dependency>
 
