@@ -120,10 +120,10 @@
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.1</bundle>
 		<bundle dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/2.1.1</bundle>
 		<bundle dependency="true">mvn:org.javassist/javassist/3.32.0-GA</bundle>
-		<bundle dependency="true">mvn:org.glassfish.hk2.external/aopalliance-repackaged/3.0.6</bundle>
-		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-api/3.0.6</bundle>
-		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-utils/3.0.6</bundle>
-		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-locator/3.0.6</bundle>
+		<bundle dependency="true">mvn:org.glassfish.hk2.external/aopalliance-repackaged/3.1.1</bundle>
+		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-api/3.1.1</bundle>
+		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-utils/3.1.1</bundle>
+		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-locator/3.1.1</bundle>
 		<!-- wrapped to strip Bundle-ActivationPolicy: lazy, which causes a deadlock with JerseyBundleTracker -->
 		<bundle dependency="true">wrap:mvn:org.glassfish.hk2/osgi-resource-locator/1.0.3$Bundle-ActivationPolicy=</bundle>
 		<!-- Jersey bundles -->
