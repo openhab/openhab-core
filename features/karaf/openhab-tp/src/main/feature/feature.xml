@@ -175,7 +175,12 @@
 
 	<feature name="openhab.tp-jaxb" description="JAXB bundles" version="${project.version}">
 		<capability>openhab.tp;feature=jaxb;version=4.0.9</capability>
-		<!-- JAXB 3.0 API kept for third-party bundles compiled against JAXB 3.0 (e.g. swagger-core-jakarta) -->
+		<!-- swagger-core-jakarta has a mandatory import of jakarta.xml.bind.annotation [3.0,4), so the JAXB 3.0
+			API is installed next to 4.0 and cannot simply be dropped. Having both is safe: the openHAB bundles
+			with JAXB annotated classes import [4.0,5) and can only wire to 4.0, and swagger uses the annotations
+			only in ModelResolver/JAXBAnnotationsHelper, via instanceof, to fill the xml section of an OpenAPI
+			schema. Annotations of the other version are therefore not recognized instead of failing, and no
+			openHAB REST DTO carries JAXB annotations to begin with. Remove once swagger moves to JAXB 4.0. -->
 		<bundle start-level="10" dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/3.0.0</bundle>
 		<!-- JAXB 4.0 API + implementation (aligned with Karaf 4.5) -->
 		<bundle start-level="10">mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.5</bundle>
