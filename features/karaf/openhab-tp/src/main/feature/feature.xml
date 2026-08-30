@@ -105,6 +105,11 @@
 		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.5</bundle>
 	</feature>
 
+	<!-- The Eclipse Jakarta REST Whiteboard, backed by Jersey, implements the OSGi Jakarta RESTful Web Services
+		Whiteboard specification. openHAB only uses that specification: its REST resources are annotated with
+		jakarta.ws.rs and registered through org.osgi.service.jakartars, none of them references
+		org.eclipse.osgitech. Replacing the implementation is therefore a change to this feature, not to the REST
+		resources, should this one stop being maintained. -->
 	<feature name="openhab.tp-jax-rs-whiteboard" description="Eclipse Jakarta REST Whiteboard" version="${project.version}">
 		<capability>openhab.tp;feature=jax-rs-whiteboard;version=${osgitech.rest.version}</capability>
 		<feature dependency="true">spifly</feature>
