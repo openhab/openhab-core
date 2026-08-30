@@ -110,6 +110,8 @@
 		<feature dependency="true">spifly</feature>
 		<feature dependency="true">scr</feature>
 		<feature dependency="true">http-whiteboard</feature>
+		<!-- provides the wrap: URL handler used for osgi-resource-locator below -->
+		<feature dependency="true">wrap</feature>
 		<!-- Jakarta REST API -->
 		<bundle dependency="true">mvn:jakarta.ws.rs/jakarta.ws.rs-api/3.1.0</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.jakartars/2.0.0</bundle>
@@ -124,7 +126,10 @@
 		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-api/3.1.1</bundle>
 		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-utils/3.1.1</bundle>
 		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-locator/3.1.1</bundle>
-		<!-- wrapped to strip Bundle-ActivationPolicy: lazy, which causes a deadlock with JerseyBundleTracker -->
+		<!-- Wrapped to strip Bundle-ActivationPolicy: lazy, which causes a deadlock with JerseyBundleTracker.
+			Every version of this bundle sets that header, so it cannot be avoided by picking another one. The
+			integration tests use the bundle unwrapped, as the bnd resolver cannot handle wrap: URLs, and hence
+			do not cover the deadlock: green itests are no reason to turn this back into a plain mvn: URL. -->
 		<bundle dependency="true">wrap:mvn:org.glassfish.hk2/osgi-resource-locator/1.0.3$Bundle-ActivationPolicy=</bundle>
 		<!-- Jersey bundles -->
 		<bundle dependency="true">mvn:org.glassfish.jersey.core/jersey-common/${jersey.version}</bundle>
