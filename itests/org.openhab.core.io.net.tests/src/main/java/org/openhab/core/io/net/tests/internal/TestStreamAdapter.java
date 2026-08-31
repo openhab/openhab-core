@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.net.tests.internal;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
@@ -29,6 +30,8 @@ import org.eclipse.jetty.http2.api.Stream;
 public class TestStreamAdapter implements Stream.Listener {
     public final CompletableFuture<String> completable = new CompletableFuture<>();
 
+    private final ByteArrayOutputStream content = new ByteArrayOutputStream();
+
     @Override
     public void onDataAvailable(@Nullable Stream stream) {
         if (stream == null) {
@@ -41,11 +44,16 @@ public class TestStreamAdapter implements Stream.Listener {
                 return;
             }
             boolean last = data.frame().isEndStream();
+            // Collect the bytes of all frames and decode them only once the stream ended: a response can arrive in
+            // several frames, the last one often carrying no content at all, and a multi byte character can be split
+            // across two frames.
             ByteBuffer buffer = data.frame().getByteBuffer();
-            String text = StandardCharsets.UTF_8.decode(buffer).toString();
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            content.writeBytes(bytes);
             data.release();
             if (last) {
-                completable.complete(text);
+                completable.complete(content.toString(StandardCharsets.UTF_8));
                 return;
             }
         }
