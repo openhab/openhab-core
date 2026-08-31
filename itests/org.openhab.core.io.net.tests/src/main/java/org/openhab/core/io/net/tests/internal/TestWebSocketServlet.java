@@ -31,6 +31,8 @@ public class TestWebSocketServlet extends JettyWebSocketServlet {
 
     @Override
     public void configure(@Nullable JettyWebSocketServletFactory factory) {
-        factory.setCreator((req, resp) -> new TestWebSocketAdapter());
+        if (factory != null) {
+            factory.setCreator((req, resp) -> new TestWebSocketAdapter());
+        }
     }
 }
