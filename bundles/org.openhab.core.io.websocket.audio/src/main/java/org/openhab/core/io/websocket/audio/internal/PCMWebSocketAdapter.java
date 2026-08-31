@@ -118,18 +118,15 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
         ArrayList<PCMWebSocketConnection> handlers = new ArrayList<>(webSocketConnections);
         for (var handler : handlers) {
             if (handler != null) {
-                boolean pinged = false;
                 var session = handler.getSession();
                 if (session != null) {
-                    session.sendPing(wrap("oh".getBytes(StandardCharsets.UTF_8)), Callback.NOOP);
-                    pinged = true;
-                }
-                if (!pinged) {
-                    logger.debug("Ping failed, disconnecting speaker '{}'", handler.getId());
-                    var session2 = handler.getSession();
-                    if (session2 != null) {
-                        session2.close();
-                    }
+                    // Sending is asynchronous since Jetty 12, so the failure is reported to the callback instead of
+                    // being thrown.
+                    session.sendPing(wrap("oh".getBytes(StandardCharsets.UTF_8)), Callback.from(() -> {
+                    }, error -> {
+                        logger.debug("Ping failed, disconnecting speaker '{}'", handler.getId());
+                        session.close();
+                    }));
                 }
             }
 
