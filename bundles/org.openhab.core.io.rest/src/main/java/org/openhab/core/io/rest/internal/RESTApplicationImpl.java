@@ -36,10 +36,12 @@ public class RESTApplicationImpl extends Application {
     @Override
     @NonNullByDefault({})
     public Map<String, Object> getProperties() {
-        // Disabling WADL takes over the role of the servlet.init.hide-service-list-page property that used to be set
-        // for the Apache Aries JAX-RS Whiteboard: it keeps the resources from being listed publicly. It also silences
-        // "JAXBContext implementation could not be found. WADL feature is disabled." on startup. The API is described
-        // by OpenAPI instead.
+        // Ask Jersey not to publish a WADL of the resources, the API is described by OpenAPI instead. This states the
+        // intent, but does not take effect at the moment: the Eclipse Jakarta REST Whiteboard builds its Jersey
+        // configuration without the properties of this application, so WadlFeature does not see the property. It
+        // disables itself anyway, because Jersey finds no JAXB implementation, and logs "JAXBContext implementation
+        // could not be found. WADL feature is disabled." while doing so. Should a JAXB implementation ever become
+        // visible to Jersey, WADL would be published unless the whiteboard passes this property on by then.
         return Map.of("jersey.config.server.wadl.disableWadl", true);
     }
 }
