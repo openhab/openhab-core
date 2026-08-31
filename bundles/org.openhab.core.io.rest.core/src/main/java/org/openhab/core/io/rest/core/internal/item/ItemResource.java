@@ -1195,6 +1195,9 @@ public class ItemResource implements RESTResource {
     }
 
     private String buildSource(@Nullable String source, SecurityContext securityContext) {
+        if (source != null && !source.isEmpty()) {
+            return source;
+        }
         String username;
         Principal principal = securityContext.getUserPrincipal();
         if (principal != null) {
