@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory
 import org.eclipse.xtext.common.types.JvmFormalParameter
 import org.eclipse.emf.common.util.EList
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
+import java.util.Map
+import org.openhab.core.events.Event
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -108,6 +110,9 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
             members += ruleModel.rules.map [ rule |
                 rule.toMethod("_" + rule.name, typeRef(Void.TYPE)) [
                     static = true
+                    parameters += rule.toParameter(VAR_EVENT_OBJECT, typeRef(Event))
+                    parameters += rule.toParameter(VAR_CTX, typeRef(Map, typeRef(String), typeRef(Object)))
+                    parameters += rule.toParameter(VAR_INPUTS, typeRef(Map, typeRef(String), typeRef(Map, typeRef(String), typeRef(Object))))
                     val privateCacheTypeRef = typeRef(ValueCache)
                     parameters += rule.toParameter(VAR_PRIVATE_CACHE, privateCacheTypeRef)
                     val sharedCacheTypeRef = typeRef(ValueCache)
