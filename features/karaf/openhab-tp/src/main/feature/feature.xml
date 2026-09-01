@@ -289,4 +289,47 @@
 		<bundle dependency="true">mvn:org.javassist/javassist/3.30.2-GA</bundle>
 	</feature>
 
+	<feature name="openhab.tp-graal-polyglot" description="Graal Polyglot" version="${project.version}">
+		<capability>openhab.tp;feature=graal-polyglot;version=${graalvm.version}</capability>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.polyglot.polyglot/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.sdk.collections/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.sdk.word/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.sdk.jniutils/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.sdk.nativeimage/${graalvm.version}</bundle>
+
+		<!-- This is only needed because of the reqirement on the polyglot bundle -->
+		<feature dependency="true">spifly</feature>
+	</feature>
+
+	<feature name="openhab.tp-graal-common" description="Graal Common" version="${project.version}">
+		<capability>openhab.tp;feature=graal-common;version=${graalvm.version}</capability>
+		<feature dependency="true">openhab.tp-graal-polyglot</feature>
+		<bundle dependency="true" start-level="78">mvn:org.openhab.osgiify/org.graalvm.regex.regex/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.shadowed.icu4j/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.shadowed.json/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.shadowed.xz/${graalvm.version}</bundle>
+		<bundle dependency="true" start-level="78">mvn:org.openhab.osgiify/org.graalvm.tools.chromeinspector-tool/${graalvm.version}</bundle>
+		<bundle dependency="true" start-level="78">mvn:org.openhab.osgiify/org.graalvm.tools.profiler-tool/${graalvm.version}</bundle>
+		<bundle dependency="true" start-level="79">mvn:org.openhab.osgiify/org.graalvm.truffle.truffle-api/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.truffle.truffle-compiler/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.truffle.truffle-runtime/${graalvm.version}</bundle>
+	</feature>
+
+	<feature name="openhab.tp-graal-javascript" description="Graal JavaScript" version="${project.version}">
+		<capability>openhab.tp;feature=graal-javascript;version=${graalvm.version}</capability>
+		<feature dependency="true">openhab.tp-graal-common</feature>
+		<bundle dependency="true" start-level="78">mvn:org.openhab.osgiify/org.graalvm.js.js-language/${graalvm.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.js.js-scriptengine/${graalvm.version}</bundle>
+	</feature>
+
+	<feature name="openhab.tp-graal-python" description="Graal Python" version="${project.version}">
+		<capability>openhab.tp;feature=graal-python;version=${graalvm.version}</capability>
+		<feature dependency="true">openhab.tp-graal-common</feature>
+		<bundle dependency="true">mvn:org.openhab.osgiify/org.graalvm.llvm.llvm-api/${graalvm.version}</bundle>
+		<bundle dependency="true" start-level="78">mvn:org.openhab.osgiify/org.graalvm.python.python-resources/${graalvm.version}</bundle>
+		<bundle dependency="true" start-level="78">mvn:org.openhab.osgiify/org.graalvm.python.python-language/${graalvm.version}</bundle>
+		<bundle dependency="true" start-level="78">mvn:org.openhab.osgiify/org.graalvm.truffle.truffle-nfi/${graalvm.version}</bundle>
+		<bundle dependency="true" start-level="78">mvn:org.openhab.osgiify/org.graalvm.truffle.truffle-nfi-libffi/${graalvm.version}</bundle>
+	</feature>
+
 </features>
