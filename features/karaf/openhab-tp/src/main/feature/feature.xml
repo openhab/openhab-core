@@ -47,7 +47,7 @@
 		<bundle>mvn:org.eclipse.californium/californium-core/4.0.0-M2</bundle>
 		<bundle>mvn:org.eclipse.californium/element-connector/4.0.0-M2</bundle>
 		<bundle>mvn:org.eclipse.californium/scandium/4.0.0-M2</bundle>
-		<bundle dependency="true">mvn:org.slf4j/jul-to-slf4j/2.0.17</bundle>
+		<bundle dependency="true">mvn:org.slf4j/jul-to-slf4j/2.0.18</bundle>
 		<bundle dependency="true">mvn:org.bouncycastle/bcprov-jdk18on/${bouncycastle.version}</bundle>
 	</feature>
 
@@ -79,8 +79,14 @@
 		<feature dependency="true">pax-web-jetty-extras</feature>
 		<feature dependency="true">pax-web-jetty-http2</feature>
 		<feature dependency="true">pax-web-jetty-http2-extras</feature>
-		<feature dependency="true">pax-web-jetty-http2-jdk9</feature>
 		<feature dependency="true">pax-web-jetty-websockets</feature>
+		<!-- jetty-client requires both jetty-compression-common (provided transitively via
+			pax-web-jetty-websockets) and jetty-compression-gzip; pax-web-features does not ship
+			the latter, so it must be added explicitly here. -->
+		<bundle>mvn:org.eclipse.jetty.compression/jetty-compression-gzip/${jetty.version}</bundle>
+		<!-- servlet-based proxy used by org.openhab.core.ui; the core jetty-proxy bundle only
+			provides the Handler-based ProxyHandler since Jetty 12. -->
+		<bundle>mvn:org.eclipse.jetty.ee10/jetty-ee10-proxy/${jetty.version}</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
@@ -93,50 +99,63 @@
 		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/${jackson.version}</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jdk8/${jackson.version}</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/${jackson.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
 		<!-- Transitive dependency of jackson-dataformat-xml -->
 		<bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/4.3.0</bundle>
 		<!-- Transitive dependency of jackson-dataformat-yaml -->
 		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.5</bundle>
 	</feature>
 
-	<feature name="openhab.tp-jax-rs-whiteboard" description="Aries JAX-RS Whiteboard" version="${project.version}">
-		<capability>openhab.tp;feature=jax-rs-whiteboard;version=2.0.2</capability>
+	<!-- The Eclipse Jakarta REST Whiteboard, backed by Jersey, implements the OSGi Jakarta RESTful Web Services
+		Whiteboard specification. openHAB only uses that specification: its REST resources are annotated with
+		jakarta.ws.rs and registered through org.osgi.service.jakartars, none of them references
+		org.eclipse.osgitech. Replacing the implementation is therefore a change to this feature, not to the REST
+		resources, should this one stop being maintained. -->
+	<feature name="openhab.tp-jax-rs-whiteboard" description="Eclipse Jakarta REST Whiteboard" version="${project.version}">
+		<capability>openhab.tp;feature=jax-rs-whiteboard;version=${osgitech.rest.version}</capability>
 		<feature dependency="true">spifly</feature>
+		<feature dependency="true">scr</feature>
 		<feature dependency="true">http-whiteboard</feature>
-		<feature dependency="true">openhab.tp-cxf</feature>
-		<feature dependency="true">openhab.tp-jaxb</feature>
+		<!-- provides the wrap: URL handler used for osgi-resource-locator below -->
+		<feature dependency="true">wrap</feature>
+		<!-- Jakarta REST API -->
+		<bundle dependency="true">mvn:jakarta.ws.rs/jakarta.ws.rs-api/3.1.0</bundle>
+		<bundle dependency="true">mvn:org.osgi/org.osgi.service.jakartars/2.0.0</bundle>
+		<bundle dependency="true">mvn:org.osgi/org.osgi.service.condition/1.0.0</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.util.function/1.2.0</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.util.promise/1.3.0</bundle>
-		<bundle dependency="true">mvn:org.osgi/org.osgi.service.jaxrs/1.0.1</bundle>
-		<bundle>mvn:org.apache.aries.component-dsl/org.apache.aries.component-dsl.component-dsl/1.2.2</bundle>
-		<bundle>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.whiteboard/2.0.2</bundle>
+		<!-- HK2 dependency injection (required by Jersey) -->
+		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.1</bundle>
+		<bundle dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/2.1.1</bundle>
+		<bundle dependency="true">mvn:org.javassist/javassist/3.32.0-GA</bundle>
+		<bundle dependency="true">mvn:org.glassfish.hk2.external/aopalliance-repackaged/3.1.1</bundle>
+		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-api/3.1.1</bundle>
+		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-utils/3.1.1</bundle>
+		<bundle dependency="true">mvn:org.glassfish.hk2/hk2-locator/3.1.1</bundle>
+		<!-- Wrapped to strip Bundle-ActivationPolicy: lazy, which causes a deadlock with JerseyBundleTracker.
+			Every version of this bundle sets that header, so it cannot be avoided by picking another one. The
+			integration tests use the bundle unwrapped, as the bnd resolver cannot handle wrap: URLs, and hence
+			do not cover the deadlock: green itests are no reason to turn this back into a plain mvn: URL. -->
+		<bundle dependency="true">wrap:mvn:org.glassfish.hk2/osgi-resource-locator/1.0.3$Bundle-ActivationPolicy=</bundle>
+		<!-- Jersey bundles -->
+		<bundle dependency="true">mvn:org.glassfish.jersey.core/jersey-common/${jersey.version}</bundle>
+		<bundle dependency="true">mvn:org.glassfish.jersey.core/jersey-client/${jersey.version}</bundle>
+		<bundle dependency="true">mvn:org.glassfish.jersey.core/jersey-server/${jersey.version}</bundle>
+		<bundle dependency="true">mvn:org.glassfish.jersey.inject/jersey-hk2/${jersey.version}</bundle>
+		<bundle dependency="true">mvn:org.glassfish.jersey.containers/jersey-container-servlet-core/${jersey.version}</bundle>
+		<bundle dependency="true">mvn:org.glassfish.jersey.containers/jersey-container-servlet/${jersey.version}</bundle>
+		<bundle dependency="true">mvn:org.glassfish.jersey.media/jersey-media-sse/${jersey.version}</bundle>
+		<bundle dependency="true">mvn:org.glassfish.jersey.media/jersey-media-jaxb/${jersey.version}</bundle>
+		<bundle dependency="true">mvn:jakarta.validation/jakarta.validation-api/3.0.2</bundle>
+		<!-- Eclipse Jakarta REST Whiteboard implementation -->
+		<bundle>mvn:org.eclipse.osgi-technology.rest/org.eclipse.osgitech.rest/${osgitech.rest.version}</bundle>
+		<bundle>mvn:org.eclipse.osgi-technology.rest/org.eclipse.osgitech.rest.servlet.whiteboard/${osgitech.rest.version}</bundle>
+		<bundle>mvn:org.eclipse.osgi-technology.rest/org.eclipse.osgitech.rest.sse/${osgitech.rest.version}</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jna" description="Java Native Access (JNA)" version="${project.version}">
 		<capability>openhab.tp;feature=jna;version=${jna.version}</capability>
 		<bundle dependency="true">mvn:net.java.dev.jna/jna/${jna.version}</bundle>
 		<bundle dependency="true">mvn:net.java.dev.jna/jna-platform/${jna.version}</bundle>
-	</feature>
-
-	<feature name="openhab.tp-cxf" description="Apache CXF" version="${project.version}">
-		<capability>openhab.tp;feature=cxf;version=3.6.10</capability>
-		<feature dependency="true">openhab.tp-jaxws</feature>
-		<bundle dependency="true">mvn:com.fasterxml.woodstox/woodstox-core/6.6.2</bundle>
-		<bundle dependency="true">mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
-		<bundle dependency="true">mvn:jakarta.xml.ws/jakarta.xml.ws-api/2.3.3</bundle>
-		<bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
-		<bundle dependency="true">mvn:org.apache.aries.spec/org.apache.aries.javax.jax.rs-api/1.0.4</bundle>
-		<bundle dependency="true">mvn:org.apache.ws.xmlschema/xmlschema-core/2.3.1</bundle>
-		<bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/4.3.0</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-core/3.6.10</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-frontend-jaxrs/3.6.10</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-rs-client/3.6.10</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-rs-sse/3.6.10</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-security/3.6.10</bundle>
-		<bundle>mvn:org.apache.cxf/cxf-rt-transports-http/3.6.10</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jbbp" description="Java Binary Block Parser library" version="${project.version}">
@@ -165,11 +184,20 @@
 	</feature>
 
 	<feature name="openhab.tp-jaxb" description="JAXB bundles" version="${project.version}">
-		<capability>openhab.tp;feature=jaxb;version=2.3.9</capability>
-		<bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.2.1/1.2.1_3</bundle>
-		<bundle start-level="10">mvn:jakarta.xml.bind/jakarta.xml.bind-api/2.3.3</bundle>
-		<bundle start-level="20">mvn:com.sun.xml.bind/jaxb-osgi/2.3.9</bundle>
-		<bundle start-level="20">mvn:org.glassfish.hk2/osgi-resource-locator/1.0.3</bundle>
+		<capability>openhab.tp;feature=jaxb;version=4.0.9</capability>
+		<!-- swagger-core-jakarta has a mandatory import of jakarta.xml.bind.annotation [3.0,4), so the JAXB 3.0
+			API is installed next to 4.0 and cannot simply be dropped. Having both is safe: the openHAB bundles
+			with JAXB annotated classes import [4.0,5) and can only wire to 4.0, and swagger uses the annotations
+			only in ModelResolver/JAXBAnnotationsHelper, via instanceof, to fill the xml section of an OpenAPI
+			schema. Annotations of the other version are therefore not recognized instead of failing, and no
+			openHAB REST DTO carries JAXB annotations to begin with. Remove once swagger moves to JAXB 4.0. -->
+		<bundle start-level="10" dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/3.0.0</bundle>
+		<!-- JAXB 4.0 API + implementation (aligned with Karaf 4.5) -->
+		<bundle start-level="10">mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.5</bundle>
+		<bundle start-level="15" dependency="true">mvn:com.sun.istack/istack-commons-runtime/4.1.2</bundle>
+		<bundle start-level="15" dependency="true">mvn:org.openhab.core.bundles/org.openhab.core.jaxb4.txw2/${project.version}</bundle>
+		<bundle start-level="20">mvn:org.glassfish.jaxb/jaxb-core/4.0.9</bundle>
+		<bundle start-level="30">mvn:org.glassfish.jaxb/jaxb-runtime/4.0.9</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jaxws" description="JAX-WS (SOAP) bundles" version="${project.version}">
@@ -201,11 +229,19 @@
 	</feature>
 
 	<feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
-		<capability>openhab.tp;feature=jupnp;version=3.0.5</capability>
+		<capability>openhab.tp;feature=jupnp;version=${jupnp.version}</capability>
 		<feature dependency="true">http</feature>
 		<feature dependency="true">scr</feature>
 		<feature dependency="true">openhab.tp-httpclient</feature>
-		<bundle>mvn:org.jupnp/org.jupnp/3.0.5</bundle>
+		<bundle>mvn:org.jupnp/org.jupnp/${jupnp.version}</bundle>
+		<!-- jUPnP no longer bundles a transport implementation; the Jetty 12 transport (and the
+			generic servlet transport infrastructure it depends on) must be added explicitly. -->
+		<bundle>mvn:org.jupnp/org.jupnp.transport.jakarta.servlet/${jupnp.version}</bundle>
+		<bundle>mvn:org.jupnp/org.jupnp.transport.jetty12/${jupnp.version}</bundle>
+		<!-- Without this bridge, OSGiUpnpServiceConfiguration falls through to jetty9's standalone
+			StreamServer, which opens its own socket on the UPnP callback port (default 8080) instead
+			of sharing openHAB's existing HttpService - colliding with pax-web on that same port. -->
+		<bundle>mvn:org.jupnp/org.jupnp.transport.jakarta.whiteboard/${jupnp.version}</bundle>
 	</feature>
 
 	<feature name="openhab.tp-lsp4j" description="Eclipse LSP4J" version="${project.version}">
@@ -241,8 +277,6 @@
 		<bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore.xmi/2.37.0</bundle>
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.common.types/${xtext.version}</bundle>
 
-		<bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
-
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase/${xtext.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.lib/${xtext.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.smap/${xtext.version}</bundle>
@@ -264,7 +298,7 @@
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.9.0</bundle>
 
 		<!-- Used for feature verification only because this is already provided by Karaf -->
-		<bundle dependency="true" start="false">mvn:org.eclipse.platform/org.eclipse.osgi/3.24.0</bundle>
+		<bundle dependency="true" start="false">mvn:org.eclipse.platform/org.eclipse.osgi/3.24.200</bundle>
 	</feature>
 
 	<feature name="openhab.tp-xtext-ide" description="Xtext - IDE Support" version="${project.version}">
@@ -280,13 +314,12 @@
 		<capability>openhab.tp;feature=swagger-jaxrs;version=${swagger.version}</capability>
 		<feature dependency="true">openhab.tp-jax-rs-whiteboard</feature>
 		<feature dependency="true">openhab.tp-jackson</feature>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-annotations/${swagger.version}</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-core/${swagger.version}</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-integration/${swagger.version}</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-jaxrs2/${swagger.version}</bundle>
-		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-models/${swagger.version}</bundle>
-		<bundle dependency="true">mvn:jakarta.validation/jakarta.validation-api/2.0.2</bundle>
-		<bundle dependency="true">mvn:org.javassist/javassist/3.30.2-GA</bundle>
+		<feature dependency="true">openhab.tp-jaxb</feature>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-annotations-jakarta/${swagger.version}</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-core-jakarta/${swagger.version}</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-integration-jakarta/${swagger.version}</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-jaxrs2-jakarta/${swagger.version}</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-models-jakarta/${swagger.version}</bundle>
 	</feature>
 
 </features>

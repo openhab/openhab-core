@@ -12,33 +12,50 @@
  */
 package org.openhab.core.io.net.tests.internal;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.http2.api.Stream;
-import org.eclipse.jetty.http2.frames.DataFrame;
-import org.eclipse.jetty.util.Callback;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 /**
  * HTTP/2 stream adapter for org.openhab.core.io.net tests.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
-@WebSocket
 @NonNullByDefault
-public class TestStreamAdapter extends Stream.Listener.Adapter {
+public class TestStreamAdapter implements Stream.Listener {
     public final CompletableFuture<String> completable = new CompletableFuture<>();
 
+    private final ByteArrayOutputStream content = new ByteArrayOutputStream();
+
     @Override
-    public void onData(@Nullable Stream stream, @Nullable DataFrame frame, @Nullable Callback callback) {
-        assertNotNull(stream);
-        assertNotNull(frame);
-        assertTrue(frame.isEndStream());
-        completable.complete(StandardCharsets.UTF_8.decode(frame.getData()).toString());
+    public void onDataAvailable(@Nullable Stream stream) {
+        if (stream == null) {
+            return;
+        }
+        while (true) {
+            Stream.Data data = stream.readData();
+            if (data == null) {
+                stream.demand();
+                return;
+            }
+            boolean last = data.frame().isEndStream();
+            // Collect the bytes of all frames and decode them only once the stream ended: a response can arrive in
+            // several frames, the last one often carrying no content at all, and a multi byte character can be split
+            // across two frames.
+            ByteBuffer buffer = data.frame().getByteBuffer();
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            content.writeBytes(bytes);
+            data.release();
+            if (last) {
+                completable.complete(content.toString(StandardCharsets.UTF_8));
+                return;
+            }
+        }
     }
 }
