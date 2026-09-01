@@ -17,6 +17,8 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import net.wimpi.modbus.Modbus;
+
 /**
  * Class representing pooling related configuration of a single endpoint
  *
@@ -63,6 +65,12 @@ public class EndpointPoolConfiguration {
      * default is respected.
      */
     private int connectTimeoutMillis;
+
+    /**
+     * Maximum time to wait for data to be received, in milliseconds. A value of zero disables the timeout.
+     * Defaults to {@link Modbus#DEFAULT_TIMEOUT}.
+     */
+    private int receiveTimeoutMillis = Modbus.DEFAULT_TIMEOUT;
 
     public void setAfterConnectionDelayMillis(long afterConnectionDelayMillis) {
         this.afterConnectionDelayMillis = afterConnectionDelayMillis;
@@ -112,10 +120,18 @@ public class EndpointPoolConfiguration {
         this.connectTimeoutMillis = connectTimeoutMillis;
     }
 
+    public int getReceiveTimeoutMillis() {
+        return receiveTimeoutMillis;
+    }
+
+    public void setReceiveTimeoutMillis(int receiveTimeoutMillis) {
+        this.receiveTimeoutMillis = receiveTimeoutMillis;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(connectMaxTries, connectTimeoutMillis, interConnectDelayMillis, interTransactionDelayMillis,
-                reconnectAfterMillis, afterConnectionDelayMillis);
+                reconnectAfterMillis, afterConnectionDelayMillis, receiveTimeoutMillis);
     }
 
     @Override
@@ -123,7 +139,8 @@ public class EndpointPoolConfiguration {
         return "EndpointPoolConfiguration [interTransactionDelayMillis=" + interTransactionDelayMillis
                 + ", interConnectDelayMillis=" + interConnectDelayMillis + ", connectMaxTries=" + connectMaxTries
                 + ", reconnectAfterMillis=" + reconnectAfterMillis + ", connectTimeoutMillis=" + connectTimeoutMillis
-                + ", afterConnectionDelayMillis=" + afterConnectionDelayMillis + "]";
+                + ", afterConnectionDelayMillis=" + afterConnectionDelayMillis + ", receiveTimeoutMillis="
+                + receiveTimeoutMillis + "]";
     }
 
     @Override
@@ -142,6 +159,7 @@ public class EndpointPoolConfiguration {
                 && interConnectDelayMillis == rhs.interConnectDelayMillis
                 && interTransactionDelayMillis == rhs.interTransactionDelayMillis
                 && reconnectAfterMillis == rhs.reconnectAfterMillis
-                && afterConnectionDelayMillis == rhs.afterConnectionDelayMillis;
+                && afterConnectionDelayMillis == rhs.afterConnectionDelayMillis
+                && receiveTimeoutMillis == rhs.receiveTimeoutMillis;
     }
 }
