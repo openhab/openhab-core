@@ -10,25 +10,24 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.thing
+package org.openhab.core.model.thing;
 
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.resource.IResourceServiceProvider
+import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.resource.IResourceServiceProvider;
 
-/** 
- * Initialization support for running Xtext languages
- * without equinox extension registry
+/**
+ * Initialization support for running Xtext languages without Equinox extension registry.
  */
-class ThingStandaloneSetup extends ThingStandaloneSetupGenerated {
-    def static void doSetup() {
-        new ThingStandaloneSetup().createInjectorAndDoEMFRegistration()
+public class ThingStandaloneSetup extends ThingStandaloneSetupGenerated {
+
+    public static void doSetup() {
+        new ThingStandaloneSetup().createInjectorAndDoEMFRegistration();
     }
-    
-    def static void unregister() {
+
+    public static void unregister() {
         EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Thing");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("things");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("things");
     }
-    
 }
