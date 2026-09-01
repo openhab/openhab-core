@@ -32,6 +32,7 @@ import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
+import org.openhab.core.common.Version;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -130,7 +131,8 @@ public class KarafAddonService implements AddonService {
         boolean isInstalled = featuresService.isInstalled(feature);
 
         Addon.Builder addon = Addon.create(uid).withType(type).withId(name).withContentType(ADDONS_CONTENT_TYPE)
-                .withVersion(feature.getVersion()).withAuthor(ADDONS_AUTHOR, true).withInstalled(isInstalled);
+                .withVersion(Version.valueOf(feature.getVersion())).withAuthor(ADDONS_AUTHOR, true)
+                .withInstalled(isInstalled);
 
         AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(uid, locale);
 
