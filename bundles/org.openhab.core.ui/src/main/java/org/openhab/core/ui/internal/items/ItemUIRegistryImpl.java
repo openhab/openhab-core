@@ -137,7 +137,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected static final String SEMANTICS_LOCATION = "Location";
     protected static final String SEMANTICS_PARENT_LOCATION_CONFIG = "isPartOf";
 
-    protected static final String DEFAULT_CONFIRM_CMD_MESSAGE = "Are you sure?";
+    protected static final String DEFAULT_COMMAND_CONFIRM_MESSAGE = "Are you sure?";
 
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
@@ -151,7 +151,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
     private String groupMembersSorting = DEFAULT_SORTING;
-    private String confirmCmdMessage = DEFAULT_CONFIRM_CMD_MESSAGE;
+    private String commandConfirmMessage = DEFAULT_COMMAND_CONFIRM_MESSAGE;
 
     private static class WidgetLabelWithSource {
         public final String label;
@@ -203,9 +203,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             if (groupMembersSortingString != null) {
                 groupMembersSorting = groupMembersSortingString;
             }
-            final String confirmCmdMessageString = Objects.toString(config.get("confirmationDialogMessage"), null);
-            if (confirmCmdMessageString != null) {
-                confirmCmdMessage = confirmCmdMessageString;
+            final String commandConfirmMessageString = Objects.toString(config.get("commandConfirmDialogMessage"),
+                    null);
+            if (commandConfirmMessageString != null) {
+                commandConfirmMessage = commandConfirmMessageString;
             }
         }
     }
@@ -1338,11 +1339,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public @Nullable String getConfirmCmdMessage(Widget w) {
+    public @Nullable String getCommandConfirmMessage(Widget w) {
         List<Rule> ruleList = w.getConfirmCmdRules();
 
         if (ruleList.isEmpty()) {
-            return w.getConfirmCmd() ? confirmCmdMessage : null;
+            return w.getConfirmCmd() ? commandConfirmMessage : null;
         }
 
         logger.debug("Checking confirm command rules for widget '{}'.", w.getLabel());
@@ -1350,7 +1351,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         for (Rule rule : ruleList) {
             if (allConditionsOk(rule.getConditions(), w)) {
                 String arg = rule.getArgument();
-                return arg != null && !arg.isBlank() ? arg : confirmCmdMessage;
+                return arg != null && !arg.isBlank() ? arg : commandConfirmMessage;
             }
         }
 

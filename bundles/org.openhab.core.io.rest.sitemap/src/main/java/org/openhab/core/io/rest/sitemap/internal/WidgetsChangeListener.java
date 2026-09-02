@@ -243,7 +243,7 @@ public class WidgetsChangeListener implements EventSubscriber {
             event.labelSource = WidgetLabelSource.SITEMAP_WIDGET.toString();
         }
         event.visibility = itemUIRegistry.getVisiblity(widget);
-        event.confirmCmdMessage = itemUIRegistry.getConfirmCmdMessage(widget);
+        event.confirmCmdMessage = itemUIRegistry.getCommandConfirmMessage(widget);
         event.descriptionChanged = false;
         // event.item contains the (potentially changed) data of the item belonging to
         // the widget including its state (in event.item.state)

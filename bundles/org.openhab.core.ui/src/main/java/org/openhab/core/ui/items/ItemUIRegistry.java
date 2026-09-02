@@ -223,7 +223,7 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      *         should be shown
      */
     @Nullable
-    String getConfirmCmdMessage(Widget w);
+    String getCommandConfirmMessage(Widget w);
 
     /**
      * Gets the item state

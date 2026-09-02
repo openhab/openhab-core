@@ -1390,10 +1390,10 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getConfirmCmd() {
         when(widgetMock.getConfirmCmd()).thenReturn(true);
-        assertEquals(ItemUIRegistryImpl.DEFAULT_CONFIRM_CMD_MESSAGE, uiRegistry.getConfirmCmdMessage(widgetMock));
+        assertEquals(ItemUIRegistryImpl.DEFAULT_COMMAND_CONFIRM_MESSAGE, uiRegistry.getCommandConfirmMessage(widgetMock));
 
         when(widgetMock.getConfirmCmd()).thenReturn(false);
-        assertNull(uiRegistry.getConfirmCmdMessage(widgetMock));
+        assertNull(uiRegistry.getCommandConfirmMessage(widgetMock));
 
         String message = "Are you absolutely sure?";
         Rule rule = mock(Rule.class);
@@ -1403,7 +1403,7 @@ public class ItemUIRegistryImplTest {
         when(rule.getConditions()).thenReturn(conditions);
         when(rule.getArgument()).thenReturn(message);
         when(widgetMock.getConfirmCmdRules()).thenReturn(rules);
-        assertEquals(message, uiRegistry.getConfirmCmdMessage(widgetMock));
+        assertEquals(message, uiRegistry.getCommandConfirmMessage(widgetMock));
 
         Condition condition = mock(Condition.class);
         when(condition.getValue()).thenReturn("21");
@@ -1416,17 +1416,17 @@ public class ItemUIRegistryImplTest {
         when(rule.getArgument()).thenReturn(null);
 
         when(itemMock.getState()).thenReturn(new DecimalType(20.9));
-        assertNull(uiRegistry.getConfirmCmdMessage(mapviewMock));
+        assertNull(uiRegistry.getCommandConfirmMessage(mapviewMock));
 
         when(itemMock.getState()).thenReturn(new DecimalType(21.0));
-        assertEquals(ItemUIRegistryImpl.DEFAULT_CONFIRM_CMD_MESSAGE, uiRegistry.getConfirmCmdMessage(widgetMock));
+        assertEquals(ItemUIRegistryImpl.DEFAULT_COMMAND_CONFIRM_MESSAGE, uiRegistry.getCommandConfirmMessage(widgetMock));
 
         when(rule.getArgument()).thenReturn(message);
         when(itemMock.getState()).thenReturn(new DecimalType(23.5));
-        assertEquals(message, uiRegistry.getConfirmCmdMessage(widgetMock));
+        assertEquals(message, uiRegistry.getCommandConfirmMessage(widgetMock));
 
         when(itemMock.getState()).thenReturn(new DecimalType(24.0));
-        assertNull(uiRegistry.getConfirmCmdMessage(widgetMock));
+        assertNull(uiRegistry.getCommandConfirmMessage(widgetMock));
     }
 
     @Test
