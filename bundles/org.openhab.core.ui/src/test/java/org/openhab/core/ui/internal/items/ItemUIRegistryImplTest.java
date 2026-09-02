@@ -1390,7 +1390,8 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getConfirmCmd() {
         when(widgetMock.getConfirmCmd()).thenReturn(true);
-        assertEquals(ItemUIRegistryImpl.DEFAULT_COMMAND_CONFIRM_MESSAGE, uiRegistry.getCommandConfirmMessage(widgetMock));
+        assertEquals(ItemUIRegistryImpl.DEFAULT_COMMAND_CONFIRM_MESSAGE,
+                uiRegistry.getCommandConfirmMessage(widgetMock));
 
         when(widgetMock.getConfirmCmd()).thenReturn(false);
         assertNull(uiRegistry.getCommandConfirmMessage(widgetMock));
@@ -1419,7 +1420,8 @@ public class ItemUIRegistryImplTest {
         assertNull(uiRegistry.getCommandConfirmMessage(mapviewMock));
 
         when(itemMock.getState()).thenReturn(new DecimalType(21.0));
-        assertEquals(ItemUIRegistryImpl.DEFAULT_COMMAND_CONFIRM_MESSAGE, uiRegistry.getCommandConfirmMessage(widgetMock));
+        assertEquals(ItemUIRegistryImpl.DEFAULT_COMMAND_CONFIRM_MESSAGE,
+                uiRegistry.getCommandConfirmMessage(widgetMock));
 
         when(rule.getArgument()).thenReturn(message);
         when(itemMock.getState()).thenReturn(new DecimalType(23.5));
