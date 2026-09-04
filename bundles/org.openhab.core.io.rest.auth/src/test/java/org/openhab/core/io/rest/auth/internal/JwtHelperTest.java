@@ -14,15 +14,13 @@ package org.openhab.core.io.rest.auth.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
-import java.nio.file.Files;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -88,15 +86,20 @@ public class JwtHelperTest {
     }
 
     /**
-     * Reads the RSA key that {@link JwtHelper} persisted into the (isolated) userdata folder. This is the same key
-     * material {@code JwtHelper} signs and verifies with, so tokens crafted with it are only rejected for the reason
-     * under test (expiration or issuer) rather than for a signature mismatch.
+     * Returns the RSA key that the {@link JwtHelper} instance under test uses for signing and verification. The key is
+     * read directly from the instance's private {@code jwtWebKey} field via reflection rather than from disk.
+     * <p>
+     * Reading from the instance (instead of re-reading the persisted key file) makes the test independent of where
+     * {@code JwtHelper} persists its key: {@code JwtHelper.KEY_FILE_PATH} is a {@code static final} field resolved once
+     * at class-initialization time, so it may not point at the isolated temp userdata folder if the {@code JwtHelper}
+     * class was loaded before the {@code openhab.userdata} property was set. Using the live instance key avoids that
+     * ordering dependency entirely while still guaranteeing the same key material is used — so crafted tokens are
+     * rejected only for the reason under test (expiration or issuer), never for a signature mismatch.
      */
-    private RsaJsonWebKey readJwtHelperKey() throws Exception {
-        Path keyFile = Path.of(
-                OpenHAB.getUserDataFolder() + File.separator + "secrets" + File.separator + "rsa_json_web_key.json");
-        String keyJson = Files.readString(keyFile).trim();
-        return (RsaJsonWebKey) JsonWebKey.Factory.newJwk(keyJson);
+    private RsaJsonWebKey getJwtHelperKey() throws Exception {
+        Field keyField = JwtHelper.class.getDeclaredField("jwtWebKey");
+        keyField.setAccessible(true);
+        return (RsaJsonWebKey) keyField.get(jwtHelper);
     }
 
     // --- Token Creation ---
@@ -176,7 +179,7 @@ public class JwtHelperTest {
         // fails is the expired 'exp' claim (and not a malformed token or a signature/issuer mismatch). All other
         // required claims (issuer, audience, subject, valid signature) are present and correct. The expiration is set
         // well beyond JwtHelper's 30 second allowed clock skew.
-        RsaJsonWebKey key = readJwtHelperKey();
+        RsaJsonWebKey key = getJwtHelperKey();
 
         NumericDate expiredAt = NumericDate.now();
         expiredAt.addSeconds(-600); // 10 minutes in the past
@@ -252,7 +255,7 @@ public class JwtHelperTest {
         // Sign with the SAME key JwtHelper uses but set a wrong 'iss' claim, so the ONLY reason verification fails is
         // the issuer mismatch (the signature is valid and all other required claims are present and correct). This
         // isolates the test to actual issuer enforcement rather than a signature verification failure.
-        RsaJsonWebKey key = readJwtHelperKey();
+        RsaJsonWebKey key = getJwtHelperKey();
 
         JwtClaims claims = new JwtClaims();
         claims.setIssuer("wrong-issuer");
