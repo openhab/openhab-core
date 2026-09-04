@@ -23,6 +23,13 @@
 			<description>Get the holidays for a specific city (e.g. New York City = "nyc").</description>
 			<advanced>true</advanced>
 		</parameter>
+		<parameter name="cache" type="boolean">
+			<label>Cache Files</label>
+			<description>User defined configuration files are cached once loaded. When set to false, files will be read for each
+				access.</description>
+			<advanced>true</advanced>
+			<default>true</default>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>
