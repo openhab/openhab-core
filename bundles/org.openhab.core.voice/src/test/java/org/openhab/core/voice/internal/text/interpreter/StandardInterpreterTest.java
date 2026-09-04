@@ -64,16 +64,16 @@ import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
-import org.openhab.core.voice.STTService;
-import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.openhab.core.voice.internal.security.ItemPermissionResolverImpl;
 import org.openhab.core.voice.security.ItemPermission;
+import org.openhab.core.voice.stt.STTService;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpreterContext;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
+import org.openhab.core.voice.tts.TTSService;
 
 /**
  * Test the standard interpreter
