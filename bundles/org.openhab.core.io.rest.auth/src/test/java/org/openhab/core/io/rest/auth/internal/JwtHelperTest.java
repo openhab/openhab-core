@@ -14,17 +14,27 @@ package org.openhab.core.io.rest.auth.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.NumericDate;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.GenericUser;
@@ -39,14 +49,54 @@ import org.openhab.core.auth.User;
 @NonNullByDefault
 public class JwtHelperTest {
 
+    private static final String ISSUER_NAME = "openhab";
+    private static final String AUDIENCE = "openhab";
+
+    private static @Nullable String previousUserDataProperty;
+
     private @NonNullByDefault({}) JwtHelper jwtHelper;
+
+    /**
+     * Isolate the userdata folder so {@link JwtHelper} writes its RSA key into the JUnit-managed temporary directory
+     * instead of the working directory. This must run before {@link JwtHelper} is first referenced, because
+     * {@code JwtHelper.KEY_FILE_PATH} is a {@code static final} field that resolves {@link OpenHAB#getUserDataFolder()}
+     * exactly once at class-initialization time. The temp dir is injected as a parameter (rather than a static field)
+     * so JUnit creates and cleans it up automatically.
+     */
+    @BeforeAll
+    public static void setupClass(@TempDir Path tempUserData) {
+        previousUserDataProperty = System.getProperty(OpenHAB.USERDATA_DIR_PROG_ARGUMENT);
+        System.setProperty(OpenHAB.USERDATA_DIR_PROG_ARGUMENT, tempUserData.toString());
+    }
+
+    @AfterAll
+    public static void teardownClass() {
+        // Restore the previous property value, or clear it if it was not set before.
+        String previous = previousUserDataProperty;
+        if (previous != null) {
+            System.setProperty(OpenHAB.USERDATA_DIR_PROG_ARGUMENT, previous);
+        } else {
+            System.clearProperty(OpenHAB.USERDATA_DIR_PROG_ARGUMENT);
+        }
+    }
 
     @BeforeEach
     public void setup() {
-        // JwtHelper reads from OpenHAB.getUserDataFolder()/secrets/rsa_json_web_key.json
-        // The system property is already set by the test framework, or we rely on the default.
-        // Create a fresh JwtHelper which will generate a new key if none exists.
+        // JwtHelper reads/writes its key from OpenHAB.getUserDataFolder()/secrets/rsa_json_web_key.json, which now
+        // points into the isolated temporary directory set up in setupClass().
         jwtHelper = new JwtHelper();
+    }
+
+    /**
+     * Reads the RSA key that {@link JwtHelper} persisted into the (isolated) userdata folder. This is the same key
+     * material {@code JwtHelper} signs and verifies with, so tokens crafted with it are only rejected for the reason
+     * under test (expiration or issuer) rather than for a signature mismatch.
+     */
+    private RsaJsonWebKey readJwtHelperKey() throws Exception {
+        Path keyFile = Path.of(
+                OpenHAB.getUserDataFolder() + File.separator + "secrets" + File.separator + "rsa_json_web_key.json");
+        String keyJson = Files.readString(keyFile).trim();
+        return (RsaJsonWebKey) JsonWebKey.Factory.newJwk(keyJson);
     }
 
     // --- Token Creation ---
@@ -122,18 +172,36 @@ public class JwtHelperTest {
 
     @Test
     public void expiredTokenThrowsAuthenticationException() throws Exception {
-        User user = new GenericUser("testuser", Set.of(Role.ADMIN));
-        // Token that expires immediately (0 minutes lifetime, but nbf is 2 minutes in past)
-        // We need to create a token with negative expiration to truly test expiry.
-        // Since getJwtAccessToken uses a positive lifetime, we create a manually expired token.
-        // The JwtHelper has 30s clock skew, so a 0 minute token may still pass briefly.
-        // Instead, test with a token from a DIFFERENT key (which will also fail verification).
-        // For true expiration testing, we construct the token manually.
+        // Build a genuinely expired token signed with the SAME key JwtHelper uses, so the only reason verification
+        // fails is the expired 'exp' claim (and not a malformed token or a signature/issuer mismatch). All other
+        // required claims (issuer, audience, subject, valid signature) are present and correct. The expiration is set
+        // well beyond JwtHelper's 30 second allowed clock skew.
+        RsaJsonWebKey key = readJwtHelperKey();
 
-        // Use the jwtHelper to create a token, but we can't easily make it expired
-        // without reflection. Instead, verify that a garbage string fails.
+        NumericDate expiredAt = NumericDate.now();
+        expiredAt.addSeconds(-600); // 10 minutes in the past
+
+        JwtClaims claims = new JwtClaims();
+        claims.setIssuer(ISSUER_NAME);
+        claims.setAudience(AUDIENCE);
+        claims.setExpirationTime(expiredAt);
+        claims.setGeneratedJwtId();
+        claims.setIssuedAt(expiredAt);
+        claims.setNotBefore(expiredAt);
+        claims.setSubject("testuser");
+        claims.setStringListClaim("role", List.of(Role.ADMIN));
+        claims.setClaim("scope", "admin");
+
+        JsonWebSignature jws = new JsonWebSignature();
+        jws.setPayload(claims.toJson());
+        jws.setKey(key.getPrivateKey());
+        jws.setKeyIdHeaderValue(key.getKeyId());
+        jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
+
+        String expiredToken = jws.getCompactSerialization();
+
         assertThrows(AuthenticationException.class, () -> {
-            jwtHelper.verifyAndParseJwtAccessToken("expired.token.here");
+            jwtHelper.verifyAndParseJwtAccessToken(expiredToken);
         });
     }
 
@@ -157,8 +225,8 @@ public class JwtHelperTest {
         RsaJsonWebKey differentKey = RsaJwkGenerator.generateJwk(2048);
 
         JwtClaims claims = new JwtClaims();
-        claims.setIssuer("openhab");
-        claims.setAudience("openhab");
+        claims.setIssuer(ISSUER_NAME);
+        claims.setAudience(AUDIENCE);
         claims.setExpirationTimeMinutesInTheFuture(60);
         claims.setGeneratedJwtId();
         claims.setIssuedAtToNow();
@@ -181,27 +249,32 @@ public class JwtHelperTest {
 
     @Test
     public void tokenWithWrongIssuerThrowsAuthenticationException() throws Exception {
-        // We can't easily create a token with the right key but wrong issuer without reflection.
-        // However, we can verify that the JwtHelper rejects tokens from other issuers by
-        // using a different key (which tests the combined verification).
-        // This test effectively validates that the consumer requires the expected issuer.
-        RsaJsonWebKey differentKey = RsaJwkGenerator.generateJwk(2048);
+        // Sign with the SAME key JwtHelper uses but set a wrong 'iss' claim, so the ONLY reason verification fails is
+        // the issuer mismatch (the signature is valid and all other required claims are present and correct). This
+        // isolates the test to actual issuer enforcement rather than a signature verification failure.
+        RsaJsonWebKey key = readJwtHelperKey();
 
         JwtClaims claims = new JwtClaims();
         claims.setIssuer("wrong-issuer");
-        claims.setAudience("openhab");
+        claims.setAudience(AUDIENCE);
         claims.setExpirationTimeMinutesInTheFuture(60);
+        claims.setGeneratedJwtId();
+        claims.setIssuedAtToNow();
+        claims.setNotBeforeMinutesInThePast(2);
         claims.setSubject("testuser");
         claims.setStringListClaim("role", List.of(Role.ADMIN));
         claims.setClaim("scope", "admin");
 
         JsonWebSignature jws = new JsonWebSignature();
         jws.setPayload(claims.toJson());
-        jws.setKey(differentKey.getPrivateKey());
+        jws.setKey(key.getPrivateKey());
+        jws.setKeyIdHeaderValue(key.getKeyId());
         jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
 
+        String wrongIssuerToken = jws.getCompactSerialization();
+
         assertThrows(AuthenticationException.class, () -> {
-            jwtHelper.verifyAndParseJwtAccessToken(jws.getCompactSerialization());
+            jwtHelper.verifyAndParseJwtAccessToken(wrongIssuerToken);
         });
     }
 
