@@ -512,7 +512,9 @@ public class SitemapResource
     @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}/*")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events for a whole sitemap. Not recommended due to potentially high traffic.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "200", description = "OK", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = SitemapWidgetEvent.class)),
+                    @Content(mediaType = "text/event-stream") }),
             @ApiResponse(responseCode = "400", description = "Missing sitemap parameter, or sitemap not linked successfully to the subscription."),
             @ApiResponse(responseCode = "404", description = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
@@ -528,7 +530,9 @@ public class SitemapResource
     @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "200", description = "OK", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = SitemapWidgetEvent.class)),
+                    @Content(mediaType = "text/event-stream") }),
             @ApiResponse(responseCode = "400", description = "Missing sitemap or page parameter, or page not linked successfully to the subscription."),
             @ApiResponse(responseCode = "404", description = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
