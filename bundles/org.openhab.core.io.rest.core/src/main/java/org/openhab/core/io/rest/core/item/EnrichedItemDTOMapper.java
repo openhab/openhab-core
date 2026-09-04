@@ -89,28 +89,32 @@ public class EnrichedItemDTOMapper {
             // only add as parent item if it is a group, otherwise duplicate memberships trigger false warnings
             parents.add(item);
         }
+
         String state;
+        String lastState;
+        State lastStateValue = item.getLastState();
+
         if (item instanceof DateTimeItem dateTimeItem && zoneId != null) {
             DateTimeType dateTime = dateTimeItem.getStateAs(DateTimeType.class);
-            if (dateTime == null) {
-                state = item.getState().toFullString();
-            } else {
-                state = dateTime.toFullString(zoneId);
-            }
+            state = dateTime != null ? dateTime.toFullString(zoneId) : item.getState().toFullString();
+            lastState = lastStateValue instanceof DateTimeType lastDateTime ? lastDateTime.toFullString(zoneId)
+                    : lastStateValue != null ? lastStateValue.toFullString() : null;
         } else {
             state = item.getState().toFullString();
+            lastState = lastStateValue != null ? lastStateValue.toFullString() : null;
         }
+
         String transformedState = considerTransformation(item, locale);
         if (state.equals(transformedState)) {
             transformedState = null;
         }
-        StateDescription stateDescription = considerTransformation(item.getStateDescription(locale));
 
-        String lastState = Optional.ofNullable(item.getLastState()).map(State::toFullString).orElse(null);
         Long lastStateUpdate = Optional.ofNullable(item.getLastStateUpdate()).map(zdt -> zdt.toInstant().toEpochMilli())
                 .orElse(null);
         Long lastStateChange = Optional.ofNullable(item.getLastStateChange()).map(zdt -> zdt.toInstant().toEpochMilli())
                 .orElse(null);
+
+        StateDescription stateDescription = considerTransformation(item.getStateDescription(locale));
 
         final String link;
         if (uriBuilder != null) {
