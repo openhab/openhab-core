@@ -34,9 +34,10 @@ import io.swagger.v3.oas.annotations.media.Schema.AdditionalPropertiesValue;
  * @author Yannick Schaus - Initial contribution
  */
 public class UIComponent {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     String component;
 
-    @Schema(additionalProperties = AdditionalPropertiesValue.TRUE)
+    @Schema(additionalProperties = AdditionalPropertiesValue.TRUE, requiredMode = Schema.RequiredMode.REQUIRED)
     Map<String, Object> config;
 
     Map<String, List<UIComponent>> slots = null;
