@@ -38,7 +38,7 @@ public class SitemapWidgetEvent extends SitemapEvent {
     public String state;
     public EnrichedItemDTO item;
     public boolean descriptionChanged;
-    public String confirmCmdMessage;
+    public String commandConfirmMessage;
 
     public SitemapWidgetEvent() {
     }

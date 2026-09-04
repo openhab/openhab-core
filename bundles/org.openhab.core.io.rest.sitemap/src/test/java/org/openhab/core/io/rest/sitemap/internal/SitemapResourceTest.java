@@ -90,7 +90,7 @@ public class SitemapResourceTest extends JavaTest {
     private static final String VALUE_COLOR_ITEM_NAME = "valueColorItemName";
     private static final String ICON_COLOR_ITEM_NAME = "iconColorItemName";
     private static final String ICON_ITEM_NAME = "iconItemName";
-    private static final String CONFIRM_CMD_ITEM_NAME = "confirmCmdItemName";
+    private static final String COMMAND_CONFIRM_ITEM_NAME = "commandConfirmItemName";
     private static final String WIDGET1_LABEL = "widget 1";
     private static final String WIDGET3_LABEL = "widget 3";
     private static final String GROUP_LABEL = "frame";
@@ -115,7 +115,7 @@ public class SitemapResourceTest extends JavaTest {
     private @NonNullByDefault({}) GenericItem valueColorItem;
     private @NonNullByDefault({}) GenericItem iconColorItem;
     private @NonNullByDefault({}) GenericItem iconItem;
-    private @NonNullByDefault({}) GenericItem confirmCmdItem;
+    private @NonNullByDefault({}) GenericItem commandConfirmItem;
 
     private @Mock @NonNullByDefault({}) HttpHeaders headersMock;
     private @Mock @NonNullByDefault({}) Sitemap defaultSitemapMock;
@@ -152,7 +152,7 @@ public class SitemapResourceTest extends JavaTest {
         valueColorItem = new TestItem(VALUE_COLOR_ITEM_NAME);
         iconColorItem = new TestItem(ICON_COLOR_ITEM_NAME);
         iconItem = new TestItem(ICON_ITEM_NAME);
-        confirmCmdItem = new TestItem(CONFIRM_CMD_ITEM_NAME);
+        commandConfirmItem = new TestItem(COMMAND_CONFIRM_ITEM_NAME);
 
         when(localeServiceMock.getLocale(null)).thenReturn(Locale.US);
 
@@ -412,7 +412,7 @@ public class SitemapResourceTest extends JavaTest {
     @Test
     public void whenLongPollingShouldObserveItemsFromConfirmCmdConditions() {
         ItemEvent itemEvent = mock(ItemEvent.class);
-        when(itemEvent.getItemName()).thenReturn(confirmCmdItem.getName());
+        when(itemEvent.getItemName()).thenReturn(commandConfirmItem.getName());
         executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
         // non-null is sufficient here.
@@ -534,7 +534,7 @@ public class SitemapResourceTest extends JavaTest {
         when(itemUIRegistryMock.getItem(VALUE_COLOR_ITEM_NAME)).thenReturn(valueColorItem);
         when(itemUIRegistryMock.getItem(ICON_COLOR_ITEM_NAME)).thenReturn(iconColorItem);
         when(itemUIRegistryMock.getItem(ICON_ITEM_NAME)).thenReturn(iconItem);
-        when(itemUIRegistryMock.getItem(CONFIRM_CMD_ITEM_NAME)).thenReturn(confirmCmdItem);
+        when(itemUIRegistryMock.getItem(COMMAND_CONFIRM_ITEM_NAME)).thenReturn(commandConfirmItem);
     }
 
     private void configureWidgetStatesPage1(State state1, State state2) {
@@ -631,7 +631,7 @@ public class SitemapResourceTest extends JavaTest {
         // add confirm command conditions to the item:
         Rule confirmCmd = mock(Rule.class);
         Condition conditon4 = mock(Condition.class);
-        when(conditon4.getItem()).thenReturn(CONFIRM_CMD_ITEM_NAME);
+        when(conditon4.getItem()).thenReturn(COMMAND_CONFIRM_ITEM_NAME);
         List<Condition> conditions4 = new ArrayList<>();
         conditions4.add(conditon4);
         when(confirmCmd.getConditions()).thenReturn(conditions4);
