@@ -122,9 +122,12 @@ public abstract class AbstractThingSerializer implements ThingSerializer {
                 continue;
             }
             Object value = configParameters.get(paramName);
+            // We apply normalization in case configParameters is provided without being normalized first.
+            // Missing normalization is happening for disabled managed things.
+            Object normalizedValue = value == null ? null : ConfigUtil.normalizeType(value, param);
             Object defaultValue = ConfigUtil.getDefaultValueAsCorrectType(param);
-            if (value != null && (!hideDefaultParameters || !value.equals(defaultValue))) {
-                parameters.add(new ConfigParameter(paramName, value));
+            if (normalizedValue != null && (!hideDefaultParameters || !normalizedValue.equals(defaultValue))) {
+                parameters.add(new ConfigParameter(paramName, normalizedValue));
             }
             handledNames.add(paramName);
         }
