@@ -14,6 +14,8 @@ package org.openhab.core.io.rest.sitemap.internal;
 
 import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A sitemap event, which provides details about a widget that has changed.
  *
@@ -23,6 +25,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Danny Baumann - New field labelSource
  * @author Mark Herwege - Add support for confirmation dialog for commands
  */
+@Schema(name = "SitemapWidgetEvent")
 public class SitemapWidgetEvent extends SitemapEvent {
 
     public String widgetId;
