@@ -12,7 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal.sitemaps;
 
-import static org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.*;
+import static org.openhab.core.sitemap.registry.SitemapFactory.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
  * This is a data transfer object that is used to serialize widgets.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 public class YamlWidgetDTO {
 
@@ -61,6 +62,7 @@ public class YamlWidgetDTO {
         MANDATORY_FIELDS.put(VIDEO, Set.of("url"));
         MANDATORY_FIELDS.put(MAPVIEW, Set.of("item"));
         MANDATORY_FIELDS.put(WEBVIEW, Set.of("url"));
+        MANDATORY_FIELDS.put(SITEMAP, Set.of());
         MANDATORY_FIELDS.put(DEFAULT, Set.of("item"));
 
         OPTIONAL_FIELDS.put(FRAME, Set.of("item"));
@@ -81,6 +83,7 @@ public class YamlWidgetDTO {
         OPTIONAL_FIELDS.put(VIDEO, Set.of("item", "encoding"));
         OPTIONAL_FIELDS.put(MAPVIEW, Set.of("height"));
         OPTIONAL_FIELDS.put(WEBVIEW, Set.of("item", "height"));
+        OPTIONAL_FIELDS.put(SITEMAP, Set.of("item", "name"));
         OPTIONAL_FIELDS.put(DEFAULT, Set.of("height"));
     }
 
@@ -113,6 +116,7 @@ public class YamlWidgetDTO {
     public String command;
     public String releaseCommand;
     public Boolean stateless;
+    public String name; // for NestedSitemap
 
     public Object visibility;
 
@@ -164,6 +168,7 @@ public class YamlWidgetDTO {
         ok &= isValidField("command", command, errors, warnings);
         ok &= isValidField("releaseCommand", releaseCommand, errors, warnings);
         ok &= isValidField("stateless", stateless, errors, warnings);
+        ok &= isValidField("name", name, errors, warnings);
 
         if ((SWITCH.equals(type) || SELECTION.equals(type)) && mappings != null && !mappings.isEmpty()) {
             for (YamlMappingDTO mapping : mappings) {
@@ -174,6 +179,9 @@ public class YamlWidgetDTO {
                 && minValue.doubleValue() > maxValue.doubleValue()) {
             addToList(warnings, "larger value %f for \"min\" field than value %f for \"max\" field"
                     .formatted(minValue.doubleValue(), maxValue.doubleValue()));
+        } else if (SITEMAP.equals(type) && (name == null || name.isBlank()) && (item == null || item.isBlank())) {
+            addToList(errors, "\"name\" or \"item\" field missing while mandatory for Sitemap widget");
+            ok = false;
         }
 
         List<String> ruleErrors = new ArrayList<>();
@@ -354,7 +362,7 @@ public class YamlWidgetDTO {
     public int hashCode() {
         return Objects.hash(type, item, label, icon, mappings, switchSupport, releaseOnly, height, min, max, step, hint,
                 url, refresh, encoding, service, period, legend, forceAsItem, yAxisDecimalPattern, interpolation, row,
-                column, command, releaseCommand, stateless, visibility, widgets);
+                column, command, releaseCommand, stateless, visibility, widgets, name);
     }
 
     @Override
@@ -378,7 +386,8 @@ public class YamlWidgetDTO {
                 && Objects.equals(interpolation, other.interpolation) && Objects.equals(row, other.row)
                 && Objects.equals(column, other.column) && Objects.equals(command, other.command)
                 && Objects.equals(releaseCommand, other.releaseCommand) && Objects.equals(stateless, other.stateless)
-                && Objects.equals(visibility, other.visibility) && Objects.equals(widgets, other.widgets);
+                && Objects.equals(visibility, other.visibility) && Objects.equals(widgets, other.widgets)
+                && Objects.equals(name, other.name);
     }
 
     record ButtonPosition(Integer row, Integer column) {
