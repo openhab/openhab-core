@@ -72,6 +72,12 @@ import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceProblem;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.config.PersistenceAllConfig;
+import org.openhab.core.persistence.config.PersistenceConfig;
+import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceGroupExcludeConfig;
+import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.PersistenceCronStrategyDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
@@ -81,6 +87,7 @@ import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurat
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationDTOMapper;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
+import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.State;
@@ -122,6 +129,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Mark Herwege - Implement aliases
  * @author Mark Herwege - Make default strategy to be only a configuration suggestion
+ * @author Martin Littkovsky - Do not report a missing store strategy when another configuration stores the items
  */
 @Component
 @JaxrsResource
@@ -425,7 +433,8 @@ public class PersistenceResource implements RESTResource {
                             persistenceProblems.add(new PersistenceServiceProblem(
                                     PersistenceServiceProblem.PERSISTENCE_NO_STRATEGY, serviceId, items, editable));
                         } else if (strategies.size() == 1
-                                && PersistenceStrategy.Globals.RESTORE.equals(strategies.getFirst())) {
+                                && PersistenceStrategy.Globals.RESTORE.equals(strategies.getFirst())
+                                && !isStoredByAnotherConfig(config, configs)) {
                             persistenceProblems.add(new PersistenceServiceProblem(
                                     PersistenceServiceProblem.PERSISTENCE_NO_STORE_STRATEGY, serviceId, items,
                                     editable));
@@ -435,6 +444,78 @@ public class PersistenceResource implements RESTResource {
             }
         }
         return JSONResponse.createResponse(Status.OK, persistenceProblems, null);
+    }
+
+    /**
+     * Checks whether the items of {@code config} (which itself only has a {@code restoreOnStartup} strategy) are
+     * actually stored by another configuration entry of the same persistence service. Persistence application is
+     * additive: every configuration entry that matches an item is applied to it, so a
+     * {@link PersistenceServiceProblem#PERSISTENCE_NO_STORE_STRATEGY} warning would be a false positive whenever
+     * another entry both has a store strategy and provably covers the same items.
+     *
+     * @param config the configuration entry that only has a {@code restoreOnStartup} strategy
+     * @param configs all configuration entries of the same persistence service
+     * @return true if another entry with a store strategy provably covers {@code config}'s items
+     */
+    private static boolean isStoredByAnotherConfig(PersistenceItemConfiguration config,
+            List<PersistenceItemConfiguration> configs) {
+        // An entry that selects nothing positively (only excludes) covers no items, so it can never be stored by
+        // another entry. This must be checked before the all-items shortcut below, otherwise a '*' store entry
+        // would vacuously suppress the warning for such an entry.
+        List<PersistenceConfig> selectors = config.items().stream().filter(selector -> !isExcludeSelector(selector))
+                .toList();
+        if (selectors.isEmpty()) {
+            return false;
+        }
+        // An entry carrying an exclude selector cannot be proven to cover anything, because appliesToItem()
+        // drops the entire entry for the excluded items.
+        List<PersistenceItemConfiguration> storing = configs.stream().filter(other -> !other.equals(config))
+                .filter(PersistenceResource::hasStoreStrategy)
+                .filter(other -> other.items().stream().noneMatch(PersistenceResource::isExcludeSelector)).toList();
+        if (storing.stream()
+                .anyMatch(other -> other.items().stream().anyMatch(PersistenceAllConfig.class::isInstance))) {
+            return true;
+        }
+        // Coverage is additive too: a selector only has to be found in SOME storing entry, not all of them in
+        // the same one, so "ItemA, ItemB" is covered by two entries storing ItemA and ItemB separately.
+        return selectors.stream().allMatch(selector -> storing.stream().flatMap(other -> other.items().stream())
+                .anyMatch(otherSelector -> isStructurallyEqual(selector, otherSelector)));
+    }
+
+    /**
+     * Only the strategies {@code PersistenceManagerImpl} actually stores for count: {@code everyUpdate},
+     * {@code everyChange} and cron strategies. They are identified positively on purpose - a file-based
+     * configuration may name arbitrary strategies, which {@code PersistenceModelManager} turns into plain
+     * {@link PersistenceStrategy} instances that nothing ever executes. Treating "neither restore nor forecast"
+     * as storing would let such a strategy silence a warning that should fire.
+     */
+    private static boolean hasStoreStrategy(PersistenceItemConfiguration config) {
+        return config.strategies().stream().anyMatch(strategy -> PersistenceStrategy.Globals.UPDATE.equals(strategy)
+                || PersistenceStrategy.Globals.CHANGE.equals(strategy) || strategy instanceof PersistenceCronStrategy);
+    }
+
+    private static boolean isExcludeSelector(PersistenceConfig selector) {
+        return selector instanceof PersistenceItemExcludeConfig || selector instanceof PersistenceGroupExcludeConfig;
+    }
+
+    /**
+     * Compares two selectors by concrete type and identifying field, since the {@link PersistenceConfig}
+     * implementations do not override {@link Object#equals(Object)}.
+     */
+    private static boolean isStructurallyEqual(PersistenceConfig selector, PersistenceConfig otherSelector) {
+        if (selector.getClass() != otherSelector.getClass()) {
+            return false;
+        }
+        if (selector instanceof PersistenceItemConfig itemSelector) {
+            return itemSelector.getItem().equals(((PersistenceItemConfig) otherSelector).getItem());
+        }
+        if (selector instanceof PersistenceGroupConfig groupSelector) {
+            return groupSelector.getGroup().equals(((PersistenceGroupConfig) otherSelector).getGroup());
+        }
+        // Any other implementation may carry distinguishing state this method does not know about, and calling
+        // two of them equal would silence a warning that should fire. PersistenceAllConfig, the one type where
+        // the class alone is decisive, is handled by the caller before this is reached.
+        return false;
     }
 
     private ZonedDateTime convertTime(String sTime) {
