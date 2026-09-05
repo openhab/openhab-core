@@ -42,10 +42,10 @@ public class SystemEventFactory extends AbstractEventFactory {
      * @param startlevel Startlevel of system
      * @return Created start level event.
      */
-    public static StartlevelEvent createStartlevelEvent(Integer startlevel) {
+    public static StartlevelEvent createStartlevelEvent(Integer startlevel, @Nullable String source) {
         SystemEventPayloadBean bean = new SystemEventPayloadBean(startlevel);
         String payload = serializePayload(bean);
-        return new StartlevelEvent(SYSTEM_STARTLEVEL_TOPIC, payload, null, startlevel);
+        return new StartlevelEvent(SYSTEM_STARTLEVEL_TOPIC, payload, source, startlevel);
     }
 
     @Override
