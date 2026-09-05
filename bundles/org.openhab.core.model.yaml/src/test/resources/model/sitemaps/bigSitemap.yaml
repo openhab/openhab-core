@@ -48,6 +48,7 @@ sitemaps:
             item: DemoNumber
             label: Test Input
             hint: number
+            confirmCmd: true
           - type: Text
             item: DemoNumber
             label:
@@ -111,20 +112,28 @@ sitemaps:
             min: 25
             max: 75
             step: 5
+            confirmCmd: Should I change the slider value?
           - type: Setpoint
             item: DemoNumber
             label: Test Setpoint
             min: 12.5
             max: 22.5
             step: 0.5
+            confirmCmd:
+              operator: ">"
+              argument: 20
+              value: "Should I change the setpoint value?"
           - type: Colorpicker
             item: DemoColor
             label: Test Colorpicker
+            confirmCmd:
+              value: "true"
           - type: Colortemperaturepicker
             item: DemoColorTemp
             label: Test Colortemperaturepicker
             min: 3000
             max: 5000
+            confirmCmd: "true"
           - type: Image
             item: DemoImage
             label: Test Image

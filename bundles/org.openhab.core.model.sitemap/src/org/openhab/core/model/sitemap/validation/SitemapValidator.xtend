@@ -38,6 +38,10 @@ import org.openhab.core.model.sitemap.sitemap.ModelWebview
 import org.openhab.core.model.sitemap.sitemap.ModelVideo
 import org.openhab.core.model.sitemap.sitemap.ModelWidget
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage
+import org.openhab.core.model.sitemap.sitemap.ModelSelection
+import org.openhab.core.model.sitemap.sitemap.ModelDefault
+import org.openhab.core.model.sitemap.sitemap.ModelColorpicker
+import org.openhab.core.model.sitemap.sitemap.ModelSwitch
 
 /**
  * Custom validation rules.
@@ -268,6 +272,14 @@ class SitemapValidator extends AbstractSitemapValidator {
                     error(buildMsgWithLineNb("Button widget doens't have click command defined", w, null, null),
                         w, SitemapPackage.Literals.MODEL_BUTTON.getEStructuralFeature(SitemapPackage.MODEL_BUTTON__CMD))
                 }
+                if ((w.confirmCmd == true || w.confirmCmdRules !== null) && w.releaseCmd !== null) {
+                    warning(buildMsgWithLineNb("Button widget has both confirmCmd and release command defined", w, null, null), w, null)
+                }
+                w.confirmCmdRules?.elements?.forEach[ rule |
+                    if (rule.conditions.isEmpty && rule.arg === null) {
+                        error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", w, null, null), w, null)
+                    }
+                ]
             } else {
                 warning(buildMsgWithLineNb("Buttongrid must contain only Buttons", w, null, null),
                     SitemapPackage.Literals.MODEL_BUTTONGRID.getEStructuralFeature(SitemapPackage.MODEL_BUTTONGRID__CHILDREN))
@@ -293,6 +305,11 @@ class SitemapValidator extends AbstractSitemapValidator {
                 sp, SitemapPackage.Literals.MODEL_SETPOINT__MIN_VALUE, SitemapPackage.Literals.MODEL_SETPOINT__MAX_VALUE),
                 SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__MIN_VALUE))
         }
+        sp.confirmCmdRules?.elements?.forEach[ rule |
+            if (rule.conditions.isEmpty && rule.arg === null) {
+                error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", sp, null, null), sp, null)
+            }
+        ]
     }
 
     @Check
@@ -312,6 +329,20 @@ class SitemapValidator extends AbstractSitemapValidator {
                 s, SitemapPackage.Literals.MODEL_SLIDER__MIN_VALUE, SitemapPackage.Literals.MODEL_SLIDER__MAX_VALUE),
                 SitemapPackage.Literals.MODEL_SLIDER.getEStructuralFeature(SitemapPackage.MODEL_SLIDER__MIN_VALUE))
         }
+        s.confirmCmdRules?.elements?.forEach[ rule |
+            if (rule.conditions.isEmpty && rule.arg === null) {
+                error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", s, null, null), s, null)
+            }
+        ]
+    }
+
+    @Check
+    def void checkColorpickerParameters(ModelColorpicker c) {
+        c.confirmCmdRules?.elements?.forEach[ rule |
+            if (rule.conditions.isEmpty && rule.arg === null) {
+                error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", c, null, null), c, null)
+            }
+        ]
     }
 
     @Check
@@ -321,6 +352,11 @@ class SitemapValidator extends AbstractSitemapValidator {
                 ctp, SitemapPackage.Literals.MODEL_COLORTEMPERATUREPICKER__MIN_VALUE, SitemapPackage.Literals.MODEL_COLORTEMPERATUREPICKER__MAX_VALUE),
                 SitemapPackage.Literals.MODEL_COLORTEMPERATUREPICKER.getEStructuralFeature(SitemapPackage.MODEL_COLORTEMPERATUREPICKER__MIN_VALUE))
         }
+        ctp.confirmCmdRules?.elements?.forEach[ rule |
+            if (rule.conditions.isEmpty && rule.arg === null) {
+                error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", ctp, null, null), ctp, null)
+            }
+        ]
     }
 
     @Check
@@ -330,6 +366,38 @@ class SitemapValidator extends AbstractSitemapValidator {
                 i, SitemapPackage.Literals.MODEL_INPUT__INPUT_HINT, null),
                 SitemapPackage.Literals.MODEL_INPUT.getEStructuralFeature(SitemapPackage.MODEL_INPUT__INPUT_HINT))
         }
+        i.confirmCmdRules?.elements?.forEach[ rule |
+            if (rule.conditions.isEmpty && rule.arg === null) {
+                error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", i, null, null), i, null)
+            }
+        ]
+    }
+
+    @Check
+    def void checkSwitchParameters(ModelSwitch s) {
+        s.confirmCmdRules?.elements?.forEach[ rule |
+            if (rule.conditions.isEmpty && rule.arg === null) {
+                error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", s, null, null), s, null)
+            }
+        ]
+    }
+
+    @Check
+    def void checkSelectionParameters(ModelSelection s) {
+        s.confirmCmdRules?.elements?.forEach[ rule |
+            if (rule.conditions.isEmpty && rule.arg === null) {
+                error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", s, null, null), s, null)
+            }
+        ]
+    }
+
+    @Check
+    def void checkDefaultParameters(ModelDefault d) {
+        d.confirmCmdRules?.elements?.forEach[ rule |
+            if (rule.conditions.isEmpty && rule.arg === null) {
+                error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", d, null, null), d, null)
+            }
+        ]
     }
 
     @Check

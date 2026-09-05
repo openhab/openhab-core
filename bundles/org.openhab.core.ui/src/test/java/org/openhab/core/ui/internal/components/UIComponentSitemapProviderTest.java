@@ -15,7 +15,9 @@ package org.openhab.core.ui.internal.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.sitemap.Condition;
+import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.registry.SitemapFactory;
 import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.ui.components.UIComponent;
@@ -40,6 +43,12 @@ class UIComponentSitemapProviderTest {
     private @Mock @NonNullByDefault({}) UIComponent component;
 
     private @InjectMocks @NonNullByDefault({}) UIComponentSitemapProvider uiComponentSitemapProvider;
+
+    private Rule mockRule() {
+        Rule rule = mock(Rule.class);
+        when(sitemapFactory.createRule()).thenReturn(rule);
+        return rule;
+    }
 
     private Condition mockCondition() {
         Condition condition = mock(Condition.class);
@@ -193,5 +202,79 @@ class UIComponentSitemapProviderTest {
         verify(condition2).setItem("item2");
         verify(condition2).setCondition("==");
         verify(condition2).setValue("10");
+    }
+
+    @Test
+    void testRuleConditionWithArgumentBaseline() {
+        Rule rule = mockRule();
+        Condition condition = mockCondition();
+        List<Rule> rules = new ArrayList<>();
+        when(component.getConfig()).thenReturn(Map.of("confirmcmdrules", List.of("item>=42=\"Confirm?\"")));
+
+        uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
+
+        assertEquals(1, rules.size());
+        verify(rule).setArgument("Confirm?");
+        verify(rule).setConditions(List.of(condition));
+        verify(condition).setItem("item");
+        verify(condition).setCondition(">=");
+        verify(condition).setValue("42");
+    }
+
+    @Test
+    void testRuleConditionOnlyNoEqualsSignNoArgument() {
+        // confirmCmd=[DemoNumber>"25"] - no argument at all, so lastIndexOf("=")
+        // must not swallow the whole rule as the argument
+        Rule rule = mockRule();
+        Condition condition = mockCondition();
+        List<Rule> rules = new ArrayList<>();
+        when(component.getConfig()).thenReturn(Map.of("confirmcmdrules", List.of("DemoNumber>\"25\"")));
+
+        uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
+
+        assertEquals(1, rules.size());
+        verify(rule).setArgument(null);
+        verify(rule).setConditions(List.of(condition));
+        verify(condition).setItem("DemoNumber");
+        verify(condition).setCondition(">");
+        verify(condition).setValue("25");
+    }
+
+    @Test
+    void testRuleArgumentWithEqualsSignInsideQuotedMessage() {
+        // confirmCmd=[DemoSwitch==ON="Set x=10?"] - the "=" inside the quoted
+        // message must not be mistaken for the condition/argument separator
+        Rule rule = mockRule();
+        Condition condition = mockCondition();
+        List<Rule> rules = new ArrayList<>();
+        when(component.getConfig()).thenReturn(Map.of("confirmcmdrules", List.of("DemoSwitch==ON=\"Set x=10?\"")));
+
+        uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
+
+        assertEquals(1, rules.size());
+        verify(rule).setArgument("Set x=10?");
+        verify(rule).setConditions(List.of(condition));
+        verify(condition).setItem("DemoSwitch");
+        verify(condition).setCondition("==");
+        verify(condition).setValue("ON");
+    }
+
+    @Test
+    void testRuleConditionOnlyWithEqualsSignInsideQuotedConditionValue() {
+        // confirmCmd=[DemoString=="a=b"] - condition-only rule where the "="
+        // inside the quoted condition value must not be read as a separator
+        Rule rule = mockRule();
+        Condition condition = mockCondition();
+        List<Rule> rules = new ArrayList<>();
+        when(component.getConfig()).thenReturn(Map.of("confirmcmdrules", List.of("DemoString==\"a=b\"")));
+
+        uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
+
+        assertEquals(1, rules.size());
+        verify(rule).setArgument(null);
+        verify(rule).setConditions(List.of(condition));
+        verify(condition).setItem("DemoString");
+        verify(condition).setCondition("==");
+        verify(condition).setValue("a=b");
     }
 }

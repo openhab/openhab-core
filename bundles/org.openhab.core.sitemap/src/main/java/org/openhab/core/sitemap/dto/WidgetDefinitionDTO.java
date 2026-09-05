@@ -20,11 +20,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * This is a data transfer object that is used to serialize widgets.
  *
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @Schema(name = "SitemapWidgetDefinition")
 public class WidgetDefinitionDTO extends AbstractWidgetDTO {
 
     public String item;
+
+    /**
+     * confirmCmd is a boolean indicating if a widget command must be confirmed before sending the command.
+     */
+    public Boolean confirmCmd;
 
     public List<MappingDTO> mappings;
 
@@ -33,6 +39,7 @@ public class WidgetDefinitionDTO extends AbstractWidgetDTO {
     public List<RuleDTO> labelColorRules;
     public List<RuleDTO> valueColorRules;
     public List<RuleDTO> iconColorRules;
+    public List<RuleDTO> confirmCmdRules;
 
     public List<WidgetDefinitionDTO> widgets;
 }

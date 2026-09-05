@@ -152,6 +152,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Added support for new sitemap element Colortemperaturepicker
  * @author Mark Herwege - Implement sitemap registry, remove Guava dependency
  * @author Mark Herwege - Implement sitemap definition endpoints
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
@@ -727,6 +728,7 @@ public class SitemapResource
         bean.unit = itemUIRegistry.getUnitForWidget(widget);
         bean.type = widget.getWidgetType();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
+        bean.commandConfirmMessage = itemUIRegistry.getCommandConfirmMessage(widget);
         if (widget instanceof LinkableWidget linkableWidget) {
             List<Widget> children = itemUIRegistry.getChildren(linkableWidget);
             if (widget instanceof Frame || widget instanceof Buttongrid) {
@@ -952,11 +954,13 @@ public class SitemapResource
             }
             // Consider items involved in any icon condition
             items.addAll(getItemsInRuleConditions(widget.getIconRules()));
-            // Consider items involved in any visibility, labelcolor, valuecolor and iconcolor condition
+            // Consider items involved in any visibility, labelcolor, valuecolor, iconcolor and confirm cmd rule
+            // condition
             items.addAll(getItemsInRuleConditions(widget.getVisibility()));
             items.addAll(getItemsInRuleConditions(widget.getLabelColor()));
             items.addAll(getItemsInRuleConditions(widget.getValueColor()));
             items.addAll(getItemsInRuleConditions(widget.getIconColor()));
+            items.addAll(getItemsInRuleConditions(widget.getConfirmCmdRules()));
         }
         return items;
     }

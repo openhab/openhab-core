@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -124,6 +125,12 @@ public class YamlWidgetDTOTest {
 
         widget.visibility = List.of();
         assertTrue(widget.isValid(err, warn));
+
+        widget.visibility = "zzz";
+        assertTrue(widget.isValid(err, warn));
+        assertEquals(1, warn.size());
+        assertEquals("rule in \"visibility\" field: unexpected string value is ignored", warn.getFirst());
+        warn.clear();
 
         YamlRuleWithUniqueConditionDTO rule1 = new YamlRuleWithUniqueConditionDTO();
         widget.visibility = rule1;
@@ -237,6 +244,125 @@ public class YamlWidgetDTOTest {
         assertEquals(1, warn.size());
         assertEquals("rule in \"visibility\" field: unexpected \"value\" field is ignored", warn.getFirst());
         warn.clear();
+
+        widget.visibility = null;
+        widget.confirmCmd = true;
+        assertTrue(widget.isValid(err, warn));
+        assertEquals(1, warn.size());
+        assertEquals("unexpected \"confirmCmd\" field is ignored", warn.getFirst());
+        warn.clear();
+        widget.type = "Switch";
+        assertTrue(widget.isValid(err, warn));
+        assertEquals(0, warn.size());
+        widget.confirmCmd = "zzz";
+        assertTrue(widget.isValid(err, warn));
+        assertEquals(0, warn.size());
+
+        rule1 = new YamlRuleWithUniqueConditionDTO();
+        widget.confirmCmd = rule1;
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals(
+                "invalid rule in \"confirmCmd\" field: \"argument\" field and \"value\" field should not both be empty",
+                err.getFirst());
+        err.clear();
+        rule1.operator = "<=";
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(2, err.size());
+        assertEquals(Set.copyOf(err), Set.of(
+                "invalid rule in \"confirmCmd\" field: \"argument\" field missing while mandatory in condition",
+                "invalid rule in \"confirmCmd\" field: \"argument\" field and \"value\" field should not both be empty"));
+        err.clear();
+        rule1.argument = "50";
+        assertTrue(widget.isValid(err, warn));
+        rule1.operator = "EQ";
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: invalid value \"EQ\" for \"operator\" field in condition",
+                err.getFirst());
+        err.clear();
+        rule1.operator = null;
+        assertTrue(widget.isValid(err, warn));
+        rule1.item = "@item";
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals(
+                "invalid rule in \"confirmCmd\" field: invalid value \"@item\" for \"item\" field in condition; it must begin with a letter or underscore followed by alphanumeric characters and underscores, and must not contain any other symbols",
+                err.getFirst());
+        err.clear();
+        rule1.item = "item";
+        assertTrue(widget.isValid(err, warn));
+        rule1.value = "xxx";
+        assertTrue(widget.isValid(err, warn));
+        assertEquals(0, warn.size());
+
+        rule2 = new YamlRuleWithAndConditionsDTO();
+        widget.confirmCmd = rule2;
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: \"and\" field missing while mandatory in rules",
+                err.getFirst());
+        err.clear();
+        rule2.and = List.of();
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: \"and\" field missing while mandatory in rules",
+                err.getFirst());
+        err.clear();
+        condition = new YamlConditionDTO();
+        rule2.and = List.of(condition);
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: \"argument\" field missing while mandatory in condition",
+                err.getFirst());
+        err.clear();
+        condition.operator = ">";
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: \"argument\" field missing while mandatory in condition",
+                err.getFirst());
+        err.clear();
+        condition.argument = "50";
+        assertTrue(widget.isValid(err, warn));
+        condition.operator = "EQ";
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: invalid value \"EQ\" for \"operator\" field in condition",
+                err.getFirst());
+        err.clear();
+        condition.operator = null;
+        assertTrue(widget.isValid(err, warn));
+        condition.item = "@item";
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals(
+                "invalid rule in \"confirmCmd\" field: invalid value \"@item\" for \"item\" field in condition; it must begin with a letter or underscore followed by alphanumeric characters and underscores, and must not contain any other symbols",
+                err.getFirst());
+        err.clear();
+        condition.item = "item";
+        assertTrue(widget.isValid(err, warn));
+        rule2.value = "yyy";
+        assertTrue(widget.isValid(err, warn));
+        assertEquals(0, warn.size());
+
+        widget.confirmCmd = List.of(rule1, rule2);
+        assertTrue(widget.isValid(err, warn));
+        rule1.argument = null;
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: \"argument\" field missing while mandatory in condition",
+                err.getFirst());
+        err.clear();
+        rule1.argument = "50";
+        assertTrue(widget.isValid(err, warn));
+        condition.argument = null;
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("invalid rule in \"confirmCmd\" field: \"argument\" field missing while mandatory in condition",
+                err.getFirst());
+        err.clear();
+        condition.argument = "50";
+        assertTrue(widget.isValid(err, warn));
     }
 
     @Test
