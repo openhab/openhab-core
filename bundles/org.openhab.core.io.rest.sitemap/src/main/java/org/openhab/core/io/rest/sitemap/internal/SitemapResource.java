@@ -170,6 +170,7 @@ public class SitemapResource
     public static final String PATH_SITEMAPS = "sitemaps";
     private static final String SEGMENT_EVENTS = "events";
     private static final String X_ACCEL_BUFFERING_HEADER = "X-Accel-Buffering";
+    private static final String X_ATMOSPHERE_TRANSPORT_HEADER = "X-Atmosphere-Transport";
 
     private static final long TIMEOUT_IN_MS = 30000;
 
@@ -409,7 +410,7 @@ public class SitemapResource
             @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
     public Response getSitemapData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @HeaderParam("X-Atmosphere-Transport") @Parameter(description = "X-Atmosphere-Transport for long polling") @Nullable String xAtmosphereTransport,
+            @HeaderParam(X_ATMOSPHERE_TRANSPORT_HEADER) @Parameter(description = "X-Atmosphere-Transport for long polling") @Nullable String xAtmosphereTransport,
             @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
             @QueryParam("subscriptionid") @Parameter(description = "subscriptionid") @Nullable String subscriptionId,
             @QueryParam("includeHidden") @Parameter(description = "include hidden widgets") boolean includeHiddenWidgets) {
@@ -442,7 +443,7 @@ public class SitemapResource
             @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
     public Response getPageData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @HeaderParam("X-Atmosphere-Transport") @Parameter(description = "X-Atmosphere-Transport for long polling") @Nullable String xAtmosphereTransport,
+            @HeaderParam(X_ATMOSPHERE_TRANSPORT_HEADER) @Parameter(description = "X-Atmosphere-Transport for long polling") @Nullable String xAtmosphereTransport,
             @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
             @PathParam("pageid") @Parameter(description = "page id") String pageId,
             @QueryParam("subscriptionid") @Parameter(description = "subscriptionid") @Nullable String subscriptionId,

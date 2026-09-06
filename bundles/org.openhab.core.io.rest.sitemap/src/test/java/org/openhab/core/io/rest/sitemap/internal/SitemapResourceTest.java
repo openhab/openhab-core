@@ -78,7 +78,6 @@ public class SitemapResourceTest extends JavaTest {
 
     private static final int STATE_UPDATE_WAIT_TIME = 100;
 
-    private static final String HTTP_HEADER_X_ATMOSPHERE_TRANSPORT = "X-Atmosphere-Transport";
     private static final String ITEM_NAME = "itemName";
 
     private static final String ITEM_LABEL = "item label";
@@ -158,9 +157,6 @@ public class SitemapResourceTest extends JavaTest {
 
         widgets = initSitemapWidgetsWithSubpages();
         configureItemUIRegistry(PercentType.HUNDRED, OnOffType.ON);
-
-        // Disable long polling
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(null);
     }
 
     @Test
@@ -280,9 +276,6 @@ public class SitemapResourceTest extends JavaTest {
         when(itemEvent.getItemName()).thenReturn(item.getName());
         executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
-        // non-null is sufficient here.
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
-
         Response response = sitemapResource.getSitemapData(headersMock, null, "long-polling", SITEMAP_NAME, null,
                 false);
 
@@ -301,9 +294,6 @@ public class SitemapResourceTest extends JavaTest {
         when(itemEvent.getItemName()).thenReturn(item.getName());
         executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
-        // non-null is sufficient here.
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
-
         Response response = sitemapResource.getPageData(headersMock, null, "long-polling", SITEMAP_NAME, SITEMAP_NAME,
                 null, false);
 
@@ -317,9 +307,6 @@ public class SitemapResourceTest extends JavaTest {
         ItemEvent itemEvent = mock(ItemEvent.class);
         when(itemEvent.getItemName()).thenReturn(item.getName());
         executeWithDelay(() -> sitemapResource.receive(itemEvent));
-
-        // non-null is sufficient here.
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
 
         Response response = sitemapResource.getPageData(headersMock, null, "long-polling", SITEMAP_NAME, SITEMAP_NAME,
                 null, false);
@@ -335,9 +322,6 @@ public class SitemapResourceTest extends JavaTest {
         when(itemEvent.getItemName()).thenReturn(visibilityRuleItem.getName());
         executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
-        // non-null is sufficient here.
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
-
         Response response = sitemapResource.getPageData(headersMock, null, "long-polling", SITEMAP_NAME, SITEMAP_NAME,
                 null, false);
 
@@ -351,9 +335,6 @@ public class SitemapResourceTest extends JavaTest {
         ItemEvent itemEvent = mock(ItemEvent.class);
         when(itemEvent.getItemName()).thenReturn(labelColorItem.getName());
         executeWithDelay(() -> sitemapResource.receive(itemEvent));
-
-        // non-null is sufficient here.
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
 
         Response response = sitemapResource.getPageData(headersMock, null, "long-polling", SITEMAP_NAME, SITEMAP_NAME,
                 null, false);
@@ -369,9 +350,6 @@ public class SitemapResourceTest extends JavaTest {
         when(itemEvent.getItemName()).thenReturn(valueColorItem.getName());
         executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
-        // non-null is sufficient here.
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
-
         Response response = sitemapResource.getPageData(headersMock, null, "long-polling", SITEMAP_NAME, SITEMAP_NAME,
                 null, false);
 
@@ -386,9 +364,6 @@ public class SitemapResourceTest extends JavaTest {
         when(itemEvent.getItemName()).thenReturn(iconColorItem.getName());
         executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
-        // non-null is sufficient here.
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
-
         Response response = sitemapResource.getPageData(headersMock, null, "long-polling", SITEMAP_NAME, SITEMAP_NAME,
                 null, false);
 
@@ -402,9 +377,6 @@ public class SitemapResourceTest extends JavaTest {
         ItemEvent itemEvent = mock(ItemEvent.class);
         when(itemEvent.getItemName()).thenReturn(iconItem.getName());
         executeWithDelay(() -> sitemapResource.receive(itemEvent));
-
-        // non-null is sufficient here.
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
 
         Response response = sitemapResource.getPageData(headersMock, null, "long-polling", SITEMAP_NAME, SITEMAP_NAME,
                 null, false);
@@ -429,9 +401,6 @@ public class SitemapResourceTest extends JavaTest {
     public void whenGetPageDataShouldReturnPageBean() throws ItemNotFoundException {
         item.setState(new PercentType(50));
         configureItemUIRegistry(item.getState(), OnOffType.ON);
-
-        // Disable long polling
-        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(null);
 
         Response response = sitemapResource.getPageData(headersMock, null, null, SITEMAP_NAME, SITEMAP_NAME, null,
                 false);
