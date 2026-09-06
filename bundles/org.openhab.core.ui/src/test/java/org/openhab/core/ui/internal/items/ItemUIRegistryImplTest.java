@@ -73,6 +73,7 @@ import org.openhab.core.sitemap.Buttongrid;
 import org.openhab.core.sitemap.Chart;
 import org.openhab.core.sitemap.Colorpicker;
 import org.openhab.core.sitemap.Condition;
+import org.openhab.core.sitemap.Default;
 import org.openhab.core.sitemap.Frame;
 import org.openhab.core.sitemap.Group;
 import org.openhab.core.sitemap.Image;
@@ -1115,6 +1116,45 @@ public class ItemUIRegistryImplTest {
                         .build().toStateDescription());
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Text.class)));
+    }
+
+    @Test
+    public void getWidgetIdWithUnresolvableDefaultSibling() throws ItemNotFoundException {
+        Default unresolvableDefault = mock(Default.class);
+        Default resolvableDefault = mock(Default.class);
+
+        SwitchItem switchItem = new SwitchItem("Zebra");
+
+        // Make sure lookup in itemRegistry with widget id fails
+        lenient().when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("unknown"));
+        doThrow(new ItemNotFoundException("missingItem")).when(registryMock).getItem("missingItem");
+        doReturn(switchItem).when(registryMock).getItem("Zebra");
+
+        // first Default points at an item that does not exist -> resolveDefault() returns null
+        when(unresolvableDefault.getItem()).thenReturn("missingItem");
+        when(registryMock.get("missingItem")).thenReturn(null);
+
+        // second Default points at a SwitchItem -> resolves to switchMock
+        when(resolvableDefault.getItem()).thenReturn("Zebra");
+        when(registryMock.get("Zebra")).thenReturn(switchItem);
+
+        when(sitemapMock.getWidgets()).thenReturn(List.of(unresolvableDefault, resolvableDefault, sliderMock));
+        when(unresolvableDefault.getParent()).thenReturn(sitemapMock);
+        when(resolvableDefault.getParent()).thenReturn(sitemapMock);
+        when(sliderMock.getParent()).thenReturn(sitemapMock);
+
+        List<Widget> children = uiRegistry.getChildren(sitemapMock);
+        assertEquals(2, children.size(), "unresolvable Default should be dropped from getChildren()");
+
+        Widget resolved = children.get(0);
+        Widget slider = children.get(1);
+
+        String resolvedId = uiRegistry.getWidgetId(resolved);
+        String sliderId = uiRegistry.getWidgetId(slider);
+
+        assertNotEquals(sliderId, resolvedId, "resolved Default and its following sibling must not share a widget id");
+        assertEquals(resolved, uiRegistry.getWidget(sitemapMock, resolvedId));
+        assertEquals(slider, uiRegistry.getWidget(sitemapMock, sliderId));
     }
 
     @Test
