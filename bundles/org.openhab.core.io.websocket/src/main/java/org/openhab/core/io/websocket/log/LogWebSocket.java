@@ -31,14 +31,13 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.openhab.core.common.ThreadFactoryBuilder;
 import org.osgi.service.log.LogEntry;
@@ -66,7 +65,7 @@ import com.google.gson.reflect.TypeToken;
 @WebSocket
 @NonNullByDefault
 @SuppressWarnings("unused")
-public class LogWebSocket implements LogListener, WriteCallback {
+public class LogWebSocket implements LogListener, Callback {
     @SuppressWarnings("unchecked")
     private static final TypeToken<List<String>> STRING_LIST_TYPE = (TypeToken<List<String>>) TypeToken
             .getParameterized(List.class, String.class);
@@ -81,9 +80,6 @@ public class LogWebSocket implements LogListener, WriteCallback {
 
     // All access must be guarded by "this"
     private @Nullable Session session;
-
-    // All access must be guarded by "this"
-    private @Nullable RemoteEndpoint remoteEndpoint;
 
     // All access must be guarded by "this"
     private @Nullable ScheduledExecutorService scheduledExecutorService;
@@ -121,7 +117,6 @@ public class LogWebSocket implements LogListener, WriteCallback {
                 enabled = false;
             }
             this.session = null;
-            this.remoteEndpoint = null;
             this.deferredLogs.clear();
             if (this.scheduledExecutorService != null) {
                 this.scheduledExecutorService.shutdownNow();
@@ -130,16 +125,16 @@ public class LogWebSocket implements LogListener, WriteCallback {
         }
     }
 
-    @OnWebSocketConnect
-    public synchronized void onConnect(Session session) {
+    @OnWebSocketOpen
+    public synchronized void onOpen(Session session) {
         this.session = session;
-        this.remoteEndpoint = session.getRemote();
         if (this.scheduledExecutorService != null) {
             this.scheduledExecutorService.shutdownNow();
         }
-        InetSocketAddress isa = session.getRemoteAddress();
-        String name = isa == null ? "websocket-logger"
-                : "websocket-logger-" + isa.getHostString() + ':' + isa.getPort();
+        java.net.SocketAddress remoteAddress = session.getRemoteSocketAddress();
+        String name = remoteAddress instanceof InetSocketAddress isa
+                ? "websocket-logger-" + isa.getHostString() + ':' + isa.getPort()
+                : "websocket-logger";
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(ThreadFactoryBuilder.create()
                 .withNamePrefix("OH").withName(name).withUncaughtExceptionHandler((t, e) -> {
                 }).build());
@@ -153,7 +148,6 @@ public class LogWebSocket implements LogListener, WriteCallback {
         }
 
         Session session;
-        RemoteEndpoint remoteEndpoint;
         synchronized (this) {
             // Defer sending live logs while we process the history
             suspended = true;
@@ -166,10 +160,9 @@ public class LogWebSocket implements LogListener, WriteCallback {
             }
 
             session = this.session;
-            remoteEndpoint = this.remoteEndpoint;
         }
-        if (session == null || remoteEndpoint == null) {
-            // no connection or no remote endpoint , do nothing this is possible due to async behavior
+        if (session == null) {
+            // no connection, do nothing this is possible due to async behavior
             suspended = false;
             return;
         }
@@ -237,7 +230,7 @@ public class LogWebSocket implements LogListener, WriteCallback {
         // Stream<LogEntry> filteredEvents = logs.stream().filter(withinTimeRange.and(nameMatchesAnyPattern));
         List<LogDTO> dtoList = filteredEvents.map(this::map).sorted().toList();
 
-        sendMessage(gson.toJson(dtoList), remoteEndpoint);
+        sendMessage(gson.toJson(dtoList), session);
 
         // Remove any duplicates from the live log buffer
         long newestSequence = logs.getFirst().getSequence();
@@ -267,8 +260,8 @@ public class LogWebSocket implements LogListener, WriteCallback {
         onClose(StatusCode.NO_CODE, message);
     }
 
-    private void sendMessage(String message, RemoteEndpoint remoteEndpoint) {
-        remoteEndpoint.sendString(message, this);
+    private void sendMessage(String message, Session session) {
+        session.sendText(message, this);
     }
 
     /**
@@ -284,9 +277,9 @@ public class LogWebSocket implements LogListener, WriteCallback {
         LogDTO logDTO = map(logEntry);
         boolean bufferEmpty;
         ScheduledExecutorService executor;
-        RemoteEndpoint remote;
+        Session remoteSession;
         synchronized (this) {
-            if ((executor = scheduledExecutorService) == null || (remote = remoteEndpoint) == null) {
+            if ((executor = scheduledExecutorService) == null || (remoteSession = session) == null) {
                 return;
             }
             lastSequence = logEntry.getSequence();
@@ -307,7 +300,7 @@ public class LogWebSocket implements LogListener, WriteCallback {
                 deferredLogs.add(logDTO);
             } else {
                 executor.submit(() -> {
-                    sendMessage(gson.toJson(logDTO), remote);
+                    sendMessage(gson.toJson(logDTO), remoteSession);
                 });
             }
         }
@@ -348,29 +341,29 @@ public class LogWebSocket implements LogListener, WriteCallback {
         stopDeferredScheduledFuture();
 
         List<LogDTO> logs;
-        RemoteEndpoint remoteEndpoint;
+        Session activeSession;
         synchronized (this) {
             if (deferredLogs.isEmpty()) {
                 logs = null;
-                remoteEndpoint = null;
+                activeSession = null;
             } else {
                 logs = List.copyOf(deferredLogs);
                 deferredLogs.clear();
-                remoteEndpoint = this.remoteEndpoint;
+                activeSession = this.session;
             }
         }
-        if (logs != null && remoteEndpoint != null) {
-            sendMessage(gson.toJson(logs), remoteEndpoint);
+        if (logs != null && activeSession != null) {
+            sendMessage(gson.toJson(logs), activeSession);
         }
     }
 
     @Override
-    public void writeSuccess() {
+    public void succeed() {
         lastSentTime = System.currentTimeMillis();
     }
 
     @Override
-    public void writeFailed(@Nullable Throwable x) {
+    public void fail(@Nullable Throwable x) {
         // Can't log anything from this class, so nothing to do
     }
 }

@@ -22,23 +22,23 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
-
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.library.types.DateTimeType;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsMediaType;
+import org.osgi.service.jakartars.whiteboard.JakartarsWhiteboardConstants;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationSelect;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsExtension;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsMediaType;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ext.MessageBodyReader;
+import jakarta.ws.rs.ext.MessageBodyWriter;
 
 /**
  * A media type extension for all supported media types.
@@ -46,9 +46,9 @@ import com.google.gson.GsonBuilder;
  * @author Markus Rathgeb - Initial contribution
  */
 @Component(scope = PROTOTYPE)
-@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
-@JaxrsExtension
-@JaxrsMediaType({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+@JakartarsApplicationSelect("(" + JakartarsWhiteboardConstants.JAKARTA_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JakartarsExtension
+@JakartarsMediaType({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
 public class MediaTypeExtension<T> implements MessageBodyReader<T>, MessageBodyWriter<T> {
 
     private static String mediaTypeWithoutParams(final MediaType mediaType) {

@@ -12,12 +12,10 @@
  */
 package org.openhab.core.io.net.tests.internal;
 
-import java.io.IOException;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.openhab.core.io.net.tests.ClientFactoryTest;
 
 /**
@@ -26,14 +24,12 @@ import org.openhab.core.io.net.tests.ClientFactoryTest;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class TestWebSocketAdapter extends WebSocketAdapter {
+public class TestWebSocketAdapter implements Session.Listener.AutoDemanding {
 
     @Override
-    public void onWebSocketConnect(@Nullable Session session) {
-        super.onWebSocketConnect(session);
-        try {
-            getRemote().sendString(ClientFactoryTest.RESPONSE);
-        } catch (IOException e) {
+    public void onWebSocketOpen(@Nullable Session session) {
+        if (session != null) {
+            session.sendText(ClientFactoryTest.RESPONSE, Callback.NOOP);
         }
     }
 }

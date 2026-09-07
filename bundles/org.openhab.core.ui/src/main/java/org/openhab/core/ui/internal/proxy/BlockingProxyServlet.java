@@ -19,19 +19,19 @@ import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.api.Response;
-import org.eclipse.jetty.client.util.InputStreamResponseListener;
+import org.eclipse.jetty.client.InputStreamResponseListener;
+import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.client.Response;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * A blocking version of the proxy servlet that complies with Servlet API 2.4.
@@ -49,7 +49,13 @@ public class BlockingProxyServlet extends HttpServlet {
 
     private final ProxyServletService service;
 
-    private static HttpClient httpClient = new HttpClient(new SslContextFactory.Client());
+    private static HttpClient httpClient = initHttpClient();
+
+    private static HttpClient initHttpClient() {
+        HttpClient client = new HttpClient();
+        client.setSslContextFactory(new SslContextFactory.Client());
+        return client;
+    }
 
     /** Timeout for HTTP requests in ms */
     private static final int TIMEOUT = 15000;

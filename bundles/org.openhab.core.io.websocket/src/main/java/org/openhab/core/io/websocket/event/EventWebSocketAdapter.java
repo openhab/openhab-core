@@ -15,12 +15,10 @@ package org.openhab.core.io.websocket.event;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import javax.ws.rs.core.SecurityContext;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
@@ -31,6 +29,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.google.gson.Gson;
+
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * The {@link EventWebSocketAdapter} allows subscription to oh events over WebSocket
@@ -77,8 +77,8 @@ public class EventWebSocketAdapter implements EventSubscriber, WebSocketAdapter 
     }
 
     @Override
-    public @Nullable Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
-            ServletUpgradeResponse servletUpgradeResponse, SecurityContext securityContext) {
+    public @Nullable Object createWebSocket(JettyServerUpgradeRequest servletUpgradeRequest,
+            JettyServerUpgradeResponse servletUpgradeResponse, SecurityContext securityContext) {
         return new EventWebSocket(gson, EventWebSocketAdapter.this, itemEventUtility, eventPublisher);
     }
 }

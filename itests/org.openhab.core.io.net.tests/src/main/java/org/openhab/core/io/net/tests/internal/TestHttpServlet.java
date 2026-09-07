@@ -16,14 +16,15 @@ import java.io.IOException;
 import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.net.tests.ClientFactoryTest;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * Servlet for org.openhab.core.io.net tests.
@@ -36,10 +37,12 @@ public class TestHttpServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType(MediaType.TEXT_PLAIN);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-        response.getWriter().write(ClientFactoryTest.RESPONSE);
+        if (response != null) {
+            response.setContentType(MediaType.TEXT_PLAIN);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+            response.getWriter().write(ClientFactoryTest.RESPONSE);
+        }
     }
 }
