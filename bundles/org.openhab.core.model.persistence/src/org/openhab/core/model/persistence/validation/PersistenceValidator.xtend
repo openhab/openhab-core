@@ -42,7 +42,7 @@ class PersistenceValidator extends AbstractPersistenceValidator {
             if (s.eIsProxy) {
                 val name = NodeModelUtils.getTokenText(nodes.get(i))
                 error(buildMsgWithLineNb("Strategy not defined '" + name + "'", config),
-                    config, PersistencePackage.Literals.PERSISTENCE_CONFIGURATION__FILTERS)
+                    config, PersistencePackage.Literals.PERSISTENCE_CONFIGURATION__STRATEGIES)
             }
         }
     }
