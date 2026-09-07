@@ -174,9 +174,8 @@ public abstract class BaseThingHandler implements ThingHandler {
         try {
             resolvedConfiguration = ConfigUtil.resolveVariables(thing.getConfiguration());
         } catch (IllegalArgumentException e) {
-            logger.warn("Updated thing '{}' with a thing containing invalid configuration '{}': {}", thing.getUID(),
-                    thing.getConfiguration(), e.getMessage());
-            resolvedConfiguration = thing.getConfiguration();
+            handleConfigurationResolutionFailure(thing);
+            throw e;
         }
         synchronized (this) {
             this.thing = thing;
@@ -293,9 +292,8 @@ public abstract class BaseThingHandler implements ThingHandler {
                     try {
                         this.resolvedConfig = resolvedConfig = ConfigUtil.resolveVariables(getRawConfig());
                     } catch (IllegalArgumentException e) {
-                        logger.warn("Failed to resolve variables for configuration '{}' of thing '{}': {}",
-                                getRawConfig(), getThing().getUID(), e.getMessage());
-                        return new Configuration(getRawConfig());
+                        handleConfigurationResolutionFailure(getThing());
+                        throw e;
                     }
                 }
             }
@@ -312,6 +310,12 @@ public abstract class BaseThingHandler implements ThingHandler {
      */
     protected <T> T getConfigAs(Class<T> configurationClass) {
         return getConfig().as(configurationClass);
+    }
+
+    private void handleConfigurationResolutionFailure(Thing thing) {
+        logger.warn("Failed to resolve configuration variables for thing '{}'.", thing.getUID());
+        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
+                "Failed to resolve configuration variables.");
     }
 
     /**

@@ -13,6 +13,7 @@
 package org.openhab.core.thing.binding;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.util.Map;
@@ -30,6 +31,8 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
@@ -167,5 +170,34 @@ class BaseThingHandlerTest {
 
         assertEquals("resolved-var_suffix", handler.getConfig().get("p1"));
         assertEquals("resolved-foo", handler.getConfig().get("p2"));
+    }
+
+    @Test
+    public void testMissingEnvironmentVariableFailsSafelyAndPreservesRawConfiguration() {
+        String placeholder = "${ENV:MISSING_SECRET}";
+        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID.getId())
+                .withConfiguration(new Configuration(Map.of("password", placeholder))).build();
+        TestThingHandler testHandler = new TestThingHandler(thing);
+        testHandler.setCallback(callback);
+        ConfigUtilAccessor.setEnv(Map.of());
+        assertThrows(IllegalArgumentException.class, testHandler::getConfig);
+        assertEquals(placeholder, thing.getConfiguration().get("password"));
+        verify(callback).statusUpdated(eq(thing), argThat(status -> status.getStatus() == ThingStatus.OFFLINE
+                && status.getStatusDetail() == ThingStatusDetail.CONFIGURATION_ERROR));
+    }
+
+    @Test
+    public void testSetThingRejectsUnresolvedConfigurationAndKeepsCurrentThing() {
+        Thing currentThing = handler.getThing();
+        Thing replacementThing = ThingBuilder.create(THING_TYPE_UID, "replacement")
+                .withConfiguration(new Configuration(Map.of("password", "${ENV:MISSING_SECRET}"))).build();
+        ConfigUtilAccessor.setEnv(Map.of());
+
+        assertThrows(IllegalArgumentException.class, () -> handler.replaceThing(replacementThing));
+
+        assertEquals(currentThing, handler.getThing());
+        assertEquals("${ENV:MISSING_SECRET}", replacementThing.getConfiguration().get("password"));
+        verify(callback).statusUpdated(eq(currentThing), argThat(status -> status.getStatus() == ThingStatus.OFFLINE
+                && status.getStatusDetail() == ThingStatusDetail.CONFIGURATION_ERROR));
     }
 }
