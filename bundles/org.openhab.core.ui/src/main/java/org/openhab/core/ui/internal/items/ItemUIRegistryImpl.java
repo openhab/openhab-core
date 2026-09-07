@@ -174,7 +174,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     private String groupMembersSorting = DEFAULT_SORTING;
 
     private final Object cacheLock = new Object(); // Make sure nested sitemap cache updates and removals are
-                                                   // synchronized
+                                                   // synchronized. This is a coarse lock. If it leads to performance
+                                                   // issues, we can consider more fine-grained locking mechanis.
 
     private static class WidgetLabelWithSource {
         public final String label;
@@ -318,7 +319,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
         if (parent instanceof Sitemap sitemap && !sitemap.getName().equals(sitemapName)) {
             return false;
         }
-        return true;
+        return true; // orphaned, treat as stale
     }
 
     /**
@@ -995,11 +996,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                 }
                 Sitemap sitemap = sitemapName != null ? sitemapRegistry.get(sitemapName) : null;
                 if (sitemap != null && sitemapName != null) {
-                    Map<String, Text> sitemapWidgets = nestedSitemapWidgetsCache.computeIfAbsent(nestedSitemap,
-                            ns -> new ConcurrentHashMap<>());
-                    if (sitemapWidgets == null) {
-                        return null;
-                    }
+                    Map<String, Text> sitemapWidgets = Objects.requireNonNull(
+                            nestedSitemapWidgetsCache.computeIfAbsent(nestedSitemap, ns -> new ConcurrentHashMap<>()));
                     return sitemapWidgets.computeIfAbsent(sitemapName, sn -> {
                         Text text = Objects.requireNonNull((Text) sitemapFactory.createWidget(SitemapFactory.TEXT));
                         copyProperties(widget, text);
