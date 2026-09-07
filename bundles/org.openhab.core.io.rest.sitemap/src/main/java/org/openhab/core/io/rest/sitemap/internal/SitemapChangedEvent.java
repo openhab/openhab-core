@@ -12,11 +12,15 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Event to notify the browser that the sitemap has been changed
  *
  * @author Stefan Triller - Initial contribution
  */
 public class SitemapChangedEvent extends SitemapEvent {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, accessMode = Schema.AccessMode.READ_ONLY, allowableValues = {
+            "SITEMAP_CHANGED" })
     public final String TYPE = "SITEMAP_CHANGED";
 }

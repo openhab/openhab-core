@@ -12,11 +12,21 @@
  */
 package org.openhab.core.io.rest.sitemap.internal;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A general sitemap event, meant to be sub-classed.
  *
+ * <p>
+ * The three concrete event types are streamed on the same SSE endpoints as a JSON-encoded {@code data:} line each. They
+ * are declared here as a {@code oneOf} without a discriminator: {@link SitemapWidgetEvent} always carries a
+ * {@code widgetId}, while {@link SitemapChangedEvent} and {@link ServerAliveEvent} carry a distinct constant
+ * {@code TYPE}, which makes the three branches mutually exclusive for generated clients without changing the wire
+ * format.
+ *
  * @author Kai Kreuzer - Initial contribution
  */
+@Schema(oneOf = { SitemapWidgetEvent.class, SitemapChangedEvent.class, ServerAliveEvent.class })
 public class SitemapEvent {
 
     /** The sitemap name this event is for */

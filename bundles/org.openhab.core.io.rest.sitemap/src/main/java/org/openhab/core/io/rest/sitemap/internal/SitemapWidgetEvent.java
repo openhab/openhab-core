@@ -14,6 +14,8 @@ package org.openhab.core.io.rest.sitemap.internal;
 
 import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A sitemap event, which provides details about a widget that has changed.
  *
@@ -24,6 +26,8 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  */
 public class SitemapWidgetEvent extends SitemapEvent {
 
+    /** Always present; distinguishes this event from the other {@link SitemapEvent} types in the SSE stream. */
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public String widgetId;
 
     public String label;
