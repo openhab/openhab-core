@@ -21,10 +21,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -834,6 +836,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     @Override
     public @Nullable Widget getWidget(Sitemap sitemap, String id) {
         if (!id.isEmpty()) {
+            // Cache to avoid resolving the same widget multiple times
+            Map<Widget, Optional<Widget>> resolveCache = new IdentityHashMap<>();
+
             // see if the id is an itemName and try to get the widget for it
             Widget w = getWidget(id);
             if (w == null) {
@@ -860,19 +865,22 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                     }
                     if (idValue.length() >= codingSize && (idValue.length() % codingSize) == 0) {
                         int widgetID = Integer.parseInt(idValue.substring(0, codingSize));
-                        List<Widget> sitemapWidgets = getChildren(sitemap);
-                        if (widgetID < sitemapWidgets.size()) {
-                            w = sitemapWidgets.get(widgetID);
+                        List<Widget> compacted = sitemap.getWidgets().stream()
+                                .filter(sibling -> resolveCached(sibling, resolveCache) != null).toList();
+                        if (widgetID < compacted.size()) {
+                            w = compacted.get(widgetID);
                             for (int i = codingSize; i < idValue.length(); i += codingSize) {
                                 int childWidgetID = Integer.parseInt(idValue.substring(i, i + codingSize));
-                                if (w instanceof LinkableWidget lw) {
-                                    List<Widget> childWidgets = getChildren(lw);
-                                    if (childWidgetID < childWidgets.size()) {
-                                        w = childWidgets.get(childWidgetID);
+                                Widget rw = resolveDefault(w);
+                                if (rw instanceof LinkableWidget lw) {
+                                    List<Widget> compactedChildren = lw.getWidgets().stream()
+                                            .filter(sibling -> resolveCached(sibling, resolveCache) != null).toList();
+                                    if (childWidgetID < compactedChildren.size()) {
+                                        w = compactedChildren.get(childWidgetID);
                                     } else {
                                         logger.warn(
                                                 "Widget id '{}' is invalid, index {} outside the number ({}) of widgets in the page",
-                                                id, childWidgetID, childWidgets.size());
+                                                id, childWidgetID, compactedChildren.size());
                                         w = null;
                                         break;
                                     }
@@ -896,7 +904,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                     // no valid number, so the requested page id does not exist
                 }
             }
-            return resolveDefault(w);
+            return resolveCached(w, resolveCache);
         }
         logger.warn("Cannot find page for id '{}'.", id);
         return null;
@@ -1447,20 +1455,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
         // That way, we can support any number of widgets in a page.
         List<Integer> indexes = new ArrayList<>();
         Widget w = widget;
+        Map<Widget, Optional<Widget>> resolvedCache = new IdentityHashMap<>();
         while (w.getParent() instanceof LinkableWidget parent) {
-            int parentIndex = getChildren(parent).indexOf(w);
-            if (parentIndex < 0) {
-                parentIndex = parent.getWidgets().indexOf(w);
-            }
-            indexes.add(parentIndex);
+            indexes.add(compactedIndexOf(w, parent.getWidgets(), resolvedCache));
             w = parent;
         }
         if (w.getParent() instanceof Sitemap sitemap) {
-            int parentIndex = getChildren(sitemap).indexOf(w);
-            if (parentIndex < 0) {
-                parentIndex = sitemap.getWidgets().indexOf(w);
-            }
-            indexes.add(parentIndex);
+            indexes.add(compactedIndexOf(w, sitemap.getWidgets(), resolvedCache));
         }
         String id = "";
         if (!indexes.isEmpty()) {
@@ -1478,6 +1479,26 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
             id = item != null ? item : id;
         }
         return id;
+    }
+
+    private @Nullable Widget resolveCached(Widget raw, Map<Widget, Optional<Widget>> cache) {
+        return Objects.requireNonNull(cache.computeIfAbsent(raw, r -> Optional.ofNullable(resolveDefault(r))))
+                .orElse(null);
+    }
+
+    private int compactedIndexOf(Widget w, List<Widget> rawSiblings, Map<Widget, Optional<Widget>> cache) {
+        int index = -1;
+        for (Widget sibling : rawSiblings) {
+            Widget resolved = resolveCached(sibling, cache);
+            if (resolved == null) {
+                continue;
+            }
+            index++;
+            if (sibling.equals(w) || resolved.equals(w)) {
+                return index;
+            }
+        }
+        return -1;
     }
 
     private boolean matchStateToValue(State state, String value, @Nullable String matchCondition) {

@@ -1119,45 +1119,6 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
-    public void getWidgetIdWithUnresolvableDefaultSibling() throws ItemNotFoundException {
-        Default unresolvableDefault = mock(Default.class);
-        Default resolvableDefault = mock(Default.class);
-
-        SwitchItem switchItem = new SwitchItem("Zebra");
-
-        // Make sure lookup in itemRegistry with widget id fails
-        lenient().when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("unknown"));
-        doThrow(new ItemNotFoundException("missingItem")).when(registryMock).getItem("missingItem");
-        doReturn(switchItem).when(registryMock).getItem("Zebra");
-
-        // first Default points at an item that does not exist -> resolveDefault() returns null
-        when(unresolvableDefault.getItem()).thenReturn("missingItem");
-        when(registryMock.get("missingItem")).thenReturn(null);
-
-        // second Default points at a SwitchItem -> resolves to switchMock
-        when(resolvableDefault.getItem()).thenReturn("Zebra");
-        when(registryMock.get("Zebra")).thenReturn(switchItem);
-
-        when(sitemapMock.getWidgets()).thenReturn(List.of(unresolvableDefault, resolvableDefault, sliderMock));
-        when(unresolvableDefault.getParent()).thenReturn(sitemapMock);
-        when(resolvableDefault.getParent()).thenReturn(sitemapMock);
-        when(sliderMock.getParent()).thenReturn(sitemapMock);
-
-        List<Widget> children = uiRegistry.getChildren(sitemapMock);
-        assertEquals(2, children.size(), "unresolvable Default should be dropped from getChildren()");
-
-        Widget resolved = children.get(0);
-        Widget slider = children.get(1);
-
-        String resolvedId = uiRegistry.getWidgetId(resolved);
-        String sliderId = uiRegistry.getWidgetId(slider);
-
-        assertNotEquals(sliderId, resolvedId, "resolved Default and its following sibling must not share a widget id");
-        assertEquals(resolved, uiRegistry.getWidget(sitemapMock, resolvedId));
-        assertEquals(slider, uiRegistry.getWidget(sitemapMock, sliderId));
-    }
-
-    @Test
     public void getUnitForWidgetForNonNumberItem() throws Exception {
         String unit = uiRegistry.getUnitForWidget(widgetMock);
 
@@ -2312,5 +2273,125 @@ public class ItemUIRegistryImplTest {
         public int hashCode() {
             return name.hashCode();
         }
+    }
+
+    @Test
+    public void getWidgetIdWithUnresolvableDefaultSibling() throws ItemNotFoundException {
+        Default unresolvableDefault = mock(Default.class);
+        Default resolvableDefault = mock(Default.class);
+
+        SwitchItem switchItem = new SwitchItem("Zebra");
+
+        // Make sure lookup in itemRegistry with widget id fails
+        lenient().when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("unknown"));
+        doThrow(new ItemNotFoundException("missingItem")).when(registryMock).getItem("missingItem");
+        doReturn(switchItem).when(registryMock).getItem("Zebra");
+
+        // first Default points at an item that does not exist -> resolveDefault() returns null
+        when(unresolvableDefault.getItem()).thenReturn("missingItem");
+        when(registryMock.get("missingItem")).thenReturn(null);
+
+        // second Default points at a SwitchItem -> resolves to switchMock
+        when(resolvableDefault.getItem()).thenReturn("Zebra");
+        when(registryMock.get("Zebra")).thenReturn(switchItem);
+
+        when(sitemapMock.getWidgets()).thenReturn(List.of(unresolvableDefault, resolvableDefault, sliderMock));
+        when(unresolvableDefault.getParent()).thenReturn(sitemapMock);
+        when(resolvableDefault.getParent()).thenReturn(sitemapMock);
+        when(sliderMock.getParent()).thenReturn(sitemapMock);
+
+        List<Widget> children = uiRegistry.getChildren(sitemapMock);
+        assertEquals(2, children.size(), "unresolvable Default should be dropped from getChildren()");
+
+        Widget resolved = children.get(0);
+        Widget slider = children.get(1);
+
+        String resolvedId = uiRegistry.getWidgetId(resolved);
+        String sliderId = uiRegistry.getWidgetId(slider);
+
+        assertNotEquals(sliderId, resolvedId, "resolved Default and its following sibling must not share a widget id");
+        assertEquals(resolved, uiRegistry.getWidget(sitemapMock, resolvedId));
+        assertEquals(slider, uiRegistry.getWidget(sitemapMock, sliderId));
+    }
+
+    @Test
+    public void getWidgetIdAndGetWidgetAgreeThroughIntermediateNestedSitemapWithMixedSiblings()
+            throws ItemNotFoundException {
+        // Use a real SitemapFactoryImpl so the resolved nested-sitemap Text and its children are real,
+        // navigable widget instances rather than mocks.
+        SitemapFactoryImpl sitemapFactory = new SitemapFactoryImpl();
+        doAnswer(invocation -> {
+            String type = invocation.getArgument(0);
+            return sitemapFactory.createWidget(type);
+        }).when(sitemapFactoryMock).createWidget(anyString());
+
+        // Make sure lookup in itemRegistry with widget id fails
+        lenient().when(registryMock.getItem(anyString())).thenThrow(new ItemNotFoundException("not found"));
+        doThrow(new ItemNotFoundException("missingItem")).when(registryMock).getItem("missingItem");
+
+        // An unresolvable Default sitting *before* the NestedSitemap in the frame -- this is what
+        // forces the NestedSitemap's compacted index to differ from its raw index (raw index 1,
+        // compacted index 0), so the test actually exercises compaction rather than a trivial
+        // singleton list.
+        Default unresolvableDefault = mock(Default.class);
+        when(unresolvableDefault.getItem()).thenReturn("missingItem");
+        when(registryMock.get("missingItem")).thenReturn(null);
+
+        // target sitemap for the nested sitemap widget, containing one real child widget
+        Sitemap targetSitemap = mock(Sitemap.class);
+        when(targetSitemap.getLabel()).thenReturn("NestedLabel");
+        when(targetSitemap.getIcon()).thenReturn("nestedIcon");
+        Widget sourceChild = sitemapFactory.createWidget(SitemapFactory.SWITCH, targetSitemap);
+        assertNotNull(sourceChild);
+        when(targetSitemap.getWidgets()).thenReturn(List.of(sourceChild));
+
+        Item sitemapSelectorItem = mock(Item.class);
+        when(sitemapSelectorItem.getState()).thenReturn(new StringType("nestedTarget"));
+        doReturn(sitemapSelectorItem).when(registryMock).get("sitemapSelector");
+        when(sitemapRegistryMock.get("nestedTarget")).thenReturn(targetSitemap);
+        when(nestedSitemapMock.getItem()).thenReturn("sitemapSelector");
+
+        // Frame contains, in order: an unresolvable Default, the NestedSitemap, and a plain Slider --
+        // mixed widget types so compaction has to actually skip one and match the NestedSitemap by
+        // its *resolved* identity (the cached Text), not its raw identity.
+        when(frameMock.getWidgets()).thenReturn(List.of(unresolvableDefault, nestedSitemapMock, sliderMock));
+        when(sitemapMock.getWidgets()).thenReturn(List.of(frameMock));
+        when(sitemapMock.getName()).thenReturn(SITEMAP_NAME);
+        when(frameMock.getParent()).thenReturn(sitemapMock);
+        when(unresolvableDefault.getParent()).thenReturn(frameMock);
+        when(nestedSitemapMock.getParent()).thenReturn(frameMock);
+        when(sliderMock.getParent()).thenReturn(frameMock);
+
+        // getChildren() should drop the unresolvable Default, leaving [resolvedNestedText, sliderMock].
+        List<Widget> frameChildren = uiRegistry.getChildren(frameMock);
+        assertThat(frameChildren, hasSize(2));
+        Widget resolvedNested = frameChildren.get(0);
+        assertEquals("NestedLabel", resolvedNested.getLabel());
+        assertSame(sliderMock, frameChildren.get(1));
+
+        // Descend into the nested sitemap's own child.
+        List<Widget> nestedChildren = uiRegistry.getChildren((Parent) resolvedNested);
+        assertThat(nestedChildren, hasSize(1));
+        Widget nestedChild = nestedChildren.get(0);
+
+        // Encode the leaf's id. This independently calls resolveDefault()/the NestedSitemap cache
+        // lookup while walking up parents -- the frame-level index must land on the NestedSitemap's
+        // compacted position (0), matched via its resolved (cached) identity, not raw indexOf().
+        String childId = uiRegistry.getWidgetId(nestedChild);
+        assertNotNull(childId);
+
+        // And the slider (compacted index 1, following the same frame-level resolution) must get a
+        // different id that does not collide with the nested child's.
+        String sliderId = uiRegistry.getWidgetId(sliderMock);
+        assertNotEquals(childId, sliderId,
+                "nested sitemap's child and its compacted sibling must not share a widget id");
+
+        // Decode must walk the same compacted frame-level list, resolve the NestedSitemap picked up
+        // at that position, and land back on the exact same child instance.
+        Widget fetchedChild = uiRegistry.getWidget(sitemapMock, childId);
+        assertSame(nestedChild, fetchedChild);
+
+        Widget fetchedSlider = uiRegistry.getWidget(sitemapMock, sliderId);
+        assertSame(sliderMock, fetchedSlider);
     }
 }
