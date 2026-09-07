@@ -221,8 +221,11 @@ public class SitemapSubscriptionService implements RegistryChangeListener<Sitema
         return sitemapWithPageId.contains(SITEMAP_PAGE_SEPARATOR);
     }
 
-    private String extractPageId(String sitemapWithPageId) {
-        return sitemapWithPageId.split(SITEMAP_PAGE_SEPARATOR)[1];
+    private @Nullable String extractPageId(String sitemapWithPageId) {
+        if (isPageListener(sitemapWithPageId)) {
+            return sitemapWithPageId.split(SITEMAP_PAGE_SEPARATOR)[1];
+        }
+        return null;
     }
 
     /**
