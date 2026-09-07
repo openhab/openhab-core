@@ -22,52 +22,70 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link AbstractServiceBundleTracker} tracks a set of bundles (selected {@link #isRelevantBundle(Bundle)}
- * and sets the
- * {@link #readyMarker} when all registered bundles are active
+ * The {@link BaseServiceBundleTracker} tracks a set of bundles (selected {@link #isRelevantBundle(Bundle)} and sets
+ * the {@link #readyMarker} when all registered bundles are active. Methods can be overridden to add additional
+ * conditions that must be fulfilled.
  *
- * @author Jan N. Klug - Initial contribution
+ * @author Ravi Nadahar - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractServiceBundleTracker extends BundleTracker<Bundle> implements ReadyService.ReadyTracker {
+public abstract class BaseServiceBundleTracker extends BundleTracker<Bundle> implements ReadyService.ReadyTracker {
     private static final int STATE_MASK = Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE | Bundle.STARTING
             | Bundle.STOPPING | Bundle.UNINSTALLED;
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(BaseServiceBundleTracker.class);
 
     private final ReadyService readyService;
     private final ReadyMarker readyMarker;
 
     private final Map<String, Integer> bundles = new ConcurrentHashMap<>();
-    private volatile boolean startLevel = false;
-    private volatile boolean ready = false;
+    private volatile boolean startLevelReached = false;
+
+    // All access must be guarded by "this"
+    private boolean ready = false;
 
     @Activate
-    public AbstractServiceBundleTracker(final @Reference ReadyService readyService, BundleContext bc,
-            ReadyMarker readyMarker) {
+    public BaseServiceBundleTracker(ReadyService readyService, ReadyMarker readyMarker, BundleContext bc) {
         super(bc, STATE_MASK, null);
         this.readyService = readyService;
         this.readyMarker = readyMarker;
         this.open();
 
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
-                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
+        int minLevel = minimumStartLevel();
+        if (minLevel >= 0) {
+            readyService.registerTracker(this, new ReadyMarkerFilter()
+                    .withType(StartLevelService.STARTLEVEL_MARKER_TYPE).withIdentifier(Integer.toString(minLevel)));
+        } else {
+            startLevelReached = true;
+        }
     }
 
     @Deactivate
     public void deactivate() throws Exception {
         this.close();
-        ready = false;
+        synchronized (this) {
+            ready = false;
+        }
     }
 
-    private boolean allBundlesActive() {
-        return bundles.values().stream().allMatch(i -> i == Bundle.ACTIVE);
-    }
+    /**
+     * The minimum startlevel when this tracker might mark the {@code readyMarker} ready;
+     *
+     * @return The minimum startlevel or a negative value to disable.
+     */
+    protected abstract int minimumStartLevel();
+
+    /**
+     * Decide if a bundle should be tracked by this bundle tracker.
+     *
+     * @param bundle the bundle to evaluate.
+     * @return {@code true} if the bundle should be tracked, {@code false} otherwise.
+     */
+    protected abstract boolean isRelevantBundle(Bundle bundle);
 
     @Override
     public Bundle addingBundle(@NonNullByDefault({}) Bundle bundle, @Nullable BundleEvent event) {
@@ -76,7 +94,7 @@ public abstract class AbstractServiceBundleTracker extends BundleTracker<Bundle>
         if (isRelevantBundle(bundle)) {
             logger.debug("Added {}: {} ", bsn, stateToString(state));
             bundles.put(bsn, state);
-            checkReady();
+            handleChange();
         }
 
         return bundle;
@@ -90,7 +108,7 @@ public abstract class AbstractServiceBundleTracker extends BundleTracker<Bundle>
         if (isRelevantBundle(bundle)) {
             logger.debug("Modified {}: {}", bsn, stateToString(state));
             bundles.put(bsn, state);
-            checkReady();
+            handleChange();
         }
     }
 
@@ -101,41 +119,55 @@ public abstract class AbstractServiceBundleTracker extends BundleTracker<Bundle>
         if (isRelevantBundle(bundle)) {
             logger.debug("Removed {}", bsn);
             bundles.remove(bsn);
-            checkReady();
+            handleChange();
         }
     }
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         logger.debug("Readymarker '{}' added", readyMarker);
-        startLevel = true;
-        checkReady();
+        startLevelReached = true;
+        handleChange();
     }
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
         logger.debug("Readymarker '{}' removed", readyMarker);
-        startLevel = false;
-        ready = false;
-        readyService.unmarkReady(readyMarker);
+        startLevelReached = false;
+        handleChange();
     }
 
-    private synchronized void checkReady() {
-        boolean allBundlesActive = allBundlesActive();
-        logger.trace("ready: {}, startlevel: {}, allActive: {}", ready, startLevel, allBundlesActive);
+    protected void handleChange() {
+        logger.trace("{} before change: ready: {}, startLevelReached: {}", getClass().getSimpleName(), ready,
+                startLevelReached);
 
-        if (!ready && startLevel && allBundlesActive) {
-            logger.debug("Adding ready marker '{}': All bundles ready ({})", readyMarker, bundles);
-            readyService.markReady(readyMarker);
-            ready = true;
-        } else if (ready && !allBundlesActive) {
-            logger.debug("Removing ready marker '{}' : Not all bundles ready ({})", readyMarker, bundles);
-            readyService.unmarkReady(readyMarker);
-            ready = false;
+        boolean newReady = evaluateReady();
+        synchronized (this) {
+            if (ready != newReady) {
+                ready = newReady;
+                if (newReady) {
+                    logger.debug("All conditions met, marking readymarker '{}' ready ({})", readyMarker, bundles);
+                    readyService.markReady(readyMarker);
+                } else {
+                    logger.debug("All conditions not met, marking readymarker '{}' not ready ({})", readyMarker,
+                            bundles);
+                    readyService.unmarkReady(readyMarker);
+                }
+                logger.trace("{} after change: ready: {}, startLevelReached: {}", getClass().getSimpleName(), ready,
+                        startLevelReached);
+            }
         }
     }
 
-    private String stateToString(int state) {
+    protected boolean evaluateReady() {
+        return startLevelReached && allBundlesActive();
+    }
+
+    protected boolean allBundlesActive() {
+        return bundles.values().stream().allMatch(i -> i == Bundle.ACTIVE);
+    }
+
+    protected String stateToString(int state) {
         return switch (state) {
             case Bundle.UNINSTALLED -> "UNINSTALLED";
             case Bundle.INSTALLED -> "INSTALLED";
@@ -146,12 +178,4 @@ public abstract class AbstractServiceBundleTracker extends BundleTracker<Bundle>
             default -> "UNKNOWN";
         };
     }
-
-    /**
-     * Decide if a bundle should be tracked by this bundle tracker
-     *
-     * @param bundle the bundle
-     * @return {@code true} if the bundle should be considered, {@code false} otherwise
-     */
-    protected abstract boolean isRelevantBundle(Bundle bundle);
 }

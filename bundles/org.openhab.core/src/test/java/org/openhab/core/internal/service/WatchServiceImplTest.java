@@ -22,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
@@ -37,6 +39,11 @@ import org.openhab.core.JavaTest;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentContext;
+
+import io.methvin.watcher.DirectoryChangeListener;
+import io.methvin.watcher.DirectoryWatcher;
 
 /**
  * The {@link WatchServiceImplTest} is a
@@ -52,21 +59,23 @@ public class WatchServiceImplTest extends JavaTest {
     private static final String TEST_FILE_NAME = "testFile";
 
     public @Mock @NonNullByDefault({}) WatchServiceImpl.WatchServiceConfiguration configurationMock;
+    public @Mock @NonNullByDefault({}) ComponentContext componentContextMock;
     public @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
+    public @Mock @NonNullByDefault({}) ConfigurationAdmin configurationAdminMock;
 
     private @NonNullByDefault({}) WatchServiceImpl watchService;
     private @TempDir @NonNullByDefault({}) Path rootPath;
     private @NonNullByDefault({}) TestWatchEventListener listener;
 
     @BeforeEach
-    public void setup() throws IOException {
+    public void setup() throws Exception {
         when(configurationMock.name()).thenReturn("unnamed");
         when(configurationMock.path()).thenReturn(rootPath.toString());
 
-        watchService = new WatchServiceImpl(configurationMock, bundleContextMock);
+        watchService = new WatchServiceImpl(configurationAdminMock, configurationMock, bundleContextMock,
+                componentContextMock);
         listener = new TestWatchEventListener();
-
-        verify(bundleContextMock, timeout(5000)).registerService(eq(WatchService.class), eq(watchService), any());
+        waitForDirWatcher();
     }
 
     @AfterEach
@@ -232,6 +241,35 @@ public class WatchServiceImplTest extends JavaTest {
         assertThat(listener.events, hasSize(1));
         assertThat(listener.events, hasItem(new Event(fullPath, kind)));
         listener.events.clear();
+    }
+
+    private void waitForDirWatcher() throws IOException, InterruptedException {
+        while (!isDirWatcherReady()) {
+            Thread.sleep(5L);
+        }
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        WatchService.WatchEventListener warmUpListener = new WatchService.WatchEventListener() {
+
+            @Override
+            public void processWatchEvent(Kind kind, Path fullPath) {
+                latch.countDown();
+            }
+        };
+        Path pingFile = rootPath.resolve("watcher-warmup.ping");
+        watchService.registerListener(warmUpListener, pingFile, false);
+        Files.createFile(pingFile);
+        latch.await(1000L, TimeUnit.MILLISECONDS);
+        watchService.unregisterListener(warmUpListener);
+    }
+
+    private boolean isDirWatcherReady() {
+        DirectoryWatcher watcher = watchService.dirWatcher;
+        if (watcher == null) {
+            return false;
+        }
+        DirectoryChangeListener listener = watcher.getListener();
+        return listener != null && listener.isWatching();
     }
 
     private static class TestWatchEventListener implements WatchService.WatchEventListener {
