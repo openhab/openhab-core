@@ -1446,10 +1446,7 @@ public class FileFormatResource implements RESTResource {
             return item1.getName().compareTo(item2.getName());
         }).toList();
 
-        List<Item> topGroups = groups.stream().filter(group -> group.getGroupNames().isEmpty())
-                .sorted((group1, group2) -> {
-                    return group1.getName().compareTo(group2.getName());
-                }).toList();
+        List<Item> topGroups = groups.stream().filter(group -> group.getGroupNames().isEmpty()).toList();
 
         List<Item> groupTree = new ArrayList<>();
         for (Item group : topGroups) {
