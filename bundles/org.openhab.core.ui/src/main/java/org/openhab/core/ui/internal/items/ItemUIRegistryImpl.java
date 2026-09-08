@@ -175,7 +175,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
 
     private final Object cacheLock = new Object(); // Make sure nested sitemap cache updates and removals are
                                                    // synchronized. This is a coarse lock. If it leads to performance
-                                                   // issues, we can consider more fine-grained locking mechanis.
+                                                   // issues, we can consider more fine-grained locking mechanism.
 
     private static class WidgetLabelWithSource {
         public final String label;
@@ -1463,11 +1463,16 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
         }
         String id = "";
         if (!indexes.isEmpty()) {
-            int codingSize = "%d".formatted(Collections.max(indexes)).length();
-            String codingFormat = "%0" + codingSize + "d";
-            Collections.reverse(indexes);
-            id = indexes.stream().map(idx -> codingFormat.formatted(idx))
-                    .collect(Collectors.joining("", codingSize + "_", ""));
+            if (Collections.min(indexes) >= 0) {
+                int codingSize = "%d".formatted(Collections.max(indexes)).length();
+                String codingFormat = "%0" + codingSize + "d";
+                Collections.reverse(indexes);
+                id = indexes.stream().map(idx -> codingFormat.formatted(idx))
+                        .collect(Collectors.joining("", codingSize + "_", ""));
+            } else {
+                logger.debug("Could not compute a widget id for '{}': widget or an ancestor is no longer resolvable",
+                        widget);
+            }
         }
 
         // if the widget is dynamically created and not available in the sitemap,
