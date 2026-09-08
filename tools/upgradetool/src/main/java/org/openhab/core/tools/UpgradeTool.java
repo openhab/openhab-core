@@ -69,7 +69,8 @@ public class UpgradeTool {
             new HomeAssistantAddonUpgrader(), // Since 5.1
             new HomieAddonUpgrader(), // Since 5.1
             new PersistenceUpgrader(), // Since 5.1
-            new SemanticTagUpgrader() // Since 5.2
+            new SemanticTagUpgrader(), // Since 5.2
+            new DialogRegistrationStorageUpgrader() // Since 5.3
     );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeTool.class);

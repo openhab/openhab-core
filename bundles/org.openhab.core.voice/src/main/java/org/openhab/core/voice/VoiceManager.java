@@ -22,9 +22,16 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.voice.dialog.DialogContext;
+import org.openhab.core.voice.dialog.DialogRegistration;
+import org.openhab.core.voice.dialog.trigger.DTServiceHandle;
+import org.openhab.core.voice.dialog.trigger.ks.KSService;
+import org.openhab.core.voice.stt.STTService;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationArguments;
 import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.tts.TTSService;
+import org.openhab.core.voice.tts.Voice;
 
 /**
  * This service provides functionality around voice services and is the central service to be used directly by others.
