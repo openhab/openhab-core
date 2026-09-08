@@ -1,0 +1,260 @@
+/**
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.io.transport.serial.internal;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.TooManyListenersException;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.transport.serial.SerialPort;
+import org.openhab.core.io.transport.serial.SerialPortEventListener;
+import org.openhab.core.io.transport.serial.UnsupportedCommOperationException;
+
+import purejavacomm.SerialPortEvent;
+
+/**
+ * Specific serial port implementation.
+ *
+ * @author Łukasz Dywicki - Initial contribution
+ * @author Karel Goderis - added further methods
+ */
+@NonNullByDefault
+public class SerialPortImpl implements SerialPort {
+
+    private final purejavacomm.SerialPort sp;
+
+    /**
+     * Constructor.
+     *
+     * @param sp the underlying serial port implementation
+     */
+    public SerialPortImpl(final purejavacomm.SerialPort sp) {
+        this.sp = sp;
+    }
+
+    @Override
+    public void close() {
+        sp.close();
+    }
+
+    @Override
+    public void setSerialPortParams(int baudrate, int dataBits, int stopBits, int parity)
+            throws UnsupportedCommOperationException {
+        try {
+            sp.setSerialPortParams(baudrate, dataBits, stopBits, parity);
+        } catch (purejavacomm.UnsupportedCommOperationException ex) {
+            throw new UnsupportedCommOperationException(ex);
+        }
+    }
+
+    @Override
+    public @Nullable InputStream getInputStream() throws IOException {
+        return sp.getInputStream();
+    }
+
+    @Override
+    public @Nullable OutputStream getOutputStream() throws IOException {
+        return sp.getOutputStream();
+    }
+
+    @Override
+    public void addEventListener(SerialPortEventListener listener) throws TooManyListenersException {
+        sp.addEventListener(new purejavacomm.SerialPortEventListener() {
+            @Override
+            public void serialEvent(final @Nullable SerialPortEvent event) {
+                if (event == null) {
+                    return;
+                }
+                listener.serialEvent(new org.openhab.core.io.transport.serial.SerialPortEvent() {
+                    @Override
+                    public int getEventType() {
+                        return event.getEventType();
+                    }
+
+                    @Override
+                    public boolean getNewValue() {
+                        return event.getNewValue();
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public void removeEventListener() {
+        sp.removeEventListener();
+    }
+
+    @Override
+    public void notifyOnDataAvailable(boolean enable) {
+        sp.notifyOnDataAvailable(enable);
+    }
+
+    @Override
+    public void notifyOnBreakInterrupt(boolean enable) {
+        sp.notifyOnBreakInterrupt(enable);
+    }
+
+    @Override
+    public void notifyOnFramingError(boolean enable) {
+        sp.notifyOnFramingError(enable);
+    }
+
+    @Override
+    public void notifyOnOverrunError(boolean enable) {
+        sp.notifyOnOverrunError(enable);
+    }
+
+    @Override
+    public void notifyOnParityError(boolean enable) {
+        sp.notifyOnParityError(enable);
+    }
+
+    @Override
+    public void enableReceiveTimeout(int timeout) throws UnsupportedCommOperationException {
+        if (timeout < 0) {
+            throw new IllegalArgumentException(String.format("timeout must be non negative (is: %d)", timeout));
+        }
+        try {
+            sp.enableReceiveTimeout(timeout);
+        } catch (purejavacomm.UnsupportedCommOperationException ex) {
+            throw new UnsupportedCommOperationException(ex);
+        }
+    }
+
+    @Override
+    public void disableReceiveTimeout() {
+        sp.disableReceiveTimeout();
+    }
+
+    @Override
+    public String getName() {
+        return sp.getName();
+    }
+
+    @Override
+    public void setFlowControlMode(int flowcontrolRtsctsOut) throws UnsupportedCommOperationException {
+        try {
+            sp.setFlowControlMode(flowcontrolRtsctsOut);
+        } catch (purejavacomm.UnsupportedCommOperationException e) {
+            throw new UnsupportedCommOperationException(e);
+        }
+    }
+
+    @Override
+    public void enableReceiveThreshold(int i) throws UnsupportedCommOperationException {
+        try {
+            sp.enableReceiveThreshold(i);
+        } catch (purejavacomm.UnsupportedCommOperationException e) {
+            throw new UnsupportedCommOperationException(e);
+        }
+    }
+
+    @Override
+    public int getBaudRate() {
+        return sp.getBaudRate();
+    }
+
+    @Override
+    public int getDataBits() {
+        return sp.getDataBits();
+    }
+
+    @Override
+    public int getStopBits() {
+        return sp.getStopBits();
+    }
+
+    @Override
+    public int getParity() {
+        return sp.getParity();
+    }
+
+    @Override
+    public void notifyOnOutputEmpty(boolean enable) {
+        sp.notifyOnOutputEmpty(enable);
+    }
+
+    @Override
+    public void notifyOnCTS(boolean enable) {
+        sp.notifyOnCTS(enable);
+    }
+
+    @Override
+    public void notifyOnDSR(boolean enable) {
+        sp.notifyOnDSR(enable);
+    }
+
+    @Override
+    public void notifyOnRingIndicator(boolean enable) {
+        sp.notifyOnRingIndicator(enable);
+    }
+
+    @Override
+    public void notifyOnCarrierDetect(boolean enable) {
+        sp.notifyOnCarrierDetect(enable);
+    }
+
+    @Override
+    public int getFlowControlMode() {
+        return getFlowControlMode();
+    }
+
+    @Override
+    public void setRTS(boolean enable) {
+        sp.setRTS(enable);
+    }
+
+    @Override
+    public boolean isRTS() {
+        return sp.isRTS();
+    }
+
+    @Override
+    public void setDTR(boolean state) {
+        sp.setDTR(state);
+    }
+
+    @Override
+    public boolean isDTR() {
+        return sp.isDTR();
+    }
+
+    @Override
+    public boolean isCTS() {
+        return sp.isCTS();
+    }
+
+    @Override
+    public boolean isDSR() {
+        return sp.isDSR();
+    }
+
+    @Override
+    public boolean isCD() {
+        return sp.isCD();
+    }
+
+    @Override
+    public boolean isRI() {
+        return sp.isRI();
+    }
+
+    @Override
+    public void sendBreak(int duration) {
+        sp.sendBreak(duration);
+    }
+}
