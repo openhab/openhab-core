@@ -326,8 +326,14 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                 continue;
             }
 
-            // Normalize first
             ConfigDescriptionParameter configDescParam = getConfigDescriptionParam(configDescParams, propertyKey);
+
+            // Check if the configuration parameter is dynamic. If not, do not update the configuration
+            if (!configDescParam.isDynamic()) {
+                continue;
+            }
+
+            // Normalize first
             Object normalizedValue = ConfigUtil.normalizeType(propertyValue, configDescParam);
 
             // If the value is equal to the one of the configuration, there is nothing to do.

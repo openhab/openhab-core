@@ -277,6 +277,7 @@ public class ConfigDescriptionRegistry {
                     .withUnit(parameter.getUnit()) //
                     .withUnitLabel(parameter.getUnitLabel()) //
                     .withVerify(parameter.isVerifyable()) //
+                    .withDynamic(parameter.isDynamic()) //
                     .build();
         } else {
             // Otherwise return the original parameter

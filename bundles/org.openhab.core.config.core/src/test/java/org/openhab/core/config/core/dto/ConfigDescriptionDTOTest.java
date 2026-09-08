@@ -79,7 +79,7 @@ class ConfigDescriptionDTOTest {
                 .withMinimum(BigDecimal.ZERO).withMultiple(true).withMultipleLimit(Integer.valueOf(3))
                 .withOptions(PARAMETER_NAME_OPTIONS).withPattern(PARAMETER_NAME_PATTERN).withReadOnly(false)
                 .withRequired(true).withStepSize(BigDecimal.ONE).withUnit(PARAMETER_NAME_UNIT)
-                .withUnitLabel(PARAMETER_NAME_UNIT_LABEL).withVerify(true).build());
+                .withUnitLabel(PARAMETER_NAME_UNIT_LABEL).withVerify(true).withDynamic(false).build());
 
         List<ConfigDescriptionParameter> result = ConfigDescriptionDTOMapper
                 .map(ConfigDescriptionDTOMapper.mapParameters(subject));
@@ -108,6 +108,7 @@ class ConfigDescriptionDTOTest {
         assertThat(parameter.getUnit(), is(PARAMETER_NAME_UNIT));
         assertThat(parameter.getUnitLabel(), is(PARAMETER_NAME_UNIT_LABEL));
         assertThat(parameter.isVerifyable(), is(true));
+        assertThat(parameter.isDynamic(), is(false));
     }
 
     @Test
