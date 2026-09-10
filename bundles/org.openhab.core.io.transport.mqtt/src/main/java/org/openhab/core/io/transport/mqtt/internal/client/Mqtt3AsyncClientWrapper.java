@@ -39,19 +39,24 @@ import com.hivemq.client.mqtt.mqtt3.message.unsubscribe.Mqtt3Unsubscribe;
  * @author Jan N. Klug - Initial contribution
  * @author Mark Herwege - Added flag for hostname validation
  * @author Mark Herwege - Added parameter for cleanSession
+ * @author Mark Herwege - Added parameter for WebSocket path
  */
 @NonNullByDefault
 public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
     private final Mqtt3AsyncClient client;
 
-    public Mqtt3AsyncClientWrapper(String host, int port, String clientId, Protocol protocol, boolean secure,
-            boolean hostnameValidated, ConnectionCallback connectionCallback,
+    public Mqtt3AsyncClientWrapper(String host, int port, String clientId, Protocol protocol, String webSocketPath,
+            boolean secure, boolean hostnameValidated, ConnectionCallback connectionCallback,
             @Nullable TrustManagerFactory trustManagerFactory) {
         Mqtt3ClientBuilder clientBuilder = Mqtt3Client.builder().serverHost(host).serverPort(port).identifier(clientId)
                 .addConnectedListener(connectionCallback).addDisconnectedListener(connectionCallback);
 
         if (protocol == Protocol.WEBSOCKETS) {
-            clientBuilder.webSocketWithDefaultConfig();
+            if (webSocketPath.isEmpty()) {
+                clientBuilder.webSocketWithDefaultConfig();
+            } else {
+                clientBuilder.webSocketConfig().serverPath(webSocketPath).applyWebSocketConfig();
+            }
         }
         if (secure) {
             if (hostnameValidated) {

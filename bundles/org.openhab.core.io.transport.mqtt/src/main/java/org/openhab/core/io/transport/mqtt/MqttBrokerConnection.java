@@ -59,6 +59,7 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
  * @author Jan N. Klug - changed from PAHO to HiveMQ client
  * @author Mark Herwege - Added flag for hostname validation
  * @author Mark Herwege - Added parameter for cleanSession/cleanStart
+ * @author Mark Herwege - Added parameter for WebSocket path
  */
 @NonNullByDefault
 public class MqttBrokerConnection {
@@ -92,6 +93,7 @@ public class MqttBrokerConnection {
     protected final boolean hostnameValidated;
     protected final MqttVersion mqttVersion;
     private boolean cleanSessionStart = true;
+    private String webSocketPath = "";
 
     private @Nullable TrustManagerFactory trustManagerFactory = InsecureTrustManagerFactory.INSTANCE;
     protected final String clientId;
@@ -524,6 +526,28 @@ public class MqttBrokerConnection {
     }
 
     /**
+     * Sets the server path used for the WebSocket handshake when {@link #protocol} is {@link Protocol#WEBSOCKETS}.
+     * Only takes effect on the next connection attempt (i.e. call this before {@link #start()}, or before a
+     * reconnect if changing it at runtime). Has no effect for {@link Protocol#TCP} connections.
+     * <p>
+     * Defaults to an empty path, matching the previous, fixed behaviour of this class.
+     *
+     * @param webSocketPath the server path to use, e.g. {@code /mqtt}; an empty string uses the default (unspecified)
+     *            path
+     */
+    public void setWebSocketPath(String webSocketPath) {
+        this.webSocketPath = webSocketPath;
+    }
+
+    /**
+     * Return the WebSocket server path configured via {@link #setWebSocketPath(String)}, or an empty string if none was
+     * set.
+     */
+    public String getWebSocketPath() {
+        return webSocketPath;
+    }
+
+    /**
      * Return true if there are subscribers registered via {@link #subscribe(String, MqttMessageSubscriber)}.
      * Call {@link #unsubscribe(String, MqttMessageSubscriber)} or {@link #unsubscribeAll()} if necessary.
      */
@@ -732,10 +756,10 @@ public class MqttBrokerConnection {
 
     protected MqttAsyncClientWrapper createClient() {
         if (mqttVersion == MqttVersion.V3) {
-            return new Mqtt3AsyncClientWrapper(host, port, clientId, protocol, secure, hostnameValidated,
+            return new Mqtt3AsyncClientWrapper(host, port, clientId, protocol, webSocketPath, secure, hostnameValidated,
                     connectionCallback, trustManagerFactory);
         } else {
-            return new Mqtt5AsyncClientWrapper(host, port, clientId, protocol, secure, hostnameValidated,
+            return new Mqtt5AsyncClientWrapper(host, port, clientId, protocol, webSocketPath, secure, hostnameValidated,
                     connectionCallback, trustManagerFactory);
         }
     }
