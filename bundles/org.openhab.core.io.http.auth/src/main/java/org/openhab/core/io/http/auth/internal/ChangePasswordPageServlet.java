@@ -105,10 +105,10 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
                 return;
             }
 
-            User user = login(username, password);
+            User user = login(username, password.toCharArray());
 
             if (user instanceof ManagedUser) {
-                userRegistry.changePassword(user, newPassword);
+                userRegistry.changePassword(user, newPassword.toCharArray());
             } else {
                 throw new AuthenticationException("User is not managed");
             }

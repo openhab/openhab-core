@@ -74,12 +74,12 @@ public class UserRegistryImplTest {
 
     @Test
     public void testUserManagement() throws Exception {
-        User user = registry.register("username", "password", Set.of("administrator"));
+        User user = registry.register("username", "password".toCharArray(), Set.of("administrator"));
         registry.added(managedProviderMock, user);
         assertNotNull(user);
-        registry.authenticate(new UsernamePasswordCredentials("username", "password"));
-        registry.changePassword(user, "password2");
-        registry.authenticate(new UsernamePasswordCredentials("username", "password2"));
+        registry.authenticate(new UsernamePasswordCredentials("username", "password".toCharArray()));
+        registry.changePassword(user, "password2".toCharArray());
+        registry.authenticate(new UsernamePasswordCredentials("username", "password2".toCharArray()));
         registry.remove(user.getName());
         registry.removed(managedProviderMock, user);
         user = registry.get("username");
@@ -88,7 +88,8 @@ public class UserRegistryImplTest {
 
     @Test
     public void testSessions() throws Exception {
-        ManagedUser user = (ManagedUser) registry.register("username", "password", Set.of("administrator"));
+        ManagedUser user = (ManagedUser) registry.register("username", "password".toCharArray(),
+                Set.of("administrator"));
         registry.added(managedProviderMock, user);
         assertNotNull(user);
         UserSession session1 = new UserSession(UUID.randomUUID().toString(), "s1", "urn:test", "urn:test", "scope");
@@ -106,12 +107,13 @@ public class UserRegistryImplTest {
 
     @Test
     public void testApiTokens() throws Exception {
-        ManagedUser user = (ManagedUser) registry.register("username", "password", Set.of("administrator"));
+        ManagedUser user = (ManagedUser) registry.register("username", "password".toCharArray(),
+                Set.of("administrator"));
         registry.added(managedProviderMock, user);
         assertNotNull(user);
-        String token1 = registry.addUserApiToken(user, "token1", "scope1");
-        String token2 = registry.addUserApiToken(user, "token2", "scope2");
-        String token3 = registry.addUserApiToken(user, "token3", "scope3");
+        String token1 = String.valueOf(registry.addUserApiToken(user, "token1", "scope1"));
+        String token2 = String.valueOf(registry.addUserApiToken(user, "token2", "scope2"));
+        String token3 = String.valueOf(registry.addUserApiToken(user, "token3", "scope3"));
         assertEquals(3, user.getApiTokens().size());
         registry.authenticate(new UserApiTokenCredentials(token1));
         registry.authenticate(new UserApiTokenCredentials(token2));

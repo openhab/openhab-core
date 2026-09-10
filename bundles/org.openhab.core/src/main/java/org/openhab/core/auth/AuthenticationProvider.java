@@ -25,12 +25,29 @@ public interface AuthenticationProvider {
 
     /**
      * Verify given credentials and give back authentication if they are valid.
+     * <p>
+     * <b>Note:</b> {@link Credentials#dispose()} is called on the specified {@link Credentials} after use, making
+     * them suitable for one-time use only. The purpose is to clear sensitive data from memory. If not desirable, use
+     * {@link #authenticate(Credentials, boolean)} instead.
      *
-     * @param credentials User credentials.
-     * @return null if credentials were not valid for this provider
+     * @param credentials the user credentials.
+     * @return {@code null} if credentials were not valid for this provider
      * @throws AuthenticationException if authentication failed due to credentials mismatch.
      */
-    Authentication authenticate(Credentials credentials) throws AuthenticationException;
+    default Authentication authenticate(Credentials credentials) throws AuthenticationException {
+        return authenticate(credentials, true);
+    }
+
+    /**
+     * Verify given credentials and give back authentication if they are valid.
+     *
+     * @param credentials the user credentials.
+     * @param dispose if {@code true}, {@link Credentials#dispose()} is called after authentication, to clear
+     *            sensitive data from memory.
+     * @return {@code null} if credentials were not valid for this provider
+     * @throws AuthenticationException if authentication failed due to credentials mismatch.
+     */
+    Authentication authenticate(Credentials credentials, boolean dispose) throws AuthenticationException;
 
     /**
      * Additional method to verify if given authentication provider can handle given type of credentials.

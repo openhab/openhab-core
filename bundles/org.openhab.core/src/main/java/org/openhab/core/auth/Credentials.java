@@ -22,4 +22,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public interface Credentials {
 
+    /** Safely clears the password from memory after use */
+    void dispose();
 }

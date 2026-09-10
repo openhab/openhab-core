@@ -82,7 +82,7 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     if (args.length == 4) {
                         User existingUser = userRegistry.get(args[1]);
                         if (existingUser == null) {
-                            User newUser = userRegistry.register(args[1], args[2], Set.of(args[3]));
+                            User newUser = userRegistry.register(args[1], args[2].toCharArray(), Set.of(args[3]));
                             console.println(newUser.toString());
                             console.println("User created.");
                         } else {
@@ -109,7 +109,7 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                     if (args.length == 3) {
                         User user = userRegistry.get(args[1]);
                         if (user != null) {
-                            userRegistry.changePassword(user, args[2]);
+                            userRegistry.changePassword(user, args[2].toCharArray());
                             console.println("Password changed.");
                         } else {
                             console.println("User not found.");
@@ -134,8 +134,8 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                             Optional<UserApiToken> userApiToken = user.getApiTokens().stream()
                                     .filter(t -> args[2].equals(t.getName())).findAny();
                             if (userApiToken.isEmpty()) {
-                                String tokenString = userRegistry.addUserApiToken(user, args[2], args[3]);
-                                console.println(tokenString);
+                                char[] tokenString = userRegistry.addUserApiToken(user, args[2], args[3]);
+                                console.println(String.valueOf(tokenString));
                             } else {
                                 console.println("Cannot create API token: another one with the same name was found.");
                             }

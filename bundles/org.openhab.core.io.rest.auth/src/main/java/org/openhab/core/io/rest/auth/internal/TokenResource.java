@@ -52,6 +52,7 @@ import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
+import org.openhab.core.io.rest.auth.JwtHelper;
 import org.openhab.core.io.rest.auth.internal.TokenEndpointException.ErrorType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
