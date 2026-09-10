@@ -1002,6 +1002,24 @@ public class YamlWidgetDTOTest {
     }
 
     @Test
+    public void testIsValidNestedSitemap() throws IOException {
+        List<String> err = new ArrayList<>();
+        List<String> warn = new ArrayList<>();
+
+        YamlWidgetDTO widget = new YamlWidgetDTO();
+        widget.type = "Sitemap";
+        assertFalse(widget.isValid(err, warn));
+        assertEquals(1, err.size());
+        assertEquals("\"name\" or \"item\" field missing while mandatory for Sitemap widget", err.getFirst());
+        err.clear();
+        widget.item = "item";
+        assertTrue(widget.isValid(err, warn));
+        widget.item = null;
+        widget.name = "sitemap";
+        assertTrue(widget.isValid(err, warn));
+    }
+
+    @Test
     public void testIsValidDefault() throws IOException {
         List<String> err = new ArrayList<>();
         List<String> warn = new ArrayList<>();
