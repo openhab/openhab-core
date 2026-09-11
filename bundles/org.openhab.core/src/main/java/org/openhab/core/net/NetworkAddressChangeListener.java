@@ -50,4 +50,14 @@ public interface NetworkAddressChangeListener {
     default void onPrimaryAddressChanged(@Nullable String oldPrimaryAddress, @Nullable String newPrimaryAddress) {
         // nothing to do for the default implementation
     }
+
+    /**
+     * Listeners will be notified by this when no more notifications will be received. The listener has
+     * effectively been removed once this has been called.
+     *
+     * @implNote The default implementation is empty.
+     */
+    default void onNotificationsEnded() {
+        // Empty default implementation
+    }
 }
