@@ -109,6 +109,10 @@ public class FeatureInstaller implements ConfigurationListener {
                                           // configuration as this must be waited for before trying to add feature repos
     private @Nullable Map<String, Object> configMapCache;
 
+    private static final int MAX_INSTALL_ATTEMPTS = 5;
+    private Set<String> failedInstallAddons = Set.of();
+    private int failedInstallAttempts;
+
     @Activate
     public FeatureInstaller(final @Reference ConfigurationAdmin configurationAdmin,
             final @Reference FeaturesService featuresService, final @Reference KarService karService,
@@ -432,41 +436,89 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private void installFeatures(Set<String> addons) {
+    /* package-private (instead of private) for testing */
+    void installFeatures(Set<String> addons) {
+        Set<String> failed = installFeatureSet(addons);
+
+        // If more than one add-on was requested and some failed, a single add-on that cannot be resolved or
+        // downloaded may have aborted the whole (transactional) installation and thereby blocked the other,
+        // working add-ons. Retry the failed add-ons individually so that one broken add-on cannot prevent the
+        // others from being installed.
+        if (!failed.isEmpty() && addons.size() > 1) {
+            logger.warn("Installing add-ons '{}' as a group failed. Retrying them individually so that a single "
+                    + "failing add-on does not block the others.", String.join(", ", failed));
+            Set<String> stillFailed = new HashSet<>();
+            for (String addon : failed) {
+                stillFailed.addAll(installFeatureSet(Set.of(addon)));
+            }
+            failed = stillFailed;
+        }
+
+        if (failed.isEmpty()) {
+            failedInstallAddons = Set.of();
+            failedInstallAttempts = 0;
+            return;
+        }
+
+        // Bound the number of automatic retries for a persistently failing set of add-ons. Without this, a
+        // permanently unavailable add-on (e.g. removed from the repository) is retried every minute forever,
+        // repeatedly refreshing bundles and never giving up, which can also block other operations.
+        if (failed.equals(failedInstallAddons)) {
+            failedInstallAttempts++;
+        } else {
+            failedInstallAddons = failed;
+            failedInstallAttempts = 1;
+        }
+
+        if (failedInstallAttempts < MAX_INSTALL_ATTEMPTS) {
+            logger.error("Failed installing add-ons '{}' (attempt {} of {}). Will retry.", String.join(", ", failed),
+                    failedInstallAttempts, MAX_INSTALL_ATTEMPTS);
+            configMapCache = null; // make sure we retry the installation
+        } else {
+            logger.error("Failed installing add-ons '{}' after {} attempts. Giving up until the add-on configuration "
+                    + "changes or the server is restarted. Please check repository/network access for these "
+                    + "add-ons.", String.join(", ", failed), failedInstallAttempts);
+            // Intentionally do not reset configMapCache here so that the periodic sync job stops retrying.
+        }
+    }
+
+    /**
+     * Installs the given set of add-on features and returns the sub-set that is not installed afterwards.
+     *
+     * @param addons the add-on feature names to install
+     * @return the add-on feature names that could not be installed
+     */
+    private Set<String> installFeatureSet(Set<String> addons) {
         try {
             if (logger.isDebugEnabled()) {
                 logger.debug("Installing '{}'", String.join(", ", addons));
             }
             featuresService.installFeatures(addons, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles,
                     FeaturesService.Option.Upgrade, FeaturesService.Option.NoFailOnFeatureNotFound));
-            try {
-                Feature[] features = featuresService.listInstalledFeatures();
-                Set<String> installed = new HashSet<>();
-                Set<String> failed = new HashSet<>();
-
-                for (String addon : addons) {
-                    if (anyMatchingFeature(features, withName(addon))) {
-                        installed.add(addon);
-                    } else {
-                        failed.add(addon);
-                    }
-                }
-
-                if (!installed.isEmpty() && logger.isDebugEnabled()) {
-                    logger.debug("Installed '{}'", String.join(", ", installed));
-                }
-                if (!failed.isEmpty()) {
-                    logger.error("Failed installing '{}'", String.join(", ", failed));
-                    configMapCache = null; // make sure we retry the installation
-                }
-                installed.forEach(this::postInstalledEvent);
-            } catch (Exception e) {
-                logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
-                configMapCache = null; // make sure we retry the installation
-            }
         } catch (Exception e) {
-            logger.error("Failed installing '{}': {}", String.join(", ", addons), e.getMessage(), debugException(e));
-            configMapCache = null; // make sure we retry the installation
+            logger.debug("Installing '{}' failed: {}", String.join(", ", addons), e.getMessage(), debugException(e));
+        }
+        try {
+            Feature[] features = featuresService.listInstalledFeatures();
+            Set<String> installed = new HashSet<>();
+            Set<String> failed = new HashSet<>();
+
+            for (String addon : addons) {
+                if (anyMatchingFeature(features, withName(addon))) {
+                    installed.add(addon);
+                } else {
+                    failed.add(addon);
+                }
+            }
+
+            if (!installed.isEmpty() && logger.isDebugEnabled()) {
+                logger.debug("Installed '{}'", String.join(", ", installed));
+            }
+            installed.forEach(this::postInstalledEvent);
+            return failed;
+        } catch (Exception e) {
+            logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
+            return addons;
         }
     }
 
