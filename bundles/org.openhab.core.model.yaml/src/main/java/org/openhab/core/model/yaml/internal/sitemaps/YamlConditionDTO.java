@@ -37,6 +37,10 @@ public class YamlConditionDTO {
     }
 
     public boolean isValid(@NonNull List<@NonNull String> errors, @NonNull List<@NonNull String> warnings) {
+        if (item == null && operator == null && argument == null) {
+            return true; // empty condition may be valid when there is a rule value, condition will be ignored for rule
+                         // with unique condition
+        }
         boolean ok = true;
         if (item != null && !ItemUtil.isValidItemName(item)) {
             addToList(errors,
@@ -48,7 +52,7 @@ public class YamlConditionDTO {
             addToList(errors, "invalid value \"%s\" for \"operator\" field in condition".formatted(operator));
             ok = false;
         }
-        if ((item != null || operator != null) && argument == null) {
+        if (argument == null) {
             addToList(errors, "\"argument\" field missing while mandatory in condition");
             ok = false;
         }

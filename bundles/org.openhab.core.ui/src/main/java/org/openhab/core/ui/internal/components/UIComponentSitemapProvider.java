@@ -80,6 +80,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Implement sitemap registry
  * @author Mark Herwege - Make provider managed and add support for adding/updating/removing sitemaps via the provider
  *         interface
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(service = { SitemapProvider.class, ManagedSitemapProvider.class }, immediate = true)
@@ -222,6 +223,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         setWidgetPropertyFromComponentConfig(widget, component, "label");
         setWidgetPropertyFromComponentConfig(widget, component, "icon");
         setWidgetPropertyFromComponentConfig(widget, component, "staticIcon");
+        setWidgetPropertyFromComponentConfig(widget, component, "confirmCmd");
 
         if (widget instanceof LinkableWidget linkableWidget) {
             if (component.getSlots() != null && component.getSlots().containsKey("widgets")) {
@@ -239,6 +241,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         addWidgetRules(widget.getValueColor(), component, "valuecolor");
         addWidgetRules(widget.getIconColor(), component, "iconcolor");
         addWidgetRules(widget.getIconRules(), component, "iconrules");
+        addWidgetRules(widget.getConfirmCmdRules(), component, "confirmcmdrules");
 
         return widget;
     }
@@ -359,13 +362,22 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         return deprecated;
     }
 
-    private void addWidgetRules(List<Rule> rules, UIComponent component, String key) {
+    /**
+     * Add rules of a specific type to a widget.
+     * This method is package-private for testing purposes, to allow testing adding rules to a widget without having to
+     * mock the whole widget building process.
+     *
+     * @param rules
+     * @param component
+     * @param key
+     */
+    void addWidgetRules(List<Rule> rules, UIComponent component, String key) {
         if (component.getConfig() != null && component.getConfig().containsKey(key)) {
             Object sourceRules = component.getConfig().get(key);
             if (sourceRules instanceof Collection<?> sourceRulesCollection) {
                 for (Object sourceRule : sourceRulesCollection) {
                     if (sourceRule instanceof String) {
-                        String argument = !"visibility".equals(key) ? getRuleArgument(sourceRule.toString()) : null;
+                        String argument = getRuleArgument(sourceRule.toString());
                         List<String> conditionsString = getRuleConditions(sourceRule.toString(), argument);
                         Rule rule = sitemapFactory.createRule();
                         List<Condition> conditions = getConditions(conditionsString, component, key);
@@ -416,10 +428,25 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         return conditions;
     }
 
-    private String getRuleArgument(String rule) {
-        int argIndex = rule.lastIndexOf("=") + 1;
-        String strippedRule = stripQuotes(rule.substring(argIndex).trim());
-        return strippedRule != null ? strippedRule : "";
+    private @Nullable String getRuleArgument(String rule) {
+        String argument = null;
+        String trimmedRule = rule.trim();
+        String strippedRule = trimmedRule;
+        if (strippedRule.endsWith("\"")) {
+            for (int i = strippedRule.length() - 2; i >= 0; i--) {
+                if (strippedRule.charAt(i) == '"') {
+                    strippedRule = i > 0 ? rule.substring(0, i) : "";
+                    break;
+                }
+            }
+        }
+        int lastEqualsIndex = strippedRule.lastIndexOf("=");
+        String charBeforeEquals = lastEqualsIndex > 0 ? rule.substring(lastEqualsIndex - 1, lastEqualsIndex) : null;
+        if (!(lastEqualsIndex == -1 || "=".equals(charBeforeEquals) || "!".equals(charBeforeEquals)
+                || "<".equals(charBeforeEquals) || ">".equals(charBeforeEquals))) {
+            argument = stripQuotes(trimmedRule.substring(lastEqualsIndex + 1).trim());
+        }
+        return argument;
     }
 
     private List<String> getRuleConditions(String rule, @Nullable String argument) {

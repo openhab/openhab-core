@@ -40,8 +40,8 @@ public interface Rule {
     void setConditions(List<Condition> conditions);
 
     /**
-     * Get the rule argument for icon or color rules. The rule argument is the resulting value if the rule is met.
-     * Visibility rules don't have an argument, always work on the full widget.
+     * Get the rule argument for icon, color or confirmCmd rules. The rule argument is the resulting value if the rule
+     * is met. Visibility rules don't have an argument, always work on the full widget.
      *
      * @return argument
      */

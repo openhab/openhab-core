@@ -25,7 +25,7 @@ ModelLinkableWidget:
 
 ModelFrame:
     {ModelFrame} 'Frame' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -33,7 +33,7 @@ ModelFrame:
 
 ModelText:
     {ModelText} 'Text' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -41,7 +41,7 @@ ModelText:
 
 ModelGroup:
     'Group' (('item=' item=GroupItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -49,7 +49,7 @@ ModelGroup:
 
 ModelImage:
     'Image' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('url=' url=STRING) | ('refresh=' refresh=INT) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -58,7 +58,7 @@ ModelImage:
 
 ModelVideo:
     'Video' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('url=' url=STRING) | ('encoding=' encoding=STRING) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -67,7 +67,7 @@ ModelVideo:
 
 ModelChart:
     'Chart' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('service=' service=STRING) | ('refresh=' refresh=INT) | ('period=' period=Period) |
     ('legend=' legend=BOOLEAN_OBJECT) | ('forceasitem=' forceAsItem=BOOLEAN_OBJECT) |
     ('yAxisDecimalPattern=' yAxisDecimalPattern=(STRING)) |
@@ -79,7 +79,7 @@ ModelChart:
 
 ModelWebview:
     'Webview' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('height=' height=INT) | ('url=' url=STRING) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -88,7 +88,8 @@ ModelWebview:
 
 ModelSwitch:
     'Switch' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('confirmCmd=' confirmCmd=BOOLEAN_OBJECT) | ('confirmCmd=' confirmCmdRules=ModelConfirmCmdRuleList) |
     ('mappings=' mappings=ModelMappingList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -97,7 +98,7 @@ ModelSwitch:
 
 ModelMapview:
     'Mapview' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('height=' height=INT) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -106,9 +107,10 @@ ModelMapview:
 
 ModelSlider:
     'Slider' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     (switchEnabled?='switchSupport') | (releaseOnly?='releaseOnly') |
     ('minValue=' minValue=Number) | ('maxValue=' maxValue=Number) | ('step=' step=Number) |
+    ('confirmCmd=' confirmCmd=BOOLEAN_OBJECT) | ('confirmCmd=' confirmCmdRules=ModelConfirmCmdRuleList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -116,8 +118,9 @@ ModelSlider:
 
 ModelSelection:
     'Selection' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('mappings=' mappings=ModelMappingList) |
+    ('confirmCmd=' confirmCmd=BOOLEAN_OBJECT) | ('confirmCmd=' confirmCmdRules=ModelConfirmCmdRuleList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -125,8 +128,9 @@ ModelSelection:
 
 ModelSetpoint:
     'Setpoint' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('minValue=' minValue=Number) | ('maxValue=' maxValue=Number) | ('step=' step=Number) |
+    ('confirmCmd=' confirmCmd=BOOLEAN_OBJECT) | ('confirmCmd=' confirmCmdRules=ModelConfirmCmdRuleList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -134,7 +138,8 @@ ModelSetpoint:
 
 ModelColorpicker:
     'Colorpicker' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('confirmCmd=' confirmCmd=BOOLEAN_OBJECT) | ('confirmCmd=' confirmCmdRules=ModelConfirmCmdRuleList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -142,8 +147,9 @@ ModelColorpicker:
 
 ModelColortemperaturepicker:
     'Colortemperaturepicker' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('minValue=' minValue=Number) | ('maxValue=' maxValue=Number) |
+    ('confirmCmd=' confirmCmd=BOOLEAN_OBJECT) | ('confirmCmd=' confirmCmdRules=ModelConfirmCmdRuleList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -151,8 +157,9 @@ ModelColortemperaturepicker:
 
 ModelInput:
     'Input' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('inputHint=' inputHint=STRING) |
+    ('confirmCmd=' confirmCmd=BOOLEAN_OBJECT) | ('confirmCmd=' confirmCmdRules=ModelConfirmCmdRuleList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -160,7 +167,7 @@ ModelInput:
 
 ModelButtongrid:
     {ModelButtongrid} 'Buttongrid' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('buttons=' buttons=ModelButtonDefinitionList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -170,8 +177,9 @@ ModelButtongrid:
 ModelButton:
     'Button' (('row=' row=INT) | ('column=' column=INT) |
     ('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     (stateless?='stateless') | ('click=' cmd=Command) | ('release=' releaseCmd=Command) |
+    ('confirmCmd=' confirmCmd=BOOLEAN_OBJECT) | ('confirmCmd=' confirmCmdRules=ModelConfirmCmdRuleList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -179,44 +187,46 @@ ModelButton:
 
 ModelDefault:
     'Default' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('height=' height=INT) |
+    ('confirmCmd=' confirmCmd=BOOLEAN_OBJECT) | ('confirmCmd=' confirmCmdRules=ModelConfirmCmdRuleList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
     ('visibility=' visibility=ModelVisibilityRuleList))*;
 
 ModelButtonDefinitionList returns ModelButtonDefinitionList:
-    '[' elements+=ModelButtonDefinition (',' elements+=ModelButtonDefinition)* ']'
-;
+    '[' elements+=ModelButtonDefinition (',' elements+=ModelButtonDefinition)* ']';
 
 ModelButtonDefinition:
     row=INT ':' column=INT ':' cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 ModelMappingList returns ModelMappingList:
-    '[' elements+=ModelMapping (',' elements+=ModelMapping)* ']'
-;
+    '[' elements+=ModelMapping (',' elements+=ModelMapping)* ']';
 
 ModelMapping:
     cmd=Command (':' releaseCmd=Command)? '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 ModelColorArrayList returns ModelColorArrayList:
-    '[' elements+=ModelColorArray (',' elements+=ModelColorArray)* ']'
-;
+    '[' elements+=ModelColorArray (',' elements+=ModelColorArray)* ']';
 
 ModelColorArray:
     ((conditions+=ModelCondition ('AND' conditions+=ModelCondition)*) '=')? (arg=STRING);
 
 ModelIconRuleList returns ModelIconRuleList:
-    '[' elements+=ModelIconRule (',' elements+=ModelIconRule)* ']'
-;
+    '[' elements+=ModelIconRule (',' elements+=ModelIconRule)* ']';
 
 ModelIconRule:
     ((conditions+=ModelCondition ('AND' conditions+=ModelCondition)*) '=')? (arg=Icon);
 
+ModelConfirmCmdRuleList returns ModelConfirmCmdRuleList:
+    '[' elements+=ModelConfirmCmdRule (',' elements+=ModelConfirmCmdRule)* ']';
+
+ModelConfirmCmdRule:
+    { ModelConfirmCmdRule } (conditions+=ModelCondition ('AND' conditions+=ModelCondition)*)? ('=' arg=STRING)?;
+
 ModelVisibilityRuleList returns ModelVisibilityRuleList:
-    '[' elements+=ModelVisibilityRule (',' elements+=ModelVisibilityRule)* ']'
-;
+    '[' elements+=ModelVisibilityRule (',' elements+=ModelVisibilityRule)* ']';
 
 ModelVisibilityRule:
     conditions+=ModelCondition ('AND' conditions+=ModelCondition)*;

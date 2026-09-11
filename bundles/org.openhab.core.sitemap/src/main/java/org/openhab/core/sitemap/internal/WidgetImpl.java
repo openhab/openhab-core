@@ -23,6 +23,7 @@ import org.openhab.core.sitemap.Widget;
 
 /**
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 public class WidgetImpl implements Widget {
@@ -40,6 +41,9 @@ public class WidgetImpl implements Widget {
     private List<Rule> valueColorRules = new CopyOnWriteArrayList<>();
     private List<Rule> iconColorRules = new CopyOnWriteArrayList<>();
     private List<Rule> visibilityRules = new CopyOnWriteArrayList<>();
+
+    private boolean confirmCmd;
+    private List<Rule> confirmCmdRules = new CopyOnWriteArrayList<>();
 
     public WidgetImpl() {
     }
@@ -146,6 +150,26 @@ public class WidgetImpl implements Widget {
     @Override
     public void setVisibility(List<Rule> visibilityRules) {
         this.visibilityRules = new CopyOnWriteArrayList<>(visibilityRules);
+    }
+
+    @Override
+    public boolean getConfirmCmd() {
+        return confirmCmd;
+    }
+
+    @Override
+    public void setConfirmCmd(@Nullable Boolean confirmCmd) {
+        this.confirmCmd = confirmCmd == null ? false : confirmCmd;
+    }
+
+    @Override
+    public List<Rule> getConfirmCmdRules() {
+        return confirmCmdRules;
+    }
+
+    @Override
+    public void setConfirmCmdRules(List<Rule> confirmCmdRules) {
+        this.confirmCmdRules = new CopyOnWriteArrayList<>(confirmCmdRules);
     }
 
     @Override
