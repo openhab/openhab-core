@@ -85,10 +85,9 @@ class GsonTest {
         assertEquals("John Doe", test.n, "Name field should match");
         assertEquals(30, test.age, "Age field should match");
         assertTrue(test.active, "Active field should match");
-        // Known issue in ECJ >3.43 due to changed handling of annotations (FIELD / TYPE_USE):
-        // when @NonNullByDefault({}) precedes @SerializedName, ECJ emits @SerializedName as a
-        // TYPE_USE annotation instead of a FIELD annotation, and Gson cannot find it.
-        assertNull(test.e, "Email field is expected to be null due to annotation ordering issue in ECJ >3.43");
+        // Note: This test failed in ECJ 3.44.0 to 3.46.0 due to handling of annotations (FIELD / TYPE_USE),
+        // fixed in ECJ 3.46.100
+        assertEquals("john.doe@example.com", test.e, "Email field should match");
     }
 
     @Test
