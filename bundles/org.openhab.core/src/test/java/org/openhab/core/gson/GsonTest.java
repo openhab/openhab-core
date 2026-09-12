@@ -86,7 +86,7 @@ class GsonTest {
         assertEquals(30, test.age, "Age field should match");
         assertTrue(test.active, "Active field should match");
         // Note: This test failed in ECJ 3.44.0 to 3.46.0 due to handling of annotations (FIELD / TYPE_USE),
-	// fixed in ECJ 3.46.100
+        // fixed in ECJ 3.46.100
         assertEquals("john.doe@example.com", test.e, "Email field should match");
     }
 
