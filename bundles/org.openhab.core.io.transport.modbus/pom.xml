@@ -55,7 +55,8 @@
             <configuration>
               <includeScope>runtime</includeScope>
               <includeTypes>jar</includeTypes>
-              <excludeGroupIds>commons-pool2,org.openhab.core.bundles</excludeGroupIds>
+              <excludeGroupIds>org.openhab.core.bundles</excludeGroupIds>
+              <excludeArtifactIds>commons-pool2</excludeArtifactIds>
               <outputDirectory>${project.build.directory}/classes</outputDirectory>
               <overWriteReleases>true</overWriteReleases>
               <overWriteSnapshots>true</overWriteSnapshots>
