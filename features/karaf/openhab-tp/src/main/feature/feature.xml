@@ -47,7 +47,7 @@
 		<bundle>mvn:org.eclipse.californium/californium-core/4.0.0-M2</bundle>
 		<bundle>mvn:org.eclipse.californium/element-connector/4.0.0-M2</bundle>
 		<bundle>mvn:org.eclipse.californium/scandium/4.0.0-M2</bundle>
-		<bundle dependency="true">mvn:org.slf4j/jul-to-slf4j/2.0.18</bundle>
+		<bundle dependency="true">mvn:org.slf4j/jul-to-slf4j/${slf4j.version}</bundle>
 		<bundle dependency="true">mvn:org.bouncycastle/bcprov-jdk18on/${bouncycastle.version}</bundle>
 	</feature>
 
@@ -298,7 +298,7 @@
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.9.0</bundle>
 
 		<!-- Used for feature verification only because this is already provided by Karaf -->
-		<bundle dependency="true" start="false">mvn:org.eclipse.platform/org.eclipse.osgi/3.24.200</bundle>
+		<bundle dependency="true" start="false">mvn:org.eclipse.platform/org.eclipse.osgi/3.24.300</bundle>
 	</feature>
 
 	<feature name="openhab.tp-xtext-ide" description="Xtext - IDE Support" version="${project.version}">

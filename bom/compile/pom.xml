@@ -469,13 +469,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.19.0</version>
+      <version>5.19.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.19.0</version>
+      <version>5.19.1</version>
       <scope>compile</scope>
     </dependency>
     <!-- transitive dependency of junit, required by javadoc in compile bom! -->
