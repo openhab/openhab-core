@@ -80,7 +80,10 @@ import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 
 import com.google.gson.Gson;
+
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 /**
  * Tests for PersistenceItem REST resource
