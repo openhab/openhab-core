@@ -25,6 +25,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A root component is a special type of {@link UIComponent} at the root of the hierarchy.
  * It has a number of specific parameters, a set of tags, a timestamp, some configurable
@@ -34,10 +36,13 @@ import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
  */
 @NonNullByDefault
 public class RootUIComponent extends UIComponent implements Identifiable<String> {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     String uid;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     Set<String> tags = new HashSet<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     ConfigDescriptionDTO props;
 
     @Nullable
