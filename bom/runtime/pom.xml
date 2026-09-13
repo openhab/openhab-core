@@ -54,7 +54,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
-      <version>3.24.200</version>
+      <version>3.24.300</version>
       <scope>compile</scope>
     </dependency>
 
@@ -291,7 +291,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.inventory</artifactId>
-      <version>1.1.0</version>
+      <version>2.0.0</version>
     </dependency>
 
     <!-- The Gogo Shell -->
@@ -718,13 +718,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.31</version>
+      <version>5.0.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.31</version>
+      <version>5.0.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -1019,13 +1019,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.19.0</version>
+      <version>5.19.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.19.0</version>
+      <version>5.19.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

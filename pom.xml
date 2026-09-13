@@ -84,7 +84,7 @@
     <karaf.tooling.version>4.5.0-SNAPSHOT</karaf.tooling.version>
     <osgitech.rest.version>1.2.3</osgitech.rest.version>
     <sat.version>0.18.0</sat.version>
-    <slf4j.version>2.0.18</slf4j.version>
+    <slf4j.version>2.0.19</slf4j.version>
     <xtext.version>2.43.0</xtext.version>
     <spotless.version>2.44.3</spotless.version>
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
