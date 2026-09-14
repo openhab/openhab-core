@@ -73,7 +73,7 @@
 
     <asm.version>9.9.1</asm.version>
     <bnd.version>7.4.0</bnd.version>
-    <bouncycastle.version>1.85</bouncycastle.version>
+    <bouncycastle.version>1.86</bouncycastle.version>
     <commons.net.version>3.13.0</commons.net.version>
     <eea.version>2.4.0</eea.version>
     <jackson.annotations.version>2.22</jackson.annotations.version>
