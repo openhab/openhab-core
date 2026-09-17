@@ -311,7 +311,7 @@ public class YamlThingProviderTest {
         assertEquals("A parameter that is not in the channel config description.",
                 channel.getConfiguration().get("other"));
 
-        assertNull(thingProvider.lazyRetryThread);
+        assertNull(thingProvider.retryThread);
         assertEquals(0, thingProvider.getRetryQueueSize());
     }
 
@@ -377,7 +377,7 @@ public class YamlThingProviderTest {
         assertThat(channel.getConfiguration().keySet(), contains("DateTimeFormat"));
         assertEquals(DEFAULT_DATE_TIME_FORMAT, channel.getConfiguration().get("DateTimeFormat"));
 
-        assertNull(thingProvider.lazyRetryThread);
+        assertNull(thingProvider.retryThread);
         assertEquals(0, thingProvider.getRetryQueueSize());
     }
 
@@ -449,7 +449,7 @@ public class YamlThingProviderTest {
             assertEquals("A parameter that is not in the channel config description.",
                     channel.getConfiguration().get("other"));
 
-            assertNull(thingProvider.lazyRetryThread);
+            assertNull(thingProvider.retryThread);
             assertEquals(0, thingProvider.getRetryQueueSize());
         }
     }
@@ -510,7 +510,7 @@ public class YamlThingProviderTest {
             // default value not injected for parameter DateTimeFormat
             assertThat(channel.getConfiguration().keySet(), hasSize(0));
 
-            assertNull(thingProvider.lazyRetryThread);
+            assertNull(thingProvider.retryThread);
             assertEquals(0, thingProvider.getRetryQueueSize());
         }
     }
@@ -573,8 +573,8 @@ public class YamlThingProviderTest {
 
         assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
         assertEquals(1, thingProvider.getRetryQueueSize());
-        assertNotNull(thingProvider.lazyRetryThread);
-        assertTrue(thingProvider.lazyRetryThread.isAlive());
+        assertNotNull(thingProvider.retryThread);
+        assertTrue(thingProvider.retryThread.isAlive());
 
         try {
             Thread.sleep(2500);
@@ -585,8 +585,8 @@ public class YamlThingProviderTest {
 
         assertEquals(3, thingHandlerFactory.getNbCallsToCreateThing());
         assertEquals(0, thingProvider.getRetryQueueSize());
-        assertNotNull(thingProvider.lazyRetryThread);
-        assertFalse(thingProvider.lazyRetryThread.isAlive());
+        assertNotNull(thingProvider.retryThread);
+        assertFalse(thingProvider.retryThread.isAlive());
 
         assertFalse(YamlModelUtils.isIsolatedModel(MODEL_NAME));
         assertThat(thingListener.things, is(aMapWithSize(1)));
@@ -619,8 +619,8 @@ public class YamlThingProviderTest {
 
         assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
         assertEquals(1, thingProvider.getRetryQueueSize());
-        assertNotNull(thingProvider.lazyRetryThread);
-        assertTrue(thingProvider.lazyRetryThread.isAlive());
+        assertNotNull(thingProvider.retryThread);
+        assertTrue(thingProvider.retryThread.isAlive());
 
         Files.copy(SOURCE_PATH.resolve("thingWithEmptyConfig.yaml"), fullModelPath,
                 StandardCopyOption.REPLACE_EXISTING);
@@ -638,8 +638,8 @@ public class YamlThingProviderTest {
         }
 
         assertEquals(2, thingHandlerFactory.getNbCallsToCreateThing());
-        assertNotNull(thingProvider.lazyRetryThread);
-        assertFalse(thingProvider.lazyRetryThread.isAlive());
+        assertNotNull(thingProvider.retryThread);
+        assertFalse(thingProvider.retryThread.isAlive());
 
         assertFalse(YamlModelUtils.isIsolatedModel(MODEL_NAME));
         assertThat(thingListener.things, is(aMapWithSize(1)));
@@ -672,8 +672,8 @@ public class YamlThingProviderTest {
 
         assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
         assertEquals(1, thingProvider.getRetryQueueSize());
-        assertNotNull(thingProvider.lazyRetryThread);
-        assertTrue(thingProvider.lazyRetryThread.isAlive());
+        assertNotNull(thingProvider.retryThread);
+        assertTrue(thingProvider.retryThread.isAlive());
 
         Files.delete(fullModelPath);
         modelRepository.processWatchEvent(WatchService.Kind.DELETE, fullModelPath);
@@ -690,8 +690,8 @@ public class YamlThingProviderTest {
         }
 
         assertEquals(1, thingHandlerFactory.getNbCallsToCreateThing());
-        assertNotNull(thingProvider.lazyRetryThread);
-        assertFalse(thingProvider.lazyRetryThread.isAlive());
+        assertNotNull(thingProvider.retryThread);
+        assertFalse(thingProvider.retryThread.isAlive());
 
         assertThat(thingProvider.getAllFromModel(MODEL_NAME), hasSize(0));
         assertThat(thingProvider.getAll(), hasSize(0));
@@ -728,7 +728,7 @@ public class YamlThingProviderTest {
             assertEquals(0, thing.getProperties().size());
             assertThat(thing.getConfiguration().keySet(), hasSize(0));
 
-            assertNull(thingProvider.lazyRetryThread);
+            assertNull(thingProvider.retryThread);
             assertEquals(0, thingProvider.getRetryQueueSize());
         }
     }
