@@ -25,11 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
+import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.io.transport.mdns.ServiceDescription;
 import org.openhab.core.net.CidrAddress;
@@ -57,6 +61,12 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
     private final Set<ServiceDescription> activeServices = ConcurrentHashMap.newKeySet();
 
     private final NetworkAddressService networkAddressService;
+
+    /**
+     * Single thread executor used to spin up the JmDNS instances asynchronously, so that the OSGi component
+     * activation does not block (and hold the bundle's state change lock) while network I/O is performed.
+     */
+    private final ExecutorService startExecutor = Executors.newSingleThreadExecutor(new NamedThreadFactory("mdns"));
 
     @Activate
     public MDNSClientImpl(final @Reference NetworkAddressService networkAddressService) {
@@ -138,7 +148,12 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
     @Activate
     protected void activate() {
         networkAddressService.addNetworkAddressChangeListener(this);
-        start();
+        // Creating the JmDNS instances performs blocking network I/O for every interface/address, which can
+        // take a considerable amount of time (especially on hosts with many network interfaces). Running this
+        // on the component activation thread holds the bundle's state change lock and can stall the activation
+        // of other bundles and the installation of features. Therefore the JmDNS instances are started
+        // asynchronously so that activation returns immediately.
+        startExecutor.execute(this::start);
     }
 
     private void start() {
@@ -156,6 +171,12 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
 
     @Deactivate
     public void deactivate() {
+        startExecutor.shutdownNow();
+        try {
+            startExecutor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         close();
         activeServices.clear();
         networkAddressService.removeNetworkAddressChangeListener(this);
