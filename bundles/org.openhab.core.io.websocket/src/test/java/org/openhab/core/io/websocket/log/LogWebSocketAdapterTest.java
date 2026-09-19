@@ -17,11 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import javax.ws.rs.core.SecurityContext;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +27,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.auth.Role;
 import org.osgi.service.log.LogReaderService;
+
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * The {@link LogWebSocketAdapterTest} contains tests for the {@link LogWebSocketAdapter}.
@@ -40,8 +40,8 @@ import org.osgi.service.log.LogReaderService;
 public class LogWebSocketAdapterTest {
 
     private @Mock @NonNullByDefault({}) LogReaderService logReaderService;
-    private @Mock @NonNullByDefault({}) ServletUpgradeRequest request;
-    private @Mock @NonNullByDefault({}) ServletUpgradeResponse response;
+    private @Mock @NonNullByDefault({}) JettyServerUpgradeRequest request;
+    private @Mock @NonNullByDefault({}) JettyServerUpgradeResponse response;
 
     private @NonNullByDefault({}) LogWebSocketAdapter logWsAdapter;
 

@@ -16,11 +16,6 @@ import java.io.IOException;
 import java.io.Serial;
 import java.util.Map;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
@@ -32,8 +27,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
-import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPattern;
+import org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardServletName;
+import org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardServletPattern;
+
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * A servlet serving a page allowing users to change their password, after confirming their identity by signing in.
@@ -59,6 +59,7 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
     }
 
     @Override
+    @NonNullByDefault({})
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, String[]> params = req.getParameterMap();
 
@@ -76,6 +77,7 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
     }
 
     @Override
+    @NonNullByDefault({})
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, String[]> params = req.getParameterMap();
         try {
