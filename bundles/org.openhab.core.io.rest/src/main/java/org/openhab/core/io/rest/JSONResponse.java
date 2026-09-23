@@ -19,12 +19,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.StreamingOutput;
-
 import org.openhab.core.library.types.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +28,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
+
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.StreamingOutput;
 
 /**
  * Static helper methods to build up JSON-like Response objects and error handling.
@@ -152,7 +152,7 @@ public class JSONResponse {
         }
 
         rp.entity((StreamingOutput) (target) -> {
-            // target must not be closed, see javadoc of javax.ws.rs.ext.MessageBodyWriter
+            // target must not be closed, see javadoc of jakarta.ws.rs.ext.MessageBodyWriter
             JsonWriter jsonWriter = new JsonWriter(
                     new BufferedWriter(new OutputStreamWriter(target, StandardCharsets.UTF_8)));
 
@@ -180,7 +180,7 @@ public class JSONResponse {
      *
      * @author Joerg Plewe
      */
-    public static class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Exception> {
+    public static class ExceptionMapper implements jakarta.ws.rs.ext.ExceptionMapper<Exception> {
 
         private final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
 

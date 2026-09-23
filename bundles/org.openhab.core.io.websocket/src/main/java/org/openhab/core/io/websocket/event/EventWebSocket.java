@@ -18,14 +18,13 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -46,7 +45,7 @@ import com.google.gson.reflect.TypeToken;
 @WebSocket
 @NonNullByDefault
 @SuppressWarnings("unused")
-public class EventWebSocket implements WriteCallback {
+public class EventWebSocket implements Callback {
     public static final String WEBSOCKET_EVENT_TYPE = "WebSocketEvent";
     public static final String WEBSOCKET_TOPIC_PREFIX = "openhab/websocket/";
 
@@ -61,9 +60,6 @@ public class EventWebSocket implements WriteCallback {
 
     // All access must be guarded by "this"
     private @Nullable Session session;
-
-    // All access must be guarded by "this"
-    private @Nullable RemoteEndpoint remoteEndpoint;
 
     // All access must be guarded by "this"
     private String remoteIdentifier = "<unknown>";
@@ -94,33 +90,28 @@ public class EventWebSocket implements WriteCallback {
         synchronized (this) {
             remoteIdentifier = "<unknown>";
             this.session = null;
-            this.remoteEndpoint = null;
         }
     }
 
-    @OnWebSocketConnect
-    public void onConnect(Session session) {
-        RemoteEndpoint remoteEndpoint = session.getRemote();
+    @OnWebSocketOpen
+    public void onOpen(Session session) {
         synchronized (this) {
             this.session = session;
-            this.remoteEndpoint = remoteEndpoint;
-            this.remoteIdentifier = remoteEndpoint.getInetSocketAddress().toString();
+            this.remoteIdentifier = session.getRemoteSocketAddress().toString();
         }
         this.wsAdapter.registerListener(this);
     }
 
     @OnWebSocketMessage
     public void onText(String message) {
-        RemoteEndpoint remoteEndpoint;
         Session session;
         String remoteIdentifier;
         synchronized (this) {
-            remoteEndpoint = this.remoteEndpoint;
             session = this.session;
             remoteIdentifier = this.remoteIdentifier;
         }
-        if (session == null || remoteEndpoint == null) {
-            // no connection or no remote endpoint , do nothing this is possible due to async behavior
+        if (session == null) {
+            // no connection, do nothing - this is possible due to async behavior
             return;
         }
 
@@ -167,7 +158,7 @@ public class EventWebSocket implements WriteCallback {
                                         gson.fromJson(eventDTO.payload, STRING_LIST_TYPE), List.of());
                                 if (logger.isDebugEnabled()) {
                                     logger.debug("Setting type filter for connection to {}: {}",
-                                            remoteEndpoint.getInetSocketAddress(), typeFilter);
+                                            session.getRemoteSocketAddress(), typeFilter);
                                 }
                             }
                             responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/type",
@@ -178,7 +169,7 @@ public class EventWebSocket implements WriteCallback {
                                         gson.fromJson(eventDTO.payload, STRING_LIST_TYPE), List.of());
                                 if (logger.isDebugEnabled()) {
                                     logger.debug("Setting source filter for connection to {}: {}",
-                                            remoteEndpoint.getInetSocketAddress(), sourceFilter);
+                                            session.getRemoteSocketAddress(), sourceFilter);
                                 }
                             }
                             responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/source",
@@ -195,7 +186,7 @@ public class EventWebSocket implements WriteCallback {
                                 }
                                 if (logger.isDebugEnabled()) {
                                     logger.debug("Setting topic filter for connection to {}: {}",
-                                            remoteEndpoint.getInetSocketAddress(), topics);
+                                            session.getRemoteSocketAddress(), topics);
                                 }
                             }
                             responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
@@ -224,7 +215,7 @@ public class EventWebSocket implements WriteCallback {
                     "Deserialization error: " + e.getMessage(), null, null);
         }
 
-        sendMessage(gson.toJson(responseEvent), remoteEndpoint);
+        sendMessage(gson.toJson(responseEvent), session);
     }
 
     @OnWebSocketError
@@ -244,17 +235,17 @@ public class EventWebSocket implements WriteCallback {
         TopicEventFilter topicIncludeFilter;
         TopicEventFilter topicExcludeFilter;
         String remoteIdentifier;
-        RemoteEndpoint remoteEndpoint;
+        Session session;
         synchronized (this) {
             typeFilter = this.typeFilter;
             sourceFilter = this.sourceFilter;
             topicIncludeFilter = this.topicIncludeFilter;
             topicExcludeFilter = this.topicExcludeFilter;
             remoteIdentifier = this.remoteIdentifier;
-            remoteEndpoint = this.remoteEndpoint;
+            session = this.session;
         }
-        if (remoteEndpoint == null) {
-            logger.warn("Could not determine remote endpoint for event '{}'", event);
+        if (session == null) {
+            logger.warn("Could not determine session for event '{}'", event);
             return;
         }
         String source = event.getSource();
@@ -262,16 +253,16 @@ public class EventWebSocket implements WriteCallback {
                 && (typeFilter.isEmpty() || typeFilter.contains(event.getType()))
                 && (topicIncludeFilter == null || topicIncludeFilter.apply(event))
                 && (topicExcludeFilter == null || !topicExcludeFilter.apply(event))) {
-            sendMessage(gson.toJson(new EventDTO(event)), remoteEndpoint);
+            sendMessage(gson.toJson(new EventDTO(event)), session);
         }
     }
 
-    private void sendMessage(String message, RemoteEndpoint remoteEndpoint) {
-        remoteEndpoint.sendString(message, this);
+    private void sendMessage(String message, Session session) {
+        session.sendText(message, this);
     }
 
     @Override
-    public void writeFailed(@Nullable Throwable x) {
+    public void fail(@Nullable Throwable x) {
         String remoteIdentifier;
         synchronized (this) {
             remoteIdentifier = this.remoteIdentifier;
@@ -281,7 +272,7 @@ public class EventWebSocket implements WriteCallback {
     }
 
     @Override
-    public void writeSuccess() {
+    public void succeed() {
         // Do nothing
     }
 }
