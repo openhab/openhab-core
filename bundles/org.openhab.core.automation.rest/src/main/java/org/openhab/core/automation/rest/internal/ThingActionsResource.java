@@ -222,7 +222,7 @@ public class ThingActionsResource implements RESTResource {
     // itself may contain further dot-separated segments (e.g. "mqtt.awtrixlight.reboot") - only the final segment
     // is the action type id, so the scope portion below repeats rather than allowing exactly one dot
     // # is URL encoded as %23
-    @Path("/{thingUID}/{actionUid: [a-zA-Z0-9]+(\\-[a-zA-Z0-9]+)?(\\.[a-zA-Z0-9]+(\\-[a-zA-Z0-9]+)?)*\\.[a-zA-Z0-9]+(%23[A-Fa-f0-9]+)?}")
+    @Path("/{thingUID}/{actionUid: [a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:\\.[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)+(?:%23[A-Fa-f0-9]+)?}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "executeThingAction", summary = "Executes a thing action.", responses = {
