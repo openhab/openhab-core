@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.internal;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +33,8 @@ import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
+import org.openhab.core.automation.module.script.rulesupport.shared.LockingCache;
+import org.openhab.core.automation.module.script.rulesupport.shared.ObjectCache;
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache;
 import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Component;
@@ -49,6 +53,8 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
     static final String PRESET_NAME = "cache";
     static final String SHARED_CACHE_NAME = "sharedCache";
     static final String PRIVATE_CACHE_NAME = "privateCache";
+    static final String OBJECT_CACHE_NAME = "objectCache";
+    static final String LOCKING_CACHE_NAME = "lockingCache";
 
     private final Logger logger = LoggerFactory.getLogger(CacheScriptExtension.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager
@@ -56,6 +62,8 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
 
     private final Lock cacheLock = new ReentrantLock();
     private final Map<String, Object> sharedCache = new HashMap<>();
+    private final ObjectCache objectCache = new ObjectCacheImpl();
+    private final LockingCache lockingCache = new LockingCacheImpl();
     private final Map<String, Set<String>> sharedCacheKeyAccessors = new ConcurrentHashMap<>();
 
     private final Map<String, ValueCacheImpl> privateCaches = new ConcurrentHashMap<>();
@@ -75,18 +83,23 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getTypes() {
-        return Set.of(PRIVATE_CACHE_NAME, SHARED_CACHE_NAME);
+        return Set.of(PRIVATE_CACHE_NAME, SHARED_CACHE_NAME, OBJECT_CACHE_NAME, LOCKING_CACHE_NAME);
     }
 
     @Override
     public @Nullable Object get(String scriptIdentifier, String type) throws IllegalArgumentException {
-        if (SHARED_CACHE_NAME.equals(type)) {
-            return new TrackingValueCacheImpl(scriptIdentifier);
-        } else if (PRIVATE_CACHE_NAME.equals(type)) {
-            return privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new);
+        switch (type) {
+            case SHARED_CACHE_NAME:
+                return new TrackingValueCacheImpl(scriptIdentifier);
+            case PRIVATE_CACHE_NAME:
+                return privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new);
+            case OBJECT_CACHE_NAME:
+                return objectCache;
+            case LOCKING_CACHE_NAME:
+                return lockingCache;
+            default:
+                return null;
         }
-
-        return null;
     }
 
     @Override
@@ -95,7 +108,7 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
             Object privateCache = Objects
                     .requireNonNull(privateCaches.computeIfAbsent(scriptIdentifier, ValueCacheImpl::new));
             return Map.of(SHARED_CACHE_NAME, new TrackingValueCacheImpl(scriptIdentifier), PRIVATE_CACHE_NAME,
-                    privateCache);
+                    privateCache, OBJECT_CACHE_NAME, objectCache, LOCKING_CACHE_NAME, lockingCache);
         }
 
         return Map.of();
@@ -272,6 +285,206 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         private void rememberAccessToKey(String key) {
             Objects.requireNonNull(sharedCacheKeyAccessors.computeIfAbsent(key, k -> new HashSet<>()))
                     .add(scriptIdentifier);
+        }
+    }
+
+    private static class ObjectCacheImpl implements ObjectCache {
+        // All access must be guarded by "cache"
+        private final Map<String, String> cache = new HashMap<>();
+
+        @Override
+        public @Nullable String put(String key, String serializedObject) {
+            synchronized (cache) {
+                return cache.put(key, serializedObject);
+            }
+        }
+
+        @Override
+        public @Nullable String remove(String key) {
+            synchronized (cache) {
+                return cache.remove(key);
+            }
+        }
+
+        @Override
+        public @Nullable String get(String key) {
+            synchronized (cache) {
+                return cache.get(key);
+            }
+        }
+
+        @Override
+        public String get(String key, Supplier<String> supplier) {
+            synchronized (cache) {
+                return Objects.requireNonNull(cache.computeIfAbsent(key, k -> supplier.get()));
+            }
+        }
+
+        @Override
+        public @Nullable String compute(String key,
+                BiFunction<String, @Nullable String, @Nullable String> remappingFunction) {
+            synchronized (cache) {
+                return cache.compute(key, (k, v) -> remappingFunction.apply(k, v));
+            }
+        }
+    }
+
+    /**
+     * A locking cache where individual entries can be locked for exclusive access for the duration
+     * of an operation. This requires explicit unlocking when the operation is over, and the potential
+     * to cause deadlocks if unlocking isn't done for certain code paths.
+     *
+     * @implNote Getting the locking right is a bit of a challenge, especially in relation to removal
+     *           of cache entries. Then an entry is removed, the lock instance is also removed, making it unavailable
+     *           for further unlocks. To avoid locks remaining locked with no way to unlock,
+     *           {@link LockingCacheValue#removed}
+     *           is used to track removal. As soon as the entry has been removed from the cache, this flag is set.
+     *           Any code that acquires locks are required to check this flag immediately after acquiring the lock,
+     *           and if it's set, immediately unlock all lock levels held by that thread. Because the thread
+     *           that performs the removal must acquire the lock to complete the removal operation, any queued
+     *           threads waiting for the lock should thus abort and release immediately if they happen to acquire
+     *           the lock after the entry has been removed.
+     */
+    private static class LockingCacheImpl implements LockingCache {
+
+        // All access must be guarded by "cache"
+        private final Map<String, LockingCacheValue> cache = new HashMap<>();
+
+        @Override
+        public @Nullable Object lockAndPut(String key, Object object) {
+            LockingCacheValue value;
+            boolean created = false;
+            synchronized (cache) {
+                value = cache.get(key);
+                if (value == null || value.removed) {
+                    created = true;
+                    value = new LockingCacheValue();
+                    value.lock.lock();
+                    cache.put(key, value);
+                }
+            }
+            Object result;
+            if (!created) {
+                value.lock.lock();
+            }
+            result = value.object;
+            value.object = object;
+            return result;
+        }
+
+        @Override
+        public @Nullable Object remove(String key) {
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = cache.remove(key);
+                if (value == null) {
+                    return null;
+                }
+                value.removed = true;
+            }
+            Object result;
+            value.lock.lock();
+            try {
+                result = value.object;
+            } finally {
+                // Release all holds on this lock, since we can't reacquire the lock in the future
+                unlockAll(value);
+            }
+            return result;
+        }
+
+        @Override
+        public @Nullable Object lockAndGet(String key) {
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = cache.get(key);
+            }
+            if (value == null) {
+                return null;
+            }
+            value.lock.lock();
+            if (value.removed) {
+                unlockAll(value);
+                return null;
+            }
+            return value.object;
+        }
+
+        @Override
+        public Object lockAndGet(String key, Supplier<Object> supplier) {
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = Objects.requireNonNull(cache.computeIfAbsent(key, k -> new LockingCacheValue(supplier.get())));
+            }
+            value.lock.lock();
+            if (value.removed) {
+                unlockAll(value);
+                synchronized (cache) {
+                    value = cache.get(key);
+                    if (value == null || value.removed) {
+                        value = new LockingCacheValue(supplier.get());
+                        cache.put(key, value);
+                    }
+                }
+                value.lock.lock();
+            }
+            return Objects.requireNonNull(value.object);
+        }
+
+        @Override
+        public @Nullable Object unlock(String key) {
+            LockingCacheValue value;
+            synchronized (cache) {
+                value = cache.get(key);
+            }
+            if (value == null) {
+                return null;
+            }
+            if (value.removed) {
+                unlockAll(value);
+            } else {
+                try {
+                    value.lock.unlock();
+                } catch (IllegalMonitorStateException e) {
+                    // Ignore
+                }
+            }
+            if (value.object instanceof Cloneable c) {
+                try {
+                    Method method = c.getClass().getMethod("clone");
+                    if (method.canAccess(c)) {
+                        return method.invoke(c);
+                    }
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException
+                        | InvocationTargetException e) {
+                    // Ignore, just return null
+                }
+            }
+            return null;
+        }
+
+        private void unlockAll(LockingCacheValue value) {
+            int holdCount = value.lock.getHoldCount();
+            for (int i = 0; i < holdCount; i++) {
+                try {
+                    value.lock.unlock();
+                } catch (IllegalMonitorStateException e) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private static class LockingCacheValue {
+        public final ReentrantLock lock = new ReentrantLock();
+        public @Nullable Object object;
+        public volatile boolean removed;
+
+        public LockingCacheValue() {
+        }
+
+        public LockingCacheValue(@Nullable Object object) {
+            this.object = object;
         }
     }
 }
