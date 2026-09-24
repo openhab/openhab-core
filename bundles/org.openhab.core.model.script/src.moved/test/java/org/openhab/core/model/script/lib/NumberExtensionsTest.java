@@ -28,9 +28,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
+import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
 
 /**
@@ -53,12 +55,12 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorPlusNumberNumber() {
-        assertThat(NumberExtensions.operator_plus(DECIMAL1, DECIMAL2), is(BigDecimal.valueOf(3)));
+        assertThat(NumberExtensions.operator_plus((Number) DECIMAL1, (Number) DECIMAL2), is(BigDecimal.valueOf(3)));
     }
 
     @Test
     public void operatorPlusNumberQuantityOne() {
-        assertThat(NumberExtensions.operator_plus(Q_ONE_1, DECIMAL2), is(BigDecimal.valueOf(3)));
+        assertThat(NumberExtensions.operator_plus((Number) Q_ONE_1, (Number) DECIMAL2), is(BigDecimal.valueOf(3)));
     }
 
     @Test
@@ -68,7 +70,7 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorMinusNumber() {
-        assertThat(NumberExtensions.operator_minus(DECIMAL1), is(BigDecimal.valueOf(-1)));
+        assertThat(NumberExtensions.operator_minus((Number) DECIMAL1), is(BigDecimal.valueOf(-1)));
     }
 
     @Test
@@ -78,12 +80,12 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorMinusNumberNumber() {
-        assertThat(NumberExtensions.operator_minus(DECIMAL2, DECIMAL1), is(BigDecimal.ONE));
+        assertThat(NumberExtensions.operator_minus((Number) DECIMAL2, (Number) DECIMAL1), is(BigDecimal.ONE));
     }
 
     @Test
     public void operatorMinusNumberQuantityOne() {
-        assertThat(NumberExtensions.operator_minus(Q_ONE_2, DECIMAL1), is(BigDecimal.ONE));
+        assertThat(NumberExtensions.operator_minus((Number) Q_ONE_2, (Number) DECIMAL1), is(BigDecimal.ONE));
     }
 
     @Test
@@ -93,7 +95,8 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorMultiplyNumberQuantity() {
-        assertThat(NumberExtensions.operator_multiply(DECIMAL2, Q_LENGTH_2_CM), is(QuantityType.valueOf("4 cm")));
+        assertThat(NumberExtensions.operator_multiply((Number) DECIMAL2, Q_LENGTH_2_CM),
+                is(QuantityType.valueOf("4 cm")));
     }
 
     @Test
@@ -103,7 +106,8 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorDivideQuantityNumber() {
-        assertThat(NumberExtensions.operator_divide(Q_LENGTH_1_M, DECIMAL2), is(QuantityType.valueOf("0.5 m")));
+        assertThat(NumberExtensions.operator_divide(Q_LENGTH_1_M, (Number) DECIMAL2),
+                is(QuantityType.valueOf("0.5 m")));
     }
 
     @Test
@@ -113,7 +117,43 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorDivideNumberQuantity() {
-        assertThat(NumberExtensions.operator_divide(DECIMAL1, Q_LENGTH_2_CM), is(QuantityType.valueOf("0.5 one/cm")));
+        assertThat(NumberExtensions.operator_divide((Number) DECIMAL1, Q_LENGTH_2_CM),
+                is(QuantityType.valueOf("0.5 one/cm")));
+    }
+
+    @Test
+    public void operatorMinusStateState() {
+        assertThat(NumberExtensions.operator_minus((State) DECIMAL2, (State) DECIMAL1), is(BigDecimal.ONE));
+    }
+
+    @Test
+    public void operatorMinusQuantityStateState() {
+        assertThat(NumberExtensions.operator_minus((State) Q_LENGTH_1_M, (State) Q_LENGTH_2_CM),
+                is(QuantityType.valueOf("0.98 m")));
+    }
+
+    @Test
+    public void operatorMultiplyStateNumber() {
+        assertThat(NumberExtensions.operator_multiply((State) DECIMAL2, BigDecimal.valueOf(1.5)),
+                is(BigDecimal.valueOf(3.0)));
+    }
+
+    @Test
+    public void operatorMultiplyQuantityStateNumber() {
+        assertThat(NumberExtensions.operator_multiply((State) Q_LENGTH_2_CM, (Number) DECIMAL2),
+                is(QuantityType.valueOf("4 cm")));
+    }
+
+    @Test
+    public void operatorDivideNumberState() {
+        assertThat(NumberExtensions.operator_divide(BigDecimal.TEN, (State) DECIMAL2),
+                is(new BigDecimal("5.00000000")));
+    }
+
+    @Test
+    public void operatorNonNumericState() {
+        assertThrows(IllegalArgumentException.class,
+                () -> NumberExtensions.operator_multiply(OnOffType.ON, (Number) DECIMAL2));
     }
 
     @Test
