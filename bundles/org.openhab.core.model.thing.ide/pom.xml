@@ -36,15 +36,10 @@
             <configuration>
               <sources>
                 <source>src-gen</source>
-                <source>xtend-gen</source>
               </sources>
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
     </plugins>
     <sourceDirectory>src</sourceDirectory>
