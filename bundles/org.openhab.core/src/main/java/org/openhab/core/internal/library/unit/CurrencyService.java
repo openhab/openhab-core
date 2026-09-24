@@ -48,7 +48,7 @@ import tech.units.indriya.format.SimpleUnitFormat;
  *
  * @author Jan N. Klug - Initial contribution
  */
-@Component(service = CurrencyService.class, immediate = true, configurationPid = CurrencyService.CONFIGURATION_PID, property = {
+@Component(configurationPid = CurrencyService.CONFIGURATION_PID, property = {
         Constants.SERVICE_PID + "=org.openhab.units", //
         "service.config.label=Unit Settings", //
         "service.config.category=system", //
