@@ -69,7 +69,8 @@ public class ConfigDescriptionDTOMapper {
                     .withAdvanced(parameter.advanced).withVerify(parameter.verify)
                     .withLimitToOptions(parameter.limitToOptions).withUnit(parameter.unit)
                     .withUnitLabel(parameter.unitLabel).withOptions(mapOptionsDTO(parameter.options))
-                    .withFilterCriteria(mapFilterCriteriaDTO(parameter.filterCriteria)).build());
+                    .withFilterCriteria(mapFilterCriteriaDTO(parameter.filterCriteria)).withDynamic(parameter.dynamic)
+                    .build());
         }
         return result;
     }
@@ -131,7 +132,7 @@ public class ConfigDescriptionDTOMapper {
                     configDescriptionParameter.getGroupName(), configDescriptionParameter.isAdvanced(),
                     configDescriptionParameter.getLimitToOptions(), configDescriptionParameter.getMultipleLimit(),
                     configDescriptionParameter.getUnit(), configDescriptionParameter.getUnitLabel(),
-                    configDescriptionParameter.isVerifyable());
+                    configDescriptionParameter.isVerifyable(), configDescriptionParameter.isDynamic());
             configDescriptionParameterBeans.add(configDescriptionParameterBean);
         }
         return configDescriptionParameterBeans;

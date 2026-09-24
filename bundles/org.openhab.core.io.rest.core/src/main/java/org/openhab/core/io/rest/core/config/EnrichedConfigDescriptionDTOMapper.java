@@ -72,7 +72,7 @@ public class EnrichedConfigDescriptionDTOMapper {
                     configDescriptionParameter.getGroupName(), configDescriptionParameter.isAdvanced(),
                     configDescriptionParameter.getLimitToOptions(), configDescriptionParameter.getMultipleLimit(),
                     configDescriptionParameter.getUnit(), configDescriptionParameter.getUnitLabel(),
-                    configDescriptionParameter.isVerifyable());
+                    configDescriptionParameter.isVerifyable(), configDescriptionParameter.isDynamic());
             configDescriptionParameterBeans.add(configDescriptionParameterBean);
         }
         return configDescriptionParameterBeans;
