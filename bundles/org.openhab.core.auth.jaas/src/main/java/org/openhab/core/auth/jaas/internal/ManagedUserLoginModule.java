@@ -37,8 +37,6 @@ public class ManagedUserLoginModule implements LoginModule {
 
     private final Logger logger = LoggerFactory.getLogger(ManagedUserLoginModule.class);
 
-    private UserRegistry userRegistry;
-
     private Subject subject;
 
     @Override
@@ -54,18 +52,19 @@ public class ManagedUserLoginModule implements LoginModule {
             BundleContext bundleContext = FrameworkUtil.getBundle(UserRegistry.class).getBundleContext();
             ServiceReference<UserRegistry> serviceReference = bundleContext.getServiceReference(UserRegistry.class);
 
-            userRegistry = bundleContext.getService(serviceReference);
+            UserRegistry userRegistry = bundleContext.getService(serviceReference);
+            try {
+                Credentials credentials = (Credentials) this.subject.getPrivateCredentials().iterator().next();
+                userRegistry.authenticate(credentials);
+                return true;
+            } catch (AuthenticationException e) {
+                throw new LoginException(e.getMessage());
+            } finally {
+                bundleContext.ungetService(serviceReference);
+            }
         } catch (Exception e) {
             logger.error("Cannot initialize the ManagedLoginModule", e);
             throw new LoginException("Authorization failed");
-        }
-
-        try {
-            Credentials credentials = (Credentials) this.subject.getPrivateCredentials().iterator().next();
-            userRegistry.authenticate(credentials);
-            return true;
-        } catch (AuthenticationException e) {
-            throw new LoginException(e.getMessage());
         }
     }
 
