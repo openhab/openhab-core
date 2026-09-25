@@ -160,10 +160,10 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
                     return;
                 }
 
-                user = userRegistry.register(username, password, Set.of(Role.ADMIN));
+                user = userRegistry.register(username, password.toCharArray(), Set.of(Role.ADMIN));
                 logger.info("First user account created: {}", username);
             } else {
-                user = login(username, password);
+                user = login(username, password.toCharArray());
             }
 
             String authorizationCode = UUID.randomUUID().toString().replace("-", "");

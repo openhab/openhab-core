@@ -12,6 +12,8 @@
  */
 package org.openhab.core.auth;
 
+import java.util.Arrays;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -22,14 +24,28 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class UserApiTokenCredentials implements Credentials {
 
-    private final String userApiToken;
+    // All access must be guarded by "this"
+    private final char[] userApiToken;
+
+    /**
+     * Creates a new instance
+     *
+     * @deprecated Tokens should not be stored as {@link String}s, use {@link #UserApiTokenCredentials(char[])}
+     *             instead.
+     *
+     * @param userApiToken the user API token
+     */
+    @Deprecated
+    public UserApiTokenCredentials(String userApiToken) {
+        this.userApiToken = userApiToken.toCharArray();
+    }
 
     /**
      * Creates a new instance
      *
      * @param userApiToken the user API token
      */
-    public UserApiTokenCredentials(String userApiToken) {
+    public UserApiTokenCredentials(char[] userApiToken) {
         this.userApiToken = userApiToken;
     }
 
@@ -38,7 +54,12 @@ public class UserApiTokenCredentials implements Credentials {
      *
      * @return the token
      */
-    public String getApiToken() {
-        return userApiToken;
+    public synchronized char[] getApiToken() {
+        return Arrays.copyOf(userApiToken, userApiToken.length);
+    }
+
+    @Override
+    public synchronized void dispose() {
+        Arrays.fill(userApiToken, Character.MIN_VALUE);
     }
 }

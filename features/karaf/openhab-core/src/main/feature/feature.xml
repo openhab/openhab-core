@@ -127,11 +127,6 @@
 		<feature dependency="true">openhab-core-ui</feature>
 	</feature>
 
-	<feature name="openhab-core-auth-jaas" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.jaas/${project.version}</bundle>
-	</feature>
-
 	<feature name="openhab-core-auth-oauth2client" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.oauth2client/${project.version}</bundle>
@@ -181,13 +176,11 @@
 
 	<feature name="openhab-core-io-http-auth" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature>openhab-core-auth-jaas</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-io-rest-auth" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature>openhab-core-auth-jaas</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.auth/${project.version}</bundle>
 		<requirement>openhab.tp;filter:="(feature=jose4j)"</requirement>
 		<feature dependency="true">openhab.tp-jose4j</feature>
@@ -456,7 +449,6 @@
 	<feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-addon-marketplace</feature>
-		<feature>openhab-core-auth-jaas</feature>
 		<feature>openhab-core-automation-rest</feature>
 		<feature>openhab-core-automation-module-script</feature>
 		<feature>openhab-core-automation-module-script-providersupport</feature>
