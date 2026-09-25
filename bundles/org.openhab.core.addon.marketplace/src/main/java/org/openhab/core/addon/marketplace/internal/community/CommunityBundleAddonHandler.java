@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceBundleInstaller;
@@ -65,9 +66,9 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
     }
 
     @Override
-    public boolean supports(String type, String contentType) {
+    public boolean supports(String type, @Nullable String contentType) {
         // we support only certain extension types, and only as pure OSGi bundles
-        return SUPPORTED_EXT_TYPES.contains(type) && contentType.equals(JAR_CONTENT_TYPE);
+        return SUPPORTED_EXT_TYPES.contains(type) && JAR_CONTENT_TYPE.equals(contentType);
     }
 
     @Override
@@ -89,8 +90,9 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
         } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
-        addBundleToCache(addon.getUid(), sourceUrl);
-        installFromCache(bundleContext, addon.getUid());
+        String addonId = addon.getUid();
+        addBundleToCache(addonId, sourceUrl);
+        installFromCache(bundleContext, addonId);
     }
 
     @Override
