@@ -33,6 +33,8 @@ import org.openhab.core.model.sitemap.sitemap.ModelColorArrayList;
 import org.openhab.core.model.sitemap.sitemap.ModelColorpicker;
 import org.openhab.core.model.sitemap.sitemap.ModelColortemperaturepicker;
 import org.openhab.core.model.sitemap.sitemap.ModelCondition;
+import org.openhab.core.model.sitemap.sitemap.ModelConfirmCmdRule;
+import org.openhab.core.model.sitemap.sitemap.ModelConfirmCmdRuleList;
 import org.openhab.core.model.sitemap.sitemap.ModelDefault;
 import org.openhab.core.model.sitemap.sitemap.ModelFrame;
 import org.openhab.core.model.sitemap.sitemap.ModelGroup;
@@ -86,20 +88,17 @@ import org.openhab.core.sitemap.fileconverter.SitemapSerializer;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * {@link SitemapSerializer} is the DSL file converter for {@link Sitemap} object
- * with the capabilities of parsing and generating file.
+ * {@link SitemapSerializer} is the DSL file converter for {@link Sitemap} object with the capabilities of parsing and
+ * generating file.
  *
  * @author Mark Herwege - Initial contribution
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SitemapSerializer.class, SitemapParser.class })
 public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
-
-    private final Logger logger = LoggerFactory.getLogger(DslSitemapConverter.class);
 
     private final ModelRepository modelRepository;
     private final DslSitemapProvider sitemapProvider;
@@ -153,6 +152,8 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
 
     private ModelWidget buildModelWidget(Widget widget) {
         ModelWidget modelWidget;
+        boolean confirmCmd = widget.getConfirmCmd();
+        List<Rule> confirmCmdRules = widget.getConfirmCmdRules();
         switch (widget) {
             case Frame frameWidget -> {
                 ModelFrame modelFrame = SitemapFactory.eINSTANCE.createModelFrame();
@@ -172,6 +173,12 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                 if (!mappings.isEmpty()) {
                     modelSwitch.setMappings(modelMappings(mappings));
                 }
+                if (confirmCmd) {
+                    modelSwitch.setConfirmCmd(confirmCmd);
+                }
+                if (!confirmCmdRules.isEmpty()) {
+                    modelSwitch.setConfirmCmdRules(modelConfirmCmdRules(confirmCmdRules));
+                }
                 modelWidget = modelSwitch;
             }
             case Buttongrid buttongridWidget -> {
@@ -185,6 +192,12 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                 modelButton.setCmd(buttonWidget.getCmd());
                 modelButton.setReleaseCmd(buttonWidget.getReleaseCmd());
                 modelButton.setStateless(buttonWidget.isStateless());
+                if (confirmCmd) {
+                    modelButton.setConfirmCmd(confirmCmd);
+                }
+                if (!confirmCmdRules.isEmpty()) {
+                    modelButton.setConfirmCmdRules(modelConfirmCmdRules(confirmCmdRules));
+                }
                 modelWidget = modelButton;
             }
             case Selection selectionWidget -> {
@@ -193,6 +206,12 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                 if (!mappings.isEmpty()) {
                     modelSelection.setMappings(modelMappings(mappings));
                 }
+                if (confirmCmd) {
+                    modelSelection.setConfirmCmd(confirmCmd);
+                }
+                if (!confirmCmdRules.isEmpty()) {
+                    modelSelection.setConfirmCmdRules(modelConfirmCmdRules(confirmCmdRules));
+                }
                 modelWidget = modelSelection;
             }
             case Setpoint setpointWidget -> {
@@ -200,6 +219,12 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                 modelSetpoint.setMinValue(setpointWidget.getMinValue());
                 modelSetpoint.setMaxValue(setpointWidget.getMaxValue());
                 modelSetpoint.setStep(setpointWidget.getStep());
+                if (confirmCmd) {
+                    modelSetpoint.setConfirmCmd(confirmCmd);
+                }
+                if (!confirmCmdRules.isEmpty()) {
+                    modelSetpoint.setConfirmCmdRules(modelConfirmCmdRules(confirmCmdRules));
+                }
                 modelWidget = modelSetpoint;
             }
             case Slider sliderWidget -> {
@@ -209,10 +234,22 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                 modelSlider.setStep(sliderWidget.getStep());
                 modelSlider.setSwitchEnabled(sliderWidget.isSwitchEnabled());
                 modelSlider.setReleaseOnly(sliderWidget.isReleaseOnly());
+                if (confirmCmd) {
+                    modelSlider.setConfirmCmd(confirmCmd);
+                }
+                if (!confirmCmdRules.isEmpty()) {
+                    modelSlider.setConfirmCmdRules(modelConfirmCmdRules(confirmCmdRules));
+                }
                 modelWidget = modelSlider;
             }
             case Colorpicker colorpickerWidget -> {
                 ModelColorpicker modelColorpicker = SitemapFactory.eINSTANCE.createModelColorpicker();
+                if (confirmCmd) {
+                    modelColorpicker.setConfirmCmd(confirmCmd);
+                }
+                if (!confirmCmdRules.isEmpty()) {
+                    modelColorpicker.setConfirmCmdRules(modelConfirmCmdRules(confirmCmdRules));
+                }
                 modelWidget = modelColorpicker;
             }
             case Colortemperaturepicker colortemperaturepickerWidget -> {
@@ -220,11 +257,23 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                         .createModelColortemperaturepicker();
                 modelColortemperaturepicker.setMinValue(colortemperaturepickerWidget.getMinValue());
                 modelColortemperaturepicker.setMaxValue(colortemperaturepickerWidget.getMaxValue());
+                if (confirmCmd) {
+                    modelColortemperaturepicker.setConfirmCmd(confirmCmd);
+                }
+                if (!confirmCmdRules.isEmpty()) {
+                    modelColortemperaturepicker.setConfirmCmdRules(modelConfirmCmdRules(confirmCmdRules));
+                }
                 modelWidget = modelColortemperaturepicker;
             }
             case Input inputWidget -> {
                 ModelInput modelInput = SitemapFactory.eINSTANCE.createModelInput();
                 modelInput.setInputHint(inputWidget.getInputHint());
+                if (confirmCmd) {
+                    modelInput.setConfirmCmd(confirmCmd);
+                }
+                if (!confirmCmdRules.isEmpty()) {
+                    modelInput.setConfirmCmdRules(modelConfirmCmdRules(confirmCmdRules));
+                }
                 modelWidget = modelInput;
             }
             case Webview webviewWidget -> {
@@ -267,6 +316,12 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
                 ModelDefault modelDefault = SitemapFactory.eINSTANCE.createModelDefault();
                 if (widget instanceof Default defaultWidget) {
                     modelDefault.setHeight(defaultWidget.getHeight());
+                }
+                if (confirmCmd) {
+                    modelDefault.setConfirmCmd(confirmCmd);
+                }
+                if (!confirmCmdRules.isEmpty()) {
+                    modelDefault.setConfirmCmdRules(modelConfirmCmdRules(confirmCmdRules));
                 }
                 modelWidget = modelDefault;
             }
@@ -344,6 +399,11 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
     private ModelVisibilityRuleList modelVisibilityRules(List<Rule> rules) {
         ModelVisibilityRuleList modelRuleList = SitemapFactory.eINSTANCE.createModelVisibilityRuleList();
         EList<ModelVisibilityRule> modelRules = modelRuleList.getElements();
+        setVisibilityRules(modelRules, rules);
+        return modelRuleList;
+    }
+
+    private void setVisibilityRules(EList<ModelVisibilityRule> modelRules, List<Rule> rules) {
         rules.forEach(rule -> {
             ModelVisibilityRule modelRule = SitemapFactory.eINSTANCE.createModelVisibilityRule();
             EList<ModelCondition> modelConditions = modelRule.getConditions();
@@ -351,7 +411,6 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             setModelConditions(modelConditions, conditions);
             modelRules.add(modelRule);
         });
-        return modelRuleList;
     }
 
     private ModelColorArrayList modelColorRules(List<Rule> rules) {
@@ -362,6 +421,18 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             EList<ModelCondition> modelConditions = modelRule.getConditions();
             List<Condition> conditions = rule.getConditions();
             setModelConditions(modelConditions, conditions);
+            modelRule.setArg(rule.getArgument());
+            modelRules.add(modelRule);
+        });
+        return modelRuleList;
+    }
+
+    private ModelConfirmCmdRuleList modelConfirmCmdRules(List<Rule> rules) {
+        ModelConfirmCmdRuleList modelRuleList = SitemapFactory.eINSTANCE.createModelConfirmCmdRuleList();
+        EList<ModelConfirmCmdRule> modelRules = modelRuleList.getElements();
+        rules.forEach(rule -> {
+            ModelConfirmCmdRule modelRule = SitemapFactory.eINSTANCE.createModelConfirmCmdRule();
+            setModelConditions(modelRule.getConditions(), rule.getConditions());
             modelRule.setArg(rule.getArgument());
             modelRules.add(modelRule);
         });

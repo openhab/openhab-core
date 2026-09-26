@@ -39,6 +39,7 @@ import org.openhab.core.types.State;
  * @author Laurent Garnier - new method getConditionalIcon
  * @author Danny Baumann - widget label source support
  * @author Mark Herwege - Implement sitemap registry
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
@@ -213,6 +214,16 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      * @return true if the item is visible
      */
     boolean getVisiblity(Widget w);
+
+    /**
+     * Gets the widget confirm cmd message property based on the item state
+     *
+     * @param w Widget
+     * @return message to show in the confirmation dialog or null if no message is defined and no confirmation dialog
+     *         should be shown
+     */
+    @Nullable
+    String getCommandConfirmMessage(Widget w);
 
     /**
      * Gets the item state

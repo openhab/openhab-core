@@ -115,6 +115,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Implement sitemap registry
  * @author Florian Hotze - Refactor getLabel(Widget w) to use {@link ItemDisplayStateUtil}
  * @author Laurent Garnier - Change widget id coding to support any number of widgets in frame/page
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -136,6 +137,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected static final String SEMANTICS_LOCATION = "Location";
     protected static final String SEMANTICS_PARENT_LOCATION_CONFIG = "isPartOf";
 
+    protected static final String DEFAULT_COMMAND_CONFIRM_MESSAGE = "Are you sure?";
+
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
@@ -148,6 +151,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
     private String groupMembersSorting = DEFAULT_SORTING;
+    private String commandConfirmMessage = DEFAULT_COMMAND_CONFIRM_MESSAGE;
 
     private static class WidgetLabelWithSource {
         public final String label;
@@ -198,6 +202,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             final String groupMembersSortingString = Objects.toString(config.get("groupMembersSorting"), null);
             if (groupMembersSortingString != null) {
                 groupMembersSorting = groupMembersSortingString;
+            }
+            final String commandConfirmMessageString = Objects.toString(config.get("commandConfirmDialogMessage"),
+                    null);
+            if (commandConfirmMessageString != null) {
+                commandConfirmMessage = commandConfirmMessageString;
             }
         }
     }
@@ -1259,9 +1268,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return matched;
     }
 
-    private @Nullable String processColorDefinition(Widget w, @Nullable List<Rule> colorList, String colorType) {
+    private @Nullable String processColorDefinition(Widget w, List<Rule> colorList, String colorType) {
         // Sanity check
-        if (colorList == null || colorList.isEmpty()) {
+        if (colorList.isEmpty()) {
             return null;
         }
 
@@ -1330,6 +1339,27 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
+    public @Nullable String getCommandConfirmMessage(Widget w) {
+        List<Rule> ruleList = w.getConfirmCmdRules();
+
+        if (ruleList.isEmpty()) {
+            return w.getConfirmCmd() ? commandConfirmMessage : null;
+        }
+
+        logger.debug("Checking confirm command rules for widget '{}'.", w.getLabel());
+
+        for (Rule rule : ruleList) {
+            if (allConditionsOk(rule.getConditions(), w)) {
+                String arg = rule.getArgument();
+                return arg != null && !arg.isBlank() ? arg : commandConfirmMessage;
+            }
+        }
+
+        logger.debug("Widget {} commands don't require confirmation.", w.getLabel());
+        return null;
+    }
+
+    @Override
     public @Nullable String getConditionalIcon(Widget w) {
         List<Rule> ruleList = w.getIconRules();
         // Sanity check
@@ -1365,9 +1395,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return icon;
     }
 
-    private boolean allConditionsOk(@Nullable List<org.openhab.core.sitemap.Condition> conditions, Widget w) {
+    private boolean allConditionsOk(List<org.openhab.core.sitemap.Condition> conditions, Widget w) {
         boolean allConditionsOk = true;
-        if (conditions != null) {
+        if (!conditions.isEmpty()) {
             State defaultState = getState(w);
 
             // Go through all AND conditions

@@ -26,6 +26,7 @@ import java.math.BigDecimal;
  * @author Laurent Garnier - Remove field columns
  * @author Laurent Garnier - New fields row, column, command, releaseCommand and stateless for Button element
  * @author Mark Herwege - Created as abstract base class for WidgetDefinitionDTO classes
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 public abstract class AbstractWidgetDTO {
 

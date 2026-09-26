@@ -79,6 +79,9 @@ public class SitemapDTOMapper {
         if (widget.isStaticIcon()) {
             widgetDTO.staticIcon = true;
         }
+        if (widget.getConfirmCmd()) {
+            widgetDTO.confirmCmd = true;
+        }
 
         List<Rule> iconRules = widget.getIconRules();
         if (!iconRules.isEmpty()) {
@@ -99,6 +102,10 @@ public class SitemapDTOMapper {
         List<Rule> iconColorRules = widget.getIconColor();
         if (!iconColorRules.isEmpty()) {
             widgetDTO.iconColorRules = iconColorRules.stream().map(SitemapDTOMapper::map).toList();
+        }
+        List<Rule> confirmCmdRules = widget.getConfirmCmdRules();
+        if (!confirmCmdRules.isEmpty()) {
+            widgetDTO.confirmCmdRules = confirmCmdRules.stream().map(SitemapDTOMapper::map).toList();
         }
 
         switch (widget) {
@@ -337,6 +344,7 @@ public class SitemapDTOMapper {
         widget.setLabel(widgetDTO.label);
         widget.setIcon(widgetDTO.icon);
         widget.setStaticIcon(widgetDTO.staticIcon);
+        widget.setConfirmCmd(widgetDTO.confirmCmd);
 
         List<RuleDTO> iconRules = widgetDTO.iconRules != null ? widgetDTO.iconRules : List.of();
         widget.setIconRules(iconRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
@@ -348,6 +356,8 @@ public class SitemapDTOMapper {
         widget.setValueColor(valueColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
         List<RuleDTO> iconColorRules = widgetDTO.iconColorRules != null ? widgetDTO.iconColorRules : List.of();
         widget.setIconColor(iconColorRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
+        List<RuleDTO> confirmCmdRules = widgetDTO.confirmCmdRules != null ? widgetDTO.confirmCmdRules : List.of();
+        widget.setConfirmCmdRules(confirmCmdRules.stream().map(rule -> map(rule, sitemapFactory)).toList());
 
         if (widget instanceof LinkableWidget linkableWidget) {
             List<WidgetDefinitionDTO> widgets = widgetDTO.widgets != null ? widgetDTO.widgets : List.of();
