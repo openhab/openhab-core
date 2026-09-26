@@ -57,6 +57,7 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
@@ -129,6 +130,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final LLMToolRegistry llmToolRegistry;
     private final ConversationManager conversationManager;
     private final ItemRegistry itemRegistry;
+    private final MetadataRegistry metadataRegistry;
     private final ItemPermissionResolver itemPermissionResolver;
 
     private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
@@ -153,7 +155,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             final @Reference StorageService storageService, final @Reference LLMToolRegistry llmToolRegistry,
             final @Reference ConversationManager conversationManager,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
-            final @Reference ItemRegistry itemRegistry,
+            final @Reference ItemRegistry itemRegistry, final @Reference MetadataRegistry metadataRegistry,
             final @Reference ItemPermissionResolver itemPermissionResolver) {
         this.localeProvider = localeProvider;
         this.audioManager = audioManager;
@@ -164,6 +166,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         this.conversationManager = conversationManager;
         this.llmToolRegistry = llmToolRegistry;
         this.itemRegistry = itemRegistry;
+        this.metadataRegistry = metadataRegistry;
         this.itemPermissionResolver = itemPermissionResolver;
         this.configuration = new VoiceManagerConfiguration(configDescriptionRegistry);
     }
@@ -1146,7 +1149,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         String base = baseSystemPrompt != null ? baseSystemPrompt : "";
         List<Item> accessibleItems = itemRegistry.getItems().stream().filter(itemPermissionResolver::isAccessible)
                 .toList();
-        String serializedItems = LLMItemSerializer.serialize(accessibleItems, locale);
+        String serializedItems = LLMItemSerializer.serialize(accessibleItems, metadataRegistry, locale);
         if (serializedItems.isEmpty()) {
             return base;
         }
