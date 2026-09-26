@@ -331,6 +331,14 @@ public class ModelRepositoryImpl implements ModelRepository {
             throws IOException {
         // use another resource for validation in order to keep the original one for emergency-removal in case of errors
         Resource resource = resourceSet.createResource(URI.createURI(PREFIX_TMP_MODEL + name));
+        if (resource == null) {
+            // No resource factory is registered (yet) for this model's file extension. This can happen during
+            // startup when the bundle providing the parser for this model type is not active yet. In that case
+            // the model cannot be validated; report no validation errors and let addOrRefreshModel() handle the
+            // missing parser gracefully instead of throwing a NullPointerException here.
+            logger.debug("Cannot validate model '{}' as no resource factory is registered for it (yet).", name);
+            return true;
+        }
         try {
             resource.load(inputStream, resourceOptions);
 
