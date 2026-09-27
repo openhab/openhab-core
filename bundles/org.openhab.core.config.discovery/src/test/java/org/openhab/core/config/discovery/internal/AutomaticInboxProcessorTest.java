@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.withFlag;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -32,6 +33,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.discovery.DiscoveryResult;
@@ -128,6 +132,12 @@ public class AutomaticInboxProcessorTest {
         when(thingTypeRegistryMock.getThingType(THING_TYPE_UID)).thenReturn(THING_TYPE);
         when(thingTypeRegistryMock.getThingType(THING_TYPE_UID2)).thenReturn(THING_TYPE2);
         when(thingTypeRegistryMock.getThingType(THING_TYPE_UID3)).thenReturn(THING_TYPE3);
+        when(configDescriptionRegistryMock.getConfigDescription(URI.create(AutomaticInboxProcessor.CONFIG_URI)))
+                .thenReturn(ConfigDescriptionBuilder.create(URI.create(AutomaticInboxProcessor.CONFIG_URI))
+                        .withParameter(ConfigDescriptionParameterBuilder
+                                .create(AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, Type.TEXT)
+                                .withMultiple(true).build())
+                        .build());
 
         when(thingHandlerFactoryMock.supportsThingType(eq(THING_TYPE_UID))).thenReturn(true);
         when(thingHandlerFactoryMock.supportsThingType(eq(THING_TYPE_UID3))).thenReturn(true);
@@ -142,7 +152,8 @@ public class AutomaticInboxProcessorTest {
         inbox.addThingHandlerFactory(thingHandlerFactoryMock);
         inbox.activate();
 
-        automaticInboxProcessor = new AutomaticInboxProcessor(thingTypeRegistryMock, thingRegistryMock, inbox);
+        automaticInboxProcessor = new AutomaticInboxProcessor(thingTypeRegistryMock, thingRegistryMock, inbox,
+                configDescriptionRegistryMock);
         automaticInboxProcessor.activate(null);
     }
 
@@ -219,7 +230,6 @@ public class AutomaticInboxProcessorTest {
                 .thenReturn(new ThingStatusInfo(ThingStatus.ONLINE, ThingStatusDetail.NONE, null));
         when(thingStatusInfoChangedEventMock.getThingUID()).thenReturn(THING_UID);
         automaticInboxProcessor.receive(thingStatusInfoChangedEventMock);
-
         results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(0));
         results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
@@ -416,6 +426,137 @@ public class AutomaticInboxProcessorTest {
         // Newly added inbox results are also approved.
         inbox.add(DiscoveryResultBuilder.create(THING_UID2).build());
         verify(thingRegistryMock, times(1)).add(argThat(thing -> THING_UID2.equals(thing.getUID())));
+    }
+
+    @Test
+    public void testAutoApproveRuleMatchesAndInterpolatesActions() {
+        String rule = "propertyMatch=ipAddress:192.168.*; "
+                + "setLabel=${label} (${properties.ipAddress}); setLocation=${properties.ipAddress}; "
+                + "setProperties=discoveredIp:${properties.ipAddress}; "
+                + "setConfig=configKey:${properties.ipAddress}";
+        automaticInboxProcessor.modified(Map.of(AutomaticInboxProcessor.ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY, false,
+                AutomaticInboxProcessor.AUTO_APPROVE_RULES_ENABLED_CONFIG_PROPERTY, true,
+                AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, List.of(rule)));
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).withLabel("Office sensor")
+                .withProperty("ipAddress", "192.168.1.25").build());
+
+        verify(thingRegistryMock).add(argThat(
+                thing -> THING_UID.equals(thing.getUID()) && "Office sensor (192.168.1.25)".equals(thing.getLabel())));
+        verify(thingRegistryMock).update(argThat(thing -> THING_UID.equals(thing.getUID())
+                && "Office sensor (192.168.1.25)".equals(thing.getLabel()) && "192.168.1.25".equals(thing.getLocation())
+                && "192.168.1.25".equals(thing.getProperties().get("discoveredIp"))
+                && "192.168.1.25".equals(thing.getConfiguration().get("configKey"))));
+    }
+
+    @Test
+    public void testAutoApproveRuleScalarStringIsNormalizedToList() {
+        String rule = "thingUid=test:test:*; setLabel=Automatically approved";
+        automaticInboxProcessor.modified(Map.of(AutomaticInboxProcessor.ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY, false,
+                AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, rule));
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
+
+        verify(thingRegistryMock).add(argThat(
+                thing -> THING_UID.equals(thing.getUID()) && "Automatically approved".equals(thing.getLabel())));
+    }
+
+    @Test
+    public void testAutoApproveRuleMatchesAndSetsMultipleProperties() {
+        String rule = "propertyMatch=vendor=Philips*, modelId=LCT*; "
+                + "setProperties=approvedBy=Rule, originalLabel=${label}";
+        automaticInboxProcessor.modified(Map.of(AutomaticInboxProcessor.ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY, false,
+                AutomaticInboxProcessor.AUTO_APPROVE_RULES_ENABLED_CONFIG_PROPERTY, true,
+                AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, List.of(rule)));
+        when(thingRegistryMock.stream()).thenAnswer(invocation -> Stream.empty());
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).withLabel("Office lamp")
+                .withProperty("vendor", "Philips Hue").withProperty("modelId", "LCT010").build());
+
+        verify(thingRegistryMock).update(argThat(
+                thing -> THING_UID.equals(thing.getUID()) && "Rule".equals(thing.getProperties().get("approvedBy"))
+                        && "Office lamp".equals(thing.getProperties().get("originalLabel"))));
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID2).withProperty("vendor", "Philips Hue")
+                .withProperty("modelId", "OTHER").build());
+
+        verify(thingRegistryMock, never()).add(argThat(thing -> THING_UID2.equals(thing.getUID())));
+    }
+
+    @Test
+    public void testAutoApproveRulesCanBeDisabled() {
+        String rule = "thingUid=test:test:*; setLabel=Should be approved";
+        automaticInboxProcessor.modified(Map.of(AutomaticInboxProcessor.ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY, false,
+                AutomaticInboxProcessor.AUTO_APPROVE_RULES_ENABLED_CONFIG_PROPERTY, false,
+                AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, List.of(rule)));
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
+
+        verify(thingRegistryMock, never()).add(argThat(thing -> THING_UID.equals(thing.getUID())));
+        assertThat(inbox.getAll().getFirst().getFlag(), is(DiscoveryResultFlag.NEW));
+    }
+
+    @Test
+    public void testAutoApproveRulesCanBeEnabled() {
+        String rule = "thingUid=test:test:*; setLabel=Automatically approved";
+        automaticInboxProcessor.modified(Map.of(AutomaticInboxProcessor.ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY, false,
+                AutomaticInboxProcessor.AUTO_APPROVE_RULES_ENABLED_CONFIG_PROPERTY, true,
+                AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, List.of(rule)));
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
+
+        verify(thingRegistryMock).add(argThat(
+                thing -> THING_UID.equals(thing.getUID()) && "Automatically approved".equals(thing.getLabel())));
+    }
+
+    @Test
+    public void testHashCommentAutoApproveRuleIsIgnored() {
+        String rule = "  #thingUid=test:test:*; setLocation=Living Room";
+        automaticInboxProcessor
+                .modified(Map.of(AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, List.of(rule)));
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
+
+        verify(thingRegistryMock, never()).add(argThat(thing -> THING_UID.equals(thing.getUID())));
+        verify(thingRegistryMock, never()).update(argThat(thing -> THING_UID.equals(thing.getUID())));
+        assertThat(inbox.getAll().getFirst().getFlag(), is(DiscoveryResultFlag.NEW));
+    }
+
+    @Test
+    public void testSlashSlashCommentAutoApproveRuleIsIgnored() {
+        String rule = "// thingUid=test:test:*; setLocation=Living Room";
+        automaticInboxProcessor
+                .modified(Map.of(AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, List.of(rule)));
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
+
+        verify(thingRegistryMock, never()).add(argThat(thing -> THING_UID.equals(thing.getUID())));
+        verify(thingRegistryMock, never()).update(argThat(thing -> THING_UID.equals(thing.getUID())));
+        assertThat(inbox.getAll().getFirst().getFlag(), is(DiscoveryResultFlag.NEW));
+    }
+
+    @Test
+    public void testUnmatchedAutoApproveRuleLeavesResultInInbox() {
+        String rule = "thingUid=other:thing:*";
+        automaticInboxProcessor
+                .modified(Map.of(AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, List.of(rule)));
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
+
+        verify(thingRegistryMock, never()).add(argThat(thing -> THING_UID.equals(thing.getUID())));
+        assertThat(inbox.getAll().getFirst().getFlag(), is(DiscoveryResultFlag.NEW));
+    }
+
+    @Test
+    public void testLegacyAutoApproveRuleKeysAreRejected() {
+        String rule = "thingUidPattern=test:test:*; targetLabel=Should not be approved";
+        automaticInboxProcessor
+                .modified(Map.of(AutomaticInboxProcessor.AUTO_APPROVE_RULES_CONFIG_PROPERTY, List.of(rule)));
+
+        inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
+
+        verify(thingRegistryMock, never()).add(argThat(thing -> THING_UID.equals(thing.getUID())));
+        assertThat(inbox.getAll().getFirst().getFlag(), is(DiscoveryResultFlag.NEW));
     }
 
     @Test

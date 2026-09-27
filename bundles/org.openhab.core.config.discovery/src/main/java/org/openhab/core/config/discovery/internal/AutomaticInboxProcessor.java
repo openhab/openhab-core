@@ -14,16 +14,25 @@ package org.openhab.core.config.discovery.internal;
 
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.discovery.DiscoveryResult;
@@ -37,6 +46,7 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.events.ThingStatusInfoChangedEvent;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
@@ -94,26 +104,38 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
 
     public static final String AUTO_IGNORE_CONFIG_PROPERTY = "autoIgnore";
     public static final String ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY = "autoApprove";
+    public static final String AUTO_APPROVE_RULES_ENABLED_CONFIG_PROPERTY = "autoApproveRulesEnabled";
+    public static final String AUTO_APPROVE_RULES_CONFIG_PROPERTY = "autoApproveRules";
 
     protected static final String CONFIG_URI = "system:inbox";
+    private static final Set<String> AUTO_APPROVE_RULE_KEYS = Set.of("thingUid", "bridgeUid", "label",
+            "representationProperty", "propertyMatch", "configMatch", "setLabel", "setLocation", "setConfig",
+            "setProperties");
+
+    private static final Pattern INTERPOLATION_PATTERN = Pattern.compile("\\$\\{([^}]+)}");
 
     private final Logger logger = LoggerFactory.getLogger(AutomaticInboxProcessor.class);
 
     private final ThingRegistry thingRegistry;
     private final ThingTypeRegistry thingTypeRegistry;
     private final Inbox inbox;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
     private boolean autoIgnore = true;
     private boolean alwaysAutoApprove = false;
+    private boolean autoApproveRulesEnabled = true;
+    private List<Map<String, String>> autoApproveRules = List.of();
 
     private final Set<InboxAutoApprovePredicate> inboxAutoApprovePredicates = new CopyOnWriteArraySet<>();
 
     @Activate
     public AutomaticInboxProcessor(final @Reference ThingTypeRegistry thingTypeRegistry,
-            final @Reference ThingRegistry thingRegistry, final @Reference Inbox inbox) {
+            final @Reference ThingRegistry thingRegistry, final @Reference Inbox inbox,
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         super(ThingStatusInfoChangedEvent.TYPE);
         this.thingTypeRegistry = thingTypeRegistry;
         this.thingRegistry = thingRegistry;
         this.inbox = inbox;
+        this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
     @Activate
@@ -126,12 +148,218 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
 
     @Modified
     protected void modified(@Nullable Map<String, Object> properties) {
+        autoApproveRulesEnabled = true;
         if (properties != null) {
-            Object value = properties.get(AUTO_IGNORE_CONFIG_PROPERTY);
+            Map<String, @Nullable Object> normalizedProperties = new HashMap<>();
+            normalizedProperties.putAll(properties);
+            ConfigDescription configDescription = configDescriptionRegistry
+                    .getConfigDescription(URI.create(CONFIG_URI));
+            if (configDescription != null) {
+                normalizedProperties = ConfigUtil.normalizeTypes(normalizedProperties, List.of(configDescription));
+            }
+
+            @Nullable
+            Object value = normalizedProperties.get(AUTO_IGNORE_CONFIG_PROPERTY);
             autoIgnore = value == null || !"false".equals(value.toString());
-            value = properties.get(ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY);
+
+            value = normalizedProperties.get(ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY);
             alwaysAutoApprove = value != null && "true".equals(value.toString());
+
+            value = normalizedProperties.get(AUTO_APPROVE_RULES_ENABLED_CONFIG_PROPERTY);
+            autoApproveRulesEnabled = value == null || !"false".equals(value.toString());
+
+            Object rawRules = normalizedProperties.get(AUTO_APPROVE_RULES_CONFIG_PROPERTY);
+            List<String> configuredRules = null;
+            if (rawRules instanceof List<?> list) {
+                configuredRules = list.stream().map(Objects::toString).toList();
+            } else if (rawRules instanceof String str && !str.isBlank()) {
+                configuredRules = List.of(str);
+            }
+            autoApproveRules = parseRules(configuredRules);
             autoApproveInboxEntries();
+        }
+    }
+
+    private List<Map<String, String>> parseRules(@Nullable List<String> configuredRules) {
+        List<Map<String, String>> rules = new ArrayList<>();
+        if (configuredRules != null) {
+            for (String configuredRule : configuredRules) {
+                addRule(rules, configuredRule);
+            }
+        }
+        return List.copyOf(rules);
+    }
+
+    private void addRule(List<Map<String, String>> rules, String ruleString) {
+        ruleString = ruleString.stripLeading();
+        if (ruleString.startsWith("#") || ruleString.startsWith("//")) {
+            return;
+        }
+        Map<String, String> rule = new HashMap<>();
+        boolean validRule = true;
+        for (String pair : ruleString.split(";")) {
+            int separator = pair.indexOf('=');
+            if (separator > 0) {
+                String key = pair.substring(0, separator).trim();
+                String value = pair.substring(separator + 1).trim();
+                if (AUTO_APPROVE_RULE_KEYS.contains(key) && !value.isEmpty()) {
+                    rule.put(key, value);
+                } else if (!pair.isBlank()) {
+                    validRule = false;
+                }
+            } else if (!pair.isBlank()) {
+                validRule = false;
+            }
+        }
+        if (validRule && !rule.isEmpty()) {
+            rules.add(Map.copyOf(rule));
+        }
+    }
+
+    private void autoApprove(DiscoveryResult result) {
+        if (result.getFlag() == DiscoveryResultFlag.IGNORED) {
+            return;
+        }
+        if (alwaysAutoApprove) {
+            Thing thing = inbox.approve(result.getThingUID(), result.getLabel(), null);
+            if (thing != null) {
+                logger.info("Auto-approved discovery result '{}' ({}) because 'autoApprove' is enabled.",
+                        result.getLabel(), result.getThingUID());
+            }
+            return;
+        }
+        if (autoApproveRulesEnabled) {
+            for (Map<String, String> rule : autoApproveRules) {
+                if (ruleMatches(rule, result)) {
+                    applyRuleAndApprove(rule, result);
+                    return;
+                }
+            }
+        }
+        if (isToBeAutoApproved(result)) {
+            inbox.approve(result.getThingUID(), result.getLabel(), null);
+        }
+    }
+
+    private boolean ruleMatches(Map<String, String> rule, DiscoveryResult result) {
+        if (!matchesIfConfigured(rule, "thingUid", result.getThingUID().getAsString())
+                || !matchesIfConfigured(rule, "bridgeUid",
+                        result.getBridgeUID() == null ? null : result.getBridgeUID().getAsString())
+                || !matchesIfConfigured(rule, "label", result.getLabel())) {
+            return false;
+        }
+        String representationProperty = result.getRepresentationProperty();
+        String representationValue = representationProperty == null ? null
+                : Objects.toString(result.getProperties().get(representationProperty), null);
+        if (!matchesIfConfigured(rule, "representationProperty", representationValue)) {
+            return false;
+        }
+        return matchesProperties(rule.get("propertyMatch"), result.getProperties())
+                && matchesProperties(rule.get("configMatch"), result.getProperties());
+    }
+
+    private boolean matchesIfConfigured(Map<String, String> rule, String key, @Nullable String value) {
+        String pattern = rule.get(key);
+        return pattern == null || value != null && globMatches(pattern, value);
+    }
+
+    private boolean matchesProperties(@Nullable String conditions, Map<String, Object> properties) {
+        if (conditions == null) {
+            return true;
+        }
+        for (String entry : conditions.split(",")) {
+            String pair = entry.trim();
+            int separator = pair.indexOf('=');
+            if (separator <= 0) {
+                separator = pair.indexOf(':');
+            }
+            if (separator <= 0 || !globMatches(pair.substring(separator + 1).trim(),
+                    String.valueOf(properties.get(pair.substring(0, separator).trim())))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean globMatches(String pattern, String value) {
+        StringBuilder regex = new StringBuilder("^");
+        for (int i = 0; i < pattern.length(); i++) {
+            char character = pattern.charAt(i);
+            if (character == '*') {
+                regex.append(".*");
+            } else if (character == '?') {
+                regex.append('.');
+            } else {
+                regex.append(Pattern.quote(String.valueOf(character)));
+            }
+        }
+        return Pattern.compile(regex.append('$').toString()).matcher(value).matches();
+    }
+
+    private String interpolate(String value, DiscoveryResult result) {
+        Matcher matcher = INTERPOLATION_PATTERN.matcher(value);
+        StringBuilder interpolated = new StringBuilder();
+        while (matcher.find()) {
+            String variable = matcher.group(1);
+            String replacement = switch (variable) {
+                case "label" -> Objects.toString(result.getLabel(), "");
+                case "thingUID" -> result.getThingUID().getAsString();
+                case "bridgeUID" -> Objects.toString(result.getBridgeUID(), "");
+                default -> variable.startsWith("properties.")
+                        ? Objects.toString(result.getProperties().get(variable.substring("properties.".length())), "")
+                        : "";
+            };
+            matcher.appendReplacement(interpolated, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(interpolated);
+        return interpolated.toString();
+    }
+
+    private void applyRuleAndApprove(Map<String, String> rule, DiscoveryResult result) {
+        String ruleString = rule.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue()).sorted()
+                .collect(Collectors.joining("; "));
+        String configuredLabel = rule.get("setLabel");
+        String label = configuredLabel == null ? result.getLabel() : interpolate(configuredLabel, result);
+        Thing thing = inbox.approve(result.getThingUID(), label, null);
+        if (thing == null) {
+            return;
+        }
+        logger.info("Auto-approved discovery result '{}' ({}) because it matched rule [{}]", result.getLabel(),
+                result.getThingUID(), ruleString);
+        if (rule.get("setLocation") == null && rule.get("setProperties") == null && rule.get("setConfig") == null) {
+            return;
+        }
+
+        ThingBuilder builder = ThingBuilder.create(thing);
+        String location = rule.get("setLocation");
+        if (location != null) {
+            builder.withLocation(interpolate(location, result));
+        }
+        Map<String, String> thingProperties = new HashMap<>(thing.getProperties());
+        applyConfiguredValues(rule.get("setProperties"), thingProperties, result);
+        builder.withProperties(thingProperties);
+        Map<String, Object> configuration = new HashMap<>(thing.getConfiguration().getProperties());
+        applyConfiguredValues(rule.get("setConfig"), configuration, result);
+        builder.withConfiguration(new Configuration(configuration));
+        thingRegistry.update(builder.build());
+    }
+
+    private <T> void applyConfiguredValues(@Nullable String configuredValues, Map<String, T> target,
+            DiscoveryResult result) {
+        if (configuredValues != null) {
+            for (String entry : configuredValues.split(",")) {
+                String assignment = entry.trim();
+                int separator = assignment.indexOf('=');
+                if (separator <= 0) {
+                    separator = assignment.indexOf(':');
+                }
+                if (separator <= 0) {
+                    continue;
+                }
+                @SuppressWarnings("unchecked")
+                T interpolated = (T) interpolate(assignment.substring(separator + 1).trim(), result);
+                target.put(assignment.substring(0, separator).trim(), interpolated);
+            }
         }
     }
 
@@ -164,9 +392,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
                 }
             }
         }
-        if (alwaysAutoApprove || isToBeAutoApproved(result)) {
-            inbox.approve(result.getThingUID(), result.getLabel(), null);
-        }
+        autoApprove(result);
     }
 
     @Override
@@ -262,9 +488,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
     private void autoApproveInboxEntries() {
         for (DiscoveryResult result : inbox.getAll()) {
             if (DiscoveryResultFlag.NEW.equals(result.getFlag())) {
-                if (alwaysAutoApprove || isToBeAutoApproved(result)) {
-                    inbox.approve(result.getThingUID(), result.getLabel(), null);
-                }
+                autoApprove(result);
             }
         }
     }

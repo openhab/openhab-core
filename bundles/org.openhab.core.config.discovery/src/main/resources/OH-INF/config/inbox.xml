@@ -6,15 +6,40 @@
 		https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="system:inbox">
+		<parameter-group name="rules">
+			<label>Rule-Based Auto Approval</label>
+			<description>Automatically approve discovered things based on custom matching criteria and actions.</description>
+		</parameter-group>
+
 		<parameter name="autoIgnore" type="boolean">
 			<label>Auto Ignore</label>
 			<description><![CDATA[If enabled, an Inbox result matching an existing thing is automatically ignored.<br>If set to false, the Inbox may contain results although identical things already exist.]]></description>
 			<default>true</default>
 		</parameter>
 		<parameter name="autoApprove" type="boolean">
-			<label>Auto Approve</label>
-			<description>If enabled, Inbox results are automatically approved, unless they were marked as ignored.</description>
+			<label>Auto Approve Everything Unconditionally</label>
+			<description>If enabled, all discovered things are automatically approved without evaluating rules, unless the inbox
+				entry is ignored.</description>
 			<default>false</default>
+		</parameter>
+
+		<parameter name="autoApproveRulesEnabled" type="boolean" groupName="rules">
+			<label>Enable Rule-Based Auto Approval</label>
+			<description><![CDATA[
+				If enabled, discovered things are matched against defined rules below and automatically approved.<br>
+				<b>Note:</b> Auto-approved items bypass the Inbox and appear directly under <b>Settings → Things</b>.
+			]]></description>
+			<default>true</default>
+		</parameter>
+		<parameter name="autoApproveRules" type="text" multiple="true" groupName="rules">
+			<label>Auto Approve Rules</label>
+			<description><![CDATA[
+				Rules are evaluated sequentially until a match is found.<br>
+				Syntax: <code>criteriaKey=value; actionKey=value</code> (Prefix with <code>#</code> or <code>//</code> to disable a rule)<br>
+				<b>Filters:</b> <code>thingUid</code>, <code>bridgeUid</code>, <code>label</code>, <code>representationProperty</code>, <code>propertyMatch</code>, <code>configMatch</code><br>
+				<b>Actions:</b> <code>setLabel</code>, <code>setLocation</code>, <code>setProperties</code>, <code>setConfig</code> (optional post-approval customizations)<br>
+				<b>Example:</b> <code>thingUid=hue:*; label=*Motion*; setLocation=Living Room; setLabel=${label} Sensor</code>
+			]]></description>
 		</parameter>
 	</config-description>
 
