@@ -163,7 +163,7 @@ public class AuthFilterTest {
         authFilter.filter(containerRequestContext);
 
         verify(containerRequestContext).setSecurityContext(any());
-        assertThat(authFilter.findLoopbackTrustedNetworks(), contains("127.0.0.1/32"));
+        assertThat(authFilter.findLoopbackTrustedNetworks(), org.hamcrest.Matchers.contains("127.0.0.1/32"));
     }
 
     @Test

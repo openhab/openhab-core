@@ -335,33 +335,24 @@ public class TokenResource implements RESTResource {
         String newRefreshToken = UUID.randomUUID().toString().replace("-", "");
         String scope = pendingToken.getScope();
 
-        // if there is PKCE information in the pending token, check that first
+        // PKCE is mandatory. The authorization endpoint no longer issues a pending token without an S256 code
+        // challenge, so one which carries none can only be a leftover created before that was enforced - it must
+        // not be honoured, or it would still be exchangeable without any proof of key possession.
         String codeChallengeMethod = pendingToken.getCodeChallengeMethod();
-        if (codeChallengeMethod != null) {
-            String codeChallenge = pendingToken.getCodeChallenge();
-            if (codeChallenge == null || codeVerifier == null) {
-                logger.warn("the PKCE code challenge or code verifier information is missing");
-                throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-            }
-            switch (codeChallengeMethod) {
-                case "plain":
-                    if (!codeVerifier.equals(codeChallenge)) {
-                        logger.warn("PKCE verification failed");
-                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                    }
-                    break;
-                case "S256":
-                    MessageDigest sha256Digest = MessageDigest.getInstance("SHA-256");
-                    String computedCodeChallenge = Base64Url.encode(sha256Digest.digest(codeVerifier.getBytes()));
-                    if (!computedCodeChallenge.equals(codeChallenge)) {
-                        logger.warn("PKCE verification failed");
-                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                    }
-                    break;
-                default:
-                    logger.warn("PKCE transformation algorithm '{}' not supported", codeChallengeMethod);
-                    throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
-            }
+        String codeChallenge = pendingToken.getCodeChallenge();
+        if (codeChallengeMethod == null || codeChallenge == null || codeVerifier == null) {
+            logger.warn("the PKCE code challenge or code verifier information is missing");
+            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+        }
+        if (!"S256".equals(codeChallengeMethod)) {
+            logger.warn("PKCE transformation algorithm '{}' not supported", codeChallengeMethod);
+            throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
+        }
+        MessageDigest sha256Digest = MessageDigest.getInstance("SHA-256");
+        String computedCodeChallenge = Base64Url.encode(sha256Digest.digest(codeVerifier.getBytes()));
+        if (!computedCodeChallenge.equals(codeChallenge)) {
+            logger.warn("PKCE verification failed");
+            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
         }
 
         // create an access token
