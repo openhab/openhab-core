@@ -23,17 +23,19 @@ import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.Protocol;
  * @author David Graeff - Initial contribution
  * @author Mark Herwege - Added flag for hostname validation
  * @author Mark Herwege - Added parameter for cleanSession/cleanStart
+ * @author Mark Herwege - Added parameter for WebSocket path
  */
 @NonNullByDefault
 public class MqttBrokerConnectionConfig {
     // Optional connection name
     public @Nullable String name;
-    // Connection parameters (host+port+secure+hostnameValidated)
+    // Connection parameters (host+port+secure+hostnameValidated+cleanSessionStart+webSocketPath)
     public @Nullable String host;
     public @Nullable Integer port;
     public boolean secure = true;
     public boolean hostnameValidated = true;
     public boolean cleanSessionStart = true;
+    public String webSocketPath = "";
     // Protocol parameters
     public Protocol protocol = MqttBrokerConnection.DEFAULT_PROTOCOL;
     public MqttVersion mqttVersion = MqttBrokerConnection.DEFAULT_MQTT_VERSION;

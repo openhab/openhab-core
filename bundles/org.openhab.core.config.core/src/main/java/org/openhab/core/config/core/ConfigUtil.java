@@ -65,7 +65,7 @@ public class ConfigUtil {
      * <p>
      * This <strong>MUST NOT</strong> be called in production environments as it can break environment variable
      * resolving.
-     * 
+     *
      * @param provider the env provider to use for resolving environment variables
      */
     protected static void setEnvProvider(EnvProvider provider) {
@@ -147,7 +147,7 @@ public class ConfigUtil {
 
     /**
      * Applies the default values from a give {@link ConfigDescription} to the given configuration {@link Map}.
-     * 
+     *
      * @param configuration the configuration {@link Map} where the default values should be added (must not be null)
      * @param configDescription the {@link ConfigDescription} where the default values are located (may be null, but
      *            method won't have any effect then)
@@ -222,8 +222,8 @@ public class ConfigUtil {
         } else if (value instanceof Collection collection) {
             return normalizeCollection(collection);
         }
-        throw new IllegalArgumentException(
-                "Invalid type '{%s}' of configuration value!".formatted(value.getClass().getCanonicalName()));
+        String valueType = value == null ? "null" : value.getClass().getCanonicalName();
+        throw new IllegalArgumentException("Invalid type '{%s}' of configuration value!".formatted(valueType));
     }
 
     /**
