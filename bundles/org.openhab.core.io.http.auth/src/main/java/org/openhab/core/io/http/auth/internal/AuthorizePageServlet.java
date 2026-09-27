@@ -14,6 +14,10 @@ package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
 import java.io.Serial;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -35,6 +39,7 @@ import org.openhab.core.auth.Role;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.util.StringUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -83,15 +88,14 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
             String scope = params.containsKey("scope") ? params.get("scope")[0] : "";
             String clientId = params.containsKey("client_id") ? params.get("client_id")[0] : "";
 
-            // Basic sanity check
-            if (scope.contains("<") || clientId.contains("<")) {
-                throw new IllegalArgumentException("invalid_request");
-            }
+            validateAuthorizationRequest(params);
+            validateRedirectUriOrigin(req, params.get("redirect_uri")[0]);
 
             if (isSignupMode()) {
                 message = getLocalizedMessage("auth.createaccount.prompt");
             } else {
-                message = String.format(getLocalizedMessage("auth.login.prompt"), scope, clientId);
+                message = String.format(getLocalizedMessage("auth.login.prompt"), StringUtils.escapeXml(scope),
+                        StringUtils.escapeXml(clientId));
             }
             resp.setContentType("text/html;charset=UTF-8");
             resp.getWriter().append(getPageBody(params, message, false));
@@ -107,6 +111,12 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, String[]> params = req.getParameterMap();
         try {
+            // The authorization request is validated before the login is even looked at: a failing login renders
+            // the page again from these very parameters, and an exception thrown while doing so could no longer be
+            // handled below - it would escape as an HTTP 500 instead of the login page.
+            validateAuthorizationRequest(params);
+            validateRedirectUriOrigin(req, params.get("redirect_uri")[0]);
+
             if (!params.containsKey("username")) {
                 throw new AuthenticationException("no username");
             }
@@ -116,33 +126,18 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
             if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
                 throw new AuthenticationException("CSRF check failed");
             }
-            if (!params.containsKey("redirect_uri")) {
-                throw new IllegalArgumentException("invalid_request");
-            }
-            if (!params.containsKey("response_type")) {
-                throw new IllegalArgumentException("unsupported_response_type");
-            }
-            if (!params.containsKey("client_id")) {
-                throw new IllegalArgumentException("unauthorized_client");
-            }
-            if (!params.containsKey("scope")) {
-                throw new IllegalArgumentException("invalid_scope");
-            }
-
-            removeCsrfToken(params.get("csrf_token")[0]);
 
             String baseRedirectUri = params.get("redirect_uri")[0];
-            String responseType = params.get("response_type")[0];
             String clientId = params.get("client_id")[0];
             String scope = params.get("scope")[0];
+            @Nullable
+            String codeChallenge = params.containsKey("code_challenge") ? params.get("code_challenge")[0] : null;
+            @Nullable
+            String codeChallengeMethod = params.containsKey("code_challenge_method")
+                    ? params.get("code_challenge_method")[0]
+                    : null;
 
-            if (!"code".equals(responseType)) {
-                throw new AuthenticationException("unsupported_response_type");
-            }
-
-            if (!clientId.equals(baseRedirectUri)) {
-                throw new IllegalArgumentException("unauthorized_client");
-            }
+            removeCsrfToken(params.get("csrf_token")[0]);
 
             String username = params.get("username")[0];
             String password = params.get("password")[0];
@@ -169,10 +164,6 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
             String authorizationCode = UUID.randomUUID().toString().replace("-", "");
 
             if (user instanceof AuthenticatedUser authenticatedUser) {
-                String codeChallenge = params.containsKey("code_challenge") ? params.get("code_challenge")[0] : null;
-                String codeChallengeMethod = params.containsKey("code_challenge_method")
-                        ? params.get("code_challenge_method")[0]
-                        : null;
                 PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope,
                         codeChallenge, codeChallengeMethod);
                 authenticatedUser.setPendingToken(pendingToken);
@@ -189,7 +180,7 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
             String baseRedirectUri = params.containsKey("redirect_uri") ? params.get("redirect_uri")[0] : null;
             @Nullable
             String state = params.containsKey("state") ? params.get("state")[0] : null;
-            if (baseRedirectUri != null) {
+            if (baseRedirectUri != null && isSafeRedirectUri(req, baseRedirectUri)) {
                 resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, null, e.getMessage(), state));
                 resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
             } else {
@@ -243,38 +234,113 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
         String codeChallengeMethod = params.containsKey("code_challenge_method")
                 ? params.get("code_challenge_method")[0]
                 : null;
-        hiddenFormFields += "<input type=\"hidden\" name=\"csrf_token\" value=\"" + csrfToken + "\">";
-        hiddenFormFields += "<input type=\"hidden\" name=\"redirect_uri\" value=\"" + redirectUri + "\">";
-        hiddenFormFields += "<input type=\"hidden\" name=\"response_type\" value=\"" + responseType + "\">";
-        hiddenFormFields += "<input type=\"hidden\" name=\"client_id\" value=\"" + clientId + "\">";
-        hiddenFormFields += "<input type=\"hidden\" name=\"scope\" value=\"" + scope + "\">";
+        // No validation takes place here: doGet and doPost reject an invalid authorization request before the page
+        // is rendered, and throwing from this method would escape its callers as an HTTP 500. Every value below is
+        // HTML-escaped, so reflecting it is safe in any case.
+        hiddenFormFields += hiddenInput("csrf_token", csrfToken);
+        hiddenFormFields += hiddenInput("redirect_uri", redirectUri);
+        hiddenFormFields += hiddenInput("response_type", responseType);
+        hiddenFormFields += hiddenInput("client_id", clientId);
+        hiddenFormFields += hiddenInput("scope", scope);
         if (state != null) {
-            hiddenFormFields += "<input type=\"hidden\" name=\"state\" value=\"" + state + "\">";
+            hiddenFormFields += hiddenInput("state", state);
         }
-        if (codeChallenge != null && codeChallengeMethod != null) {
-            hiddenFormFields += "<input type=\"hidden\" name=\"code_challenge\" value=\"" + codeChallenge + "\">";
-            hiddenFormFields += "<input type=\"hidden\" name=\"code_challenge_method\" value=\"" + codeChallengeMethod
-                    + "\">";
-        }
+        hiddenFormFields += hiddenInput("code_challenge", codeChallenge);
+        hiddenFormFields += hiddenInput("code_challenge_method", codeChallengeMethod);
 
         return hiddenFormFields;
+    }
+
+    private String hiddenInput(String name, @Nullable String value) {
+        return value == null ? ""
+                : "<input type=\"hidden\" name=\"" + name + "\" value=\"" + StringUtils.escapeXml(value) + "\">";
     }
 
     private String getRedirectUri(String baseRedirectUri, @Nullable String authorizationCode, @Nullable String error,
             @Nullable String state) {
         String redirectUri = baseRedirectUri;
+        String separator = baseRedirectUri.contains("?") ? "&" : "?";
 
         if (authorizationCode != null) {
-            redirectUri += "?code=" + authorizationCode;
+            redirectUri += separator + "code=" + URLEncoder.encode(authorizationCode, StandardCharsets.UTF_8);
+            separator = "&";
         } else if (error != null) {
-            redirectUri += "?error=" + error;
+            redirectUri += separator + "error=" + URLEncoder.encode(error, StandardCharsets.UTF_8);
+            separator = "&";
         }
 
         if (state != null) {
-            redirectUri += "&state=" + state;
+            redirectUri += separator + "state=" + URLEncoder.encode(state, StandardCharsets.UTF_8);
         }
 
         return redirectUri;
+    }
+
+    static void validateAuthorizationRequest(Map<String, String[]> params) {
+        if (!params.containsKey("redirect_uri")) {
+            throw new IllegalArgumentException("invalid_request");
+        }
+        if (!params.containsKey("response_type")) {
+            throw new IllegalArgumentException("unsupported_response_type");
+        }
+        if (!params.containsKey("client_id")) {
+            throw new IllegalArgumentException("unauthorized_client");
+        }
+        if (!params.containsKey("scope")) {
+            throw new IllegalArgumentException("invalid_scope");
+        }
+
+        @Nullable
+        String codeChallenge = params.containsKey("code_challenge") ? params.get("code_challenge")[0] : null;
+        @Nullable
+        String codeChallengeMethod = params.containsKey("code_challenge_method")
+                ? params.get("code_challenge_method")[0]
+                : null;
+        validateAuthorizationRequest(params.get("redirect_uri")[0], params.get("client_id")[0],
+                params.get("response_type")[0], codeChallenge, codeChallengeMethod);
+    }
+
+    static void validateAuthorizationRequest(String redirectUri, String clientId, String responseType,
+            @Nullable String codeChallenge, @Nullable String codeChallengeMethod) {
+        if (!"code".equals(responseType)) {
+            throw new IllegalArgumentException("unsupported_response_type");
+        }
+        if (!clientId.equals(redirectUri)) {
+            throw new IllegalArgumentException("unauthorized_client");
+        }
+        if (codeChallenge == null || !"S256".equals(codeChallengeMethod)) {
+            throw new IllegalArgumentException("invalid_request");
+        }
+    }
+
+    /**
+     * Ensures the {@code redirect_uri} points back to the same origin (scheme, host and port) the browser used to
+     * reach this servlet. Since clients aren't pre-registered (the {@code client_id} is required to equal the
+     * {@code redirect_uri}), this is the only origin we can meaningfully trust, and it prevents an attacker from
+     * supplying an arbitrary {@code redirect_uri} to have the authorization code (or an error message) delivered to
+     * a site they control.
+     */
+    static void validateRedirectUriOrigin(HttpServletRequest req, String redirectUri) {
+        if (!isSafeRedirectUri(req, redirectUri)) {
+            throw new IllegalArgumentException("unauthorized_client");
+        }
+    }
+
+    static boolean isSafeRedirectUri(HttpServletRequest req, String redirectUri) {
+        try {
+            URI uri = new URI(redirectUri);
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+            if (scheme == null || host == null || uri.getUserInfo() != null || uri.getFragment() != null) {
+                return false;
+            }
+            int port = uri.getPort();
+            int effectivePort = port != -1 ? port : ("https".equalsIgnoreCase(scheme) ? 443 : 80);
+            return scheme.equalsIgnoreCase(req.getScheme()) && host.equalsIgnoreCase(req.getServerName())
+                    && effectivePort == req.getServerPort();
+        } catch (URISyntaxException e) {
+            return false;
+        }
     }
 
     private boolean isSignupMode() {
