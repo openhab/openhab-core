@@ -41,7 +41,7 @@ import org.osgi.framework.ServiceReference;
 @NonNullByDefault
 public class HttpServiceUtilTest {
 
-    private static final String ORG_OSGI_SERVICE_HTTP_SERVICE = "org.osgi.service.http.HttpService";
+    private static final String HTTP_SERVICE_INTERFACE = "org.ops4j.pax.web.service.http.HttpService";
     private static final String HTTP_PORT = "org.osgi.service.http.port";
     private static final String HTTP_PORT_SECURE = "org.osgi.service.http.port.secure";
 
@@ -52,7 +52,7 @@ public class HttpServiceUtilTest {
         ServiceReference<?>[] httpServiceReferences = getHttpServiceReferences();
         ServiceReference<?>[] secureHttpServiceReferences = getSecureHttpServiceReferences();
 
-        when(bundleContextMock.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null)).thenReturn(
+        when(bundleContextMock.getAllServiceReferences(HTTP_SERVICE_INTERFACE, null)).thenReturn(
                 Stream.concat(Arrays.stream(httpServiceReferences), Arrays.stream(secureHttpServiceReferences))
                         .toArray(ServiceReference<?>[]::new));
     }
@@ -73,7 +73,7 @@ public class HttpServiceUtilTest {
 
     @Test
     public void shouldReturnHttpServicePortFromSystemProperty() throws InvalidSyntaxException {
-        when(bundleContextMock.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null))
+        when(bundleContextMock.getAllServiceReferences(HTTP_SERVICE_INTERFACE, null))
                 .thenReturn(new ServiceReference[0]);
         when(bundleContextMock.getProperty(HTTP_PORT)).thenReturn("9090");
 
@@ -84,7 +84,7 @@ public class HttpServiceUtilTest {
 
     @Test
     public void shouldReturnHttpServicePortSecureFromSystemProperty() throws InvalidSyntaxException {
-        when(bundleContextMock.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null))
+        when(bundleContextMock.getAllServiceReferences(HTTP_SERVICE_INTERFACE, null))
                 .thenReturn(new ServiceReference[0]);
         when(bundleContextMock.getProperty(HTTP_PORT_SECURE)).thenReturn("49090");
 
@@ -95,7 +95,7 @@ public class HttpServiceUtilTest {
 
     @Test
     public void shouldReturnUndefinedForException() throws InvalidSyntaxException {
-        when(bundleContextMock.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null))
+        when(bundleContextMock.getAllServiceReferences(HTTP_SERVICE_INTERFACE, null))
                 .thenThrow(new InvalidSyntaxException(null, null));
 
         int undfinedPort = HttpServiceUtil.getHttpServicePort(bundleContextMock);

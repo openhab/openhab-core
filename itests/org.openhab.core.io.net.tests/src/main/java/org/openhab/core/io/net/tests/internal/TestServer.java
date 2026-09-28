@@ -15,13 +15,14 @@ package org.openhab.core.io.net.tests.internal;
 import java.net.URI;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
  * Embedded jetty server used in the tests.
@@ -64,10 +65,12 @@ public class TestServer {
     }
 
     public void startServer() throws Exception {
-        ServletHandler handler = new ServletHandler();
-        handler.addServletWithMapping(new ServletHolder(new TestHttpServlet()), SERVLET_PATH);
-        handler.addServletWithMapping(new ServletHolder(new TestWebSocketServlet()), WEBSOCKET_PATH);
-        server.setHandler(handler);
+        ServletContextHandler context = new ServletContextHandler();
+        context.setContextPath("/");
+        JettyWebSocketServletContainerInitializer.configure(context, null);
+        context.addServlet(new ServletHolder(new TestHttpServlet()), SERVLET_PATH);
+        context.addServlet(new ServletHolder(new TestWebSocketServlet()), WEBSOCKET_PATH);
+        server.setHandler(context);
 
         HttpConfiguration httpConfig = new HttpConfiguration();
         HttpConnectionFactory h1 = new HttpConnectionFactory(httpConfig);

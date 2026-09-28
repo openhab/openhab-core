@@ -14,24 +14,20 @@ package org.openhab.core.io.websocket;
 
 import java.io.IOException;
 import java.io.Serial;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.ws.rs.core.SecurityContext;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketCreator;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.auth.AuthFilter;
@@ -41,11 +37,14 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.NamespaceException;
-import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
-import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPattern;
+import org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardServletName;
+import org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardServletPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * The {@link CommonWebSocketServlet} provides the servlet for WebSocket connections.
@@ -66,7 +65,7 @@ import org.slf4j.LoggerFactory;
 @HttpWhiteboardServletName(CommonWebSocketServlet.SERVLET_PATH)
 @HttpWhiteboardServletPattern(CommonWebSocketServlet.SERVLET_PATH + "/*")
 @Component(immediate = true, service = { Servlet.class })
-public class CommonWebSocketServlet extends WebSocketServlet {
+public class CommonWebSocketServlet extends JettyWebSocketServlet {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -82,17 +81,14 @@ public class CommonWebSocketServlet extends WebSocketServlet {
     private final Map<String, WebSocketAdapter> connectionHandlers = new ConcurrentHashMap<>();
     private final AuthFilter authFilter;
 
-    @SuppressWarnings("unused")
-    private @Nullable WebSocketServerFactory importNeeded;
-
     @Activate
-    public CommonWebSocketServlet(@Reference AuthFilter authFilter) throws ServletException, NamespaceException {
+    public CommonWebSocketServlet(@Reference AuthFilter authFilter) throws ServletException {
         this.authFilter = authFilter;
     }
 
     @Override
-    public void configure(@NonNullByDefault({}) WebSocketServletFactory webSocketServletFactory) {
-        webSocketServletFactory.getPolicy().setIdleTimeout(10000);
+    public void configure(@NonNullByDefault({}) JettyWebSocketServletFactory webSocketServletFactory) {
+        webSocketServletFactory.setIdleTimeout(Duration.ofMillis(10000));
         webSocketServletFactory.setCreator(new CommonWebSocketCreator());
     }
 
@@ -105,12 +101,12 @@ public class CommonWebSocketServlet extends WebSocketServlet {
         this.connectionHandlers.remove(wsAdapter.getId());
     }
 
-    private class CommonWebSocketCreator implements WebSocketCreator {
+    private class CommonWebSocketCreator implements JettyWebSocketCreator {
         private final Logger logger = LoggerFactory.getLogger(CommonWebSocketCreator.class);
 
         @Override
-        public @Nullable Object createWebSocket(@Nullable ServletUpgradeRequest servletUpgradeRequest,
-                @Nullable ServletUpgradeResponse servletUpgradeResponse) {
+        public @Nullable Object createWebSocket(@Nullable JettyServerUpgradeRequest servletUpgradeRequest,
+                @Nullable JettyServerUpgradeResponse servletUpgradeResponse) {
             if (servletUpgradeRequest == null || servletUpgradeResponse == null) {
                 return null;
             }
@@ -128,12 +124,12 @@ public class CommonWebSocketServlet extends WebSocketServlet {
                         accessToken = new String(Base64.getDecoder().decode(base64));
                     } catch (IllegalArgumentException e) {
                         logger.warn("Invalid base64 encoded access token in Sec-WebSocket-Protocol header from {}.",
-                                servletUpgradeRequest.getRemoteAddress());
+                                servletUpgradeRequest.getRemoteSocketAddress());
                         return null;
                     }
                 } else {
                     logger.warn("Invalid use of Sec-WebSocket-Protocol header from {}.",
-                            servletUpgradeRequest.getRemoteAddress());
+                            servletUpgradeRequest.getRemoteSocketAddress());
                     return null;
                 }
             }
@@ -164,7 +160,7 @@ public class CommonWebSocketServlet extends WebSocketServlet {
                 return wsAdapter.createWebSocket(servletUpgradeRequest, servletUpgradeResponse, securityContext);
             } else {
                 logger.warn("Unauthenticated request to create a websocket from {}.",
-                        servletUpgradeRequest.getRemoteAddress());
+                        servletUpgradeRequest.getRemoteSocketAddress());
             }
             return null;
         }
@@ -183,7 +179,7 @@ public class CommonWebSocketServlet extends WebSocketServlet {
             }
         }
 
-        private @Nullable SecurityContext getSecurityContext(ServletUpgradeRequest servletUpgradeRequest) {
+        private @Nullable SecurityContext getSecurityContext(JettyServerUpgradeRequest servletUpgradeRequest) {
             try {
                 return authFilter.getSecurityContext(servletUpgradeRequest.getHttpServletRequest(), true);
             } catch (AuthenticationException | IOException e) {
