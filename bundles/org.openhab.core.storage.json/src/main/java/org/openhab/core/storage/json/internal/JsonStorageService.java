@@ -27,6 +27,7 @@ import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.storage.json.internal.migration.BridgeImplTypeMigrator;
 import org.openhab.core.storage.json.internal.migration.PersistedTransformationTypeMigrator;
+import org.openhab.core.storage.json.internal.migration.RenamingTypeMigrator;
 import org.openhab.core.storage.json.internal.migration.ThingImplTypeMigrator;
 import org.openhab.core.storage.json.internal.migration.TypeMigrator;
 import org.osgi.framework.Constants;
@@ -57,7 +58,10 @@ public class JsonStorageService implements StorageService {
     private static final Map<String, List<TypeMigrator>> MIGRATORS = Map.of( //
             "org.openhab.core.thing.Thing", List.of(new BridgeImplTypeMigrator(), new ThingImplTypeMigrator()), //
             "org.openhab.core.transform.TransformationConfiguration",
-            List.of(new PersistedTransformationTypeMigrator()));
+            List.of(new PersistedTransformationTypeMigrator()), //
+            "org.openhab.core.voice.dialog.DialogRegistration",
+            List.of(new RenamingTypeMigrator("org.openhab.core.voice.DialogRegistration",
+                    "org.openhab.core.voice.dialog.DialogRegistration")));
 
     private final Logger logger = LoggerFactory.getLogger(JsonStorageService.class);
 

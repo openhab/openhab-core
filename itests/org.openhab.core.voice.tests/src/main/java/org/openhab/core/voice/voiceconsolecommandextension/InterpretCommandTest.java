@@ -22,10 +22,10 @@ import java.util.Hashtable;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
-import org.openhab.core.voice.internal.TTSServiceStub;
 import org.openhab.core.voice.internal.VoiceConfigurationConstants;
-import org.openhab.core.voice.internal.VoiceStub;
+import org.openhab.core.voice.text.HumanLanguageInterpreterStub;
+import org.openhab.core.voice.tts.TTSServiceStub;
+import org.openhab.core.voice.tts.VoiceStub;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 

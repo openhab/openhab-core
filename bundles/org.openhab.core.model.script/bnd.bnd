@@ -52,7 +52,10 @@ Import-Package: \
  org.openhab.core.types,\
  org.openhab.core.util,\
  org.openhab.core.voice,\
+ org.openhab.core.voice.dialog.trigger.ks,\
+ org.openhab.core.voice.stt,\
  org.openhab.core.voice.text,\
+ org.openhab.core.voice.tts,\
  com.google.common.*;version="14",\
  javax.measure,\
  javax.measure.quantity,\
