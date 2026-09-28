@@ -42,4 +42,8 @@ public enum PlayPauseType implements PrimitiveType, State, Command {
     public String toFullString() {
         return super.toString();
     }
+
+    public PlayPauseType toggle() {
+        return this == PLAY ? PAUSE : PLAY;
+    }
 }
