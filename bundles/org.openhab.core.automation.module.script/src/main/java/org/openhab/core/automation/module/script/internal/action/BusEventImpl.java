@@ -27,6 +27,8 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
@@ -123,6 +125,30 @@ public class BusEventImpl implements BusEvent {
     }
 
     @Override
+    public void sendCommand(Item item, DecimalType command) {
+        sendCommand(item, command, null);
+    }
+
+    @Override
+    public void sendCommand(Item item, DecimalType command, @Nullable String source) {
+        if (item != null) {
+            publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, buildSource(source)));
+        }
+    }
+
+    @Override
+    public void sendCommand(Item item, QuantityType<?> command) {
+        sendCommand(item, command, null);
+    }
+
+    @Override
+    public void sendCommand(Item item, QuantityType<?> command, @Nullable String source) {
+        if (item != null) {
+            publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, buildSource(source)));
+        }
+    }
+
+    @Override
     public void postUpdate(Item item, String stateString) {
         postUpdate(item, stateString, null);
     }
@@ -178,6 +204,30 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void postUpdate(Item item, State state, @Nullable String source) {
+        if (item != null) {
+            publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
+        }
+    }
+
+    @Override
+    public void postUpdate(Item item, DecimalType state) {
+        postUpdate(item, state, null);
+    }
+
+    @Override
+    public void postUpdate(Item item, DecimalType state, @Nullable String source) {
+        if (item != null) {
+            publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
+        }
+    }
+
+    @Override
+    public void postUpdate(Item item, QuantityType<?> state) {
+        postUpdate(item, state, null);
+    }
+
+    @Override
+    public void postUpdate(Item item, QuantityType<?> state, @Nullable String source) {
         if (item != null) {
             publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
         }
