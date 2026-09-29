@@ -30,6 +30,7 @@ import org.openhab.core.types.TimeSeries;
  * be sent to the bus, so that all interested bundles are notified.
  *
  * @author Florian Hotze - Initial contribution
+ * @author Mark Herwege - DecimalType and QuantityType overrides
  */
 @NonNullByDefault
 public interface BusEvent {
@@ -243,7 +244,7 @@ public interface BusEvent {
      * @param item the item to send the time series for
      * @param timeSeries a {@link TimeSeries} containing policy and values
      */
-    void sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries);
+    void sendTimeSeries(Item item, TimeSeries timeSeries);
 
     /**
      * Sends a time series to the event bus
@@ -252,7 +253,7 @@ public interface BusEvent {
      * @param timeSeries a {@link TimeSeries} containing policy and values
      * @param source the source of the time series
      */
-    void sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries, @Nullable String source);
+    void sendTimeSeries(Item item, TimeSeries timeSeries, @Nullable String source);
 
     /**
      * Sends a time series to the event bus
@@ -262,7 +263,7 @@ public interface BusEvent {
      *            {@link State}
      * @param policy either <code>ADD</code> or <code>REPLACE</code>
      */
-    void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy);
+    void sendTimeSeries(String itemName, Map<ZonedDateTime, State> values, String policy);
 
     /**
      * Sends a time series to the event bus
@@ -273,8 +274,7 @@ public interface BusEvent {
      * @param policy either <code>ADD</code> or <code>REPLACE</code>
      * @param source the source of the time series
      */
-    void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy,
-            @Nullable String source);
+    void sendTimeSeries(String itemName, Map<ZonedDateTime, State> values, String policy, @Nullable String source);
 
     /**
      * Stores the current states for a list of items in a map.

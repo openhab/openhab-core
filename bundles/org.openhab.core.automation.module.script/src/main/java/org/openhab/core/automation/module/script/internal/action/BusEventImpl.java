@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Florian Hotze - Refactored to OSGi service
+ * @author Mark Herwege - DecimalType and QuantityType overrides
  */
 @Component(immediate = true, service = BusEvent.class)
 @NonNullByDefault
@@ -63,16 +64,12 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void sendCommand(Item item, String commandString) {
-        if (item != null) {
-            sendCommand(item.getName(), commandString);
-        }
+        sendCommand(item.getName(), commandString);
     }
 
     @Override
     public void sendCommand(Item item, String commandString, @Nullable String source) {
-        if (item != null) {
-            sendCommand(item.getName(), commandString, source);
-        }
+        sendCommand(item.getName(), commandString, source);
     }
 
     @Override
@@ -82,9 +79,7 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void sendCommand(Item item, Number command, @Nullable String source) {
-        if (item != null && command != null) {
-            sendCommand(item.getName(), command.toString(), source);
-        }
+        sendCommand(item.getName(), command.toString(), source);
     }
 
     @Override
@@ -119,9 +114,7 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void sendCommand(Item item, Command command, @Nullable String source) {
-        if (item != null) {
-            publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, buildSource(source)));
-        }
+        publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, buildSource(source)));
     }
 
     @Override
@@ -131,9 +124,7 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void sendCommand(Item item, DecimalType command, @Nullable String source) {
-        if (item != null) {
-            publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, buildSource(source)));
-        }
+        publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, buildSource(source)));
     }
 
     @Override
@@ -143,9 +134,7 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void sendCommand(Item item, QuantityType<?> command, @Nullable String source) {
-        if (item != null) {
-            publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, buildSource(source)));
-        }
+        publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, buildSource(source)));
     }
 
     @Override
@@ -155,9 +144,7 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void postUpdate(Item item, String stateString, @Nullable String source) {
-        if (item != null) {
-            postUpdate(item.getName(), stateString, source);
-        }
+        postUpdate(item.getName(), stateString, source);
     }
 
     @Override
@@ -167,9 +154,7 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void postUpdate(Item item, Number state, @Nullable String source) {
-        if (item != null && state != null) {
-            postUpdate(item.getName(), state.toString(), source);
-        }
+        postUpdate(item.getName(), state.toString(), source);
     }
 
     private static <T extends State> List<String> getAcceptedDataTypeNames(Item item) {
@@ -204,9 +189,7 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void postUpdate(Item item, State state, @Nullable String source) {
-        if (item != null) {
-            publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
-        }
+        publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
     }
 
     @Override
@@ -216,9 +199,7 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void postUpdate(Item item, DecimalType state, @Nullable String source) {
-        if (item != null) {
-            publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
-        }
+        publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
     }
 
     @Override
@@ -228,54 +209,46 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void postUpdate(Item item, QuantityType<?> state, @Nullable String source) {
-        if (item != null) {
-            publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
-        }
+        publisher.post(ItemEventFactory.createStateEvent(item.getName(), state, buildSource(source)));
     }
 
     @Override
-    public void sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries) {
+    public void sendTimeSeries(Item item, TimeSeries timeSeries) {
         sendTimeSeries(item, timeSeries, null);
     }
 
     @Override
-    public void sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries, @Nullable String source) {
-        if (item != null && timeSeries != null) {
-            publisher.post(ItemEventFactory.createTimeSeriesEvent(item.getName(), timeSeries, buildSource(source)));
-        }
+    public void sendTimeSeries(Item item, TimeSeries timeSeries, @Nullable String source) {
+        publisher.post(ItemEventFactory.createTimeSeriesEvent(item.getName(), timeSeries, buildSource(source)));
     }
 
     @Override
-    public void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy) {
+    public void sendTimeSeries(String itemName, Map<ZonedDateTime, State> values, String policy) {
         sendTimeSeries(itemName, values, policy, null);
     }
 
     @Override
-    public void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy,
+    public void sendTimeSeries(String itemName, Map<ZonedDateTime, State> values, String policy,
             @Nullable String source) {
-        if (itemName != null && values != null) {
-            try {
-                TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.valueOf(policy));
-                values.forEach((key, value) -> timeSeries.add(key.toInstant(), value));
-                publisher.post(ItemEventFactory.createTimeSeriesEvent(itemName, timeSeries, buildSource(source)));
-            } catch (IllegalArgumentException e) {
-                logger.warn("Policy '{}' does not exist.", policy);
-            }
+        try {
+            TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.valueOf(policy));
+            values.forEach((key, value) -> timeSeries.add(key.toInstant(), value));
+            publisher.post(ItemEventFactory.createTimeSeriesEvent(itemName, timeSeries, buildSource(source)));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Policy '{}' does not exist.", policy);
         }
     }
 
     @Override
     public Map<Item, State> storeStates(Item... items) {
         Map<Item, State> statesMap = new HashMap<>();
-        if (items != null) {
-            for (Item item : items) {
-                if (item instanceof GroupItem groupItem) {
-                    for (Item member : groupItem.getAllMembers()) {
-                        statesMap.put(member, member.getState());
-                    }
-                } else {
-                    statesMap.put(item, item.getState());
+        for (Item item : items) {
+            if (item instanceof GroupItem groupItem) {
+                for (Item member : groupItem.getAllMembers()) {
+                    statesMap.put(member, member.getState());
                 }
+            } else {
+                statesMap.put(item, item.getState());
             }
         }
         return statesMap;
@@ -283,13 +256,11 @@ public class BusEventImpl implements BusEvent {
 
     @Override
     public void restoreStates(Map<Item, State> statesMap) {
-        if (statesMap != null) {
-            for (Map.Entry<Item, State> entry : statesMap.entrySet()) {
-                if (entry.getValue() instanceof Command) {
-                    sendCommand(entry.getKey(), (Command) entry.getValue());
-                } else {
-                    postUpdate(entry.getKey(), entry.getValue());
-                }
+        for (Map.Entry<Item, State> entry : statesMap.entrySet()) {
+            if (entry.getValue() instanceof Command) {
+                sendCommand(entry.getKey(), (Command) entry.getValue());
+            } else {
+                postUpdate(entry.getKey(), entry.getValue());
             }
         }
     }

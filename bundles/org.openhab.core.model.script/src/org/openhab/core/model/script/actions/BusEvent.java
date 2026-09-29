@@ -15,7 +15,6 @@ package org.openhab.core.model.script.actions;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -28,157 +27,190 @@ import org.openhab.core.types.TimeSeries;
  * The {@link BusEvent} is a wrapper for the BusEvent actions.
  *
  * @author Florian Hotze - Initial contribution
+ * @author Mark Herwege - DecimalType and QuantityType overrides
  */
 public class BusEvent {
 
     public static Object sendCommand(Item item, String commandString) {
-        BusEventActionService.getBusEvent().sendCommand(item, commandString);
+        sendCommand(item, commandString, null);
         return null;
     }
 
     public static Object sendCommand(Item item, String commandString, String source) {
-        BusEventActionService.getBusEvent().sendCommand(item, commandString, source);
+        if (item != null && commandString != null) {
+            BusEventActionService.getBusEvent().sendCommand(item, commandString, source);
+        }
         return null;
     }
 
     public static Object sendCommand(Item item, Number number) {
-        BusEventActionService.getBusEvent().sendCommand(item, number);
+        sendCommand(item, number, null);
         return null;
     }
 
     public static Object sendCommand(Item item, Number number, String source) {
-        BusEventActionService.getBusEvent().sendCommand(item, number, source);
+        if (item != null && number != null) {
+            BusEventActionService.getBusEvent().sendCommand(item, number, source);
+        }
         return null;
     }
 
     public static Object sendCommand(String itemName, String commandString) {
-        BusEventActionService.getBusEvent().sendCommand(itemName, commandString);
+        sendCommand(itemName, commandString, null);
         return null;
     }
 
     public static Object sendCommand(String itemName, String commandString, String source) {
-        BusEventActionService.getBusEvent().sendCommand(itemName, commandString, source);
+        if (itemName != null && commandString != null) {
+            BusEventActionService.getBusEvent().sendCommand(itemName, commandString, source);
+        }
         return null;
     }
 
     public static Object sendCommand(Item item, Command command) {
-        BusEventActionService.getBusEvent().sendCommand(item, command);
+        sendCommand(item, command, null);
         return null;
     }
 
     public static Object sendCommand(Item item, Command command, String source) {
-        BusEventActionService.getBusEvent().sendCommand(item, command, source);
+        if (item != null && command != null) {
+            BusEventActionService.getBusEvent().sendCommand(item, command, source);
+        }
         return null;
     }
 
     public static Object sendCommand(Item item, DecimalType command) {
-        BusEventActionService.getBusEvent().sendCommand(item, command);
+        sendCommand(item, command, null);
         return null;
     }
 
     public static Object sendCommand(Item item, DecimalType command, String source) {
-        BusEventActionService.getBusEvent().sendCommand(item, command, source);
+        if (item != null && command != null) {
+            BusEventActionService.getBusEvent().sendCommand(item, command, source);
+        }
         return null;
     }
 
     public static Object sendCommand(Item item, QuantityType<?> command) {
-        BusEventActionService.getBusEvent().sendCommand(item, command);
+        sendCommand(item, command, null);
         return null;
     }
 
     public static Object sendCommand(Item item, QuantityType<?> command, String source) {
-        BusEventActionService.getBusEvent().sendCommand(item, command, source);
+        if (item != null && command != null) {
+            BusEventActionService.getBusEvent().sendCommand(item, command, source);
+        }
         return null;
     }
 
     public static Object postUpdate(Item item, Number state) {
-        BusEventActionService.getBusEvent().postUpdate(item, state);
+        postUpdate(item, state, null);
         return null;
     }
 
     public static Object postUpdate(Item item, Number state, String source) {
-        BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        if (item != null && state != null) {
+            BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        }
         return null;
     }
 
     public static Object postUpdate(Item item, String stateAsString) {
-        BusEventActionService.getBusEvent().postUpdate(item, stateAsString);
+        postUpdate(item, stateAsString, null);
         return null;
     }
 
     public static Object postUpdate(Item item, String stateAsString, String source) {
-        BusEventActionService.getBusEvent().postUpdate(item, stateAsString, source);
+        if (item != null && stateAsString != null) {
+            BusEventActionService.getBusEvent().postUpdate(item, stateAsString, source);
+        }
         return null;
     }
 
     public static Object postUpdate(String itemName, String stateString) {
-        BusEventActionService.getBusEvent().postUpdate(itemName, stateString);
+        postUpdate(itemName, stateString, null);
         return null;
     }
 
     public static Object postUpdate(String itemName, String stateString, String source) {
-        BusEventActionService.getBusEvent().postUpdate(itemName, stateString, source);
+        if (itemName != null && stateString != null) {
+            BusEventActionService.getBusEvent().postUpdate(itemName, stateString, source);
+        }
         return null;
     }
 
     public static Object postUpdate(Item item, State state) {
-        BusEventActionService.getBusEvent().postUpdate(item, state);
+        postUpdate(item, state, null);
         return null;
     }
 
     public static Object postUpdate(Item item, State state, String source) {
-        BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        if (item != null && state != null) {
+            BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        }
         return null;
     }
 
     public static Object postUpdate(Item item, DecimalType state) {
-        BusEventActionService.getBusEvent().postUpdate(item, state);
+        postUpdate(item, state, null);
         return null;
     }
 
     public static Object postUpdate(Item item, DecimalType state, String source) {
-        BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        if (item != null && state != null) {
+            BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        }
         return null;
     }
 
     public static Object postUpdate(Item item, QuantityType<?> state) {
-        BusEventActionService.getBusEvent().postUpdate(item, state);
+        postUpdate(item, state, null);
         return null;
     }
 
     public static Object postUpdate(Item item, QuantityType<?> state, String source) {
-        BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        if (item != null && state != null) {
+            BusEventActionService.getBusEvent().postUpdate(item, state, source);
+        }
         return null;
     }
 
-    public static Object sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries) {
-        BusEventActionService.getBusEvent().sendTimeSeries(item, timeSeries);
+    public static Object sendTimeSeries(Item item, TimeSeries timeSeries) {
+        sendTimeSeries(item, timeSeries, null);
         return null;
     }
 
-    public static Object sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries, String source) {
-        BusEventActionService.getBusEvent().sendTimeSeries(item, timeSeries, source);
+    public static Object sendTimeSeries(Item item, TimeSeries timeSeries, String source) {
+        if (item != null && timeSeries != null) {
+            BusEventActionService.getBusEvent().sendTimeSeries(item, timeSeries, source);
+        }
         return null;
     }
 
-    public static Object sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values,
-            String policy) {
-        BusEventActionService.getBusEvent().sendTimeSeries(itemName, values, policy);
+    public static Object sendTimeSeries(String itemName, Map<ZonedDateTime, State> values, String policy) {
+        sendTimeSeries(itemName, values, policy, null);
         return null;
     }
 
-    public static Object sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values,
-            String policy, String source) {
-        BusEventActionService.getBusEvent().sendTimeSeries(itemName, values, policy, source);
+    public static Object sendTimeSeries(String itemName, Map<ZonedDateTime, State> values, String policy,
+            String source) {
+        if (itemName != null && values != null && policy != null) {
+            BusEventActionService.getBusEvent().sendTimeSeries(itemName, values, policy, source);
+        }
         return null;
     }
 
     public static Map<Item, State> storeStates(Item... items) {
+        if (items == null || items.length == 0) {
+            return Map.of();
+        }
         return BusEventActionService.getBusEvent().storeStates(items);
     }
 
     public static Object restoreStates(Map<Item, State> statesMap) {
-        BusEventActionService.getBusEvent().restoreStates(statesMap);
+        if (statesMap != null) {
+            BusEventActionService.getBusEvent().restoreStates(statesMap);
+        }
         return null;
     }
 }
