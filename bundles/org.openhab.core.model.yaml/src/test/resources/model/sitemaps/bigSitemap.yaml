@@ -194,5 +194,8 @@ sitemaps:
                 argument: "100"
           - type: Group
             item: DemoSwitchGroup
+          - type: Sitemap
+            name: sitemap
+            label: Test Nested Sitemap
           - type: Default
             item: DemoLocation

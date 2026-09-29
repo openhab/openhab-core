@@ -50,6 +50,7 @@ import org.openhab.core.model.sitemap.sitemap.ModelLinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.ModelMapping;
 import org.openhab.core.model.sitemap.sitemap.ModelMappingList;
 import org.openhab.core.model.sitemap.sitemap.ModelMapview;
+import org.openhab.core.model.sitemap.sitemap.ModelNestedSitemap;
 import org.openhab.core.model.sitemap.sitemap.ModelSelection;
 import org.openhab.core.model.sitemap.sitemap.ModelSetpoint;
 import org.openhab.core.model.sitemap.sitemap.ModelSitemap;
@@ -72,6 +73,7 @@ import org.openhab.core.sitemap.Input;
 import org.openhab.core.sitemap.LinkableWidget;
 import org.openhab.core.sitemap.Mapping;
 import org.openhab.core.sitemap.Mapview;
+import org.openhab.core.sitemap.NestedSitemap;
 import org.openhab.core.sitemap.Parent;
 import org.openhab.core.sitemap.Rule;
 import org.openhab.core.sitemap.Selection;
@@ -96,6 +98,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Mark Herwege - Separate registry from model
+ * @author Mark Herwege - Add support for nested sitemaps
  */
 @NonNullByDefault
 @Component(service = { SitemapProvider.class, DslSitemapProvider.class }, immediate = true)
@@ -133,12 +136,11 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     @Override
-    public @Nullable Sitemap getSitemap(String sitemapName) {
+    public @Nullable Sitemap getSitemap(String name) {
         Sitemap sitemap = sitemapCache.entrySet().stream().filter(e -> !isIsolatedModel(e.getKey()))
-                .flatMap(e -> e.getValue().stream()).filter(s -> sitemapName.equals(s.getName())).findAny()
-                .orElse(null);
+                .flatMap(e -> e.getValue().stream()).filter(s -> name.equals(s.getName())).findAny().orElse(null);
         if (sitemap == null) {
-            logger.trace("Sitemap {} cannot be found", sitemapName);
+            logger.trace("Sitemap {} cannot be found", name);
         }
         return sitemap;
     }
@@ -251,6 +253,10 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     ModelDefault modelDefault = (ModelDefault) modelWidget;
                     defaultWidget.setHeight(modelDefault.getHeight());
                     break;
+                case NestedSitemap nestedSitemapWidget:
+                    ModelNestedSitemap modelNestedSitemap = (ModelNestedSitemap) modelWidget;
+                    nestedSitemapWidget.setName(modelNestedSitemap.getSitemapName());
+                    break;
                 default:
                     break;
             }
@@ -287,6 +293,11 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
         String instanceTypeName = modelWidget.eClass().getInstanceTypeName();
         String widgetType = instanceTypeName
                 .substring(instanceTypeName.lastIndexOf("." + MODEL_TYPE_PREFIX) + MODEL_TYPE_PREFIX.length() + 1);
+        if (widgetType.equals("NestedSitemap")) {
+            // We need a different type for nested sitemaps, but can keep a common name for the model type, so we need
+            // to distinguish them here
+            widgetType = SitemapFactory.SITEMAP;
+        }
         return widgetType;
     }
 
@@ -316,8 +327,8 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
                     "Defining buttons as properties of a Butongrid widget is deprecated although still supported; please prefer Button sub-widgets");
             EList<ModelButtonDefinition> modelButtons = modelButtonList.getElements();
             modelButtons.forEach(modelButton -> {
-                Button button = (Button) Objects.requireNonNull(sitemapFactory.createWidget(
-                        org.openhab.core.sitemap.internal.registry.SitemapFactoryImpl.BUTTON, buttongridWidget));
+                Button button = (Button) Objects
+                        .requireNonNull(sitemapFactory.createWidget(SitemapFactory.BUTTON, buttongridWidget));
                 button.setItem(modelButtongrid.getItem());
                 button.setRow(modelButton.getRow());
                 button.setColumn(modelButton.getColumn());
@@ -433,10 +444,9 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     private void notifyRemovedSitemap(String modelName, Sitemap sitemap) {
-        String sitemapName = sitemap.getName();
+        String name = sitemap.getName();
         Sitemap existingSitemap = sitemapCache.entrySet().stream().filter(e -> !e.getKey().equals(modelName))
-                .flatMap(e -> e.getValue().stream()).filter(s -> sitemapName.equals(s.getName())).findAny()
-                .orElse(null);
+                .flatMap(e -> e.getValue().stream()).filter(s -> name.equals(s.getName())).findAny().orElse(null);
         if (existingSitemap != null) {
             // Another sitemap with the same name exists, so we need to update it to use the other one instead
             // of the removed one

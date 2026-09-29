@@ -176,6 +176,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         result.command = partial.command;
         result.releaseCommand = partial.releaseCommand;
         result.stateless = partial.stateless;
+        result.name = partial.name;
 
         if (partial.label != null) {
             if (partial.label.isValueNode()) {
@@ -381,6 +382,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         public String releaseCommand;
         public Boolean stateless;
         public JsonNode visibility;
+        public String name;
         public List<YamlPartialWidgetDTO> widgets;
     }
 }

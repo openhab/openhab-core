@@ -12,8 +12,6 @@
  */
 package org.openhab.core.sitemap;
 
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
@@ -69,18 +67,4 @@ public interface Sitemap extends Identifiable<String>, Parent {
      * @param icon the new sitemap icon.
      */
     void setIcon(@Nullable String icon);
-
-    /**
-     * Returns the top level list of widgets in the sitemap. The returned list is a modifiable list.
-     *
-     * @return list of widgets.
-     */
-    List<Widget> getWidgets();
-
-    /**
-     * Replace the sitemap child widgets with a new list of widgets.
-     *
-     * @param widgets
-     */
-    void setWidgets(List<Widget> widgets);
 }
