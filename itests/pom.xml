@@ -171,7 +171,7 @@
         <dependency>
           <groupId>org.junit.platform</groupId>
           <artifactId>junit-platform-commons</artifactId>
-          <version>1.14.4</version>
+          <version>${junit.version}</version>
         </dependency>
       </dependencies>
 
