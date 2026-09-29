@@ -234,7 +234,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature in percent
      */
     public static final ChannelType SYSTEM_COLOR_TEMPERATURE = ChannelTypeBuilder
-            .state(SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE, "Color Temperature", CoreItemFactory.DIMMER)
+            .state(SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE, "Color Temperature Percent", CoreItemFactory.DIMMER)
             .withDescription("Controls the color temperature of the light from 0 (cold) to 100 (warm)")
             .withCategory("ColorLight")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
