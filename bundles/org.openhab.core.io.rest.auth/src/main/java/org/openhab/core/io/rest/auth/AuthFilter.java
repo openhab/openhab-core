@@ -42,6 +42,8 @@ import javax.ws.rs.ext.Provider;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jose4j.jwt.consumer.ErrorCodes;
+import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.User;
@@ -54,7 +56,6 @@ import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.auth.internal.ExpiringUserSecurityContextCache;
-import org.openhab.core.io.rest.auth.internal.JwtHelper;
 import org.openhab.core.io.rest.auth.internal.JwtSecurityContext;
 import org.openhab.core.io.rest.auth.internal.UserSecurityContext;
 import org.osgi.framework.Constants;
@@ -188,8 +189,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
     private SecurityContext authenticateBearerToken(String token) throws AuthenticationException {
         if (token.startsWith(API_TOKEN_PREFIX)) {
-            UserApiTokenCredentials credentials = new UserApiTokenCredentials(token);
-            Authentication auth = userRegistry.authenticate(credentials);
+            Authentication auth = userRegistry.authenticate(new UserApiTokenCredentials(token.toCharArray()));
             User user = userRegistry.get(auth.getUsername());
             if (user == null) {
                 throw new AuthenticationException("User not found in registry");
@@ -216,9 +216,8 @@ public class AuthFilter implements ContainerRequestFilter {
             throw new AuthenticationException("Invalid Basic authentication credential format");
         }
 
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(decodedCredentials[0],
-                decodedCredentials[1]);
-        Authentication auth = userRegistry.authenticate(credentials);
+        Authentication auth = userRegistry.authenticate(
+                new UsernamePasswordCredentials(decodedCredentials[0], decodedCredentials[1].toCharArray()));
         User user = userRegistry.get(auth.getUsername());
         if (user == null) {
             throw new AuthenticationException("User not found in registry");
@@ -242,7 +241,12 @@ public class AuthFilter implements ContainerRequestFilter {
                     requestContext.setSecurityContext(sc);
                 }
             } catch (AuthenticationException e) {
-                logger.warn("Unauthorized API request from {}: {}", getClientIp(servletRequest), e.getMessage());
+                if (e.getCause() instanceof InvalidJwtException ije && ije.hasErrorCode(ErrorCodes.EXPIRED)) {
+                    logger.debug("API request with expired token from {}: {}", getClientIp(servletRequest),
+                            ije.getMessage());
+                } else {
+                    logger.warn("Unauthorized API request from {}: {}", getClientIp(servletRequest), e.getMessage());
+                }
                 requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
         }

@@ -32,7 +32,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.auth.UserRegistry;
-import org.openhab.core.io.rest.auth.internal.JwtHelper;
 
 /**
  * The {@link AuthFilterTest} is a

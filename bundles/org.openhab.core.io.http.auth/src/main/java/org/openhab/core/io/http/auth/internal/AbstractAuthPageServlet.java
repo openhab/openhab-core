@@ -120,7 +120,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
         csrfTokens.remove(csrfToken);
     }
 
-    protected User login(String username, String password) throws AuthenticationException {
+    protected User login(String username, char[] password) throws AuthenticationException {
         // Enforce a dynamic cooldown period after a failed authentication attempt: the number of
         // consecutive failures in seconds
         if (lastAuthenticationFailure != null && lastAuthenticationFailure
@@ -129,8 +129,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
         }
 
         // Authenticate the user with the supplied credentials
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
-        Authentication auth = authProvider.authenticate(credentials);
+        Authentication auth = authProvider.authenticate(new UsernamePasswordCredentials(username, password));
         logger.debug("Login successful: {}", auth.getUsername());
         lastAuthenticationFailure = null;
         authenticationFailureCount = 0;
