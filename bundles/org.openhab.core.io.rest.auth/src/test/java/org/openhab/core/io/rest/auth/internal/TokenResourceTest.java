@@ -54,6 +54,10 @@ import org.openhab.core.auth.UserSession;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class TokenResourceTest {
 
+    /** PKCE code verifier and its S256 code challenge, taken from RFC 7636 Appendix B. */
+    private static final String CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+    private static final String CODE_CHALLENGE = "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM";
+
     private @NonNullByDefault({}) TokenResource tokenResource;
 
     private @Mock @NonNullByDefault({}) UserRegistry userRegistryMock;
@@ -99,9 +103,13 @@ public class TokenResourceTest {
         assertEquals(expectedError, error.error);
     }
 
+    /**
+     * Creates a user with a pending token carrying the S256 {@link #CODE_CHALLENGE}, as issued by the
+     * authorization endpoint (PKCE is mandatory).
+     */
     private ManagedUser createUserWithPendingToken(String username, String authCode, String clientId,
             String redirectUri, String scope) {
-        return createUserWithPendingToken(username, authCode, clientId, redirectUri, scope, null, null);
+        return createUserWithPendingToken(username, authCode, clientId, redirectUri, scope, CODE_CHALLENGE, "S256");
     }
 
     @NonNullByDefault({})
@@ -134,7 +142,7 @@ public class TokenResourceTest {
         when(userRegistryMock.getAll()).thenReturn(List.of(user));
 
         Response response = callGetToken("authorization_code", authCode, "http://localhost/callback", "test-client",
-                null, null, false, null);
+                null, CODE_VERIFIER, false, null);
 
         assertEquals(200, response.getStatus());
         assertNotNull(response.getEntity());
@@ -160,7 +168,7 @@ public class TokenResourceTest {
         when(userRegistryMock.getAll()).thenReturn(List.of(user));
 
         Response response = callGetToken("authorization_code", authCode, "http://localhost/callback", "wrong-client",
-                null, null, false, null);
+                null, CODE_VERIFIER, false, null);
 
         assertTokenError(response, "invalid_grant");
     }
@@ -173,7 +181,7 @@ public class TokenResourceTest {
         when(userRegistryMock.getAll()).thenReturn(List.of(user));
 
         Response response = callGetToken("authorization_code", authCode, "http://localhost/wrong", "test-client", null,
-                null, false, null);
+                CODE_VERIFIER, false, null);
 
         assertTokenError(response, "invalid_grant");
     }
@@ -225,7 +233,8 @@ public class TokenResourceTest {
     }
 
     @Test
-    public void pkcePlainValidationSucceeds() {
+    public void pkcePlainMethodIsRejected() {
+        // The 'plain' transformation is no longer supported, even when the verifier matches the challenge
         String codeVerifier = "plain-code-challenge";
 
         String authCode = UUID.randomUUID().toString();
@@ -236,20 +245,9 @@ public class TokenResourceTest {
         Response response = callGetToken("authorization_code", authCode, "http://localhost/callback", "test-client",
                 null, codeVerifier, false, null);
 
-        assertEquals(200, response.getStatus());
-    }
-
-    @Test
-    public void pkcePlainValidationFailsWithWrongVerifier() {
-        String authCode = UUID.randomUUID().toString();
-        ManagedUser user = createUserWithPendingToken("testuser", authCode, "test-client", "http://localhost/callback",
-                "admin", "correct-challenge", "plain");
-        when(userRegistryMock.getAll()).thenReturn(List.of(user));
-
-        Response response = callGetToken("authorization_code", authCode, "http://localhost/callback", "test-client",
-                null, "wrong-verifier", false, null);
-
-        assertTokenError(response, "invalid_grant");
+        assertTokenError(response, "invalid_request");
+        assertNotNull(user.getPendingToken());
+        assertTrue(user.getSessions().isEmpty());
     }
 
     @Test
@@ -267,17 +265,20 @@ public class TokenResourceTest {
     }
 
     @Test
-    public void noPkceSkipsValidation() {
+    public void pendingTokenWithoutPkceIsRejected() {
+        // A pending token without a code challenge (e.g. persisted before PKCE was enforced) must not be
+        // exchangeable, even if the client sends a verifier
         String authCode = UUID.randomUUID().toString();
-        // No code challenge in pending token (both null)
         ManagedUser user = createUserWithPendingToken("testuser", authCode, "test-client", "http://localhost/callback",
-                "admin");
+                "admin", null, null);
         when(userRegistryMock.getAll()).thenReturn(List.of(user));
 
         Response response = callGetToken("authorization_code", authCode, "http://localhost/callback", "test-client",
-                null, null, false, null);
+                null, CODE_VERIFIER, false, null);
 
-        assertEquals(200, response.getStatus());
+        assertTokenError(response, "invalid_grant");
+        assertNotNull(user.getPendingToken());
+        assertTrue(user.getSessions().isEmpty());
     }
 
     // --- Refresh Token Grant ---
@@ -556,8 +557,8 @@ public class TokenResourceTest {
                 "admin");
         when(userRegistryMock.getAll()).thenReturn(List.of(user));
 
-        Response response = callGetToken("authorization_code", authCode, "http://localhost/", "test-client", null, null,
-                true, null);
+        Response response = callGetToken("authorization_code", authCode, "http://localhost/", "test-client", null,
+                CODE_VERIFIER, true, null);
 
         assertEquals(200, response.getStatus());
         // Should have Set-Cookie header for root URI
@@ -574,7 +575,7 @@ public class TokenResourceTest {
         when(userRegistryMock.getAll()).thenReturn(List.of(user));
 
         Response response = callGetToken("authorization_code", authCode, "http://localhost/some/path", "test-client",
-                null, null, true, null);
+                null, CODE_VERIFIER, true, null);
 
         // Non-root redirect URI with useCookie should fail
         assertTokenError(response, "unauthorized_client");
