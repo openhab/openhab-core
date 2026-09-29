@@ -18,6 +18,8 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
@@ -100,6 +102,40 @@ public interface BusEvent {
     void sendCommand(Item item, Command command, @Nullable String source);
 
     /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param command the command to send
+     */
+    void sendCommand(Item item, DecimalType command);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param command the command to send
+     * @param source the source of the command
+     */
+    void sendCommand(Item item, DecimalType command, @Nullable String source);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param command the command to send
+     */
+    void sendCommand(Item item, QuantityType<?> command);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param command the command to send
+     * @param source the source of the command
+     */
+    void sendCommand(Item item, QuantityType<?> command, @Nullable String source);
+
+    /**
      * Posts a status update for a specified item to the event bus.
      *
      * @param item the item to send the status update for
@@ -166,6 +202,40 @@ public interface BusEvent {
      * @param source the source of the status update
      */
     void postUpdate(Item item, State state, @Nullable String source);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     */
+    void postUpdate(Item item, DecimalType state);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     * @param source the source of the status update
+     */
+    void postUpdate(Item item, DecimalType state, @Nullable String source);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     */
+    void postUpdate(Item item, QuantityType<?> state);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     * @param source the source of the status update
+     */
+    void postUpdate(Item item, QuantityType<?> state, @Nullable String source);
 
     /**
      * Sends a time series to the event bus
