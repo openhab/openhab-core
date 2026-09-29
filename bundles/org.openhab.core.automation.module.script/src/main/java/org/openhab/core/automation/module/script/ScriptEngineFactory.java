@@ -87,4 +87,14 @@ public interface ScriptEngineFactory {
     default @Nullable ScriptDependencyTracker getDependencyTracker() {
         return null;
     }
+
+    /**
+     * @return {@code true} if the engine is done initializing and is ready to serve, {@code false} otherwise.
+     *
+     * @implNote The default implementation returns {@code true}, making this an optional method that can be used by
+     *           engines that need to do further initialization after bundle activation.
+     */
+    default boolean isReady() {
+        return true;
+    }
 }

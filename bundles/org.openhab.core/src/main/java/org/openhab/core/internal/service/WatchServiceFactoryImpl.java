@@ -69,12 +69,14 @@ public class WatchServiceFactoryImpl implements WatchServiceFactory {
                 Dictionary<String, Object> map = new Hashtable<>();
 
                 map.put("name", name);
+                map.put(WatchService.SERVICE_PROPERTY_NAME, name);
                 map.put("path", basePath.toString());
                 config.update(map);
             } else {
                 Configuration config = configurations[0];
                 Dictionary<String, Object> map = config.getProperties();
                 map.put("name", name);
+                map.put(WatchService.SERVICE_PROPERTY_NAME, name);
                 map.put("path", basePath.toString());
                 config.update(map);
             }
