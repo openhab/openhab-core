@@ -25,7 +25,7 @@ ModelLinkableWidget:
 
 ModelNestedSitemap:
     {ModelNestedSitemap} 'Sitemap' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('name=' sitemapName=ID) | 
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
