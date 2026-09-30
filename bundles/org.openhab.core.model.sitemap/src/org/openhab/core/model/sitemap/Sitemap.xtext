@@ -25,7 +25,7 @@ ModelLinkableWidget:
 
 ModelNestedSitemap:
     {ModelNestedSitemap} 'Sitemap' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('name=' sitemapName=ID) | 
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -34,7 +34,7 @@ ModelNestedSitemap:
 
 ModelFrame:
     {ModelFrame} 'Frame' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -42,7 +42,7 @@ ModelFrame:
 
 ModelText:
     {ModelText} 'Text' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -50,7 +50,7 @@ ModelText:
 
 ModelGroup:
     'Group' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -58,7 +58,7 @@ ModelGroup:
 
 ModelImage:
     'Image' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('url=' url=STRING) | ('refresh=' refresh=INT) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -67,7 +67,7 @@ ModelImage:
 
 ModelVideo:
     'Video' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('url=' url=STRING) | ('encoding=' encoding=STRING) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -76,7 +76,7 @@ ModelVideo:
 
 ModelChart:
     'Chart' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('service=' service=STRING) | ('refresh=' refresh=INT) | ('period=' period=Period) |
     ('legend=' legend=BOOLEAN_OBJECT) | ('forceasitem=' forceAsItem=BOOLEAN_OBJECT) |
     ('yAxisDecimalPattern=' yAxisDecimalPattern=(STRING)) |
@@ -88,7 +88,7 @@ ModelChart:
 
 ModelWebview:
     'Webview' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('height=' height=INT) | ('url=' url=STRING) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -97,7 +97,7 @@ ModelWebview:
 
 ModelSwitch:
     'Switch' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('mappings=' mappings=ModelMappingList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -106,7 +106,7 @@ ModelSwitch:
 
 ModelMapview:
     'Mapview' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('height=' height=INT) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -115,7 +115,7 @@ ModelMapview:
 
 ModelSlider:
     'Slider' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     (switchEnabled?='switchSupport') | (releaseOnly?='releaseOnly') |
     ('minValue=' minValue=Number) | ('maxValue=' maxValue=Number) | ('step=' step=Number) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
@@ -125,7 +125,7 @@ ModelSlider:
 
 ModelSelection:
     'Selection' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('mappings=' mappings=ModelMappingList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -134,7 +134,7 @@ ModelSelection:
 
 ModelSetpoint:
     'Setpoint' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('minValue=' minValue=Number) | ('maxValue=' maxValue=Number) | ('step=' step=Number) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -143,7 +143,7 @@ ModelSetpoint:
 
 ModelColorpicker:
     'Colorpicker' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
     ('iconcolor=' iconColor=ModelColorArrayList) |
@@ -151,7 +151,7 @@ ModelColorpicker:
 
 ModelColortemperaturepicker:
     'Colortemperaturepicker' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('minValue=' minValue=Number) | ('maxValue=' maxValue=Number) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -160,7 +160,7 @@ ModelColortemperaturepicker:
 
 ModelInput:
     'Input' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('inputHint=' inputHint=STRING) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -169,7 +169,7 @@ ModelInput:
 
 ModelButtongrid:
     {ModelButtongrid} 'Buttongrid' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('buttons=' buttons=ModelButtonDefinitionList) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -179,7 +179,7 @@ ModelButtongrid:
 ModelButton:
     'Button' (('row=' row=INT) | ('column=' column=INT) |
     ('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     (stateless?='stateless') | ('click=' cmd=Command) | ('release=' releaseCmd=Command) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -188,7 +188,7 @@ ModelButton:
 
 ModelDefault:
     'Default' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
-    ('icon=' icon=Icon) | ('icon=' IconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
+    ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('height=' height=INT) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
