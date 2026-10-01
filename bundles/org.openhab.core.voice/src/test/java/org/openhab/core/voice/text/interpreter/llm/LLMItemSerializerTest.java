@@ -383,6 +383,12 @@ public class LLMItemSerializerTest {
 
     @Test
     public void testSerializeRecursiveGroups() {
+        /*
+         * Rootless cyclic group hierarchy:
+         * GroupC -> GroupA -> GroupB -> GroupC
+         * (GroupA has parent GroupC, GroupB has parent GroupA, GroupC has parent GroupB)
+         * Since there is no root outside the cycle, GroupA is picked as the entry point (alphabetically first).
+         */
         MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of());
 
         Item groupA = mockItem("GroupA", "Group A", "Group", Set.of(), List.of("GroupC"));
@@ -391,12 +397,54 @@ public class LLMItemSerializerTest {
 
         List<Item> items = List.of(groupA, groupB, groupC);
 
-        String result = LLMItemSerializer.serialize(items, metadataRegistry, null);
-        assertEquals("", result);
+        String expected = """
+                # Format: [..]name [type] ["label"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]
+
+                # Non-semantic Items
+                GroupA
+                ..GroupB
+                ....GroupC
+                """;
+
+        assertEquals(expected, LLMItemSerializer.serialize(items, metadataRegistry, null));
+    }
+
+    @Test
+    public void testSerializeRootlessCycleWithMembers() {
+        /*
+         * Rootless cyclic group hierarchy with member item:
+         * GroupB -> GroupA -> GroupB, with ItemX in GroupB
+         * (GroupA has parent GroupB, GroupB has parent GroupA, ItemX has parent GroupB)
+         * GroupA is picked as the entry point, traversing to child GroupB, which contains child ItemX.
+         */
+        MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of());
+
+        Item groupA = mockItem("GroupA", "Group A", "Group", Set.of(), List.of("GroupB"));
+        Item groupB = mockItem("GroupB", "Group B", "Group", Set.of(), List.of("GroupA"));
+        Item itemX = mockItem("ItemX", "Custom Label X", "Switch", Set.of(), List.of("GroupB"));
+
+        List<Item> items = List.of(groupA, groupB, itemX);
+
+        String expected = """
+                # Format: [..]name [type] ["label"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]
+
+                # Non-semantic Items
+                GroupA
+                ..GroupB
+                ....ItemX Switch "Custom Label X"
+                """;
+
+        assertEquals(expected, LLMItemSerializer.serialize(items, metadataRegistry, null));
     }
 
     @Test
     public void testSerializeRecursiveGroupsFromRoot() {
+        /*
+         * Cyclic group hierarchy starting from a true root:
+         * GroupA (root) -> GroupB -> GroupC -> GroupB
+         * (GroupA has no parent, GroupB has parent GroupA & GroupC, GroupC has parent GroupB)
+         * Traversal starts at true root GroupA and stops at cyclic reference GroupB.
+         */
         MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of());
 
         Item groupA = mockItem("GroupA", "Label A", "Group", Set.of(), List.of());

@@ -129,6 +129,7 @@ public class LLMItemSerializer {
         List<Item> rootEquipments = new ArrayList<>();
         List<Item> rootPoints = new ArrayList<>();
         List<Item> nonSemanticItems = new ArrayList<>();
+        List<Item> allNonSemanticItems = new ArrayList<>();
 
         for (Item item : items) {
             boolean isLocation = SemanticTags.getLocation(item) != null;
@@ -148,6 +149,7 @@ public class LLMItemSerializer {
                     rootPoints.add(item);
                 }
             } else {
+                allNonSemanticItems.add(item);
                 if (!nonSemanticChildNames.contains(item.getName())) {
                     nonSemanticItems.add(item);
                 }
@@ -158,6 +160,7 @@ public class LLMItemSerializer {
         rootEquipments.sort(ITEM_COMPARATOR);
         rootPoints.sort(ITEM_COMPARATOR);
         nonSemanticItems.sort(ITEM_COMPARATOR);
+        allNonSemanticItems.sort(ITEM_COMPARATOR);
 
         List<LocationNode> rootLocNodes = new ArrayList<>();
         List<EquipmentNode> rootEqNodes = new ArrayList<>();
@@ -174,7 +177,13 @@ public class LLMItemSerializer {
             rootPtNodes.add(buildPointNode(pt, locale));
         }
         for (Item item : nonSemanticItems) {
-            nonSemanticNodes.add(buildNonSemanticNode(item, parentToChildren, Set.of(), locale));
+            nonSemanticNodes.add(buildNonSemanticNode(item, parentToChildren, Set.of(), nonSemanticChildNames, locale));
+        }
+        for (Item item : allNonSemanticItems) {
+            if (nonSemanticChildNames.contains(item.getName())) {
+                nonSemanticNodes
+                        .add(buildNonSemanticNode(item, parentToChildren, Set.of(), nonSemanticChildNames, locale));
+            }
         }
         RootNode root = new RootNode(rootLocNodes, rootEqNodes, rootPtNodes, nonSemanticNodes);
         return formatRoot(root);
@@ -458,7 +467,9 @@ public class LLMItemSerializer {
     }
 
     private static NonSemanticItemNode buildNonSemanticNode(Item item, Map<String, List<Item>> parentToChildren,
-            Set<String> ancestors, @Nullable Locale locale) {
+            Set<String> ancestors, Set<String> nonSemanticChildNames, @Nullable Locale locale) {
+        nonSemanticChildNames.remove(item.getName());
+
         List<Item> children = parentToChildren.getOrDefault(item.getName(), List.of());
         List<NonSemanticItemNode> childNodes = new ArrayList<>();
 
@@ -467,7 +478,8 @@ public class LLMItemSerializer {
 
         for (Item child : children) {
             if (!newAncestors.contains(child.getName())) {
-                childNodes.add(buildNonSemanticNode(child, parentToChildren, newAncestors, locale));
+                childNodes.add(
+                        buildNonSemanticNode(child, parentToChildren, newAncestors, nonSemanticChildNames, locale));
             }
         }
 
