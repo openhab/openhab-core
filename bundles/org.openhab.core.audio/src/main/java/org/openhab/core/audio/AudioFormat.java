@@ -412,19 +412,19 @@ public class AudioFormat {
                 // These values must be interdependent (bitRate = bitDepth * frequency)
                 if (null == bitRate) {
                     if (null == bitDepth) {
-                        bitDepth = Integer.valueOf(defaultBitDepth);
+                        bitDepth = defaultBitDepth;
                     }
                     if (null == frequency) {
-                        frequency = Long.valueOf(defaultFrequency);
+                        frequency = defaultFrequency;
                     }
-                    bitRate = Integer.valueOf(bitDepth.intValue() * frequency.intValue());
+                    bitRate = bitDepth * frequency.intValue();
                 } else if (null == bitDepth) {
                     if (null == frequency) {
-                        frequency = Long.valueOf(defaultFrequency);
+                        frequency = defaultFrequency;
                     }
-                    bitDepth = Integer.valueOf(bitRate.intValue() / frequency.intValue());
+                    bitDepth = bitRate / frequency.intValue();
                 } else if (null == frequency) {
-                    frequency = Long.valueOf(bitRate.longValue() / bitDepth.longValue());
+                    frequency = bitRate.longValue() / bitDepth.longValue();
                 }
 
                 format = new AudioFormat(format.getContainer(), format.getCodec(), format.isBigEndian(), bitDepth,
