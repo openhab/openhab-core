@@ -438,6 +438,36 @@ public class LLMItemSerializerTest {
     }
 
     @Test
+    public void testSerializeRootlessCycleMemberSortingBeforeGroups() {
+        /*
+         * Rootless cyclic group hierarchy with member item that sorts before groups:
+         * GroupA <-> GroupB, with AItem in GroupB
+         * (GroupA has parent GroupB, GroupB has parent GroupA, AItem has parent GroupB)
+         * AItem sorts alphabetically before GroupA and GroupB.
+         * GroupA is prioritized as a Group cycle entry point, ensuring AItem is NOT emitted as a duplicate top-level
+         * item.
+         */
+        MetadataRegistry metadataRegistry = mockMetadataRegistry(Map.of());
+
+        Item groupA = mockItem("GroupA", "Group A", "Group", Set.of(), List.of("GroupB"));
+        Item groupB = mockItem("GroupB", "Group B", "Group", Set.of(), List.of("GroupA"));
+        Item aItem = mockItem("AItem", "A Item Label", "Switch", Set.of(), List.of("GroupB"));
+
+        List<Item> items = List.of(aItem, groupA, groupB);
+
+        String expected = """
+                # Format: [..]name [type] ["label"] [:semanticClass] [[properties]] [(commandOptions: COMMAND=Label)]
+
+                # Non-semantic Items
+                GroupA
+                ..GroupB
+                ....AItem Switch "A Item Label"
+                """;
+
+        assertEquals(expected, LLMItemSerializer.serialize(items, metadataRegistry, null));
+    }
+
+    @Test
     public void testSerializeRecursiveGroupsFromRoot() {
         /*
          * Cyclic group hierarchy starting from a true root:

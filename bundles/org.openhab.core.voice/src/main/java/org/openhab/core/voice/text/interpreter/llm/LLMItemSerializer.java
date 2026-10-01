@@ -156,6 +156,12 @@ public class LLMItemSerializer {
                     .add(buildNonSemanticNode(item, parentToChildren, ancestors, nonSemanticChildNames, locale));
         }
         for (Item item : allNonSemanticItems) {
+            if ("Group".equals(item.getType()) && nonSemanticChildNames.contains(item.getName())) {
+                nonSemanticNodes
+                        .add(buildNonSemanticNode(item, parentToChildren, ancestors, nonSemanticChildNames, locale));
+            }
+        }
+        for (Item item : allNonSemanticItems) {
             if (nonSemanticChildNames.contains(item.getName())) {
                 nonSemanticNodes
                         .add(buildNonSemanticNode(item, parentToChildren, ancestors, nonSemanticChildNames, locale));
