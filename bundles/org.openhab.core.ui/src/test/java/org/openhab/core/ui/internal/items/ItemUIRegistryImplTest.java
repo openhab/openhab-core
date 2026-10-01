@@ -41,7 +41,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -132,6 +134,8 @@ public class ItemUIRegistryImplTest {
     private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactoryMock;
     private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistryMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
+    private @Mock @NonNullByDefault({}) LocaleProvider localeProviderMock;
+    private @Mock @NonNullByDefault({}) TranslationProvider translationProviderMock;
     private @Mock @NonNullByDefault({}) Sitemap sitemapMock;
     private @Mock @NonNullByDefault({}) Widget widgetMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
@@ -174,7 +178,7 @@ public class ItemUIRegistryImplTest {
     @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void setup() throws Exception {
         uiRegistry = spy(new ItemUIRegistryImpl(registryMock, metadataRegistryMock, sitemapFactoryMock,
-                sitemapRegistryMock, timeZoneProviderMock));
+                sitemapRegistryMock, timeZoneProviderMock, localeProviderMock, translationProviderMock));
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);

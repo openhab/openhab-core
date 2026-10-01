@@ -21,7 +21,6 @@
 		<parameter name="commandConfirmDialogMessage" type="text">
 			<label>Command Confirmation Dialog Message</label>
 			<description>Defines the default message to be shown in command confirmation dialogs in the UI.</description>
-			<default>Are you sure?</default>
 		</parameter>
 	</config-description>
 
