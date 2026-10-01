@@ -122,4 +122,12 @@ public class AudioFormatTest {
         AudioFormat bestMatch = AudioFormat.getBestMatch(inputs, outputs);
         assertThat("The best match for the audio format was not as expected", bestMatch, is(nullValue()));
     }
+
+    @Test
+    public void flacAudioFormatIsCompatibleWithItself() {
+        AudioFormat flacFormat = AudioFormat.FLAC;
+        assertThat("FLAC format should be compatible with itself", flacFormat.isCompatible(AudioFormat.FLAC), is(true));
+        assertThat("FLAC format codec should be FLAC", flacFormat.getCodec(), is(AudioFormat.CODEC_FLAC));
+        assertThat("FLAC format container should be FLAC", flacFormat.getContainer(), is(AudioFormat.CONTAINER_FLAC));
+    }
 }

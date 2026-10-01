@@ -48,6 +48,10 @@ public class AudioFormat {
     public static final AudioFormat AAC = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_AAC, null, null,
             null, null);
 
+    /** Generic FLAC format without any further constraints */
+    public static final AudioFormat FLAC = new AudioFormat(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC, null,
+            null, null, null);
+
     /**
      * {@code AudioCodec} encoded data without any container header or footer,
      * e.g. MP3 is a non-container format
@@ -69,6 +73,17 @@ public class AudioFormat {
      * @see <a href="https://www.xiph.org/ogg/">OGG</a>
      */
     public static final String CONTAINER_OGG = "OGG";
+
+    /**
+     * FLAC native container format
+     *
+     * @see <a href="https://xiph.org/flac/">FLAC</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9639.html#name-format-principles">RFC 9639: 5. Format
+     *      Principles</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9639.html#name-file-level-metadata">RFC 9639: 8. File-Level
+     *      Metadata</a>
+     */
+    public static final String CONTAINER_FLAC = "FLAC";
 
     /**
      * PCM Signed
@@ -116,6 +131,16 @@ public class AudioFormat {
      * AAC Codec
      */
     public static final String CODEC_AAC = "AAC";
+
+    /**
+     * FLAC Codec
+     *
+     * @see <a href="https://xiph.org/flac/">FLAC</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9639.html#name-conceptual-overview">RFC 9639: 4. Conceptual
+     *      Overview</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9639.html#name-frame-structure">RFC 9639: 9. Frame Structure</a>
+     */
+    public static final String CODEC_FLAC = "FLAC";
 
     /**
      * Codec
