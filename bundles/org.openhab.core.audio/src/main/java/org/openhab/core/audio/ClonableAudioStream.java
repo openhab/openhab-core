@@ -17,7 +17,7 @@ import java.io.InputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is for an {@link AudioStream}, that can be cloned
+ * Interface to be implemented by {@link AudioStream} implementations that can be cloned.
  *
  * @author Gwendal Roulleau - Initial contribution, separation from {@link FixedLengthAudioStream}
  */
