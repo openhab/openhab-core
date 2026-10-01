@@ -62,7 +62,7 @@ public class JsonStorageService implements StorageService {
             "org.openhab.core.voice.dialog.DialogRegistration",
             List.of(new RenamingTypeMigrator("org.openhab.core.voice.DialogRegistration",
                     "org.openhab.core.voice.dialog.DialogRegistration")), //
-            "org.openhab.core.voice.internal.cache.AudioFormatInfo",
+            "org.openhab.voice.tts",
             List.of(new RenamingTypeMigrator("org.openhab.core.voice.internal.cache.AudioFormatInfo",
                     "org.openhab.core.voice.internal.tts.cache.AudioFormatInfo")));
 
