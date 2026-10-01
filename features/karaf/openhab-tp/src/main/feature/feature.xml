@@ -256,7 +256,12 @@
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.1</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.aopalliance/1.0.0.v201105210816</bundle>
-		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.184</bundle>
+		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.192</bundle>
+		<bundle dependency="true">mvn:org.ow2.asm/asm/${asm.version}</bundle>
+		<bundle dependency="true">mvn:org.ow2.asm/asm-analysis/${asm.version}</bundle>
+		<bundle dependency="true">mvn:org.ow2.asm/asm-commons/${asm.version}</bundle>
+		<bundle dependency="true">mvn:org.ow2.asm/asm-tree/${asm.version}</bundle>
+		<bundle dependency="true">mvn:org.ow2.asm/asm-util/${asm.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.antlr.runtime/3.2.0.v201101311130</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.20.300</bundle>
