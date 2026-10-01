@@ -17,41 +17,18 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 
 /**
- * Serializable AudioFormat storage class
- * We cannot use a record yet (requires Gson v2.10)
+ * Serializable {@link AudioFormat} storage class to store {@link AudioFormat} with
+ * {@link org.openhab.core.storage.StorageService}.
  *
  * @author Gwendal Roulleau - Initial contribution
  */
 @NonNullByDefault
-public class AudioFormatInfo {
-    public final @Nullable Boolean bigEndian;
-    public final @Nullable Integer bitDepth;
-    public final @Nullable Integer bitRate;
-    public final @Nullable Long frequency;
-    public final @Nullable Integer channels;
-    public final @Nullable String codec;
-    public final @Nullable String container;
-
-    public AudioFormatInfo(String text, @Nullable Boolean bigEndian, @Nullable Integer bitDepth,
-            @Nullable Integer bitRate, @Nullable Long frequency, @Nullable Integer channels, @Nullable String codec,
-            @Nullable String container) {
-        this.bigEndian = bigEndian;
-        this.bitDepth = bitDepth;
-        this.bitRate = bitRate;
-        this.frequency = frequency;
-        this.channels = channels;
-        this.codec = codec;
-        this.container = container;
-    }
+public record AudioFormatInfo(@Nullable Boolean bigEndian, @Nullable Integer bitDepth, @Nullable Integer bitRate,
+        @Nullable Long frequency, @Nullable Integer channels, @Nullable String codec, @Nullable String container) {
 
     public AudioFormatInfo(AudioFormat audioFormat) {
-        this.bigEndian = audioFormat.isBigEndian();
-        this.bitDepth = audioFormat.getBitDepth();
-        this.bitRate = audioFormat.getBitRate();
-        this.frequency = audioFormat.getFrequency();
-        this.channels = audioFormat.getChannels();
-        this.codec = audioFormat.getCodec();
-        this.container = audioFormat.getContainer();
+        this(audioFormat.isBigEndian(), audioFormat.getBitDepth(), audioFormat.getBitRate(), audioFormat.getFrequency(),
+                audioFormat.getChannels(), audioFormat.getCodec(), audioFormat.getContainer());
     }
 
     public AudioFormat toAudioFormat() {
