@@ -28,23 +28,23 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class AudioFormat {
-    // generic pcm signed format (no container) without any further constraints
+    /** Generic PCM signed format (no container) without any further constraints */
     public static final AudioFormat PCM_SIGNED = new AudioFormat(AudioFormat.CONTAINER_NONE,
             AudioFormat.CODEC_PCM_SIGNED, null, null, null, null);
 
-    // generic mp3 format without any further constraints
+    /** Generic MP3 format without any further constraints */
     public static final AudioFormat MP3 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, null, null,
             null, null);
 
-    // generic wav format without any further constraints
+    /** Generic WAV format without any further constraints */
     public static final AudioFormat WAV = new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED,
             null, null, null, null);
 
-    // generic OGG format without any further constraints
+    /** Generic OGG format without any further constraints */
     public static final AudioFormat OGG = new AudioFormat(AudioFormat.CONTAINER_OGG, AudioFormat.CODEC_VORBIS, null,
             null, null, null);
 
-    // generic AAC format without any further constraints
+    /** Generic AAC format without any further constraints */
     public static final AudioFormat AAC = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_AAC, null, null,
             null, null);
 
@@ -55,18 +55,18 @@ public class AudioFormat {
     public static final String CONTAINER_NONE = "NONE";
 
     /**
-     * Microsofts wave container format
+     * Microsoft's WAVE container format
      *
-     * @see <a href="http://bit.ly/1TUW93t">WAV Format</a>
-     * @see <a href="http://bit.ly/1oRMKOt">Supported codecs</a>
-     * @see <a href="http://bit.ly/1TUWSlk">RIFF container format</a>
+     * @see <a href="https://www.zytrax.com/tech/audio/formats.html#wav-format">WAV Format</a>
+     * @see <a href="https://www.zytrax.com/tech/audio/formats.html#wav-format">Supported codecs</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Resource_Interchange_File_Format">RIFF container format</a>
      */
     public static final String CONTAINER_WAVE = "WAVE";
 
     /**
      * OGG container format
      *
-     * @see <a href="http://bit.ly/1oRMWNE">OGG</a>
+     * @see <a href="https://www.xiph.org/ogg/">OGG</a>
      */
     public static final String CONTAINER_OGG = "OGG";
 
@@ -135,14 +135,14 @@ public class AudioFormat {
     /**
      * Bit depth
      *
-     * @see <a href="http://bit.ly/1OTydad">Bit Depth</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Audio_bit_depth">Bit Depth</a>
      */
     private final @Nullable Integer bitDepth;
 
     /**
      * Bit rate
      *
-     * @see <a href="http://bit.ly/1OTy5rk">Bit Rate</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Bit_rate">Bit Rate</a>
      */
     private final @Nullable Integer bitRate;
 
@@ -159,10 +159,12 @@ public class AudioFormat {
     /**
      * Constructs an instance with the specified properties.
      *
+     * <p>
      * Note that any properties that are null indicate that
      * the corresponding AudioFormat allows any value for
      * the property.
      *
+     * <p>
      * Concretely this implies that if, for example, one
      * passed null for the value of frequency, this would
      * mean the created AudioFormat allowed for any valid
@@ -170,8 +172,8 @@ public class AudioFormat {
      *
      * @param container The container for the audio
      * @param codec The audio codec
-     * @param bigEndian If the audo data is big endian
-     * @param bitDepth The bit depth of the audo data
+     * @param bigEndian If the audio data is big endian
+     * @param bitDepth The bit depth of the audio data
      * @param bitRate The bit rate of the audio
      * @param frequency The frequency at which the audio was sampled
      */
@@ -183,10 +185,12 @@ public class AudioFormat {
     /**
      * Constructs an instance with the specified properties.
      *
+     * <p>
      * Note that any properties that are null indicate that
      * the corresponding AudioFormat allows any value for
      * the property.
      *
+     * <p>
      * Concretely this implies that if, for example, one
      * passed null for the value of frequency, this would
      * mean the created AudioFormat allowed for any valid
@@ -194,8 +198,8 @@ public class AudioFormat {
      *
      * @param container The container for the audio
      * @param codec The audio codec
-     * @param bigEndian If the audo data is big endian
-     * @param bitDepth The bit depth of the audo data
+     * @param bigEndian If the audio data is big endian
+     * @param bitDepth The bit depth of the audio data
      * @param bitRate The bit rate of the audio
      * @param frequency The frequency at which the audio was sampled
      * @param channels The number of channels
@@ -280,6 +284,7 @@ public class AudioFormat {
     /**
      * Determines if the passed AudioFormat is compatible with this AudioFormat.
      *
+     * <p>
      * This AudioFormat is compatible with the passed AudioFormat if both have
      * the same value for all non-null members of this instance.
      */
