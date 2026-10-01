@@ -123,7 +123,7 @@ public class TTSLRUCacheImplTest {
         // prepare some files
         String key1 = ttsServiceMock.getClass().getSimpleName() + "_" + "filesound1";
         File soundFile1 = cacheDirectory.resolve(key1).toFile();
-        storage.put(key1, new AudioFormatInfo("text", null, 42, 16, 16000L, 1, "MP3", null));
+        storage.put(key1, new AudioFormatInfo(null, 42, 16, 16000L, 1, "MP3", null));
         try (FileWriter soundFile1Writer = new FileWriter(soundFile1)) {
             soundFile1Writer.write("falsedata");
         }
@@ -131,7 +131,7 @@ public class TTSLRUCacheImplTest {
         // prepare some files
         String key2 = ttsServiceMock.getClass().getSimpleName() + "_" + "filesound2";
         File soundFile2 = cacheDirectory.resolve(key2).toFile();
-        storage.put(key2, new AudioFormatInfo("text2", null, 42, 16, 16000L, 2, "MP3", null));
+        storage.put(key2, new AudioFormatInfo(null, 42, 16, 16000L, 2, "MP3", null));
         try (FileWriter soundFile2Writer = new FileWriter(soundFile2)) {
             soundFile2Writer.write("falsedata");
         }
