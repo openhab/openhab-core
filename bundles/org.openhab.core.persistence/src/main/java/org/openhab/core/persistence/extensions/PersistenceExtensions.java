@@ -188,10 +188,22 @@ public class PersistenceExtensions {
      *
      * @param item the item to store
      * @param timestamp the date for the item state to be stored
-     * @param stateString the state to be stored
+     * @param state the state to be stored
      */
-    public static void persist(Item item, ZonedDateTime timestamp, String stateString) {
-        internalPersist(item, timestamp, stateString, null);
+    public static void persist(Item item, ZonedDateTime timestamp, DecimalType state) {
+        internalPersist(item, timestamp, state, null);
+    }
+
+    /**
+     * Persists a <code>state</code> at a given <code>timestamp</code> of an <code>item</code> through the default
+     * persistence service.
+     *
+     * @param item the item to store
+     * @param timestamp the date for the item state to be stored
+     * @param state the state to be stored
+     */
+    public static void persist(Item item, ZonedDateTime timestamp, QuantityType<?> state) {
+        internalPersist(item, timestamp, state, null);
     }
 
     /**
@@ -207,16 +219,41 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Persists a <code>state</code> at a given <code>timestamp</code> of an <code>item</code> through a
-     * {@link PersistenceService} identified by the <code>serviceId</code>.
+     * Persists a <code>state</code> at a given <code>timestamp</code> of an <code>item</code> through the default
+     * persistence service.
      *
-     * @param item the item
+     * @param item the item to store
      * @param timestamp the date for the item state to be stored
      * @param stateString the state to be stored
+     */
+    public static void persist(Item item, ZonedDateTime timestamp, String stateString) {
+        internalPersist(item, timestamp, stateString, null);
+    }
+
+    /**
+     * Persists a <code>state</code> at a given <code>timestamp</code> of an <code>item</code> through the default
+     * persistence service.
+     *
+     * @param item the item to store
+     * @param timestamp the date for the item state to be stored
+     * @param state the state to be stored
      * @param serviceId the name of the {@link PersistenceService} to use
      */
-    public static void persist(Item item, ZonedDateTime timestamp, String stateString, @Nullable String serviceId) {
-        internalPersist(item, timestamp, stateString, serviceId);
+    public static void persist(Item item, ZonedDateTime timestamp, DecimalType state, @Nullable String serviceId) {
+        internalPersist(item, timestamp, state, serviceId);
+    }
+
+    /**
+     * Persists a <code>state</code> at a given <code>timestamp</code> of an <code>item</code> through the default
+     * persistence service.
+     *
+     * @param item the item to store
+     * @param timestamp the date for the item state to be stored
+     * @param state the state to be stored
+     * @param serviceId the name of the {@link PersistenceService} to use
+     */
+    public static void persist(Item item, ZonedDateTime timestamp, QuantityType<?> state, @Nullable String serviceId) {
+        internalPersist(item, timestamp, state, serviceId);
     }
 
     /**
@@ -230,6 +267,19 @@ public class PersistenceExtensions {
      */
     public static void persist(Item item, ZonedDateTime timestamp, Number state, @Nullable String serviceId) {
         internalPersist(item, timestamp, state.toString(), serviceId);
+    }
+
+    /**
+     * Persists a <code>state</code> at a given <code>timestamp</code> of an <code>item</code> through a
+     * {@link PersistenceService} identified by the <code>serviceId</code>.
+     *
+     * @param item the item
+     * @param timestamp the date for the item state to be stored
+     * @param stateString the state to be stored
+     * @param serviceId the name of the {@link PersistenceService} to use
+     */
+    public static void persist(Item item, ZonedDateTime timestamp, String stateString, @Nullable String serviceId) {
+        internalPersist(item, timestamp, stateString, serviceId);
     }
 
     private static void internalPersist(Item item, ZonedDateTime timestamp, String stateString,
