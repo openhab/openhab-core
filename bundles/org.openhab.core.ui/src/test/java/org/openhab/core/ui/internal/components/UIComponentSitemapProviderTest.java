@@ -260,6 +260,25 @@ class UIComponentSitemapProviderTest {
     }
 
     @Test
+    void testRuleArgumentWithQuoteInsideQuotedMessage() {
+        // confirmCmd=[DemoSwitch==ON="Try \"this\"?"]
+        Rule rule = mockRule();
+        Condition condition = mockCondition();
+        List<Rule> rules = new ArrayList<>();
+        when(component.getConfig())
+                .thenReturn(Map.of("confirmcmdrules", List.of("DemoSwitch==ON=\"Try \\\"this\\\"?\"")));
+
+        uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
+
+        assertEquals(1, rules.size());
+        verify(rule).setArgument("Try \"this\"?");
+        verify(rule).setConditions(List.of(condition));
+        verify(condition).setItem("DemoSwitch");
+        verify(condition).setCondition("==");
+        verify(condition).setValue("ON");
+    }
+
+    @Test
     void testRuleConditionOnlyWithEqualsSignInsideQuotedConditionValue() {
         // confirmCmd=[DemoString=="a=b"] - condition-only rule where the "="
         // inside the quoted condition value must not be read as a separator

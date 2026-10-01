@@ -93,6 +93,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
 
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
+    private static final Pattern CONDITIONS_PREFIX = Pattern.compile("^(?:\"[^\"]*\"|==|!=|<=|>=|<|>|[^\"=])*");
     private static final Pattern CONDITION_PATTERN = Pattern.compile(
             "(?:(?<item>[a-zA-Z_][a-zA-Z0-9_]*)(?=(?:\\s+|==|!=|<=|>=|<|>)\\S))?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>\\\"[^\\\"]*\\\"|(\\+|-)?.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
@@ -380,13 +381,13 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             Object sourceRules = component.getConfig().get(key);
             if (sourceRules instanceof Collection<?> sourceRulesCollection) {
                 for (Object sourceRule : sourceRulesCollection) {
-                    if (sourceRule instanceof String) {
-                        String argument = getRuleArgument(sourceRule.toString());
-                        List<String> conditionsString = getRuleConditions(sourceRule.toString(), argument);
+                    if (sourceRule instanceof String ruleString) {
+                        ArgumentMatch match = findTrailingArgument(ruleString, component, key);
+                        List<String> conditionsString = getRuleConditions(sourceRule.toString(), match);
                         Rule rule = sitemapFactory.createRule();
                         List<Condition> conditions = getConditions(conditionsString, component, key);
                         rule.setConditions(conditions);
-                        rule.setArgument(argument);
+                        rule.setArgument(match != null ? match.value() : null);
                         rules.add(rule);
                     }
                 }
@@ -432,38 +433,54 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         return conditions;
     }
 
-    private @Nullable String getRuleArgument(String rule) {
-        String argument = null;
-        String trimmedRule = rule.trim();
-        String strippedRule = trimmedRule;
-        if (strippedRule.endsWith("\"")) {
-            for (int i = strippedRule.length() - 2; i >= 0; i--) {
-                if (strippedRule.charAt(i) == '"') {
-                    strippedRule = i > 0 ? rule.substring(0, i) : "";
-                    break;
-                }
-            }
-        }
-        int lastEqualsIndex = strippedRule.lastIndexOf("=");
-        String charBeforeEquals = lastEqualsIndex > 0 ? rule.substring(lastEqualsIndex - 1, lastEqualsIndex) : null;
-        if (!(lastEqualsIndex == -1 || "=".equals(charBeforeEquals) || "!".equals(charBeforeEquals)
-                || "<".equals(charBeforeEquals) || ">".equals(charBeforeEquals))) {
-            argument = stripQuotes(trimmedRule.substring(lastEqualsIndex + 1).trim());
-        }
-        return argument;
+    private record ArgumentMatch(String value, int conditionsEnd) {
     }
 
-    private List<String> getRuleConditions(String rule, @Nullable String argument) {
-        String conditions = rule;
-        if (argument != null) {
-            conditions = rule.substring(0, rule.lastIndexOf(argument)).trim();
-            if (conditions.endsWith("=\"")) {
-                // If the argument was surrounded by quotes, we need to remove the quote and the preceding =
-                conditions = conditions.substring(0, conditions.length() - 2);
-            } else if (conditions.endsWith("=")) {
-                conditions = conditions.substring(0, conditions.length() - 1);
-            }
+    /**
+     * Finds a trailing, properly closed, escape-aware quoted literal that reaches the end of the rule string and is
+     * introduced by a bare "=" (not part of ==, !=, <=, >=). Honors \" and \\ escapes inside the literal, mirroring
+     * Xtext STRING semantics, and returns the unescaped value. Returns null if there is no such trailing argument.
+     */
+    private @Nullable ArgumentMatch findTrailingArgument(String rule, UIComponent component, String key) {
+        String trimmed = rule.trim();
+        Matcher m = CONDITIONS_PREFIX.matcher(trimmed);
+        m.find();
+        int delimiterIndex = m.end();
+        if (delimiterIndex >= trimmed.length() || trimmed.charAt(delimiterIndex) != '=') {
+            return null;
         }
+        String argument = trimmed.substring(delimiterIndex + 1).trim();
+        String unescaped = unescapeFullyQuotedLiteral(argument);
+        if (unescaped == null) {
+            logger.warn("Syntax error in {} rule argument '{}' for widget {}", key, trimmed, component.getType());
+        }
+        return unescaped != null ? new ArgumentMatch(unescaped, delimiterIndex) : null;
+    }
+
+    private @Nullable String unescapeFullyQuotedLiteral(String value) {
+        if (value.length() < 2 || value.charAt(0) != '"') {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        int j = 1;
+        while (j < value.length()) {
+            char c = value.charAt(j);
+            if (c == '\\' && j + 1 < value.length() && (value.charAt(j + 1) == '"' || value.charAt(j + 1) == '\\')) {
+                sb.append(value.charAt(j + 1));
+                j += 2;
+                continue;
+            }
+            if (c == '"') {
+                return j == value.length() - 1 ? sb.toString() : null;
+            }
+            sb.append(c);
+            j++;
+        }
+        return null;
+    }
+
+    private List<String> getRuleConditions(String rule, @Nullable ArgumentMatch match) {
+        String conditions = match != null ? rule.trim().substring(0, match.conditionsEnd()) : rule.trim();
         List<String> conditionsList = List.of(conditions.split(" AND "));
         return conditionsList.stream().filter(Predicate.not(String::isBlank)).map(String::trim).toList();
     }

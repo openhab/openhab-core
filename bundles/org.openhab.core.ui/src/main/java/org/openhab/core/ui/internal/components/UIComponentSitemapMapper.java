@@ -204,9 +204,13 @@ public class UIComponentSitemapMapper {
                 .collect(Collectors.joining(" AND "));
         String argument = rule.getArgument();
         if (argument != null) {
-            ruleString = ruleString + "=\"" + argument + "\"";
+            ruleString = ruleString + "=\"" + escapeRuleArgument(argument) + "\"";
         }
         return ruleString;
+    }
+
+    private static String escapeRuleArgument(String argument) {
+        return argument.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private static String map(Condition condition) {
