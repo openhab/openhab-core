@@ -82,9 +82,6 @@ public class LLMItemSerializer {
             List<PointNode> pointItems, List<NonSemanticItemNode> items) {
     }
 
-    private record ResolvedParents(List<String> semanticParents, List<String> nonSemanticParents) {
-    }
-
     /**
      * Serializes a collection of items, evaluating openHAB semantic relations and group membership,
      * localizing command options with the given locale if available.
@@ -108,58 +105,34 @@ public class LLMItemSerializer {
         Set<String> semanticChildNames = new HashSet<>();
         Set<String> nonSemanticChildNames = new HashSet<>();
 
+        List<Item> allLocations = new ArrayList<>();
+        List<Item> allEquipments = new ArrayList<>();
+        List<Item> allPoints = new ArrayList<>();
+        List<Item> allNonSemanticItems = new ArrayList<>();
+
         for (Item child : items) {
             boolean isLocation = SemanticTags.getLocation(child) != null;
             boolean isEquipment = SemanticTags.getEquipment(child) != null;
             boolean isPoint = SemanticTags.getPoint(child) != null || SemanticTags.getProperty(child) != null;
 
-            ResolvedParents parents = findParents(metadataRegistry, child, itemMap, isLocation, isEquipment, isPoint);
-
-            for (String parentName : parents.semanticParents()) {
-                parentToChildren.computeIfAbsent(parentName, k -> new ArrayList<>()).add(child);
-                semanticChildNames.add(child.getName());
-            }
-            for (String parentName : parents.nonSemanticParents()) {
-                parentToChildren.computeIfAbsent(parentName, k -> new ArrayList<>()).add(child);
-                nonSemanticChildNames.add(child.getName());
-            }
-        }
-
-        List<Item> rootLocations = new ArrayList<>();
-        List<Item> rootEquipments = new ArrayList<>();
-        List<Item> rootPoints = new ArrayList<>();
-        List<Item> nonSemanticItems = new ArrayList<>();
-        List<Item> allNonSemanticItems = new ArrayList<>();
-
-        for (Item item : items) {
-            boolean isLocation = SemanticTags.getLocation(item) != null;
-            boolean isEquipment = SemanticTags.getEquipment(item) != null;
-            boolean isPoint = SemanticTags.getPoint(item) != null || SemanticTags.getProperty(item) != null;
-
             if (isLocation) {
-                if (!semanticChildNames.contains(item.getName())) {
-                    rootLocations.add(item);
-                }
+                allLocations.add(child);
             } else if (isEquipment) {
-                if (!semanticChildNames.contains(item.getName())) {
-                    rootEquipments.add(item);
-                }
+                allEquipments.add(child);
             } else if (isPoint) {
-                if (!semanticChildNames.contains(item.getName())) {
-                    rootPoints.add(item);
-                }
+                allPoints.add(child);
             } else {
-                allNonSemanticItems.add(item);
-                if (!nonSemanticChildNames.contains(item.getName())) {
-                    nonSemanticItems.add(item);
-                }
+                allNonSemanticItems.add(child);
             }
+
+            resolveParents(metadataRegistry, child, itemMap, isLocation, isEquipment, isPoint, parentToChildren,
+                    semanticChildNames, nonSemanticChildNames);
         }
 
-        rootLocations.sort(ITEM_COMPARATOR);
-        rootEquipments.sort(ITEM_COMPARATOR);
-        rootPoints.sort(ITEM_COMPARATOR);
-        nonSemanticItems.sort(ITEM_COMPARATOR);
+        List<Item> rootLocations = filterAndSortRoots(allLocations, semanticChildNames);
+        List<Item> rootEquipments = filterAndSortRoots(allEquipments, semanticChildNames);
+        List<Item> rootPoints = filterAndSortRoots(allPoints, semanticChildNames);
+        List<Item> nonSemanticRoots = filterAndSortRoots(allNonSemanticItems, nonSemanticChildNames);
         allNonSemanticItems.sort(ITEM_COMPARATOR);
 
         List<LocationNode> rootLocNodes = new ArrayList<>();
@@ -176,28 +149,43 @@ public class LLMItemSerializer {
         for (Item pt : rootPoints) {
             rootPtNodes.add(buildPointNode(pt, locale));
         }
-        for (Item item : nonSemanticItems) {
-            nonSemanticNodes.add(buildNonSemanticNode(item, parentToChildren, Set.of(), nonSemanticChildNames, locale));
+
+        Set<String> ancestors = new HashSet<>();
+        for (Item item : nonSemanticRoots) {
+            nonSemanticNodes
+                    .add(buildNonSemanticNode(item, parentToChildren, ancestors, nonSemanticChildNames, locale));
         }
         for (Item item : allNonSemanticItems) {
             if (nonSemanticChildNames.contains(item.getName())) {
                 nonSemanticNodes
-                        .add(buildNonSemanticNode(item, parentToChildren, Set.of(), nonSemanticChildNames, locale));
+                        .add(buildNonSemanticNode(item, parentToChildren, ancestors, nonSemanticChildNames, locale));
             }
         }
+
         RootNode root = new RootNode(rootLocNodes, rootEqNodes, rootPtNodes, nonSemanticNodes);
         return formatRoot(root);
+    }
+
+    private static List<Item> filterAndSortRoots(List<Item> items, Set<String> childNames) {
+        List<Item> roots = new ArrayList<>();
+        for (Item item : items) {
+            if (!childNames.contains(item.getName())) {
+                roots.add(item);
+            }
+        }
+        roots.sort(ITEM_COMPARATOR);
+        return roots;
     }
 
     /**
      * Resolves the parent item names for a child item using semantic relation metadata for semantic parents
      * and group membership for non-semantic parent groups.
      */
-    private static ResolvedParents findParents(MetadataRegistry metadataRegistry, Item child, Map<String, Item> itemMap,
-            boolean isLocation, boolean isEquipment, boolean isPoint) {
+    private static void resolveParents(MetadataRegistry metadataRegistry, Item child, Map<String, Item> itemMap,
+            boolean isLocation, boolean isEquipment, boolean isPoint, Map<String, List<Item>> parentToChildren,
+            Set<String> semanticChildNames, Set<String> nonSemanticChildNames) {
 
-        List<String> semanticParents = new ArrayList<>();
-        List<String> nonSemanticParents = new ArrayList<>();
+        String semanticParent = null;
 
         // Resolve semantic parent via SemanticsMetadataProvider configuration keys
         Metadata md = metadataRegistry.get(new MetadataKey(METADATA_NAMESPACE, child.getName()));
@@ -206,35 +194,27 @@ public class LLMItemSerializer {
 
             if (isLocation) {
                 // Sub-location -> Parent Location
-                String parentLoc = getValidTarget(config.get(REL_IS_PART_OF), itemMap);
-                if (parentLoc != null) {
-                    semanticParents.add(parentLoc);
-                }
+                semanticParent = getValidTarget(config.get(REL_IS_PART_OF), itemMap);
             } else if (isEquipment) {
                 // Sub-equipment -> Parent Equipment
-                String parentEq = getValidTarget(config.get(REL_IS_PART_OF), itemMap);
-                if (parentEq != null) {
-                    semanticParents.add(parentEq);
-                } else {
+                semanticParent = getValidTarget(config.get(REL_IS_PART_OF), itemMap);
+                if (semanticParent == null) {
                     // Equipment -> Parent Location
-                    String parentLoc = getValidTarget(config.get(REL_HAS_LOCATION), itemMap);
-                    if (parentLoc != null) {
-                        semanticParents.add(parentLoc);
-                    }
+                    semanticParent = getValidTarget(config.get(REL_HAS_LOCATION), itemMap);
                 }
             } else if (isPoint) {
                 // Point -> Parent Equipment
-                String parentEq = getValidTarget(config.get(REL_IS_POINT_OF), itemMap);
-                if (parentEq != null) {
-                    semanticParents.add(parentEq);
-                } else {
+                semanticParent = getValidTarget(config.get(REL_IS_POINT_OF), itemMap);
+                if (semanticParent == null) {
                     // Loose Point -> Parent Location
-                    String parentLoc = getValidTarget(config.get(REL_HAS_LOCATION), itemMap);
-                    if (parentLoc != null) {
-                        semanticParents.add(parentLoc);
-                    }
+                    semanticParent = getValidTarget(config.get(REL_HAS_LOCATION), itemMap);
                 }
             }
+        }
+
+        if (semanticParent != null) {
+            parentToChildren.computeIfAbsent(semanticParent, k -> new ArrayList<>()).add(child);
+            semanticChildNames.add(child.getName());
         }
 
         // Add non-semantic parent groups from group membership
@@ -247,12 +227,11 @@ public class LLMItemSerializer {
             boolean parentIsLocation = SemanticTags.getLocation(parent) != null;
             boolean parentIsEquipment = SemanticTags.getEquipment(parent) != null;
 
-            if (!parentIsLocation && !parentIsEquipment && !semanticParents.contains(groupName)) {
-                nonSemanticParents.add(groupName);
+            if (!parentIsLocation && !parentIsEquipment && !groupName.equals(semanticParent)) {
+                parentToChildren.computeIfAbsent(groupName, k -> new ArrayList<>()).add(child);
+                nonSemanticChildNames.add(child.getName());
             }
         }
-
-        return new ResolvedParents(semanticParents, nonSemanticParents);
     }
 
     private static @Nullable String getValidTarget(@Nullable Object targetName, Map<String, Item> itemMap) {
@@ -396,7 +375,7 @@ public class LLMItemSerializer {
     }
 
     private static void formatLocationNode(LocationNode loc, int depth, StringBuilder sb) {
-        sb.append(getIndent(depth)).append(loc.name());
+        sb.repeat("..", depth).append(loc.name());
 
         if (!"Group".equals(loc.type())) {
             sb.append(" ").append(loc.type());
@@ -421,7 +400,7 @@ public class LLMItemSerializer {
     }
 
     private static void formatEquipmentNode(EquipmentNode eq, int depth, StringBuilder sb) {
-        sb.append(getIndent(depth)).append(eq.name());
+        sb.repeat("..", depth).append(eq.name());
 
         if (!"Group".equals(eq.type())) {
             sb.append(" ").append(eq.type());
@@ -433,7 +412,9 @@ public class LLMItemSerializer {
             sb.append(" :").append(eq.semanticType());
         }
         if (!eq.commandOptions().isEmpty()) {
-            sb.append(" (").append(formatCommandOptions(eq.commandOptions())).append(")");
+            sb.append(" (");
+            formatCommandOptions(eq.commandOptions(), sb);
+            sb.append(")");
         }
         sb.append("\n");
 
@@ -446,7 +427,7 @@ public class LLMItemSerializer {
     }
 
     private static void formatPointNode(PointNode pt, int depth, StringBuilder sb) {
-        sb.append(getIndent(depth)).append(pt.name());
+        sb.repeat("..", depth).append(pt.name());
 
         if (!"Group".equals(pt.type())) {
             sb.append(" ").append(pt.type());
@@ -461,7 +442,9 @@ public class LLMItemSerializer {
             sb.append(" [").append(String.join(",", pt.properties())).append("]");
         }
         if (!pt.commandOptions().isEmpty()) {
-            sb.append(" (").append(formatCommandOptions(pt.commandOptions())).append(")");
+            sb.append(" (");
+            formatCommandOptions(pt.commandOptions(), sb);
+            sb.append(")");
         }
         sb.append("\n");
     }
@@ -469,20 +452,18 @@ public class LLMItemSerializer {
     private static NonSemanticItemNode buildNonSemanticNode(Item item, Map<String, List<Item>> parentToChildren,
             Set<String> ancestors, Set<String> nonSemanticChildNames, @Nullable Locale locale) {
         nonSemanticChildNames.remove(item.getName());
+        ancestors.add(item.getName());
 
         List<Item> children = parentToChildren.getOrDefault(item.getName(), List.of());
         List<NonSemanticItemNode> childNodes = new ArrayList<>();
 
-        Set<String> newAncestors = new HashSet<>(ancestors);
-        newAncestors.add(item.getName());
-
         for (Item child : children) {
-            if (!newAncestors.contains(child.getName())) {
-                childNodes.add(
-                        buildNonSemanticNode(child, parentToChildren, newAncestors, nonSemanticChildNames, locale));
+            if (!ancestors.contains(child.getName())) {
+                childNodes.add(buildNonSemanticNode(child, parentToChildren, ancestors, nonSemanticChildNames, locale));
             }
         }
 
+        ancestors.remove(item.getName());
         childNodes.sort(Comparator.comparing(NonSemanticItemNode::name));
 
         return new NonSemanticItemNode(item.getName(), getOrNullLabel(item), item.getType(),
@@ -494,7 +475,7 @@ public class LLMItemSerializer {
     }
 
     private static void formatNonSemanticItemNode(NonSemanticItemNode item, int depth, StringBuilder sb) {
-        sb.append(getIndent(depth)).append(item.name());
+        sb.repeat("..", depth).append(item.name());
 
         if (!"Group".equals(item.type())) {
             sb.append(" ").append(item.type());
@@ -503,7 +484,9 @@ public class LLMItemSerializer {
             sb.append(" \"").append(item.label().replace("\"", "\\\"")).append("\"");
         }
         if (!item.commandOptions().isEmpty()) {
-            sb.append(" (").append(formatCommandOptions(item.commandOptions())).append(")");
+            sb.append(" (");
+            formatCommandOptions(item.commandOptions(), sb);
+            sb.append(")");
         }
         sb.append("\n");
 
@@ -521,21 +504,16 @@ public class LLMItemSerializer {
         return !cleanLabel.equalsIgnoreCase(cleanName);
     }
 
-    private static String getIndent(int depth) {
-        StringBuilder sb = new StringBuilder();
-        sb.repeat("..", Math.max(0, depth));
-        return sb.toString();
-    }
-
-    private static String formatCommandOptions(List<CommandOptionNode> commandOptions) {
-        List<String> formatted = new ArrayList<>();
-        for (CommandOptionNode option : commandOptions) {
+    private static void formatCommandOptions(List<CommandOptionNode> commandOptions, StringBuilder sb) {
+        for (int i = 0; i < commandOptions.size(); i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            CommandOptionNode option = commandOptions.get(i);
+            sb.append(option.command());
             if (option.label() != null && !option.label().isBlank()) {
-                formatted.add(option.command() + "=" + option.label());
-            } else {
-                formatted.add(option.command());
+                sb.append("=").append(option.label());
             }
         }
-        return String.join(",", formatted);
     }
 }
