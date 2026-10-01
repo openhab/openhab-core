@@ -94,7 +94,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
     @Nullable
     ScheduledFuture<?> periodicCleaner;
 
-    private AudioSinkUtils audioSinkUtils;
+    private final AudioSinkUtils audioSinkUtils;
 
     @Activate
     public AudioServlet(@Reference AudioSinkUtils audioSinkUtils) {
@@ -120,14 +120,19 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
             List<String> acceptedMimeTypes) throws AudioException {
         logger.debug("Stream to serve is {}", streamServed.url());
 
+        AudioStream audioStream = streamServed.audioStream();
+
         // try to set the content-type, if possible
         final String mimeType;
-        if (AudioFormat.CODEC_MP3.equals(streamServed.audioStream().getFormat().getCodec())) {
+        if (AudioFormat.CODEC_MP3.equals(audioStream.getFormat().getCodec())) {
             mimeType = "audio/mpeg";
-        } else if (AudioFormat.CONTAINER_WAVE.equals(streamServed.audioStream().getFormat().getContainer())) {
+        } else if (AudioFormat.CONTAINER_WAVE.equals(audioStream.getFormat().getContainer())) {
             mimeType = WAV_MIME_TYPES.stream().filter(acceptedMimeTypes::contains).findFirst().orElse("audio/wav");
-        } else if (AudioFormat.CONTAINER_OGG.equals(streamServed.audioStream().getFormat().getContainer())) {
+        } else if (AudioFormat.CONTAINER_OGG.equals(audioStream.getFormat().getContainer())) {
             mimeType = "audio/ogg";
+        } else if (AudioFormat.CODEC_FLAC.equals(audioStream.getFormat().getCodec())
+                || AudioFormat.CONTAINER_FLAC.equals(audioStream.getFormat().getContainer())) {
+            mimeType = "audio/flac";
         } else {
             mimeType = null;
         }
@@ -136,17 +141,16 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         }
 
         // try to set the content-length, if possible
-        if (streamServed.audioStream() instanceof SizeableAudioStream sizeableServedStream) {
+        if (audioStream instanceof SizeableAudioStream sizeableServedStream) {
             final long size = sizeableServedStream.length();
             resp.setContentLength((int) size);
         }
 
-        if (streamServed.multiTimeStream()
-                && streamServed.audioStream() instanceof ClonableAudioStream clonableAudioStream) {
+        if (streamServed.multiTimeStream() && audioStream instanceof ClonableAudioStream clonableAudioStream) {
             // we need to care about concurrent access and have a separate stream for each thread
             return clonableAudioStream.getClonedStream();
         } else {
-            return streamServed.audioStream();
+            return audioStream;
         }
     }
 
