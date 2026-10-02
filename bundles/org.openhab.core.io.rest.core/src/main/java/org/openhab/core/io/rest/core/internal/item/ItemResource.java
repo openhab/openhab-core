@@ -1195,6 +1195,11 @@ public class ItemResource implements RESTResource {
     }
 
     private String buildSource(@Nullable String source, SecurityContext securityContext) {
+        // HABApp is always sending through the API, so the suffix is redundant information
+        if (source != null && !source.isEmpty() && source.regionMatches(true, 0, "HABApp", 0, "HABApp".length())) {
+            return source;
+        }
+
         String username;
         Principal principal = securityContext.getUserPrincipal();
         if (principal != null) {
