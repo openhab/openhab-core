@@ -18,6 +18,8 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
@@ -28,6 +30,7 @@ import org.openhab.core.types.TimeSeries;
  * be sent to the bus, so that all interested bundles are notified.
  *
  * @author Florian Hotze - Initial contribution
+ * @author Mark Herwege - DecimalType and QuantityType overrides
  */
 @NonNullByDefault
 public interface BusEvent {
@@ -100,6 +103,40 @@ public interface BusEvent {
     void sendCommand(Item item, Command command, @Nullable String source);
 
     /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param command the command to send
+     */
+    void sendCommand(Item item, DecimalType command);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param command the command to send
+     * @param source the source of the command
+     */
+    void sendCommand(Item item, DecimalType command, @Nullable String source);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param command the command to send
+     */
+    void sendCommand(Item item, QuantityType<?> command);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param command the command to send
+     * @param source the source of the command
+     */
+    void sendCommand(Item item, QuantityType<?> command, @Nullable String source);
+
+    /**
      * Posts a status update for a specified item to the event bus.
      *
      * @param item the item to send the status update for
@@ -168,12 +205,46 @@ public interface BusEvent {
     void postUpdate(Item item, State state, @Nullable String source);
 
     /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     */
+    void postUpdate(Item item, DecimalType state);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     * @param source the source of the status update
+     */
+    void postUpdate(Item item, DecimalType state, @Nullable String source);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     */
+    void postUpdate(Item item, QuantityType<?> state);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     * @param source the source of the status update
+     */
+    void postUpdate(Item item, QuantityType<?> state, @Nullable String source);
+
+    /**
      * Sends a time series to the event bus
      *
      * @param item the item to send the time series for
      * @param timeSeries a {@link TimeSeries} containing policy and values
      */
-    void sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries);
+    void sendTimeSeries(Item item, TimeSeries timeSeries);
 
     /**
      * Sends a time series to the event bus
@@ -182,7 +253,7 @@ public interface BusEvent {
      * @param timeSeries a {@link TimeSeries} containing policy and values
      * @param source the source of the time series
      */
-    void sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries, @Nullable String source);
+    void sendTimeSeries(Item item, TimeSeries timeSeries, @Nullable String source);
 
     /**
      * Sends a time series to the event bus
@@ -192,7 +263,7 @@ public interface BusEvent {
      *            {@link State}
      * @param policy either <code>ADD</code> or <code>REPLACE</code>
      */
-    void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy);
+    void sendTimeSeries(String itemName, Map<ZonedDateTime, State> values, String policy);
 
     /**
      * Sends a time series to the event bus
@@ -203,8 +274,7 @@ public interface BusEvent {
      * @param policy either <code>ADD</code> or <code>REPLACE</code>
      * @param source the source of the time series
      */
-    void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy,
-            @Nullable String source);
+    void sendTimeSeries(String itemName, Map<ZonedDateTime, State> values, String policy, @Nullable String source);
 
     /**
      * Stores the current states for a list of items in a map.
