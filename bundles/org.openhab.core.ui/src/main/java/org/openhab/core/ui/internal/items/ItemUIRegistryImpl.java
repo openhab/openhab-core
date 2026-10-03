@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -42,7 +43,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -105,7 +108,9 @@ import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
 import org.openhab.core.ui.items.ItemUIProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -135,6 +140,7 @@ import org.slf4j.LoggerFactory;
  * @author Florian Hotze - Refactor getLabel(Widget w) to use {@link ItemDisplayStateUtil}
  * @author Laurent Garnier - Change widget id coding to support any number of widgets in frame/page
  * @author Mark Herwege - Add support for nested sitemaps
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -156,6 +162,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     protected static final String SEMANTICS_LOCATION = "Location";
     protected static final String SEMANTICS_PARENT_LOCATION_CONFIG = "isPartOf";
 
+    private static final String DEFAULT_COMMAND_CONFIRM_MESSAGE_I18N_KEY = "system.config.sitemap.commandConfirmDialogMessage.default";
+    protected static final String DEFAULT_COMMAND_CONFIRM_MESSAGE = "Are you sure?";
+
     private final Logger logger = LoggerFactory.getLogger(ItemUIRegistryImpl.class);
 
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
@@ -165,6 +174,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     private final SitemapFactory sitemapFactory;
     private final SitemapRegistry sitemapRegistry;
     private final TimeZoneProvider timeZoneProvider;
+    private final LocaleProvider localeProvider;
+    private final TranslationProvider i18nProvider;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<NestedSitemap, Map<String, Text>> nestedSitemapWidgetsCache = new ConcurrentHashMap<>();
@@ -172,6 +183,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     private final Map<Text, String> nestedSitemapOrigin = new ConcurrentHashMap<>();
 
     private String groupMembersSorting = DEFAULT_SORTING;
+    private @Nullable String commandConfirmMessageOverride = null;
 
     private final Object cacheLock = new Object(); // Make sure nested sitemap cache updates and removals are
                                                    // synchronized. This is a coarse lock. If it leads to performance
@@ -190,12 +202,15 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     @Activate
     public ItemUIRegistryImpl(final @Reference ItemRegistry itemRegistry,
             final @Reference MetadataRegistry metadataRegistry, final @Reference SitemapFactory sitemapFactory,
-            final @Reference SitemapRegistry sitemapRegistry, final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference SitemapRegistry sitemapRegistry, final @Reference TimeZoneProvider timeZoneProvider,
+            final @Reference LocaleProvider localeProvider, final @Reference TranslationProvider i18nProvider) {
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
         this.sitemapFactory = sitemapFactory;
         this.sitemapRegistry = sitemapRegistry;
         this.timeZoneProvider = timeZoneProvider;
+        this.localeProvider = localeProvider;
+        this.i18nProvider = i18nProvider;
         sitemapRegistry.addRegistryChangeListener(this);
     }
 
@@ -353,6 +368,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
             if (groupMembersSortingString != null) {
                 groupMembersSorting = groupMembersSortingString;
             }
+            Object msg = config.get("commandConfirmDialogMessage");
+            commandConfirmMessageOverride = (msg instanceof String s && !s.isBlank()) ? s : null;
         }
     }
 
@@ -1649,9 +1666,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
         return matched;
     }
 
-    private @Nullable String processColorDefinition(Widget w, @Nullable List<Rule> colorList, String colorType) {
+    private @Nullable String processColorDefinition(Widget w, List<Rule> colorList, String colorType) {
         // Sanity check
-        if (colorList == null || colorList.isEmpty()) {
+        if (colorList.isEmpty()) {
             return null;
         }
 
@@ -1720,6 +1737,39 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
     }
 
     @Override
+    public @Nullable String getCommandConfirmMessage(Widget w) {
+        List<Rule> ruleList = w.getConfirmCmdRules();
+
+        if (ruleList.isEmpty()) {
+            return w.getConfirmCmd() ? getDefaultConfirmCmdMessage() : null;
+        }
+
+        logger.debug("Checking confirm command rules for widget '{}'.", w.getLabel());
+
+        for (Rule rule : ruleList) {
+            if (allConditionsOk(rule.getConditions(), w)) {
+                String arg = rule.getArgument();
+                return arg != null && !arg.isBlank() ? arg : getDefaultConfirmCmdMessage();
+            }
+        }
+
+        logger.debug("Widget {} commands don't require confirmation.", w.getLabel());
+        return null;
+    }
+
+    private String getDefaultConfirmCmdMessage() {
+        String override = commandConfirmMessageOverride;
+        if (override != null && !override.equals(DEFAULT_COMMAND_CONFIRM_MESSAGE)) {
+            return override;
+        }
+        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+        Locale locale = localeProvider.getLocale();
+        String message = i18nProvider.getText(bundle, DEFAULT_COMMAND_CONFIRM_MESSAGE_I18N_KEY,
+                DEFAULT_COMMAND_CONFIRM_MESSAGE, locale);
+        return message != null ? message : DEFAULT_COMMAND_CONFIRM_MESSAGE;
+    }
+
+    @Override
     public @Nullable String getConditionalIcon(Widget w) {
         List<Rule> ruleList = w.getIconRules();
         // Sanity check
@@ -1755,9 +1805,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
         return icon;
     }
 
-    private boolean allConditionsOk(@Nullable List<org.openhab.core.sitemap.Condition> conditions, Widget w) {
+    private boolean allConditionsOk(List<org.openhab.core.sitemap.Condition> conditions, Widget w) {
         boolean allConditionsOk = true;
-        if (conditions != null) {
+        if (!conditions.isEmpty()) {
             State defaultState = getState(w);
 
             // Go through all AND conditions

@@ -251,6 +251,8 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getIconRules(), hasSize(0));
         assertThat(widget.getIconColor(), hasSize(0));
         assertThat(widget.getVisibility(), hasSize(0));
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(0));
         assertTrue(widget instanceof Switch);
         Switch switchWidget = (Switch) widget;
         assertThat(switchWidget.getMappings(), hasSize(0));
@@ -265,6 +267,8 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getIconRules(), hasSize(0));
         assertThat(widget.getIconColor(), hasSize(0));
         assertThat(widget.getVisibility(), hasSize(0));
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(0));
         assertTrue(widget instanceof Switch);
         switchWidget = (Switch) widget;
         assertThat(switchWidget.getMappings(), hasSize(1));
@@ -285,6 +289,8 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getIconRules(), hasSize(0));
         assertThat(widget.getIconColor(), hasSize(0));
         assertThat(widget.getVisibility(), hasSize(0));
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(0));
         assertTrue(widget instanceof Selection);
         Selection selectionWidget = (Selection) widget;
         assertThat(selectionWidget.getMappings(), hasSize(2));
@@ -344,6 +350,8 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getIconRules(), hasSize(0));
         assertThat(widget.getIconColor(), hasSize(0));
         assertThat(widget.getVisibility(), hasSize(0));
+        assertTrue(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(0));
         assertTrue(widget instanceof Input);
         Input inputWidget = (Input) widget;
         assertEquals("number", inputWidget.getInputHint());
@@ -453,6 +461,11 @@ public class YamlSitemapProviderTest {
         assertThat(rule.getConditions(), hasSize(0));
         assertEquals("blue", rule.getArgument());
         assertThat(widget.getVisibility(), hasSize(0));
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(1));
+        rule = widget.getConfirmCmdRules().getFirst();
+        assertThat(rule.getConditions(), hasSize(0));
+        assertEquals("Should I change the slider value?", rule.getArgument());
         assertTrue(widget instanceof Slider);
         Slider sliderWidget = (Slider) widget;
         assertEquals(BigDecimal.valueOf(25), sliderWidget.getMinValue());
@@ -471,6 +484,14 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getIconRules(), hasSize(0));
         assertThat(widget.getIconColor(), hasSize(0));
         assertThat(widget.getVisibility(), hasSize(0));
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(1));
+        rule = widget.getConfirmCmdRules().getFirst();
+        assertThat(rule.getConditions(), hasSize(1));
+        condition = rule.getConditions().getFirst();
+        assertEquals(">", condition.getCondition());
+        assertEquals("20", condition.getValue());
+        assertEquals("Should I change the setpoint value?", rule.getArgument());
         assertTrue(widget instanceof Setpoint);
         Setpoint setpointWidget = (Setpoint) widget;
         assertEquals(BigDecimal.valueOf(12.5), setpointWidget.getMinValue());
@@ -487,6 +508,11 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getIconRules(), hasSize(0));
         assertThat(widget.getIconColor(), hasSize(0));
         assertThat(widget.getVisibility(), hasSize(0));
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(1));
+        rule = widget.getConfirmCmdRules().getFirst();
+        assertThat(rule.getConditions(), hasSize(0));
+        assertEquals("true", rule.getArgument());
         assertTrue(widget instanceof Colorpicker);
 
         widget = widgets.get(9);
@@ -499,6 +525,11 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getIconRules(), hasSize(0));
         assertThat(widget.getIconColor(), hasSize(0));
         assertThat(widget.getVisibility(), hasSize(0));
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(1));
+        rule = widget.getConfirmCmdRules().getFirst();
+        assertThat(rule.getConditions(), hasSize(0));
+        assertEquals("true", rule.getArgument());
         assertTrue(widget instanceof Colortemperaturepicker);
         Colortemperaturepicker pickerWidget = (Colortemperaturepicker) widget;
         assertEquals(BigDecimal.valueOf(3000), pickerWidget.getMinValue());
@@ -589,6 +620,8 @@ public class YamlSitemapProviderTest {
         assertEquals("!=", condition.getCondition());
         assertEquals("ON", condition.getValue());
         assertNull(rule.getArgument());
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(0));
         assertTrue(widget instanceof Button);
         Button buttonWidget = (Button) widget;
         assertEquals(1, buttonWidget.getRow());
@@ -615,6 +648,8 @@ public class YamlSitemapProviderTest {
         assertEquals("==", condition.getCondition());
         assertEquals("ON", condition.getValue());
         assertNull(rule.getArgument());
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(0));
         assertTrue(widget instanceof Button);
         buttonWidget = (Button) widget;
         assertEquals(1, buttonWidget.getRow());
@@ -714,6 +749,8 @@ public class YamlSitemapProviderTest {
         assertThat(widget.getIconRules(), hasSize(0));
         assertThat(widget.getIconColor(), hasSize(0));
         assertThat(widget.getVisibility(), hasSize(0));
+        assertFalse(widget.getConfirmCmd());
+        assertThat(widget.getConfirmCmdRules(), hasSize(0));
         assertTrue(widget instanceof Default);
         Default defaultWidget = (Default) widget;
         assertEquals(0, defaultWidget.getHeight());
