@@ -171,7 +171,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
         ChannelType colorTemperatureChannelType = systemChannelTypeProvider
                 .getChannelType(SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE, Locale.GERMAN);
         assertNotNull(colorTemperatureChannelType);
-        assertEquals("Farbtemperatur", colorTemperatureChannelType.getLabel());
+        assertEquals("Farbtemperatur (Prozentsatz)", colorTemperatureChannelType.getLabel());
         assertEquals("Steuert die Farbtemperatur des Lichts von 0 (kalt) bis 100 (warm).",
                 colorTemperatureChannelType.getDescription());
 
