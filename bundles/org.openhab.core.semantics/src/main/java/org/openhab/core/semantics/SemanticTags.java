@@ -33,6 +33,18 @@ import org.openhab.core.types.StateDescription;
 @NonNullByDefault
 public class SemanticTags {
 
+    /**
+     * The namespace to use for the semantics metadata.
+     */
+    public static final String METADATA_NAMESPACE = "semantics";
+
+    // the config property names to use for the metadata
+    public static final String REL_HAS_LOCATION = "hasLocation";
+    public static final String REL_IS_PART_OF = "isPartOf";
+    public static final String REL_IS_POINT_OF = "isPointOf";
+    public static final String REL_HAS_POINT = "hasPoint";
+    public static final String REL_RELATES_TO = "relatesTo";
+
     private static final Map<String, Class<? extends Tag>> TAGS = Collections.synchronizedMap(new TreeMap<>());
 
     static {
