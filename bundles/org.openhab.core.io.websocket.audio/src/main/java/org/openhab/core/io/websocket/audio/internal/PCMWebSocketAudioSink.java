@@ -30,11 +30,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.FixedLengthAudioStream;
 import org.openhab.core.audio.PipedAudioStream;
 import org.openhab.core.audio.SizeableAudioStream;
-import org.openhab.core.audio.UnsupportedAudioFormatException;
-import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.openhab.core.library.types.PercentType;
 import org.slf4j.Logger;
@@ -59,8 +56,7 @@ public class PCMWebSocketAudioSink implements AudioSink {
      */
     private static final byte STREAM_TERMINATION_BYTE = (byte) 254;
     private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.WAV, AudioFormat.PCM_SIGNED);
-    private static final Set<Class<? extends AudioStream>> SUPPORTED_STREAMS = Set.of(FixedLengthAudioStream.class,
-            PipedAudioStream.class);
+    private static final Set<Class<? extends AudioStream>> SUPPORTED_STREAMS = Set.of(AudioStream.class);
 
     private final Logger logger = LoggerFactory.getLogger(PCMWebSocketAudioSink.class);
 
@@ -69,11 +65,11 @@ public class PCMWebSocketAudioSink implements AudioSink {
     private final PCMWebSocketConnection websocket;
     private PercentType sinkVolume = new PercentType(100);
     @Nullable
-    private Integer forceSampleRate;
+    private final Integer forceSampleRate;
     @Nullable
-    private Integer forceBitDepth;
+    private final Integer forceBitDepth;
     @Nullable
-    private Integer forceChannels;
+    private final Integer forceChannels;
 
     public PCMWebSocketAudioSink(String id, String label, PCMWebSocketConnection websocket,
             @Nullable Integer forceSampleRate, @Nullable Integer forceBitDepth, @Nullable Integer forceChannels) {
@@ -96,8 +92,7 @@ public class PCMWebSocketAudioSink implements AudioSink {
     }
 
     @Override
-    public void process(@Nullable AudioStream audioStream)
-            throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
+    public void process(@Nullable AudioStream audioStream) {
         if (audioStream == null) {
             return;
         }
@@ -130,10 +125,10 @@ public class PCMWebSocketAudioSink implements AudioSink {
             int bitDepth = Objects.requireNonNull(audioFormat.getBitDepth());
             int channels = Objects.requireNonNull(audioFormat.getChannels());
             int targetSampleRate = Objects.requireNonNullElse(forceSampleRate, sampleRate);
-            Integer targetBitDepth = Objects.requireNonNullElse(forceBitDepth, bitDepth);
-            Integer targetChannels = Objects.requireNonNullElse(forceChannels, channels);
-            outputStream = new PCMWebSocketOutputStream(websocket, targetSampleRate, targetBitDepth.byteValue(),
-                    targetChannels.byteValue());
+            int targetBitDepth = Objects.requireNonNullElse(forceBitDepth, bitDepth);
+            int targetChannels = Objects.requireNonNullElse(forceChannels, channels);
+            outputStream = new PCMWebSocketOutputStream(websocket, targetSampleRate, (byte) targetBitDepth,
+                    (byte) targetChannels);
             InputStream finalAudioStream;
             if ( //
             (forceSampleRate != null && !forceSampleRate.equals(sampleRate)) || //

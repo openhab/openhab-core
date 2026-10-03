@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-public class ByteArrayAudioStream extends FixedLengthAudioStream {
+public class ByteArrayAudioStream extends AudioStream implements SizeableAudioStream, ClonableAudioStream {
 
     private final byte[] bytes;
     private final AudioFormat format;
