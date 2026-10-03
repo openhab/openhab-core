@@ -54,23 +54,23 @@ public class AudioSinkUtilsImpl implements AudioSinkUtils {
         // copy already read data to the output stream :
         out.write(dataBytes);
         // transfer everything else
-        Long dataTransferedLength = dataBytes.length + in.transferTo(out);
+        long dataTransferredLength = dataBytes.length + in.transferTo(out);
 
-        if (dataTransferedLength > 0) {
+        if (dataTransferredLength > 0) {
             if (AudioFormat.CODEC_PCM_SIGNED.equals(audioFormat.getCodec())) {
                 try (AudioInputStream audioInputStream = AudioSystem
                         .getAudioInputStream(new ByteArrayInputStream(dataBytes))) {
                     int frameSize = audioInputStream.getFormat().getFrameSize();
                     float frameRate = audioInputStream.getFormat().getFrameRate();
-                    long computedDuration = Float.valueOf((dataTransferedLength / (frameSize * frameRate)) * 1000000000)
-                            .longValue();
+                    long computedDuration = Float
+                            .valueOf((dataTransferredLength / (frameSize * frameRate)) * 1000000000).longValue();
                     return startTime + computedDuration;
                 } catch (IOException | UnsupportedAudioFileException e) {
                     logger.debug("Cannot compute the duration of input stream with method java stream sound analysis",
                             e);
                     Integer bitRate = audioFormat.getBitRate();
                     if (bitRate != null && bitRate != 0) {
-                        long computedDuration = Float.valueOf((8f * dataTransferedLength / bitRate) * 1000000000)
+                        long computedDuration = Float.valueOf((8f * dataTransferredLength / bitRate) * 1000000000)
                                 .longValue();
                         return startTime + computedDuration;
                     } else {
@@ -84,7 +84,7 @@ public class AudioSinkUtilsImpl implements AudioSinkUtils {
                 try {
                     Header h = bitstream.readFrame();
                     if (h != null) {
-                        long computedDuration = Float.valueOf(h.total_ms(dataTransferedLength.intValue()) * 1000000)
+                        long computedDuration = Float.valueOf(h.total_ms((int) dataTransferredLength) * 1000000)
                                 .longValue();
                         return startTime + computedDuration;
                     }
