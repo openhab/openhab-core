@@ -15,7 +15,7 @@ package org.openhab.core.audio;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is for an {@link AudioStream}, which size is known
+ * Interface to be implemented by {@link AudioStream} implementations which size is known.
  *
  * @author Gwendal Roulleau - Initial contribution, separation from {@link FixedLengthAudioStream}
  */

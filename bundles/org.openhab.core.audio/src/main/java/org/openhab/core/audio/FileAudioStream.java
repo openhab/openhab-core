@@ -33,7 +33,7 @@ import org.openhab.core.common.Disposable;
  * @author Christoph Weitkamp - Refactored use of filename extension
  */
 @NonNullByDefault
-public class FileAudioStream extends FixedLengthAudioStream implements Disposable {
+public class FileAudioStream extends AudioStream implements SizeableAudioStream, ClonableAudioStream, Disposable {
 
     public static final String WAV_EXTENSION = "wav";
     public static final String MP3_EXTENSION = "mp3";
