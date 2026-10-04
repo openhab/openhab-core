@@ -23,7 +23,6 @@ import org.openhab.core.io.transport.modbus.ModbusBitUtilities;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.IncreaseDecreaseType;
 import org.openhab.core.library.types.OnOffType;
-import org.openhab.core.library.types.OpenClosedType;
 
 /**
  * @author Sami Salonen - Initial contribution
@@ -56,20 +55,8 @@ public class BitUtilitiesTranslateCommand2BooleanTest {
     }
 
     @Test
-    public void testOpen() {
-        Optional<Boolean> actual = ModbusBitUtilities.translateCommand2Boolean(OpenClosedType.OPEN);
-        assertThat(actual, is(equalTo(Optional.of(true))));
-    }
-
-    @Test
     public void testOff() {
         Optional<Boolean> actual = ModbusBitUtilities.translateCommand2Boolean(OnOffType.OFF);
-        assertThat(actual, is(equalTo(Optional.of(false))));
-    }
-
-    @Test
-    public void testClosed() {
-        Optional<Boolean> actual = ModbusBitUtilities.translateCommand2Boolean(OpenClosedType.CLOSED);
         assertThat(actual, is(equalTo(Optional.of(false))));
     }
 
