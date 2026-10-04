@@ -51,8 +51,9 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
     public StateDescriptionConverter() {
         super(StateDescription.class);
 
-        this.attributeMapValidator = new ConverterAttributeMapValidator(new String[][] { { "min", "false" },
-                { "max", "false" }, { "step", "false" }, { "pattern", "false" }, { "readOnly", "false" } });
+        this.attributeMapValidator = new ConverterAttributeMapValidator(
+                new String[][] { { "min", "false" }, { "max", "false" }, { "step", "false" }, { "rangeUnit", "false" },
+                        { "pattern", "false" }, { "readOnly", "false" } });
     }
 
     private @Nullable BigDecimal toBigDecimal(Map<String, String> attributes, String attribute,
@@ -121,6 +122,11 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
         BigDecimal step = toBigDecimal(attributes, "step", null);
         if (step != null) {
             builder.withStep(step);
+        }
+
+        String rangeUnit = attributes.get("rangeUnit");
+        if (rangeUnit != null) {
+            builder.withRangeUnit(rangeUnit);
         }
 
         String pattern = attributes.get("pattern");
