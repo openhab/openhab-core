@@ -15,8 +15,8 @@
 		<parameter name="trustedNetworks" type="text">
 			<advanced>true</advanced>
 			<label>Trusted Networks</label>
-			<description>Grant implicit user role to requests originating from these networks; Comma separated list of CIDR
-				(ignored if "Implicit User Role" is enabled).</description>
+			<description>Grant the implicit user role to requests whose direct connection peer is in these networks;
+				comma-separated list of CIDRs. Forwarded headers are not used (ignored if "Implicit User Role" is enabled).</description>
 		</parameter>
 		<parameter name="allowBasicAuth" type="boolean">
 			<advanced>true</advanced>

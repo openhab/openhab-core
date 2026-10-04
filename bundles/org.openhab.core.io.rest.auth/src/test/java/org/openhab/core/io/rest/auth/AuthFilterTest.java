@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest.auth;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -77,13 +79,13 @@ public class AuthFilterTest {
     }
 
     @Test
-    public void trustedNetworkAllowsAccessIfForwardedHeaderMatches() throws IOException {
+    public void trustedNetworkDeniesAccessIfForwardedHeaderMatchesButRemoteAddressDoesNot() throws IOException {
         authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
                 "192.168.1.0/24"));
         when(servletRequest.getHeader("x-forwarded-for")).thenReturn("192.168.1.100");
         authFilter.filter(containerRequestContext);
 
-        verify(containerRequestContext).setSecurityContext(any());
+        verify(containerRequestContext, never()).setSecurityContext(any());
     }
 
     @Test
@@ -109,6 +111,67 @@ public class AuthFilterTest {
     public void trustedNetworkDeniesAccessIfRemoteAddressDoesNotMatch() throws IOException {
         authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
                 "192.168.1.0/24"));
+        authFilter.filter(containerRequestContext);
+
+        verify(containerRequestContext, never()).setSecurityContext(any());
+    }
+
+    @Test
+    public void trustedNetworkDeniesAccessForSpoofedLoopbackForwardedHeader() throws IOException {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "127.0.0.1/32"));
+        when(servletRequest.getRemoteAddr()).thenReturn("203.0.113.7");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("127.0.0.1, 203.0.113.7");
+        authFilter.filter(containerRequestContext);
+
+        verify(containerRequestContext, never()).setSecurityContext(any());
+    }
+
+    @Test
+    public void trustedNetworkAllowsAccessIfRemoteAddressMatchesDespiteUntrustedForwardedHeader() throws IOException {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "192.168.0.0/24"));
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("203.0.113.7");
+        authFilter.filter(containerRequestContext);
+
+        verify(containerRequestContext).setSecurityContext(any());
+    }
+
+    @Test
+    public void loopbackTrustedNetworksAreDetected() {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "127.0.0.1/32, 127.0.0.0/8, ::1/128, 0.0.0.0/0, 192.168.1.0/24, 10.0.0.0/8"));
+
+        assertThat(authFilter.findLoopbackTrustedNetworks(),
+                contains("127.0.0.1/32", "127.0.0.0/8", "::1/128", "0.0.0.0/0"));
+    }
+
+    @Test
+    public void trustedNetworksWithoutLoopbackAreNotReported() {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "192.168.1.0/24, 10.0.0.0/8, 126.0.0.0/8, 128.0.0.0/8"));
+
+        assertThat(authFilter.findLoopbackTrustedNetworks(), is(empty()));
+    }
+
+    @Test
+    public void trustedNetworkWithLoopbackGrantsAccessToEveryProxiedClient() throws IOException {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "127.0.0.1/32"));
+        when(servletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("203.0.113.7");
+        authFilter.filter(containerRequestContext);
+
+        verify(containerRequestContext).setSecurityContext(any());
+        assertThat(authFilter.findLoopbackTrustedNetworks(), contains("127.0.0.1/32"));
+    }
+
+    @Test
+    public void trustedNetworkDeniesAccessForClientBehindProxy() throws IOException {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "192.168.1.0/24"));
+        when(servletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("192.168.1.50");
         authFilter.filter(containerRequestContext);
 
         verify(containerRequestContext, never()).setSecurityContext(any());
