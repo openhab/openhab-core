@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest.auth;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -51,6 +53,7 @@ import org.openhab.core.io.rest.auth.internal.UserSecurityContext;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Gabor Bicskei - Added regression tests for auth behavior
+ * @author Holger Friedrich - Add tests for forwarded header handling
  */
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
@@ -90,13 +93,13 @@ public class AuthFilterTest {
     }
 
     @Test
-    public void trustedNetworkAllowsAccessIfForwardedHeaderMatches() throws IOException {
+    public void trustedNetworkDeniesAccessIfForwardedHeaderMatchesButRemoteAddressDoesNot() throws IOException {
         authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
                 "192.168.1.0/24"));
         when(servletRequest.getHeader("x-forwarded-for")).thenReturn("192.168.1.100");
         authFilter.filter(containerRequestContext);
 
-        verify(containerRequestContext).setSecurityContext(any());
+        verify(containerRequestContext, never()).setSecurityContext(any());
     }
 
     @Test
@@ -467,5 +470,81 @@ public class AuthFilterTest {
 
         assertNotNull(sc);
         assertInstanceOf(UserSecurityContext.class, sc);
+    }
+
+    @Test
+    public void trustedNetworkDeniesAccessForSpoofedLoopbackForwardedHeader() throws IOException {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "127.0.0.1/32"));
+        when(servletRequest.getRemoteAddr()).thenReturn("203.0.113.7");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("127.0.0.1, 203.0.113.7");
+        authFilter.filter(containerRequestContext);
+
+        verify(containerRequestContext, never()).setSecurityContext(any());
+    }
+
+    @Test
+    public void trustedNetworkAllowsAccessIfRemoteAddressMatchesDespiteUntrustedForwardedHeader() throws IOException {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "192.168.0.0/24"));
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("203.0.113.7");
+        authFilter.filter(containerRequestContext);
+
+        verify(containerRequestContext).setSecurityContext(any());
+    }
+
+    @Test
+    public void loopbackTrustedNetworksAreDetected() {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "127.0.0.1/32, 127.0.0.0/8, ::1/128, 0.0.0.0/0, 192.168.1.0/24, 10.0.0.0/8"));
+
+        assertThat(authFilter.findLoopbackTrustedNetworks(),
+                contains("127.0.0.1/32", "127.0.0.0/8", "::1/128", "0.0.0.0/0"));
+    }
+
+    @Test
+    public void trustedNetworksWithoutLoopbackAreNotReported() {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "192.168.1.0/24, 10.0.0.0/8, 126.0.0.0/8, 128.0.0.0/8"));
+
+        assertThat(authFilter.findLoopbackTrustedNetworks(), is(empty()));
+    }
+
+    /**
+     * Behaviour change in 5.3: with a reverse proxy on the same host, every request now has the proxy as its connection
+     * peer, so configuring the proxy address as a trusted network grants the implicit user role to all forwarded
+     * requests, including those from the internet. The configuration warns about this, but the request is still
+     * accepted.
+     */
+    @Test
+    public void trustedNetworkWithLoopbackGrantsAccessToEveryProxiedClient() throws IOException {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "127.0.0.1/32"));
+        when(servletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("203.0.113.7");
+        authFilter.filter(containerRequestContext);
+
+        verify(containerRequestContext).setSecurityContext(any());
+        // before 5.3: verify(containerRequestContext, never()).setSecurityContext(any());
+        assertThat(authFilter.findLoopbackTrustedNetworks(), contains("127.0.0.1/32"));
+    }
+
+    /**
+     * Behaviour change in 5.3: clients reaching the instance through a reverse proxy can no longer be told apart by
+     * their own address, because only the address of the proxy is available. They are treated as external traffic and
+     * have to authenticate. This worked before and is the setup the trusted networks option was originally added for,
+     * but restoring it would require trusting a forwarded header, which is what allowed the trusted network check to be
+     * bypassed.
+     */
+    @Test
+    public void trustedNetworkDeniesAccessForClientBehindProxy() throws IOException {
+        authFilter.activate(Map.of(AuthFilter.CONFIG_IMPLICIT_USER_ROLE, false, AuthFilter.CONFIG_TRUSTED_NETWORKS,
+                "192.168.1.0/24"));
+        when(servletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(servletRequest.getHeader("x-forwarded-for")).thenReturn("192.168.1.50");
+        authFilter.filter(containerRequestContext);
+
+        verify(containerRequestContext, never()).setSecurityContext(any());
+        // before 5.3: verify(containerRequestContext).setSecurityContext(any());
     }
 }

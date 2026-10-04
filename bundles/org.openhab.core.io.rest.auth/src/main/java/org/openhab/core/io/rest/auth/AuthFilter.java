@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -154,6 +153,11 @@ public class AuthFilter implements ContainerRequestFilter {
                     true);
             trustedNetworks = parseTrustedNetworks(
                     ConfigParser.valueAsOrElse(properties.get(CONFIG_TRUSTED_NETWORKS), String.class, ""));
+            if (!implicitUserRole) {
+                findLoopbackTrustedNetworks().forEach(network -> logger.warn(
+                        "Trusted network '{}' contains a loopback address. If a reverse proxy is running on this host, every request it forwards is granted the implicit user role, including requests from remote clients.",
+                        network));
+            }
             try {
                 cacheExpiration = ConfigParser.valueAsOrElse(properties.get(CONFIG_CACHE_EXPIRATION), Long.class, 6L);
             } catch (NumberFormatException e) {
@@ -242,7 +246,7 @@ public class AuthFilter implements ContainerRequestFilter {
                     requestContext.setSecurityContext(sc);
                 }
             } catch (AuthenticationException e) {
-                logger.warn("Unauthorized API request from {}: {}", getClientIp(servletRequest), e.getMessage());
+                logger.warn("Unauthorized API request from {}: {}", servletRequest.getRemoteAddr(), e.getMessage());
                 requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
         }
@@ -317,12 +321,24 @@ public class AuthFilter implements ContainerRequestFilter {
             return true;
         }
         try {
-            byte[] clientAddress = InetAddress.getByName(getClientIp(request)).getAddress();
+            byte[] clientAddress = InetAddress.getByName(request.getRemoteAddr()).getAddress();
             return trustedNetworks.stream().anyMatch(networkCIDR -> networkCIDR.isInRange(clientAddress));
         } catch (IOException e) {
             logger.debug("Error validating trusted networks: {}", e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Returns the configured trusted networks that contain a loopback address.
+     *
+     * Such a network cannot distinguish a local client from a remote one as soon as a reverse proxy forwards requests
+     * from the same host, because all of them arrive with the address of the proxy.
+     *
+     * @return the offending networks, in configuration order
+     */
+    List<String> findLoopbackTrustedNetworks() {
+        return trustedNetworks.stream().filter(CIDR::containsLoopbackAddress).map(CIDR::toString).toList();
     }
 
     private List<CIDR> parseTrustedNetworks(String value) {
@@ -339,14 +355,11 @@ public class AuthFilter implements ContainerRequestFilter {
         return cidrList;
     }
 
-    private String getClientIp(HttpServletRequest request) throws UnknownHostException {
-        String ipForwarded = Objects.requireNonNullElse(request.getHeader("x-forwarded-for"), "");
-        String clientIp = ipForwarded.split(",")[0];
-        return clientIp.isBlank() ? request.getRemoteAddr() : clientIp;
-    }
-
     private static class CIDR {
         private static final Pattern CIDR_PATTERN = Pattern.compile("(?<networkAddress>.*?)/(?<prefixLength>\\d+)");
+        private static final byte[] LOOPBACK_V4 = new byte[] { 127, 0, 0, 1 };
+        private static final byte[] LOOPBACK_V6 = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+        private final String cidr;
         private final byte[] networkBytes;
         private final int prefix;
 
@@ -355,8 +368,18 @@ public class AuthFilter implements ContainerRequestFilter {
             if (!m.matches()) {
                 throw new UnknownHostException();
             }
+            this.cidr = cidr;
             this.prefix = Integer.parseInt(m.group("prefixLength"));
             this.networkBytes = InetAddress.getByName(m.group("networkAddress")).getAddress();
+        }
+
+        public boolean containsLoopbackAddress() {
+            return isInRange(LOOPBACK_V4) || isInRange(LOOPBACK_V6);
+        }
+
+        @Override
+        public String toString() {
+            return cidr;
         }
 
         public boolean isInRange(byte[] address) {
