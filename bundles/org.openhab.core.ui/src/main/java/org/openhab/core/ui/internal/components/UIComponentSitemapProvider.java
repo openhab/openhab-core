@@ -82,6 +82,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Make provider managed and add support for adding/updating/removing sitemaps via the provider
  *         interface
  * @author Mark Herwege - Add support for nested sitemaps
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 @Component(service = { SitemapProvider.class, ManagedSitemapProvider.class }, immediate = true)
@@ -92,6 +93,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
 
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
+    private static final Pattern CONDITIONS_PREFIX = Pattern.compile("^(?:\"[^\"]*\"|==|!=|<=|>=|<|>|[^\"=])*");
     private static final Pattern CONDITION_PATTERN = Pattern.compile(
             "(?:(?<item>[a-zA-Z_][a-zA-Z0-9_]*)(?=(?:\\s+|==|!=|<=|>=|<|>)\\S))?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>\\\"[^\\\"]*\\\"|(\\+|-)?.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
@@ -227,6 +229,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         setWidgetPropertyFromComponentConfig(widget, component, "label");
         setWidgetPropertyFromComponentConfig(widget, component, "icon");
         setWidgetPropertyFromComponentConfig(widget, component, "staticIcon");
+        setWidgetPropertyFromComponentConfig(widget, component, "confirmCmd");
 
         if (widget instanceof LinkableWidget linkableWidget) {
             if (component.getSlots() != null && component.getSlots().containsKey("widgets")) {
@@ -244,6 +247,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         addWidgetRules(widget.getValueColor(), component, "valuecolor");
         addWidgetRules(widget.getIconColor(), component, "iconcolor");
         addWidgetRules(widget.getIconRules(), component, "iconrules");
+        addWidgetRules(widget.getConfirmCmdRules(), component, "confirmcmdrules");
 
         return widget;
     }
@@ -363,18 +367,27 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         return deprecated;
     }
 
-    private void addWidgetRules(List<Rule> rules, UIComponent component, String key) {
+    /**
+     * Add rules of a specific type to a widget.
+     * This method is package-private for testing purposes, to allow testing adding rules to a widget without having to
+     * mock the whole widget building process.
+     *
+     * @param rules
+     * @param component
+     * @param key
+     */
+    void addWidgetRules(List<Rule> rules, UIComponent component, String key) {
         if (component.getConfig() != null && component.getConfig().containsKey(key)) {
             Object sourceRules = component.getConfig().get(key);
             if (sourceRules instanceof Collection<?> sourceRulesCollection) {
                 for (Object sourceRule : sourceRulesCollection) {
-                    if (sourceRule instanceof String) {
-                        String argument = !"visibility".equals(key) ? getRuleArgument(sourceRule.toString()) : null;
-                        List<String> conditionsString = getRuleConditions(sourceRule.toString(), argument);
+                    if (sourceRule instanceof String ruleString) {
+                        ArgumentMatch match = findTrailingArgument(ruleString, component, key);
+                        List<String> conditionsString = getRuleConditions(sourceRule.toString(), match);
                         Rule rule = sitemapFactory.createRule();
                         List<Condition> conditions = getConditions(conditionsString, component, key);
                         rule.setConditions(conditions);
-                        rule.setArgument(argument);
+                        rule.setArgument(match != null ? match.value() : null);
                         rules.add(rule);
                     }
                 }
@@ -420,23 +433,54 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         return conditions;
     }
 
-    private String getRuleArgument(String rule) {
-        int argIndex = rule.lastIndexOf("=") + 1;
-        String strippedRule = stripQuotes(rule.substring(argIndex).trim());
-        return strippedRule != null ? strippedRule : "";
+    private record ArgumentMatch(String value, int conditionsEnd) {
     }
 
-    private List<String> getRuleConditions(String rule, @Nullable String argument) {
-        String conditions = rule;
-        if (argument != null) {
-            conditions = rule.substring(0, rule.lastIndexOf(argument)).trim();
-            if (conditions.endsWith("=\"")) {
-                // If the argument was surrounded by quotes, we need to remove the quote and the preceding =
-                conditions = conditions.substring(0, conditions.length() - 2);
-            } else if (conditions.endsWith("=")) {
-                conditions = conditions.substring(0, conditions.length() - 1);
-            }
+    /**
+     * Finds a trailing, properly closed, escape-aware quoted literal that reaches the end of the rule string and is
+     * introduced by a bare "=" (not part of ==, !=, <=, >=). Honors \" and \\ escapes inside the literal, mirroring
+     * Xtext STRING semantics, and returns the unescaped value. Returns null if there is no such trailing argument.
+     */
+    private @Nullable ArgumentMatch findTrailingArgument(String rule, UIComponent component, String key) {
+        String trimmed = rule.trim();
+        Matcher m = CONDITIONS_PREFIX.matcher(trimmed);
+        m.find();
+        int delimiterIndex = m.end();
+        if (delimiterIndex >= trimmed.length() || trimmed.charAt(delimiterIndex) != '=') {
+            return null;
         }
+        String argument = trimmed.substring(delimiterIndex + 1).trim();
+        String unescaped = unescapeFullyQuotedLiteral(argument);
+        if (unescaped == null) {
+            logger.warn("Syntax error in {} rule argument '{}' for widget {}", key, trimmed, component.getType());
+        }
+        return unescaped != null ? new ArgumentMatch(unescaped, delimiterIndex) : null;
+    }
+
+    private @Nullable String unescapeFullyQuotedLiteral(String value) {
+        if (value.length() < 2 || value.charAt(0) != '"') {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        int j = 1;
+        while (j < value.length()) {
+            char c = value.charAt(j);
+            if (c == '\\' && j + 1 < value.length() && (value.charAt(j + 1) == '"' || value.charAt(j + 1) == '\\')) {
+                sb.append(value.charAt(j + 1));
+                j += 2;
+                continue;
+            }
+            if (c == '"') {
+                return j == value.length() - 1 ? sb.toString() : null;
+            }
+            sb.append(c);
+            j++;
+        }
+        return null;
+    }
+
+    private List<String> getRuleConditions(String rule, @Nullable ArgumentMatch match) {
+        String conditions = match != null ? rule.trim().substring(0, match.conditionsEnd()) : rule.trim();
         List<String> conditionsList = List.of(conditions.split(" AND "));
         return conditionsList.stream().filter(Predicate.not(String::isBlank)).map(String::trim).toList();
     }

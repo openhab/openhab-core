@@ -41,7 +41,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -132,6 +134,8 @@ public class ItemUIRegistryImplTest {
     private @Mock @NonNullByDefault({}) SitemapFactory sitemapFactoryMock;
     private @Mock @NonNullByDefault({}) SitemapRegistry sitemapRegistryMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
+    private @Mock @NonNullByDefault({}) LocaleProvider localeProviderMock;
+    private @Mock @NonNullByDefault({}) TranslationProvider translationProviderMock;
     private @Mock @NonNullByDefault({}) Sitemap sitemapMock;
     private @Mock @NonNullByDefault({}) Widget widgetMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
@@ -174,7 +178,7 @@ public class ItemUIRegistryImplTest {
     @SuppressWarnings("PMD.SetDefaultTimeZone")
     public void setup() throws Exception {
         uiRegistry = spy(new ItemUIRegistryImpl(registryMock, metadataRegistryMock, sitemapFactoryMock,
-                sitemapRegistryMock, timeZoneProviderMock));
+                sitemapRegistryMock, timeZoneProviderMock, localeProviderMock, translationProviderMock));
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
@@ -1394,6 +1398,50 @@ public class ItemUIRegistryImplTest {
         when(itemMock.getState()).thenReturn(new DecimalType(24.0));
 
         assertFalse(uiRegistry.getVisiblity(widgetMock));
+    }
+
+    @Test
+    public void getConfirmCmd() {
+        when(widgetMock.getConfirmCmd()).thenReturn(true);
+        assertEquals(ItemUIRegistryImpl.DEFAULT_COMMAND_CONFIRM_MESSAGE,
+                uiRegistry.getCommandConfirmMessage(widgetMock));
+
+        when(widgetMock.getConfirmCmd()).thenReturn(false);
+        assertNull(uiRegistry.getCommandConfirmMessage(widgetMock));
+
+        String message = "Are you absolutely sure?";
+        Rule rule = mock(Rule.class);
+        List<Rule> rules = new ArrayList<>();
+        rules.add(rule);
+        List<Condition> conditions = new ArrayList<>();
+        when(rule.getConditions()).thenReturn(conditions);
+        when(rule.getArgument()).thenReturn(message);
+        when(widgetMock.getConfirmCmdRules()).thenReturn(rules);
+        assertEquals(message, uiRegistry.getCommandConfirmMessage(widgetMock));
+
+        Condition condition = mock(Condition.class);
+        when(condition.getValue()).thenReturn("21");
+        when(condition.getCondition()).thenReturn(">=");
+        Condition condition2 = mock(Condition.class);
+        when(condition2.getValue()).thenReturn("24");
+        when(condition2.getCondition()).thenReturn("<");
+        conditions.add(condition);
+        conditions.add(condition2);
+        when(rule.getArgument()).thenReturn(null);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(20.9));
+        assertNull(uiRegistry.getCommandConfirmMessage(mapviewMock));
+
+        when(itemMock.getState()).thenReturn(new DecimalType(21.0));
+        assertEquals(ItemUIRegistryImpl.DEFAULT_COMMAND_CONFIRM_MESSAGE,
+                uiRegistry.getCommandConfirmMessage(widgetMock));
+
+        when(rule.getArgument()).thenReturn(message);
+        when(itemMock.getState()).thenReturn(new DecimalType(23.5));
+        assertEquals(message, uiRegistry.getCommandConfirmMessage(widgetMock));
+
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
+        assertNull(uiRegistry.getCommandConfirmMessage(widgetMock));
     }
 
     @Test

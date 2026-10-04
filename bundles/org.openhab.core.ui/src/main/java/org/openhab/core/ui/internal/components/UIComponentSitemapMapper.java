@@ -41,19 +41,16 @@ import org.openhab.core.sitemap.Webview;
 import org.openhab.core.sitemap.Widget;
 import org.openhab.core.ui.components.RootUIComponent;
 import org.openhab.core.ui.components.UIComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link UIComponentSitemapMapper} is a utility class to map sitemaps into UI Component objects.
  *
  * @author Mark Herwege - Initial contribution
  * @author Mark Herwege - Add support for nested sitemaps
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @NonNullByDefault
 public class UIComponentSitemapMapper {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UIComponentSitemapMapper.class);
 
     public static RootUIComponent map(Sitemap element) {
         String sitemapName = element.getName();
@@ -78,12 +75,16 @@ public class UIComponentSitemapMapper {
         if (widget.isStaticIcon()) {
             addConfig(widgetComponent, "staticIcon", true);
         }
+        if (widget.getConfirmCmd()) {
+            addConfig(widgetComponent, "confirmCmd", true);
+        }
 
         addConfig(widgetComponent, "iconrules", map(widget.getIconRules()));
         addConfig(widgetComponent, "visibility", map(widget.getVisibility()));
         addConfig(widgetComponent, "labelcolor", map(widget.getLabelColor()));
         addConfig(widgetComponent, "valuecolor", map(widget.getValueColor()));
         addConfig(widgetComponent, "iconcolor", map(widget.getIconColor()));
+        addConfig(widgetComponent, "confirmcmdrules", map(widget.getConfirmCmdRules()));
 
         switch (widget) {
             case Switch switchWidget -> {
@@ -203,9 +204,13 @@ public class UIComponentSitemapMapper {
                 .collect(Collectors.joining(" AND "));
         String argument = rule.getArgument();
         if (argument != null) {
-            ruleString = ruleString + "=\"" + argument + "\"";
+            ruleString = ruleString + "=\"" + escapeRuleArgument(argument) + "\"";
         }
         return ruleString;
+    }
+
+    private static String escapeRuleArgument(String argument) {
+        return argument.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private static String map(Condition condition) {

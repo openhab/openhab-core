@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * @author Mark Herwege - Initial contribution
  * @author Mark Herwege - Add support for nested sitemaps
+ * @author Mark Herwege - Add support for confirmation dialog for commands
  */
 @Schema(name = "SitemapWidgetDefinition")
 public class WidgetDefinitionDTO extends AbstractWidgetDTO {
@@ -31,6 +32,9 @@ public class WidgetDefinitionDTO extends AbstractWidgetDTO {
     // widget containing the sitemap definition as child widgets.
     public String name;
 
+    // confirmCmd is a boolean indicating if a widget command must be confirmed before sending the command.
+    public Boolean confirmCmd;
+
     public List<MappingDTO> mappings;
 
     public List<RuleDTO> visibilityRules;
@@ -38,6 +42,7 @@ public class WidgetDefinitionDTO extends AbstractWidgetDTO {
     public List<RuleDTO> labelColorRules;
     public List<RuleDTO> valueColorRules;
     public List<RuleDTO> iconColorRules;
+    public List<RuleDTO> confirmCmdRules;
 
     public List<WidgetDefinitionDTO> widgets;
 }
