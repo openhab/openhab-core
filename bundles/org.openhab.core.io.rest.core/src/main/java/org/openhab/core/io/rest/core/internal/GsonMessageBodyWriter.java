@@ -87,11 +87,6 @@ public class GsonMessageBodyWriter<T> implements MessageBodyWriter<T> {
             } else {
                 entityStream.write(gson.toJson(object).getBytes(StandardCharsets.UTF_8));
             }
-
-            // Flush the stream.
-            // Keep this code as it has been present before,
-            // but I don't think this needs to be done in the message body writer itself.
-            entityStream.flush();
         } catch (IOException e) {
             // we catch this exception to avoid confusion errors in the log file, since this is not any error situation
             // see https://github.com/openhab/openhab-distro/issues/1188
