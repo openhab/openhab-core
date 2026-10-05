@@ -22,6 +22,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -101,6 +102,7 @@ public class ProxyServletService extends HttpServlet {
 
     private @Nullable Servlet impl;
     private final Set<String> allowedHosts;
+    private final AtomicBoolean allowedHostsEmptyWarningLogged = new AtomicBoolean();
 
     protected final HttpService httpService;
     protected final ItemUIRegistry itemUIRegistry;
@@ -286,19 +288,27 @@ public class ProxyServletService extends HttpServlet {
             }
 
             String itemName = widget.getItem();
-            if (itemName != null && !allowedHosts.isEmpty()) {
-                State state = itemUIRegistry.getItemState(itemName);
-                if (state instanceof StringType) {
-                    try {
-                        URI itemUri = createURIFromString(state.toString());
-                        if (isAllowedItemUri(itemUri)) {
-                            request.setAttribute(ATTR_URI, itemUri);
-                            return itemUri;
-                        }
-                        logger.debug("Ignoring url of item '{}' as its host is not in '{}'", itemName,
+            if (itemName != null) {
+                if (allowedHosts.isEmpty()) {
+                    if (allowedHostsEmptyWarningLogged.compareAndSet(false, true)) {
+                        logger.warn("URLs from item states are disabled because '{}' is empty. Configure this setting "
+                                + "with the permitted host(s) to enable them; using the sitemap URL for this request.",
                                 CONFIG_ALLOWED_HOSTS);
-                    } catch (MalformedURLException | URISyntaxException ex) {
-                        // fall thru
+                    }
+                } else {
+                    State state = itemUIRegistry.getItemState(itemName);
+                    if (state instanceof StringType) {
+                        try {
+                            URI itemUri = createURIFromString(state.toString());
+                            if (isAllowedItemUri(itemUri)) {
+                                request.setAttribute(ATTR_URI, itemUri);
+                                return itemUri;
+                            }
+                            logger.debug("Ignoring url of item '{}' as its host is not in '{}'", itemName,
+                                    CONFIG_ALLOWED_HOSTS);
+                        } catch (MalformedURLException | URISyntaxException ex) {
+                            // fall thru
+                        }
                     }
                 }
             }

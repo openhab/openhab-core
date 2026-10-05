@@ -42,6 +42,12 @@ import org.openhab.core.sitemap.registry.SitemapRegistry;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.service.http.HttpService;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 /**
  * Unit tests for the {@link ProxyServletService} class.
@@ -286,6 +292,30 @@ public class ProxyServletServiceTest {
         URI uri = imageUriWithItemState(serviceWithAllowedHosts("openHAB.org"), "file://openhab.org/etc/passwd");
         assertNotNull(uri);
         assertEquals(VALID_IMAGE_URL, uri.toString());
+    }
+
+    @Test
+    public void testEmptyAllowedHostsLogsOnceAndUsesSitemapUrl() {
+        Logger logger = (Logger) LoggerFactory.getLogger(ProxyServletService.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            URI firstUri = imageUriWithItemState(service, ITEM_VALID_IMAGE_URL);
+            URI secondUri = imageUriWithItemState(service, ITEM_VALID_IMAGE_URL);
+
+            assertNotNull(firstUri);
+            assertEquals(VALID_IMAGE_URL, firstUri.toString());
+            assertNotNull(secondUri);
+            assertEquals(VALID_IMAGE_URL, secondUri.toString());
+            assertEquals(1,
+                    appender.list.stream()
+                            .filter(event -> event.getLevel().equals(Level.WARN)
+                                    && event.getFormattedMessage().contains("URLs from item states are disabled"))
+                            .count());
+        } finally {
+            logger.detachAppender(appender);
+        }
     }
 
     @Test
