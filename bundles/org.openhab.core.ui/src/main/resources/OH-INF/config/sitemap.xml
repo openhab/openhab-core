@@ -17,6 +17,17 @@
 			</options>
 			<default>NONE</default>
 		</parameter>
+		<parameter name="allowedHosts" type="text">
+			<label>Allowed Proxy Hosts</label>
+			<description>Comma-separated list of hosts (host or host:port) for which the URL held by an item bound to an Image or
+				Video widget may be proxied. If empty, the URL defined in the sitemap is always used.</description>
+		</parameter>
+		<parameter name="maxProxyThreads" type="integer" min="1">
+			<label>Max Proxy Threads</label>
+			<description>Maximum number of threads used by the proxy serving Image and Video widget content. If not set, the
+				larger of 8 and the number of processors is used.</description>
+			<advanced>true</advanced>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>

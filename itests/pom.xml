@@ -40,6 +40,7 @@
     <module>org.openhab.core.model.thing.tests</module>
     <module>org.openhab.core.storage.json.tests</module>
     <module>org.openhab.core.thing.tests</module>
+    <module>org.openhab.core.ui.tests</module>
     <module>org.openhab.core.voice.tests</module>
   </modules>
 
