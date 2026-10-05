@@ -19,8 +19,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -59,12 +62,14 @@ import org.slf4j.LoggerFactory;
  * hence provide the data of the url specified in the according widget. Note that it does NOT allow
  * general access to any servers in the LAN - only urls that are specified in a sitemap are accessible.
  *
- * However, if the Image or Video widget is associated with an item whose current State is a StringType,
- * it will attempt to use the state of the item as the url to proxy, or fall back to the url= attribute
- * if the state is not a valid url, so you must make sure that the item's state cannot be set to an
- * internal image or video url that you do not wish to proxy out of your network. If you are concerned
- * with the security aspect of using item= to proxy image or video URLs, then do not use item= with those
- * widgets in your sitemaps.
+ * If the Image or Video widget is associated with an item whose current State is a StringType, the state of the
+ * item is used as the url to proxy ONLY IF its host (or host:port) is listed in the "allowedHosts" configuration
+ * (comma-separated, case-insensitive, e.g. "camera.local, 192.168.1.20:8080") of the "org.openhab.sitemap" service
+ * (Sitemap in the system settings).
+ * By default the list is empty, so item states are never used as proxy targets. Item states with credentials in the
+ * url, with a scheme other than http/https, or with a host that is not allowed are ignored and the url= attribute
+ * of the widget is used instead. Only list hosts that you want to expose through the proxy, as anybody who can
+ * change the state of the item can then make the proxy fetch any resource on those hosts.
  *
  * It is also possible to use credentials in a url, e.g. "http://user:pwd@localserver/image.jpg" -
  * the proxy servlet will be able to access the content and provide it to the web UIs through the
@@ -77,7 +82,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Implement sitemap registry
  */
 @NonNullByDefault
-@Component(immediate = true, property = { "service.pid=org.openhab.proxy" })
+@Component(immediate = true, configurationPid = "org.openhab.sitemap")
 public class ProxyServletService extends HttpServlet {
 
     /** the alias for this servlet */
@@ -85,14 +90,17 @@ public class ProxyServletService extends HttpServlet {
 
     @Serial
     private static final long serialVersionUID = -4716754591953017793L;
-    private static final String CONFIG_MAX_THREADS = "maxThreads";
+    private static final String CONFIG_MAX_PROXY_THREADS = "maxProxyThreads";
+    private static final String JETTY_MAX_THREADS = "maxThreads";
     private static final int DEFAULT_MAX_THREADS = 8;
+    private static final String CONFIG_ALLOWED_HOSTS = "allowedHosts";
     public static final String ATTR_URI = ProxyServletService.class.getName() + ".URI";
     public static final String ATTR_SERVLET_EXCEPTION = ProxyServletService.class.getName() + ".ProxyServletException";
 
     private final Logger logger = LoggerFactory.getLogger(ProxyServletService.class);
 
     private @Nullable Servlet impl;
+    private final Set<String> allowedHosts;
 
     protected final HttpService httpService;
     protected final ItemUIRegistry itemUIRegistry;
@@ -104,6 +112,7 @@ public class ProxyServletService extends HttpServlet {
         this.httpService = httpService;
         this.itemUIRegistry = itemUIRegistry;
         this.sitemapRegistry = sitemapRegistry;
+        this.allowedHosts = parseAllowedHosts(config.get(CONFIG_ALLOWED_HOSTS));
 
         Servlet servlet = getImpl();
 
@@ -114,6 +123,31 @@ public class ProxyServletService extends HttpServlet {
         } catch (NamespaceException | ServletException e) {
             logger.error("Error during servlet startup: {}", e.getMessage());
         }
+    }
+
+    private static Set<String> parseAllowedHosts(@Nullable Object value) {
+        if (value == null) {
+            return Set.of();
+        }
+        return Stream.of(value.toString().split(",")).map(String::trim).filter(h -> !h.isEmpty())
+                .map(h -> h.toLowerCase(Locale.ROOT)).collect(Collectors.toUnmodifiableSet());
+    }
+
+    /**
+     * Checks whether an url derived from an item state may be proxied.
+     */
+    private boolean isAllowedItemUri(URI uri) {
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        if (scheme == null || host == null || uri.getUserInfo() != null) {
+            return false;
+        }
+        if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
+            return false;
+        }
+        host = host.toLowerCase(Locale.ROOT);
+        return allowedHosts.contains(host)
+                || (uri.getPort() != -1 && allowedHosts.contains(host + ":" + uri.getPort()));
     }
 
     @Deactivate
@@ -144,23 +178,31 @@ public class ProxyServletService extends HttpServlet {
     }
 
     /**
-     * Copy the ConfigAdminManager's config to the init parameters of the servlet.
+     * Build the init parameters of the servlet. Only the maximum number of threads is taken from the configuration
+     * ("maxProxyThreads") and passed on under the name expected by the Jetty proxy servlet ("maxThreads").
      *
-     * @param config the OSGi config, may be <code>null</code>
+     * @param config the OSGi config
      * @return properties to pass to servlet for initialization
      */
-    private Hashtable<String, @Nullable String> propsFromConfig(Map<String, Object> config, Servlet servlet) {
+    Hashtable<String, @Nullable String> propsFromConfig(Map<String, Object> config, Servlet servlet) {
         Hashtable<String, @Nullable String> props = new Hashtable<>();
 
-        for (Entry<String, Object> entry : config.entrySet()) {
-            props.put(entry.getKey(), entry.getValue().toString());
+        int maxThreads = Math.max(DEFAULT_MAX_THREADS, Runtime.getRuntime().availableProcessors());
+        Object configured = config.get(CONFIG_MAX_PROXY_THREADS);
+        if (configured != null) {
+            try {
+                int value = Integer.parseInt(configured.toString().trim());
+                if (value > 0) {
+                    maxThreads = value;
+                } else {
+                    logger.warn("Ignoring invalid {} '{}', using {}", CONFIG_MAX_PROXY_THREADS, configured, maxThreads);
+                }
+            } catch (NumberFormatException e) {
+                logger.warn("Ignoring invalid {} '{}', using {}", CONFIG_MAX_PROXY_THREADS, configured, maxThreads);
+            }
         }
-
         // must specify for Jetty proxy servlet, per http://stackoverflow.com/a/27625380
-        if (props.get(CONFIG_MAX_THREADS) == null) {
-            props.put(CONFIG_MAX_THREADS,
-                    String.valueOf(Math.max(DEFAULT_MAX_THREADS, Runtime.getRuntime().availableProcessors())));
-        }
+        props.put(JETTY_MAX_THREADS, String.valueOf(maxThreads));
 
         if (servlet instanceof AsyncProxyServlet) {
             props.put("async-supported", "true");
@@ -244,13 +286,17 @@ public class ProxyServletService extends HttpServlet {
             }
 
             String itemName = widget.getItem();
-            if (itemName != null) {
+            if (itemName != null && !allowedHosts.isEmpty()) {
                 State state = itemUIRegistry.getItemState(itemName);
                 if (state instanceof StringType) {
                     try {
-                        uri = createURIFromString(state.toString());
-                        request.setAttribute(ATTR_URI, uri);
-                        return uri;
+                        URI itemUri = createURIFromString(state.toString());
+                        if (isAllowedItemUri(itemUri)) {
+                            request.setAttribute(ATTR_URI, itemUri);
+                            return itemUri;
+                        }
+                        logger.debug("Ignoring url of item '{}' as its host is not in '{}'", itemName,
+                                CONFIG_ALLOWED_HOSTS);
                     } catch (MalformedURLException | URISyntaxException ex) {
                         // fall thru
                     }

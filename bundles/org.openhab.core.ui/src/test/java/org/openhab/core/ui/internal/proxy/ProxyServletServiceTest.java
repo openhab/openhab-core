@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.junit.jupiter.api.BeforeEach;
@@ -205,7 +206,86 @@ public class ProxyServletServiceTest {
         when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_VALID_IMAGE_URL);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
+    }
+
+    @Test
+    public void testMaxProxyThreadsPassedToJettyAsMaxThreads() {
+        ProxyServletService svc = new ProxyServletService(httpServiceMock, itemUIRegistryMock, sitemapRegistryMock,
+                Map.of("maxProxyThreads", "20", "allowedHosts", "openHAB.org", "groupMembersSorting", "NAME"));
+        var props = svc.propsFromConfig(Map.of("maxProxyThreads", 20, "allowedHosts", "openHAB.org"),
+                mock(javax.servlet.Servlet.class));
+        assertEquals("20", props.get("maxThreads"));
+        assertNull(props.get("maxProxyThreads"));
+        assertNull(props.get("allowedHosts"));
+    }
+
+    @Test
+    public void testMaxThreadsDefaultAndInvalidValues() {
+        ProxyServletService svc = serviceWithAllowedHosts("");
+        int expected = Math.max(8, Runtime.getRuntime().availableProcessors());
+        for (Map<String, Object> config : java.util.List.<Map<String, Object>> of(Map.of(),
+                Map.of("maxProxyThreads", "abc"), Map.of("maxProxyThreads", "0"), Map.of("maxProxyThreads", -3))) {
+            var props = svc.propsFromConfig(config, mock(javax.servlet.Servlet.class));
+            assertEquals(String.valueOf(expected), props.get("maxThreads"));
+        }
+    }
+
+    private ProxyServletService serviceWithAllowedHosts(String allowedHosts) {
+        return new ProxyServletService(httpServiceMock, itemUIRegistryMock, sitemapRegistryMock,
+                Map.of("allowedHosts", allowedHosts));
+    }
+
+    private @Nullable URI imageUriWithItemState(ProxyServletService svc, String state) {
+        when(requestMock.getParameter(eq("widgetId"))).thenReturn(IMAGE_WIDGET_ID);
+        when(imageWidgetMock.getUrl()).thenReturn(VALID_IMAGE_URL);
+        when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_VALID_IMAGE_URL);
+        when(itemUIRegistryMock.getItemState(eq(ITEM_NAME_VALID_IMAGE_URL))).thenReturn(new StringType(state));
+        return svc.uriFromRequest(requestMock);
+    }
+
+    @Test
+    public void testItemStateUrlUsedWhenHostAllowed() {
+        URI uri = imageUriWithItemState(serviceWithAllowedHosts("openHAB.org"), ITEM_VALID_IMAGE_URL);
+        assertNotNull(uri);
         assertEquals(ITEM_VALID_IMAGE_URL, uri.toString());
+    }
+
+    @Test
+    public void testItemStateUrlUsedWhenHostAndPortAllowed() {
+        URI uri = imageUriWithItemState(serviceWithAllowedHosts("other.local, 192.168.1.20:8080"),
+                "http://192.168.1.20:8080/cam.jpg");
+        assertNotNull(uri);
+        assertEquals("http://192.168.1.20:8080/cam.jpg", uri.toString());
+    }
+
+    @Test
+    public void testItemStateUrlIgnoredWhenPortNotAllowed() {
+        URI uri = imageUriWithItemState(serviceWithAllowedHosts("192.168.1.20:8080"),
+                "http://192.168.1.20:9090/cam.jpg");
+        assertNotNull(uri);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
+    }
+
+    @Test
+    public void testItemStateUrlIgnoredWhenHostNotAllowed() {
+        URI uri = imageUriWithItemState(serviceWithAllowedHosts("openHAB.org"), "http://169.254.169.254/latest");
+        assertNotNull(uri);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
+    }
+
+    @Test
+    public void testItemStateUrlIgnoredWhenContainingCredentials() {
+        URI uri = imageUriWithItemState(serviceWithAllowedHosts("openHAB.org"), "https://user:pw@openhab.org/x.jpg");
+        assertNotNull(uri);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
+    }
+
+    @Test
+    public void testItemStateUrlIgnoredForNonHttpScheme() {
+        URI uri = imageUriWithItemState(serviceWithAllowedHosts("openHAB.org"), "file://openhab.org/etc/passwd");
+        assertNotNull(uri);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
     }
 
     @Test
@@ -274,6 +354,6 @@ public class ProxyServletServiceTest {
         when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_VALID_VIDEO_URL);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(ITEM_VALID_VIDEO_URL, uri.toString());
+        assertEquals(VALID_VIDEO_URL, uri.toString());
     }
 }
