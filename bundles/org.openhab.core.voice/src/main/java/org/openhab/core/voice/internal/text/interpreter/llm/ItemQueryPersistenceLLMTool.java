@@ -96,7 +96,7 @@ public class ItemQueryPersistenceLLMTool implements LLMTool {
     public String getDescription(@Nullable Locale locale) {
         return """
                 Query historical or forecasted item state and aggregations. \
-                Requires 'state' for STATE_AT. Aggregations (MINIMUM, MAXIMUM, AVERAGE, DELTA, SUM) \
+                Requires 'start' for STATE_AT. Aggregations (MINIMUM, MAXIMUM, AVERAGE, DELTA, SUM) \
                 query between 'start' and 'end' (defaulting to 'now' if only one past/future bound is given).""";
     }
 

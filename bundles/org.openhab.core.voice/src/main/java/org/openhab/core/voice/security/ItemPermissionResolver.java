@@ -15,7 +15,6 @@ package org.openhab.core.voice.security;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
-import org.openhab.core.voice.text.HumanLanguageInterpreter;
 
 /**
  * Defines a utility service to resolve the permission for an item for Human Language Interpreters.
@@ -64,7 +63,7 @@ public interface ItemPermissionResolver {
     ItemPermission getPermission(Item item);
 
     /**
-     * Returns whether an item is accessible for {@link HumanLanguageInterpreter}s.
+     * Returns whether an item is accessible for {@link org.openhab.core.voice.text.HumanLanguageInterpreter}s.
      *
      * @param item the item to check
      * @return true if the item is accessible, false otherwise

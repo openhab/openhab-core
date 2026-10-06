@@ -13,6 +13,7 @@
 package org.openhab.core.voice.internal.text.interpreter.llm;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -27,7 +28,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.State;
 import org.openhab.core.voice.security.ItemPermission;
@@ -89,7 +89,7 @@ final class LLMToolUtil {
      * <ul>
      * <li>{@code "now"} (case-insensitive)</li>
      * <li>Relative ISO-8601 duration or period prefixed with '+' or '-' (e.g. {@code "-PT4H"}, {@code "+P1D"})</li>
-     * <li>Absolute ISO-8601 timestamp supported by {@link DateTimeType}</li>
+     * <li>Absolute ISO-8601 timestamp with or without time-zone</li>
      * </ul>
      *
      * @param timeStr the string to parse
@@ -121,9 +121,13 @@ final class LLMToolUtil {
         }
 
         try {
-            return DateTimeType.valueOf(trimmed).getZonedDateTime(zoneId);
-        } catch (IllegalArgumentException e) {
-            throw new LLMToolException("Failed to parse timestamp '" + timeStr + "': " + e.getMessage(), e);
+            return ZonedDateTime.parse(trimmed).withZoneSameInstant(zoneId);
+        } catch (DateTimeParseException e1) {
+            try {
+                return LocalDateTime.parse(trimmed).atZone(zoneId);
+            } catch (DateTimeParseException e2) {
+                throw new LLMToolException("Failed to parse timestamp '" + timeStr + "': " + e2.getMessage(), e2);
+            }
         }
     }
 

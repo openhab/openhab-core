@@ -110,7 +110,7 @@ public class ItemCommandLLMTool implements LLMTool {
         ItemPermission permission = itemAndPermission.permission();
 
         if (!(commandObj instanceof String commandString)) {
-            throw new LLMToolException("Missing or invalid required parameters 'itemName' and 'command'");
+            throw new LLMToolException("Missing or invalid required parameter 'command'");
         }
 
         if (permission == ItemPermission.READ_ONLY) {
