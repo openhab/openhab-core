@@ -60,6 +60,11 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.energy</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.voice</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
