@@ -12,9 +12,12 @@
  */
 package org.openhab.core.voice.internal.text.interpreter.llm;
 
+import java.time.Duration;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 import java.util.Map;
@@ -24,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.types.State;
 import org.openhab.core.voice.security.ItemPermission;
@@ -79,6 +83,51 @@ final class LLMToolUtil {
     }
 
     /**
+     * Parses a time string into a {@link ZonedDateTime}.
+     * <p>
+     * Supports:
+     * <ul>
+     * <li>{@code "now"} (case-insensitive)</li>
+     * <li>Relative ISO-8601 duration or period prefixed with '+' or '-' (e.g. {@code "-PT4H"}, {@code "+P1D"})</li>
+     * <li>Absolute ISO-8601 timestamp supported by {@link DateTimeType}</li>
+     * </ul>
+     *
+     * @param timeStr the string to parse
+     * @param now the reference time for relative expressions
+     * @param zoneId the timezone to use when parsing absolute timestamps without offset/timezone
+     * @return the parsed {@link ZonedDateTime}
+     * @throws LLMToolException if the time string cannot be parsed
+     */
+    public static ZonedDateTime parseTime(String timeStr, ZonedDateTime now, ZoneId zoneId) throws LLMToolException {
+        String trimmed = timeStr.trim();
+        if ("now".equalsIgnoreCase(trimmed)) {
+            return now;
+        }
+
+        if (trimmed.startsWith("+") || trimmed.startsWith("-")) {
+            boolean negative = trimmed.startsWith("-");
+            String durationStr = trimmed.substring(1);
+            try {
+                Duration duration = Duration.parse(durationStr);
+                return negative ? now.minus(duration) : now.plus(duration);
+            } catch (DateTimeParseException e) {
+                try {
+                    Period period = Period.parse(durationStr);
+                    return negative ? now.minus(period) : now.plus(period);
+                } catch (DateTimeParseException pe) {
+                    throw new LLMToolException("Invalid ISO duration offset: " + timeStr, pe);
+                }
+            }
+        }
+
+        try {
+            return DateTimeType.valueOf(trimmed).getZonedDateTime(zoneId);
+        } catch (IllegalArgumentException e) {
+            throw new LLMToolException("Failed to parse timestamp '" + timeStr + "': " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Formats a timestamp using the given locale. If the locale is null, the default locale is used.
      * 
      * @param timestamp the timestamp to format
@@ -107,7 +156,7 @@ final class LLMToolUtil {
      * @return the formatted state
      */
     public static String formatItemState(Item item, State state, @Nullable Locale locale, ZoneId zoneId) {
-        String rawState = item.getState().toString();
+        String rawState = state.toString();
         String displayState = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
 
         if (displayState != null && !displayState.equals(rawState)) {
