@@ -12,13 +12,20 @@
  */
 package org.openhab.core.voice.internal.text.interpreter.llm;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.transform.util.ItemDisplayStateUtil;
+import org.openhab.core.types.State;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
@@ -69,6 +76,62 @@ final class LLMToolUtil {
         }
 
         return new ItemAndPermission(item, permission);
+    }
+
+    /**
+     * Formats a timestamp using the given locale. If the locale is null, the default locale is used.
+     * 
+     * @param timestamp the timestamp to format
+     * @param locale the locale to use for formatting the timestamp
+     * @return the formatted timestamp
+     */
+    public static String formatTimestamp(ZonedDateTime timestamp, @Nullable Locale locale) {
+        Locale effectiveLocale = locale != null ? locale : Locale.getDefault();
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG)
+                .withLocale(effectiveLocale);
+        return timestamp.format(formatter);
+    }
+
+    /**
+     * Formats an Item's state:
+     *
+     * <ul>
+     * <li>if displayState is not null and differs rawState: <code>displayState (rawState)</code></li>
+     * <li>else: <code>rawState</code></li>
+     * </ul>
+     *
+     * @param item the item to get the state description from
+     * @param state the state to format
+     * @param locale the locale to use for formatting the displayState
+     * @param zoneId the timezone to use for formatting the displayState
+     * @return the formatted state
+     */
+    public static String formatItemState(Item item, State state, @Nullable Locale locale, ZoneId zoneId) {
+        String rawState = item.getState().toString();
+        String displayState = ItemDisplayStateUtil.getDisplayState(item, state, locale, zoneId);
+
+        if (displayState != null && !displayState.equals(rawState)) {
+            return displayState + " (" + rawState + ")";
+        }
+
+        return rawState;
+    }
+
+    /**
+     * Formats an Item's state:
+     *
+     * <ul>
+     * <li>if displayState is not null and differs rawState: <code>displayState (rawState)</code></li>
+     * <li>else: <code>rawState</code></li>
+     * </ul>
+     *
+     * @param item the item which state to format depending on its state description
+     * @param locale the locale to use for formatting the displayState
+     * @param zoneId the timezone to use for formatting the displayState
+     * @return the formatted state
+     */
+    public static String formatItemState(Item item, @Nullable Locale locale, ZoneId zoneId) {
+        return formatItemState(item, item.getState(), locale, zoneId);
     }
 
     public record ItemAndPermission(Item item, ItemPermission permission) {

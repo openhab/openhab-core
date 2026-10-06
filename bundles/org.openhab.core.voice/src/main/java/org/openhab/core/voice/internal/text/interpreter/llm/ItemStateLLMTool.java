@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.transform.util.ItemDisplayStateUtil;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
@@ -83,13 +82,6 @@ public class ItemStateLLMTool implements LLMTool {
     public String call(Map<String, Object> params, @Nullable Locale locale) throws LLMToolException {
         Item item = LLMToolUtil.resolveAndValidateItem(itemRegistry, itemPermissionResolver, params).item();
 
-        String rawState = item.getState().toString();
-        String displayState = ItemDisplayStateUtil.getDisplayState(item, locale, timeZoneProvider.getTimeZone());
-
-        if (displayState != null && !displayState.equals(rawState)) {
-            return displayState + " (" + rawState + ")";
-        }
-
-        return rawState;
+        return LLMToolUtil.formatItemState(item, locale, timeZoneProvider.getTimeZone());
     }
 }
