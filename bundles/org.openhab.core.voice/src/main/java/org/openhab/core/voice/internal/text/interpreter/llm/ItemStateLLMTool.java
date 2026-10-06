@@ -20,10 +20,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.transform.util.ItemDisplayStateUtil;
-import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMTool;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
@@ -84,27 +82,7 @@ public class ItemStateLLMTool implements LLMTool {
 
     @Override
     public String call(Map<String, Object> params, @Nullable Locale locale) throws LLMToolException {
-        Object itemNameObj = params.get("itemName");
-
-        if (!(itemNameObj instanceof String itemName)) {
-            throw new LLMToolException("Missing or invalid required parameter 'itemName'");
-        }
-
-        int lastDot = itemName.lastIndexOf('.');
-        if (lastDot != -1) {
-            itemName = itemName.substring(lastDot + 1);
-        }
-
-        Item item;
-        try {
-            item = itemRegistry.getItem(itemName);
-        } catch (ItemNotFoundException e) {
-            throw new LLMToolException("Item not found: " + itemName, e);
-        }
-
-        if (itemPermissionResolver.getPermission(item) == ItemPermission.NO_ACCESS) {
-            throw new LLMToolException("Item not found: " + itemName);
-        }
+        Item item = LLMToolUtil.resolveAndValidateItem(itemRegistry, itemPermissionResolver, params).item();
 
         String rawState = item.getState().toString();
         String displayState = ItemDisplayStateUtil.getDisplayState(item, locale, timeZoneProvider.getTimeZone());

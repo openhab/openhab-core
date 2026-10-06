@@ -13,6 +13,7 @@
 package org.openhab.core.voice.internal.text.interpreter.llm;
 
 import static org.openhab.core.voice.VoiceManager.VOICE_SOURCE;
+import static org.openhab.core.voice.internal.text.interpreter.llm.LLMToolUtil.resolveAndValidateItem;
 
 import java.util.List;
 import java.util.Locale;
@@ -22,7 +23,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.types.Command;
@@ -106,39 +106,29 @@ public class ItemCommandLLMTool implements LLMTool {
 
     @Override
     public String call(Map<String, Object> params, @Nullable Locale locale) throws LLMToolException {
-        Object itemNameObj = params.get("itemName");
         Object commandObj = params.get("command");
 
-        if (!(itemNameObj instanceof String itemName) || !(commandObj instanceof String commandString)) {
+        LLMToolUtil.ItemAndPermission itemAndPermission = resolveAndValidateItem(itemRegistry, itemPermissionResolver,
+                params);
+        Item item = itemAndPermission.item();
+        ItemPermission permission = itemAndPermission.permission();
+
+        if (!(commandObj instanceof String commandString)) {
             throw new LLMToolException("Missing or invalid required parameters 'itemName' and 'command'");
         }
 
-        int lastDot = itemName.lastIndexOf('.');
-        if (lastDot != -1) {
-            itemName = itemName.substring(lastDot + 1);
-        }
-
-        Item item;
-        try {
-            item = itemRegistry.getItem(itemName);
-        } catch (ItemNotFoundException e) {
-            throw new LLMToolException("Item not found: " + itemName, e);
-        }
-
-        var permission = itemPermissionResolver.getPermission(item);
-        if (permission == ItemPermission.NO_ACCESS) {
-            throw new LLMToolException("Item not found: " + itemName);
-        } else if (permission == ItemPermission.READ_ONLY) {
-            throw new LLMToolException("Item is read-only: " + itemName);
+        if (permission == ItemPermission.READ_ONLY) {
+            throw new LLMToolException("Item is read-only: " + item.getName());
         }
 
         Command command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);
         if (command == null) {
-            throw new LLMToolException("Failed to parse command '" + commandString + "' for item '" + itemName + "'");
+            throw new LLMToolException(
+                    "Failed to parse command '" + commandString + "' for item '" + item.getName() + "'");
         }
 
-        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command, VOICE_SOURCE));
+        eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, VOICE_SOURCE));
 
-        return "Successfully sent command '" + commandString + "' to item '" + itemName + "'.";
+        return "Successfully sent command '" + commandString + "' to item '" + item.getName() + "'.";
     }
 }
