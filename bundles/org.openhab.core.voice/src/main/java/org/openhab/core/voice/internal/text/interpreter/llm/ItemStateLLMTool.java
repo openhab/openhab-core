@@ -61,23 +61,22 @@ public class ItemStateLLMTool implements LLMTool {
 
     @Override
     public String getLabel(@Nullable Locale locale) {
-        return "Get Item State";
+        return "Get State";
     }
 
     @Override
     public String getShortDescription(@Nullable Locale locale) {
-        return "Gets the current state of a specific item.";
+        return "Returns current state of Item.";
     }
 
     @Override
     public String getDescription(@Nullable Locale locale) {
-        return "Get the current state of an item. Returns display and raw state if display state is available, otherwise only raw state.";
+        return getShortDescription(locale);
     }
 
     @Override
     public List<LLMToolParam> getParamDescriptions(@Nullable Locale locale) {
-        return List.of(new LLMToolParam("itemName", LLMToolParamType.STRING, "The name of the item to get the state of",
-                List.of(), true));
+        return List.of(new LLMToolParam("itemName", LLMToolParamType.STRING, "Item name", List.of(), true));
     }
 
     @Override

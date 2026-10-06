@@ -68,12 +68,12 @@ public class ItemCommandLLMTool implements LLMTool {
 
     @Override
     public String getLabel(@Nullable Locale locale) {
-        return "Send Command to Item";
+        return "Send Command";
     }
 
     @Override
     public String getShortDescription(@Nullable Locale locale) {
-        return "Sends a command to an item.";
+        return "Sends command to Item.";
     }
 
     @Override
@@ -90,18 +90,14 @@ public class ItemCommandLLMTool implements LLMTool {
                 - DateTime: ISO 8601 (e.g., '2026-06-24T23:49:09+02:00')
                 - Location: Latitude,longitude[,altitude] (e.g., '52.520008,13.404954')
                 - Contact, Image, Call: REFRESH
-                Items may accept command options (command/label pairs).
                 """;
     }
 
     @Override
     public List<LLMToolParam> getParamDescriptions(@Nullable Locale locale) {
-        return List.of(
-                new LLMToolParam("itemName", LLMToolParamType.STRING, "The name of the item to control", List.of(),
-                        true),
+        return List.of(new LLMToolParam("itemName", LLMToolParamType.STRING, "Item name", List.of(), true),
                 new LLMToolParam("command", LLMToolParamType.STRING,
-                        "The command to send. Must match the item type, e.g., ON/OFF for Switch/Dimmer, UP/DOWN/STOP/MOVE for Rollershutter, etc.",
-                        List.of(), true));
+                        "Command to send. Must match the item type, e.g., ON/OFF for Switch, etc.", List.of(), true));
     }
 
     @Override

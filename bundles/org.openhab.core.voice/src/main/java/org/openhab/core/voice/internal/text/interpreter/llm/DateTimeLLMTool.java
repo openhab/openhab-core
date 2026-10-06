@@ -53,17 +53,17 @@ public class DateTimeLLMTool implements LLMTool {
 
     @Override
     public String getLabel(@Nullable Locale locale) {
-        return "Get Date and Time";
+        return "Date & Time";
     }
 
     @Override
     public String getShortDescription(@Nullable Locale locale) {
-        return "Returns the current date and time.";
+        return "Returns current date & time.";
     }
 
     @Override
     public String getDescription(@Nullable Locale locale) {
-        return "This tool returns the current date and time in a human-readable format.";
+        return getShortDescription(locale);
     }
 
     @Override
