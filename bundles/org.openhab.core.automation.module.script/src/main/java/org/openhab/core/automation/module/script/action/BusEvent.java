@@ -18,6 +18,8 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
@@ -27,7 +29,11 @@ import org.openhab.core.types.TimeSeries;
  * Items should not be updated directly (setting the state property), but updates should
  * be sent to the bus, so that all interested bundles are notified.
  *
+ * All methods in this interface should accept null arguments and handle them gracefully, without throwing exceptions.
+ * This is to allow scripts in various languages to be more robust and not fail due to null values.
+ *
  * @author Florian Hotze - Initial contribution
+ * @author Mark Herwege - DecimalType and QuantityType overrides
  */
 @NonNullByDefault
 public interface BusEvent {
@@ -35,60 +41,9 @@ public interface BusEvent {
      * Sends a command for a specified item to the event bus.
      *
      * @param item the item to send the command to
-     * @param commandString the command to send
-     */
-    void sendCommand(Item item, String commandString);
-
-    /**
-     * Sends a command for a specified item to the event bus.
-     *
-     * @param item the item to send the command to
-     * @param commandString the command to send
-     * @param source the source of the command
-     */
-    void sendCommand(Item item, String commandString, @Nullable String source);
-
-    /**
-     * Sends a number as a command for a specified item to the event bus.
-     *
-     * @param item the item to send the command to
-     * @param command the number to send as a command
-     */
-    void sendCommand(Item item, Number command);
-
-    /**
-     * Sends a number as a command for a specified item to the event bus.
-     *
-     * @param item the item to send the command to
-     * @param command the number to send as a command
-     * @param source the source of the command
-     */
-    void sendCommand(Item item, Number command, @Nullable String source);
-
-    /**
-     * Sends a command for a specified item to the event bus.
-     *
-     * @param itemName the name of the item to send the command to
-     * @param commandString the command to send
-     */
-    void sendCommand(String itemName, String commandString);
-
-    /**
-     * Sends a command for a specified item to the event bus.
-     *
-     * @param itemName the name of the item to send the command to
-     * @param commandString the command to send
-     * @param source the source of the command
-     */
-    void sendCommand(String itemName, String commandString, @Nullable String source);
-
-    /**
-     * Sends a command for a specified item to the event bus.
-     *
-     * @param item the item to send the command to
      * @param command the command to send
      */
-    void sendCommand(Item item, Command command);
+    void sendCommand(@Nullable Item item, @Nullable Command command);
 
     /**
      * Sends a command for a specified item to the event bus.
@@ -97,58 +52,92 @@ public interface BusEvent {
      * @param command the command to send
      * @param source the source of the command
      */
-    void sendCommand(Item item, Command command, @Nullable String source);
+    void sendCommand(@Nullable Item item, @Nullable Command command, @Nullable String source);
 
     /**
-     * Posts a status update for a specified item to the event bus.
+     * Sends a number as a command for a specified item to the event bus.
      *
-     * @param item the item to send the status update for
-     * @param stateString the new state of the item
+     * @param item the item to send the command to
+     * @param command the number to send as a command
      */
-    void postUpdate(Item item, String stateString);
+    void sendCommand(@Nullable Item item, @Nullable Number command);
 
     /**
-     * Posts a status update for a specified item to the event bus.
+     * Sends a number as a command for a specified item to the event bus.
      *
-     * @param item the item to send the status update for
-     * @param stateString the new state of the item
-     * @param source the source of the status update
+     * @param item the item to send the command to
+     * @param command the number to send as a command
+     * @param source the source of the command
      */
-    void postUpdate(Item item, String stateString, @Nullable String source);
+    void sendCommand(@Nullable Item item, @Nullable Number command, @Nullable String source);
 
     /**
-     * Posts a status update for a specified item to the event bus.
+     * Sends a command for a specified item to the event bus.
      *
-     * @param item the item to send the status update for
-     * @param state the new state of the item as a number
+     * @param item the item to send the command to
+     * @param command the command to send
      */
-    void postUpdate(Item item, Number state);
+    void sendCommand(@Nullable Item item, @Nullable DecimalType command);
 
     /**
-     * Posts a status update for a specified item to the event bus.
+     * Sends a command for a specified item to the event bus.
      *
-     * @param item the item to send the status update for
-     * @param state the new state of the item as a number
-     * @param source the source of the status update
+     * @param item the item to send the command to
+     * @param command the command to send
+     * @param source the source of the command
      */
-    void postUpdate(Item item, Number state, @Nullable String source);
+    void sendCommand(@Nullable Item item, @Nullable DecimalType command, @Nullable String source);
 
     /**
-     * Posts a status update for a specified item to the event bus.
+     * Sends a command for a specified item to the event bus.
      *
-     * @param itemName the name of the item to send the status update for
-     * @param stateString the new state of the item
+     * @param item the item to send the command to
+     * @param command the command to send
      */
-    void postUpdate(String itemName, String stateString);
+    void sendCommand(@Nullable Item item, @Nullable QuantityType<?> command);
 
     /**
-     * Posts a status update for a specified item to the event bus.
+     * Sends a command for a specified item to the event bus.
      *
-     * @param itemName the name of the item to send the status update for
-     * @param stateString the new state of the item
-     * @param source the source of the status update
+     * @param item the item to send the command to
+     * @param command the command to send
+     * @param source the source of the command
      */
-    void postUpdate(String itemName, String stateString, @Nullable String source);
+    void sendCommand(@Nullable Item item, @Nullable QuantityType<?> command, @Nullable String source);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param commandString the command to send
+     */
+    void sendCommand(@Nullable Item item, @Nullable String commandString);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param commandString the command to send
+     * @param source the source of the command
+     */
+    void sendCommand(@Nullable Item item, @Nullable String commandString, @Nullable String source);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param itemName the name of the item to send the command to
+     * @param commandString the command to send
+     */
+    void sendCommand(@Nullable String itemName, @Nullable String commandString);
+
+    /**
+     * Sends a command for a specified item to the event bus.
+     *
+     * @param itemName the name of the item to send the command to
+     * @param commandString the command to send
+     * @param source the source of the command
+     */
+    void sendCommand(@Nullable String itemName, @Nullable String commandString, @Nullable String source);
 
     /**
      * Posts a status update for a specified item to the event bus.
@@ -156,7 +145,7 @@ public interface BusEvent {
      * @param item the item to send the status update for
      * @param state the new state of the item
      */
-    void postUpdate(Item item, State state);
+    void postUpdate(@Nullable Item item, @Nullable State state);
 
     /**
      * Posts a status update for a specified item to the event bus.
@@ -165,7 +154,92 @@ public interface BusEvent {
      * @param state the new state of the item
      * @param source the source of the status update
      */
-    void postUpdate(Item item, State state, @Nullable String source);
+    void postUpdate(@Nullable Item item, @Nullable State state, @Nullable String source);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item as a number
+     */
+    void postUpdate(@Nullable Item item, @Nullable Number state);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item as a number
+     * @param source the source of the status update
+     */
+    void postUpdate(@Nullable Item item, @Nullable Number state, @Nullable String source);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     */
+    void postUpdate(@Nullable Item item, @Nullable DecimalType state);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     * @param source the source of the status update
+     */
+    void postUpdate(@Nullable Item item, @Nullable DecimalType state, @Nullable String source);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     */
+    void postUpdate(@Nullable Item item, @Nullable QuantityType<?> state);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param state the new state of the item
+     * @param source the source of the status update
+     */
+    void postUpdate(@Nullable Item item, @Nullable QuantityType<?> state, @Nullable String source);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param stateString the new state of the item
+     */
+    void postUpdate(@Nullable Item item, @Nullable String stateString);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param item the item to send the status update for
+     * @param stateString the new state of the item
+     * @param source the source of the status update
+     */
+    void postUpdate(@Nullable Item item, @Nullable String stateString, @Nullable String source);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param itemName the name of the item to send the status update for
+     * @param stateString the new state of the item
+     */
+    void postUpdate(@Nullable String itemName, @Nullable String stateString);
+
+    /**
+     * Posts a status update for a specified item to the event bus.
+     *
+     * @param itemName the name of the item to send the status update for
+     * @param stateString the new state of the item
+     * @param source the source of the status update
+     */
+    void postUpdate(@Nullable String itemName, @Nullable String stateString, @Nullable String source);
 
     /**
      * Sends a time series to the event bus
@@ -192,7 +266,7 @@ public interface BusEvent {
      *            {@link State}
      * @param policy either <code>ADD</code> or <code>REPLACE</code>
      */
-    void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy);
+    void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, @Nullable String policy);
 
     /**
      * Sends a time series to the event bus
@@ -203,7 +277,7 @@ public interface BusEvent {
      * @param policy either <code>ADD</code> or <code>REPLACE</code>
      * @param source the source of the time series
      */
-    void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy,
+    void sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, @Nullable String policy,
             @Nullable String source);
 
     /**
@@ -213,7 +287,7 @@ public interface BusEvent {
      * @param items the items for which the state should be stored
      * @return the map of items with their states
      */
-    Map<Item, State> storeStates(Item... items);
+    Map<Item, State> storeStates(@Nullable Item @Nullable... items);
 
     /**
      * Restores item states from a map.
@@ -223,5 +297,5 @@ public interface BusEvent {
      *
      * @param statesMap a map with ({@link Item}, {@link State}) entries
      */
-    void restoreStates(Map<Item, State> statesMap);
+    void restoreStates(@Nullable Map<Item, @Nullable State> statesMap);
 }
