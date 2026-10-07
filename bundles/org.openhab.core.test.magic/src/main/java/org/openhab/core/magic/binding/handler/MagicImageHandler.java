@@ -52,7 +52,7 @@ public class MagicImageHandler extends BaseThingHandler {
     public void initialize() {
         url = (String) getConfig().get("url");
         if (url == null || url.isEmpty()) {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "The URL must not be blank");
+            updateStatus(ThingStatusDetail.CONFIGURATION_ERROR, "The URL must not be blank");
         }
 
         updateStatus(ThingStatus.ONLINE);
