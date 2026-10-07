@@ -68,7 +68,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
     private NamedThreadFactory threadFactory = new NamedThreadFactory("audio");
 
     private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV,
-            AudioFormat.PCM_SIGNED);
+            AudioFormat.PCM_SIGNED, AudioFormat.FLAC);
 
     // we accept any stream
     private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Set.of(AudioStream.class);
