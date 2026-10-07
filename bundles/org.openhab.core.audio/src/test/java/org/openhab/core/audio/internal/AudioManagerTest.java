@@ -320,4 +320,23 @@ public class AudioManagerTest {
 
         return new ByteArrayAudioStream(testByteArray, audioFormat);
     }
+
+    @Test
+    public void audioManagerTranscodesUnsupportedFormatBeforePlaying() throws Exception {
+        audioManager.addAudioSink(audioSink);
+
+        // audioSink only supports MP3 and WAV
+        ByteArrayAudioStream flacStream = getByteArrayAudioStream(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC);
+
+        ByteArrayAudioStream transcodedWavStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
+                AudioFormat.CODEC_PCM_SIGNED);
+
+        when(transcodingService.transcodeToSupported(flacStream, audioSink.getSupportedFormats()))
+                .thenReturn(transcodedWavStream);
+
+        audioManager.play(flacStream, audioSink.getId());
+
+        assertThat(audioSink.isStreamProcessed, is(true));
+        assertThat(audioSink.audioFormat, is(transcodedWavStream.getFormat()));
+    }
 }
