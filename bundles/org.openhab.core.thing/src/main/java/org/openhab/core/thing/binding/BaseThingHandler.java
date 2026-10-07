@@ -456,12 +456,47 @@ public abstract class BaseThingHandler implements ThingHandler {
     }
 
     /**
+     * Updates the status of the thing, deriving the status from the detail.
+     *
+     * @param statusDetail the detail of the status; must not be {@link ThingStatusDetail#NONE}
+     * @throws IllegalArgumentException if the detail is {@link ThingStatusDetail#NONE}
+     */
+    protected void updateStatus(ThingStatusDetail statusDetail) {
+        updateStatus(statusDetail, null);
+    }
+
+    /**
+     * Updates the status of the thing, deriving the status from the detail.
+     *
+     * @param statusDetail the detail of the status; must not be {@link ThingStatusDetail#NONE}
+     * @param description the description of the status
+     * @throws IllegalArgumentException if the detail is {@link ThingStatusDetail#NONE}
+     */
+    protected void updateStatus(ThingStatusDetail statusDetail, @Nullable String description) {
+        ThingStatus status = switch (statusDetail) {
+            case NONE -> throw new IllegalArgumentException("A status cannot be derived from the NONE detail");
+            case NOT_YET_READY, HANDLER_MISSING_ERROR, HANDLER_REGISTERING_ERROR, HANDLER_INITIALIZING_ERROR,
+                    HANDLER_CONFIGURATION_PENDING, BRIDGE_UNINITIALIZED, DISABLED ->
+                ThingStatus.UNINITIALIZED;
+            case CONFIGURATION_PENDING -> ThingStatus.ONLINE;
+            case COMMUNICATION_ERROR, CONFIGURATION_ERROR, BRIDGE_OFFLINE, FIRMWARE_UPDATING, DUTY_CYCLE, GONE ->
+                ThingStatus.OFFLINE;
+        };
+        updateStatus(status, statusDetail, description);
+    }
+
+    /**
      * Updates the status of the thing.
      *
      * @param status the status
      * @param statusDetail the detail of the status
      * @param description the description of the status
+     * @deprecated since 5.3.0; use {@link #updateStatus(ThingStatus)} for a status without detail, or
+     *             {@link #updateStatus(ThingStatusDetail, String)} for a detail. Descriptions with
+     *             {@link ThingStatusDetail#NONE} do not yet have a replacement. This method will be removed in openHAB
+     *             6.0.0.
      */
+    @Deprecated(since = "5.3.0", forRemoval = true)
     protected void updateStatus(ThingStatus status, ThingStatusDetail statusDetail, @Nullable String description) {
         synchronized (this) {
             if (this.callback != null) {
@@ -480,7 +515,11 @@ public abstract class BaseThingHandler implements ThingHandler {
      *
      * @param status the status
      * @param statusDetail the detail of the status
+     * @deprecated since 5.3.0; use {@link #updateStatus(ThingStatus)} for a status without detail, or
+     *             {@link #updateStatus(ThingStatusDetail, String)} for a detail. This method will be removed in openHAB
+     *             6.0.0.
      */
+    @Deprecated(since = "5.3.0", forRemoval = true)
     protected void updateStatus(ThingStatus status, ThingStatusDetail statusDetail) {
         updateStatus(status, statusDetail, null);
     }
