@@ -14,8 +14,15 @@ package org.openhab.core.io.transport.upnp.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.net.URI;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,10 +30,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.jupnp.UpnpService;
 import org.jupnp.controlpoint.ControlPoint;
+import org.jupnp.model.ValidationException;
+import org.jupnp.model.gena.CancelReason;
+import org.jupnp.model.gena.RemoteGENASubscription;
 import org.jupnp.model.meta.DeviceDetails;
 import org.jupnp.model.meta.DeviceIdentity;
 import org.jupnp.model.meta.LocalDevice;
 import org.jupnp.model.meta.LocalService;
+import org.jupnp.model.meta.RemoteDevice;
+import org.jupnp.model.meta.RemoteDeviceIdentity;
+import org.jupnp.model.meta.RemoteService;
 import org.jupnp.model.types.DeviceType;
 import org.jupnp.model.types.ServiceId;
 import org.jupnp.model.types.ServiceType;
@@ -38,6 +51,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
+import org.openhab.core.io.transport.upnp.internal.UpnpIOServiceImpl.UpnpSubscriptionCallback;
 
 /**
  * Tests {@link UpnpIOServiceImpl}.
@@ -58,9 +72,17 @@ public class UpnpIOServiceTest {
     private static final String ACTION_ID = "actionId";
     private static final String DEVICE_TYPE = "deviceType";
     private static final String SERVICE_TYPE = "serviceType";
+    private static final UDN REMOTE_UDN = new UDN("remoteUDN");
+    private static final UDN EMBEDDED_UDN = new UDN("remoteUDN_MR");
+    private static final String REMOTE_SERVICE_ID = "remoteServiceId";
+    private static final String EMBEDDED_SERVICE_ID = "embeddedServiceId";
 
     private @Mock @NonNullByDefault({}) UpnpIOParticipant upnpIoParticipantMock;
     private @Mock @NonNullByDefault({}) UpnpIOParticipant upnpIoParticipant2Mock;
+    private @Mock @NonNullByDefault({}) UpnpIOParticipant embeddedDeviceParticipantMock;
+    private @Mock @NonNullByDefault({}) RemoteGENASubscription remoteSubscriptionMock;
+    private @Mock @NonNullByDefault({}) RemoteGENASubscription embeddedSubscriptionMock;
+    private @Mock @NonNullByDefault({}) RemoteGENASubscription otherSubscriptionMock;
     private @Mock @NonNullByDefault({}) Registry upnpRegistryMock;
     private @Mock @NonNullByDefault({}) ControlPoint controlPointMock;
     private @Mock @NonNullByDefault({}) UpnpService upnpServiceMock;
@@ -156,6 +178,105 @@ public class UpnpIOServiceTest {
         upnpIoService.removeSubscription(upnpIoParticipant2Mock, SERVICE_ID_2);
         upnpIoService.unregisterParticipant(upnpIoParticipant2Mock);
         assertThatEverythingIsEmpty();
+    }
+
+    @Test
+    public void testRemovedDeviceDropsItsSubscriptionsAndThoseOfItsEmbeddedDevices() throws ValidationException {
+        RemoteDevice device = registerRemoteDevice();
+        when(embeddedDeviceParticipantMock.getUDN()).thenReturn(EMBEDDED_UDN.getIdentifierString());
+        upnpIoService.registerParticipant(embeddedDeviceParticipantMock);
+        upnpIoService.addSubscription(upnpIoParticipantMock, REMOTE_SERVICE_ID, 60);
+        upnpIoService.addSubscription(upnpIoParticipantMock, EMBEDDED_SERVICE_ID, 60);
+        upnpIoService.addSubscription(upnpIoParticipant2Mock, SERVICE_ID_2, 60);
+        Map<String, RemoteGENASubscription> subscriptions = Map.of(REMOTE_SERVICE_ID, remoteSubscriptionMock,
+                EMBEDDED_SERVICE_ID, embeddedSubscriptionMock, SERVICE_ID_2, otherSubscriptionMock);
+        upnpIoService.subscriptionCallbacks.forEach(
+                (service, callback) -> callback.setSubscription(subscriptions.get(service.getServiceId().getId())));
+
+        upnpIoService.remoteDeviceRemoved(upnpRegistryMock, device);
+
+        verify(upnpRegistryMock).removeRemoteSubscription(remoteSubscriptionMock);
+        verify(upnpRegistryMock).removeRemoteSubscription(embeddedSubscriptionMock);
+        verify(upnpRegistryMock, never()).removeRemoteSubscription(otherSubscriptionMock);
+        verify(upnpIoParticipantMock).onServiceSubscribed(REMOTE_SERVICE_ID, false);
+        verify(upnpIoParticipantMock).onServiceSubscribed(EMBEDDED_SERVICE_ID, false);
+        verify(embeddedDeviceParticipantMock).onServiceSubscribed(EMBEDDED_SERVICE_ID, false);
+        verify(embeddedDeviceParticipantMock, never()).onServiceSubscribed(REMOTE_SERVICE_ID, false);
+        verify(upnpIoParticipant2Mock, never()).onServiceSubscribed(anyString(), anyBoolean());
+        assertEquals(1, upnpIoService.subscriptionCallbacks.size());
+    }
+
+    @Test
+    public void testFailedRenewalResubscribesWhileTracked() throws ValidationException {
+        registerRemoteDevice();
+        UpnpSubscriptionCallback callback = subscribeToRemoteService();
+
+        callback.ended(remoteSubscriptionMock, CancelReason.RENEWAL_FAILED, null);
+
+        UpnpSubscriptionCallback resubscription = upnpIoService.subscriptionCallbacks.get(callback.getService());
+        assertNotNull(resubscription);
+        assertNotSame(callback, resubscription);
+        verify(controlPointMock).execute(resubscription);
+    }
+
+    @Test
+    public void testFailedRenewalDoesNotResubscribeAfterTheSubscriptionWasDropped() throws ValidationException {
+        RemoteDevice device = registerRemoteDevice();
+        UpnpSubscriptionCallback callback = subscribeToRemoteService();
+        upnpIoService.remoteDeviceRemoved(upnpRegistryMock, device);
+
+        callback.ended(remoteSubscriptionMock, CancelReason.RENEWAL_FAILED, null);
+
+        verify(controlPointMock).execute(callback);
+        verifyNoMoreInteractions(controlPointMock);
+    }
+
+    @Test
+    public void testSubscriptionEstablishedWhileTrackedIsReported() throws ValidationException {
+        registerRemoteDevice();
+        UpnpSubscriptionCallback callback = subscribeToRemoteService();
+
+        callback.established(remoteSubscriptionMock);
+
+        verify(upnpIoParticipantMock).onServiceSubscribed(REMOTE_SERVICE_ID, true);
+        verify(upnpRegistryMock, never()).removeRemoteSubscription(remoteSubscriptionMock);
+    }
+
+    @Test
+    public void testSubscriptionEstablishedAfterItWasDroppedIsRemovedFromTheRegistry() throws ValidationException {
+        RemoteDevice device = registerRemoteDevice();
+        UpnpSubscriptionCallback callback = subscribeToRemoteService();
+        upnpIoService.remoteDeviceRemoved(upnpRegistryMock, device);
+
+        callback.established(remoteSubscriptionMock);
+
+        verify(upnpRegistryMock).removeRemoteSubscription(remoteSubscriptionMock);
+        verify(upnpIoParticipantMock, never()).onServiceSubscribed(REMOTE_SERVICE_ID, true);
+    }
+
+    private RemoteDevice registerRemoteDevice() throws ValidationException {
+        RemoteDevice device = remoteDevice(REMOTE_UDN, REMOTE_SERVICE_ID,
+                remoteDevice(EMBEDDED_UDN, EMBEDDED_SERVICE_ID));
+        when(upnpRegistryMock.getDevice(eq(REMOTE_UDN), anyBoolean())).thenReturn(device);
+        when(upnpIoParticipantMock.getUDN()).thenReturn(REMOTE_UDN.getIdentifierString());
+        return device;
+    }
+
+    private UpnpSubscriptionCallback subscribeToRemoteService() {
+        upnpIoService.addSubscription(upnpIoParticipantMock, REMOTE_SERVICE_ID, 60);
+        UpnpSubscriptionCallback callback = upnpIoService.subscriptionCallbacks.values().iterator().next();
+        when(remoteSubscriptionMock.getService()).thenReturn((RemoteService) callback.getService());
+        return callback;
+    }
+
+    private RemoteDevice remoteDevice(UDN udn, String serviceId, RemoteDevice... embeddedDevices)
+            throws ValidationException {
+        RemoteService service = new RemoteService(new ServiceType(UDAServiceId.DEFAULT_NAMESPACE, SERVICE_TYPE),
+                new ServiceId(UDAServiceId.DEFAULT_NAMESPACE, serviceId), URI.create("/description"),
+                URI.create("/control"), URI.create("/event"));
+        return new RemoteDevice(new RemoteDeviceIdentity(udn, 1800, null, null, null),
+                new DeviceType(UDAServiceId.DEFAULT_NAMESPACE, DEVICE_TYPE, 1), (DeviceDetails) null,
+                new RemoteService[] { service }, embeddedDevices);
     }
 
     private void assertThatEverythingIsEmpty() {

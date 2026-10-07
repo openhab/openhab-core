@@ -34,6 +34,7 @@ import org.jupnp.model.action.ActionException;
 import org.jupnp.model.action.ActionInvocation;
 import org.jupnp.model.gena.CancelReason;
 import org.jupnp.model.gena.GENASubscription;
+import org.jupnp.model.gena.RemoteGENASubscription;
 import org.jupnp.model.message.UpnpResponse;
 import org.jupnp.model.meta.Action;
 import org.jupnp.model.meta.Device;
@@ -120,14 +121,24 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                     if (cp != null) {
                         final UpnpSubscriptionCallback callback = new UpnpSubscriptionCallback(service,
                                 subscription.getActualDurationSeconds());
-                        cp.execute(callback);
+                        if (subscriptionCallbacks.replace(service, this, callback)) {
+                            cp.execute(callback);
+                        }
                     }
                 }
             }
         }
 
+        private boolean isTracked() {
+            return equals(subscriptionCallbacks.get(getService()));
+        }
+
         @Override
         protected void established(GENASubscription subscription) {
+            if (!isTracked()) {
+                removeFromRegistry(subscription);
+                return;
+            }
             Device deviceRoot = subscription.getService().getDevice().getRoot();
             String serviceId = subscription.getService().getServiceId().getId();
 
@@ -532,10 +543,46 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     @Override
     public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
+        dropSubscriptionsWithoutUnsubscribing(device);
+
         informParticipants(device, false);
 
         for (RemoteDevice childDevice : device.getEmbeddedDevices()) {
             informParticipants(childDevice, false);
+        }
+    }
+
+    private void dropSubscriptionsWithoutUnsubscribing(RemoteDevice removedDevice) {
+        for (Service service : subscriptionCallbacks.keySet()) {
+            if (removedDevice.equals(service.getDevice().getRoot())) {
+                UpnpSubscriptionCallback callback = subscriptionCallbacks.remove(service);
+                if (callback != null) {
+                    removeFromRegistry(callback.getSubscription());
+                    reportSubscriptionLost(service);
+                }
+            }
+        }
+    }
+
+    private void removeFromRegistry(@Nullable GENASubscription subscription) {
+        if (subscription instanceof RemoteGENASubscription remoteSubscription) {
+            upnpService.getRegistry().removeRemoteSubscription(remoteSubscription);
+        }
+    }
+
+    private void reportSubscriptionLost(Service service) {
+        String serviceId = service.getServiceId().getId();
+        String deviceUdn = service.getDevice().getIdentity().getUdn().getIdentifierString();
+        String rootUdn = service.getDevice().getRoot().getIdentity().getUdn().getIdentifierString();
+        for (UpnpIOParticipant participant : participants) {
+            String participantUdn = participant.getUDN();
+            if (deviceUdn.equals(participantUdn) || rootUdn.equals(participantUdn)) {
+                try {
+                    participant.onServiceSubscribed(serviceId, false);
+                } catch (Exception e) {
+                    logger.error("Participant threw an exception onServiceSubscribed", e);
+                }
+            }
         }
     }
 
