@@ -13,6 +13,7 @@
 package org.openhab.core.thing.binding;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.util.Map;
@@ -30,6 +31,9 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
@@ -167,5 +171,53 @@ class BaseThingHandlerTest {
 
         assertEquals("resolved-var_suffix", handler.getConfig().get("p1"));
         assertEquals("resolved-foo", handler.getConfig().get("p2"));
+    }
+
+    @Test
+    public void testUpdateStatusDerivesStatusFromDetail() {
+        Map<ThingStatusDetail, ThingStatus> expectedStatuses = Map.ofEntries(
+                Map.entry(ThingStatusDetail.NOT_YET_READY, ThingStatus.UNINITIALIZED),
+                Map.entry(ThingStatusDetail.HANDLER_MISSING_ERROR, ThingStatus.UNINITIALIZED),
+                Map.entry(ThingStatusDetail.HANDLER_REGISTERING_ERROR, ThingStatus.UNINITIALIZED),
+                Map.entry(ThingStatusDetail.HANDLER_INITIALIZING_ERROR, ThingStatus.UNINITIALIZED),
+                Map.entry(ThingStatusDetail.HANDLER_CONFIGURATION_PENDING, ThingStatus.UNINITIALIZED),
+                Map.entry(ThingStatusDetail.BRIDGE_UNINITIALIZED, ThingStatus.UNINITIALIZED),
+                Map.entry(ThingStatusDetail.DISABLED, ThingStatus.UNINITIALIZED),
+                Map.entry(ThingStatusDetail.CONFIGURATION_PENDING, ThingStatus.ONLINE),
+                Map.entry(ThingStatusDetail.COMMUNICATION_ERROR, ThingStatus.OFFLINE),
+                Map.entry(ThingStatusDetail.CONFIGURATION_ERROR, ThingStatus.OFFLINE),
+                Map.entry(ThingStatusDetail.BRIDGE_OFFLINE, ThingStatus.OFFLINE),
+                Map.entry(ThingStatusDetail.FIRMWARE_UPDATING, ThingStatus.OFFLINE),
+                Map.entry(ThingStatusDetail.DUTY_CYCLE, ThingStatus.OFFLINE),
+                Map.entry(ThingStatusDetail.GONE, ThingStatus.OFFLINE));
+
+        expectedStatuses.forEach((detail, status) -> {
+            handler.updateStatus(detail, "description");
+            verify(callback).statusUpdated(handler.getThing(), new ThingStatusInfo(status, detail, "description"));
+            clearInvocations(callback);
+        });
+    }
+
+    @Test
+    public void testUpdateStatusRejectsNoneDetail() {
+        assertThrows(IllegalArgumentException.class, () -> handler.updateStatus(ThingStatusDetail.NONE, "description"));
+        verifyNoInteractions(callback);
+    }
+
+    @Test
+    public void testUpdateStatusWithoutDetail() {
+        handler.updateStatus(ThingStatus.ONLINE);
+
+        verify(callback).statusUpdated(handler.getThing(),
+                new ThingStatusInfo(ThingStatus.ONLINE, ThingStatusDetail.NONE, null));
+    }
+
+    @Test
+    @SuppressWarnings("removal")
+    public void testLegacyUpdateStatusPreservesDescriptionWithoutDetail() {
+        handler.updateStatus(ThingStatus.ONLINE, ThingStatusDetail.NONE, "legacy description");
+
+        verify(callback).statusUpdated(handler.getThing(),
+                new ThingStatusInfo(ThingStatus.ONLINE, ThingStatusDetail.NONE, "legacy description"));
     }
 }
