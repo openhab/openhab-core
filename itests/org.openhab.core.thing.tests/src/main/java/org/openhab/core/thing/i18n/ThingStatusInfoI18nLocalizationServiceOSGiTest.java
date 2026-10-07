@@ -311,8 +311,7 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
         }
 
         public void setThingStatusInfo(ThingStatusInfo thingStatusInfo) {
-            updateStatus(thingStatusInfo.getStatus(), thingStatusInfo.getStatusDetail(),
-                    thingStatusInfo.getDescription());
+            updateStatus(thingStatusInfo.getStatusDetail(), thingStatusInfo.getDescription());
         }
     }
 
