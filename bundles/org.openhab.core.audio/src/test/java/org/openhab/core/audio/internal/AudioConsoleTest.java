@@ -34,6 +34,7 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.internal.fake.AudioSinkFake;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
+import org.openhab.core.audio.transcode.AudioTranscodingService;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.console.Console;
 
@@ -76,7 +77,7 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
         fileHandler = new BundledSoundFileHandler();
         audioSink = new AudioSinkFake();
 
-        audioManager = new AudioManagerImpl();
+        audioManager = new AudioManagerImpl(mock(AudioTranscodingService.class));
         audioManager.addAudioSink(audioSink);
 
         LocaleProvider localeProvider = mock(LocaleProvider.class);

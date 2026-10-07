@@ -41,6 +41,7 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.internal.fake.AudioSinkFake;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
+import org.openhab.core.audio.transcode.AudioTranscodingService;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.library.types.PercentType;
 
@@ -56,6 +57,7 @@ import org.openhab.core.library.types.PercentType;
 public class AudioManagerTest {
 
     private @NonNullByDefault({}) AudioManagerImpl audioManager;
+    private @NonNullByDefault({}) AudioTranscodingService transcodingService;
     private @NonNullByDefault({}) AudioSinkFake audioSink;
     private @NonNullByDefault({}) AudioSource audioSource;
     private @NonNullByDefault({}) BundledSoundFileHandler fileHandler;
@@ -63,7 +65,8 @@ public class AudioManagerTest {
     @BeforeEach
     public void setup() throws IOException {
         fileHandler = new BundledSoundFileHandler();
-        audioManager = new AudioManagerImpl();
+        transcodingService = mock(AudioTranscodingService.class);
+        audioManager = new AudioManagerImpl(transcodingService);
         audioSink = new AudioSinkFake();
 
         audioSource = mock(AudioSource.class);
@@ -79,7 +82,8 @@ public class AudioManagerTest {
     @Test
     public void audioManagerPlaysByteArrayAudioStream() throws AudioException {
         audioManager.addAudioSink(audioSink);
-        ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_MP3);
+        ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
+                AudioFormat.CODEC_PCM_SIGNED);
 
         audioManager.play(audioStream, audioSink.getId());
 

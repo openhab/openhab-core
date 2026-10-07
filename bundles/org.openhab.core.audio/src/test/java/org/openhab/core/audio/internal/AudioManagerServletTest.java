@@ -14,6 +14,7 @@ package org.openhab.core.audio.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -24,6 +25,7 @@ import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.internal.fake.AudioSinkFake;
+import org.openhab.core.audio.transcode.AudioTranscodingService;
 
 /**
  * OSGi test for {@link AudioManagerImpl}
@@ -41,7 +43,7 @@ public class AudioManagerServletTest extends AbstractAudioServletTest {
 
     @BeforeEach
     public void setup() {
-        audioManager = new AudioManagerImpl();
+        audioManager = new AudioManagerImpl(mock(AudioTranscodingService.class));
         audioSink = new AudioSinkFake();
     }
 
