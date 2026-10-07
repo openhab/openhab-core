@@ -459,6 +459,16 @@ public abstract class BaseThingHandler implements ThingHandler {
      * Updates the status of the thing, deriving the status from the detail.
      *
      * @param statusDetail the detail of the status; must not be {@link ThingStatusDetail#NONE}
+     * @throws IllegalArgumentException if the detail is {@link ThingStatusDetail#NONE}
+     */
+    protected void updateStatus(ThingStatusDetail statusDetail) {
+        updateStatus(statusDetail, null);
+    }
+
+    /**
+     * Updates the status of the thing, deriving the status from the detail.
+     *
+     * @param statusDetail the detail of the status; must not be {@link ThingStatusDetail#NONE}
      * @param description the description of the status
      * @throws IllegalArgumentException if the detail is {@link ThingStatusDetail#NONE}
      */
