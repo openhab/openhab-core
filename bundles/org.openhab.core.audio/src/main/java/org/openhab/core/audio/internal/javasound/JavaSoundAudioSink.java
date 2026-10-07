@@ -65,7 +65,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
     private @Nullable PercentType macVolumeValue = null;
     private @Nullable static Player streamPlayer = null;
 
-    private NamedThreadFactory threadFactory = new NamedThreadFactory("audio");
+    private final NamedThreadFactory threadFactory = new NamedThreadFactory("audio");
 
     private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV,
             AudioFormat.PCM_SIGNED, AudioFormat.FLAC);
@@ -185,8 +185,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
         if (!isMac) {
             final Float[] volumes = new Float[1];
             runVolumeCommand((FloatControl input) -> {
-                FloatControl volumeControl = input;
-                volumes[0] = volumeControl.getValue();
+                volumes[0] = input.getValue();
                 return true;
             });
             if (volumes[0] != null) {
@@ -202,7 +201,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
                 Process p = Runtime.getRuntime()
                         .exec(new String[] { "osascript", "-e", "output volume of (get volume settings)" });
                 String value;
-                try (Scanner scanner = new Scanner(p.getInputStream(), StandardCharsets.UTF_8.name())) {
+                try (Scanner scanner = new Scanner(p.getInputStream(), StandardCharsets.UTF_8)) {
                     value = scanner.useDelimiter("\\A").next().strip();
                 }
                 try {
