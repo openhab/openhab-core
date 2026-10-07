@@ -46,6 +46,8 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.transcode.AudioTranscodingException;
+import org.openhab.core.audio.transcode.AudioTranscodingService;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -128,23 +130,24 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final Map<String, STTService> sttServices = new HashMap<>();
     private final Map<String, TTSService> ttsServices = new HashMap<>();
     private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
-    private final LLMToolRegistry llmToolRegistry;
-    private final ConversationManager conversationManager;
-    private final ItemRegistry itemRegistry;
-    private final MetadataRegistry metadataRegistry;
-    private final ItemPermissionResolver itemPermissionResolver;
-
-    private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
 
     private final LocaleProvider localeProvider;
     private final AudioManager audioManager;
     private final EventPublisher eventPublisher;
     private final TranslationProvider i18nProvider;
     private final Storage<DialogRegistration> dialogRegistrationStorage;
+    private final AudioTranscodingService transcodingService;
+    private final LLMToolRegistry llmToolRegistry;
+    private final ConversationManager conversationManager;
+    private final ItemRegistry itemRegistry;
+    private final MetadataRegistry metadataRegistry;
+    private final ItemPermissionResolver itemPermissionResolver;
+
     private final VoiceManagerConfiguration configuration;
 
     private @Nullable Bundle bundle;
 
+    private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
     private final Map<String, DialogProcessor> dialogProcessors = new HashMap<>();
     private final Map<String, DialogProcessor> singleDialogProcessors = new ConcurrentHashMap<>();
     private @Nullable DialogContext lastDialogContext;
@@ -153,8 +156,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Activate
     public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
             final @Reference EventPublisher eventPublisher, final @Reference TranslationProvider i18nProvider,
-            final @Reference StorageService storageService, final @Reference LLMToolRegistry llmToolRegistry,
-            final @Reference ConversationManager conversationManager,
+            final @Reference StorageService storageService, final @Reference AudioTranscodingService transcodingService,
+            final @Reference LLMToolRegistry llmToolRegistry, final @Reference ConversationManager conversationManager,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
             final @Reference ItemRegistry itemRegistry, final @Reference MetadataRegistry metadataRegistry,
             final @Reference ItemPermissionResolver itemPermissionResolver) {
@@ -164,6 +167,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         this.i18nProvider = i18nProvider;
         this.dialogRegistrationStorage = storageService.getStorage(DialogRegistration.class.getName(),
                 this.getClass().getClassLoader());
+        this.transcodingService = transcodingService;
         this.conversationManager = conversationManager;
         this.llmToolRegistry = llmToolRegistry;
         this.itemRegistry = itemRegistry;
@@ -272,7 +276,20 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                         "Failed playing audio stream '" + audioStream + "' as audio sink doesn't support it");
             }
             Runnable restoreVolume = audioManager.handleVolumeCommand(volume, sink);
-            sink.processAndComplete(audioStream).exceptionally(exception -> {
+            AudioStream streamToPlay = audioStream;
+            boolean isFormatSupported = sink.getSupportedFormats().stream()
+                    .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
+            if (!isFormatSupported) {
+                try {
+                    logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
+                    streamToPlay = transcodingService.transcodeToSupported(audioStream, sink.getSupportedFormats());
+                } catch (AudioTranscodingException e) {
+                    logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
+                            e.getMessage());
+                    return;
+                }
+            }
+            sink.processAndComplete(streamToPlay).exceptionally(exception -> {
                 logger.warn("Error playing '{}': {}", audioStream, exception.getMessage(), exception);
                 return null;
             }).thenRun(restoreVolume);

@@ -45,6 +45,8 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
+import org.openhab.core.audio.transcode.AudioTranscodingException;
+import org.openhab.core.audio.transcode.AudioTranscodingService;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.config.core.ConfigOptionProvider;
@@ -84,6 +86,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     static final String CONFIG_DEFAULT_SOURCE = "defaultSource";
 
     private final Logger logger = LoggerFactory.getLogger(AudioManagerImpl.class);
+    private final AudioTranscodingService transcodingService;
 
     // service maps
     private final Map<String, AudioSource> audioSources = new ConcurrentHashMap<>();
@@ -94,6 +97,11 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
      */
     private @Nullable String defaultSource;
     private @Nullable String defaultSink;
+
+    @Activate
+    public AudioManagerImpl(final @Reference AudioTranscodingService transcodingService) {
+        this.transcodingService = transcodingService;
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -126,8 +134,23 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     public void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume) {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
+            AudioStream streamToPlay = audioStream;
+            if (audioStream != null) {
+                boolean isFormatSupported = sink.getSupportedFormats().stream()
+                        .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
+                if (!isFormatSupported) {
+                    try {
+                        logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
+                        streamToPlay = transcodingService.transcodeToSupported(audioStream, sink.getSupportedFormats());
+                    } catch (AudioTranscodingException e) {
+                        logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
+                                e.getMessage());
+                        return;
+                    }
+                }
+            }
             Runnable restoreVolume = handleVolumeCommand(volume, sink);
-            sink.processAndComplete(audioStream).exceptionally(exception -> {
+            sink.processAndComplete(streamToPlay).exceptionally(exception -> {
                 logger.warn("Error playing '{}': {}", audioStream, exception.getMessage(), exception);
                 return null;
             }).thenRun(restoreVolume);
