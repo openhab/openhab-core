@@ -75,7 +75,7 @@ public class TTSLRUCacheImpl implements TTSCache {
     private long maxTextLengthCacheTTS = DEFAULT_MAX_TEXT_LENGTH_CACHE_TTS;
     protected boolean enableCacheTTS = true;
 
-    private StorageService storageService;
+    private final StorageService storageService;
 
     /**
      * Constructs a cache system for TTS result.
@@ -87,9 +87,8 @@ public class TTSLRUCacheImpl implements TTSCache {
     }
 
     /**
-     * @param config Informations about the size of the cache in kB, and to enable the cache or not. The size is not a
+     * @param config Information about the size of the cache in kB, and to enable the cache or not. The size is not a
      *            hard one, because the final size of the current request is not known and may exceed the limit.
-     * @throws IOException when we cannot create the cache directory or if we have not enough space (*2 security margin)
      */
     @Modified
     protected void modified(Map<String, Object> config) {
