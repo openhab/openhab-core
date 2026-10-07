@@ -264,7 +264,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 throw new TTSException("Unable to find the audio sink " + sinkId);
             }
 
-            AudioFormat ttsAudioFormat = getBestMatch(ttsSupportedFormats, sink.getSupportedFormats());
+            AudioFormat ttsAudioFormat = getBestMatchWithTranscoding(ttsSupportedFormats, sink.getSupportedFormats());
             if (ttsAudioFormat == null) {
                 throw new TTSException("No compatible audio format found for TTS '" + tts.getId() + "' and sink '"
                         + sink.getId() + "'");
@@ -582,6 +582,30 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 }
             }
         }
+        return null;
+    }
+
+    @Nullable
+    AudioFormat getBestMatchWithTranscoding(Set<AudioFormat> ttsSupportedFormats,
+            Set<AudioFormat> sinkSupportedFormats) {
+        AudioFormat bestMatch = getBestMatch(ttsSupportedFormats, sinkSupportedFormats);
+        if (bestMatch != null) {
+            return bestMatch;
+        }
+
+        AudioFormat preferredFormat = getPreferredFormat(ttsSupportedFormats);
+        if (preferredFormat != null && sinkSupportedFormats.stream()
+                .anyMatch(sinkFormat -> transcodingService.canTranscode(preferredFormat, sinkFormat))) {
+            return preferredFormat;
+        }
+
+        for (AudioFormat ttsFormat : ttsSupportedFormats) {
+            if (sinkSupportedFormats.stream()
+                    .anyMatch(sinkFormat -> transcodingService.canTranscode(ttsFormat, sinkFormat))) {
+                return ttsFormat;
+            }
+        }
+
         return null;
     }
 
