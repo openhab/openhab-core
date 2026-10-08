@@ -97,6 +97,24 @@ public class TranscodedAudioStream extends AudioStream {
     }
 
     @Override
+    public synchronized void mark(int readlimit) {
+        input.mark(readlimit);
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        if (closed.get()) {
+            throw new IOException("Stream is closed");
+        }
+        input.reset();
+    }
+
+    @Override
+    public boolean markSupported() {
+        return input.markSupported();
+    }
+
+    @Override
     public void close() throws IOException {
         if (closed.getAndSet(true)) {
             return;
