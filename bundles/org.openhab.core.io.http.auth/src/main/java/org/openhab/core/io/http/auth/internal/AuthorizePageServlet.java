@@ -71,6 +71,9 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
     @Serial
     private static final long serialVersionUID = 5340598701104679843L;
 
+    private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+    private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+
     private final Logger logger = LoggerFactory.getLogger(AuthorizePageServlet.class);
 
     @Activate
@@ -334,13 +337,42 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
             if (scheme == null || host == null || uri.getUserInfo() != null || uri.getFragment() != null) {
                 return false;
             }
-            int port = uri.getPort();
-            int effectivePort = port != -1 ? port : ("https".equalsIgnoreCase(scheme) ? 443 : 80);
-            return scheme.equalsIgnoreCase(req.getScheme()) && host.equalsIgnoreCase(req.getServerName())
-                    && effectivePort == req.getServerPort();
+            @Nullable
+            String forwardedProto = firstHeaderValue(req, X_FORWARDED_PROTO);
+            @Nullable
+            String forwardedHost = firstHeaderValue(req, X_FORWARDED_HOST);
+            if (forwardedProto == null && forwardedHost == null) {
+                return scheme.equalsIgnoreCase(req.getScheme()) && host.equalsIgnoreCase(req.getServerName())
+                        && effectivePort(uri) == req.getServerPort();
+            }
+
+            // Safe to trust: a page can't make the browser send these headers.
+            String originHost = forwardedHost != null ? forwardedHost : req.getHeader(HttpHeaders.HOST);
+            if (originHost == null) {
+                return false;
+            }
+            URI origin = new URI((forwardedProto != null ? forwardedProto : req.getScheme()) + "://" + originHost);
+            return scheme.equalsIgnoreCase(origin.getScheme()) && host.equalsIgnoreCase(origin.getHost())
+                    && effectivePort(uri) == effectivePort(origin);
         } catch (URISyntaxException e) {
             return false;
         }
+    }
+
+    private static int effectivePort(URI uri) {
+        int port = uri.getPort();
+        return port != -1 ? port : ("https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80);
+    }
+
+    private static @Nullable String firstHeaderValue(HttpServletRequest req, String name) {
+        String value = req.getHeader(name);
+        if (value == null) {
+            return null;
+        }
+        // the first proxy's value is the browser's
+        int comma = value.indexOf(',');
+        value = (comma >= 0 ? value.substring(0, comma) : value).trim();
+        return value.isEmpty() ? null : value;
     }
 
     private boolean isSignupMode() {
