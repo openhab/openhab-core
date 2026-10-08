@@ -30,6 +30,8 @@ import org.openhab.core.audio.SizeableAudioStream;
 import org.openhab.core.audio.transcode.AudioTranscoder;
 import org.openhab.core.audio.transcode.AudioTranscodingException;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link AudioTranscoder} that encodes a raw PCM signed stream into a FLAC stream via Java Sound / flannel SPI.
@@ -39,6 +41,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = AudioTranscoder.class)
 @NonNullByDefault
 public class PcmToFlacEncoder implements AudioTranscoder {
+    private final Logger logger = LoggerFactory.getLogger(PcmToFlacEncoder.class);
 
     private static final Set<AudioFormat> SOURCES = Set.of(AudioFormat.PCM_SIGNED);
     private static final Set<AudioFormat> TARGETS = Set.of(AudioFormat.FLAC);
@@ -139,8 +142,8 @@ public class PcmToFlacEncoder implements AudioTranscoder {
                 try (source; ais; group) {
                     AudioFileFormat.Type flacType = new AudioFileFormat.Type("FLAC", "flac");
                     AudioSystem.write(ais, flacType, group);
-                } catch (Exception ignored) {
-                    // Ignored intentionally. Exceptions here usually mean the consumer closed the stream early.
+                } catch (Exception e) {
+                    logger.warn("FLAC transcoding finished with exception: {}", e.getMessage(), e);
                 }
             });
 
