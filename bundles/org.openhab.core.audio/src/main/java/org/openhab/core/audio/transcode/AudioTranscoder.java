@@ -186,17 +186,52 @@ public final class AudioTranscoder {
     /**
      * Transcodes the given audio stream to the requested target format.
      *
+     * <p>
+     * Favors streaming via {@link PipedAudioStream} for lower latency without disk buffering.
+     *
      * @param source the audio stream to transcode
      * @param targetFormat the desired target format
      * @return a new audio stream in the requested target format
      * @throws AudioTranscodingException if transcoding fails or formats are unsupported
      */
     public static AudioStream transcode(AudioStream source, AudioFormat targetFormat) throws AudioTranscodingException {
+        return transcode(source, targetFormat, false);
+    }
+
+    /**
+     * Transcodes the given audio stream to the requested target format, taking into account supported stream types.
+     *
+     * @param source the audio stream to transcode
+     * @param targetFormat the desired target format
+     * @param supportedStreams the set of stream classes supported by the consumer/sink
+     * @return a new audio stream in the requested target format
+     * @throws AudioTranscodingException if transcoding fails or formats are unsupported
+     */
+    public static AudioStream transcode(AudioStream source, AudioFormat targetFormat,
+            Set<Class<? extends AudioStream>> supportedStreams) throws AudioTranscodingException {
+        boolean requireSizeable = supportedStreams.stream()
+                .noneMatch(clazz -> clazz.isAssignableFrom(PipedAudioStream.class));
+        return transcode(source, targetFormat, requireSizeable);
+    }
+
+    /**
+     * Transcodes the given audio stream to the requested target format.
+     *
+     * @param source the audio stream to transcode
+     * @param targetFormat the desired target format
+     * @param requireSizeable true to buffer to disk and return a {@link SizeableAudioStream}, false to stream via pipe
+     * @return a new audio stream in the requested target format
+     * @throws AudioTranscodingException if transcoding fails or formats are unsupported
+     */
+    public static AudioStream transcode(AudioStream source, AudioFormat targetFormat, boolean requireSizeable)
+            throws AudioTranscodingException {
         Objects.requireNonNull(source, "source audio stream must not be null");
         Objects.requireNonNull(targetFormat, "targetFormat must not be null");
 
         if (targetFormat.isCompatible(source.getFormat())) {
-            return source;
+            if (!requireSizeable || source instanceof SizeableAudioStream) {
+                return source;
+            }
         }
 
         if (!isSourceSupported(source.getFormat())) {
@@ -274,13 +309,6 @@ public final class AudioTranscoder {
                 convertedAis = convertAudioInputStream(inAis, sourceJFormat, targetJFormat);
             }
 
-            // Calculate converted frame length if known
-            if (inAis.getFrameLength() != AudioSystem.NOT_SPECIFIED && sourceJFormat.getSampleRate() > 0) {
-                double ratio = (double) targetSampleRate / (double) sourceJFormat.getSampleRate();
-                long estimatedFrameLength = Math.round(inAis.getFrameLength() * ratio);
-                convertedAis = new AudioInputStream(convertedAis, targetJFormat, estimatedFrameLength);
-            }
-
             String targetContainer = targetFormat.getContainer();
             String resultCodec = toOpenHabCodec(targetEncoding, targetContainer);
             int bitRate = Math.round(targetSampleRate * targetBitDepth * targetChannels);
@@ -290,19 +318,22 @@ public final class AudioTranscoder {
 
             if (AudioFormat.CONTAINER_FLAC.equals(targetContainer)) {
                 AudioFileFormat.Type flacFileType = getFlacFileType(convertedAis);
-                return writeToTempFile(source, convertedAis, flacFileType, resultFormat);
-            } else if (AudioFormat.CONTAINER_WAVE.equals(targetContainer)) {
-                if (convertedAis.getFrameLength() != AudioSystem.NOT_SPECIFIED) {
-                    return writeToPipedStream(source, convertedAis, AudioFileFormat.Type.WAVE, resultFormat);
+                if (requireSizeable) {
+                    return writeToTempFile(source, convertedAis, flacFileType, resultFormat);
                 } else {
-                    return writeToTempFile(source, convertedAis, AudioFileFormat.Type.WAVE, resultFormat);
+                    return writeToPipedStream(source, convertedAis, flacFileType, resultFormat);
                 }
+            } else if (AudioFormat.CONTAINER_WAVE.equals(targetContainer)) {
+                return writeToTempFile(source, convertedAis, AudioFileFormat.Type.WAVE, resultFormat);
             } else {
                 // Raw PCM stream
                 long frameLength = convertedAis.getFrameLength();
                 if (frameLength >= 0) {
                     return new SizeableTranscodedAudioStream(resultFormat, source.getId(), convertedAis,
                             frameLength * targetFrameSize);
+                }
+                if (requireSizeable) {
+                    return writeToTempFile(source, convertedAis, AudioFileFormat.Type.WAVE, resultFormat);
                 }
                 return new TranscodedAudioStream(resultFormat, source.getId(), convertedAis);
             }
@@ -325,13 +356,46 @@ public final class AudioTranscoder {
      */
     public static AudioStream transcodeToSupported(AudioStream source, Set<AudioFormat> candidateFormats)
             throws AudioTranscodingException {
+        return transcodeToSupported(source, candidateFormats, false);
+    }
+
+    /**
+     * Transcodes the audio stream to a format and stream type supported by candidateFormats and supportedStreams (e.g.
+     * from an AudioSink).
+     *
+     * @param source the audio stream to transcode
+     * @param candidateFormats the acceptable target formats
+     * @param supportedStreams the set of stream classes supported by the consumer/sink
+     * @return an audio stream compatible with one of the candidateFormats
+     * @throws AudioTranscodingException if no route to any candidate format exists or transcoding fails
+     */
+    public static AudioStream transcodeToSupported(AudioStream source, Set<AudioFormat> candidateFormats,
+            Set<Class<? extends AudioStream>> supportedStreams) throws AudioTranscodingException {
+        boolean requireSizeable = supportedStreams.stream()
+                .noneMatch(clazz -> clazz.isAssignableFrom(PipedAudioStream.class));
+        return transcodeToSupported(source, candidateFormats, requireSizeable);
+    }
+
+    /**
+     * Transcodes the audio stream to a format supported by candidateFormats (e.g. from an AudioSink).
+     *
+     * @param source the audio stream to transcode
+     * @param candidateFormats the acceptable target formats
+     * @param requireSizeable true to buffer to disk and return a {@link SizeableAudioStream}, false to stream via pipe
+     * @return an audio stream compatible with one of the candidateFormats
+     * @throws AudioTranscodingException if no route to any candidate format exists or transcoding fails
+     */
+    public static AudioStream transcodeToSupported(AudioStream source, Set<AudioFormat> candidateFormats,
+            boolean requireSizeable) throws AudioTranscodingException {
         Objects.requireNonNull(source, "source audio stream must not be null");
         Objects.requireNonNull(candidateFormats, "candidateFormats must not be null");
 
         AudioFormat sourceFormat = source.getFormat();
         for (AudioFormat candidate : candidateFormats) {
             if (candidate.isCompatible(sourceFormat)) {
-                return source;
+                if (!requireSizeable || source instanceof SizeableAudioStream) {
+                    return source;
+                }
             }
         }
 
@@ -360,7 +424,7 @@ public final class AudioTranscoder {
                     + sourceFormat + " among candidates " + candidateFormats);
         }
 
-        return transcode(source, target);
+        return transcode(source, target, requireSizeable);
     }
 
     /**
