@@ -12,7 +12,6 @@
  */
 package org.openhab.core.audio.internal.transcode;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
@@ -26,7 +25,6 @@ import org.openhab.core.audio.AudioStream;
 /**
  * An {@link AudioStream} implementation that delegates audio reading to an underlying {@link InputStream}
  * and retains audio format and stream ID metadata.
- * It supports attaching {@link Closeable}s to be called when the stream is closed.
  *
  * @author Florian Hotze - Initial contribution
  */
