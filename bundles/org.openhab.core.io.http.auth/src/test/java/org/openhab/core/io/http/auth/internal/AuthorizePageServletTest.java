@@ -103,6 +103,50 @@ public class AuthorizePageServletTest {
     }
 
     /**
+     * Builds a request reaching openHAB on {@code http://localhost:8080} through a reverse proxy.
+     */
+    private static HttpServletRequest proxiedRequest(@Nullable String hostHeader, @Nullable String forwardedProto,
+            @Nullable String forwardedHost) {
+        HttpServletRequest req = request("http", "localhost", 8080);
+        when(req.getHeader("Host")).thenReturn(hostHeader);
+        when(req.getHeader("X-Forwarded-Proto")).thenReturn(forwardedProto);
+        when(req.getHeader("X-Forwarded-Host")).thenReturn(forwardedHost);
+        return req;
+    }
+
+    @ParameterizedTest
+    @CsvSource(nullValues = "null", value = { //
+            // browser's Host plus X-Forwarded-Proto, as the openHAB Cloud connector sends
+            "myopenhab.org,        https, null,              https://myopenhab.org", //
+            "connect.myopenhab.org:443, https, null,          https://connect.myopenhab.org", //
+            "openhab.example.com:8443,  https, null,          https://openhab.example.com:8443", //
+            // Host rewritten to the upstream, browser host in X-Forwarded-Host
+            "localhost:8080,        https, openhab.example.com, https://openhab.example.com", //
+            "localhost:8080,        null,  openhab.example.com, http://openhab.example.com", //
+            // only the first value counts
+            "localhost:8080,        'https, http', 'openhab.example.com, localhost:8080', https://openhab.example.com" })
+    public void redirectUriOfForwardedOriginIsAccepted(@Nullable String hostHeader, @Nullable String forwardedProto,
+            @Nullable String forwardedHost, String redirectUri) {
+        assertTrue(AuthorizePageServlet.isSafeRedirectUri(proxiedRequest(hostHeader, forwardedProto, forwardedHost),
+                redirectUri));
+    }
+
+    @ParameterizedTest
+    @CsvSource(nullValues = "null", value = { //
+            "myopenhab.org,         https, null,              https://attacker.com", //
+            "myopenhab.org,         https, null,              http://myopenhab.org", //
+            "myopenhab.org,         https, null,              https://myopenhab.org:8443", //
+            "localhost:8080,        https, openhab.example.com, https://localhost:8080", //
+            "localhost:8080,        https, openhab.example.com, https://attacker.com", //
+            "null,                 https, null,              https://myopenhab.org", //
+            "myopenhab.org,        'ht tps', null,           https://myopenhab.org" })
+    public void foreignRedirectUriBehindProxyIsRejected(@Nullable String hostHeader, @Nullable String forwardedProto,
+            @Nullable String forwardedHost, String redirectUri) {
+        assertFalse(AuthorizePageServlet.isSafeRedirectUri(proxiedRequest(hostHeader, forwardedProto, forwardedHost),
+                redirectUri));
+    }
+
+    /**
      * A loopback target is not accepted just for being loopback. No openHAB client asks for one: they either use the
      * origin they were served on, or do not use this flow at all. Accepting it regardless of the serving origin would
      * let a crafted request deliver an authorization code to any port on the machine running the browser, so the
