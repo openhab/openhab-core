@@ -280,7 +280,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             if (!isFormatSupported) {
                 try {
                     logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
-                    streamToPlay = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats());
+                    streamToPlay = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats(),
+                            sink.getSupportedStreams());
                 } catch (AudioTranscodingException e) {
                     logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
                             e.getMessage());
