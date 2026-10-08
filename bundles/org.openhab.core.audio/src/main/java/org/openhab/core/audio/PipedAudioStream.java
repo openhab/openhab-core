@@ -267,16 +267,15 @@ public class PipedAudioStream extends AudioStream {
             synchronized (openPipes) {
                 for (var pipe : openPipes) {
                     try {
-                        pipe.close();
+                        pipe.getOutputStream().close();
                     } catch (InterruptedIOException e) {
-                        logger.warn("InterruptedIOException closing pipe: {}", e.getMessage());
+                        logger.warn("InterruptedIOException closing pipe output: {}", e.getMessage());
                     } catch (IOException e) {
-                        logger.warn("IOException closing pipe: {}", e.getMessage());
+                        logger.warn("IOException closing pipe output: {}", e.getMessage());
                     } catch (RuntimeException e) {
-                        logger.warn("RuntimeException closing pipe: {}", e.getMessage());
+                        logger.warn("RuntimeException closing pipe output: {}", e.getMessage());
                     }
                 }
-                openPipes.clear();
             }
         }
     }
