@@ -45,6 +45,8 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
+import org.openhab.core.audio.transcode.AudioTranscoder;
+import org.openhab.core.audio.transcode.AudioTranscodingException;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.config.core.ConfigOptionProvider;
@@ -126,8 +128,23 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     public void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume) {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
+            AudioStream streamToPlay = audioStream;
+            if (audioStream != null) {
+                boolean isFormatSupported = sink.getSupportedFormats().stream()
+                        .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
+                if (!isFormatSupported) {
+                    try {
+                        logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
+                        streamToPlay = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats());
+                    } catch (AudioTranscodingException e) {
+                        logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
+                                e.getMessage());
+                        return;
+                    }
+                }
+            }
             Runnable restoreVolume = handleVolumeCommand(volume, sink);
-            sink.processAndComplete(audioStream).exceptionally(exception -> {
+            sink.processAndComplete(streamToPlay).exceptionally(exception -> {
                 logger.warn("Error playing '{}': {}", audioStream, exception.getMessage(), exception);
                 return null;
             }).thenRun(restoreVolume);

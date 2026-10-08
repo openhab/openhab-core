@@ -79,7 +79,8 @@ public class AudioManagerTest {
     @Test
     public void audioManagerPlaysByteArrayAudioStream() throws AudioException {
         audioManager.addAudioSink(audioSink);
-        ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_MP3);
+        ByteArrayAudioStream audioStream = getByteArrayAudioStream(AudioFormat.CONTAINER_WAVE,
+                AudioFormat.CODEC_PCM_SIGNED);
 
         audioManager.play(audioStream, audioSink.getId());
 
