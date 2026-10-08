@@ -16,8 +16,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -38,7 +36,6 @@ public class TranscodedAudioStream extends AudioStream {
     private final @Nullable String id;
     private final InputStream input;
     private final AtomicBoolean closed = new AtomicBoolean(false);
-    private final Queue<Closeable> onCloseChain = new ConcurrentLinkedQueue<>();
 
     public TranscodedAudioStream(AudioFormat format, @Nullable String id, InputStream input) {
         this.format = Objects.requireNonNull(format);
@@ -119,41 +116,7 @@ public class TranscodedAudioStream extends AudioStream {
         if (closed.getAndSet(true)) {
             return;
         }
-        IOException thrownException = null;
 
-        try {
-            input.close();
-        } catch (IOException e) {
-            thrownException = e;
-        }
-
-        for (Closeable action : onCloseChain) {
-            try {
-                action.close();
-            } catch (IOException e) {
-                if (thrownException == null) {
-                    thrownException = e;
-                } else {
-                    thrownException.addSuppressed(e);
-                }
-            }
-        }
-
-        if (thrownException != null) {
-            throw thrownException;
-        }
-    }
-
-    /**
-     * Adds a {@link Closeable} to the chain of {@link Closeable}s to be called when the stream is closed.
-     * 
-     * @param closeable the closeable to call when the stream is closed
-     * @throws IllegalStateException if the stream is already closed
-     */
-    public void onClose(Closeable closeable) {
-        if (closed.get()) {
-            throw new IllegalStateException("Stream is already closed");
-        }
-        onCloseChain.add(closeable);
+        input.close();
     }
 }

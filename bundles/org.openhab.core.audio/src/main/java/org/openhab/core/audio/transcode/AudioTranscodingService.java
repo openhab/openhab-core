@@ -16,7 +16,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.AudioFormat;
-import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioStream;
 
 /**
@@ -49,7 +48,7 @@ public interface AudioTranscodingService {
 
     /**
      * Transcodes the audio stream to a format supported by <code>candidateFormats</code> (e.g., from an
-     * {@link AudioSink}).
+     * {@link org.openhab.core.audio.AudioSink}).
      * If the source stream's format is already compatible with one of <code>candidateFormats</code>, the stream is
      * returned
      * as-is without transcoding.

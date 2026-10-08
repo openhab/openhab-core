@@ -37,12 +37,13 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = AudioTranscoder.class)
 @NonNullByDefault
 public class PcmResampler implements AudioTranscoder {
+    public static String ID = "pcm-resample";
 
     private static final Set<AudioFormat> FORMATS = Set.of(AudioFormat.PCM_SIGNED);
 
     @Override
     public String getId() {
-        return "pcm-resample";
+        return ID;
     }
 
     @Override
