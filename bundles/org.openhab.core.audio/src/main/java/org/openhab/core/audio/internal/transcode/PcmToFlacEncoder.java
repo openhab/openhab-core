@@ -32,13 +32,13 @@ import org.openhab.core.audio.transcode.AudioTranscodingException;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Transcoder that converts a raw PCM signed stream into a FLAC stream via Java Sound / flannel SPI.
+ * {@link AudioTranscoder} that encodes a raw PCM signed stream into a FLAC stream via Java Sound / flannel SPI.
  *
  * @author Florian Hotze - Initial contribution
  */
 @Component(service = AudioTranscoder.class)
 @NonNullByDefault
-public class PcmToFlacTranscoder implements AudioTranscoder {
+public class PcmToFlacEncoder implements AudioTranscoder {
 
     private static final Set<AudioFormat> SOURCES = Set.of(AudioFormat.PCM_SIGNED);
     private static final Set<AudioFormat> TARGETS = Set.of(AudioFormat.FLAC);

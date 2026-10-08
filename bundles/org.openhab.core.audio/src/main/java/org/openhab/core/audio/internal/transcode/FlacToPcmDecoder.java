@@ -36,7 +36,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(service = AudioTranscoder.class)
 @NonNullByDefault
-public class FlacToPcmTranscoder implements AudioTranscoder {
+public class FlacToPcmDecoder implements AudioTranscoder {
 
     private static final Set<AudioFormat> SOURCES = Set.of(AudioFormat.FLAC);
     private static final Set<AudioFormat> TARGETS = Set.of(AudioFormat.PCM_SIGNED);
