@@ -15,6 +15,7 @@ package org.openhab.core.audio.internal.transcode;
 import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Set;
 
 import javax.sound.sampled.AudioInputStream;
@@ -87,15 +88,15 @@ public class FlacToPcmDecoder implements AudioTranscoder {
 
         // AudioSystem requires mark() and reset() support to probe the stream for format headers.
         // Wrapping the source in a BufferedInputStream ensures these operations are supported.
-        BufferedInputStream bis = new BufferedInputStream(source);
+        InputStream markableStream = source.markSupported() ? source : new BufferedInputStream(source);
         AudioInputStream sourceAis = null;
 
         try {
             // Parse the FLAC headers and wrap the stream in a Java Sound AudioInputStream
             try {
-                sourceAis = AudioSystem.getAudioInputStream(bis);
+                sourceAis = AudioSystem.getAudioInputStream(markableStream);
             } catch (UnsupportedAudioFileException | IOException e) {
-                closeQuietly(bis);
+                closeQuietly(markableStream);
                 throw new AudioTranscodingException("Failed to read FLAC audio stream: " + e.getMessage(), e);
             }
 
@@ -140,11 +141,13 @@ public class FlacToPcmDecoder implements AudioTranscoder {
             // Wrap decoded stream in TranscodedAudioStream to map it back to the openHAB AudioStream
             return new TranscodedAudioStream(outputFormat, source.getId(), pcmAis);
         } catch (AudioTranscodingException ate) {
-            closeQuietly(bis);
+            closeQuietly(source);
+            closeQuietly(markableStream);
             closeQuietly(sourceAis);
             throw ate;
         } catch (RuntimeException re) {
-            closeQuietly(bis);
+            closeQuietly(source);
+            closeQuietly(markableStream);
             closeQuietly(sourceAis);
             throw new AudioTranscodingException("Failed to transcode FLAC stream: " + re.getMessage(), re);
         }

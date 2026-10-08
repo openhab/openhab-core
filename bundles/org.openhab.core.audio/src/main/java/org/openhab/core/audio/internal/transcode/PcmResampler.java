@@ -107,6 +107,8 @@ public class PcmResampler implements AudioTranscoder {
                     "Resampling from " + source.getFormat() + " to " + targetFormat + " is not supported");
         }
 
+        AudioInputStream sourceAis = null;
+
         try {
             AudioFormat sourceFormat = source.getFormat();
             Integer sourceBitDepth = sourceFormat.getBitDepth();
@@ -155,7 +157,7 @@ public class PcmResampler implements AudioTranscoder {
                 frameLength = sizeable.length() / inFrameSize;
             }
 
-            AudioInputStream sourceAis = new AudioInputStream(source, jSourceFormat, frameLength);
+            sourceAis = new AudioInputStream(source, jSourceFormat, frameLength);
 
             AudioInputStream resampledAis;
             try {
@@ -177,9 +179,11 @@ public class PcmResampler implements AudioTranscoder {
             return new TranscodedAudioStream(outputFormat, source.getId(), resampledAis);
         } catch (AudioTranscodingException ate) {
             closeQuietly(source);
+            closeQuietly(sourceAis);
             throw ate;
         } catch (RuntimeException re) {
             closeQuietly(source);
+            closeQuietly(sourceAis);
             throw new AudioTranscodingException("Failed to resample PCM stream: " + re.getMessage(), re);
         }
     }
