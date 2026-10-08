@@ -344,6 +344,9 @@ public class AudioFormat {
         if (getFrequency() instanceof Long frequency && !frequency.equals(audioFormat.getFrequency())) {
             return false;
         }
+        if (getChannels() instanceof Integer channels && !channels.equals(audioFormat.getChannels())) {
+            return false;
+        }
         return true;
     }
 
