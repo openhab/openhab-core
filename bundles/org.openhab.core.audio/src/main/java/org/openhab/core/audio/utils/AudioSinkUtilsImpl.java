@@ -13,6 +13,7 @@
 package org.openhab.core.audio.utils;
 
 import java.io.ByteArrayInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,17 +45,47 @@ public class AudioSinkUtilsImpl implements AudioSinkUtils {
     private final Logger logger = LoggerFactory.getLogger(AudioSinkUtilsImpl.class);
 
     @Override
-    public @Nullable Long transferAndAnalyzeLength(InputStream in, OutputStream out, AudioFormat audioFormat)
-            throws IOException {
+    public @Nullable Long transferAndAnalyzeLength(InputStream in, OutputStream out, AudioFormat audioFormat,
+            boolean flush) throws IOException {
         // take some data from the stream beginning
         byte[] dataBytes = in.readNBytes(8192);
 
         // beginning sound timestamp :
         long startTime = System.nanoTime();
         // copy already read data to the output stream :
-        out.write(dataBytes);
+        if (dataBytes.length > 0) {
+            out.write(dataBytes);
+            if (flush) {
+                out.flush();
+            }
+        }
         // transfer everything else
-        long dataTransferredLength = dataBytes.length + in.transferTo(out);
+        long transferred;
+        if (flush) {
+            transferred = in.transferTo(new FilterOutputStream(out) {
+                @Override
+                public void write(byte @Nullable [] b, int off, int len) throws IOException {
+                    if (b != null && len > 0) {
+                        out.write(b, off, len);
+                        out.flush();
+                    }
+                }
+
+                @Override
+                public void write(int b) throws IOException {
+                    out.write(b);
+                    out.flush();
+                }
+
+                @Override
+                public void flush() throws IOException {
+                    out.flush();
+                }
+            });
+        } else {
+            transferred = in.transferTo(out);
+        }
+        long dataTransferredLength = dataBytes.length + transferred;
 
         if (dataTransferredLength > 0) {
             if (AudioFormat.CODEC_PCM_SIGNED.equals(audioFormat.getCodec())) {
