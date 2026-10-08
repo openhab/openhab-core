@@ -20,7 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.utils.AudioStreamUtils;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.openhab.core.common.Disposable;
@@ -39,6 +43,7 @@ public class FileAudioStream extends AudioStream implements SizeableAudioStream,
     public static final String MP3_EXTENSION = "mp3";
     public static final String OGG_EXTENSION = "ogg";
     public static final String AAC_EXTENSION = "aac";
+    public static final String FLAC_EXTENSION = "flac";
 
     private final File file;
     private final AudioFormat audioFormat;
@@ -67,18 +72,14 @@ public class FileAudioStream extends AudioStream implements SizeableAudioStream,
     private static AudioFormat getAudioFormat(File file) throws AudioException {
         final String filename = file.getName().toLowerCase();
         final String extension = AudioStreamUtils.getExtension(filename);
-        switch (extension) {
-            case WAV_EXTENSION:
-                return parseWavFormat(file);
-            case MP3_EXTENSION:
-                return AudioFormat.MP3;
-            case OGG_EXTENSION:
-                return AudioFormat.OGG;
-            case AAC_EXTENSION:
-                return AudioFormat.AAC;
-            default:
-                throw new AudioException("Unsupported file extension!");
-        }
+        return switch (extension) {
+            case WAV_EXTENSION -> parseWavFormat(file);
+            case MP3_EXTENSION -> AudioFormat.MP3;
+            case OGG_EXTENSION -> AudioFormat.OGG;
+            case AAC_EXTENSION -> AudioFormat.AAC;
+            case FLAC_EXTENSION -> parseFlacFormat(file);
+            default -> throw new AudioException("Unsupported file extension!");
+        };
     }
 
     private static AudioFormat parseWavFormat(File file) throws AudioException {
@@ -86,6 +87,24 @@ public class FileAudioStream extends AudioStream implements SizeableAudioStream,
             return AudioWaveUtils.parseWavFormat(inputStream);
         } catch (IOException e) {
             throw new AudioException("Cannot parse wav stream", e);
+        }
+    }
+
+    private static AudioFormat parseFlacFormat(File file) throws AudioException {
+        try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream(file))) {
+            javax.sound.sampled.AudioFormat format = AudioSystem.getAudioInputStream(inputStream).getFormat();
+            int bitDepth = format.getSampleSizeInBits();
+            long sampleRate = Float.valueOf(format.getSampleRate()).longValue();
+            int channels = format.getChannels();
+            Integer bitRate = bitDepth > 0 && channels > 0 ? Math.round(format.getSampleRate() * bitDepth * channels)
+                    : null;
+            return new AudioFormat(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC, format.isBigEndian(),
+                    bitDepth > 0 ? bitDepth : null, bitRate, sampleRate > 0 ? sampleRate : null,
+                    channels > 0 ? channels : null);
+        } catch (UnsupportedAudioFileException e) {
+            return AudioFormat.FLAC;
+        } catch (IOException e) {
+            throw new AudioException("Cannot parse flac stream", e);
         }
     }
 
