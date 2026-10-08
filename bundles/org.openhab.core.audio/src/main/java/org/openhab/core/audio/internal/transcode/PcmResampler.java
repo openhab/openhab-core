@@ -98,6 +98,10 @@ public class PcmResampler implements AudioTranscoder {
 
     @Override
     public AudioStream transcode(AudioStream source, AudioFormat targetFormat) throws AudioTranscodingException {
+        if (targetFormat.isCompatible(source.getFormat())) {
+            return source;
+        }
+
         if (!canTranscode(source.getFormat(), targetFormat)) {
             closeQuietly(source);
             throw new AudioTranscodingException(
