@@ -110,6 +110,11 @@ public class FlacToPcmTranscoder implements AudioTranscoder {
             AudioFormat outputFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false,
                     bitDepth, Math.round(sampleRate * bitDepth * channels), (long) sampleRate, channels);
 
+            long frameLength = pcmAis.getFrameLength();
+            if (frameLength >= 0) {
+                return new SizeableTranscodedAudioStream(outputFormat, source.getId(), pcmAis, frameLength * frameSize);
+            }
+
             // Wrap decoded stream in TranscodedAudioStream to map it back to the openHAB AudioStream
             return new TranscodedAudioStream(outputFormat, source.getId(), pcmAis);
         } catch (AudioTranscodingException ate) {
