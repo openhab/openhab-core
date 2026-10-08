@@ -273,8 +273,8 @@ public final class AudioTranscoder {
 
             // Calculate converted frame length if known
             if (inAis.getFrameLength() != AudioSystem.NOT_SPECIFIED && sourceJFormat.getSampleRate() > 0) {
-                long estimatedFrameLength = Math
-                        .round(inAis.getFrameLength() * (targetSampleRate / sourceJFormat.getSampleRate()));
+                double ratio = (double) targetSampleRate / (double) sourceJFormat.getSampleRate();
+                long estimatedFrameLength = Math.round(inAis.getFrameLength() * ratio);
                 convertedAis = new AudioInputStream(convertedAis, targetJFormat, estimatedFrameLength);
             }
 
