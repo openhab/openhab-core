@@ -171,6 +171,11 @@ public final class AudioTranscoder {
         }
 
         // only specific bit depths are supported:
+        Integer sourceBitDepth = sourceFormat.getBitDepth();
+        if (sourceBitDepth != null && sourceBitDepth != 8 && sourceBitDepth != 16 && sourceBitDepth != 24
+                && sourceBitDepth != 32) {
+            return false;
+        }
         Integer targetBitDepth = targetFormat.getBitDepth();
         if (targetBitDepth != null && targetBitDepth != 8 && targetBitDepth != 16 && targetBitDepth != 24
                 && targetBitDepth != 32) {
