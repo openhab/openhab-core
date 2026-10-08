@@ -105,8 +105,38 @@ public class FileAudioStream extends AudioStream implements SizeableAudioStream,
     @Override
     public int read() throws IOException {
         int read = inputStream.read();
-        alreadyRead++;
+        if (read >= 0) {
+            alreadyRead++;
+        }
         return read;
+    }
+
+    @Override
+    public int read(byte @Nullable [] b) throws IOException {
+        return read(b, 0, b.length);
+    }
+
+    @Override
+    public int read(byte @Nullable [] b, int off, int len) throws IOException {
+        int read = inputStream.read(b, off, len);
+        if (read > 0) {
+            alreadyRead += read;
+        }
+        return read;
+    }
+
+    @Override
+    public long skip(long n) throws IOException {
+        long skipped = inputStream.skip(n);
+        if (skipped > 0) {
+            alreadyRead += (int) skipped;
+        }
+        return skipped;
+    }
+
+    @Override
+    public int available() throws IOException {
+        return inputStream.available();
     }
 
     @Override
