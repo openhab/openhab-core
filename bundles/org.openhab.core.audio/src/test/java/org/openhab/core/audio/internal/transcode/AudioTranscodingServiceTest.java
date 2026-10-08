@@ -125,4 +125,139 @@ public class AudioTranscodingServiceTest {
             service.transcodeToSupported(source, Set.of(AudioFormat.FLAC));
         });
     }
+
+    @Test
+    public void testWavToFlacTranscodingWithResampling() throws AudioTranscodingException {
+        AudioFormat wav44100 = new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                705600, 44100L, 1);
+        AudioFormat flac48000 = new AudioFormat(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC, null, 16, null,
+                48000L, 1);
+        AudioFormat pcm44100 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                null, 44100L, 1);
+        AudioFormat pcm48000 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                null, 48000L, 1);
+
+        AudioTranscoder wavToPcm = mock(AudioTranscoder.class);
+        when(wavToPcm.getId()).thenReturn("wav-to-pcm");
+        when(wavToPcm.getSupportedSourceFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(wavToPcm.getSupportedTargetFormats()).thenReturn(Set.of(AudioFormat.PCM_SIGNED));
+        when(wavToPcm.canTranscode(wav44100, pcm44100)).thenReturn(true);
+        when(wavToPcm.canTranscode(wav44100, pcm48000)).thenReturn(false);
+        when(wavToPcm.getCost()).thenReturn(1);
+
+        PcmResampler pcmResample = mock(PcmResampler.class);
+        when(pcmResample.getId()).thenReturn(PcmResampler.ID);
+        when(pcmResample.getSupportedSourceFormats()).thenReturn(PcmResampler.FORMATS);
+        when(pcmResample.getSupportedTargetFormats()).thenReturn(PcmResampler.FORMATS);
+        when(pcmResample.canTranscode(pcm44100, pcm48000)).thenReturn(true);
+        when(pcmResample.getCost()).thenReturn(10);
+
+        AudioTranscoder pcmToFlac = mock(AudioTranscoder.class);
+        when(pcmToFlac.getId()).thenReturn("pcm-to-flac");
+        when(pcmToFlac.getSupportedSourceFormats()).thenReturn(Set.of(AudioFormat.PCM_SIGNED));
+        when(pcmToFlac.getSupportedTargetFormats()).thenReturn(Set.of(AudioFormat.FLAC));
+        when(pcmToFlac.canTranscode(pcm44100, flac48000)).thenReturn(false);
+        when(pcmToFlac.canTranscode(pcm48000, flac48000)).thenReturn(true);
+        when(pcmToFlac.getCost()).thenReturn(15);
+
+        service.addAudioTranscoder(wavToPcm);
+        service.addAudioTranscoder(pcmResample);
+        service.addAudioTranscoder(pcmToFlac);
+
+        AudioStream wavStream = createMockStream(wav44100);
+        AudioStream pcm441Stream = createMockStream(pcm44100);
+        AudioStream pcm48Stream = createMockStream(pcm48000);
+        AudioStream flacStream = createMockStream(flac48000);
+
+        when(wavToPcm.transcode(wavStream, pcm44100)).thenReturn(pcm441Stream);
+        when(pcmResample.transcode(pcm441Stream, pcm48000)).thenReturn(pcm48Stream);
+        when(pcmToFlac.transcode(pcm48Stream, flac48000)).thenReturn(flacStream);
+
+        assertTrue(service.canTranscode(wav44100, flac48000));
+
+        AudioStream result = service.transcode(wavStream, flac48000);
+        assertSame(flacStream, result);
+
+        // Verify the 3-step pipeline was executed in order
+        verify(wavToPcm).transcode(wavStream, pcm44100);
+        verify(pcmResample).transcode(pcm441Stream, pcm48000);
+        verify(pcmToFlac).transcode(pcm48Stream, flac48000);
+    }
+
+    @Test
+    public void cannotTranscodeAcrossFrequenciesWithoutResampler() {
+        AudioFormat wav44100 = new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                705600, 44100L, 1);
+        AudioFormat flac48000 = new AudioFormat(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC, null, 16, null,
+                48000L, 1);
+        AudioFormat pcm44100 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                null, 44100L, 1);
+
+        AudioTranscoder wavToPcm = mock(AudioTranscoder.class);
+        when(wavToPcm.getId()).thenReturn("wav-to-pcm");
+        when(wavToPcm.getSupportedSourceFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(wavToPcm.getSupportedTargetFormats()).thenReturn(Set.of(AudioFormat.PCM_SIGNED));
+        when(wavToPcm.canTranscode(wav44100, pcm44100)).thenReturn(true);
+        when(wavToPcm.getCost()).thenReturn(1);
+
+        AudioTranscoder pcmToFlac = mock(AudioTranscoder.class);
+        when(pcmToFlac.getId()).thenReturn("pcm-to-flac");
+        when(pcmToFlac.getSupportedSourceFormats()).thenReturn(Set.of(AudioFormat.PCM_SIGNED));
+        when(pcmToFlac.getSupportedTargetFormats()).thenReturn(Set.of(AudioFormat.FLAC));
+        when(pcmToFlac.canTranscode(pcm44100, flac48000)).thenReturn(false);
+        when(pcmToFlac.getCost()).thenReturn(15);
+
+        service.addAudioTranscoder(wavToPcm);
+        service.addAudioTranscoder(pcmToFlac);
+
+        assertFalse(service.canTranscode(wav44100, flac48000));
+    }
+
+    @Test
+    public void transcodingWithEndiannessChange() {
+        AudioFormat pcmLe = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16, null,
+                44100L, 1);
+        AudioFormat pcmBe = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, true, 16, null,
+                44100L, 1);
+
+        PcmResampler pcmResample = mock(PcmResampler.class);
+        when(pcmResample.getId()).thenReturn(PcmResampler.ID);
+        when(pcmResample.getSupportedSourceFormats()).thenReturn(PcmResampler.FORMATS);
+        when(pcmResample.getSupportedTargetFormats()).thenReturn(PcmResampler.FORMATS);
+        when(pcmResample.canTranscode(pcmLe, pcmBe)).thenReturn(true);
+        when(pcmResample.getCost()).thenReturn(10);
+
+        service.addAudioTranscoder(pcmResample);
+
+        assertTrue(service.canTranscode(pcmLe, pcmBe));
+    }
+
+    @Test
+    public void stereoChannelsPreservedInMultiHopTranscoding() {
+        AudioFormat wavStereo = new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                null, 44100L, 2);
+        AudioFormat pcmStereo = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                null, 44100L, 2);
+        AudioFormat flacStereo = new AudioFormat(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC, null, 16, null,
+                44100L, 2);
+
+        AudioTranscoder wavToPcm = mock(AudioTranscoder.class);
+        when(wavToPcm.getId()).thenReturn("wav-to-pcm");
+        when(wavToPcm.getSupportedSourceFormats()).thenReturn(Set.of(AudioFormat.WAV));
+        when(wavToPcm.getSupportedTargetFormats()).thenReturn(Set.of(AudioFormat.PCM_SIGNED));
+        when(wavToPcm.canTranscode(wavStereo, pcmStereo)).thenReturn(true);
+        when(wavToPcm.getCost()).thenReturn(1);
+
+        AudioTranscoder pcmToFlac = mock(AudioTranscoder.class);
+        when(pcmToFlac.getId()).thenReturn("pcm-to-flac");
+        when(pcmToFlac.getSupportedSourceFormats()).thenReturn(Set.of(AudioFormat.PCM_SIGNED));
+        when(pcmToFlac.getSupportedTargetFormats()).thenReturn(Set.of(AudioFormat.FLAC));
+        when(pcmToFlac.canTranscode(pcmStereo, flacStereo)).thenReturn(true);
+        when(pcmToFlac.getCost()).thenReturn(15);
+
+        service.addAudioTranscoder(wavToPcm);
+        service.addAudioTranscoder(pcmToFlac);
+
+        assertTrue(service.canTranscode(wavStereo, flacStereo));
+    }
 }
