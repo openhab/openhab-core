@@ -156,9 +156,7 @@ public final class AudioTranscoder {
         if (sourceFormat == null || targetFormat == null) {
             return false;
         }
-        if (targetFormat.isCompatible(sourceFormat)) {
-            return true;
-        }
+
         if (!isSourceSupported(sourceFormat) || !isTargetSupported(targetFormat)) {
             return false;
         }
