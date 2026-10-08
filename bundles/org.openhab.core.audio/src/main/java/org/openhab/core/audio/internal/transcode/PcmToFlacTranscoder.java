@@ -64,6 +64,26 @@ public class PcmToFlacTranscoder implements AudioTranscoder {
     }
 
     @Override
+    public boolean canTranscode(AudioFormat sourceFormat, AudioFormat targetFormat) {
+        if (!AudioTranscoder.super.canTranscode(sourceFormat, targetFormat)) {
+            return false;
+        }
+        if (sourceFormat.getFrequency() != null && targetFormat.getFrequency() != null
+                && !sourceFormat.getFrequency().equals(targetFormat.getFrequency())) {
+            return false;
+        }
+        if (sourceFormat.getChannels() != null && targetFormat.getChannels() != null
+                && !sourceFormat.getChannels().equals(targetFormat.getChannels())) {
+            return false;
+        }
+        if (sourceFormat.getBitDepth() != null && targetFormat.getBitDepth() != null
+                && !sourceFormat.getBitDepth().equals(targetFormat.getBitDepth())) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public AudioStream transcode(AudioStream source, AudioFormat targetFormat) throws AudioTranscodingException {
         try {
             // Extract and validate required metadata from PCM source
