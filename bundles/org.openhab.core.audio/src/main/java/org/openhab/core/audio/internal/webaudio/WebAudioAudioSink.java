@@ -48,11 +48,12 @@ public class WebAudioAudioSink extends AudioSinkAsync {
 
     private final Logger logger = LoggerFactory.getLogger(WebAudioAudioSink.class);
 
-    private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
+    private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV,
+            AudioFormat.FLAC);
     private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Set.of(AudioStream.class);
 
-    private AudioHTTPServer audioHTTPServer;
-    private EventPublisher eventPublisher;
+    private final AudioHTTPServer audioHTTPServer;
+    private final EventPublisher eventPublisher;
 
     @Activate
     public WebAudioAudioSink(@Reference AudioHTTPServer audioHTTPServer, @Reference EventPublisher eventPublisher) {
