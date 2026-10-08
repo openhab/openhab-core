@@ -46,6 +46,8 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.transcode.AudioTranscoder;
+import org.openhab.core.audio.transcode.AudioTranscodingException;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -260,7 +262,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 throw new TTSException("Unable to find the audio sink " + sinkId);
             }
 
-            AudioFormat ttsAudioFormat = getBestMatch(ttsSupportedFormats, sink.getSupportedFormats());
+            AudioFormat ttsAudioFormat = getBestMatchWithTranscoding(ttsSupportedFormats, sink.getSupportedFormats());
             if (ttsAudioFormat == null) {
                 throw new TTSException("No compatible audio format found for TTS '" + tts.getId() + "' and sink '"
                         + sink.getId() + "'");
@@ -272,7 +274,20 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                         "Failed playing audio stream '" + audioStream + "' as audio sink doesn't support it");
             }
             Runnable restoreVolume = audioManager.handleVolumeCommand(volume, sink);
-            sink.processAndComplete(audioStream).exceptionally(exception -> {
+            AudioStream streamToPlay = audioStream;
+            boolean isFormatSupported = sink.getSupportedFormats().stream()
+                    .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
+            if (!isFormatSupported) {
+                try {
+                    logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
+                    streamToPlay = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats());
+                } catch (AudioTranscodingException e) {
+                    logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
+                            e.getMessage());
+                    return;
+                }
+            }
+            sink.processAndComplete(streamToPlay).exceptionally(exception -> {
                 logger.warn("Error playing '{}': {}", audioStream, exception.getMessage(), exception);
                 return null;
             }).thenRun(restoreVolume);
@@ -565,6 +580,30 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 }
             }
         }
+        return null;
+    }
+
+    @Nullable
+    AudioFormat getBestMatchWithTranscoding(Set<AudioFormat> ttsSupportedFormats,
+            Set<AudioFormat> sinkSupportedFormats) {
+        AudioFormat bestMatch = getBestMatch(ttsSupportedFormats, sinkSupportedFormats);
+        if (bestMatch != null) {
+            return bestMatch;
+        }
+
+        AudioFormat preferredFormat = getPreferredFormat(ttsSupportedFormats);
+        if (preferredFormat != null && sinkSupportedFormats.stream()
+                .anyMatch(sinkFormat -> AudioTranscoder.canTranscode(preferredFormat, sinkFormat))) {
+            return preferredFormat;
+        }
+
+        for (AudioFormat ttsFormat : ttsSupportedFormats) {
+            if (sinkSupportedFormats.stream()
+                    .anyMatch(sinkFormat -> AudioTranscoder.canTranscode(ttsFormat, sinkFormat))) {
+                return ttsFormat;
+            }
+        }
+
         return null;
     }
 
