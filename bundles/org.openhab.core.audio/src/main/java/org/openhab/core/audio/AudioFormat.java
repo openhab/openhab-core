@@ -31,6 +31,15 @@ public class AudioFormat {
     /** Generic PCM signed format (no container) without any further constraints */
     public static final AudioFormat PCM_SIGNED = new AudioFormat(AudioFormat.CONTAINER_NONE,
             AudioFormat.CODEC_PCM_SIGNED, null, null, null, null);
+    /** Generic PCM unsigned format (no container) without any further constraints */
+    public static final AudioFormat PCM_UNSIGNED = new AudioFormat(AudioFormat.CONTAINER_NONE,
+            AudioFormat.CODEC_PCM_UNSIGNED, null, null, null, null);
+    /** Generic PCM A-law format (no container) without any further constraints */
+    public static final AudioFormat PCM_ALAW = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_ALAW,
+            null, null, null, null);
+    /** Generic PCM μ-law format (no container) without any further constraints */
+    public static final AudioFormat PCM_ULAW = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_ULAW,
+            null, null, null, null);
 
     /** Generic MP3 format without any further constraints */
     public static final AudioFormat MP3 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, null, null,
