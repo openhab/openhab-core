@@ -286,12 +286,13 @@ public final class AudioTranscoder {
                     targetBigEndian, targetBitDepth, bitRate, (long) targetSampleRate, targetChannels);
 
             if (AudioFormat.CONTAINER_FLAC.equals(targetContainer)) {
-                return writeFlacToTempFile(source, convertedAis, resultFormat);
+                AudioFileFormat.Type flacFileType = getFlacFileType(convertedAis);
+                return writeToTempFile(source, convertedAis, flacFileType, resultFormat);
             } else if (AudioFormat.CONTAINER_WAVE.equals(targetContainer)) {
                 if (convertedAis.getFrameLength() != AudioSystem.NOT_SPECIFIED) {
                     return writeToPipedStream(source, convertedAis, AudioFileFormat.Type.WAVE, resultFormat);
                 } else {
-                    return writeWavToTempFile(source, convertedAis, resultFormat);
+                    return writeToTempFile(source, convertedAis, AudioFileFormat.Type.WAVE, resultFormat);
                 }
             } else {
                 // Raw PCM stream
@@ -399,18 +400,26 @@ public final class AudioTranscoder {
     }
 
     /**
-     * Asynchronously writes the transcoded audio stream to a {@link PipedAudioStream}.
+     * Asynchronously transcodes an audio stream into a {@link PipedAudioStream} for low-latency,
+     * forward-only pipeline streaming without disk I/O.
      *
      * <p>
-     * If asynchronous write fails, the source openHAB {@link AudioStream} and transcoded Java {@link AudioInputStream}
-     * are closed.
+     * Encoding runs in a background thread via {@link CompletableFuture#runAsync(Runnable)}, writing directly
+     * into a {@link PipedAudioStream.Group} while consumers immediately start reading the resulting stream.
+     * Because the destination is a non-seekable {@link java.io.OutputStream}, the underlying encoder cannot
+     * seek back to update header metadata once encoding completes (e.g. retroactive MD5 checksums, or file sizes
+     * that were not known ahead of time).
      *
-     * @param source the source audio stream from openHAB
-     * @param ais the transcoded audio stream from Java Sound
-     * @param fileType the Java Sound {@link AudioFileFormat.Type} of the transcoded audio stream
-     * @param resultFormat the openHAB {@link AudioFormat} of the transcoded audio stream
-     * @return the transcoded openHAB {@link AudioStream}
-     * @throws AudioTranscodingException when initialization of the {@link PipedAudioStream} fails or write fails
+     * <p>
+     * Both the {@code source} stream and the converted {@code ais} are closed automatically in the background
+     * thread upon completion or failure.
+     *
+     * @param source the source openHAB {@link AudioStream} to be closed after processing
+     * @param ais the converted Java Sound {@link AudioInputStream} to encode
+     * @param fileType the target {@link AudioFileFormat.Type} container format
+     * @param resultFormat the target openHAB {@link AudioFormat} metadata for the resulting stream
+     * @return an {@link AudioStream} connected to the write end of the piped group
+     * @throws AudioTranscodingException if the piped output stream fails to initialize
      */
     private static AudioStream writeToPipedStream(AudioStream source, AudioInputStream ais,
             AudioFileFormat.Type fileType, AudioFormat resultFormat) throws AudioTranscodingException {
@@ -435,38 +444,46 @@ public final class AudioTranscoder {
         return outputStream;
     }
 
-    private static AudioStream writeWavToTempFile(AudioStream source, AudioInputStream ais, AudioFormat resultFormat)
-            throws AudioTranscodingException {
+    /**
+     * Transcodes an audio input stream into a concrete audio file container by buffering the output in a temporary
+     * file.
+     *
+     * <p>
+     * Writing directly to a {@link java.io.File} via
+     * {@link AudioSystem#write(AudioInputStream, AudioFileFormat.Type, java.io.File)}
+     * is required for audio container formats whose header metadata cannot be fully populated in a single forward-only
+     * pass
+     * (e.g., FLAC {@code STREAMINFO} total sample count and MD5 audio checksums, or WAV RIFF chunk sizes when the input
+     * frame
+     * length is unknown upfront). A seekable file target allows SPI encoders to rewind to the beginning and backfill
+     * missing header fields once encoding completes.
+     *
+     * <p>
+     * The returned {@link FileAudioStream} is configured to delete the underlying temporary file when closed.
+     * Both the {@code source} stream and the converted {@code ais} are closed upon completing the write operation
+     * or if an error occurs.
+     *
+     * @param source the source openHAB {@link AudioStream} to be closed after processing
+     * @param ais the converted Java Sound {@link AudioInputStream} to encode
+     * @param fileType the target {@link AudioFileFormat.Type} container format (e.g., WAVE, FLAC)
+     * @param resultFormat the target openHAB {@link AudioFormat} metadata for the resulting stream
+     * @return a {@link FileAudioStream} backed by the generated temporary file, scheduled for deletion on close
+     * @throws AudioTranscodingException if creating the temp file, encoding, or wrapping the result fails
+     */
+    private static AudioStream writeToTempFile(AudioStream source, AudioInputStream ais, AudioFileFormat.Type fileType,
+            AudioFormat resultFormat) throws AudioTranscodingException {
         Path tempFile;
         try {
-            tempFile = Files.createTempFile("transcoded-", ".wav");
+            tempFile = Files.createTempFile("transcoded-", "." + fileType.getExtension());
             tempFile.toFile().deleteOnExit();
             try (source; ais) {
-                AudioSystem.write(ais, AudioFileFormat.Type.WAVE, tempFile.toFile());
+                AudioSystem.write(ais, fileType, tempFile.toFile());
             }
             return new FileAudioStream(tempFile.toFile(), resultFormat, true);
         } catch (IOException | AudioException e) {
             closeQuietly(ais);
             closeQuietly(source);
-            throw new AudioTranscodingException("Failed to transcode WAV stream to temporary file: " + e.getMessage(),
-                    e);
-        }
-    }
-
-    private static AudioStream writeFlacToTempFile(AudioStream source, AudioInputStream ais, AudioFormat resultFormat)
-            throws AudioTranscodingException {
-        Path tempFile;
-        try {
-            tempFile = Files.createTempFile("transcoded-", ".flac");
-            tempFile.toFile().deleteOnExit();
-            try (source; ais) {
-                AudioSystem.write(ais, getFlacFileType(ais), tempFile.toFile());
-            }
-            return new FileAudioStream(tempFile.toFile(), resultFormat, true);
-        } catch (IOException | AudioException e) {
-            closeQuietly(ais);
-            closeQuietly(source);
-            throw new AudioTranscodingException("Failed to transcode FLAC stream to temporary file: " + e.getMessage(),
+            throw new AudioTranscodingException("Failed to transcode audio stream to temporary file: " + e.getMessage(),
                     e);
         }
     }
