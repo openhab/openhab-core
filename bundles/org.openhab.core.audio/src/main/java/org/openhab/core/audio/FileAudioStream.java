@@ -20,7 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.utils.AudioStreamUtils;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 import org.openhab.core.common.Disposable;
@@ -39,6 +43,7 @@ public class FileAudioStream extends AudioStream implements SizeableAudioStream,
     public static final String MP3_EXTENSION = "mp3";
     public static final String OGG_EXTENSION = "ogg";
     public static final String AAC_EXTENSION = "aac";
+    public static final String FLAC_EXTENSION = "flac";
 
     private final File file;
     private final AudioFormat audioFormat;
@@ -76,8 +81,28 @@ public class FileAudioStream extends AudioStream implements SizeableAudioStream,
                 return AudioFormat.OGG;
             case AAC_EXTENSION:
                 return AudioFormat.AAC;
+            case FLAC_EXTENSION:
+                return parseFlacFormat(file);
             default:
                 throw new AudioException("Unsupported file extension!");
+        }
+    }
+
+    private static AudioFormat parseFlacFormat(File file) throws AudioException {
+        try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream(file))) {
+            javax.sound.sampled.AudioFormat format = AudioSystem.getAudioInputStream(inputStream).getFormat();
+            int bitDepth = format.getSampleSizeInBits();
+            long sampleRate = Float.valueOf(format.getSampleRate()).longValue();
+            int channels = format.getChannels();
+            Integer bitRate = bitDepth > 0 && channels > 0 ? Math.round(format.getSampleRate() * bitDepth * channels)
+                    : null;
+            return new AudioFormat(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC, null,
+                    bitDepth > 0 ? bitDepth : null, bitRate, sampleRate > 0 ? sampleRate : null,
+                    channels > 0 ? channels : null);
+        } catch (UnsupportedAudioFileException e) {
+            return AudioFormat.FLAC;
+        } catch (IOException e) {
+            throw new AudioException("Cannot parse flac stream", e);
         }
     }
 
