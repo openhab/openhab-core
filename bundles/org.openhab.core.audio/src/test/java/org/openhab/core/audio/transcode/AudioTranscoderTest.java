@@ -17,8 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -27,9 +30,15 @@ import javax.sound.sampled.AudioSystem;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
+import org.openhab.core.audio.FileAudioStream;
+import org.openhab.core.audio.PipedAudioStream;
+import org.openhab.core.audio.SizeableAudioStream;
 import org.openhab.core.audio.utils.AudioWaveUtils;
 
 /**
@@ -70,6 +79,20 @@ public class AudioTranscoderTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         AudioSystem.write(ais, AudioFileFormat.Type.WAVE, baos);
         return baos.toByteArray();
+    }
+
+    private byte[] createFlacBytes(int sampleRate, int bitDepth, int channels, int durationMs)
+            throws AudioTranscodingException, IOException {
+        byte[] pcm = createPcmBytes(sampleRate, bitDepth, channels, durationMs);
+        AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false,
+                bitDepth, sampleRate * (bitDepth / 8) * channels * 8, (long) sampleRate, channels);
+        ByteArrayAudioStream stream = new ByteArrayAudioStream(pcm, pcmFormat);
+        AudioFormat targetFormat = new AudioFormat(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC, null, bitDepth,
+                null, (long) sampleRate, channels);
+        AudioStream flacStream = AudioTranscoder.transcode(stream, targetFormat, true);
+        byte[] flacBytes = flacStream.readAllBytes();
+        flacStream.close();
+        return flacBytes;
     }
 
     @Test
@@ -163,52 +186,98 @@ public class AudioTranscoderTest {
         assertSame(stream, result);
     }
 
-    @Test
-    public void testResamplePcmFrequency() throws AudioTranscodingException, IOException {
-        byte[] pcmData = createPcmBytes(44100, 16, 1, 100);
-        AudioFormat sourceFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
-                705600, 44100L, 1);
-        ByteArrayAudioStream sourceStream = new ByteArrayAudioStream(pcmData, sourceFormat);
-
-        AudioFormat targetFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
-                null, 48000L, 1);
-
-        AudioStream resampled = AudioTranscoder.transcode(sourceStream, targetFormat);
-        assertNotNull(resampled);
-
-        AudioFormat resultFormat = resampled.getFormat();
-        assertEquals(AudioFormat.CONTAINER_NONE, resultFormat.getContainer());
-        assertEquals(AudioFormat.CODEC_PCM_SIGNED, resultFormat.getCodec());
-        assertEquals(48000L, resultFormat.getFrequency());
-        assertEquals(16, resultFormat.getBitDepth());
-        assertEquals(1, resultFormat.getChannels());
-
-        byte[] output = resampled.readAllBytes();
-        // 100 ms at 16 bit at 48 kHz => 4800 samples, sample size = 2 byte: 4800 * 2 = 9600 (+/- filter, alignment,
-        // ...)
-        assertTrue(output.length >= 9500 && output.length <= 9700);
-        resampled.close();
+    static Stream<Arguments> sampleRatePairs() {
+        int[] rates = { 8000, 11025, 16000, 22050, 44100, 48000 };
+        List<Arguments> pairs = new ArrayList<>();
+        for (int sourceRate : rates) {
+            for (int targetRate : rates) {
+                if (sourceRate != targetRate) {
+                    pairs.add(Arguments.of(sourceRate, targetRate));
+                }
+            }
+        }
+        return pairs.stream();
     }
 
-    @Test
-    public void testConvertPcmBitDepth() throws AudioTranscodingException, IOException {
-        byte[] pcmData = createPcmBytes(44100, 16, 1, 100);
+    @ParameterizedTest(name = "from {0} Hz to {1} Hz")
+    @MethodSource("sampleRatePairs")
+    void testResamplePcmFrequency(int sourceRate, int targetRate) throws AudioTranscodingException, IOException {
+        byte[] pcmBytes = createPcmBytes(sourceRate, 16, 1, 50);
         AudioFormat sourceFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
-                705600, 44100L, 1);
+                sourceRate * 16, (long) sourceRate, 1);
+        ByteArrayAudioStream srcStream = new ByteArrayAudioStream(pcmBytes, sourceFormat);
+
+        AudioFormat targetFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                targetRate * 16, (long) targetRate, 1);
+
+        try (AudioStream resampled = AudioTranscoder.transcode(srcStream, targetFormat)) {
+            assertNotNull(resampled);
+
+            AudioFormat resultFormat = resampled.getFormat();
+            assertEquals(AudioFormat.CONTAINER_NONE, resultFormat.getContainer());
+            assertEquals(AudioFormat.CODEC_PCM_SIGNED, resultFormat.getCodec());
+            assertEquals(targetRate, resultFormat.getFrequency());
+            assertEquals(16, resultFormat.getBitDepth());
+            assertEquals(1, resultFormat.getChannels());
+
+            byte[] output = resampled.readAllBytes();
+            assertTrue(output.length > 0);
+
+            double expectedSamples = 50.0 * targetRate / 1000.0;
+            int expectedBytes = (int) Math.round(expectedSamples * 2);
+            assertTrue(output.length >= expectedBytes * 0.7 && output.length <= expectedBytes * 1.3,
+                    "Resampling from " + sourceRate + " to " + targetRate + " gave unexpected length: " + output.length
+                            + " vs expected " + expectedBytes);
+        }
+    }
+
+    static Stream<Arguments> bitDepthPairs() {
+        int[] bitDepths = { 8, 16, 24, 32 };
+        List<Arguments> pairs = new ArrayList<>();
+        for (int sourceDepth : bitDepths) {
+            for (int targetDepth : bitDepths) {
+                if (sourceDepth != targetDepth) {
+                    pairs.add(Arguments.of(sourceDepth, targetDepth));
+                }
+            }
+        }
+        return pairs.stream();
+    }
+
+    @ParameterizedTest(name = "from {0}-bit to {1}-bit")
+    @MethodSource("bitDepthPairs")
+    void testConvertPcmBitDepth(int sourceDepth, int targetDepth) throws AudioTranscodingException, IOException {
+        int sampleRate = 44100;
+        int durationMs = 100;
+        int channels = 1;
+
+        byte[] pcmData = createPcmBytes(sampleRate, sourceDepth, channels, durationMs);
+        int bitrate = sampleRate * sourceDepth * channels;
+
+        AudioFormat sourceFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false,
+                sourceDepth, bitrate, (long) sampleRate, channels);
         ByteArrayAudioStream sourceStream = new ByteArrayAudioStream(pcmData, sourceFormat);
 
-        AudioFormat targetFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 24,
-                null, 44100L, 1);
+        AudioFormat targetFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false,
+                targetDepth, null, (long) sampleRate, channels);
 
-        AudioStream converted = AudioTranscoder.transcode(sourceStream, targetFormat);
-        assertNotNull(converted);
-        assertEquals(24, converted.getFormat().getBitDepth());
-        assertEquals(44100L, converted.getFormat().getFrequency());
+        try (AudioStream converted = AudioTranscoder.transcode(sourceStream, targetFormat)) {
+            assertNotNull(converted);
 
-        byte[] output = converted.readAllBytes();
-        // sample size increased from 2 to 3 bytes (16 to 24 bit)
-        assertEquals((pcmData.length / 2) * 3, output.length);
-        converted.close();
+            AudioFormat resultFormat = converted.getFormat();
+            assertEquals(targetDepth, resultFormat.getBitDepth());
+            assertEquals(sampleRate, resultFormat.getFrequency());
+            assertEquals(channels, resultFormat.getChannels());
+
+            byte[] output = converted.readAllBytes();
+
+            int sourceBytesPerSample = sourceDepth / 8;
+            int targetBytesPerSample = targetDepth / 8;
+            int expectedBytes = (pcmData.length / sourceBytesPerSample) * targetBytesPerSample;
+
+            assertEquals(expectedBytes, output.length,
+                    "Converting from " + sourceDepth + "-bit to " + targetDepth + "-bit yielded unexpected byte count");
+        }
     }
 
     @Test
@@ -286,7 +355,7 @@ public class AudioTranscoderTest {
     }
 
     @Test
-    public void testPcmToWav() throws Exception {
+    public void testPcmToWav() throws AudioTranscodingException, IOException {
         byte[] pcmBytes = createPcmBytes(44100, 16, 1, 100);
         AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
                 705600, 44100L, 1);
@@ -309,7 +378,138 @@ public class AudioTranscoderTest {
     }
 
     @Test
-    public void testTranscodeToSupported() throws Exception {
+    public void testWavAlwaysSizeable() throws AudioTranscodingException, IOException {
+        byte[] pcmBytes = createPcmBytes(44100, 16, 1, 100);
+        AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                705600, 44100L, 1);
+        ByteArrayAudioStream stream1 = new ByteArrayAudioStream(pcmBytes, pcmFormat);
+        AudioStream wavStream = AudioTranscoder.transcode(stream1, AudioFormat.WAV, false);
+        assertInstanceOf(FileAudioStream.class, wavStream);
+        assertInstanceOf(SizeableAudioStream.class, wavStream);
+        byte[] wavBytes = wavStream.readAllBytes();
+        assertTrue(wavBytes.length > 0);
+        wavStream.close();
+
+        ByteArrayAudioStream stream2 = new ByteArrayAudioStream(pcmBytes, pcmFormat);
+        AudioStream fileWav = AudioTranscoder.transcode(stream2, AudioFormat.WAV, true);
+        assertInstanceOf(FileAudioStream.class, fileWav);
+        assertInstanceOf(SizeableAudioStream.class, fileWav);
+        byte[] fileWavBytes = fileWav.readAllBytes();
+        assertTrue(fileWavBytes.length > 0);
+        fileWav.close();
+    }
+
+    @Test
+    public void testPcmToFlacStream() throws AudioTranscodingException, IOException {
+        byte[] pcmBytes = createPcmBytes(44100, 16, 1, 100);
+        AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                705600, 44100L, 1);
+        ByteArrayAudioStream pcmStream = new ByteArrayAudioStream(pcmBytes, pcmFormat);
+
+        AudioStream flacStream = AudioTranscoder.transcode(pcmStream, AudioFormat.FLAC);
+        assertNotNull(flacStream);
+        assertEquals(AudioFormat.CONTAINER_FLAC, flacStream.getFormat().getContainer());
+        byte[] flacData = flacStream.readAllBytes();
+        assertTrue(flacData.length > 0);
+        assertEquals((byte) 'f', flacData[0]);
+        assertEquals((byte) 'L', flacData[1]);
+        assertEquals((byte) 'a', flacData[2]);
+        assertEquals((byte) 'C', flacData[3]);
+        flacStream.close();
+    }
+
+    @Test
+    public void testPcmToFlacToPcm() throws AudioTranscodingException, IOException {
+        byte[] originalPcm = createPcmBytes(44100, 16, 1, 100);
+        AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                705600, 44100L, 1);
+        ByteArrayAudioStream srcStream = new ByteArrayAudioStream(originalPcm, pcmFormat);
+        AudioStream flacStream = AudioTranscoder.transcode(srcStream, AudioFormat.FLAC, true);
+        byte[] flacBytes = flacStream.readAllBytes();
+        flacStream.close();
+
+        ByteArrayAudioStream flacIn = new ByteArrayAudioStream(flacBytes, AudioFormat.FLAC);
+        AudioStream pcmStream = AudioTranscoder.transcode(flacIn, pcmFormat);
+        assertNotNull(pcmStream);
+        assertEquals(AudioFormat.CONTAINER_NONE, pcmStream.getFormat().getContainer());
+        assertEquals(AudioFormat.CODEC_PCM_SIGNED, pcmStream.getFormat().getCodec());
+        assertEquals(44100L, pcmStream.getFormat().getFrequency());
+
+        byte[] decodedPcm = pcmStream.readAllBytes();
+        assertEquals(originalPcm.length, decodedPcm.length);
+        pcmStream.close();
+    }
+
+    @Test
+    public void testFlacToWav() throws AudioTranscodingException, IOException {
+        byte[] flacBytes = createFlacBytes(44100, 16, 1, 100);
+        ByteArrayAudioStream flacStream = new ByteArrayAudioStream(flacBytes, AudioFormat.FLAC);
+
+        AudioStream wavStream = AudioTranscoder.transcode(flacStream, AudioFormat.WAV);
+        assertNotNull(wavStream);
+        assertEquals(AudioFormat.CONTAINER_WAVE, wavStream.getFormat().getContainer());
+
+        byte[] wavBytes = wavStream.readAllBytes();
+        assertTrue(wavBytes.length > 0);
+        AudioFormat parsed = AudioWaveUtils.parseWavFormat(new ByteArrayInputStream(wavBytes));
+        assertEquals(AudioFormat.CONTAINER_WAVE, parsed.getContainer());
+        assertEquals(44100L, parsed.getFrequency());
+        wavStream.close();
+    }
+
+    @Test
+    public void testWavToFlac() throws AudioTranscodingException, IOException {
+        byte[] wavBytes = createWavBytes(44100, 16, 1, 100);
+        ByteArrayAudioStream wavStream = new ByteArrayAudioStream(wavBytes, AudioFormat.WAV);
+
+        AudioStream flacStream = AudioTranscoder.transcode(wavStream, AudioFormat.FLAC);
+        assertNotNull(flacStream);
+        assertEquals(AudioFormat.CONTAINER_FLAC, flacStream.getFormat().getContainer());
+        byte[] flacBytes = flacStream.readAllBytes();
+        assertTrue(flacBytes.length > 0);
+        assertEquals((byte) 'f', flacBytes[0]);
+        assertEquals((byte) 'L', flacBytes[1]);
+        assertEquals((byte) 'a', flacBytes[2]);
+        assertEquals((byte) 'C', flacBytes[3]);
+        flacStream.close();
+    }
+
+    @Test
+    public void testFlacStreamingVsSizeable() throws AudioTranscodingException, IOException {
+        byte[] pcmBytes = createPcmBytes(44100, 16, 1, 100);
+        AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                705600, 44100L, 1);
+        ByteArrayAudioStream stream1 = new ByteArrayAudioStream(pcmBytes, pcmFormat);
+        AudioStream pipedFlac = AudioTranscoder.transcode(stream1, AudioFormat.FLAC, false);
+        assertInstanceOf(PipedAudioStream.class, pipedFlac);
+        byte[] pipedFlacBytes = pipedFlac.readAllBytes();
+        assertTrue(pipedFlacBytes.length > 0);
+        pipedFlac.close();
+
+        ByteArrayAudioStream stream2 = new ByteArrayAudioStream(pcmBytes, pcmFormat);
+        AudioStream fileFlac = AudioTranscoder.transcode(stream2, AudioFormat.FLAC, true);
+        assertInstanceOf(FileAudioStream.class, fileFlac);
+        assertInstanceOf(SizeableAudioStream.class, fileFlac);
+        byte[] fileFlacBytes = fileFlac.readAllBytes();
+        assertTrue(fileFlacBytes.length > 0);
+        fileFlac.close();
+    }
+
+    @Test
+    public void testCorruptFlacThrowsException() throws IOException {
+        byte[] invalidFlac = new byte[] { 'f', 'L', 'a', 'C', 0, 1, 2, 3, 4, 5 };
+
+        try (ByteArrayAudioStream stream = new ByteArrayAudioStream(invalidFlac, AudioFormat.FLAC)) {
+            AudioFormat targetFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false,
+                    16, null, 44100L, 1);
+            assertThrows(AudioTranscodingException.class, () -> {
+                AudioTranscoder.transcode(stream, targetFormat);
+            });
+        }
+    }
+
+    @Test
+    public void testTranscodeToSupported() throws AudioTranscodingException, IOException {
         byte[] pcmBytes = createPcmBytes(44100, 16, 1, 50);
         AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
                 705600, 44100L, 1);
@@ -323,20 +523,39 @@ public class AudioTranscoderTest {
     }
 
     @Test
-    public void testTranscodeToSupportedThrowsWhenNoMatch() {
-        byte[] pcmBytes = createPcmBytes(44100, 16, 1, 50);
+    public void testTranscodeToSupportedWithSupportedStreams() throws AudioTranscodingException, IOException {
+        byte[] pcmBytes = createPcmBytes(44100, 16, 1, 100);
         AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
                 705600, 44100L, 1);
-        ByteArrayAudioStream pcmStream = new ByteArrayAudioStream(pcmBytes, pcmFormat);
+        ByteArrayAudioStream stream1 = new ByteArrayAudioStream(pcmBytes, pcmFormat);
+        Set<Class<? extends AudioStream>> pipedSupported = Set.of(AudioStream.class);
+        AudioStream piped = AudioTranscoder.transcodeToSupported(stream1, Set.of(AudioFormat.FLAC), pipedSupported);
+        assertInstanceOf(PipedAudioStream.class, piped);
+        piped.close();
 
-        Set<AudioFormat> candidates = Set.of(AudioFormat.MP3, AudioFormat.AAC);
-        assertThrows(AudioTranscodingException.class, () -> {
-            AudioTranscoder.transcodeToSupported(pcmStream, candidates);
-        });
+        ByteArrayAudioStream stream2 = new ByteArrayAudioStream(pcmBytes, pcmFormat);
+        Set<Class<? extends AudioStream>> fileSupported = Set.of(FileAudioStream.class);
+        AudioStream sizeable = AudioTranscoder.transcodeToSupported(stream2, Set.of(AudioFormat.FLAC), fileSupported);
+        assertInstanceOf(FileAudioStream.class, sizeable);
+        assertInstanceOf(SizeableAudioStream.class, sizeable);
+        sizeable.close();
     }
 
     @Test
-    public void testClosingStreamClosesSource() throws Exception {
+    public void testTranscodeToSupportedThrowsWhenNoMatch() throws IOException {
+        byte[] pcmBytes = createPcmBytes(44100, 16, 1, 50);
+        AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                705600, 44100L, 1);
+        try (ByteArrayAudioStream pcmStream = new ByteArrayAudioStream(pcmBytes, pcmFormat)) {
+            Set<AudioFormat> candidates = Set.of(AudioFormat.MP3, AudioFormat.AAC);
+            assertThrows(AudioTranscodingException.class, () -> {
+                AudioTranscoder.transcodeToSupported(pcmStream, candidates);
+            });
+        }
+    }
+
+    @Test
+    public void testClosingStreamClosesSource() throws AudioTranscodingException, IOException {
         byte[] pcmData = createPcmBytes(44100, 16, 1, 50);
         AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -377,7 +596,7 @@ public class AudioTranscoderTest {
     }
 
     @Test
-    public void testPreservesStreamId() throws Exception {
+    public void testPreservesStreamId() throws AudioTranscodingException, IOException {
         byte[] pcmData = createPcmBytes(44100, 16, 1, 50);
         AudioStream sourceStream = new AudioStream() {
             private final ByteArrayInputStream in = new ByteArrayInputStream(pcmData);
