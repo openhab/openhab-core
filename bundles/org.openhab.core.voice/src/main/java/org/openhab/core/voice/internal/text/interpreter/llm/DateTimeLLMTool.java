@@ -13,8 +13,6 @@
 package org.openhab.core.voice.internal.text.interpreter.llm;
 
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,17 +51,17 @@ public class DateTimeLLMTool implements LLMTool {
 
     @Override
     public String getLabel(@Nullable Locale locale) {
-        return "Get Date and Time";
+        return "Date & Time";
     }
 
     @Override
     public String getShortDescription(@Nullable Locale locale) {
-        return "Returns the current date and time.";
+        return "Returns current date & time.";
     }
 
     @Override
     public String getDescription(@Nullable Locale locale) {
-        return "This tool returns the current date and time in a human-readable format.";
+        return getShortDescription(locale);
     }
 
     @Override
@@ -74,9 +72,7 @@ public class DateTimeLLMTool implements LLMTool {
     @Override
     public String call(Map<String, Object> params, @Nullable Locale locale) throws LLMToolException {
         ZonedDateTime now = ZonedDateTime.now(timeZoneProvider.getTimeZone());
-        Locale effectiveLocale = locale != null ? locale : Locale.getDefault();
-        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG)
-                .withLocale(effectiveLocale);
-        return now.format(formatter);
+
+        return LLMToolUtil.formatTimestamp(now, locale);
     }
 }

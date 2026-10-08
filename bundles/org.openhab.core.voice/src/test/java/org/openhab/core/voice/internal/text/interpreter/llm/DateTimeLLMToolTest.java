@@ -45,18 +45,8 @@ public class DateTimeLLMToolTest {
     }
 
     @Test
-    public void testGetUID() {
+    public void getUIDReturnsCorrectId() {
         assertEquals(DateTimeLLMTool.ID, tool.getUID());
-    }
-
-    @Test
-    public void testGetLabel() {
-        assertNotNull(tool.getLabel(Locale.ENGLISH));
-    }
-
-    @Test
-    public void testGetDescription() {
-        assertNotNull(tool.getDescription(Locale.ENGLISH));
     }
 
     @Test

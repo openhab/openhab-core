@@ -13,6 +13,7 @@
 package org.openhab.core.voice.internal.text.interpreter.llm;
 
 import static org.openhab.core.voice.VoiceManager.VOICE_SOURCE;
+import static org.openhab.core.voice.internal.text.interpreter.llm.LLMToolUtil.resolveAndValidateItem;
 
 import java.util.List;
 import java.util.Locale;
@@ -22,7 +23,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.types.Command;
@@ -68,12 +68,12 @@ public class ItemCommandLLMTool implements LLMTool {
 
     @Override
     public String getLabel(@Nullable Locale locale) {
-        return "Send Command to Item";
+        return "Send Command";
     }
 
     @Override
     public String getShortDescription(@Nullable Locale locale) {
-        return "Sends a command to an item.";
+        return "Sends command to Item.";
     }
 
     @Override
@@ -90,55 +90,41 @@ public class ItemCommandLLMTool implements LLMTool {
                 - DateTime: ISO 8601 (e.g., '2026-06-24T23:49:09+02:00')
                 - Location: Latitude,longitude[,altitude] (e.g., '52.520008,13.404954')
                 - Contact, Image, Call: REFRESH
-                Items may accept command options (command/label pairs).
                 """;
     }
 
     @Override
     public List<LLMToolParam> getParamDescriptions(@Nullable Locale locale) {
-        return List.of(
-                new LLMToolParam("itemName", LLMToolParamType.STRING, "The name of the item to control", List.of(),
-                        true),
+        return List.of(new LLMToolParam("itemName", LLMToolParamType.STRING, "Item name", List.of(), true),
                 new LLMToolParam("command", LLMToolParamType.STRING,
-                        "The command to send. Must match the item type, e.g., ON/OFF for Switch/Dimmer, UP/DOWN/STOP/MOVE for Rollershutter, etc.",
-                        List.of(), true));
+                        "Command to send. Must match the item type, e.g., ON/OFF for Switch, etc.", List.of(), true));
     }
 
     @Override
     public String call(Map<String, Object> params, @Nullable Locale locale) throws LLMToolException {
-        Object itemNameObj = params.get("itemName");
         Object commandObj = params.get("command");
 
-        if (!(itemNameObj instanceof String itemName) || !(commandObj instanceof String commandString)) {
-            throw new LLMToolException("Missing or invalid required parameters 'itemName' and 'command'");
+        LLMToolUtil.ItemAndPermission itemAndPermission = resolveAndValidateItem(itemRegistry, itemPermissionResolver,
+                params);
+        Item item = itemAndPermission.item();
+        ItemPermission permission = itemAndPermission.permission();
+
+        if (!(commandObj instanceof String commandString)) {
+            throw new LLMToolException("Missing or invalid required parameter 'command'");
         }
 
-        int lastDot = itemName.lastIndexOf('.');
-        if (lastDot != -1) {
-            itemName = itemName.substring(lastDot + 1);
-        }
-
-        Item item;
-        try {
-            item = itemRegistry.getItem(itemName);
-        } catch (ItemNotFoundException e) {
-            throw new LLMToolException("Item not found: " + itemName, e);
-        }
-
-        var permission = itemPermissionResolver.getPermission(item);
-        if (permission == ItemPermission.NO_ACCESS) {
-            throw new LLMToolException("Item not found: " + itemName);
-        } else if (permission == ItemPermission.READ_ONLY) {
-            throw new LLMToolException("Item is read-only: " + itemName);
+        if (permission == ItemPermission.READ_ONLY) {
+            throw new LLMToolException("Item is read-only: " + item.getName());
         }
 
         Command command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);
         if (command == null) {
-            throw new LLMToolException("Failed to parse command '" + commandString + "' for item '" + itemName + "'");
+            throw new LLMToolException(
+                    "Failed to parse command '" + commandString + "' for item '" + item.getName() + "'");
         }
 
-        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, command, VOICE_SOURCE));
+        eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, VOICE_SOURCE));
 
-        return "Successfully sent command '" + commandString + "' to item '" + itemName + "'.";
+        return "Successfully sent command '" + commandString + "' to item '" + item.getName() + "'.";
     }
 }
