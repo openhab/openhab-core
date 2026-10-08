@@ -273,13 +273,16 @@ public final class AudioTranscoder {
         try {
             javax.sound.sampled.AudioFormat sourceJFormat = inAis.getFormat();
 
-            float targetSampleRate = targetFormat.getFrequency() != null ? targetFormat.getFrequency().floatValue()
+            Long nullableTargetSampleRate = targetFormat.getFrequency();
+            float targetSampleRate = nullableTargetSampleRate != null ? nullableTargetSampleRate.floatValue()
                     : sourceJFormat.getSampleRate();
 
-            int targetBitDepth = targetFormat.getBitDepth() != null ? targetFormat.getBitDepth()
+            Integer nullableTargetBitDepth = targetFormat.getBitDepth();
+            int targetBitDepth = nullableTargetBitDepth != null ? nullableTargetBitDepth
                     : (sourceJFormat.getSampleSizeInBits() > 0 ? sourceJFormat.getSampleSizeInBits() : 16);
 
-            int targetChannels = targetFormat.getChannels() != null ? targetFormat.getChannels()
+            Integer nullableTargetChannels = targetFormat.getChannels();
+            int targetChannels = nullableTargetChannels != null ? nullableTargetChannels
                     : (sourceJFormat.getChannels() > 0 ? sourceJFormat.getChannels() : 1);
 
             boolean targetBigEndian;
@@ -582,9 +585,12 @@ public final class AudioTranscoder {
      */
     private static javax.sound.sampled.AudioFormat toJavaSoundFormat(AudioFormat format)
             throws AudioTranscodingException {
-        float sampleRate = format.getFrequency() != null ? format.getFrequency().floatValue() : 44100.0f;
-        int bitDepth = format.getBitDepth() != null ? format.getBitDepth() : 16;
-        int channels = format.getChannels() != null ? format.getChannels() : 1;
+        Long nullableSampleRate = format.getFrequency();
+        float sampleRate = nullableSampleRate != null ? nullableSampleRate.floatValue() : 44100.0f;
+        Integer nullableBitDepth = format.getBitDepth();
+        int bitDepth = nullableBitDepth != null ? nullableBitDepth : 16;
+        Integer nullableChannels = format.getChannels();
+        int channels = nullableChannels != null ? nullableChannels : 1;
         boolean bigEndian = Boolean.TRUE.equals(format.isBigEndian());
 
         Encoding encoding = toJavaSoundEncoding(format.getCodec());
