@@ -85,6 +85,12 @@ public class PcmToFlacEncoder implements AudioTranscoder {
 
     @Override
     public AudioStream transcode(AudioStream source, AudioFormat targetFormat) throws AudioTranscodingException {
+        if (!canTranscode(source.getFormat(), targetFormat)) {
+            closeQuietly(source);
+            throw new AudioTranscodingException(
+                    "Transcoding from " + source.getFormat() + " to " + targetFormat + " is not supported");
+        }
+
         try {
             // Extract and validate required metadata from PCM source
             AudioFormat sourceFormat = source.getFormat();
