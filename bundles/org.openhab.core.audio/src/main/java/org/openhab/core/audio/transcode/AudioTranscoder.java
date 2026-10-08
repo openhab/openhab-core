@@ -216,12 +216,12 @@ public final class AudioTranscoder {
 
         try {
             if (AudioFormat.CONTAINER_NONE.equals(sourceFormat.getContainer())) {
-                javax.sound.sampled.AudioFormat jSourceFormat = toJavaSoundFormat(sourceFormat);
+                javax.sound.sampled.AudioFormat sourceJFormat = toJavaSoundFormat(sourceFormat);
                 long frameLength = AudioSystem.NOT_SPECIFIED;
-                if (source instanceof SizeableAudioStream sizeable && jSourceFormat.getFrameSize() > 0) {
-                    frameLength = sizeable.length() / jSourceFormat.getFrameSize();
+                if (source instanceof SizeableAudioStream sizeable && sourceJFormat.getFrameSize() > 0) {
+                    frameLength = sizeable.length() / sourceJFormat.getFrameSize();
                 }
-                inAis = new AudioInputStream(source, jSourceFormat, frameLength);
+                inAis = new AudioInputStream(source, sourceJFormat, frameLength);
             } else {
                 // Java Sound API requires markable input streams to read container headers
                 InputStream markable = source.markSupported() ? source : new BufferedInputStream(source);
@@ -286,12 +286,11 @@ public final class AudioTranscoder {
                     targetBigEndian, targetBitDepth, bitRate, (long) targetSampleRate, targetChannels);
 
             if (AudioFormat.CONTAINER_FLAC.equals(targetContainer)) {
-                return writeToPipedStream(source, convertedAis, getFlacFileType(convertedAis), resultFormat);
+                return writeFlacToTempFile(source, convertedAis, resultFormat);
             } else if (AudioFormat.CONTAINER_WAVE.equals(targetContainer)) {
                 if (convertedAis.getFrameLength() != AudioSystem.NOT_SPECIFIED) {
                     return writeToPipedStream(source, convertedAis, AudioFileFormat.Type.WAVE, resultFormat);
                 } else {
-                    // TODO: Evaluate this implementation
                     return writeWavToTempFile(source, convertedAis, resultFormat);
                 }
             } else {
@@ -436,7 +435,6 @@ public final class AudioTranscoder {
         return outputStream;
     }
 
-    // TODO: Evaluate this implementation
     private static AudioStream writeWavToTempFile(AudioStream source, AudioInputStream ais, AudioFormat resultFormat)
             throws AudioTranscodingException {
         Path tempFile;
@@ -451,6 +449,24 @@ public final class AudioTranscoder {
             closeQuietly(ais);
             closeQuietly(source);
             throw new AudioTranscodingException("Failed to transcode WAV stream to temporary file: " + e.getMessage(),
+                    e);
+        }
+    }
+
+    private static AudioStream writeFlacToTempFile(AudioStream source, AudioInputStream ais, AudioFormat resultFormat)
+            throws AudioTranscodingException {
+        Path tempFile;
+        try {
+            tempFile = Files.createTempFile("transcoded-", ".flac");
+            tempFile.toFile().deleteOnExit();
+            try (source; ais) {
+                AudioSystem.write(ais, getFlacFileType(ais), tempFile.toFile());
+            }
+            return new FileAudioStream(tempFile.toFile(), resultFormat, true);
+        } catch (IOException | AudioException e) {
+            closeQuietly(ais);
+            closeQuietly(source);
+            throw new AudioTranscodingException("Failed to transcode FLAC stream to temporary file: " + e.getMessage(),
                     e);
         }
     }
@@ -516,7 +532,7 @@ public final class AudioTranscoder {
         } else if (AudioFormat.CODEC_PCM_ULAW.equals(codec)) {
             return Encoding.ULAW;
         } else if (AudioFormat.CODEC_FLAC.equals(codec)) {
-            return new Encoding("FLAC");
+            return Encoding.PCM_SIGNED; // Tested to work with FLAC
         }
         throw new AudioTranscodingException("No Java Sound encoding available for '" + codec + "'!");
     }
