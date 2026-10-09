@@ -186,6 +186,7 @@ class BaseThingHandlerTest {
                 Map.entry(ThingStatusDetail.CONFIGURATION_PENDING, ThingStatus.ONLINE),
                 Map.entry(ThingStatusDetail.COMMUNICATION_ERROR, ThingStatus.OFFLINE),
                 Map.entry(ThingStatusDetail.CONFIGURATION_ERROR, ThingStatus.OFFLINE),
+                Map.entry(ThingStatusDetail.AUTHORIZATION_REQUIRED, ThingStatus.OFFLINE),
                 Map.entry(ThingStatusDetail.BRIDGE_OFFLINE, ThingStatus.OFFLINE),
                 Map.entry(ThingStatusDetail.FIRMWARE_UPDATING, ThingStatus.OFFLINE),
                 Map.entry(ThingStatusDetail.DUTY_CYCLE, ThingStatus.OFFLINE),
