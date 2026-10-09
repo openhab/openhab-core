@@ -134,6 +134,13 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
 
         @Override
+        public synchronized void run() {
+            if (isTracked()) {
+                super.run();
+            }
+        }
+
+        @Override
         protected void established(GENASubscription subscription) {
             if (!isTracked()) {
                 removeFromRegistry(subscription);

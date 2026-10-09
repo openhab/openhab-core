@@ -45,7 +45,9 @@ import org.jupnp.model.types.ServiceId;
 import org.jupnp.model.types.ServiceType;
 import org.jupnp.model.types.UDAServiceId;
 import org.jupnp.model.types.UDN;
+import org.jupnp.protocol.ProtocolFactory;
 import org.jupnp.registry.Registry;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -83,6 +85,7 @@ public class UpnpIOServiceTest {
     private @Mock @NonNullByDefault({}) RemoteGENASubscription remoteSubscriptionMock;
     private @Mock @NonNullByDefault({}) RemoteGENASubscription embeddedSubscriptionMock;
     private @Mock @NonNullByDefault({}) RemoteGENASubscription otherSubscriptionMock;
+    private @Mock(answer = Answers.RETURNS_MOCKS) @NonNullByDefault({}) ProtocolFactory protocolFactoryMock;
     private @Mock @NonNullByDefault({}) Registry upnpRegistryMock;
     private @Mock @NonNullByDefault({}) ControlPoint controlPointMock;
     private @Mock @NonNullByDefault({}) UpnpService upnpServiceMock;
@@ -229,6 +232,34 @@ public class UpnpIOServiceTest {
 
         verify(controlPointMock).execute(callback);
         verifyNoMoreInteractions(controlPointMock);
+    }
+
+    @Test
+    public void testTrackedSubscriptionIsSent() throws ValidationException {
+        registerRemoteDevice();
+        UpnpSubscriptionCallback callback = subscribeToRemoteService();
+        callback.setControlPoint(controlPointMock);
+        when(controlPointMock.getProtocolFactory()).thenReturn(protocolFactoryMock);
+
+        callback.run();
+
+        verify(controlPointMock).getProtocolFactory();
+    }
+
+    @Test
+    public void testResubscriptionDroppedBeforeItRunsIsNotSent() throws ValidationException {
+        RemoteDevice device = registerRemoteDevice();
+        UpnpSubscriptionCallback callback = subscribeToRemoteService();
+        callback.ended(remoteSubscriptionMock, CancelReason.RENEWAL_FAILED, null);
+        UpnpSubscriptionCallback resubscription = upnpIoService.subscriptionCallbacks.get(callback.getService());
+        assertNotNull(resubscription);
+        upnpIoService.remoteDeviceRemoved(upnpRegistryMock, device);
+        resubscription.setControlPoint(controlPointMock);
+        when(controlPointMock.getProtocolFactory()).thenReturn(protocolFactoryMock);
+
+        resubscription.run();
+
+        verify(controlPointMock, never()).getProtocolFactory();
     }
 
     @Test
