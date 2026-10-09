@@ -509,6 +509,31 @@ public class AudioTranscoderTest {
     }
 
     @Test
+    public void testTranscodeWithNullCodecInTargetFormat() throws AudioTranscodingException, IOException {
+        byte[] pcmData = createPcmBytes(44100, 16, 1, 50);
+        AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,
+                705600, 44100L, 1);
+
+        // WAV target with null codec should default to PCM_SIGNED
+        AudioStream source1 = new ByteArrayAudioStream(pcmData, pcmFormat);
+        AudioFormat targetWav = new AudioFormat(AudioFormat.CONTAINER_WAVE, null, false, 16, null, 44100L, 1);
+        AudioStream transcodedWav = AudioTranscoder.transcode(source1, targetWav);
+        assertNotNull(transcodedWav);
+        assertEquals(AudioFormat.CONTAINER_WAVE, transcodedWav.getFormat().getContainer());
+        assertEquals(AudioFormat.CODEC_PCM_SIGNED, transcodedWav.getFormat().getCodec());
+        transcodedWav.close();
+
+        // FLAC target with null codec should default to CODEC_FLAC
+        AudioStream source2 = new ByteArrayAudioStream(pcmData, pcmFormat);
+        AudioFormat targetFlac = new AudioFormat(AudioFormat.CONTAINER_FLAC, null, null, 16, null, 44100L, 1);
+        AudioStream transcodedFlac = AudioTranscoder.transcode(source2, targetFlac);
+        assertNotNull(transcodedFlac);
+        assertEquals(AudioFormat.CONTAINER_FLAC, transcodedFlac.getFormat().getContainer());
+        assertEquals(AudioFormat.CODEC_FLAC, transcodedFlac.getFormat().getCodec());
+        transcodedFlac.close();
+    }
+
+    @Test
     public void testTranscodeToSupported() throws AudioTranscodingException, IOException {
         byte[] pcmBytes = createPcmBytes(44100, 16, 1, 50);
         AudioFormat pcmFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_SIGNED, false, 16,

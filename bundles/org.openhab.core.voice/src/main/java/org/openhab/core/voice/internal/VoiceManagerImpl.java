@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice.internal;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.transcode.AudioTranscoder;
 import org.openhab.core.audio.transcode.AudioTranscodingException;
+import org.openhab.core.common.Disposable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -269,27 +271,39 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             }
 
             AudioStream audioStream = tts.synthesize(text, voice, ttsAudioFormat);
-            if (!sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStream))) {
-                throw new TTSException(
-                        "Failed playing audio stream '" + audioStream + "' as audio sink doesn't support it");
-            }
-            Runnable restoreVolume = audioManager.handleVolumeCommand(volume, sink);
-            AudioStream streamToPlay = audioStream;
             boolean isFormatSupported = sink.getSupportedFormats().stream()
                     .anyMatch(format -> format.isCompatible(audioStream.getFormat()));
-            if (!isFormatSupported) {
+            boolean isStreamSupported = sink.getSupportedStreams().stream()
+                    .anyMatch(clazz -> clazz.isInstance(audioStream));
+            AudioStream streamCandidate = audioStream;
+            // if format or stream implementation isn't supported by AudioSink, attempt to transcode it
+            if (!isFormatSupported || !isStreamSupported) {
                 try {
                     logger.debug("Transcoding stream '{}' for sink '{}'...", audioStream, sink.getId());
-                    streamToPlay = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats(),
+                    streamCandidate = AudioTranscoder.transcodeToSupported(audioStream, sink.getSupportedFormats(),
                             sink.getSupportedStreams());
                 } catch (AudioTranscodingException e) {
+                    closeQuietly(audioStream);
                     logger.warn("Failed transcoding audio stream '{}' for sink '{}': {}", audioStream, sink.getId(),
                             e.getMessage());
                     return;
                 }
             }
+            final AudioStream streamToPlay = streamCandidate;
+            if (sink.getSupportedStreams().stream().noneMatch(clazz -> clazz.isInstance(streamToPlay))) {
+                closeQuietly(streamToPlay);
+                throw new TTSException(
+                        "Failed playing audio stream '" + streamToPlay + "' as audio sink doesn't support it");
+            }
+            Runnable restoreVolume = audioManager.handleVolumeCommand(volume, sink);
             sink.processAndComplete(streamToPlay).exceptionally(exception -> {
-                logger.warn("Error playing '{}': {}", audioStream, exception.getMessage(), exception);
+                logger.warn("Error playing '{}': {}", streamToPlay, exception.getMessage(), exception);
+                if (streamToPlay instanceof Disposable disposable) {
+                    try {
+                        disposable.dispose();
+                    } catch (IOException ignored) {
+                    }
+                }
                 return null;
             }).thenRun(restoreVolume);
         } catch (TTSException e) {
@@ -1196,5 +1210,20 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         }
         String itemsSection = "Available items:\n" + serializedItems;
         return base.isEmpty() ? itemsSection : base + "\n\n" + itemsSection;
+    }
+
+    private void closeQuietly(@Nullable Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException ignored) {
+            }
+            if (closeable instanceof Disposable disposable) {
+                try {
+                    disposable.dispose();
+                } catch (IOException ignored) {
+                }
+            }
+        }
     }
 }

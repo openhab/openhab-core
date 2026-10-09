@@ -38,6 +38,8 @@ import org.openhab.core.audio.PipedAudioStream;
 import org.openhab.core.audio.SizeableAudioStream;
 import org.openhab.core.audio.internal.transcode.SizeableTranscodedAudioStream;
 import org.openhab.core.audio.internal.transcode.TranscodedAudioStream;
+import org.openhab.core.common.Disposable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -294,7 +296,8 @@ public final class AudioTranscoder {
                 targetBigEndian = sourceJFormat.isBigEndian();
             }
 
-            Encoding targetEncoding = toJavaSoundEncoding(targetFormat.getCodec());
+            String targetContainer = targetFormat.getContainer();
+            Encoding targetEncoding = toJavaSoundEncoding(targetContainer, targetFormat.getCodec());
             if (targetEncoding.equals(Encoding.ALAW) || targetEncoding.equals(Encoding.ULAW)) {
                 targetBitDepth = 8;
             }
@@ -312,7 +315,6 @@ public final class AudioTranscoder {
                 convertedAis = convertAudioInputStream(inAis, sourceJFormat, targetJFormat);
             }
 
-            String targetContainer = targetFormat.getContainer();
             String resultCodec = toOpenHabCodec(targetEncoding, targetContainer);
             int bitRate = Math.round(targetSampleRate * targetBitDepth * targetChannels);
             AudioFormat resultFormat = new AudioFormat(
@@ -403,6 +405,7 @@ public final class AudioTranscoder {
         }
 
         if (!isSourceSupported(sourceFormat)) {
+            closeQuietly(source);
             throw new AudioTranscodingException("Source format " + sourceFormat + " is not supported for decoding");
         }
 
@@ -423,6 +426,7 @@ public final class AudioTranscoder {
         }
 
         if (target == null) {
+            closeQuietly(source);
             throw new AudioTranscodingException("No supported transcoding target found for source format "
                     + sourceFormat + " among candidates " + candidateFormats);
         }
@@ -474,11 +478,12 @@ public final class AudioTranscoder {
      * forward-only pipeline streaming without disk I/O.
      *
      * <p>
-     * Encoding runs in a background thread via {@link CompletableFuture#runAsync(Runnable)}, writing directly
-     * into a {@link PipedAudioStream.Group} while consumers immediately start reading the resulting stream.
+     * Encoding runs on the <code>audio-transcoder</code> thread pool via {@link CompletableFuture#runAsync(Runnable)},
+     * writing directly into a {@link PipedAudioStream.Group} while consumers immediately start reading the resulting
+     * stream.
      * Because the destination is a non-seekable {@link java.io.OutputStream}, the underlying encoder cannot
-     * seek back to update header metadata once encoding completes (e.g. retroactive MD5 checksums, or file sizes
-     * that were not known ahead of time).
+     * seek back to update header metadata once encoding completes (e.g., retroactive MD5 checksums, or file sizes not
+     * known ahead of time).
      *
      * <p>
      * Both the {@code source} stream and the converted {@code ais} are closed automatically in the background
@@ -503,13 +508,23 @@ public final class AudioTranscoder {
             throw new AudioTranscodingException("Failed to initialize piped output stream: " + e.getMessage(), e);
         }
 
+        // Immediately stop transcoding when the outputStream is closed
+        outputStream.onClose(() -> {
+            closeQuietly(ais);
+            closeQuietly(source);
+        });
+
         CompletableFuture.runAsync(() -> {
             try (source; ais; group) {
                 AudioSystem.write(ais, fileType, group);
             } catch (Exception e) {
-                LOGGER.warn("Transcoding write finished with exception: {}", e.getMessage(), e);
+                if (group.isEmpty()) {
+                    LOGGER.debug("Transcoding write terminated (stream closed): {}", e.getMessage());
+                } else {
+                    LOGGER.warn("Transcoding write finished with exception: {}", e.getMessage(), e);
+                }
             }
-        });
+        }, ThreadPoolManager.getPool("audio-transcoder"));
 
         return outputStream;
     }
@@ -529,7 +544,7 @@ public final class AudioTranscoder {
      * missing header fields once encoding completes.
      *
      * <p>
-     * The returned {@link FileAudioStream} is configured to delete the underlying temporary file when closed.
+     * The returned {@link FileAudioStream} is configured to delete the underlying temporary file when disposed.
      * Both the {@code source} stream and the converted {@code ais} are closed upon completing the write operation
      * or if an error occurs.
      *
@@ -537,20 +552,25 @@ public final class AudioTranscoder {
      * @param ais the converted Java Sound {@link AudioInputStream} to encode
      * @param fileType the target {@link AudioFileFormat.Type} container format (e.g., WAVE, FLAC)
      * @param resultFormat the target openHAB {@link AudioFormat} metadata for the resulting stream
-     * @return a {@link FileAudioStream} backed by the generated temporary file, scheduled for deletion on close
+     * @return a {@link FileAudioStream} backed by the generated temporary file, scheduled for deletion on dispose
      * @throws AudioTranscodingException if creating the temp file, encoding, or wrapping the result fails
      */
     private static AudioStream writeToTempFile(AudioStream source, AudioInputStream ais, AudioFileFormat.Type fileType,
             AudioFormat resultFormat) throws AudioTranscodingException {
-        Path tempFile;
+        Path tempFile = null;
         try {
             tempFile = Files.createTempFile("transcoded-", "." + fileType.getExtension());
-            tempFile.toFile().deleteOnExit();
             try (source; ais) {
                 AudioSystem.write(ais, fileType, tempFile.toFile());
             }
             return new FileAudioStream(tempFile.toFile(), resultFormat, true);
         } catch (IOException | AudioException e) {
+            if (tempFile != null) {
+                try {
+                    Files.deleteIfExists(tempFile);
+                } catch (IOException ignored) {
+                }
+            }
             closeQuietly(ais);
             closeQuietly(source);
             throw new AudioTranscodingException("Failed to transcode audio stream to temporary file: " + e.getMessage(),
@@ -593,7 +613,7 @@ public final class AudioTranscoder {
         int channels = nullableChannels != null ? nullableChannels : 1;
         boolean bigEndian = Boolean.TRUE.equals(format.isBigEndian());
 
-        Encoding encoding = toJavaSoundEncoding(format.getCodec());
+        Encoding encoding = toJavaSoundEncoding(format.getContainer(), format.getCodec());
         int frameSize;
         if (encoding.equals(Encoding.ALAW) || encoding.equals(Encoding.ULAW)) {
             frameSize = channels;
@@ -612,19 +632,27 @@ public final class AudioTranscoder {
      * @return the Java Sound {@link Encoding}
      * @throws AudioTranscodingException if Java Sound does not support the codec
      */
-    private static Encoding toJavaSoundEncoding(@Nullable String codec) throws AudioTranscodingException {
-        if (AudioFormat.CODEC_PCM_SIGNED.equals(codec)) {
-            return Encoding.PCM_SIGNED;
-        } else if (AudioFormat.CODEC_PCM_UNSIGNED.equals(codec)) {
-            return Encoding.PCM_UNSIGNED;
-        } else if (AudioFormat.CODEC_PCM_ALAW.equals(codec)) {
-            return Encoding.ALAW;
-        } else if (AudioFormat.CODEC_PCM_ULAW.equals(codec)) {
-            return Encoding.ULAW;
-        } else if (AudioFormat.CODEC_FLAC.equals(codec)) {
-            return Encoding.PCM_SIGNED; // Tested to work with FLAC
+    private static Encoding toJavaSoundEncoding(@Nullable String container, @Nullable String codec)
+            throws AudioTranscodingException {
+        if (codec == null) {
+            if (AudioFormat.CONTAINER_NONE.equals(container) || AudioFormat.CONTAINER_WAVE.equals(container)) {
+                return Encoding.PCM_SIGNED;
+            }
+            if (AudioFormat.CONTAINER_FLAC.equals(container)) {
+                return Encoding.PCM_SIGNED; // Tested to work with FLAC
+            }
+            throw new AudioTranscodingException(
+                    "No Java Sound encoding available for container '" + container + "' with codec 'null'!");
         }
-        throw new AudioTranscodingException("No Java Sound encoding available for '" + codec + "'!");
+        return switch (codec) {
+            case AudioFormat.CODEC_PCM_SIGNED -> Encoding.PCM_SIGNED;
+            case AudioFormat.CODEC_PCM_UNSIGNED -> Encoding.PCM_UNSIGNED;
+            case AudioFormat.CODEC_PCM_ALAW -> Encoding.ALAW;
+            case AudioFormat.CODEC_PCM_ULAW -> Encoding.ULAW;
+            case AudioFormat.CODEC_FLAC -> Encoding.PCM_SIGNED; // Tested to work with FLAC
+
+            default -> throw new AudioTranscodingException("No Java Sound encoding available for '" + codec + "'!");
+        };
     }
 
     /***
@@ -657,7 +685,7 @@ public final class AudioTranscoder {
      * @param codec a openHAB {@link AudioFormat#getCodec()} codec
      * @return true if the codec is a PCM codec, false otherwise
      */
-    private static boolean isPcmCodec(String codec) {
+    private static boolean isPcmCodec(@Nullable String codec) {
         return AudioFormat.CODEC_PCM_SIGNED.equals(codec) || AudioFormat.CODEC_PCM_UNSIGNED.equals(codec)
                 || AudioFormat.CODEC_PCM_ALAW.equals(codec) || AudioFormat.CODEC_PCM_ULAW.equals(codec);
     }
@@ -671,6 +699,12 @@ public final class AudioTranscoder {
             try {
                 c.close();
             } catch (IOException ignored) {
+            }
+            if (c instanceof Disposable disposable) {
+                try {
+                    disposable.dispose();
+                } catch (IOException ignored) {
+                }
             }
         }
     }

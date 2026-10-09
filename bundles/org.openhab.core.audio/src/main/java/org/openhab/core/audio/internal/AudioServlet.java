@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,6 +53,7 @@ import org.openhab.core.audio.PipedAudioStream;
 import org.openhab.core.audio.SizeableAudioStream;
 import org.openhab.core.audio.StreamServed;
 import org.openhab.core.audio.utils.AudioSinkUtils;
+import org.openhab.core.common.Disposable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -115,6 +115,12 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
                 stream.close();
             } catch (IOException ignored) {
             }
+            if (stream instanceof Disposable disposableStream) {
+                try {
+                    disposableStream.dispose();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
@@ -173,7 +179,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String requestURI = req.getRequestURI();
         if (requestURI == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "requestURI is null");
@@ -212,12 +218,19 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
                             endOfPlayTimestamp, endOfPlayTimestamp - System.nanoTime(), servedStream.timeout().get());
                 }
                 resp.flushBuffer();
+                // try-with-resources automatically closes stream on exit of try_block
             } catch (final AudioException ex) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
             } finally {
                 currentlyServedStream.decrementAndGet();
                 if (!servedStream.multiTimeStream()) {
                     servedStreams.remove(streamId);
+                    if (servedStream.audioStream() instanceof Disposable disposableStream) {
+                        try {
+                            disposableStream.dispose();
+                        } catch (IOException ignored) {
+                        }
+                    }
                     servedStream.playEnd().complete(null);
                     logger.debug("Removed served stream {}", streamId);
                 }
