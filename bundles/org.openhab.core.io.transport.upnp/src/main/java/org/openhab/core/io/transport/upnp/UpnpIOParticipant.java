@@ -31,7 +31,7 @@ public interface UpnpIOParticipant {
      * Called to notify if a GENA subscription succeeded or failed.
      *
      * @param service the UPnP service subscribed
-     * @param succeeded true if the subscription succeeded; false if failed
+     * @param succeeded true if the subscription succeeded; false if it failed or was dropped
      */
     void onServiceSubscribed(String service, boolean succeeded);
 
