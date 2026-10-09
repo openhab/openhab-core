@@ -20,9 +20,11 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Wrapper for a source of audio data.
  *
+ * <p>
  * In contrast to {@link AudioSource}, this is often a "one time use" instance for passing some audio data,
  * but it is not meant to be registered as a service.
  *
+ * <p>
  * The stream needs to be closed by the client that uses it.
  *
  * @author Harald Kuhn - Initial contribution
@@ -40,8 +42,8 @@ public abstract class AudioStream extends InputStream {
     public abstract AudioFormat getFormat();
 
     /**
-     * Usefull for sinks playing the same stream multiple times,
-     * to avoid already done computation (like reencoding).
+     * Useful for sinks playing the same stream multiple times
+     * to avoid already done computation (like re-encoding).
      *
      * @return A string uniquely identifying the stream.
      */

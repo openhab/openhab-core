@@ -13,6 +13,7 @@
 package org.openhab.core.audio.utils;
 
 import java.io.ByteArrayInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,33 +45,63 @@ public class AudioSinkUtilsImpl implements AudioSinkUtils {
     private final Logger logger = LoggerFactory.getLogger(AudioSinkUtilsImpl.class);
 
     @Override
-    public @Nullable Long transferAndAnalyzeLength(InputStream in, OutputStream out, AudioFormat audioFormat)
-            throws IOException {
+    public @Nullable Long transferAndAnalyzeLength(InputStream in, OutputStream out, AudioFormat audioFormat,
+            boolean flush) throws IOException {
         // take some data from the stream beginning
         byte[] dataBytes = in.readNBytes(8192);
 
         // beginning sound timestamp :
         long startTime = System.nanoTime();
         // copy already read data to the output stream :
-        out.write(dataBytes);
+        if (dataBytes.length > 0) {
+            out.write(dataBytes);
+            if (flush) {
+                out.flush();
+            }
+        }
         // transfer everything else
-        Long dataTransferedLength = dataBytes.length + in.transferTo(out);
+        long transferred;
+        if (flush) {
+            transferred = in.transferTo(new FilterOutputStream(out) {
+                @Override
+                public void write(byte @Nullable [] b, int off, int len) throws IOException {
+                    if (b != null && len > 0) {
+                        out.write(b, off, len);
+                        out.flush();
+                    }
+                }
 
-        if (dataTransferedLength > 0) {
+                @Override
+                public void write(int b) throws IOException {
+                    out.write(b);
+                    out.flush();
+                }
+
+                @Override
+                public void flush() throws IOException {
+                    out.flush();
+                }
+            });
+        } else {
+            transferred = in.transferTo(out);
+        }
+        long dataTransferredLength = dataBytes.length + transferred;
+
+        if (dataTransferredLength > 0) {
             if (AudioFormat.CODEC_PCM_SIGNED.equals(audioFormat.getCodec())) {
                 try (AudioInputStream audioInputStream = AudioSystem
                         .getAudioInputStream(new ByteArrayInputStream(dataBytes))) {
                     int frameSize = audioInputStream.getFormat().getFrameSize();
                     float frameRate = audioInputStream.getFormat().getFrameRate();
-                    long computedDuration = Float.valueOf((dataTransferedLength / (frameSize * frameRate)) * 1000000000)
-                            .longValue();
+                    long computedDuration = Float
+                            .valueOf((dataTransferredLength / (frameSize * frameRate)) * 1000000000).longValue();
                     return startTime + computedDuration;
                 } catch (IOException | UnsupportedAudioFileException e) {
                     logger.debug("Cannot compute the duration of input stream with method java stream sound analysis",
                             e);
                     Integer bitRate = audioFormat.getBitRate();
                     if (bitRate != null && bitRate != 0) {
-                        long computedDuration = Float.valueOf((8f * dataTransferedLength / bitRate) * 1000000000)
+                        long computedDuration = Float.valueOf((8f * dataTransferredLength / bitRate) * 1000000000)
                                 .longValue();
                         return startTime + computedDuration;
                     } else {
@@ -84,7 +115,7 @@ public class AudioSinkUtilsImpl implements AudioSinkUtils {
                 try {
                     Header h = bitstream.readFrame();
                     if (h != null) {
-                        long computedDuration = Float.valueOf(h.total_ms(dataTransferedLength.intValue()) * 1000000)
+                        long computedDuration = Float.valueOf(h.total_ms((int) dataTransferredLength) * 1000000)
                                 .longValue();
                         return startTime + computedDuration;
                     }

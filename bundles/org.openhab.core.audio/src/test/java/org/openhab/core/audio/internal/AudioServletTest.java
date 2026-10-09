@@ -14,6 +14,7 @@ package org.openhab.core.audio.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
@@ -29,6 +30,7 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.audio.FileAudioStream;
+import org.openhab.core.audio.PipedAudioStream;
 import org.openhab.core.audio.StreamServed;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
 
@@ -258,5 +260,44 @@ public class AudioServletTest extends AbstractAudioServletTest {
 
         verify(oneTimeStream).close();
         verify(multiTimeStream).close();
+    }
+
+    @Test
+    public void audioServletProcessesPipedAudioStreamChunked() throws Exception {
+        AudioFormat format = AudioFormat.FLAC;
+        PipedAudioStream.Group group = PipedAudioStream.newGroup(format, 8192);
+        PipedAudioStream pipedStream = group.getAudioStreamInGroup();
+
+        byte[] payload = new byte[] { 10, 20, 30, 40, 50 };
+        group.write(payload);
+        group.close();
+
+        String url = serveStream(pipedStream);
+        ContentResponse response = getHttpRequest(url).send();
+
+        assertThat("Status should be 200", response.getStatus(), is(HttpStatus.OK_200));
+        assertThat("Content should match", response.getContent(), is(payload));
+        assertThat("Cache-Control must prevent caching for streaming", response.getHeaders().get("Cache-Control"),
+                is("no-cache, no-store, must-revalidate"));
+        assertThat("Content-Length should not be set for piped streaming", response.getHeaders().get("Content-Length"),
+                is(nullValue()));
+
+        assertThat(audioServlet.getServedStreams().values().stream().map(StreamServed::audioStream).toList(),
+                not(contains(pipedStream)));
+    }
+
+    @Test
+    public void pipedAudioStreamIsNotCachedAsClonable() throws Exception {
+        AudioFormat format = AudioFormat.FLAC;
+        PipedAudioStream.Group group = PipedAudioStream.newGroup(format, 8192);
+        PipedAudioStream pipedStream = group.getAudioStreamInGroup();
+        group.close();
+
+        String url = serveStream(pipedStream, 10);
+        String uuid = url.substring(url.lastIndexOf("/") + 1);
+        StreamServed servedStream = audioServlet.getServedStreams().get(uuid);
+        assertNotNull(servedStream);
+        assertThat(servedStream.audioStream(), is(pipedStream));
+        assertThat(servedStream.multiTimeStream(), is(false));
     }
 }

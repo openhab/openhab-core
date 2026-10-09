@@ -32,12 +32,30 @@ public interface AudioSinkUtils {
     /**
      * Transfers data from an input stream to an output stream and computes on the fly its duration
      *
-     * @param in the input stream giving audio data ta play
+     * @param in the input stream giving audio data to play
      * @param out the output stream receiving data to play
+     * @param audioFormat the audio format of the stream
+     * @return the timestamp (from System.nanoTime) when the sound should be fully played. Returns null if computing
+     *         time fails.
+     * @throws IOException if reading from the stream or writing to the stream failed
+     */
+    default @Nullable Long transferAndAnalyzeLength(InputStream in, OutputStream out, AudioFormat audioFormat)
+            throws IOException {
+        return transferAndAnalyzeLength(in, out, audioFormat, false);
+    }
+
+    /**
+     * Transfers data from an input stream to an output stream and computes on the fly its duration
+     *
+     * @param in the input stream giving audio data to play
+     * @param out the output stream receiving data to play
+     * @param audioFormat the audio format of the stream
+     * @param flush whether to immediately flush each written chunk (useful for low-latency live/piped streams)
      * @return the timestamp (from System.nanoTime) when the sound should be fully played. Returns null if computing
      *         time fails.
      * @throws IOException if reading from the stream or writing to the stream failed
      */
     @Nullable
-    Long transferAndAnalyzeLength(InputStream in, OutputStream out, AudioFormat audioFormat) throws IOException;
+    Long transferAndAnalyzeLength(InputStream in, OutputStream out, AudioFormat audioFormat, boolean flush)
+            throws IOException;
 }
