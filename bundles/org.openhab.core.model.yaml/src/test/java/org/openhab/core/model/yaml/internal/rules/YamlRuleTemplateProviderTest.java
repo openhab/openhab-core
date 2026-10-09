@@ -496,7 +496,6 @@ public class YamlRuleTemplateProviderTest {
                     hasEntry("text", "The sleep temperature has been set"));
             assertThat(action.getConfiguration().getProperties(), is(aMapWithSize(2)));
             assertThat(action.getInputs(), is(anEmptyMap()));
-
         }
     }
 

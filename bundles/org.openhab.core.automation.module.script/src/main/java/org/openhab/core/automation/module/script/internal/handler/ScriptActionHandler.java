@@ -99,7 +99,6 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
                         logger.error(
                                 "Failed to acquire lock within {} milliseconds for script module '{}' of rule with UID '{}'",
                                 timeout, module.getId(), ruleUID);
-
                     } else {
                         logger.error(
                                 "Failed to acquire lock within {} seconds for script module '{}' of rule with UID '{}'",

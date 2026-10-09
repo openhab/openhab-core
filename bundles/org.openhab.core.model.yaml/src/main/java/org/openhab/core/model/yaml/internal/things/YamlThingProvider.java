@@ -125,7 +125,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                         queue.removeIf(qc -> retryCreateThing(qc.thingHandlerFactory, qc.thingTypeUID, qc.configuration,
                                 qc.thingUID, qc.bridgeUID));
                         stop = queue.isEmpty();
-                        threadStopping = stop == true;
+                        threadStopping = stop;
                     }
                 }
             } while (!stop);
