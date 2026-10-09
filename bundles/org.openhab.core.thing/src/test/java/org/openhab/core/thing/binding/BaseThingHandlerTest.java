@@ -202,6 +202,10 @@ class BaseThingHandlerTest {
     @Test
     public void testUpdateStatusRejectsNoneDetail() {
         assertThrows(IllegalArgumentException.class, () -> handler.updateStatus(ThingStatusDetail.NONE, "description"));
+        assertThrows(IllegalArgumentException.class,
+                () -> handler.updateStatus(ThingStatusDetail.ONLINE.NONE, "description"));
+        assertThrows(IllegalArgumentException.class,
+                () -> handler.updateStatus(ThingStatusDetail.OFFLINE.NONE, "description"));
         verifyNoInteractions(callback);
     }
 
@@ -211,6 +215,17 @@ class BaseThingHandlerTest {
 
         verify(callback).statusUpdated(handler.getThing(),
                 new ThingStatusInfo(ThingStatus.ONLINE, ThingStatusDetail.NONE, null));
+    }
+
+    @Test
+    public void testUpdateStatusWithoutDetailWithDescription() {
+        handler.updateStatus(ThingStatus.ONLINE, "online description");
+        handler.updateStatus(ThingStatus.OFFLINE, "offline description");
+
+        verify(callback).statusUpdated(handler.getThing(),
+                new ThingStatusInfo(ThingStatus.ONLINE, ThingStatusDetail.NONE, "online description"));
+        verify(callback).statusUpdated(handler.getThing(),
+                new ThingStatusInfo(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "offline description"));
     }
 
     @Test

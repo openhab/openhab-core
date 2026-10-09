@@ -492,9 +492,8 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param status the status
      * @param statusDetail the detail of the status
      * @param description the description of the status
-     * @deprecated since 5.3.0; use {@link #updateStatus(ThingStatus)} for a status without detail, or
-     *             {@link #updateStatus(ThingStatusDetail, String)} for a detail. Descriptions with
-     *             {@link ThingStatusDetail#NONE} do not yet have a replacement. This method will be removed in openHAB
+     * @deprecated since 5.3.0; use {@link #updateStatus(ThingStatus, String)} for a status without detail, or
+     *             {@link #updateStatus(ThingStatusDetail, String)} for a detail. This method will be removed in openHAB
      *             6.0.0.
      */
     @Deprecated(since = "5.3.0", forRemoval = true)
@@ -522,6 +521,16 @@ public abstract class BaseThingHandler implements ThingHandler {
     @Deprecated(since = "5.3.0", forRemoval = true)
     protected void updateStatus(ThingStatus status, ThingStatusDetail statusDetail) {
         updateStatus(status, statusDetail, null);
+    }
+
+    /**
+     * Updates the status of the thing. The detail of the status will be 'NONE'.
+     *
+     * @param status the status
+     * @param description the description of the status
+     */
+    protected void updateStatus(ThingStatus status, @Nullable String description) {
+        updateStatus(status, ThingStatusDetail.NONE, description);
     }
 
     /**
