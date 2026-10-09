@@ -516,8 +516,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param status the status
      * @param statusDetail the detail of the status
      * @deprecated since 5.3.0; use {@link #updateStatus(ThingStatus)} for a status without detail, or
-     *             {@link #updateStatus(ThingStatusDetail, String)} for a detail. This method will be removed in openHAB
-     *             6.0.0.
+     *             {@link #updateStatus(ThingStatusDetail)} for a detail. This method will be removed in openHAB 6.0.0.
      */
     @Deprecated(since = "5.3.0", forRemoval = true)
     protected void updateStatus(ThingStatus status, ThingStatusDetail statusDetail) {
