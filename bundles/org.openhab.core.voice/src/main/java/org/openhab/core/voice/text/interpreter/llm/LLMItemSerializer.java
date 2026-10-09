@@ -192,7 +192,6 @@ public final class LLMItemSerializer {
     private static void resolveParents(MetadataRegistry metadataRegistry, Item child, Map<String, Item> itemMap,
             boolean isLocation, boolean isEquipment, boolean isPoint, Map<String, List<Item>> parentToChildren,
             Set<String> semanticChildNames, Set<String> nonSemanticChildNames) {
-
         String semanticParent = null;
 
         // Resolve semantic parent via SemanticsMetadataProvider configuration keys

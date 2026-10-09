@@ -182,7 +182,6 @@ public class UpgradeTool {
             if (command == null) {
                 updateVersionRecord();
             }
-
         } catch (ParseException e) {
             HelpFormatter formatter = HelpFormatter.builder().get();
             try {
