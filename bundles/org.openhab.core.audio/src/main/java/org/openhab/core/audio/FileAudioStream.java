@@ -202,7 +202,7 @@ public class FileAudioStream extends AudioStream implements SizeableAudioStream,
     @Override
     public void dispose() throws IOException {
         if (isTemporaryFile) {
-            Files.delete(file.toPath());
+            Files.deleteIfExists(file.toPath());
         }
     }
 }

@@ -151,16 +151,24 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
             }
             final AudioStream streamToPlay = streamCandidate;
             Runnable restoreVolume = handleVolumeCommand(volume, sink);
-            sink.processAndComplete(streamToPlay).exceptionally(exception -> {
-                logger.warn("Error playing '{}': {}", streamToPlay, exception.getMessage(), exception);
+            sink.processAndComplete(streamToPlay).whenComplete((result, throwable) -> {
                 if (streamToPlay instanceof Disposable disposable) {
                     try {
                         disposable.dispose();
-                    } catch (IOException ignored) {
+                    } catch (IOException | RuntimeException ignored) {
                     }
                 }
-                return null;
-            }).thenRun(restoreVolume);
+
+                if (throwable != null) {
+                    logger.warn("Error playing '{}': {}", streamToPlay, throwable.getMessage(), throwable);
+                }
+
+                try {
+                    restoreVolume.run();
+                } catch (RuntimeException e) {
+                    logger.warn("Failed to restore volume after playing '{}': {}", streamToPlay, e.getMessage(), e);
+                }
+            });
         } else {
             closeQuietly(audioStream);
             logger.warn("Failed playing audio stream '{}' as no audio sink was found.", audioStream);

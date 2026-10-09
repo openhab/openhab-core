@@ -14,6 +14,7 @@ package org.openhab.core.audio.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -26,6 +27,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -41,6 +43,7 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.internal.fake.AudioSinkFake;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
+import org.openhab.core.common.Disposable;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.library.types.PercentType;
 
@@ -307,6 +310,33 @@ public class AudioManagerTest {
                 is(true));
     }
 
+    @Test
+    public void disposableStreamIsDisposedOnSuccessfulPlayback() {
+        audioManager.addAudioSink(audioSink);
+        AtomicBoolean disposed = new AtomicBoolean(false);
+        DisposableAudioStream stream = new DisposableAudioStream(new byte[] { 0, 1, 2 },
+                new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, true, 16, 1000, 16384L),
+                () -> disposed.set(true));
+
+        audioManager.play(stream, audioSink.getId());
+
+        assertTrue(disposed.get());
+    }
+
+    @Test
+    public void disposableStreamIsDisposedOnFailedPlayback() {
+        audioManager.addAudioSink(audioSink);
+        audioSink.isUnsupportedAudioFormatExceptionExpected = true;
+        AtomicBoolean disposed = new AtomicBoolean(false);
+        DisposableAudioStream stream = new DisposableAudioStream(new byte[] { 0, 1, 2 },
+                new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, true, 16, 1000, 16384L),
+                () -> disposed.set(true));
+
+        audioManager.play(stream, audioSink.getId());
+
+        assertTrue(disposed.get());
+    }
+
     private ByteArrayAudioStream getByteArrayAudioStream(String container, String codec) {
         int bitDepth = 16;
         int bitRate = 1000;
@@ -316,5 +346,19 @@ public class AudioManagerTest {
         AudioFormat audioFormat = new AudioFormat(container, codec, true, bitDepth, bitRate, frequency);
 
         return new ByteArrayAudioStream(testByteArray, audioFormat);
+    }
+
+    private static class DisposableAudioStream extends ByteArrayAudioStream implements Disposable {
+        private final Runnable onDispose;
+
+        DisposableAudioStream(byte[] bytes, AudioFormat format, Runnable onDispose) {
+            super(bytes, format);
+            this.onDispose = onDispose;
+        }
+
+        @Override
+        public void dispose() {
+            onDispose.run();
+        }
     }
 }

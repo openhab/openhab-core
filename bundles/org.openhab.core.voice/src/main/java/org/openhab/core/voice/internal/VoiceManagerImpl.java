@@ -296,16 +296,24 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                         "Failed playing audio stream '" + streamToPlay + "' as audio sink doesn't support it");
             }
             Runnable restoreVolume = audioManager.handleVolumeCommand(volume, sink);
-            sink.processAndComplete(streamToPlay).exceptionally(exception -> {
-                logger.warn("Error playing '{}': {}", streamToPlay, exception.getMessage(), exception);
+            sink.processAndComplete(streamToPlay).whenComplete((result, throwable) -> {
                 if (streamToPlay instanceof Disposable disposable) {
                     try {
                         disposable.dispose();
-                    } catch (IOException ignored) {
+                    } catch (IOException | RuntimeException ignored) {
                     }
                 }
-                return null;
-            }).thenRun(restoreVolume);
+
+                if (throwable != null) {
+                    logger.warn("Error playing '{}': {}", streamToPlay, throwable.getMessage(), throwable);
+                }
+
+                try {
+                    restoreVolume.run();
+                } catch (RuntimeException e) {
+                    logger.warn("Failed to restore volume after playing '{}': {}", streamToPlay, e.getMessage(), e);
+                }
+            });
         } catch (TTSException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
