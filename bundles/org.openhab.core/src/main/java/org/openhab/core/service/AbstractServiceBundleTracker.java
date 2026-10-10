@@ -44,8 +44,8 @@ public abstract class AbstractServiceBundleTracker extends BundleTracker<Bundle>
     private final ReadyMarker readyMarker;
 
     private final Map<String, Integer> bundles = new ConcurrentHashMap<>();
-    private boolean startLevel = false;
-    private boolean ready = false;
+    private volatile boolean startLevel = false;
+    private volatile boolean ready = false;
 
     @Activate
     public AbstractServiceBundleTracker(final @Reference ReadyService readyService, BundleContext bc,

@@ -556,4 +556,11 @@
 		<feature>openhab-core-io-transport-upnp</feature>
 	</feature>
 
+	<feature name="openhab-core-graal" description="Graal Shared" version="${project.version}">
+		<requirement>openhab.tp;filter:="(feature=graal-common)"</requirement>
+		<feature dependency="true">openhab.tp-graal-common</feature>
+
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.graal/${project.version}</bundle>
+	</feature>
+
 </features>

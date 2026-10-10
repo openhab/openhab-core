@@ -22,14 +22,17 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -37,12 +40,19 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.service.WatchService;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationEvent;
+import org.osgi.service.cm.ConfigurationListener;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,21 +83,22 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
     private final List<Listener> dirPathListeners = new CopyOnWriteArrayList<>();
     private final List<Listener> subDirPathListeners = new CopyOnWriteArrayList<>();
     private final Map<Path, FileHash> hashCache = new ConcurrentHashMap<>();
+    private final ConfigurationAdmin configurationAdmin;
     private final ExecutorService executor;
     private final ScheduledExecutorService scheduler;
 
     private final String name;
     private final BundleContext bundleContext;
-
-    private @Nullable Path basePath;
-    private @Nullable DirectoryWatcher dirWatcher;
-    private @Nullable ServiceRegistration<WatchService> reg;
+    private volatile @Nullable Path basePath;
+    volatile @Nullable DirectoryWatcher dirWatcher;
 
     private final Map<Path, ScheduledFuture<?>> scheduledEvents = new HashMap<>();
     private final Map<Path, List<DirectoryChangeEvent>> scheduledEventKinds = new ConcurrentHashMap<>();
 
     @Activate
-    public WatchServiceImpl(WatchServiceConfiguration config, BundleContext bundleContext) throws IOException {
+    public WatchServiceImpl(@Reference ConfigurationAdmin configurationAdmin, WatchServiceConfiguration config,
+            BundleContext bundleContext, ComponentContext componentContext) throws IOException {
+        this.configurationAdmin = configurationAdmin;
         this.bundleContext = bundleContext;
         if (config.name().isBlank()) {
             throw new IllegalArgumentException("service name must not be blank");
@@ -96,11 +107,11 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
         this.name = config.name();
         executor = Executors.newSingleThreadExecutor(r -> new Thread(r, name));
         scheduler = ThreadPoolManager.getScheduledPool("watchservice");
-        modified(config);
+        modified(config, componentContext);
     }
 
     @Modified
-    public void modified(WatchServiceConfiguration config) throws IOException {
+    public void modified(WatchServiceConfiguration config, final ComponentContext componentContext) throws IOException {
         logger.trace("Trying to setup WatchService '{}' with path '{}'", config.name(), config.path());
 
         Path basePath = Path.of(config.path()).toAbsolutePath();
@@ -109,10 +120,11 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             return;
         }
 
+        final boolean cycle = this.basePath != null;
         this.basePath = basePath;
 
         try {
-            closeWatcherAndUnregister();
+            closeWatcher();
 
             if (!Files.exists(basePath)) {
                 logger.info("Watch directory '{}' does not exist. Trying to create it.", basePath);
@@ -120,12 +132,64 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             }
 
             DirectoryWatcher newDirWatcher = DirectoryWatcher.builder().listener(this).path(basePath).build();
-            CompletableFuture
-                    .runAsync(
-                            () -> newDirWatcher.watchAsync(executor)
-                                    .thenRun(() -> logger.debug("WatchService '{}' has been shut down.", name)),
-                            ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON))
-                    .thenRun(this::registerWatchService);
+            ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON).execute(() -> {
+                if (cycle) {
+                    Object pid = componentContext.getProperties().get("service.pid");
+                    if (pid instanceof String pidString) {
+                        Configuration[] configs = null;
+                        try {
+                            configs = configurationAdmin.listConfigurations("(service.pid=" + pidString + ")");
+                        } catch (IOException | InvalidSyntaxException e) {
+                            logger.warn("WatchService '{}': Failed to acquire configuration, cannot restart service",
+                                    name, e);
+                        }
+
+                        if (configs != null && configs.length > 0) {
+                            final AtomicReference<@Nullable ServiceRegistration<ConfigurationListener>> registrationReference = new AtomicReference<>();
+
+                            ConfigurationListener tempListener = new ConfigurationListener() {
+                                @Override
+                                public void configurationEvent(@Nullable ConfigurationEvent event) {
+                                    if (event != null && event.getType() == ConfigurationEvent.CM_DELETED
+                                            && pidString.equals(event.getPid())) {
+                                        logger.debug("WatchService '{}': Configuration deleted", name);
+
+                                        // Unregister the listener first, this is a one trick pony
+                                        ServiceRegistration<ConfigurationListener> registration = registrationReference
+                                                .get();
+                                        if (registration != null) {
+                                            try {
+                                                registration.unregister();
+                                            } catch (IllegalStateException e) {
+                                                // Already unregistered
+                                            }
+                                        }
+
+                                        createConfiguration(basePath);
+                                    }
+                                }
+                            };
+
+                            ServiceRegistration<ConfigurationListener> registration = bundleContext
+                                    .registerService(ConfigurationListener.class, tempListener, null);
+                            registrationReference.set(registration);
+                            try {
+                                configs[0].delete();
+                            } catch (IOException | RuntimeException e) {
+                                logger.warn("WatchService '{}': Failed to delete configuration, cannot restart service",
+                                        name, e);
+                                try {
+                                    registration.unregister();
+                                } catch (IllegalStateException e2) {
+                                    // Already unregistered
+                                }
+                            }
+                        }
+                    }
+                }
+                newDirWatcher.watchAsync(executor)
+                        .thenRun(() -> logger.debug("WatchService '{}' has been shut down.", name));
+            });
             this.dirWatcher = newDirWatcher;
         } catch (NoSuchFileException e) {
             // log message here, otherwise it'll be swallowed by the call to newInstance in the factory
@@ -143,35 +207,45 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
     @Deactivate
     public void deactivate() {
         try {
-            closeWatcherAndUnregister();
-            executor.shutdown();
+            closeWatcher();
+            executor.shutdownNow();
+            try {
+                executor.awaitTermination(1000L, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                // We still want to cancel the scheduled events, so let it be re-caught after that
+            }
+            synchronized (scheduledEvents) {
+                for (ScheduledFuture<?> future : scheduledEvents.values()) {
+                    if (!future.isDone()) {
+                        future.cancel(true);
+                    }
+                }
+                for (ScheduledFuture<?> future : scheduledEvents.values()) {
+                    if (!future.isDone()) {
+                        try {
+                            future.get(1000L, TimeUnit.MILLISECONDS);
+                        } catch (CancellationException e) {
+                            // This is what we want. move on
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            return;
+                        } catch (ExecutionException | TimeoutException e) {
+                            logger.debug("Failed to conclude scheduled event during deactivate: {}", e.getMessage(), e);
+                        }
+                    }
+                }
+            }
         } catch (IOException e) {
             logger.warn("Failed to shutdown WatchService '{}'", name, e);
         }
     }
 
-    private void registerWatchService() {
-        Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put(WatchService.SERVICE_PROPERTY_NAME, name);
-        this.reg = bundleContext.registerService(WatchService.class, this, properties);
-        logger.debug("WatchService '{}' completed initialization and registered itself as service.", name);
-    }
-
-    private void closeWatcherAndUnregister() throws IOException {
+    private void closeWatcher() throws IOException {
         DirectoryWatcher localDirWatcher = this.dirWatcher;
         if (localDirWatcher != null) {
             localDirWatcher.close();
             this.dirWatcher = null;
-        }
-
-        ServiceRegistration<?> localReg = this.reg;
-        if (localReg != null) {
-            try {
-                localReg.unregister();
-            } catch (IllegalStateException e) {
-                logger.debug("WatchService '{}' was already unregistered.", name, e);
-            }
-            this.reg = null;
         }
 
         hashCache.clear();
@@ -230,8 +304,36 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
                 future.cancel(true);
             }
             future = scheduler.schedule(() -> notifyListeners(path), PROCESSING_TIME, TimeUnit.MILLISECONDS);
-            scheduledEventKinds.computeIfAbsent(path, k -> new CopyOnWriteArrayList<>()).add(directoryChangeEvent);
+            Objects.requireNonNull(scheduledEventKinds.computeIfAbsent(path, k -> new CopyOnWriteArrayList<>()))
+                    .add(directoryChangeEvent);
             scheduledEvents.put(path, future);
+        }
+    }
+
+    private void createConfiguration(Path basePath) {
+        logger.debug("WatchService '{}': Creating new configuration for path '{}'", name, basePath);
+        try {
+            String filter = "(&(name=" + name + ")" + "(service.factoryPid=" + WatchService.SERVICE_PID + "))";
+            Configuration[] configurations = configurationAdmin.listConfigurations(filter);
+
+            if (configurations == null || configurations.length == 0) {
+                Configuration c = configurationAdmin.createFactoryConfiguration(WatchService.SERVICE_PID, "?");
+                Dictionary<String, Object> map = new Hashtable<>();
+
+                map.put("name", name);
+                map.put(WatchService.SERVICE_PROPERTY_NAME, name);
+                map.put("path", basePath.toString());
+                c.update(map);
+            } else {
+                Configuration c = configurations[0];
+                Dictionary<String, Object> map = c.getProperties();
+                map.put("name", name);
+                map.put(WatchService.SERVICE_PROPERTY_NAME, name);
+                map.put("path", basePath.toString());
+                c.update(map);
+            }
+        } catch (IOException | InvalidSyntaxException e) {
+            logger.error("WatchService '{}': Failed to create configuration with path '{}'", name, basePath, e);
         }
     }
 
