@@ -358,7 +358,7 @@ public class YamlConfigDescriptionParameterDTO {
 
         /**
          * Convert this {@link YamlConfigDescriptionParameterListEntryDTO} to a corresponding
-         * {@link YamlConfigDescriptionParameterDTO), where the name is missing. The name must be handled/kept
+         * {@link YamlConfigDescriptionParameterDTO}, where the name is missing. The name must be handled/kept
          * independently.
          *
          * @return The resulting {@link YamlConfigDescriptionParameterDTO}.

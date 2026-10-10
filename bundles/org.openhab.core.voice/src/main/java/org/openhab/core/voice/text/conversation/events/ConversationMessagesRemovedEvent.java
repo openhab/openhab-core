@@ -18,6 +18,8 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * The {@link ConversationMessagesRemovedEvent} defines a {@link org.openhab.core.events.Event} implementation that
  * emits on removal of messages from a conversation.
+ *
+ * @author Florian Hotze - Initial contribution
  */
 @NonNullByDefault
 public class ConversationMessagesRemovedEvent extends ConversationEvent {

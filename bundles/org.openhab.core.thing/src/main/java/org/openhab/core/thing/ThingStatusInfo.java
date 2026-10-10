@@ -22,9 +22,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * A {@link ThingStatusInfo} represents status information of a thing which consists of
  * <ul>
- * <li>the status itself </il>
- * <li>detail of the status</il>
- * <li>and a description of the status</il>
+ * <li>the status itself</li>
+ * <li>detail of the status</li>
+ * <li>and a description of the status</li>
  * </ul>
  *
  * @author Stefan Bußweiler - Initial contribution

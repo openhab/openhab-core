@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
- * Tests for {@link ConfigDescriptionParameterBuilder) class.
+ * Tests for {@link ConfigDescriptionParameterBuilder} class.
  *
  * @author Christoph Knauf - Initial contribution
  */
