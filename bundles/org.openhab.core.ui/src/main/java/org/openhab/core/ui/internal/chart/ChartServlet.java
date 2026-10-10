@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  * <li>groups: A comma separated list of group names, whose members should be displayed</li>
  * <li>service: The persistence service name. If not supplied the first service found will be used.</li>
  * <li>theme: The chart theme to use. If not supplied the chart provider uses a default theme.</li>
- * <li>dpi: The DPI (dots per inch) value. If not supplied, a default is used.</code></li>
+ * <li>dpi: The DPI (dots per inch) value. If not supplied, a default is used.</li>
  * <li>legend: Show the legend? If not supplied, the ChartProvider should make his own decision.</li>
  * </ul>
  *
