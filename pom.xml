@@ -82,7 +82,7 @@
     <jackson.annotations.version>2.22</jackson.annotations.version>
     <jackson.version>2.22.2</jackson.version>
     <karaf.compile.version>4.4.11</karaf.compile.version>
-    <karaf.tooling.version>4.4.11</karaf.tooling.version>
+    <karaf.tooling.version>4.4.12</karaf.tooling.version>
     <sat.version>0.18.0</sat.version>
     <slf4j.version>2.0.17</slf4j.version>
     <xtext.version>2.43.0</xtext.version>
