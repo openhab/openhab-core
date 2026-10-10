@@ -14,6 +14,7 @@ package org.openhab.core.automation.internal.module.handler;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -33,6 +34,7 @@ import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
+import org.openhab.core.events.system.StartlevelEvent;
 import org.openhab.core.events.system.SystemEventFactory;
 import org.openhab.core.service.StartLevelService;
 import org.osgi.framework.BundleContext;
@@ -47,6 +49,7 @@ import org.osgi.framework.BundleContext;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class SystemTriggerHandlerTest {
     private static final int CFG_STARTLEVEL = 80;
+    private static final String TEST_SOURCE = "test.source";
 
     private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
     private @Mock @NonNullByDefault({}) StartLevelService startLevelServiceMock;
@@ -80,7 +83,7 @@ public class SystemTriggerHandlerTest {
         SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
-        Event event = SystemEventFactory.createStartlevelEvent(70);
+        Event event = SystemEventFactory.createStartlevelEvent(70, TEST_SOURCE);
         triggerHandler.receive(event);
 
         verifyNoInteractions(callbackMock);
@@ -93,7 +96,7 @@ public class SystemTriggerHandlerTest {
         SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
-        Event event = SystemEventFactory.createStartlevelEvent(100);
+        Event event = SystemEventFactory.createStartlevelEvent(100, TEST_SOURCE);
         triggerHandler.receive(event);
 
         verify(callbackMock).triggered(eq(triggerMock), captor.capture());
@@ -109,7 +112,7 @@ public class SystemTriggerHandlerTest {
         SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
-        Event event = SystemEventFactory.createStartlevelEvent(100);
+        Event event = SystemEventFactory.createStartlevelEvent(100, TEST_SOURCE);
         triggerHandler.receive(event);
 
         verify(callbackMock).triggered(eq(triggerMock), captor.capture());
@@ -120,5 +123,23 @@ public class SystemTriggerHandlerTest {
         triggerHandler.receive(event);
 
         verifyNoMoreInteractions(callbackMock);
+    }
+
+    @Test
+    public void testEventSource() {
+        when(startLevelServiceMock.getStartLevel()).thenReturn(0);
+
+        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
+        triggerHandler.setCallback(callbackMock);
+
+        Event event = SystemEventFactory.createStartlevelEvent(100, TEST_SOURCE);
+        triggerHandler.receive(event);
+
+        verify(callbackMock).triggered(eq(triggerMock), captor.capture());
+
+        Map<String, Object> configuration = captor.getValue();
+        StartlevelEvent startlevelEvent = (StartlevelEvent) configuration.get("event");
+        assertNotNull(startlevelEvent);
+        assertThat(startlevelEvent.getSource(), is(TEST_SOURCE));
     }
 }

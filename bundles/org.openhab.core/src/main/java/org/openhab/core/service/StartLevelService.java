@@ -267,7 +267,7 @@ public class StartLevelService {
         openHABStartLevel = level;
         scheduler.submit(() -> {
             atomicSaveFile(level);
-            StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level);
+            StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(level, "org.openhab.core");
             eventPublisher.post(startlevelEvent);
             logger.debug("Reached start level {}", level);
         });

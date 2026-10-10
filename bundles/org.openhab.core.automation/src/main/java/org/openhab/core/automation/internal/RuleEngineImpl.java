@@ -937,8 +937,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (started && slTriggers.stream()
                 .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
                         .intValue() <= startLevel)) {
-            runAsync(rule.getUID(), true, Map.of(SystemTriggerHandler.OUT_STARTLEVEL,
-                    StartLevelService.STARTLEVEL_RULES, "event", SystemEventFactory.createStartlevelEvent(startLevel)));
+            runAsync(rule.getUID(), true,
+                    Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",
+                            SystemEventFactory.createStartlevelEvent(startLevel, "org.openhab.core.automation")));
         }
 
         return true;
@@ -1708,7 +1709,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                     .filter(this::mustTrigger) //
                     .map(r -> runAsync(r.getUID(), true,
                             Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",
-                                    SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES))))
+                                    SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES,
+                                            "org.openhab.core.automation"))))
                     .toList();
 
             // Wait for the rule executions to complete before announcing to be "started"
