@@ -40,7 +40,9 @@ public enum ThingStatusDetail {
      * the thing handler should be removed.
      */
     GONE,
-    DISABLED;
+    DISABLED,
+    /** The Thing requires user authorization before it can connect. */
+    AUTHORIZATION_REQUIRED;
 
     public static final UninitializedStatus UNINITIALIZED = new UninitializedStatus();
     public static final NoneOnlyStatus INITIALIZING = new NoneOnlyStatus();
@@ -84,6 +86,7 @@ public enum ThingStatusDetail {
         public ThingStatusDetail NONE = ThingStatusDetail.NONE;
         public ThingStatusDetail COMMUNICATION_ERROR = ThingStatusDetail.COMMUNICATION_ERROR;
         public ThingStatusDetail CONFIGURATION_ERROR = ThingStatusDetail.CONFIGURATION_ERROR;
+        public ThingStatusDetail AUTHORIZATION_REQUIRED = ThingStatusDetail.AUTHORIZATION_REQUIRED;
         public ThingStatusDetail BRIDGE_OFFLINE = ThingStatusDetail.BRIDGE_OFFLINE;
         public ThingStatusDetail FIRMWARE_UPDATING = ThingStatusDetail.FIRMWARE_UPDATING;
         public ThingStatusDetail DUTY_CYCLE = ThingStatusDetail.DUTY_CYCLE;
