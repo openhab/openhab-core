@@ -479,7 +479,7 @@ public abstract class BaseThingHandler implements ThingHandler {
                     HANDLER_CONFIGURATION_PENDING, BRIDGE_UNINITIALIZED, DISABLED ->
                 ThingStatus.UNINITIALIZED;
             case CONFIGURATION_PENDING -> ThingStatus.ONLINE;
-            case AUTHORIZATION_REQUIRED, BRIDGE_OFFLINE, COMMUNICATION_ERROR, CONFIGURATION_ERROR, FIRMWARE_UPDATING,
+            case AUTHORIZATION_PENDING, BRIDGE_OFFLINE, COMMUNICATION_ERROR, CONFIGURATION_ERROR, FIRMWARE_UPDATING,
                     DUTY_CYCLE, GONE ->
                 ThingStatus.OFFLINE;
         };
