@@ -83,9 +83,10 @@ public class AudioManagerServletTest extends AbstractAudioServletTest {
         int bitDepth = 16;
         int bitRate = 1000;
         long frequency = 16384;
+        int channels = 1;
         byte[] testByteArray = new byte[] { 0, 1, 2 };
 
-        AudioFormat audioFormat = new AudioFormat(container, codec, true, bitDepth, bitRate, frequency);
+        AudioFormat audioFormat = new AudioFormat(container, codec, true, bitDepth, bitRate, frequency, channels);
 
         return new ByteArrayAudioStream(testByteArray, audioFormat);
     }

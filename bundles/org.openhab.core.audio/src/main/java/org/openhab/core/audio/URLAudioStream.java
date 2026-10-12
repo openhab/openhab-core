@@ -59,7 +59,8 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
 
     public URLAudioStream(String url) throws AudioException {
         this.url = url;
-        this.audioFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, false, 16, null, null);
+        this.audioFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, false, 16, null, null,
+                null);
         this.inputStream = createInputStream();
     }
 
@@ -70,7 +71,7 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
             URL streamUrl = new URI(url).toURL();
             switch (extension) {
                 case M3U_EXTENSION:
-                    try (Scanner scanner = new Scanner(streamUrl.openStream(), StandardCharsets.UTF_8.name())) {
+                    try (Scanner scanner = new Scanner(streamUrl.openStream(), StandardCharsets.UTF_8)) {
                         while (true) {
                             String line = scanner.nextLine();
                             if (!line.isEmpty() && !line.startsWith("#")) {
@@ -83,10 +84,10 @@ public class URLAudioStream extends AudioStream implements ClonableAudioStream {
                     }
                     break;
                 case PLS_EXTENSION:
-                    try (Scanner scanner = new Scanner(streamUrl.openStream(), StandardCharsets.UTF_8.name())) {
+                    try (Scanner scanner = new Scanner(streamUrl.openStream(), StandardCharsets.UTF_8)) {
                         while (true) {
                             String line = scanner.nextLine();
-                            if (!line.isEmpty() && line.startsWith("File")) {
+                            if (line.startsWith("File")) {
                                 final Matcher matcher = PLS_STREAM_PATTERN.matcher(line);
                                 if (matcher.find()) {
                                     url = matcher.group(1);

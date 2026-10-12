@@ -88,8 +88,9 @@ public abstract class AbstractAudioServletTest extends JavaTest {
         int bitDepth = 16;
         int bitRate = 1000;
         long frequency = 16384;
+        int channels = 1;
 
-        AudioFormat audioFormat = new AudioFormat(container, codec, true, bitDepth, bitRate, frequency);
+        AudioFormat audioFormat = new AudioFormat(container, codec, true, bitDepth, bitRate, frequency, channels);
 
         return new ByteArrayAudioStream(byteArray, audioFormat);
     }
