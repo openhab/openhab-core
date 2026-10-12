@@ -30,36 +30,36 @@ import org.eclipse.jdt.annotation.Nullable;
 public class AudioFormat {
     /** Generic PCM signed format (no container) without any further constraints */
     public static final AudioFormat PCM_SIGNED = new AudioFormat(AudioFormat.CONTAINER_NONE,
-            AudioFormat.CODEC_PCM_SIGNED, null, null, null, null);
+            AudioFormat.CODEC_PCM_SIGNED, null, null, null, null, null);
     /** Generic PCM unsigned format (no container) without any further constraints */
     public static final AudioFormat PCM_UNSIGNED = new AudioFormat(AudioFormat.CONTAINER_NONE,
-            AudioFormat.CODEC_PCM_UNSIGNED, null, null, null, null);
+            AudioFormat.CODEC_PCM_UNSIGNED, null, null, null, null, null);
     /** Generic PCM A-law format (no container) without any further constraints */
     public static final AudioFormat PCM_ALAW = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_ALAW,
-            null, null, null, null);
+            null, null, null, null, null);
     /** Generic PCM μ-law format (no container) without any further constraints */
     public static final AudioFormat PCM_ULAW = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_PCM_ULAW,
-            null, null, null, null);
+            null, null, null, null, null);
 
     /** Generic MP3 format without any further constraints */
     public static final AudioFormat MP3 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, null, null,
-            null, null);
+            null, null, null);
 
     /** Generic WAV format without any further constraints */
     public static final AudioFormat WAV = new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED,
-            null, null, null, null);
+            null, null, null, null, null);
 
     /** Generic OGG format without any further constraints */
     public static final AudioFormat OGG = new AudioFormat(AudioFormat.CONTAINER_OGG, AudioFormat.CODEC_VORBIS, null,
-            null, null, null);
+            null, null, null, null);
 
     /** Generic AAC format without any further constraints */
     public static final AudioFormat AAC = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_AAC, null, null,
-            null, null);
+            null, null, null);
 
     /** Generic FLAC format without any further constraints */
     public static final AudioFormat FLAC = new AudioFormat(AudioFormat.CONTAINER_FLAC, AudioFormat.CODEC_FLAC, null,
-            null, null, null);
+            null, null, null, null);
 
     /**
      * {@code AudioCodec} encoded data without any container header or footer,
@@ -210,10 +210,12 @@ public class AudioFormat {
      * @param bitDepth The bit depth of the audio data
      * @param bitRate The bit rate of the audio
      * @param frequency The frequency at which the audio was sampled
+     * @deprecated Use {@link #AudioFormat(String, String, Boolean, Integer, Integer, Long, Integer)} instead.
      */
+    @Deprecated
     public AudioFormat(@Nullable String container, @Nullable String codec, @Nullable Boolean bigEndian,
             @Nullable Integer bitDepth, @Nullable Integer bitRate, @Nullable Long frequency) {
-        this(container, codec, bigEndian, bitDepth, bitRate, frequency, 1);
+        this(container, codec, bigEndian, bitDepth, bitRate, frequency, null);
     }
 
     /**
