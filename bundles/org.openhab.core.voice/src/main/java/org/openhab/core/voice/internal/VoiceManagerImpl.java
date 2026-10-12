@@ -545,10 +545,10 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 continue;
             }
 
-            // If required set BigEndian, BitDepth, BitRate, and Frequency to default values
+            // If required, set bigEndian, bit-depth, bit-rate, and frequency to default values
             if (null == format.isBigEndian()) {
                 format = new AudioFormat(format.getContainer(), format.getCodec(), Boolean.TRUE, format.getBitDepth(),
-                        format.getBitRate(), format.getFrequency());
+                        format.getBitRate(), format.getFrequency(), format.getChannels());
             }
             if (null == format.getBitDepth() || null == format.getBitRate() || null == format.getFrequency()) {
                 // Define default values
@@ -563,23 +563,23 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 // These values must be interdependent (bitRate = bitDepth * frequency)
                 if (null == bitRate) {
                     if (null == bitDepth) {
-                        bitDepth = Integer.valueOf(defaultBitDepth);
+                        bitDepth = defaultBitDepth;
                     }
                     if (null == frequency) {
-                        frequency = Long.valueOf(defaultFrequency);
+                        frequency = defaultFrequency;
                     }
-                    bitRate = Integer.valueOf(bitDepth.intValue() * frequency.intValue());
+                    bitRate = bitDepth * frequency.intValue();
                 } else if (null == bitDepth) {
                     if (null == frequency) {
-                        frequency = Long.valueOf(defaultFrequency);
+                        frequency = defaultFrequency;
                     }
-                    bitDepth = Integer.valueOf(bitRate.intValue() / frequency.intValue());
+                    bitDepth = bitRate / frequency.intValue();
                 } else if (null == frequency) {
-                    frequency = Long.valueOf(bitRate.longValue() / bitDepth.longValue());
+                    frequency = bitRate.longValue() / bitDepth.longValue();
                 }
 
                 format = new AudioFormat(format.getContainer(), format.getCodec(), format.isBigEndian(), bitDepth,
-                        bitRate, frequency);
+                        bitRate, frequency, format.getChannels());
             }
 
             // Return preferred AudioFormat

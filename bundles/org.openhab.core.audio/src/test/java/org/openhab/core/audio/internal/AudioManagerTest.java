@@ -315,7 +315,7 @@ public class AudioManagerTest {
         audioManager.addAudioSink(audioSink);
         AtomicBoolean disposed = new AtomicBoolean(false);
         DisposableAudioStream stream = new DisposableAudioStream(new byte[] { 0, 1, 2 },
-                new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, true, 16, 1000, 16384L),
+                new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, true, 16, 1000, 16384L, 1),
                 () -> disposed.set(true));
 
         audioManager.play(stream, audioSink.getId());
@@ -329,7 +329,7 @@ public class AudioManagerTest {
         audioSink.isUnsupportedAudioFormatExceptionExpected = true;
         AtomicBoolean disposed = new AtomicBoolean(false);
         DisposableAudioStream stream = new DisposableAudioStream(new byte[] { 0, 1, 2 },
-                new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, true, 16, 1000, 16384L),
+                new AudioFormat(AudioFormat.CONTAINER_WAVE, AudioFormat.CODEC_PCM_SIGNED, true, 16, 1000, 16384L, 1),
                 () -> disposed.set(true));
 
         audioManager.play(stream, audioSink.getId());
@@ -341,9 +341,10 @@ public class AudioManagerTest {
         int bitDepth = 16;
         int bitRate = 1000;
         long frequency = 16384;
+        int channels = 1;
         byte[] testByteArray = new byte[] { 0, 1, 2 };
 
-        AudioFormat audioFormat = new AudioFormat(container, codec, true, bitDepth, bitRate, frequency);
+        AudioFormat audioFormat = new AudioFormat(container, codec, true, bitDepth, bitRate, frequency, channels);
 
         return new ByteArrayAudioStream(testByteArray, audioFormat);
     }

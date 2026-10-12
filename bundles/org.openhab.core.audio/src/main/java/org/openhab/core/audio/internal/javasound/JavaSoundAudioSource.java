@@ -186,7 +186,9 @@ public class JavaSoundAudioSource implements AudioSource {
         float sampleRate = audioFormat.getSampleRate();
         Long frequency = ((AudioSystem.NOT_SPECIFIED == sampleRate) ? null : Long.valueOf((long) sampleRate));
 
-        return new AudioFormat(container, codec, bigEndian, bitDepth, bitRate, frequency);
+        int channels = audioFormat.getChannels();
+
+        return new AudioFormat(container, codec, bigEndian, bitDepth, bitRate, frequency, channels);
     }
 
     @Override

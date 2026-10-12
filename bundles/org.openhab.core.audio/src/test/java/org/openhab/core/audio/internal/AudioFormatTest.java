@@ -33,9 +33,10 @@ public class AudioFormatTest {
     private final String testContainer = AudioFormat.CONTAINER_WAVE;
     private final String testCodec = AudioFormat.CODEC_PCM_SIGNED;
     private final boolean testBigEndian = true;
-    private final Integer testBitDepth = Integer.valueOf(16);
-    private final Integer testBitRate = Integer.valueOf(1000);
-    private final Long testFrequency = Long.valueOf(1024);
+    private final Integer testBitDepth = 16;
+    private final Integer testBitRate = 1000;
+    private final Long testFrequency = 1024L;
+    private final Integer testChannels = 1;
 
     @Test
     public void thereIsNoBestMatchForAnAudioFormatIfOneOfTheFieldsIsNull() {
@@ -43,17 +44,17 @@ public class AudioFormatTest {
         Set<AudioFormat> outputs = new HashSet<>();
 
         AudioFormat nullContainerAudioFormat = new AudioFormat(null, testCodec, testBigEndian, testBitDepth,
-                testBitRate, testFrequency);
+                testBitRate, testFrequency, testChannels);
         AudioFormat nullCodecAudioFormat = new AudioFormat(testContainer, null, testBigEndian, testBitDepth,
-                testBitRate, testFrequency);
+                testBitRate, testFrequency, testChannels);
         AudioFormat nullBitDepthAudioFormat = new AudioFormat(testContainer, testCodec, testBigEndian, null,
-                testBitRate, testFrequency);
+                testBitRate, testFrequency, testChannels);
         AudioFormat nullBitRateAudioFormat = new AudioFormat(testContainer, testCodec, testBigEndian, testBitDepth,
-                null, testFrequency);
+                null, testFrequency, testChannels);
         AudioFormat nullFrequencyAudioFormat = new AudioFormat(testContainer, testCodec, testBigEndian, testBitDepth,
-                testBitRate, null);
+                testBitRate, null, testChannels);
         AudioFormat outputAudioFormat = new AudioFormat(testContainer, testCodec, testBigEndian, testBitDepth,
-                testBitRate, testFrequency);
+                testBitRate, testFrequency, testChannels);
 
         inputs.add(nullContainerAudioFormat);
         inputs.add(nullCodecAudioFormat);
@@ -72,9 +73,9 @@ public class AudioFormatTest {
         Set<AudioFormat> audioFormats = new HashSet<>();
 
         AudioFormat waveContainerAudioFormat = new AudioFormat(testContainer, testCodec, true, testBitDepth,
-                testBitRate, testFrequency);
+                testBitRate, testFrequency, testChannels);
         AudioFormat oggContainerAudioFormat = new AudioFormat(AudioFormat.CONTAINER_OGG, testCodec, true, testBitDepth,
-                testBitRate, testFrequency);
+                testBitRate, testFrequency, testChannels);
 
         audioFormats.add(waveContainerAudioFormat);
         audioFormats.add(oggContainerAudioFormat);
@@ -90,9 +91,9 @@ public class AudioFormatTest {
         Set<AudioFormat> outputs = new HashSet<>();
 
         AudioFormat alawAudioFormat = new AudioFormat(testContainer, AudioFormat.CODEC_PCM_ALAW, true, testBitDepth,
-                testBitRate, testFrequency);
+                testBitRate, testFrequency, testChannels);
         AudioFormat ulawAudioFormat = new AudioFormat(testContainer, AudioFormat.CODEC_PCM_ULAW, true, testBitDepth,
-                testBitRate, testFrequency);
+                testBitRate, testFrequency, testChannels);
 
         inputs.add(alawAudioFormat);
         inputs.add(ulawAudioFormat);
@@ -109,9 +110,9 @@ public class AudioFormatTest {
         Set<AudioFormat> outputs = new HashSet<>();
 
         AudioFormat oggContainerAudioFormat = new AudioFormat(AudioFormat.CONTAINER_OGG, testCodec, true, testBitDepth,
-                testBitRate, testFrequency);
+                testBitRate, testFrequency, testChannels);
         AudioFormat nonContainerAudioFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, true,
-                testBitDepth, testBitRate, testFrequency);
+                testBitDepth, testBitRate, testFrequency, testChannels);
 
         inputs.add(oggContainerAudioFormat);
         inputs.add(nonContainerAudioFormat);
