@@ -28,6 +28,8 @@ public enum ThingStatusDetail {
     HANDLER_REGISTERING_ERROR,
     HANDLER_INITIALIZING_ERROR,
     HANDLER_CONFIGURATION_PENDING,
+    /** The Thing is waiting for user authorization before it can connect. */
+    AUTHORIZATION_PENDING,
     CONFIGURATION_PENDING,
     COMMUNICATION_ERROR,
     CONFIGURATION_ERROR,
@@ -40,9 +42,7 @@ public enum ThingStatusDetail {
      * the thing handler should be removed.
      */
     GONE,
-    DISABLED,
-    /** The Thing is waiting for user authorization before it can connect. */
-    AUTHORIZATION_PENDING;
+    DISABLED;
 
     public static final UninitializedStatus UNINITIALIZED = new UninitializedStatus();
     public static final NoneOnlyStatus INITIALIZING = new NoneOnlyStatus();
