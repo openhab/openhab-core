@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * This is a data transfer object that is used to serialize a widget icon.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add aliases for DSL parameter names
  */
 public class YamlWidgetIconDTO {
 
@@ -34,6 +35,7 @@ public class YamlWidgetIconDTO {
     @JsonProperty("static")
     @JsonAlias("staticIcon")
     public Boolean staticIcon;
+    @JsonAlias("iconcolor")
     public Object color;
 
     public YamlWidgetIconDTO() {

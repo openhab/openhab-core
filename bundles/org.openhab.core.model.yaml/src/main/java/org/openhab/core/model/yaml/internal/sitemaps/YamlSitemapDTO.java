@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * The {@link YamlSitemapDTO} is a data transfer object used to serialize a UI sitemap in a YAML configuration file.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add aliases for DSL parameter names
  */
 @YamlElementName("sitemaps")
 public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, JsonNode>, YamlElement, Cloneable {
@@ -198,7 +199,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
                 YamlWidgetLabelDTO widgetLabel = new YamlWidgetLabelDTO();
                 widgetLabel.label = toStringDto(objectNode, "label");
                 widgetLabel.format = toStringDto(objectNode, "format");
-                if ((objNode = objectNode.get("labelColor")) != null) {
+                if ((objNode = getField(objectNode, "labelColor", "labelcolor")) != null) {
                     if (objNode.isValueNode()) {
                         widgetLabel.labelColor = objNode.asText();
                     } else if (objNode.isArray()) {
@@ -207,7 +208,7 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
                         widgetLabel.labelColor = toRuleDto(objNode);
                     }
                 }
-                if ((objNode = objectNode.get("valueColor")) != null) {
+                if ((objNode = getField(objectNode, "valueColor", "valuecolor")) != null) {
                     if (objNode.isValueNode()) {
                         widgetLabel.valueColor = objNode.asText();
                     } else if (objNode.isArray()) {
@@ -236,10 +237,10 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
                         widgetIcon.name = toRuleDto(objNode);
                     }
                 }
-                if ((objNode = objectNode.get("static")) != null && objNode.isBoolean()) {
+                if ((objNode = getField(objectNode, "static", "staticIcon")) != null && objNode.isBoolean()) {
                     widgetIcon.staticIcon = objNode.asBoolean();
                 }
-                if ((objNode = objectNode.get("color")) != null) {
+                if ((objNode = getField(objectNode, "color", "iconcolor")) != null) {
                     if (objNode.isValueNode()) {
                         widgetIcon.color = objNode.asText();
                     } else if (objNode.isArray()) {
@@ -330,6 +331,17 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         }
     }
 
+    /**
+     * Get a field from an object node, also accepting alternative names for the field.
+     */
+    private @Nullable JsonNode getField(JsonNode objectNode, String name, String... aliases) {
+        JsonNode node = objectNode.get(name);
+        for (int i = 0; node == null && i < aliases.length; i++) {
+            node = objectNode.get(aliases[i]);
+        }
+        return node;
+    }
+
     private @Nullable String toStringDto(@NonNull JsonNode objectNode, String field) throws SerializationException {
         JsonNode valueNode;
         if ((valueNode = objectNode.get(field)) != null) {
@@ -375,10 +387,13 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         public Boolean switchSupport;
         public Boolean releaseOnly;
         public Integer height;
+        @JsonAlias({ "minValue" })
         public BigDecimal min;
+        @JsonAlias({ "maxValue" })
         public BigDecimal max;
         @JsonAlias({ "stepsize" })
         public BigDecimal step;
+        @JsonAlias({ "inputHint" })
         public String hint;
         public String url;
         public Integer refresh;
@@ -386,12 +401,15 @@ public class YamlSitemapDTO implements ModularDTO<YamlSitemapDTO, ObjectMapper, 
         public String period;
         public String service;
         public Boolean legend;
+        @JsonAlias({ "forceasitem" })
         public Boolean forceAsItem;
         public String yAxisDecimalPattern;
         public String interpolation;
         public Integer row;
         public Integer column;
+        @JsonAlias({ "click" })
         public String command;
+        @JsonAlias({ "release" })
         public String releaseCommand;
         public Boolean stateless;
         public JsonNode visibility;

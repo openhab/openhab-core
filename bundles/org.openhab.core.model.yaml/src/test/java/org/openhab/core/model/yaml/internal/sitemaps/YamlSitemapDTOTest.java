@@ -15,16 +15,23 @@ package org.openhab.core.model.yaml.internal.sitemaps;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.io.dto.SerializationException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 
 /**
  * The {@link YamlSitemapDTOTest} contains tests for the {@link YamlSitemapDTO} class.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Mark Herwege - Add aliases for DSL parameter names
  */
 @NonNullByDefault
 public class YamlSitemapDTOTest {
@@ -153,5 +160,96 @@ public class YamlSitemapDTOTest {
         sitemap2.icon = "icon";
         assertTrue(sitemap1.equals(sitemap2));
         assertEquals(sitemap1.hashCode(), sitemap2.hashCode());
+    }
+
+    private final ObjectMapper mapper = new ObjectMapper(
+            YAMLFactory.builder().enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build());
+
+    private YamlWidgetDTO parseWidget(String widgetYaml) throws IOException, SerializationException {
+        String yaml = "name: demo\nwidgets:\n" + widgetYaml.indent(2);
+        YamlSitemapDTO sitemap = new YamlSitemapDTO().toDto(mapper.readTree(yaml), mapper);
+        assertNotNull(sitemap.widgets);
+        assertEquals(1, sitemap.widgets.size());
+        return sitemap.widgets.getFirst();
+    }
+
+    @Test
+    public void testDslParameterNameAliases() throws IOException, SerializationException {
+        YamlWidgetDTO widget = parseWidget("""
+                - type: Slider
+                  item: DemoNumber
+                  minValue: 10
+                  maxValue: 90
+                  stepsize: 5
+                """);
+        assertEquals(new BigDecimal(10), widget.min);
+        assertEquals(new BigDecimal(90), widget.max);
+        assertEquals(new BigDecimal(5), widget.step);
+
+        widget = parseWidget("""
+                - type: Input
+                  item: DemoNumber
+                  inputHint: number
+                """);
+        assertEquals("number", widget.hint);
+
+        widget = parseWidget("""
+                - type: Chart
+                  item: DemoNumber
+                  period: D
+                  forceasitem: true
+                """);
+        assertEquals(Boolean.TRUE, widget.forceAsItem);
+
+        widget = parseWidget("""
+                - type: Button
+                  item: DemoSwitch
+                  row: 1
+                  column: 1
+                  click: ON
+                  release: OFF
+                """);
+        assertEquals("ON", widget.command);
+        assertEquals("OFF", widget.releaseCommand);
+    }
+
+    @Test
+    public void testLabelAndIconAliases() throws IOException, SerializationException {
+        YamlWidgetDTO widget = parseWidget("""
+                - type: Text
+                  item: DemoNumber
+                  label:
+                    label: Test
+                    labelcolor: green
+                    valuecolor: blue
+                  icon:
+                    name: temperature
+                    staticIcon: true
+                    iconcolor: red
+                """);
+        YamlWidgetLabelDTO label = assertInstanceOf(YamlWidgetLabelDTO.class, widget.label);
+        assertEquals("green", label.labelColor);
+        assertEquals("blue", label.valueColor);
+        YamlWidgetIconDTO icon = assertInstanceOf(YamlWidgetIconDTO.class, widget.icon);
+        assertEquals("temperature", icon.name);
+        assertEquals(Boolean.TRUE, icon.staticIcon);
+        assertEquals("red", icon.color);
+    }
+
+    @Test
+    public void testPrimaryNameTakesPrecedenceOverAlias() throws IOException, SerializationException {
+        YamlWidgetDTO widget = parseWidget("""
+                - type: Text
+                  item: DemoNumber
+                  icon:
+                    name: temperature
+                    static: false
+                    staticIcon: true
+                    color: red
+                    iconcolor: blue
+                """);
+        YamlWidgetIconDTO icon = assertInstanceOf(YamlWidgetIconDTO.class, widget.icon);
+        assertEquals(Boolean.FALSE, icon.staticIcon);
+        assertEquals("red", icon.color);
     }
 }
