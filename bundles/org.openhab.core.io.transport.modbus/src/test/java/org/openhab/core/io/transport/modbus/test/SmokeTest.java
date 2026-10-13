@@ -725,7 +725,7 @@ public class SmokeTest extends IntegrationTestSupport {
         float averagePollPeriodMillis = ((float) (pollEndMillis - pollStartMillis)) / (responses - 1);
         assertTrue(averagePollPeriodMillis > expectedPollAverageMin && averagePollPeriodMillis < expectedPollAverageMax,
                 String.format(
-                        "Measured avarage poll period %f ms (%d responses in %d ms) is not withing expected limits [%d, %d]",
+                        "Measured average poll period %f ms (%d responses in %d ms) is not within expected limits [%d, %d]",
                         averagePollPeriodMillis, responses, pollEndMillis - pollStartMillis, expectedPollAverageMin,
                         expectedPollAverageMax));
     }

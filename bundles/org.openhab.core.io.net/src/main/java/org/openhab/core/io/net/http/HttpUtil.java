@@ -151,7 +151,7 @@ public class HttpUtil {
     public static String executeUrl(String httpMethod, String url, Properties httpHeaders, InputStream content,
             String contentType, int timeout, String proxyHost, Integer proxyPort, String proxyUser,
             String proxyPassword, String nonProxyHosts) throws IOException {
-        ContentResponse response = executeUrlAndGetReponse(httpMethod, url, httpHeaders, content, contentType, timeout,
+        ContentResponse response = executeUrlAndGetResponse(httpMethod, url, httpHeaders, content, contentType, timeout,
                 proxyHost, proxyPort, proxyUser, proxyPassword, nonProxyHosts);
         String encoding = response.getEncoding() != null ? response.getEncoding().replace("\"", "").trim()
                 : StandardCharsets.UTF_8.name();
@@ -182,7 +182,7 @@ public class HttpUtil {
      * @return the response as a ContentResponse object or <code>NULL</code> when the request went wrong
      * @throws IOException when the request execution failed, timed out or it was interrupted
      */
-    private static ContentResponse executeUrlAndGetReponse(String httpMethod, String url, Properties httpHeaders,
+    private static ContentResponse executeUrlAndGetResponse(String httpMethod, String url, Properties httpHeaders,
             InputStream content, String contentType, int timeout, String proxyHost, Integer proxyPort, String proxyUser,
             String proxyPassword, String nonProxyHosts) throws IOException {
         // Referenced http client factory not available
@@ -491,7 +491,7 @@ public class HttpUtil {
             String proxyPassword, String nonProxyHosts) {
         RawType rawData = null;
         try {
-            ContentResponse response = executeUrlAndGetReponse("GET", url, null, null, null, timeout, proxyHost,
+            ContentResponse response = executeUrlAndGetResponse("GET", url, null, null, null, timeout, proxyHost,
                     proxyPort, proxyUser, proxyPassword, nonProxyHosts);
             byte[] data = response.getContent();
             if (data == null) {

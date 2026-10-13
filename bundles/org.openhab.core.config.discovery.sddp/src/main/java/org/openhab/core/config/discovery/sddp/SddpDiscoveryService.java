@@ -89,7 +89,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     private static final InetSocketAddress SDDP_GROUP = new InetSocketAddress(SDDP_IP_ADDRESS, SDDP_PORT);
 
     private static final int READ_BUFFER_SIZE = 1024;
-    private static final Duration SOCKET_TIMOUT = Duration.ofMillis(1000);
+    private static final Duration SOCKET_TIMEOUT = Duration.ofMillis(1000);
     private static final Duration SEARCH_LISTEN_DURATION = Duration.ofSeconds(5);
     private static final Duration CACHE_PURGE_INTERVAL = Duration.ofSeconds(300);
 
@@ -238,7 +238,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
             socket = new MulticastSocket(SDDP_PORT);
             socket.joinGroup(SDDP_GROUP, networkInterface);
-            socket.setSoTimeout((int) SOCKET_TIMOUT.toMillis());
+            socket.setSoTimeout((int) SOCKET_TIMEOUT.toMillis());
 
             DatagramPacket packet = null;
             byte[] buffer = new byte[READ_BUFFER_SIZE];
@@ -298,7 +298,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             }
 
             socket.setOption(StandardSocketOptions.IP_MULTICAST_IF, networkInterface);
-            socket.setSoTimeout((int) SOCKET_TIMOUT.toMillis());
+            socket.setSoTimeout((int) SOCKET_TIMEOUT.toMillis());
 
             DatagramPacket packet;
             byte[] buffer;

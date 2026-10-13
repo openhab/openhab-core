@@ -164,7 +164,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
             return false;
         }
         if (!showUnstable && !"stable".equals(addonEntry.maturity)) {
-            logger.debug("Skipping {} because the the add-on is not stable and showUnstable is disabled.", addonEntry);
+            logger.debug("Skipping {} because the add-on is not stable and showUnstable is disabled.", addonEntry);
             return false;
         }
         return true;

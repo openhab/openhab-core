@@ -150,10 +150,10 @@ public class AutoUpdateManager {
             if (metadata != null && !metadata.getValue().isBlank()) {
                 boolean override = Boolean.parseBoolean(metadata.getValue());
                 if (override) {
-                    logger.trace("Auto update strategy {} overriden by item metadata to REQUIRED", autoUpdate);
+                    logger.trace("Auto update strategy {} overridden by item metadata to REQUIRED", autoUpdate);
                     autoUpdate = Recommendation.REQUIRED;
                 } else {
-                    logger.trace("Auto update strategy {} overriden by item metadata to DONT", autoUpdate);
+                    logger.trace("Auto update strategy {} overridden by item metadata to DONT", autoUpdate);
                     autoUpdate = Recommendation.DONT;
                 }
             }

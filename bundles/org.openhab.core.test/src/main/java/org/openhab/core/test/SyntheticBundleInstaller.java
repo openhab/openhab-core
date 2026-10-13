@@ -60,7 +60,7 @@ import org.osgi.framework.ServiceReference;
  */
 public class SyntheticBundleInstaller {
 
-    private static final int WAIT_TIMOUT = 30; // [seconds]
+    private static final int WAIT_TIMEOUT = 30; // [seconds]
     private static final String BUNDLE_POOL_PATH = "/test-bundle-pool";
 
     private static final String XML_THING_TYPE = "openhab.xmlThingTypes";
@@ -284,8 +284,8 @@ public class SyntheticBundleInstaller {
         ReadyService readyService = (ReadyService) context.getService(readyServiceRef);
         ReadyMarker expected = new ReadyMarker(marker, identifier);
         while (!readyService.isReady(expected)) {
-            if (System.nanoTime() - startTime > TimeUnit.SECONDS.toNanos(WAIT_TIMOUT)) {
-                fail(MessageFormat.format("Timout waiting for marker {0} at bundle {1}", marker, identifier));
+            if (System.nanoTime() - startTime > TimeUnit.SECONDS.toNanos(WAIT_TIMEOUT)) {
+                fail(MessageFormat.format("Timeout waiting for marker {0} at bundle {1}", marker, identifier));
             }
             try {
                 Thread.sleep(100);

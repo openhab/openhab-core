@@ -75,14 +75,14 @@ public class CompositeActionHandler extends AbstractCompositeModuleHandler<Actio
                     : childHandler.execute(childContext);
             if (childResults != null) {
                 for (Entry<String, @Nullable Object> childResult : childResults.entrySet()) {
-                    String childOuputName = child.getId() + "." + childResult.getKey();
-                    Output output = compositeOutputs.get(childOuputName);
+                    String childOutputName = child.getId() + "." + childResult.getKey();
+                    Output output = compositeOutputs.get(childOutputName);
                     if (output != null) {
-                        String childOuputRef = output.getReference();
-                        if (childOuputRef != null && childOuputRef.length() > childOuputName.length()) {
-                            childOuputRef = childOuputRef.substring(childOuputName.length());
+                        String childOutputRef = output.getReference();
+                        if (childOutputRef != null && childOutputRef.length() > childOutputName.length()) {
+                            childOutputRef = childOutputRef.substring(childOutputName.length());
                             result.put(output.getName(), ReferenceResolver
-                                    .resolveComplexDataReference(childResult.getValue(), childOuputRef));
+                                    .resolveComplexDataReference(childResult.getValue(), childOutputRef));
                         } else {
                             result.put(output.getName(), childResult.getValue());
                         }
