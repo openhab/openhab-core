@@ -35,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
  * @author Laurent Garnier - Initial contribution
  * @author Mark Herwege - Add support for nested sitemaps
  * @author Mark Herwege - Add support for confirmation dialog for commands
+ * @author Mark Herwege - Add aliases for DSL parameter names
  */
 public class YamlWidgetDTO {
 
@@ -98,10 +99,13 @@ public class YamlWidgetDTO {
     public Boolean switchSupport;
     public Boolean releaseOnly;
     public Integer height;
+    @JsonAlias({ "minValue" })
     public BigDecimal min;
+    @JsonAlias({ "maxValue" })
     public BigDecimal max;
     @JsonAlias({ "stepsize" })
     public BigDecimal step;
+    @JsonAlias({ "inputHint" })
     public String hint;
     public String url;
     public Integer refresh;
@@ -109,12 +113,15 @@ public class YamlWidgetDTO {
     public String period;
     public String service;
     public Boolean legend;
+    @JsonAlias({ "forceasitem" })
     public Boolean forceAsItem;
     public String yAxisDecimalPattern;
     public String interpolation;
     public Integer row;
     public Integer column;
+    @JsonAlias({ "click" })
     public String command;
+    @JsonAlias({ "release" })
     public String releaseCommand;
     public Boolean stateless;
     public String name; // for NestedSitemap

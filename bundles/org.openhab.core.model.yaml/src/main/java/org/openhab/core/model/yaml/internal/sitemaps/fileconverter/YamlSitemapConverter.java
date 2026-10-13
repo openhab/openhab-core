@@ -232,8 +232,8 @@ public class YamlSitemapConverter implements SitemapSerializer, SitemapParser {
         if (!confirmCmdRules.isEmpty()) {
             if (confirmCmdRules.size() == 1) {
                 if (confirmCmdRules.getFirst() instanceof YamlRuleWithUniqueConditionDTO rule && rule.item == null
-                        && rule.operator == null && rule.value == null) {
-                    dto.confirmCmd = rule.argument;
+                        && rule.operator == null && rule.argument == null && rule.value != null) {
+                    dto.confirmCmd = rule.value;
                 } else {
                     dto.confirmCmd = confirmCmdRules.getFirst();
                 }
