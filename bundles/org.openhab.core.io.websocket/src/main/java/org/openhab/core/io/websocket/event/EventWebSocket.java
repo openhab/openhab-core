@@ -216,7 +216,6 @@ public class EventWebSocket implements WriteCallback {
                 logger.warn("Failed to process deserialized event '{}': {}", message, e.getMessage());
                 responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/failed",
                         "Processing error: " + e.getMessage(), null, eventDTO != null ? eventDTO.eventId : "");
-
             }
         } catch (JsonParseException e) {
             logger.warn("Could not deserialize '{}'", message);

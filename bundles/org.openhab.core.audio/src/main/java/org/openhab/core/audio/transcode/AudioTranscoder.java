@@ -650,7 +650,6 @@ public final class AudioTranscoder {
             case AudioFormat.CODEC_PCM_ALAW -> Encoding.ALAW;
             case AudioFormat.CODEC_PCM_ULAW -> Encoding.ULAW;
             case AudioFormat.CODEC_FLAC -> Encoding.PCM_SIGNED; // Tested to work with FLAC
-
             default -> throw new AudioTranscodingException("No Java Sound encoding available for '" + codec + "'!");
         };
     }

@@ -327,7 +327,6 @@ public class NetUtil implements NetworkAddressService {
                 prefix -= (short) 8;
                 i++;
             }
-
         }
         return null;
     }

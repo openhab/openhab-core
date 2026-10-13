@@ -81,7 +81,7 @@ public class DateTimeTypeTest {
         /**
          * direct input of a time string (with or without time zone).
          *
-         * @see {@link DateTimeType#valueOf(String)}
+         * @see DateTimeType#valueOf(String)
          *      if this is set, the {@link ParameterSet#inputTimeMap} and {@link ParameterSet#inputTimeZone} are ignored
          */
         public final @Nullable String inputTimeString;

@@ -59,7 +59,7 @@ public abstract class ModuleImpl implements Module {
     /**
      * Configuration values of the ModuleImpl.
      *
-     * @see {@link ConfigDescriptionParameter}.
+     * @see ConfigDescriptionParameter
      */
     private Configuration configuration;
 
