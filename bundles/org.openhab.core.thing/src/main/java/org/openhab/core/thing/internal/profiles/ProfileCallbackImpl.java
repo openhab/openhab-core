@@ -109,7 +109,7 @@ public class ProfileCallbackImpl implements ProfileCallback {
             } else {
                 logger.warn("Cannot delegate command '{}' for item '{}' to handler for channel '{}', "
                         + "because no handler is assigned. Maybe the binding is not installed or not "
-                        + "propertly initialized.", command, link.getItemName(), link.getLinkedUID());
+                        + "properly initialized.", command, link.getItemName(), link.getLinkedUID());
             }
         } else {
             logger.warn(

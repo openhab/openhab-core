@@ -39,7 +39,7 @@ public class Semantics {
      * @param item the Item to check
      * @return return true, if the given Item is a Location, false otherwise
      */
-    @ActionDoc(text = "checks if the given Item is is a Location")
+    @ActionDoc(text = "checks if the given Item is a Location")
     public static boolean isLocation(Item item) {
         return SemanticsActionService.isLocation(item);
     }
@@ -50,7 +50,7 @@ public class Semantics {
      * @param item the Item to check
      * @return return true, if the given Item is an Equipment, false otherwise
      */
-    @ActionDoc(text = "checks if the given Item is is an Equipment")
+    @ActionDoc(text = "checks if the given Item is an Equipment")
     public static boolean isEquipment(Item item) {
         return SemanticsActionService.isEquipment(item);
     }
@@ -61,7 +61,7 @@ public class Semantics {
      * @param item the Item to check
      * @return return true, if the given Item is a Point, false otherwise
      */
-    @ActionDoc(text = "checks if the given Item is is a Point")
+    @ActionDoc(text = "checks if the given Item is a Point")
     public static boolean isPoint(Item item) {
         return SemanticsActionService.isPoint(item);
     }

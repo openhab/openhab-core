@@ -49,7 +49,7 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private static final String CORE_LIBRARY_PACKAGE = "org.openhab.core.library.types.";
 
-    private static final String ITEM_COMAND_EVENT_TOPIC = "openhab/items/{itemName}/command";
+    private static final String ITEM_COMMAND_EVENT_TOPIC = "openhab/items/{itemName}/command";
 
     private static final String ITEM_STATE_EVENT_TOPIC = "openhab/items/{itemName}/state";
 
@@ -276,7 +276,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      */
     public static ItemCommandEvent createCommandEvent(String itemName, Command command, @Nullable String source) {
         assertValidArguments(itemName, command, "command");
-        String topic = buildTopic(ITEM_COMAND_EVENT_TOPIC, itemName);
+        String topic = buildTopic(ITEM_COMMAND_EVENT_TOPIC, itemName);
         ItemEventPayloadBean bean = new ItemEventPayloadBean(getCommandType(command), command.toString());
         String payload = serializePayload(bean);
         return new ItemCommandEvent(topic, payload, itemName, command, source);
