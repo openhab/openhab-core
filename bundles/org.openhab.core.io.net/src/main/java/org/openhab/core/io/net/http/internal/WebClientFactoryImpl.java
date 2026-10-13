@@ -454,7 +454,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     /**
-     * Extends the default {@link HttpClientTransportOverHTTP) but exposes the underling {@link EndPoint} of each
+     * Extends the default {@link HttpClientTransportOverHTTP} but exposes the underling {@link EndPoint} of each
      * request/response.
      * It mimics the way it's done in higher Jetty Http client versions.
      */

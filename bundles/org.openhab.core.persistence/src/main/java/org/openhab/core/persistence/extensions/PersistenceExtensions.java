@@ -1027,7 +1027,7 @@ public class PersistenceExtensions {
      * @param end the point in time to stop the check
      * @return a {@link HistoricItem} with the maximum state value between two points in time, a
      *         {@link HistoricItem} constructed from the <code>item</code>'s state if no persisted states found, or
-     *         <code>null</code> if <code>begin</code> is after <code>end</end> or if the default persistence service
+     *         <code>null</code> if <code>begin</code> is after <code>end</code> or if the default persistence service
      *         does not refer to an available{@link QueryablePersistenceService}
      */
     public static @Nullable HistoricItem maximumBetween(final Item item, ZonedDateTime begin, ZonedDateTime end) {
@@ -1078,7 +1078,7 @@ public class PersistenceExtensions {
      * @param serviceId the name of the {@link PersistenceService} to use
      * @return a {@link HistoricItem} with the maximum state value between two points in time, a
      *         {@link HistoricItem} constructed from the <code>item</code>'s state if no persisted states found, or
-     *         <code>null</code> if <code>begin</code> is after <code>end</end> or if the given <code>serviceId</code>
+     *         <code>null</code> if <code>begin</code> is after <code>end</code> or if the given <code>serviceId</code>
      *         does not refer to an available {@link QueryablePersistenceService}
      */
     public static @Nullable HistoricItem maximumBetween(final Item item, ZonedDateTime begin, ZonedDateTime end,
@@ -1155,7 +1155,7 @@ public class PersistenceExtensions {
      * @param end the ending point in time to
      * @return a {@link HistoricItem} with the minimum state value between two points in time, a
      *         {@link HistoricItem} constructed from the <code>item</code>'s state if no persisted states found, or
-     *         <code>null</code> if <code>begin</code> is after <code>end</end> or if the default persistence service
+     *         <code>null</code> if <code>begin</code> is after <code>end</code> or if the default persistence service
      *         does not refer to an available{@link QueryablePersistenceService}
      */
     public static @Nullable HistoricItem minimumBetween(final Item item, ZonedDateTime begin, ZonedDateTime end) {
@@ -1206,7 +1206,7 @@ public class PersistenceExtensions {
      * @param serviceId the name of the {@link PersistenceService} to use
      * @return a {@link HistoricItem} with the minimum state value between two points in time, a
      *         {@link HistoricItem} constructed from the <code>item</code>'s state if no persisted states found, or
-     *         <code>null</code> if <code>begin</code> is after <code>end</end> or if the given <code>serviceId</code>
+     *         <code>null</code> if <code>begin</code> is after <code>end</code> or if the given <code>serviceId</code>
      *         does not refer to an available {@link QueryablePersistenceService}
      */
     public static @Nullable HistoricItem minimumBetween(final Item item, ZonedDateTime begin, ZonedDateTime end,

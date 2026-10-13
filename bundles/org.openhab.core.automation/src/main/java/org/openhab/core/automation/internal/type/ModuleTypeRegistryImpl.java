@@ -203,25 +203,20 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
             result = new CompositeTriggerType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getOutputs(),
                     new ArrayList<>(m.getChildren()));
-
         } else if (mType instanceof TriggerType m) {
             result = new TriggerType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getOutputs());
-
         } else if (mType instanceof CompositeConditionType m) {
             result = new CompositeConditionType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getInputs(),
                     new ArrayList<>(m.getChildren()));
-
         } else if (mType instanceof ConditionType m) {
             result = new ConditionType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getInputs());
-
         } else if (mType instanceof CompositeActionType m) {
             result = new CompositeActionType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getInputs(), m.getOutputs(),
                     new ArrayList<>(m.getChildren()));
-
         } else if (mType instanceof ActionType m) {
             result = new ActionType(mType.getUID(), mType.getConfigurationDescriptions(), mType.getLabel(),
                     mType.getDescription(), mType.getTags(), mType.getVisibility(), m.getInputs(), m.getOutputs());

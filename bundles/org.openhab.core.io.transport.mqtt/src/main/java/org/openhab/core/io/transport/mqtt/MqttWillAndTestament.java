@@ -113,7 +113,7 @@ public class MqttWillAndTestament {
      *
      * @param topic topic is a normal topic string (no placeholders are allowed)
      * @param payload The optional payload. Can be null.
-     * @param qos Valid values are 0 (Deliver at most once),1 (Deliver at least once) or 2</li>
+     * @param qos Valid values are 0 (Deliver at most once),1 (Deliver at least once) or 2
      * @param retain true if messages shall be retained
      */
     public MqttWillAndTestament(String topic, byte @Nullable [] payload, int qos, boolean retain) {

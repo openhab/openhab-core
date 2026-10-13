@@ -51,7 +51,7 @@ public enum BinaryPrefix implements SymbolSupplier, UnitConverterSupplier {
      * The <code>UnitConverter</code> of this prefix, as returned by {@link #getConverter}.
      *
      * @see #getConverter()
-     * @see {@link UnitConverter}
+     * @see UnitConverter
      */
     private final UnitConverter converter;
 

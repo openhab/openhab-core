@@ -37,7 +37,7 @@ public class ConfigDescriptionBuilder {
     /**
      * Creates a config description builder
      *
-     * @param @param uri the URI of this description within the {@link ConfigDescriptionRegistry}
+     * @param uri the URI of this description within the {@link ConfigDescriptionRegistry}
      * @return the config description builder instance
      */
     public static ConfigDescriptionBuilder create(URI uri) {

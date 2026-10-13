@@ -59,7 +59,7 @@ public class Output {
     /**
      * This field is associated with the {@code Output}. The tags add additional restrictions to connections between
      * {@link Input}s and {@link Output}s. The {@link Input}'s tags must be subset of the {@code Output}'s tags to
-     * succeed the connection.</br>
+     * succeed the connection.<br>
      * For example: When we want to connect {@link Input} to {@code Output} and both have same java.lang.double data
      * type. The the output has assign "temperature" and "celsius" tags then the input must have at least one of these
      * output's tags (i.e. "temperature") to connect this input to the selected {@code Output}.

@@ -295,7 +295,8 @@ public class AuthFilter implements ContainerRequestFilter {
             } else if ("Bearer".equalsIgnoreCase(authType)) {
                 return authenticateBearerToken(authValue);
             } else if ("Basic".equalsIgnoreCase(authType)) {
-                String[] decodedCredentials = new String(Base64.getDecoder().decode(authValue), "UTF-8").split(":");
+                String[] decodedCredentials = new String(Base64.getDecoder().decode(authValue), StandardCharsets.UTF_8)
+                        .split(":");
                 if (decodedCredentials.length > 2) {
                     throw new AuthenticationException("Invalid Basic authentication credential format");
                 }
