@@ -931,7 +931,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             logger.debug("Cannot send command to read-only item {}", item.getName());
             throw new UnrecoverableInterpretationException(language.getString(READ_ONLY));
         }
-        postCommand(item, command, context.interpreterContext());
+        postCommand(item, command, context.interpreterContext(), language);
         return !context.isSilent() ? language.getString(OK) : "";
     }
 
@@ -943,10 +943,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param item the item to command
      * @param command the command to send
      * @param context the interpreter context if available
+     * @param language the resource bundle for the current locale
      * @throws InterpretationException if an interpretation error occurs
      */
-    protected void postCommand(Item item, Command command, @Nullable InterpreterContext context)
-            throws InterpretationException {
+    protected void postCommand(Item item, Command command, @Nullable InterpreterContext context,
+            ResourceBundle language) throws InterpretationException {
         eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, VOICE_SOURCE));
     }
 
