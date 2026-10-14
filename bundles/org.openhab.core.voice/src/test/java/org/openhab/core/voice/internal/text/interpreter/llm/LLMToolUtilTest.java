@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.Item;
@@ -52,9 +53,20 @@ public class LLMToolUtilTest {
     private final ItemPermissionResolver itemPermissionResolver = mock(ItemPermissionResolver.class);
     private final Item item = mock(Item.class);
 
+    private final Locale defaultLocale = Locale.getDefault();
+
     @BeforeEach
+    @SuppressWarnings("PMD.SetDefaultLocale")
     public void setUp() throws ItemNotFoundException {
+        // state patterns are formatted with the default locale, so make tests independent of the system locale
+        Locale.setDefault(Locale.ENGLISH);
         when(itemRegistry.getItem(ITEM_NAME)).thenReturn(item);
+    }
+
+    @AfterEach
+    @SuppressWarnings("PMD.SetDefaultLocale")
+    public void tearDown() {
+        Locale.setDefault(defaultLocale);
     }
 
     @Test
