@@ -247,6 +247,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             if ((result = rule.execute(language, tokens, locationItem)).isSuccess()) {
                 return result.getResponse();
             } else {
+                if (result.getException() instanceof UnrecoverableInterpretationException unrecoverable) {
+                    throw unrecoverable;
+                }
                 if (!InterpretationResult.SYNTAX_ERROR.equals(result)) {
                     lastResult = result;
                 }
@@ -921,7 +924,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         }
         if (itemPermissionResolver.getPermission(item) != ItemPermission.READ_WRITE) {
             logger.debug("Cannot send command to read-only item {}", item.getName());
-            return language.getString(READ_ONLY);
+            throw new UnrecoverableInterpretationException(language.getString(READ_ONLY));
         }
         eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, VOICE_SOURCE));
         return !isSilent ? language.getString(OK) : "";
