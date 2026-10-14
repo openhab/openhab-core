@@ -53,6 +53,7 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpretationResult;
 import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
@@ -209,26 +210,29 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     @Override
     public String interpret(Locale locale, String text) throws InterpretationException {
-        return interpret(locale, text, (String) null);
+        return interpret(locale, text, (InterpreterContext) null);
     }
 
     @Override
     public String interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
         Conversation.Message message = interpreterContext.conversation().getLastMessage();
         if (message == null || message.role() != ConversationRole.USER) {
-            throw new InterpretationException("Last conversation message is not an user message");
+            throw new InterpretationException("Last conversation message is not a user message");
         }
-        String response = interpret(locale, message.content(), interpreterContext.locationItem());
-        try {
-            interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
-        } catch (ConversationException e) {
-            String errMsg = e.getMessage();
-            throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+        String response = interpret(locale, message.content(), interpreterContext);
+        if (!response.isEmpty()) {
+            try {
+                interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
+            } catch (ConversationException e) {
+                String errMsg = e.getMessage();
+                throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+            }
         }
         return response;
     }
 
-    private String interpret(Locale locale, String text, @Nullable String locationItem) throws InterpretationException {
+    private String interpret(Locale locale, String text, @Nullable InterpreterContext interpreterContext)
+            throws InterpretationException {
         ResourceBundle language = ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale);
         Rule[] rules = getRules(locale);
         if (rules.length == 0) {
@@ -243,7 +247,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
         InterpretationResult lastResult = null;
         for (Rule rule : rules) {
-            if ((result = rule.execute(language, tokens, locationItem)).isSuccess()) {
+            if ((result = rule.execute(language, tokens, interpreterContext)).isSuccess()) {
                 return result.getResponse();
             } else {
                 if (result.getException() instanceof UnrecoverableInterpretationException unrecoverable) {
@@ -857,7 +861,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 logger.warn("Failed resolving item command");
                 return language.getString(ERROR);
             }
-            return trySendCommand(language, item, command, context.isForced(), context.isSilent());
+            return trySendCommand(language, item, command, context);
         }
     }
 
@@ -879,9 +883,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (compatibleItemEntries.isEmpty()) {
             throw new InterpretationException(language.getString(NO_OBJECTS));
         }
-        if (compatibleItemEntries.size() > 1 && context.locationItem() != null) {
+        @Nullable
+        String locationItem = context.interpreterContext() != null ? context.interpreterContext().locationItem() : null;
+        if (compatibleItemEntries.size() > 1 && locationItem != null) {
             var filteredCompatibleEntries = compatibleItemEntries.stream() //
-                    .filter(itemEntry -> itemEntry.getValue().locationParentNames.contains(context.locationItem())) //
+                    .filter(itemEntry -> itemEntry.getValue().locationParentNames.contains(locationItem)) //
                     .collect(Collectors.toSet());
             if (filteredCompatibleEntries.size() == 1) {
                 logger.debug("Collision resolved based on location context");
@@ -897,15 +903,15 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             logger.warn("Failed creating command");
             return language.getString(ERROR);
         }
-        return trySendCommand(language, item, command, context.isForced(), context.isSilent());
+        return trySendCommand(language, item, command, context);
     }
 
-    private String trySendCommand(ResourceBundle language, Item item, Command command, boolean isForced,
-            boolean isSilent) {
+    private String trySendCommand(ResourceBundle language, Item item, Command command,
+            Rule.InterpretationContext context) throws InterpretationException {
         if (command instanceof State newState) {
             try {
                 State oldState = item.getStateAs(newState.getClass());
-                if (!isForced && newState.equals(oldState)) {
+                if (!context.isForced() && newState.equals(oldState)) {
                     String template = language.getString(STATE_ALREADY_SINGULAR);
                     String cmdName = "state_" + command.toString().toLowerCase();
                     String stateText;
@@ -925,8 +931,23 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             logger.debug("Cannot send command to read-only item {}", item.getName());
             throw new UnrecoverableInterpretationException(language.getString(READ_ONLY));
         }
+        postCommand(item, command, context.interpreterContext());
+        return !context.isSilent() ? language.getString(OK) : "";
+    }
+
+    /**
+     * Posts a command event to the event bus for the given item.
+     *
+     * @implNote Subclasses should override this method to provide custom command posting if needed.
+     *
+     * @param item the item to command
+     * @param command the command to send
+     * @param context the interpreter context if available
+     * @throws InterpretationException if an interpretation error occurs
+     */
+    protected void postCommand(Item item, Command command, @Nullable InterpreterContext context)
+            throws InterpretationException {
         eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, VOICE_SOURCE));
-        return !isSilent ? language.getString(OK) : "";
     }
 
     /**
@@ -1019,7 +1040,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                     exactMatchOnTargetItemsData.keySet().stream().map(Item::getName).collect(Collectors.joining(", ")));
         }
         @Nullable
-        String locationContext = context.locationItem();
+        String locationContext = context.interpreterContext() != null ? context.interpreterContext().locationItem()
+                : null;
         if (locationContext != null && itemsData.size() > 1) {
             logger.trace("Filtering {} matched items based on location '{}'", itemsData.size(), locationContext);
             Item matchByLocation = filterMatchedItemsByLocation(itemsData, locationContext);
