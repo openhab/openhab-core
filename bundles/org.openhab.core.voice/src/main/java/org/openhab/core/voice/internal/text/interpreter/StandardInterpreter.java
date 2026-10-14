@@ -107,16 +107,16 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
             throw new UnrecoverableInterpretationException(language.getString(COMMANDS_NOT_ALLOWED));
         }
 
-        super.postCommand(item, command, context, language);
         LLMToolCall toolCall = new LLMToolCall(ItemCommandLLMTool.ID,
                 Map.of("itemName", item.getName(), "command", command.toString()));
         String toolResult = "Successfully sent command '" + command + "' to item '" + item.getName() + "'.";
         try {
             context.conversation().addMessage(ConversationRole.TOOL_CALL, toolCall.toJson());
+            super.postCommand(item, command, context, language);
             context.conversation().addMessage(ConversationRole.TOOL_RETURN, toolResult);
         } catch (ConversationException e) {
             String errMsg = e.getMessage();
-            throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+            throw new UnrecoverableInterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
         }
     }
 

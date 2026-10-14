@@ -64,6 +64,7 @@ import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
+import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.internal.VoiceConfigurationConstants;
 import org.openhab.core.voice.internal.security.ItemPermissionResolverImpl;
 import org.openhab.core.voice.internal.text.interpreter.llm.ItemCommandLLMTool;
@@ -654,7 +655,8 @@ public class StandardInterpreterTest {
         InterpreterContext context = new InterpreterContext(conversation, llmTools, null, null);
 
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, context));
-        verify(eventPublisherMock, times(1)).post(ItemEventFactory.createCommandEvent("light1", OnOffType.ON, any()));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent("light", OnOffType.ON, VoiceManager.VOICE_SOURCE));
         assertEquals(4, conversation.getMessages().size());
 
         assertEquals(ConversationRole.TOOL_CALL, conversation.getMessages().get(1).role());

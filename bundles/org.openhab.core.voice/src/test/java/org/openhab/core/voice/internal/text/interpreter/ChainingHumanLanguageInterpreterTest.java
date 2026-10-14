@@ -179,18 +179,22 @@ public class ChainingHumanLanguageInterpreterTest {
     }
 
     @Test
-    public void contextInterpretationDelegation() throws InterpretationException, ConversationException {
+    public void interpreterContextDelegation() throws InterpretationException, ConversationException {
         Conversation conversation = new Conversation("c1");
         conversation.addMessage(ConversationRole.USER, "turn on light");
         InterpreterContext context = new InterpreterContext(conversation, List.of(), null, null);
 
-        when(primaryMock.interpret(Locale.ENGLISH, context)).thenReturn("");
+        when(primaryMock.interpret(Locale.ENGLISH, context)).thenThrow(new InterpretationException("Not understood"));
+        when(secondaryMock.interpret(Locale.ENGLISH, context))
+                .thenThrow(new InterpretationException("Sorry, I don't understand."));
+        when(tertiaryMock.interpret(Locale.ENGLISH, context)).thenReturn("Got it.");
 
         String result = chainedInterpreter.interpret(Locale.ENGLISH, context);
 
-        assertEquals("", result);
+        assertEquals("Got it.", result);
         verify(primaryMock, times(1)).interpret(Locale.ENGLISH, context);
-        verify(secondaryMock, never()).interpret(any(), any(InterpreterContext.class));
+        verify(secondaryMock, times(1)).interpret(Locale.ENGLISH, context);
+        verify(tertiaryMock, times(1)).interpret(Locale.ENGLISH, context);
     }
 
     @Test
