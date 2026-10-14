@@ -44,17 +44,23 @@ public class LocaleServiceImpl implements LocaleService {
     public Locale getLocale(@Nullable String acceptLanguageHttpHeader) {
         Locale locale = tryGetLocale();
         if (acceptLanguageHttpHeader != null) {
-            int pos = acceptLanguageHttpHeader.indexOf(',');
-            String[] split;
+            String primary = acceptLanguageHttpHeader;
+            int pos = primary.indexOf(',');
             if (pos > -1) {
-                split = acceptLanguageHttpHeader.substring(0, pos).split("-");
-            } else {
-                split = acceptLanguageHttpHeader.split("-");
+                primary = primary.substring(0, pos);
             }
-            if (split.length == 2) {
-                locale = Locale.of(split[0], split[1]);
-            } else {
-                locale = Locale.of(split[0]);
+            int semiPos = primary.indexOf(';');
+            if (semiPos > -1) {
+                primary = primary.substring(0, semiPos);
+            }
+            primary = primary.trim();
+            if (!primary.isEmpty()) {
+                String[] split = primary.replace('_', '-').split("-");
+                if (split.length == 2) {
+                    locale = Locale.of(split[0], split[1]);
+                } else {
+                    locale = Locale.of(split[0]);
+                }
             }
         }
         return locale;
