@@ -55,11 +55,11 @@ Fragment-Host: org.openhab.core.model.item
 	org.eclipse.xtext.common.types;version='[2.44.0,2.44.1)',\
 	org.eclipse.xtext.util;version='[2.44.0,2.44.1)',\
 	org.eclipse.xtext.xbase.lib;version='[2.44.0,2.44.1)',\
-	org.objectweb.asm;version='[9.10.1,9.10.2)',\
-	org.objectweb.asm.commons;version='[9.10.1,9.10.2)',\
-	org.objectweb.asm.tree;version='[9.10.1,9.10.2)',\
-	org.objectweb.asm.tree.analysis;version='[9.10.1,9.10.2)',\
-	org.objectweb.asm.util;version='[9.10.1,9.10.2)',\
+	org.objectweb.asm;version='[9.11.0,9.11.1)',\
+	org.objectweb.asm.commons;version='[9.11.0,9.11.1)',\
+	org.objectweb.asm.tree;version='[9.11.0,9.11.1)',\
+	org.objectweb.asm.tree.analysis;version='[9.11.0,9.11.1)',\
+	org.objectweb.asm.util;version='[9.11.0,9.11.1)',\
 	org.openhab.core;version='[5.3.0,5.3.1)',\
 	org.openhab.core.addon;version='[5.3.0,5.3.1)',\
 	org.openhab.core.config.core;version='[5.3.0,5.3.1)',\
