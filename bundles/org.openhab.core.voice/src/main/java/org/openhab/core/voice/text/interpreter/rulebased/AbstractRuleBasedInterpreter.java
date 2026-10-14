@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -299,7 +298,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * used as alternative labels creating new alternative chains for the item.
      *
      * @param locale The locale that is to be used for preparing the tokens.
-     * @return the list of identifier token sets per item
+     * @return map of identifier token sets per item
      */
     Map<Item, ItemInterpretationMetadata> getItemTokens(Locale locale) {
         Map<Item, ItemInterpretationMetadata> localeTokens = itemTokens.get(locale);
@@ -395,7 +394,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return tag(VALUE, star(new ExpressionIdentifier(this, stopper)));
     }
 
-    private @Nullable List<@NonNull Rule> getLanguageRules(@Nullable Locale locale) {
+    private @Nullable List<Rule> getLanguageRules(@Nullable Locale locale) {
         if (!languageRules.containsKey(locale)) {
             createRules(locale);
         }
@@ -1110,7 +1109,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             specialCharactersRegex = "[^\\w\\s" + extraAllowedChars + "]";
         }
         return Arrays.stream(text.toLowerCase(locale) //
-                .replaceAll("[\\']", "") //
+                .replace("'", "") //
                 .replaceAll(specialCharactersRegex, " ") //
                 .split("\\s")) //
                 .filter(i -> !i.isBlank()) //
@@ -1321,17 +1320,17 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      */
     private class JSGFGenerator {
 
-        private ResourceBundle language;
+        private final ResourceBundle language;
 
-        private Map<Expression, Integer> ids = new HashMap<>();
-        private Set<Expression> exported = new HashSet<>();
-        private Set<Expression> shared = new HashSet<>();
+        private final Map<Expression, Integer> ids = new HashMap<>();
+        private final Set<Expression> exported = new HashSet<>();
+        private final Set<Expression> shared = new HashSet<>();
         private int counter = 0;
 
-        private Set<String> identifierExcludes = new HashSet<>();
-        private Set<String> identifiers = new HashSet<>();
+        private final Set<String> identifierExcludes = new HashSet<>();
+        private final Set<String> identifiers = new HashSet<>();
 
-        private StringBuilder builder = new StringBuilder();
+        private final StringBuilder builder = new StringBuilder();
 
         JSGFGenerator(ResourceBundle language) {
             this.language = language;
@@ -1405,16 +1404,14 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
         private void emitExpression(Expression expression) {
             Expression unwrappedExpression = unwrapLet(expression);
-            if (unwrappedExpression instanceof ExpressionMatch match) {
-                emitMatchExpression(match);
-            } else if (unwrappedExpression instanceof ExpressionSequence sequence) {
-                emitSequenceExpression(sequence);
-            } else if (unwrappedExpression instanceof ExpressionAlternatives alternatives) {
-                emitAlternativesExpression(alternatives);
-            } else if (unwrappedExpression instanceof ExpressionCardinality cardinality) {
-                emitCardinalExpression(cardinality);
-            } else if (unwrappedExpression instanceof ExpressionIdentifier identifier) {
-                emitItemIdentifierExpression(identifier);
+            switch (unwrappedExpression) {
+                case ExpressionMatch match -> emitMatchExpression(match);
+                case ExpressionSequence sequence -> emitSequenceExpression(sequence);
+                case ExpressionAlternatives alternatives -> emitAlternativesExpression(alternatives);
+                case ExpressionCardinality cardinality -> emitCardinalExpression(cardinality);
+                case ExpressionIdentifier identifier -> emitItemIdentifierExpression(identifier);
+                default -> {
+                }
             }
         }
 
