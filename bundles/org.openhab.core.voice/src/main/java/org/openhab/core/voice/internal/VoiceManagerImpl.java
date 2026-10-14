@@ -423,7 +423,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     public String interpret(String text, @Nullable InterpretationArguments args) throws InterpretationException {
         if (args == null) {
-            args = new InterpretationArguments("", "", "", "", null);
+            args = new InterpretationArguments("", "", "*", "", null);
         }
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
         if (args.hliIdList().isEmpty()) {
