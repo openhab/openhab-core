@@ -33,6 +33,7 @@ import org.openhab.core.types.State;
 import org.openhab.core.voice.security.ItemPermission;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.interpreter.llm.LLMToolException;
+import org.openhab.core.voice.text.interpreter.llm.UnrecoverableLLMToolException;
 
 /**
  * Utility class for LLM tool implementations.
@@ -71,12 +72,12 @@ final class LLMToolUtil {
         try {
             item = itemRegistry.getItem(itemName);
         } catch (ItemNotFoundException e) {
-            throw new LLMToolException("Item not found: " + itemName, e);
+            throw new UnrecoverableLLMToolException("Item not found: " + itemName, e);
         }
 
         ItemPermission permission = itemPermissionResolver.getPermission(item);
         if (permission == ItemPermission.NO_ACCESS) {
-            throw new LLMToolException("Item not found: " + itemName);
+            throw new UnrecoverableLLMToolException("Item not found: " + itemName);
         }
 
         return new ItemAndPermission(item, permission);
