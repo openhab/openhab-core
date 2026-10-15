@@ -189,24 +189,38 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     }
 
     /**
-     * Merge the given {@link StateDescriptionFragment}. Set all unset ({@code null}) fields of this instance to the
-     * values from the given {@link StateDescriptionFragment}.
+     * Merge the given {@link StateDescriptionFragment}. If either fragment specifies a range unit, keep the first
+     * range definition as a whole. Otherwise, merge missing range fields individually.
      *
      * @param fragment a {@link StateDescriptionFragment} this instance should merge in.
      * @return this instance with the fields merged.
      */
     public StateDescriptionFragment merge(StateDescriptionFragment fragment) {
-        if (minimum == null) {
-            minimum = fragment.getMinimum();
-        }
-        if (maximum == null) {
-            maximum = fragment.getMaximum();
-        }
-        if (step == null) {
-            step = fragment.getStep();
-        }
-        if (rangeUnit == null) {
-            rangeUnit = fragment.getRangeUnit();
+        return merge(fragment, rangeUnit == null && fragment.getRangeUnit() == null);
+    }
+
+    /**
+     * Merge the given fragment using the range policy determined across all contributing providers.
+     *
+     * @param fragment the fragment to merge in
+     * @param mergeRangeFields whether missing range fields can be filled individually; otherwise, copy the range only
+     *            if this instance has no range information
+     * @return this instance with the fields merged
+     */
+    public StateDescriptionFragment merge(StateDescriptionFragment fragment, boolean mergeRangeFields) {
+        if (mergeRangeFields || (minimum == null && maximum == null && step == null && rangeUnit == null)) {
+            if (minimum == null) {
+                minimum = fragment.getMinimum();
+            }
+            if (maximum == null) {
+                maximum = fragment.getMaximum();
+            }
+            if (step == null) {
+                step = fragment.getStep();
+            }
+            if (rangeUnit == null) {
+                rangeUnit = fragment.getRangeUnit();
+            }
         }
         if (pattern == null) {
             pattern = fragment.getPattern();

@@ -13,6 +13,7 @@
 package org.openhab.core.internal.service;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,8 +23,12 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
@@ -215,7 +220,6 @@ public class StateDescriptionServiceImplTest {
                 .withMinimum(BigDecimal.ONE) //
                 .withMaximum(BigDecimal.ONE) //
                 .withStep(BigDecimal.ONE) //
-                .withRangeUnit("x") //
                 .withPattern("base_pattern") //
                 .withOptions(options).build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
@@ -225,13 +229,94 @@ public class StateDescriptionServiceImplTest {
         assertThat(stateDescription.getMinimum(), is(BigDecimal.ZERO));
         assertThat(stateDescription.getMaximum(), is(BigDecimal.TEN));
         assertThat(stateDescription.getStep(), is(BigDecimal.ONE));
-        assertThat(stateDescription.getRangeUnit(), is("x"));
+        assertThat(stateDescription.getRangeUnit(), is(nullValue()));
         assertThat(stateDescription.getPattern(), is("pattern"));
         assertThat(stateDescription.isReadOnly(), is(true));
         assertThat(stateDescription.getOptions(), is(options));
         // check that fragement2 is not merged into fragement1
         List<StateOption> fragment1Options = Objects.requireNonNull(stateDescriptionFragment1.getOptions());
         assertThat(fragment1Options.size(), is(0));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = { "°C, °F", "°C, °C", "none, °C", "°C, none" }, nullValues = "none")
+    public void testPartialRangeOverride(@Nullable String higherUnit, @Nullable String lowerUnit) {
+        StateDescriptionFragmentBuilder higher = StateDescriptionFragmentBuilder.create()
+                .withMinimum(BigDecimal.valueOf(20));
+        if (higherUnit != null) {
+            higher.withRangeUnit(higherUnit);
+        }
+        registerStateDescriptionFragmentProvider(higher.build(), 1);
+
+        StateDescriptionFragmentBuilder lower = StateDescriptionFragmentBuilder.create()
+                .withMinimum(BigDecimal.valueOf(50)).withMaximum(BigDecimal.valueOf(86)).withStep(BigDecimal.ONE)
+                .withPattern("%.1f °F").withReadOnly(true).withOption(new StateOption("value", "label"));
+        if (lowerUnit != null) {
+            lower.withRangeUnit(lowerUnit);
+        }
+        registerStateDescriptionFragmentProvider(lower.build(), 0);
+
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
+
+        assertThat(stateDescription.getMinimum(), is(BigDecimal.valueOf(20)));
+        assertThat(stateDescription.getMaximum(), is(nullValue()));
+        assertThat(stateDescription.getStep(), is(nullValue()));
+        assertThat(stateDescription.getRangeUnit(), is(higherUnit));
+        assertThat(stateDescription.getPattern(), is("%.1f °F"));
+        assertThat(stateDescription.isReadOnly(), is(true));
+        assertThat(stateDescription.getOptions(), is(List.of(new StateOption("value", "label"))));
+    }
+
+    @ParameterizedTest
+    @MethodSource("partialRanges")
+    public void testHighestPriorityRangeIsSelectedAsAWhole(StateDescriptionFragment range) {
+        registerStateDescriptionFragmentProvider(StateDescriptionFragmentBuilder.create().withPattern("%.1f °F")
+                .withReadOnly(true).withOption(new StateOption("value", "label")).build(), 3);
+        registerStateDescriptionFragmentProvider(StateDescriptionFragmentBuilder.create().build(), 2);
+        registerStateDescriptionFragmentProvider(range, 1);
+        StateDescriptionFragment fallback = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                .withMaximum(BigDecimal.TEN).withStep(BigDecimal.ONE).withRangeUnit("°C").build();
+        registerStateDescriptionFragmentProvider(fallback, 0);
+
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
+
+        assertThat(stateDescription.getMinimum(), is(range.getMinimum()));
+        assertThat(stateDescription.getMaximum(), is(range.getMaximum()));
+        assertThat(stateDescription.getStep(), is(range.getStep()));
+        assertThat(stateDescription.getRangeUnit(), is(range.getRangeUnit()));
+        assertThat(stateDescription.getPattern(), is("%.1f °F"));
+        assertThat(stateDescription.isReadOnly(), is(true));
+        assertThat(stateDescription.getOptions(), is(List.of(new StateOption("value", "label"))));
+    }
+
+    private static List<StateDescriptionFragment> partialRanges() {
+        return List.of(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ONE).build(),
+                StateDescriptionFragmentBuilder.create().withMaximum(BigDecimal.ONE).build(),
+                StateDescriptionFragmentBuilder.create().withStep(BigDecimal.ONE).build(),
+                StateDescriptionFragmentBuilder.create().withRangeUnit("K").build(),
+                StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO).withMaximum(BigDecimal.TEN)
+                        .withStep(BigDecimal.ONE).withRangeUnit("°C").build());
+    }
+
+    @Test
+    public void testUnitInLowestPriorityProviderPreventsEarlierRangeMerging() {
+        StateDescriptionFragment higher = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ONE).build();
+        StateDescriptionFragment middle = StateDescriptionFragmentBuilder.create().withMaximum(BigDecimal.TEN).build();
+        registerStateDescriptionFragmentProvider(higher, 2);
+        registerStateDescriptionFragmentProvider(middle, 1);
+        registerStateDescriptionFragmentProvider(
+                StateDescriptionFragmentBuilder.create().withStep(BigDecimal.ONE).withRangeUnit("°C").build(), 0);
+
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
+
+        assertThat(stateDescription.getMinimum(), is(BigDecimal.ONE));
+        assertThat(stateDescription.getMaximum(), is(nullValue()));
+        assertThat(stateDescription.getStep(), is(nullValue()));
+        assertThat(stateDescription.getRangeUnit(), is(nullValue()));
+        assertThat(higher.getMaximum(), is(nullValue()));
+        assertThat(higher.getRangeUnit(), is(nullValue()));
+        assertThat(middle.getMinimum(), is(nullValue()));
+        assertThat(middle.getRangeUnit(), is(nullValue()));
     }
 
     private void registerStateDescriptionFragmentProvider(StateDescriptionFragment stateDescriptionFragment,
