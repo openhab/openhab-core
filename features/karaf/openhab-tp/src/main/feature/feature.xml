@@ -117,10 +117,13 @@
 		<feature dependency="true">spifly</feature>
 		<feature dependency="true">scr</feature>
 		<feature dependency="true">http-whiteboard</feature>
-		<!-- provides the wrap: URL handler used for osgi-resource-locator below -->
+		<!-- provides the wrap: URL handler used for jakarta.ws.rs-api and osgi-resource-locator below -->
 		<feature dependency="true">wrap</feature>
-		<!-- Jakarta REST API -->
-		<bundle dependency="true">mvn:jakarta.ws.rs/jakarta.ws.rs-api/3.1.0</bundle>
+		<!-- Jakarta REST API. jakarta.ws.rs-api 3.1.0 imports jakarta.xml.bind.annotation[.adapters] as [3,4), which
+			pins it (and through "uses" all of Jersey) to JAXB API 3.0.0, while Karaf's resolver prefers 4.0.5 for
+			Jersey's unversioned optional imports. That mismatch made every feature install refresh the complete REST
+			stack. Widening the optional range to [3,5) lets JAX-RS and Jersey wire to JAXB 4. -->
+		<bundle dependency="true">wrap:mvn:jakarta.ws.rs/jakarta.ws.rs-api/3.1.0$overwrite=merge&amp;Import-Package=jakarta.ws.rs;version="[3.1,4)",jakarta.ws.rs.client;version="[3.1,4)",jakarta.ws.rs.core;version="[3.1,4)",jakarta.ws.rs.ext;version="[3.1,4)",jakarta.xml.bind.annotation;version="[3.0,5)";resolution:=optional,jakarta.xml.bind.annotation.adapters;version="[3.0,5)";resolution:=optional,javax.net.ssl,javax.xml.namespace</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.jakartars/2.0.0</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.condition/1.0.0</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.util.function/1.2.0</bundle>
