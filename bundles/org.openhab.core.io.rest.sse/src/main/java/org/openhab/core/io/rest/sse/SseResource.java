@@ -163,6 +163,9 @@ public class SseResource implements RESTResource, SsePublisher {
         // events at the moment of sending them.
         response.addHeader(HttpHeaders.CONTENT_ENCODING, "identity");
 
+        // flushBuffer() commits the response before the SSE sink has set its content type, so set it here
+        response.setContentType(MediaType.SERVER_SENT_EVENTS);
+
         try {
             response.flushBuffer();
         } catch (final IOException ex) {
