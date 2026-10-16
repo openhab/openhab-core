@@ -83,6 +83,7 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.dto.GroupItemDTO;
+import org.openhab.core.items.dto.ItemDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.items.dto.MetadataDTO;
 import org.openhab.core.items.events.ItemEventFactory;
@@ -882,13 +883,14 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "addOrUpdateItemInRegistry", summary = "Adds a new item to the registry or updates the existing item.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
-                    @ApiResponse(responseCode = "201", description = "Item created."),
-                    @ApiResponse(responseCode = "400", description = "Payload invalid."),
-                    @ApiResponse(responseCode = "404", description = "Item not found or name in path invalid."),
-                    @ApiResponse(responseCode = "405", description = "Item not editable.") })
+    @Operation(operationId = "addOrUpdateItemInRegistry", summary = "Adds a new item to the registry or updates the existing item.", requestBody = @RequestBody(description = "item data", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(oneOf = {
+            ItemDTO.class, GroupItemDTO.class }))), security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
+                            @ApiResponse(responseCode = "201", description = "Item created."),
+                            @ApiResponse(responseCode = "400", description = "Payload invalid."),
+                            @ApiResponse(responseCode = "404", description = "Item not found or name in path invalid."),
+                            @ApiResponse(responseCode = "405", description = "Item not editable.") })
     public Response createOrUpdateItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemName") @Parameter(description = "item name") String itemName,
@@ -947,10 +949,11 @@ public class ItemResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "addOrUpdateItemsInRegistry", summary = "Adds a list of items to the registry or updates the existing items.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Payload is invalid.") })
+    @Operation(operationId = "addOrUpdateItemsInRegistry", summary = "Adds a list of items to the registry or updates the existing items.", requestBody = @RequestBody(description = "array of item data", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(oneOf = {
+            ItemDTO.class, GroupItemDTO.class })))), security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+                            @ApiResponse(responseCode = "400", description = "Payload is invalid.") })
     public Response createOrUpdateItems(
             @Parameter(description = "array of item data", required = true) GroupItemDTO @Nullable [] items) {
         // If we didn't get an item list bean, then return!
