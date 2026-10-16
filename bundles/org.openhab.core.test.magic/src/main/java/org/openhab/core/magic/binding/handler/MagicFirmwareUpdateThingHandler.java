@@ -64,7 +64,7 @@ public class MagicFirmwareUpdateThingHandler extends BaseThingHandler implements
         progressCallback.defineSequence(ProgressStep.DOWNLOADING, ProgressStep.TRANSFERRING, ProgressStep.UPDATING,
                 ProgressStep.REBOOTING, ProgressStep.WAITING);
 
-        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.FIRMWARE_UPDATING, "Firmware is updating");
+        updateStatus(ThingStatusDetail.FIRMWARE_UPDATING);
 
         progressCallback.next();
         for (int percent = 1; percent < 100; percent++) {

@@ -28,6 +28,8 @@ public enum ThingStatusDetail {
     HANDLER_REGISTERING_ERROR,
     HANDLER_INITIALIZING_ERROR,
     HANDLER_CONFIGURATION_PENDING,
+    /** The Thing is waiting for user authorization before it can connect. */
+    AUTHORIZATION_PENDING,
     CONFIGURATION_PENDING,
     COMMUNICATION_ERROR,
     CONFIGURATION_ERROR,
@@ -84,6 +86,7 @@ public enum ThingStatusDetail {
         public ThingStatusDetail NONE = ThingStatusDetail.NONE;
         public ThingStatusDetail COMMUNICATION_ERROR = ThingStatusDetail.COMMUNICATION_ERROR;
         public ThingStatusDetail CONFIGURATION_ERROR = ThingStatusDetail.CONFIGURATION_ERROR;
+        public ThingStatusDetail AUTHORIZATION_PENDING = ThingStatusDetail.AUTHORIZATION_PENDING;
         public ThingStatusDetail BRIDGE_OFFLINE = ThingStatusDetail.BRIDGE_OFFLINE;
         public ThingStatusDetail FIRMWARE_UPDATING = ThingStatusDetail.FIRMWARE_UPDATING;
         public ThingStatusDetail DUTY_CYCLE = ThingStatusDetail.DUTY_CYCLE;

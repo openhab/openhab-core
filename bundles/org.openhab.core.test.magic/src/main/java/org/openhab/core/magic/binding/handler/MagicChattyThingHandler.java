@@ -64,7 +64,7 @@ public class MagicChattyThingHandler extends BaseThingHandler {
         interval = (BigDecimal) config.get(PARAM_INTERVAL);
 
         if (interval == null) {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Interval not set");
+            updateStatus(ThingStatusDetail.CONFIGURATION_ERROR, "Interval not set");
             return;
         }
 

@@ -15,6 +15,8 @@ package org.openhab.core.thing.i18n;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -311,8 +313,11 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
         }
 
         public void setThingStatusInfo(ThingStatusInfo thingStatusInfo) {
-            updateStatus(thingStatusInfo.getStatus(), thingStatusInfo.getStatusDetail(),
-                    thingStatusInfo.getDescription());
+            if (thingStatusInfo.getStatusDetail() == ThingStatusDetail.NONE) {
+                updateStatus(thingStatusInfo.getStatus(), thingStatusInfo.getDescription());
+            } else {
+                updateStatus(thingStatusInfo.getStatusDetail(), thingStatusInfo.getDescription());
+            }
         }
     }
 
