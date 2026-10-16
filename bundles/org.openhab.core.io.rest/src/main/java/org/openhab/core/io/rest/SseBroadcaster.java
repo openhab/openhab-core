@@ -105,18 +105,26 @@ public class SseBroadcaster<@NonNull I> implements Closeable {
                 return;
             }
 
-            sink.send(event).exceptionally(throwable -> {
-                logger.debug("Sending event to sink failed", throwable);
-
-                close(sink);
-
-                // We are using a concurrent collection, so we are allowed to modify the collection asynchronous (we
-                // don't know if there is currently an iteration in progress or not, but it does not matter).
-                handleRemoval(sink);
-
-                return null;
-            });
+            try {
+                sink.send(event).exceptionally(throwable -> {
+                    handleSendFailure(sink, throwable);
+                    return null;
+                });
+            } catch (RuntimeException e) {
+                // Jersey fails synchronously if the sink's request scope is gone, e.g. while the application shuts down
+                handleSendFailure(sink, e);
+            }
         });
+    }
+
+    private void handleSendFailure(final SseEventSink sink, final Throwable throwable) {
+        logger.debug("Sending event to sink failed", throwable);
+
+        close(sink);
+
+        // We are using a concurrent collection, so we are allowed to modify the collection asynchronous (we
+        // don't know if there is currently an iteration in progress or not, but it does not matter).
+        handleRemoval(sink);
     }
 
     public void closeAndRemoveIf(Predicate<I> predicate) {
