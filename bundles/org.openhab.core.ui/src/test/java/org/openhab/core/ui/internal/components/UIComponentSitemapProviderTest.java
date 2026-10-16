@@ -260,6 +260,23 @@ class UIComponentSitemapProviderTest {
     }
 
     @Test
+    void testRuleArgumentUnquoted() {
+        // valueColor=[>25=orange]
+        Rule rule = mockRule();
+        Condition condition = mockCondition();
+        List<Rule> rules = new ArrayList<>();
+        when(component.getConfig()).thenReturn(Map.of("valuecolor", List.of(">25=orange")));
+
+        uiComponentSitemapProvider.addWidgetRules(rules, component, "valuecolor");
+
+        assertEquals(1, rules.size());
+        verify(rule).setArgument("orange");
+        verify(rule).setConditions(List.of(condition));
+        verify(condition).setCondition(">");
+        verify(condition).setValue("25");
+    }
+
+    @Test
     void testRuleArgumentWithQuoteInsideQuotedMessage() {
         // confirmCmd=[DemoSwitch==ON="Try \"this\"?"]
         Rule rule = mockRule();
