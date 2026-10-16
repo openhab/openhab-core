@@ -483,7 +483,7 @@ public abstract class BaseThingHandler implements ThingHandler {
                     DUTY_CYCLE, GONE ->
                 ThingStatus.OFFLINE;
         };
-        updateStatus(status, statusDetail, description);
+        updateStatusInternal(status, statusDetail, description);
     }
 
     /**
@@ -498,6 +498,10 @@ public abstract class BaseThingHandler implements ThingHandler {
      */
     @Deprecated(since = "5.3.0", forRemoval = true)
     protected void updateStatus(ThingStatus status, ThingStatusDetail statusDetail, @Nullable String description) {
+        updateStatusInternal(status, statusDetail, description);
+    }
+
+    void updateStatusInternal(ThingStatus status, ThingStatusDetail statusDetail, @Nullable String description) {
         synchronized (this) {
             if (this.callback != null) {
                 ThingStatusInfoBuilder statusBuilder = ThingStatusInfoBuilder.create(status, statusDetail);
@@ -520,7 +524,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      */
     @Deprecated(since = "5.3.0", forRemoval = true)
     protected void updateStatus(ThingStatus status, ThingStatusDetail statusDetail) {
-        updateStatus(status, statusDetail, null);
+        updateStatusInternal(status, statusDetail, null);
     }
 
     /**
@@ -530,7 +534,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param description the description of the status
      */
     protected void updateStatus(ThingStatus status, @Nullable String description) {
-        updateStatus(status, ThingStatusDetail.NONE, description);
+        updateStatusInternal(status, ThingStatusDetail.NONE, description);
     }
 
     /**
@@ -539,7 +543,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param status the status
      */
     protected void updateStatus(ThingStatus status) {
-        updateStatus(status, ThingStatusDetail.NONE, null);
+        updateStatusInternal(status, ThingStatusDetail.NONE, null);
     }
 
     /**
