@@ -154,15 +154,18 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
             String baseRedirectUri = params.get("redirect_uri")[0];
             @Nullable
             String externalHost = externalHost(req, baseRedirectUri);
-            if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
-                throw new AuthenticationException("CSRF check failed");
-            }
             if (externalHost != null) {
                 // the first account has to be created in openHAB itself, not handed to an external site
                 if (isSignupMode()) {
                     throw new IllegalArgumentException("access_denied");
                 }
+                // set before any failure below, so a retry page still asks for the site name
                 params.put(EXTERNAL_HOST_PARAM, new String[] { externalHost });
+            }
+            if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
+                throw new AuthenticationException("CSRF check failed");
+            }
+            if (externalHost != null) {
                 String typedHost = params.containsKey(CONFIRM_HOST_PARAM) ? params.get(CONFIRM_HOST_PARAM)[0] : "";
                 if (!externalHost.equalsIgnoreCase(typedHost.strip())) {
                     logger.warn("Site name confirmation for {} failed from {}", externalHost, req.getRemoteAddr());

@@ -375,7 +375,7 @@ public class AuthorizePageServletTest {
     }
 
     @Test
-    public void wrongHostWithoutCsrfTokenIsAFailedLogin() throws Exception {
+    public void missingCsrfTokenIsAFailedLoginThatStillAsksForTheSite() throws Exception {
         AuthorizePageServlet servlet = servlet(true);
         servlet.csrfTokens.clear();
         StringWriter body = new StringWriter();
@@ -384,6 +384,8 @@ public class AuthorizePageServletTest {
 
         assertTrue(body.toString().contains("Please try again."));
         assertFalse(body.toString().contains("doesn't match"));
+        assertTrue(body.toString().contains("<div class=\"site\">claude.ai</div>"));
+        assertTrue(body.toString().contains("name=\"confirm_host\""));
     }
 
     @ParameterizedTest
