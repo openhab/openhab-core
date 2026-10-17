@@ -81,6 +81,7 @@
     <eea.version>2.4.0</eea.version>
     <jackson.annotations.version>2.22</jackson.annotations.version>
     <jackson.version>2.22.2</jackson.version>
+    <jupnp.version>4.0.0-SNAPSHOT</jupnp.version>
     <karaf.compile.version>4.4.12</karaf.compile.version>
     <karaf.tooling.version>4.4.12</karaf.tooling.version>
     <sat.version>0.18.0</sat.version>
