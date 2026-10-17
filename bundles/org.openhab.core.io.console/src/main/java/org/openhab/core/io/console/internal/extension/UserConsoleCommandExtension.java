@@ -12,12 +12,14 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.ManagedUser;
+import org.openhab.core.auth.RoleRegistry;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserApiToken;
 import org.openhab.core.auth.UserRegistry;
@@ -45,13 +47,18 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
     private static final String SUBCMD_ADDAPITOKEN = "addApiToken";
     private static final String SUBCMD_RMAPITOKEN = "rmApiToken";
     private static final String SUBCMD_CLEARSESSIONS = "clearSessions";
+    private static final String SUBCMD_ADDROLE = "addRole";
+    private static final String SUBCMD_REMOVEROLE = "removeRole";
 
     private final UserRegistry userRegistry;
+    private final RoleRegistry roleRegistry;
 
     @Activate
-    public UserConsoleCommandExtension(final @Reference UserRegistry userRegistry) {
+    public UserConsoleCommandExtension(final @Reference UserRegistry userRegistry,
+            final @Reference RoleRegistry roleRegistry) {
         super("users", "Access the user registry.");
         this.userRegistry = userRegistry;
+        this.roleRegistry = roleRegistry;
     }
 
     @Override
@@ -67,7 +74,9 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                 buildCommandUsage(SUBCMD_RMAPITOKEN + " <userId> <tokenName>",
                         "removes (revokes) the specified API token"),
                 buildCommandUsage(SUBCMD_CLEARSESSIONS + " <userId>",
-                        "clear the refresh tokens associated with the user (will sign the user out of all sessions)"));
+                        "clear the refresh tokens associated with the user (will sign the user out of all sessions)"),
+                buildCommandUsage(SUBCMD_ADDROLE + " <userId> <role>", "assigns a role to a user"),
+                buildCommandUsage(SUBCMD_REMOVEROLE + " <userId> <role>", "removes a role from a user"));
     }
 
     @Override
@@ -176,6 +185,50 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                         }
                     } else {
                         console.printUsage(findUsage(SUBCMD_CLEARSESSIONS));
+                    }
+                    break;
+                case SUBCMD_ADDROLE:
+                    if (args.length == 3) {
+                        User user = userRegistry.get(args[1]);
+                        if (user instanceof ManagedUser managedUser) {
+                            String roleName = args[2];
+                            if (roleRegistry.get(roleName) == null) {
+                                console.println(
+                                        "Warning: role '" + roleName + "' is not defined in the role registry.");
+                            }
+                            Set<String> roles = new HashSet<>(managedUser.getRoles());
+                            if (roles.add(roleName)) {
+                                managedUser.setRoles(roles);
+                                userRegistry.update(managedUser);
+                                console.println("Role '" + roleName + "' added to user '" + args[1] + "'.");
+                            } else {
+                                console.println("User already has role '" + roleName + "'.");
+                            }
+                        } else {
+                            console.println("User not found.");
+                        }
+                    } else {
+                        console.printUsage(findUsage(SUBCMD_ADDROLE));
+                    }
+                    break;
+                case SUBCMD_REMOVEROLE:
+                    if (args.length == 3) {
+                        User user = userRegistry.get(args[1]);
+                        if (user instanceof ManagedUser managedUser) {
+                            String roleName = args[2];
+                            Set<String> roles = new HashSet<>(managedUser.getRoles());
+                            if (roles.remove(roleName)) {
+                                managedUser.setRoles(roles);
+                                userRegistry.update(managedUser);
+                                console.println("Role '" + roleName + "' removed from user '" + args[1] + "'.");
+                            } else {
+                                console.println("User does not have role '" + roleName + "'.");
+                            }
+                        } else {
+                            console.println("User not found.");
+                        }
+                    } else {
+                        console.printUsage(findUsage(SUBCMD_REMOVEROLE));
                     }
                     break;
                 default:
