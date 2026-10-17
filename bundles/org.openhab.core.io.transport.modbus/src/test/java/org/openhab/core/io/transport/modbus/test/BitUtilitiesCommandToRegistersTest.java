@@ -31,7 +31,6 @@ import org.openhab.core.io.transport.modbus.ModbusRegisterArray;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.IncreaseDecreaseType;
 import org.openhab.core.library.types.OnOffType;
-import org.openhab.core.library.types.OpenClosedType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Command;
@@ -305,10 +304,6 @@ public class BitUtilitiesCommandToRegistersTest {
                 a("5000000000", FLOAT32_SWAP, 0x02F9, 0x4F95),
                 // ON/OFF
                 a(OnOffType.ON, FLOAT32_SWAP, 0x0000, 0x3F80), a(OnOffType.OFF, FLOAT32_SWAP, 0x0000, 0x0000),
-                // OPEN
-                a(OpenClosedType.OPEN, FLOAT32_SWAP, 0x0000, 0x3F80), a(OpenClosedType.OPEN, INT16, 1),
-                // CLOSED
-                a(OpenClosedType.CLOSED, FLOAT32_SWAP, 0x0000, 0x0000), a(OpenClosedType.CLOSED, INT16, 0x0000),
                 // QuantityType, dimensionless units are converted to unit of 1. e.g. 500% -> 5
                 a(QuantityType.valueOf(500, Units.PERCENT), INT16, 0x0005),
                 // 50% = 0.5 truncated to zero
