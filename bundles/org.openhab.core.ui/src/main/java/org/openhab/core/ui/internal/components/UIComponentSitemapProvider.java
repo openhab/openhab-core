@@ -437,11 +437,14 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     /**
-     * Finds a trailing, properly closed, escape-aware quoted literal that reaches the end of the rule string and is
-     * introduced by a bare "=" (not part of ==, !=, <=, >=). Honors \" and \\ escapes inside the literal, mirroring
+     * Finds a trailing, properly closed, escape-aware literal that reaches the end of the rule string and is introduced
+     * by a bare "=" (not part of ==, !=, <=, >=). Honors \" and \\ escapes inside the literal if quoted, mirroring
      * Xtext STRING semantics, and returns the unescaped value. Returns null if there is no such trailing argument.
      */
     private @Nullable ArgumentMatch findTrailingArgument(String rule, UIComponent component, String key) {
+        if ("visibility".equals(key)) {
+            return null;
+        }
         String trimmed = rule.trim();
         Matcher m = CONDITIONS_PREFIX.matcher(trimmed);
         m.find();
@@ -450,16 +453,16 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             return null;
         }
         String argument = trimmed.substring(delimiterIndex + 1).trim();
-        String unescaped = unescapeFullyQuotedLiteral(argument);
+        String unescaped = parseArgument(argument);
         if (unescaped == null) {
             logger.warn("Syntax error in {} rule argument '{}' for widget {}", key, trimmed, component.getType());
         }
         return unescaped != null ? new ArgumentMatch(unescaped, delimiterIndex) : null;
     }
 
-    private @Nullable String unescapeFullyQuotedLiteral(String value) {
-        if (value.length() < 2 || value.charAt(0) != '"') {
-            return null;
+    private @Nullable String parseArgument(String value) {
+        if (!value.startsWith("\"")) {
+            return value;
         }
         StringBuilder sb = new StringBuilder();
         int j = 1;
