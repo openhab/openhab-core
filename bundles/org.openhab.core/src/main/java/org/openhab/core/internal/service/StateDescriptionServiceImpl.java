@@ -12,8 +12,10 @@
  */
 package org.openhab.core.internal.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
@@ -66,19 +68,24 @@ public class StateDescriptionServiceImpl implements StateDescriptionService {
 
     private @Nullable StateDescriptionFragment getMergedStateDescriptionFragments(String itemName,
             @Nullable Locale locale) {
-        StateDescriptionFragmentImpl result = null;
+        List<StateDescriptionFragment> fragments = new ArrayList<>();
         for (StateDescriptionFragmentProvider provider : stateDescriptionFragmentProviders) {
             StateDescriptionFragment fragment = provider.getStateDescriptionFragment(itemName, locale);
-            if (fragment == null) {
-                continue;
+            if (fragment != null) {
+                fragments.add(fragment);
             }
+        }
 
+        // A unit in any provider prevents combining range fields from different providers.
+        boolean mergeRangeFields = fragments.stream().noneMatch(fragment -> fragment.getRangeUnit() != null);
+        StateDescriptionFragmentImpl result = null;
+        for (StateDescriptionFragment fragment : fragments) {
             // we pick up the first valid StateDescriptionFragment here:
             if (result == null) {
                 // create a deep copy of the first found fragment before merging other fragments into it
                 result = new StateDescriptionFragmentImpl((StateDescriptionFragmentImpl) fragment);
             } else {
-                result.merge(fragment);
+                result.merge(fragment, mergeRangeFields);
             }
         }
         return result;
