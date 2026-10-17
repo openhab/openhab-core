@@ -44,6 +44,7 @@ import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.marketplace.test.TestAddonHandler;
 import org.openhab.core.addon.marketplace.test.TestAddonService;
+import org.openhab.core.common.Version;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
@@ -283,7 +284,7 @@ public class AbstractRemoteAddonServiceTest {
 
     private Addon getMockedAddon(String version, boolean compatible) {
         Addon addon = mock(Addon.class);
-        when(addon.getVersion()).thenReturn(version);
+        when(addon.getVersion()).thenReturn(Version.valueOf(version));
         when(addon.getCompatible()).thenReturn(compatible);
         return addon;
     }

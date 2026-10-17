@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
@@ -47,7 +48,7 @@ public class TestAddonHandler implements MarketplaceAddonHandler {
     }
 
     @Override
-    public boolean supports(String type, String contentType) {
+    public boolean supports(String type, @Nullable String contentType) {
         return SUPPORTED_ADDON_TYPES.contains(type) && TEST_ADDON_CONTENT_TYPE.equals(contentType);
     }
 
