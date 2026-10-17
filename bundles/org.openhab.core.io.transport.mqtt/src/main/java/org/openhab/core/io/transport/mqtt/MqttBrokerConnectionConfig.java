@@ -29,13 +29,14 @@ import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.Protocol;
 public class MqttBrokerConnectionConfig {
     // Optional connection name
     public @Nullable String name;
-    // Connection parameters (host+port+secure+hostnameValidated+cleanSessionStart+webSocketPath)
+    // Connection parameters (host+port+secure+hostnameValidated+cleanSessionStart+webSocketPath+webSocketSubprotocol)
     public @Nullable String host;
     public @Nullable Integer port;
     public boolean secure = true;
     public boolean hostnameValidated = true;
     public boolean cleanSessionStart = true;
     public String webSocketPath = "";
+    public String webSocketSubprotocol = MqttBrokerConnection.DEFAULT_WEBSOCKET_SUBPROTOCOL;
     // Protocol parameters
     public Protocol protocol = MqttBrokerConnection.DEFAULT_PROTOCOL;
     public MqttVersion mqttVersion = MqttBrokerConnection.DEFAULT_MQTT_VERSION;
