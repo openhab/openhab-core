@@ -15,6 +15,7 @@ package org.openhab.core.voice.text;
 import java.io.Serial;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * An exception used by {@link HumanLanguageInterpreter}s, if an error occurs.
@@ -34,5 +35,24 @@ public class InterpretationException extends Exception {
      */
     public InterpretationException(String msg) {
         super(msg);
+    }
+
+    /**
+     * Constructs a new interpretation exception with a cause.
+     *
+     * @param msg the textual response.
+     * @param cause the cause of this exception.
+     */
+    public InterpretationException(String msg, @Nullable Throwable cause) {
+        super(msg, cause);
+    }
+
+    /**
+     * Constructs a new interpretation exception with a cause.
+     *
+     * @param cause the cause of this exception.
+     */
+    public InterpretationException(Throwable cause) {
+        super(cause);
     }
 }

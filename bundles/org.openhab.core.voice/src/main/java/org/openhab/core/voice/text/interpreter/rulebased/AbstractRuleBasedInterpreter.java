@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -54,6 +53,7 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.voice.text.InterpretationResult;
 import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.UnrecoverableInterpretationException;
 import org.openhab.core.voice.text.conversation.Conversation;
 import org.openhab.core.voice.text.conversation.ConversationException;
 import org.openhab.core.voice.text.conversation.ConversationRole;
@@ -210,26 +210,29 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     @Override
     public String interpret(Locale locale, String text) throws InterpretationException {
-        return interpret(locale, text, (String) null);
+        return interpret(locale, text, (InterpreterContext) null);
     }
 
     @Override
     public String interpret(Locale locale, InterpreterContext interpreterContext) throws InterpretationException {
         Conversation.Message message = interpreterContext.conversation().getLastMessage();
         if (message == null || message.role() != ConversationRole.USER) {
-            throw new InterpretationException("Last conversation message is not an user message");
+            throw new InterpretationException("Last conversation message is not a user message");
         }
-        String response = interpret(locale, message.content(), interpreterContext.locationItem());
-        try {
-            interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
-        } catch (ConversationException e) {
-            String errMsg = e.getMessage();
-            throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+        String response = interpret(locale, message.content(), interpreterContext);
+        if (!response.isEmpty()) {
+            try {
+                interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
+            } catch (ConversationException e) {
+                String errMsg = e.getMessage();
+                throw new UnrecoverableInterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+            }
         }
         return response;
     }
 
-    private String interpret(Locale locale, String text, @Nullable String locationItem) throws InterpretationException {
+    private String interpret(Locale locale, String text, @Nullable InterpreterContext interpreterContext)
+            throws InterpretationException {
         ResourceBundle language = ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale);
         Rule[] rules = getRules(locale);
         if (rules.length == 0) {
@@ -244,9 +247,12 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
         InterpretationResult lastResult = null;
         for (Rule rule : rules) {
-            if ((result = rule.execute(language, tokens, locationItem)).isSuccess()) {
+            if ((result = rule.execute(language, tokens, interpreterContext)).isSuccess()) {
                 return result.getResponse();
             } else {
+                if (result.getException() instanceof UnrecoverableInterpretationException unrecoverable) {
+                    throw unrecoverable;
+                }
                 if (!InterpretationResult.SYNTAX_ERROR.equals(result)) {
                     lastResult = result;
                 }
@@ -296,7 +302,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * used as alternative labels creating new alternative chains for the item.
      *
      * @param locale The locale that is to be used for preparing the tokens.
-     * @return the list of identifier token sets per item
+     * @return map of identifier token sets per item
      */
     Map<Item, ItemInterpretationMetadata> getItemTokens(Locale locale) {
         Map<Item, ItemInterpretationMetadata> localeTokens = itemTokens.get(locale);
@@ -392,7 +398,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return tag(VALUE, star(new ExpressionIdentifier(this, stopper)));
     }
 
-    private @Nullable List<@NonNull Rule> getLanguageRules(@Nullable Locale locale) {
+    private @Nullable List<Rule> getLanguageRules(@Nullable Locale locale) {
         if (!languageRules.containsKey(locale)) {
             createRules(locale);
         }
@@ -855,7 +861,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 logger.warn("Failed resolving item command");
                 return language.getString(ERROR);
             }
-            return trySendCommand(language, item, command, context.isForced(), context.isSilent());
+            return trySendCommand(language, item, command, context);
         }
     }
 
@@ -877,9 +883,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (compatibleItemEntries.isEmpty()) {
             throw new InterpretationException(language.getString(NO_OBJECTS));
         }
-        if (compatibleItemEntries.size() > 1 && context.locationItem() != null) {
+        @Nullable
+        String locationItem = context.interpreterContext() != null ? context.interpreterContext().locationItem() : null;
+        if (compatibleItemEntries.size() > 1 && locationItem != null) {
             var filteredCompatibleEntries = compatibleItemEntries.stream() //
-                    .filter(itemEntry -> itemEntry.getValue().locationParentNames.contains(context.locationItem())) //
+                    .filter(itemEntry -> itemEntry.getValue().locationParentNames.contains(locationItem)) //
                     .collect(Collectors.toSet());
             if (filteredCompatibleEntries.size() == 1) {
                 logger.debug("Collision resolved based on location context");
@@ -895,15 +903,15 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             logger.warn("Failed creating command");
             return language.getString(ERROR);
         }
-        return trySendCommand(language, item, command, context.isForced(), context.isSilent());
+        return trySendCommand(language, item, command, context);
     }
 
-    private String trySendCommand(ResourceBundle language, Item item, Command command, boolean isForced,
-            boolean isSilent) {
+    private String trySendCommand(ResourceBundle language, Item item, Command command,
+            Rule.InterpretationContext context) throws InterpretationException {
         if (command instanceof State newState) {
             try {
                 State oldState = item.getStateAs(newState.getClass());
-                if (!isForced && newState.equals(oldState)) {
+                if (!context.isForced() && newState.equals(oldState)) {
                     String template = language.getString(STATE_ALREADY_SINGULAR);
                     String cmdName = "state_" + command.toString().toLowerCase();
                     String stateText;
@@ -921,10 +929,26 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         }
         if (itemPermissionResolver.getPermission(item) != ItemPermission.READ_WRITE) {
             logger.debug("Cannot send command to read-only item {}", item.getName());
-            return language.getString(READ_ONLY);
+            throw new UnrecoverableInterpretationException(language.getString(READ_ONLY));
         }
+        postCommand(item, command, context.interpreterContext(), language);
+        return !context.isSilent() ? language.getString(OK) : "";
+    }
+
+    /**
+     * Posts a command event to the event bus for the given item.
+     *
+     * @implNote Subclasses should override this method to provide custom command posting if needed.
+     *
+     * @param item the item to command
+     * @param command the command to send
+     * @param context the interpreter context if available
+     * @param language the resource bundle for the current locale
+     * @throws InterpretationException if an interpretation error occurs
+     */
+    protected void postCommand(Item item, Command command, @Nullable InterpreterContext context,
+            ResourceBundle language) throws InterpretationException {
         eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command, VOICE_SOURCE));
-        return !isSilent ? language.getString(OK) : "";
     }
 
     /**
@@ -1017,7 +1041,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                     exactMatchOnTargetItemsData.keySet().stream().map(Item::getName).collect(Collectors.joining(", ")));
         }
         @Nullable
-        String locationContext = context.locationItem();
+        String locationContext = context.interpreterContext() != null ? context.interpreterContext().locationItem()
+                : null;
         if (locationContext != null && itemsData.size() > 1) {
             logger.trace("Filtering {} matched items based on location '{}'", itemsData.size(), locationContext);
             Item matchByLocation = filterMatchedItemsByLocation(itemsData, locationContext);
@@ -1107,7 +1132,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             specialCharactersRegex = "[^\\w\\s" + extraAllowedChars + "]";
         }
         return Arrays.stream(text.toLowerCase(locale) //
-                .replaceAll("[\\']", "") //
+                .replace("'", "") //
                 .replaceAll(specialCharactersRegex, " ") //
                 .split("\\s")) //
                 .filter(i -> !i.isBlank()) //
@@ -1318,17 +1343,17 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      */
     private class JSGFGenerator {
 
-        private ResourceBundle language;
+        private final ResourceBundle language;
 
-        private Map<Expression, Integer> ids = new HashMap<>();
-        private Set<Expression> exported = new HashSet<>();
-        private Set<Expression> shared = new HashSet<>();
+        private final Map<Expression, Integer> ids = new HashMap<>();
+        private final Set<Expression> exported = new HashSet<>();
+        private final Set<Expression> shared = new HashSet<>();
         private int counter = 0;
 
-        private Set<String> identifierExcludes = new HashSet<>();
-        private Set<String> identifiers = new HashSet<>();
+        private final Set<String> identifierExcludes = new HashSet<>();
+        private final Set<String> identifiers = new HashSet<>();
 
-        private StringBuilder builder = new StringBuilder();
+        private final StringBuilder builder = new StringBuilder();
 
         JSGFGenerator(ResourceBundle language) {
             this.language = language;
@@ -1402,16 +1427,14 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
         private void emitExpression(Expression expression) {
             Expression unwrappedExpression = unwrapLet(expression);
-            if (unwrappedExpression instanceof ExpressionMatch match) {
-                emitMatchExpression(match);
-            } else if (unwrappedExpression instanceof ExpressionSequence sequence) {
-                emitSequenceExpression(sequence);
-            } else if (unwrappedExpression instanceof ExpressionAlternatives alternatives) {
-                emitAlternativesExpression(alternatives);
-            } else if (unwrappedExpression instanceof ExpressionCardinality cardinality) {
-                emitCardinalExpression(cardinality);
-            } else if (unwrappedExpression instanceof ExpressionIdentifier identifier) {
-                emitItemIdentifierExpression(identifier);
+            switch (unwrappedExpression) {
+                case ExpressionMatch match -> emitMatchExpression(match);
+                case ExpressionSequence sequence -> emitSequenceExpression(sequence);
+                case ExpressionAlternatives alternatives -> emitAlternativesExpression(alternatives);
+                case ExpressionCardinality cardinality -> emitCardinalExpression(cardinality);
+                case ExpressionIdentifier identifier -> emitItemIdentifierExpression(identifier);
+                default -> {
+                }
             }
         }
 

@@ -17,6 +17,7 @@ import java.util.ResourceBundle;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.voice.text.InterpretationResult;
+import org.openhab.core.voice.text.InterpreterContext;
 
 /**
  * Represents an expression plus action code that will be executed after successful parsing. This class is immutable and
@@ -58,11 +59,12 @@ public abstract class Rule {
     public abstract InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
             InterpretationContext context);
 
-    InterpretationResult execute(ResourceBundle language, TokenList list, @Nullable String locationItem) {
+    InterpretationResult execute(ResourceBundle language, TokenList list,
+            @Nullable InterpreterContext interpreterContext) {
         ASTNode node = expression.parse(language, list);
         if (node.isSuccess() && node.getRemainingTokens().eof()) {
             return interpretAST(language, node,
-                    new InterpretationContext(this.itemFilter, isForced, isSilent, locationItem));
+                    new InterpretationContext(this.itemFilter, isForced, isSilent, interpreterContext));
         }
         return InterpretationResult.SYNTAX_ERROR;
     }
@@ -80,9 +82,9 @@ public abstract class Rule {
      * @author Miguel Álvarez - Initial contribution
      *
      * @param itemFilter Restricts rule compatibility to allowed items.
-     * @param locationItem Location item to prioritize item matches or null.
+     * @param interpreterContext The interpreter context if available.
      */
     public record InterpretationContext(AbstractRuleBasedInterpreter.ItemFilter itemFilter, boolean isForced,
-            boolean isSilent, @Nullable String locationItem) {
+            boolean isSilent, @Nullable InterpreterContext interpreterContext) {
     }
 }

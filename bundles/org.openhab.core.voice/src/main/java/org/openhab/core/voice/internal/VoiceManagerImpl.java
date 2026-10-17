@@ -417,13 +417,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public String interpret(String text, @Nullable String hliIdList) throws InterpretationException {
-        return interpret(text, hliIdList == null ? null : new InterpretationArguments(hliIdList, "", "", "", null));
+        return interpret(text, hliIdList == null ? null : new InterpretationArguments(hliIdList, "", "*", "", null));
     }
 
     @Override
     public String interpret(String text, @Nullable InterpretationArguments args) throws InterpretationException {
         if (args == null) {
-            args = new InterpretationArguments("", "", "", "", null);
+            args = new InterpretationArguments("", "", "*", "", null);
         }
         List<HumanLanguageInterpreter> interpreters = new ArrayList<>();
         if (args.hliIdList().isEmpty()) {
@@ -679,6 +679,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 .withVoice(this.getDefaultVoice()) //
                 .withMelody(configuration.getListeningMelody()) //
                 .withListeningItem(configuration.getListeningItem()) //
+                .withLLMTools(llmToolRegistry.getAll()) //
                 .withSystemPrompt(configuration.getSystemPrompt());
     }
 

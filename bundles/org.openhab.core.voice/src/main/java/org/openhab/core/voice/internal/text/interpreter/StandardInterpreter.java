@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,8 +42,15 @@ import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.TypeParser;
+import org.openhab.core.voice.internal.text.interpreter.llm.ItemCommandLLMTool;
 import org.openhab.core.voice.security.ItemPermissionResolver;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.InterpreterContext;
+import org.openhab.core.voice.text.UnrecoverableInterpretationException;
+import org.openhab.core.voice.text.conversation.ConversationException;
+import org.openhab.core.voice.text.conversation.ConversationRole;
+import org.openhab.core.voice.text.interpreter.llm.LLMToolCall;
 import org.openhab.core.voice.text.interpreter.rulebased.AbstractRuleBasedInterpreter;
 import org.openhab.core.voice.text.interpreter.rulebased.Expression;
 import org.openhab.core.voice.text.interpreter.rulebased.Rule;
@@ -65,6 +73,9 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = HumanLanguageInterpreter.class)
 public class StandardInterpreter extends AbstractRuleBasedInterpreter {
     public static final String VOICE_SYSTEM_NAMESPACE = "voiceSystem";
+
+    private static final String COMMANDS_NOT_ALLOWED = "commands_not_allowed";
+
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
 
@@ -81,6 +92,32 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
     @Deactivate
     protected void deactivate() {
         super.deactivate();
+    }
+
+    @Override
+    protected void postCommand(Item item, Command command, @Nullable InterpreterContext context,
+            ResourceBundle language) throws InterpretationException {
+        if (context == null) {
+            super.postCommand(item, command, context, language);
+            return;
+        }
+
+        boolean canSendCommand = context.tools().stream().anyMatch(t -> ItemCommandLLMTool.ID.equals(t.getUID()));
+        if (!canSendCommand) {
+            throw new UnrecoverableInterpretationException(language.getString(COMMANDS_NOT_ALLOWED));
+        }
+
+        LLMToolCall toolCall = new LLMToolCall(ItemCommandLLMTool.ID,
+                Map.of("itemName", item.getName(), "command", command.toString()));
+        String toolResult = "Successfully sent command '" + command + "' to item '" + item.getName() + "'.";
+        try {
+            context.conversation().addMessage(ConversationRole.TOOL_CALL, toolCall.toJson());
+            super.postCommand(item, command, context, language);
+            context.conversation().addMessage(ConversationRole.TOOL_RETURN, toolResult);
+        } catch (ConversationException e) {
+            String errMsg = e.getMessage();
+            throw new UnrecoverableInterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+        }
     }
 
     @Override

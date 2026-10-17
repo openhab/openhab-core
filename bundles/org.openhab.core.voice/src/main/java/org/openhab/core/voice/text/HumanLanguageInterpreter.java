@@ -97,7 +97,7 @@ public interface HumanLanguageInterpreter {
             interpreterContext.conversation().addMessage(ConversationRole.OPENHAB, response);
         } catch (ConversationException e) {
             String errMsg = e.getMessage();
-            throw new InterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
+            throw new UnrecoverableInterpretationException(errMsg != null ? errMsg : "Unknown conversation error");
         }
         return response;
     }
