@@ -12,25 +12,36 @@
  */
 package org.openhab.core.io.rest.internal;
 
-import javax.ws.rs.core.Application;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationBase;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+
+import jakarta.ws.rs.core.Application;
 
 /**
  * The JAX-RS application for the openHAB JAX-RS resources.
  *
  * @author Markus Rathgeb - Initial contribution
  */
-@Component(service = Application.class, property = {
-        // https://lists.apache.org/thread.html/
-        // r1379789bd90c6b7e3971d5ffeedb2e0d1e1c9103fd2392cb95458596%40%3Cuser.aries.apache.org%3E
-        "servlet.init.hide-service-list-page=true" })
-@JaxrsName(RESTConstants.JAX_RS_NAME)
-@JaxrsApplicationBase("rest")
+@Component(service = Application.class)
+@JakartarsName(RESTConstants.JAX_RS_NAME)
+@JakartarsApplicationBase("rest")
 @NonNullByDefault
 public class RESTApplicationImpl extends Application {
+
+    @Override
+    @NonNullByDefault({})
+    public Map<String, Object> getProperties() {
+        // Ask Jersey not to publish a WADL of the resources, the API is described by OpenAPI instead. This states the
+        // intent, but does not take effect at the moment: the Eclipse Jakarta REST Whiteboard builds its Jersey
+        // configuration without the properties of this application, so WadlFeature does not see the property. It
+        // disables itself anyway, because Jersey finds no JAXB implementation, and logs "JAXBContext implementation
+        // could not be found. WADL feature is disabled." while doing so. Should a JAXB implementation ever become
+        // visible to Jersey, WADL would be published unless the whiteboard passes this property on by then.
+        return Map.of("jersey.config.server.wadl.disableWadl", true);
+    }
 }

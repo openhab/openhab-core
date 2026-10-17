@@ -28,6 +28,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.util.Fields;
+import org.eclipse.jetty.util.MultiMap;
 import org.eclipse.jetty.util.UrlEncoded;
 import org.openhab.core.auth.client.oauth2.AccessTokenRefreshListener;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
@@ -175,19 +176,20 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         // parse the redirectURL
         try {
             URL redirectURLObject = (new URI(redirectURLwithParams)).toURL();
-            UrlEncoded urlEncoded = new UrlEncoded(redirectURLObject.getQuery());
+            MultiMap<String> params = UrlEncoded.decodeQuery(redirectURLObject.getQuery());
+            String stateFromRedirectURL = params.getValue(STATE, 0); // may contain multiple...
+            String extractedCode = params.getValue(CODE, 0);
 
-            String stateFromRedirectURL = urlEncoded.getValue(STATE, 0); // may contain multiple...
             if (stateFromRedirectURL == null) {
                 if (persistedParams.state == null) {
                     // This should not happen as the state is usually set
-                    return urlEncoded.getValue(CODE, 0);
+                    return extractedCode;
                 } // else
                 throw new OAuthException(String.format("state from redirectURL is incorrect.  Expected: %s Found: %s",
                         persistedParams.state, stateFromRedirectURL));
             } else {
                 if (stateFromRedirectURL.equals(persistedParams.state)) {
-                    return urlEncoded.getValue(CODE, 0);
+                    return extractedCode;
                 } // else
                 throw new OAuthException(String.format("state from redirectURL is incorrect.  Expected: %s Found: %s",
                         persistedParams.state, stateFromRedirectURL));
