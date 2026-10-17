@@ -437,8 +437,8 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
     }
 
     /**
-     * Finds a trailing, properly closed, escape-aware quoted literal that reaches the end of the rule string and is
-     * introduced by a bare "=" (not part of ==, !=, <=, >=). Honors \" and \\ escapes inside the literal, mirroring
+     * Finds a trailing, properly closed, escape-aware literal that reaches the end of the rule string and is introduced
+     * by a bare "=" (not part of ==, !=, <=, >=). Honors \" and \\ escapes inside the literal if quoted, mirroring
      * Xtext STRING semantics, and returns the unescaped value. Returns null if there is no such trailing argument.
      */
     private @Nullable ArgumentMatch findTrailingArgument(String rule, UIComponent component, String key) {
