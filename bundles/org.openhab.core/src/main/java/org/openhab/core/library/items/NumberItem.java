@@ -219,9 +219,11 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         timeSeries.getStates().forEach(s -> internalSeries.add(s.timestamp(),
                 Objects.requireNonNullElse(getInternalState(s.state()), UnDefType.NULL)));
 
-        if (dimension != null && internalSeries.getStates().allMatch(s -> s.state() instanceof QuantityType<?>)) {
+        if (dimension != null && internalSeries.getStates()
+                .allMatch(s -> s.state() instanceof QuantityType<?> || s.state() instanceof UnDefType)) {
             applyTimeSeries(internalSeries);
-        } else if (internalSeries.getStates().allMatch(s -> s.state() instanceof DecimalType)) {
+        } else if (internalSeries.getStates()
+                .allMatch(s -> s.state() instanceof DecimalType || s.state() instanceof UnDefType)) {
             applyTimeSeries(internalSeries);
         } else {
             logSetTypeError(timeSeries);
