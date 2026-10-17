@@ -20,11 +20,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
@@ -65,7 +65,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
     protected @Nullable Instant lastAuthenticationFailure;
     protected int authenticationFailureCount = 0;
 
-    protected Map<String, Instant> csrfTokens = new HashMap<>();
+    protected Map<String, Instant> csrfTokens = new ConcurrentHashMap<>();
 
     protected String pageTemplate;
 
@@ -147,8 +147,12 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
         authenticationFailureCount += 1;
         resp.setContentType("text/html;charset=UTF-8");
         logger.warn("Authentication failed from {}: {}", remoteAddr, message);
-        resp.getWriter().append(getPageBody(params, getLocalizedMessage("auth.login.fail"), false));
+        resp.getWriter().append(getPageBody(params, getFailedLoginMessage(params), false));
         resp.getWriter().close();
+    }
+
+    protected String getFailedLoginMessage(Map<String, String[]> params) {
+        return getLocalizedMessage("auth.login.fail");
     }
 
     protected String getLocalizedMessage(String messageKey) {
