@@ -418,9 +418,9 @@
 
     <!-- JBBP -->
     <dependency>
-      <groupId>com.igormaznitsa</groupId>
-      <artifactId>jbbp</artifactId>
-      <version>3.0.2</version>
+      <groupId>org.openhab.osgiify</groupId>
+      <artifactId>com.igormaznitsa.jbbp</artifactId>
+      <version>${jbbp.version}</version>
       <scope>compile</scope>
     </dependency>
 
