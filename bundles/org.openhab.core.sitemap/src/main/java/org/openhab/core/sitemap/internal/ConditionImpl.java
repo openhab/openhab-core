@@ -24,7 +24,7 @@ public class ConditionImpl implements Condition {
 
     private @Nullable String item;
     private @Nullable String condition;
-    private String value = "";
+    private String argument = "";
 
     public ConditionImpl() {
     }
@@ -32,7 +32,7 @@ public class ConditionImpl implements Condition {
     public ConditionImpl(Condition condition) {
         this.item = condition.getItem();
         this.condition = condition.getCondition();
-        this.value = condition.getArgument();
+        this.argument = condition.getArgument();
     }
 
     @Override
@@ -57,11 +57,11 @@ public class ConditionImpl implements Condition {
 
     @Override
     public String getArgument() {
-        return value;
+        return argument;
     }
 
     @Override
     public void setArgument(String value) {
-        this.value = value;
+        this.argument = value;
     }
 }
