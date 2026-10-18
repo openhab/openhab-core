@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Markus Rathgeb - Initial contribution
  * @author Markus Rathgeb - Respect the possible failure of port identifier creation
+ * @author Karel Goderis - Try all matching providers instead of returning the first null
  */
 @NonNullByDefault
 @Component
@@ -72,7 +73,11 @@ public class SerialPortManagerImpl implements SerialPortManager {
         final URI portUri = URI.create(name);
         for (final SerialPortProvider provider : registry.getPortProvidersForPortName(portUri)) {
             try {
-                return provider.getPortIdentifier(portUri);
+                // Skip null so a later provider can still resolve the same local port name.
+                final SerialPortIdentifier ident = provider.getPortIdentifier(portUri);
+                if (ident != null) {
+                    return ident;
+                }
             } catch (final UnsatisfiedLinkError error) {
                 /*
                  * At the time of writing every serial implementation needs some native code.
@@ -82,7 +87,7 @@ public class SerialPortManagerImpl implements SerialPortManager {
                 logger.warn("The provider \"{}\" miss some native code support.", provider.getClass().getSimpleName(),
                         error);
             } catch (final RuntimeException ex) {
-                logger.warn("The provider \"{}\" cannot provide a serial port itendifier for \"{}\".",
+                logger.warn("The provider \"{}\" cannot provide a serial port identifier for \"{}\".",
                         provider.getClass().getSimpleName(), name, ex);
             }
         }
