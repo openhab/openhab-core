@@ -65,11 +65,12 @@ import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.openhab.core.transform.TransformationException;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jayway.jsonpath.JsonPath;
+import com.google.gson.JsonPrimitive;
 
 /**
  * @author Henning Treu - Initial contribution
@@ -128,7 +129,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void shouldReturnUnicodeItems() throws IOException, TransformationException {
+    public void shouldReturnUnicodeItems() throws IOException {
         item4.setLabel(ITEM_LABEL4);
 
         Response response = itemResource.getItems(uriInfoMock, httpHeadersMock, request, null, null, null, null, false,
@@ -137,7 +138,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void shouldReturnUnicodeItem() throws IOException, TransformationException {
+    public void shouldReturnUnicodeItem() throws IOException {
         item4.setLabel(ITEM_LABEL4);
 
         Response response = itemResource.getItemByName(uriInfoMock, httpHeadersMock, null, null, true, false,
@@ -229,13 +230,31 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     private List<String> readItemNamesFromResponse(Response response) throws IOException {
-        String jsonResponse = toString(response.getEntity());
-        return JsonPath.read(jsonResponse, "$..name");
+        return findValues(toString(response.getEntity()), "name");
     }
 
-    private List<String> readItemLabelsFromResponse(Response response) throws IOException, TransformationException {
-        String jsonResponse = toString(response.getEntity());
-        return JsonPath.read(jsonResponse, "$..label");
+    private List<String> readItemLabelsFromResponse(Response response) throws IOException {
+        return findValues(toString(response.getEntity()), "label");
+    }
+
+    /**
+     * Collects the values of all primitive members with the given key at any depth (like JsonPath {@code $..key}).
+     */
+    private static List<String> findValues(String json, String key) {
+        List<String> values = new ArrayList<>();
+        collectValues(JsonParser.parseString(json), key, values);
+        return values;
+    }
+
+    private static void collectValues(JsonElement element, String key, List<String> values) {
+        if (element instanceof JsonObject object) {
+            if (object.get(key) instanceof JsonPrimitive value) {
+                values.add(value.getAsString());
+            }
+            object.entrySet().forEach(entry -> collectValues(entry.getValue(), key, values));
+        } else if (element instanceof JsonArray array) {
+            array.forEach(child -> collectValues(child, key, values));
+        }
     }
 
     @Test
@@ -258,8 +277,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         items = itemList.toArray(items);
         Response response = itemResource.createOrUpdateItems(items);
 
-        String jsonResponse = toString(response.getEntity());
-        List<String> statusCodes = JsonPath.read(jsonResponse, "$..status");
+        List<String> statusCodes = findValues(toString(response.getEntity()), "status");
 
         // expect 2x created
         assertThat(statusCodes.size(), is(2));
@@ -276,8 +294,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         items = itemList.toArray(items);
         response = itemResource.createOrUpdateItems(items);
 
-        jsonResponse = toString(response.getEntity());
-        statusCodes = JsonPath.read(jsonResponse, "$..status");
+        statusCodes = findValues(toString(response.getEntity()), "status");
 
         // expect error and updated
         assertThat(statusCodes.size(), is(2));
