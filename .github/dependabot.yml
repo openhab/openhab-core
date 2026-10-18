@@ -196,7 +196,6 @@ updates:
       - dependency-name: "org.apache.karaf:org.apache.karaf.client"
       - dependency-name: "org.apache.karaf:org.apache.karaf.main"
       - dependency-name: "org.apache.karaf:org.apache.karaf.util"
-      - dependency-name: "org.apache.maven.plugin-tools:maven-plugin-annotations"
       - dependency-name: "org.apache.maven.resolver:maven-resolver-api"
       - dependency-name: "org.apache.maven.resolver:maven-resolver-impl"
       - dependency-name: "org.apache.maven.resolver:maven-resolver-named-locks"
