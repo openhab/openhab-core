@@ -1731,7 +1731,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
             }
         }
 
-        logger.debug("Widget {} is not visible.", w.getLabel());
+        logger.debug("Widget '{}' is not visible.", w.getLabel());
 
         return false;
     }
@@ -1753,7 +1753,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
             }
         }
 
-        logger.debug("Widget {} commands don't require confirmation.", w.getLabel());
+        logger.debug("Widget '{}' commands don't require confirmation.", w.getLabel());
         return null;
     }
 
@@ -1826,7 +1826,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry, RegistryChangeListene
                         // Get the item state
                         state = item.getState();
                     } catch (ItemNotFoundException e) {
-                        logger.warn("Cannot retrieve item {} for widget {}", itemName, w.getClass().getSimpleName());
+                        logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.getClass().getSimpleName());
                     }
                 }
 
