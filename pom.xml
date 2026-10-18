@@ -83,6 +83,7 @@
     <jackson.version>2.22.2</jackson.version>
     <karaf.compile.version>4.4.12</karaf.compile.version>
     <karaf.tooling.version>4.4.12</karaf.tooling.version>
+    <maven.plugin.tools.version>3.16.0</maven.plugin.tools.version>
     <sat.version>0.18.0</sat.version>
     <slf4j.version>2.0.19</slf4j.version>
     <xtext.version>2.44.0</xtext.version>
@@ -392,7 +393,7 @@ Import-Package: \
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.16.0</version>
+          <version>${maven.plugin.tools.version}</version>
         </plugin>
 
         <plugin>
