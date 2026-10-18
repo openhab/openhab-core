@@ -280,7 +280,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                     warning(buildMsgWithLineNb("Button widget has both confirmCmd and release command defined", w, null, null), w, null)
                 }
                 w.confirmCmdRules?.elements?.forEach[ rule |
-                    if (rule.conditions.isEmpty && rule.arg === null) {
+                    if (rule.conditions.isEmpty && rule.value === null) {
                         error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", w, null, null), w, null)
                     }
                 ]
@@ -310,7 +310,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                 SitemapPackage.Literals.MODEL_SETPOINT.getEStructuralFeature(SitemapPackage.MODEL_SETPOINT__MIN_VALUE))
         }
         sp.confirmCmdRules?.elements?.forEach[ rule |
-            if (rule.conditions.isEmpty && rule.arg === null) {
+            if (rule.conditions.isEmpty && rule.value === null) {
                 error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", sp, null, null), sp, null)
             }
         ]
@@ -334,7 +334,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                 SitemapPackage.Literals.MODEL_SLIDER.getEStructuralFeature(SitemapPackage.MODEL_SLIDER__MIN_VALUE))
         }
         s.confirmCmdRules?.elements?.forEach[ rule |
-            if (rule.conditions.isEmpty && rule.arg === null) {
+            if (rule.conditions.isEmpty && rule.value === null) {
                 error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", s, null, null), s, null)
             }
         ]
@@ -343,7 +343,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkColorpickerParameters(ModelColorpicker c) {
         c.confirmCmdRules?.elements?.forEach[ rule |
-            if (rule.conditions.isEmpty && rule.arg === null) {
+            if (rule.conditions.isEmpty && rule.value === null) {
                 error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", c, null, null), c, null)
             }
         ]
@@ -357,7 +357,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                 SitemapPackage.Literals.MODEL_COLORTEMPERATUREPICKER.getEStructuralFeature(SitemapPackage.MODEL_COLORTEMPERATUREPICKER__MIN_VALUE))
         }
         ctp.confirmCmdRules?.elements?.forEach[ rule |
-            if (rule.conditions.isEmpty && rule.arg === null) {
+            if (rule.conditions.isEmpty && rule.value === null) {
                 error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", ctp, null, null), ctp, null)
             }
         ]
@@ -371,7 +371,7 @@ class SitemapValidator extends AbstractSitemapValidator {
                 SitemapPackage.Literals.MODEL_INPUT.getEStructuralFeature(SitemapPackage.MODEL_INPUT__INPUT_HINT))
         }
         i.confirmCmdRules?.elements?.forEach[ rule |
-            if (rule.conditions.isEmpty && rule.arg === null) {
+            if (rule.conditions.isEmpty && rule.value === null) {
                 error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", i, null, null), i, null)
             }
         ]
@@ -380,7 +380,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkSwitchParameters(ModelSwitch s) {
         s.confirmCmdRules?.elements?.forEach[ rule |
-            if (rule.conditions.isEmpty && rule.arg === null) {
+            if (rule.conditions.isEmpty && rule.value === null) {
                 error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", s, null, null), s, null)
             }
         ]
@@ -389,7 +389,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkSelectionParameters(ModelSelection s) {
         s.confirmCmdRules?.elements?.forEach[ rule |
-            if (rule.conditions.isEmpty && rule.arg === null) {
+            if (rule.conditions.isEmpty && rule.value === null) {
                 error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", s, null, null), s, null)
             }
         ]
@@ -398,7 +398,7 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkDefaultParameters(ModelDefault d) {
         d.confirmCmdRules?.elements?.forEach[ rule |
-            if (rule.conditions.isEmpty && rule.arg === null) {
+            if (rule.conditions.isEmpty && rule.value === null) {
                 error(buildMsgWithLineNb("confirmCmd rule has neither a condition nor a message", d, null, null), d, null)
             }
         ]

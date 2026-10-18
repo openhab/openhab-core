@@ -24,7 +24,7 @@ public class ConditionDTO {
 
     public String item;
     public String condition;
-    public String value;
+    public String argument;
 
     public ConditionDTO() {
     }

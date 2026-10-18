@@ -220,19 +220,19 @@ ModelColorArrayList returns ModelColorArrayList:
     '[' elements+=ModelColorArray (',' elements+=ModelColorArray)* ']';
 
 ModelColorArray:
-    ((conditions+=ModelCondition ('AND' conditions+=ModelCondition)*) '=')? (arg=STRING);
+    ((conditions+=ModelCondition ('AND' conditions+=ModelCondition)*) '=')? (value=STRING);
 
 ModelIconRuleList returns ModelIconRuleList:
     '[' elements+=ModelIconRule (',' elements+=ModelIconRule)* ']';
 
 ModelIconRule:
-    ((conditions+=ModelCondition ('AND' conditions+=ModelCondition)*) '=')? (arg=Icon);
+    ((conditions+=ModelCondition ('AND' conditions+=ModelCondition)*) '=')? (value=Icon);
 
 ModelConfirmCmdRuleList returns ModelConfirmCmdRuleList:
     '[' elements+=ModelConfirmCmdRule (',' elements+=ModelConfirmCmdRule)* ']';
 
 ModelConfirmCmdRule:
-    { ModelConfirmCmdRule } (conditions+=ModelCondition ('AND' conditions+=ModelCondition)*)? ('=' arg=STRING)?;
+    { ModelConfirmCmdRule } (conditions+=ModelCondition ('AND' conditions+=ModelCondition)*)? ('=' value=STRING)?;
 
 ModelVisibilityRuleList returns ModelVisibilityRuleList:
     '[' elements+=ModelVisibilityRule (',' elements+=ModelVisibilityRule)* ']';

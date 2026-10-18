@@ -58,16 +58,16 @@ public interface Condition {
     void setCondition(@Nullable String condition);
 
     /**
-     * Get the condition comparison value.
+     * Get the condition comparison argument.
      *
-     * @return value
+     * @return argument
      */
-    String getValue();
+    String getArgument();
 
     /**
-     * Set the condition comparison value.
+     * Set the condition comparison argument.
      *
-     * @param value
+     * @param argument
      */
-    void setValue(String value);
+    void setArgument(String argument);
 }

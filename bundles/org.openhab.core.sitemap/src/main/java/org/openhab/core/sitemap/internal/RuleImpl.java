@@ -34,7 +34,7 @@ public class RuleImpl implements Rule {
 
     public RuleImpl(Rule rule) {
         this.conditions = rule.getConditions();
-        this.argument = rule.getArgument();
+        this.argument = rule.getValue();
     }
 
     @Override
@@ -48,12 +48,12 @@ public class RuleImpl implements Rule {
     }
 
     @Override
-    public @Nullable String getArgument() {
+    public @Nullable String getValue() {
         return argument;
     }
 
     @Override
-    public void setArgument(@Nullable String argument) {
+    public void setValue(@Nullable String argument) {
         this.argument = argument;
     }
 }

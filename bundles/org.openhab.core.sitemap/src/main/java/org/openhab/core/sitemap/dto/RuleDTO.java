@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class RuleDTO {
 
     public List<ConditionDTO> conditions;
-    public String argument;
+    public String value;
 
     public RuleDTO() {
     }

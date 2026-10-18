@@ -32,7 +32,7 @@ public class ConditionImpl implements Condition {
     public ConditionImpl(Condition condition) {
         this.item = condition.getItem();
         this.condition = condition.getCondition();
-        this.value = condition.getValue();
+        this.value = condition.getArgument();
     }
 
     @Override
@@ -56,12 +56,12 @@ public class ConditionImpl implements Condition {
     }
 
     @Override
-    public String getValue() {
+    public String getArgument() {
         return value;
     }
 
     @Override
-    public void setValue(String value) {
+    public void setArgument(String value) {
         this.value = value;
     }
 }
