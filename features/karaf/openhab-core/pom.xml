@@ -16,7 +16,7 @@
   <description>openHAB Core Features</description>
 
   <properties>
-    <jetty.version>12.1.12</jetty.version>
+    <jetty.version>12.1.14</jetty.version>
     <jna.version>5.19.1</jna.version>
   </properties>
 

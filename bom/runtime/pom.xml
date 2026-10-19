@@ -17,9 +17,9 @@
 
   <properties>
     <californium.version>4.0.0-M2</californium.version>
-    <jetty.version>12.1.12</jetty.version>
+    <jetty.version>12.1.14</jetty.version>
     <pax.logging.version>2.3.5</pax.logging.version>
-    <pax.web.version>11.1.3</pax.web.version>
+    <pax.web.version>11.1.4</pax.web.version>
   </properties>
 
   <dependencyManagement>
