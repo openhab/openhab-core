@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class DiscoveryResultImpl implements DiscoveryResult {
 
-    private final Logger logger = LoggerFactory.getLogger(DiscoveryResultImpl.class);
+    private final transient Logger logger = LoggerFactory.getLogger(DiscoveryResultImpl.class);
 
     private @Nullable ThingUID bridgeUID;
     private @NonNullByDefault({}) ThingUID thingUID;
