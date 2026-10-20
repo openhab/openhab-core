@@ -19,13 +19,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
-
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 
 /**
- * The {@link ThingDescriptionConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface
+ * The {@link ThingDescriptionConverter} is a concrete implementation of the {@link XmlConverter} interface
  * used to convert a list of type information within an XML document
  * into a {@link ThingDescriptionList} object.
  * <p>
@@ -46,14 +45,14 @@ public class ThingDescriptionConverter extends GenericUnmarshaller<ThingDescript
     }
 
     @Override
-    public final @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public final @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         // read attributes
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
         String bindingId = attributes.get("bindingId");
 
         context.put("thing-descriptions.bindingId", bindingId);
 
-        List<?> typeList = (List<?>) context.convertAnother(context, List.class);
+        List<?> typeList = (List<?>) context.convertAnother(List.class);
 
         return new ThingDescriptionList(typeList);
     }

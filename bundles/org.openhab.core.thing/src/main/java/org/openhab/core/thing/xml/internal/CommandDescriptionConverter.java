@@ -14,21 +14,20 @@ package org.openhab.core.thing.xml.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 import org.openhab.core.config.core.xml.util.NodeList;
 import org.openhab.core.config.core.xml.util.NodeValue;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link CommandDescriptionConverter} is a concrete implementation of the {@code XStream} {@link Converter}
+ * The {@link CommandDescriptionConverter} is a concrete implementation of the {@link XmlConverter}
  * interface used to convert a command description within an XML document into a {@link CommandDescription} object.
  * <p>
  * This converter converts {@code command} XML tags.
@@ -43,8 +42,8 @@ public class CommandDescriptionConverter extends GenericUnmarshaller<CommandDesc
     }
 
     @Override
-    public final @Nullable CommandDescription unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        NodeList nodes = (NodeList) context.convertAnother(context, NodeList.class);
+    public final @Nullable CommandDescription unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
+        NodeList nodes = (NodeList) context.convertAnother(NodeList.class);
         NodeIterator nodeIterator = new NodeIterator(nodes.getList());
 
         NodeList commandOptionsNode = (NodeList) nodeIterator.next();

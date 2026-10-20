@@ -38,6 +38,7 @@
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.component.annotations/1.5.1</bundle>
 
 		<!-- TODO: Unbundled libraries -->
+		<!-- xstream will be removed when Karaf 4.5 lands due deprecation warnings with Java 25 -->
 		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.21</bundle>
 	</feature>
 

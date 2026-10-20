@@ -19,20 +19,19 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.NodeAttributes;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 import org.openhab.core.config.core.xml.util.NodeList;
 import org.openhab.core.config.core.xml.util.NodeValue;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 import org.openhab.core.thing.ThingTypeUID;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link ThingTypeConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface used
+ * The {@link ThingTypeConverter} is a concrete implementation of the {@link XmlConverter} interface used
  * to convert {@code Thing} type information within
  * an XML document into a {@link ThingTypeXmlResult} object.
  * <p>
@@ -66,7 +65,7 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     }
 
     protected @Nullable List<String> readSupportedBridgeTypeUIDs(NodeIterator nodeIterator,
-            UnmarshallingContext context) {
+            XmlUnmarshallingContext context) {
         Object nextNode = nodeIterator.next("supported-bridge-type-refs", false);
 
         if (nextNode != null) {
@@ -118,7 +117,7 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     }
 
     @Override
-    protected @Nullable ThingTypeXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
+    protected @Nullable ThingTypeXmlResult unmarshalType(XmlNodeReader reader, XmlUnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
         return new ThingTypeXmlResult(new ThingTypeUID(super.getUID(attributes, context)),
                 readSupportedBridgeTypeUIDs(nodeIterator, context), super.readLabel(nodeIterator),

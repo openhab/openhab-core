@@ -384,7 +384,7 @@
       </exclusions>
     </dependency>
 
-    <!-- XStream -->
+    <!-- XStream: not used by openHAB Core anymore, kept for add-ons; will be removed when Karaf 4.5 lands due to deprecation warnings with Java 25 -->
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>

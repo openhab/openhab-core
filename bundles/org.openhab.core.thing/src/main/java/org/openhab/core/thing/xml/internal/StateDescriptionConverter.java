@@ -20,22 +20,21 @@ import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 import org.openhab.core.config.core.xml.util.NodeList;
 import org.openhab.core.config.core.xml.util.NodeValue;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link StateDescriptionConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface
+ * The {@link StateDescriptionConverter} is a concrete implementation of the {@link XmlConverter} interface
  * used to convert a state description within an XML document
  * into a {@link StateDescription} object.
  * <p>
@@ -102,7 +101,7 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
     }
 
     @Override
-    public final @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public final @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
 
         boolean readOnly = toBoolean(attributes, "readOnly", false);
@@ -128,7 +127,7 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
             builder.withPattern(pattern);
         }
 
-        NodeList nodes = (NodeList) context.convertAnother(context, NodeList.class);
+        NodeList nodes = (NodeList) context.convertAnother(NodeList.class);
         NodeIterator nodeIterator = new NodeIterator(nodes.getList());
 
         NodeList optionNodes = (NodeList) nodeIterator.next();

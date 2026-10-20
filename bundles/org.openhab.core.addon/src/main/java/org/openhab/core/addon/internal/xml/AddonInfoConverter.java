@@ -25,13 +25,12 @@ import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
-
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 
 /**
- * The {@link AddonInfoConverter} is a concrete implementation of the {@code XStream}
- * {@link com.thoughtworks.xstream.converters.Converter} interface used
+ * The {@link AddonInfoConverter} is a concrete implementation of the
+ * {@link org.openhab.core.config.core.xml.util.XmlConverter} interface used
  * to convert add-on information within an XML document into a {@link AddonInfoXmlResult} object.
  * This converter converts {@code addon} XML tags.
  *
@@ -66,7 +65,7 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
     }
 
     @Override
-    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         // read attributes
         Map<String, String> attributes = attributeMapValidator.readValidatedAttributes(reader);
 
@@ -76,7 +75,7 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
         context.put("config-description.uri", CONFIG_DESCRIPTION_URI_PLACEHOLDER);
 
         // read values
-        List<?> nodes = (List<?>) context.convertAnother(context, List.class);
+        List<?> nodes = (List<?>) context.convertAnother(List.class);
         NodeIterator nodeIterator = new NodeIterator(nodes);
 
         String type = requireNonEmpty((String) nodeIterator.nextValue("type", true), "Add-on type is null or empty");

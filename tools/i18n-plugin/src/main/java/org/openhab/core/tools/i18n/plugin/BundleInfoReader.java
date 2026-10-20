@@ -28,6 +28,7 @@ import org.openhab.core.addon.internal.xml.AddonInfoReader;
 import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.xml.internal.ConfigDescriptionReader;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.thing.xml.internal.ChannelGroupTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ChannelTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ThingDescriptionReader;
@@ -37,7 +38,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
  * Reads all the bundle information provided by XML files in the <code>OH-INF</code> directory to {@link BundleInfo}.

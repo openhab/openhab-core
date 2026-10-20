@@ -18,20 +18,19 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 import org.openhab.core.config.core.xml.util.NodeList;
 import org.openhab.core.config.core.xml.util.NodeValue;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.EventOption;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link EventDescriptionConverter} is a concrete implementation of the {@code XStream}
- * {@link com.thoughtworks.xstream.converters.Converter} interface
+ * The {@link EventDescriptionConverter} is a concrete implementation of the
+ * {@link org.openhab.core.config.core.xml.util.XmlConverter} interface
  * used to convert a event description within an XML document into an {@link EventDescription} object.
  * <p>
  * This converter converts {@code state} XML tags.
@@ -80,10 +79,10 @@ public class EventDescriptionConverter extends GenericUnmarshaller<EventDescript
     }
 
     @Override
-    public final @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public final @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         List<EventOption> eventOptions = null;
 
-        NodeList nodes = (NodeList) context.convertAnother(context, NodeList.class);
+        NodeList nodes = (NodeList) context.convertAnother(NodeList.class);
         NodeIterator nodeIterator = new NodeIterator(nodes.getList());
 
         NodeList optionNodes = (NodeList) nodeIterator.next();

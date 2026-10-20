@@ -18,19 +18,18 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 import org.openhab.core.config.core.xml.util.NodeValue;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link ChannelConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface used
+ * The {@link ChannelConverter} is a concrete implementation of the {@link XmlConverter} interface used
  * to convert channel information within an XML document
  * into a {@link ChannelXmlResult} object.
  * <p>
@@ -57,7 +56,7 @@ public class ChannelConverter extends GenericUnmarshaller<ChannelXmlResult> {
         return (List<NodeValue>) nodeIterator.nextList("properties", false);
     }
 
-    protected ChannelXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
+    protected ChannelXmlResult unmarshalType(XmlNodeReader reader, XmlUnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
         String id = requireNonEmpty(attributes.get("id"), "Channel id attribute is null or empty");
         String typeId = requireNonEmpty(attributes.get("typeId"), "Channel typeId attribute is null or empty");
@@ -78,12 +77,12 @@ public class ChannelConverter extends GenericUnmarshaller<ChannelXmlResult> {
     }
 
     @Override
-    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         // read attributes
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);
 
         // read values
-        List<?> nodes = (List<?>) context.convertAnother(context, List.class);
+        List<?> nodes = (List<?>) context.convertAnother(List.class);
         NodeIterator nodeIterator = new NodeIterator(nodes);
 
         // create object

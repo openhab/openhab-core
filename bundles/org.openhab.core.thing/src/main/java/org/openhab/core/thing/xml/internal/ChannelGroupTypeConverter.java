@@ -17,17 +17,16 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.NodeIterator;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 import org.openhab.core.thing.type.ChannelGroupTypeUID;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link ChannelGroupTypeConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface
+ * The {@link ChannelGroupTypeConverter} is a concrete implementation of the {@link XmlConverter} interface
  * used to convert channel group type information within an
  * XML document into a {@link ChannelGroupTypeXmlResult} object.
  * <p>
@@ -54,9 +53,8 @@ public class ChannelGroupTypeConverter extends AbstractDescriptionTypeConverter<
     }
 
     @Override
-    protected @Nullable ChannelGroupTypeXmlResult unmarshalType(HierarchicalStreamReader reader,
-            UnmarshallingContext context, Map<String, String> attributes, NodeIterator nodeIterator)
-            throws ConversionException {
+    protected @Nullable ChannelGroupTypeXmlResult unmarshalType(XmlNodeReader reader, XmlUnmarshallingContext context,
+            Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
         ChannelGroupTypeUID channelGroupTypeUID = new ChannelGroupTypeUID(super.getUID(attributes, context));
 
         String label = super.readLabel(nodeIterator);

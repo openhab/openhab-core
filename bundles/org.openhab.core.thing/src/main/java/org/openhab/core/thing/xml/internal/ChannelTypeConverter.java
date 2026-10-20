@@ -23,9 +23,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.xml.util.ConversionException;
 import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 import org.openhab.core.config.core.xml.util.NodeValue;
+import org.openhab.core.config.core.xml.util.XmlConverter;
+import org.openhab.core.config.core.xml.util.XmlNodeReader;
+import org.openhab.core.config.core.xml.util.XmlUnmarshallingContext;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
@@ -38,13 +42,8 @@ import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link ChannelTypeConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface used
+ * The {@link ChannelTypeConverter} is a concrete implementation of the {@link XmlConverter} interface used
  * to convert channel type information within an XML document
  * into a {@link ChannelTypeXmlResult} object.
  * <p>
@@ -173,9 +172,8 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
     }
 
     @Override
-    protected @Nullable ChannelTypeXmlResult unmarshalType(HierarchicalStreamReader reader,
-            UnmarshallingContext context, Map<String, String> attributes, NodeIterator nodeIterator)
-            throws ConversionException {
+    protected @Nullable ChannelTypeXmlResult unmarshalType(XmlNodeReader reader, XmlUnmarshallingContext context,
+            Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
         boolean advanced = readBoolean(attributes, "advanced", false);
         boolean system = readBoolean(attributes, "system", false);
 

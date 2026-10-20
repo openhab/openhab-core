@@ -30,14 +30,13 @@ import org.openhab.core.config.core.xml.util.NodeListConverter;
 import org.openhab.core.config.core.xml.util.NodeValue;
 import org.openhab.core.config.core.xml.util.NodeValueConverter;
 import org.openhab.core.config.core.xml.util.XmlDocumentReader;
-
-import com.thoughtworks.xstream.XStream;
+import org.openhab.core.config.core.xml.util.XmlMapping;
 
 /**
  * The {@link ConfigDescriptionReader} reads XML documents, which contain the {@code config-descriptions} XML tag, and
  * converts them to {@link List} objects consisting of {@link ConfigDescription} objects.
  * <p>
- * This reader uses {@code XStream} and {@code StAX} to parse and convert the XML document.
+ * This reader uses {@code StAX} to parse and convert the XML document.
  *
  * @author Michael Grammling - Initial contribution
  * @author Alex Tugarev - Extended for options and filter criteria
@@ -46,37 +45,27 @@ import com.thoughtworks.xstream.XStream;
 @NonNullByDefault
 public class ConfigDescriptionReader extends XmlDocumentReader<List<ConfigDescription>> {
 
-    /**
-     * The default constructor of this class.
-     */
-    public ConfigDescriptionReader() {
-        ClassLoader classLoader = ConfigDescriptionReader.class.getClassLoader();
-        if (classLoader != null) {
-            super.setClassLoader(classLoader);
-        }
+    @Override
+    protected void registerConverters(XmlMapping mapping) {
+        mapping.registerConverter(new NodeValueConverter());
+        mapping.registerConverter(new NodeListConverter());
+        mapping.registerConverter(new NodeAttributesConverter());
+        mapping.registerConverter(new ConfigDescriptionConverter());
+        mapping.registerConverter(new ConfigDescriptionParameterConverter());
+        mapping.registerConverter(new ConfigDescriptionParameterGroupConverter());
+        mapping.registerConverter(new FilterCriteriaConverter());
     }
 
     @Override
-    protected void registerConverters(XStream xstream) {
-        xstream.registerConverter(new NodeValueConverter());
-        xstream.registerConverter(new NodeListConverter());
-        xstream.registerConverter(new NodeAttributesConverter());
-        xstream.registerConverter(new ConfigDescriptionConverter());
-        xstream.registerConverter(new ConfigDescriptionParameterConverter());
-        xstream.registerConverter(new ConfigDescriptionParameterGroupConverter());
-        xstream.registerConverter(new FilterCriteriaConverter());
-    }
-
-    @Override
-    protected void registerAliases(XStream xstream) {
-        xstream.alias("config-descriptions", List.class);
-        xstream.alias("config-description", ConfigDescription.class);
-        xstream.alias("config-description-ref", NodeAttributes.class);
-        xstream.alias("parameter", ConfigDescriptionParameter.class);
-        xstream.alias("parameter-group", ConfigDescriptionParameterGroup.class);
-        xstream.alias("options", NodeList.class);
-        xstream.alias("option", NodeValue.class);
-        xstream.alias("filter", List.class);
-        xstream.alias("criteria", FilterCriteria.class);
+    protected void registerAliases(XmlMapping mapping) {
+        mapping.alias("config-descriptions", List.class);
+        mapping.alias("config-description", ConfigDescription.class);
+        mapping.alias("config-description-ref", NodeAttributes.class);
+        mapping.alias("parameter", ConfigDescriptionParameter.class);
+        mapping.alias("parameter-group", ConfigDescriptionParameterGroup.class);
+        mapping.alias("options", NodeList.class);
+        mapping.alias("option", NodeValue.class);
+        mapping.alias("filter", List.class);
+        mapping.alias("criteria", FilterCriteria.class);
     }
 }

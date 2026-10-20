@@ -19,12 +19,8 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-
 /**
- * The {@link NodeListConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface used to
+ * The {@link NodeListConverter} is a concrete implementation of the {@link XmlConverter} interface used to
  * convert a list of XML tags within an XML document
  * into a {@link NodeList} object.
  *
@@ -38,11 +34,11 @@ public class NodeListConverter extends GenericUnmarshaller<NodeList> {
     }
 
     @Override
-    public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public @Nullable Object unmarshal(XmlNodeReader reader, XmlUnmarshallingContext context) {
         Map<String, String> attributes = ConverterAttributeMapValidator.readValidatedAttributes(reader, null);
 
         String nodeName = reader.getNodeName();
-        List<?> values = (List<?>) context.convertAnother(context, List.class);
+        List<?> values = (List<?>) context.convertAnother(List.class);
 
         return new NodeList(nodeName, attributes, Objects.requireNonNullElse(values, List.of()));
     }
