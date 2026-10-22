@@ -160,12 +160,25 @@
       <artifactId>org.eclipse.osgitech.rest</artifactId>
       <version>${osgitech.rest.version}</version>
       <scope>compile</scope>
+      <exclusions>
+        <!-- legacy javax servlet shims (felix.http.servlet-api pulls tomcat-servlet-api), jakarta.servlet-api is used -->
+        <exclusion>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>org.apache.felix.http.servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.osgi-technology.rest</groupId>
       <artifactId>org.eclipse.osgitech.rest.servlet.whiteboard</artifactId>
       <version>${osgitech.rest.version}</version>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>org.apache.felix.http.servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.osgi-technology.rest</groupId>
