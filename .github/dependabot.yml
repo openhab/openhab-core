@@ -84,7 +84,6 @@ updates:
       - dependency-name: "com.thoughtworks.xstream:xstream"
       - dependency-name: "commons-cli:commons-cli"
       - dependency-name: "commons-codec:commons-codec"
-      - dependency-name: "commons-fileupload:commons-fileupload"
       - dependency-name: "commons-io:commons-io"
       - dependency-name: "commons-logging:commons-logging"
       - dependency-name: "commons-net:commons-net"
