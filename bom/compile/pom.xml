@@ -319,12 +319,6 @@
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-jsp</artifactId>
-      <version>${pax.web.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-runtime</artifactId>
       <version>${pax.web.version}</version>
       <scope>compile</scope>

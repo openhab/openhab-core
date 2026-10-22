@@ -120,17 +120,11 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- Log Stream Service -->
+    <!-- Log Service -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.log</artifactId>
       <version>1.5.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.equinox.log.stream</artifactId>
-      <version>1.2.100</version>
       <scope>compile</scope>
     </dependency>
 
@@ -235,14 +229,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- OSGi PushStream -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.util.pushstream</artifactId>
-      <version>1.1.0</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- OSGi Converter -->
     <dependency>
       <groupId>org.osgi</groupId>
@@ -256,14 +242,6 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configurator</artifactId>
       <version>1.0.18</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- Used heavily in conjunction with JDBC -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.jdbc</artifactId>
-      <version>1.1.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -537,12 +515,6 @@
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-jsp</artifactId>
-      <version>${pax.web.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-runtime</artifactId>
       <version>${pax.web.version}</version>
       <scope>compile</scope>
@@ -582,12 +554,6 @@
     <dependency>
       <groupId>org.eclipse.jetty.ee10</groupId>
       <artifactId>jetty-ee10-servlet</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-deploy</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -636,12 +602,6 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-security</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.ee10</groupId>
-      <artifactId>jetty-ee10-jaspi</artifactId>
       <version>${jetty.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -717,20 +677,6 @@
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-alpn-java-client</artifactId>
       <version>${jetty.version}</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- Xbean -->
-    <dependency>
-      <groupId>org.apache.xbean</groupId>
-      <artifactId>xbean-bundleutils</artifactId>
-      <version>5.0.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.xbean</groupId>
-      <artifactId>xbean-finder</artifactId>
-      <version>5.0.0</version>
       <scope>compile</scope>
     </dependency>
 
