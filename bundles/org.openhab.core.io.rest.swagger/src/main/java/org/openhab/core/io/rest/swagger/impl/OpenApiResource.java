@@ -17,13 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -33,11 +26,11 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
-import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.osgi.service.jakartars.whiteboard.JakartarsWhiteboardConstants;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationSelect;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +47,12 @@ import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * An endpoint to generate and provide an OpenAPI description.
@@ -64,9 +63,9 @@ import io.swagger.v3.oas.models.servers.Server;
  * @author Wouter Born - Migrated to OpenAPI
  */
 @Component(service = OpenApiResource.class)
-@JaxrsResource
-@JaxrsName("spec")
-@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JakartarsResource
+@JakartarsName("spec")
+@JakartarsApplicationSelect("(" + JakartarsWhiteboardConstants.JAKARTA_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path("/spec")
 @NonNullByDefault
@@ -128,7 +127,7 @@ public class OpenApiResource implements RESTResource {
         ServiceReference<Application> applicationReference = bundleContext.getServiceReference(Application.class);
 
         Server server = new Server();
-        server.setUrl("/" + applicationReference.getProperty(JaxrsWhiteboardConstants.JAX_RS_APPLICATION_BASE));
+        server.setUrl("/" + applicationReference.getProperty(JakartarsWhiteboardConstants.JAKARTA_RS_APPLICATION_BASE));
 
         return server;
     }

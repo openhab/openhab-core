@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.io.http.WrappingHttpContext;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 /**
  *
@@ -52,7 +52,7 @@ public class HttpContextFactoryServiceImplTest {
 
     @Test
     public void shouldCreateHttpContext() {
-        HttpContext context = httpContextFactoryService.createDefaultHttpContext(bundleMock);
+        ServletContextHelper context = httpContextFactoryService.createDefaultHttpContext(bundleMock);
         assertThat(context, is(notNullValue()));
 
         verify(httpContextMock).wrap(bundleMock);
@@ -60,7 +60,7 @@ public class HttpContextFactoryServiceImplTest {
 
     @Test
     public void httpContextShouldCallgetResourceOnBundle() {
-        HttpContext context = httpContextFactoryService.createDefaultHttpContext(bundleMock);
+        ServletContextHelper context = httpContextFactoryService.createDefaultHttpContext(bundleMock);
         context.getResource(RESOURCE);
 
         verify(httpContextMock).wrap(bundleMock);
@@ -69,7 +69,7 @@ public class HttpContextFactoryServiceImplTest {
 
     @Test
     public void httpContextShouldCallgetResourceOnBundleWithoutLeadingSlash() {
-        HttpContext context = httpContextFactoryService.createDefaultHttpContext(bundleMock);
+        ServletContextHelper context = httpContextFactoryService.createDefaultHttpContext(bundleMock);
         context.getResource("/" + RESOURCE);
 
         verify(httpContextMock).wrap(bundleMock);
