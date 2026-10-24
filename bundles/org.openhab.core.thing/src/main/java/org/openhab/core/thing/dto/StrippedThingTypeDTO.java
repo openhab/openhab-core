@@ -43,6 +43,8 @@ public class StrippedThingTypeDTO {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     public boolean bridge;
     public @Nullable String semanticEquipmentTag;
+    /** The symbolic name of the bundle that provides this thing type (can be used to relate it to an add-on). */
+    public @Nullable String bundleSymbolicName;
 
     // do not remove - needed by GSON
     public StrippedThingTypeDTO() {
