@@ -373,7 +373,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
             modelColorRules.forEach(modelRule -> {
                 Rule rule = sitemapFactory.createRule();
                 addRuleConditions(rule.getConditions(), modelRule.getConditions());
-                rule.setArgument(modelRule.getArg());
+                rule.setValue(modelRule.getValue());
                 colorRules.add(rule);
             });
         }
@@ -385,7 +385,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
             modelIconRules.forEach(modelRule -> {
                 Rule rule = sitemapFactory.createRule();
                 addRuleConditions(rule.getConditions(), modelRule.getConditions());
-                rule.setArgument(modelRule.getArg());
+                rule.setValue(modelRule.getValue());
                 iconRules.add(rule);
             });
         }
@@ -397,7 +397,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
             modelConfirmCmdRuleList.getElements().forEach(modelRule -> {
                 Rule rule = sitemapFactory.createRule();
                 addRuleConditions(rule.getConditions(), modelRule.getConditions());
-                rule.setArgument(modelRule.getArg());
+                rule.setValue(modelRule.getValue());
                 confirmCmdRules.add(rule);
             });
         }
@@ -422,7 +422,7 @@ public class DslSitemapProvider extends AbstractProvider<Sitemap>
             condition.setCondition(modelCondition.getCondition());
             String sign = modelCondition.getSign();
             String value = (sign != null ? sign : "") + modelCondition.getState();
-            condition.setValue(value);
+            condition.setArgument(value);
             conditions.add(condition);
         });
     }

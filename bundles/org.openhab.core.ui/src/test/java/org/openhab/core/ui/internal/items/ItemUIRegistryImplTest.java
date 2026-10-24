@@ -959,13 +959,13 @@ public class ItemUIRegistryImplTest {
         when(widgetMock.getLabel()).thenReturn(testLabel);
 
         Condition condition = mock(Condition.class);
-        when(condition.getValue()).thenReturn("21");
+        when(condition.getArgument()).thenReturn("21");
         when(condition.getCondition()).thenReturn("<");
         List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArgument()).thenReturn("yellow");
+        when(rule.getValue()).thenReturn("yellow");
         List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         when(widgetMock.getLabelColor()).thenReturn(rules);
@@ -988,13 +988,13 @@ public class ItemUIRegistryImplTest {
         when(widgetMock.getLabel()).thenReturn(testLabel);
 
         Condition condition = mock(Condition.class);
-        when(condition.getValue()).thenReturn("20");
+        when(condition.getArgument()).thenReturn("20");
         when(condition.getCondition()).thenReturn("==");
         List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArgument()).thenReturn("yellow");
+        when(rule.getValue()).thenReturn("yellow");
         List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         when(widgetMock.getLabelColor()).thenReturn(rules);
@@ -1168,36 +1168,36 @@ public class ItemUIRegistryImplTest {
         when(widgetMock.getLabel()).thenReturn(testLabel);
 
         Condition condition = mock(Condition.class);
-        when(condition.getValue()).thenReturn("18");
+        when(condition.getArgument()).thenReturn("18");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getValue()).thenReturn("21");
+        when(condition2.getArgument()).thenReturn("21");
         when(condition2.getCondition()).thenReturn("<");
         List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         conditions.add(condition2);
         Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArgument()).thenReturn("yellow");
+        when(rule.getValue()).thenReturn("yellow");
         List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         Condition condition3 = mock(Condition.class);
-        when(condition3.getValue()).thenReturn("21");
+        when(condition3.getArgument()).thenReturn("21");
         when(condition3.getCondition()).thenReturn(">=");
         Condition condition4 = mock(Condition.class);
-        when(condition4.getValue()).thenReturn("24");
+        when(condition4.getArgument()).thenReturn("24");
         when(condition4.getCondition()).thenReturn("<");
         List<Condition> conditions2 = new ArrayList<>();
         conditions2.add(condition3);
         conditions2.add(condition4);
         Rule rule2 = mock(Rule.class);
         when(rule2.getConditions()).thenReturn(conditions2);
-        when(rule2.getArgument()).thenReturn("red");
+        when(rule2.getValue()).thenReturn("red");
         rules.add(rule2);
         List<Condition> conditions5 = new ArrayList<>();
         Rule rule3 = mock(Rule.class);
         when(rule3.getConditions()).thenReturn(conditions5);
-        when(rule3.getArgument()).thenReturn("blue");
+        when(rule3.getValue()).thenReturn("blue");
         rules.add(rule3);
         when(widgetMock.getLabelColor()).thenReturn(rules);
 
@@ -1235,36 +1235,36 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getValueColor() {
         Condition condition = mock(Condition.class);
-        when(condition.getValue()).thenReturn("18");
+        when(condition.getArgument()).thenReturn("18");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getValue()).thenReturn("21");
+        when(condition2.getArgument()).thenReturn("21");
         when(condition2.getCondition()).thenReturn("<");
         List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         conditions.add(condition2);
         Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArgument()).thenReturn("yellow");
+        when(rule.getValue()).thenReturn("yellow");
         List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         Condition condition3 = mock(Condition.class);
-        when(condition3.getValue()).thenReturn("21");
+        when(condition3.getArgument()).thenReturn("21");
         when(condition3.getCondition()).thenReturn(">=");
         Condition condition4 = mock(Condition.class);
-        when(condition4.getValue()).thenReturn("24");
+        when(condition4.getArgument()).thenReturn("24");
         when(condition4.getCondition()).thenReturn("<");
         List<Condition> conditions2 = new ArrayList<>();
         conditions2.add(condition3);
         conditions2.add(condition4);
         Rule rule2 = mock(Rule.class);
         when(rule2.getConditions()).thenReturn(conditions2);
-        when(rule2.getArgument()).thenReturn("red");
+        when(rule2.getValue()).thenReturn("red");
         rules.add(rule2);
         List<Condition> conditions5 = new ArrayList<>();
         Rule rule3 = mock(Rule.class);
         when(rule3.getConditions()).thenReturn(conditions5);
-        when(rule3.getArgument()).thenReturn("blue");
+        when(rule3.getValue()).thenReturn("blue");
         rules.add(rule3);
         when(widgetMock.getValueColor()).thenReturn(rules);
 
@@ -1302,36 +1302,36 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getIconColor() {
         Condition condition = mock(Condition.class);
-        when(condition.getValue()).thenReturn("18");
+        when(condition.getArgument()).thenReturn("18");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getValue()).thenReturn("21");
+        when(condition2.getArgument()).thenReturn("21");
         when(condition2.getCondition()).thenReturn("<");
         List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         conditions.add(condition2);
         Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArgument()).thenReturn("yellow");
+        when(rule.getValue()).thenReturn("yellow");
         List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         Condition condition3 = mock(Condition.class);
-        when(condition3.getValue()).thenReturn("21");
+        when(condition3.getArgument()).thenReturn("21");
         when(condition3.getCondition()).thenReturn(">=");
         Condition condition4 = mock(Condition.class);
-        when(condition4.getValue()).thenReturn("24");
+        when(condition4.getArgument()).thenReturn("24");
         when(condition4.getCondition()).thenReturn("<");
         List<Condition> conditions2 = new ArrayList<>();
         conditions2.add(condition3);
         conditions2.add(condition4);
         Rule rule2 = mock(Rule.class);
         when(rule2.getConditions()).thenReturn(conditions2);
-        when(rule2.getArgument()).thenReturn("red");
+        when(rule2.getValue()).thenReturn("red");
         rules.add(rule2);
         List<Condition> conditions5 = new ArrayList<>();
         Rule rule3 = mock(Rule.class);
         when(rule3.getConditions()).thenReturn(conditions5);
-        when(rule3.getArgument()).thenReturn("blue");
+        when(rule3.getValue()).thenReturn("blue");
         rules.add(rule3);
         when(widgetMock.getIconColor()).thenReturn(rules);
 
@@ -1369,10 +1369,10 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getVisibility() {
         Condition condition = mock(Condition.class);
-        when(condition.getValue()).thenReturn("21");
+        when(condition.getArgument()).thenReturn("21");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getValue()).thenReturn("24");
+        when(condition2.getArgument()).thenReturn("24");
         when(condition2.getCondition()).thenReturn("<");
         List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
@@ -1415,19 +1415,19 @@ public class ItemUIRegistryImplTest {
         rules.add(rule);
         List<Condition> conditions = new ArrayList<>();
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArgument()).thenReturn(message);
+        when(rule.getValue()).thenReturn(message);
         when(widgetMock.getConfirmCmdRules()).thenReturn(rules);
         assertEquals(message, uiRegistry.getCommandConfirmMessage(widgetMock));
 
         Condition condition = mock(Condition.class);
-        when(condition.getValue()).thenReturn("21");
+        when(condition.getArgument()).thenReturn("21");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getValue()).thenReturn("24");
+        when(condition2.getArgument()).thenReturn("24");
         when(condition2.getCondition()).thenReturn("<");
         conditions.add(condition);
         conditions.add(condition2);
-        when(rule.getArgument()).thenReturn(null);
+        when(rule.getValue()).thenReturn(null);
 
         when(itemMock.getState()).thenReturn(new DecimalType(20.9));
         assertNull(uiRegistry.getCommandConfirmMessage(mapviewMock));
@@ -1436,7 +1436,7 @@ public class ItemUIRegistryImplTest {
         assertEquals(ItemUIRegistryImpl.DEFAULT_COMMAND_CONFIRM_MESSAGE,
                 uiRegistry.getCommandConfirmMessage(widgetMock));
 
-        when(rule.getArgument()).thenReturn(message);
+        when(rule.getValue()).thenReturn(message);
         when(itemMock.getState()).thenReturn(new DecimalType(23.5));
         assertEquals(message, uiRegistry.getCommandConfirmMessage(widgetMock));
 
@@ -1461,23 +1461,23 @@ public class ItemUIRegistryImplTest {
         when(widgetMock.getIcon()).thenReturn(null);
         when(widgetMock.isStaticIcon()).thenReturn(false);
         Condition condition = mock(Condition.class);
-        when(condition.getValue()).thenReturn("21");
+        when(condition.getArgument()).thenReturn("21");
         when(condition.getCondition()).thenReturn(">=");
         Condition condition2 = mock(Condition.class);
-        when(condition2.getValue()).thenReturn("24");
+        when(condition2.getArgument()).thenReturn("24");
         when(condition2.getCondition()).thenReturn("<");
         List<Condition> conditions = new ArrayList<>();
         conditions.add(condition);
         conditions.add(condition2);
         Rule rule = mock(Rule.class);
         when(rule.getConditions()).thenReturn(conditions);
-        when(rule.getArgument()).thenReturn("temperature");
+        when(rule.getValue()).thenReturn("temperature");
         List<Rule> rules = new ArrayList<>();
         rules.add(rule);
         List<Condition> conditions2 = new ArrayList<>();
         Rule rule2 = mock(Rule.class);
         when(rule2.getConditions()).thenReturn(conditions2);
-        when(rule2.getArgument()).thenReturn("humidity");
+        when(rule2.getValue()).thenReturn("humidity");
         rules.add(rule2);
         when(widgetMock.getIconRules()).thenReturn(rules);
 

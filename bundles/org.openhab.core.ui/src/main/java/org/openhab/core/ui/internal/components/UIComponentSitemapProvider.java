@@ -95,7 +95,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
 
     private static final Pattern CONDITIONS_PREFIX = Pattern.compile("^(?:\"[^\"]*\"|==|!=|<=|>=|<|>|[^\"=])*");
     private static final Pattern CONDITION_PATTERN = Pattern.compile(
-            "(?:(?<item>[a-zA-Z_][a-zA-Z0-9_]*)(?=(?:\\s+|==|!=|<=|>=|<|>)\\S))?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<value>\\\"[^\\\"]*\\\"|(\\+|-)?.+)");
+            "(?:(?<item>[a-zA-Z_][a-zA-Z0-9_]*)(?=(?:\\s+|==|!=|<=|>=|<|>)\\S))?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<argument>\\\"[^\\\"]*\\\"|(\\+|-)?.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
@@ -382,12 +382,12 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
             if (sourceRules instanceof Collection<?> sourceRulesCollection) {
                 for (Object sourceRule : sourceRulesCollection) {
                     if (sourceRule instanceof String ruleString) {
-                        ArgumentMatch match = findTrailingArgument(ruleString, component, key);
+                        ValueMatch match = findTrailingValue(ruleString, component, key);
                         List<String> conditionsString = getRuleConditions(sourceRule.toString(), match);
                         Rule rule = sitemapFactory.createRule();
                         List<Condition> conditions = getConditions(conditionsString, component, key);
                         rule.setConditions(conditions);
-                        rule.setArgument(match != null ? match.value() : null);
+                        rule.setValue(match != null ? match.value() : null);
                         rules.add(rule);
                     }
                 }
@@ -397,9 +397,11 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
 
     /**
      * Get conditions from a list of condition strings. Each condition string may use an optional item name, an optional
-     * comparison operator, and a value. The operator may be written either with surrounding whitespace (for example,
-     * "Temperature > 25") or without whitespace (for example, "Temperature>25" or "item==\"value\""). Values may be
-     * quoted or unquoted, and item and operator may be omitted entirely for simple values such as "ON". The supported
+     * comparison operator, and an argument. The operator may be written either with surrounding whitespace (for
+     * example,
+     * "Temperature > 25") or without whitespace (for example, "Temperature>25" or "item==\"value\""). Arguments may be
+     * quoted or unquoted, and item and operator may be omitted entirely for simple arguments such as "ON". The
+     * supported
      * comparison operators are ==, !=, <, >, <=, >=. If a condition string does not match one of the accepted forms,
      * it is ignored and a warning is logged.
      * This method is package-private for testing purposes, to allow testing the parsing of conditions without having to
@@ -415,15 +417,15 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         List<Condition> conditions = new ArrayList<>();
         for (String conditionString : conditionsString) {
             Matcher matcher = CONDITION_PATTERN.matcher(conditionString);
-            String value = null;
+            String argument = null;
             if (matcher.matches()) {
-                value = stripQuotes(matcher.group("value"));
+                argument = stripQuotes(matcher.group("argument"));
             }
-            if (matcher.matches() && value != null) {
+            if (matcher.matches() && argument != null) {
                 Condition condition = sitemapFactory.createCondition();
                 condition.setItem(matcher.group("item"));
                 condition.setCondition(matcher.group("condition"));
-                condition.setValue(value);
+                condition.setArgument(argument);
                 conditions.add(condition);
             } else {
                 logger.warn("Syntax error in {} rule condition '{}' for widget {}", key, conditionString,
@@ -433,15 +435,15 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         return conditions;
     }
 
-    private record ArgumentMatch(String value, int conditionsEnd) {
+    private record ValueMatch(String value, int conditionsEnd) {
     }
 
     /**
      * Finds a trailing, properly closed, escape-aware literal that reaches the end of the rule string and is introduced
      * by a bare "=" (not part of ==, !=, <=, >=). Honors \" and \\ escapes inside the literal if quoted, mirroring
-     * Xtext STRING semantics, and returns the unescaped value. Returns null if there is no such trailing argument.
+     * Xtext STRING semantics, and returns the unescaped value. Returns null if there is no such trailing value.
      */
-    private @Nullable ArgumentMatch findTrailingArgument(String rule, UIComponent component, String key) {
+    private @Nullable ValueMatch findTrailingValue(String rule, UIComponent component, String key) {
         if ("visibility".equals(key)) {
             return null;
         }
@@ -452,15 +454,15 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         if (delimiterIndex >= trimmed.length() || trimmed.charAt(delimiterIndex) != '=') {
             return null;
         }
-        String argument = trimmed.substring(delimiterIndex + 1).trim();
-        String unescaped = parseArgument(argument);
+        String value = trimmed.substring(delimiterIndex + 1).trim();
+        String unescaped = parseValue(value);
         if (unescaped == null) {
-            logger.warn("Syntax error in {} rule argument '{}' for widget {}", key, trimmed, component.getType());
+            logger.warn("Syntax error in {} rule value '{}' for widget {}", key, trimmed, component.getType());
         }
-        return unescaped != null ? new ArgumentMatch(unescaped, delimiterIndex) : null;
+        return unescaped != null ? new ValueMatch(unescaped, delimiterIndex) : null;
     }
 
-    private @Nullable String parseArgument(String value) {
+    private @Nullable String parseValue(String value) {
         if (!value.startsWith("\"")) {
             return value;
         }
@@ -482,7 +484,7 @@ public class UIComponentSitemapProvider extends AbstractProvider<Sitemap>
         return null;
     }
 
-    private List<String> getRuleConditions(String rule, @Nullable ArgumentMatch match) {
+    private List<String> getRuleConditions(String rule, @Nullable ValueMatch match) {
         String conditions = match != null ? rule.trim().substring(0, match.conditionsEnd()) : rule.trim();
         List<String> conditionsList = List.of(conditions.split(" AND "));
         return conditionsList.stream().filter(Predicate.not(String::isBlank)).map(String::trim).toList();

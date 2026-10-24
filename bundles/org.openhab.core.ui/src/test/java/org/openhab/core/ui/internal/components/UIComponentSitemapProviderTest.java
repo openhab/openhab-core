@@ -59,21 +59,21 @@ class UIComponentSitemapProviderTest {
     @Test
     void testValueOnly() {
         Condition condition = mockCondition();
-        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("value"), component, "key");
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("argument"), component, "key");
         assertEquals(1, result.size());
         verify(condition).setItem(null);
         verify(condition).setCondition(null);
-        verify(condition).setValue("value");
+        verify(condition).setArgument("argument");
     }
 
     @Test
     void testItemAndValue() {
         Condition condition = mockCondition();
-        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item value"), component, "key");
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item argument"), component, "key");
         assertEquals(1, result.size());
         verify(condition).setItem("item");
         verify(condition).setCondition(null);
-        verify(condition).setValue("value");
+        verify(condition).setArgument("argument");
     }
 
     @Test
@@ -83,7 +83,7 @@ class UIComponentSitemapProviderTest {
         assertEquals(1, result.size());
         verify(condition).setItem("item");
         verify(condition).setCondition(">=");
-        verify(condition).setValue("42");
+        verify(condition).setArgument("42");
     }
 
     @Test
@@ -93,7 +93,7 @@ class UIComponentSitemapProviderTest {
         assertEquals(1, result.size());
         verify(condition).setItem("item");
         verify(condition).setCondition(">=");
-        verify(condition).setValue("42");
+        verify(condition).setArgument("42");
     }
 
     @Test
@@ -103,62 +103,62 @@ class UIComponentSitemapProviderTest {
         assertEquals(1, result.size());
         verify(condition).setItem(null);
         verify(condition).setCondition(">=");
-        verify(condition).setValue("42");
+        verify(condition).setArgument("42");
     }
 
     @Test
     void testQuotedValue() {
         Condition condition = mockCondition();
-        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item \"value string\""), component,
-                "key");
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item \"argument string\""),
+                component, "key");
         assertEquals(1, result.size());
         verify(condition).setItem("item");
         verify(condition).setCondition(null);
-        verify(condition).setValue("value string");
+        verify(condition).setArgument("argument string");
     }
 
     @Test
     void testItemConditionQuotedValue() {
         Condition condition = mockCondition();
-        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item == \"value string\""),
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item == \"argument string\""),
                 component, "key");
         assertEquals(1, result.size());
         verify(condition).setItem("item");
         verify(condition).setCondition("==");
-        verify(condition).setValue("value string");
+        verify(condition).setArgument("argument string");
     }
 
     @Test
     void testItemConditionQuotedValueNoSpaces() {
         Condition condition = mockCondition();
-        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item==\"value string\""), component,
-                "key");
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("item==\"argument string\""),
+                component, "key");
         assertEquals(1, result.size());
         verify(condition).setItem("item");
         verify(condition).setCondition("==");
-        verify(condition).setValue("value string");
+        verify(condition).setArgument("argument string");
     }
 
     @Test
     void testQuotedValueOnly() {
         Condition condition = mockCondition();
-        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("\"value string\""), component,
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("\"argument string\""), component,
                 "key");
         assertEquals(1, result.size());
         verify(condition).setItem(null);
         verify(condition).setCondition(null);
-        verify(condition).setValue("value string");
+        verify(condition).setArgument("argument string");
     }
 
     @Test
     void testQuotedValueWithConditionOperator() {
         Condition condition = mockCondition();
-        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("\"value == string\""), component,
+        List<Condition> result = uiComponentSitemapProvider.getConditions(List.of("\"argument == string\""), component,
                 "key");
         assertEquals(1, result.size());
         verify(condition).setItem(null);
         verify(condition).setCondition(null);
-        verify(condition).setValue("value == string");
+        verify(condition).setArgument("argument == string");
     }
 
     @Test
@@ -168,7 +168,7 @@ class UIComponentSitemapProviderTest {
         assertEquals(1, result.size());
         verify(condition).setItem("_temp");
         verify(condition).setCondition(">=");
-        verify(condition).setValue("42");
+        verify(condition).setArgument("42");
     }
 
     @Test
@@ -178,7 +178,7 @@ class UIComponentSitemapProviderTest {
         assertEquals(1, result.size());
         verify(condition).setItem("T");
         verify(condition).setCondition("==");
-        verify(condition).setValue("ON");
+        verify(condition).setArgument("ON");
     }
 
     @Test
@@ -198,10 +198,10 @@ class UIComponentSitemapProviderTest {
         assertEquals(2, result.size());
         verify(condition1).setItem("item1");
         verify(condition1).setCondition(">=");
-        verify(condition1).setValue("42");
+        verify(condition1).setArgument("42");
         verify(condition2).setItem("item2");
         verify(condition2).setCondition("==");
-        verify(condition2).setValue("10");
+        verify(condition2).setArgument("10");
     }
 
     @Test
@@ -214,11 +214,11 @@ class UIComponentSitemapProviderTest {
         uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
 
         assertEquals(1, rules.size());
-        verify(rule).setArgument("Confirm?");
+        verify(rule).setValue("Confirm?");
         verify(rule).setConditions(List.of(condition));
         verify(condition).setItem("item");
         verify(condition).setCondition(">=");
-        verify(condition).setValue("42");
+        verify(condition).setArgument("42");
     }
 
     @Test
@@ -233,11 +233,11 @@ class UIComponentSitemapProviderTest {
         uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
 
         assertEquals(1, rules.size());
-        verify(rule).setArgument(null);
+        verify(rule).setValue(null);
         verify(rule).setConditions(List.of(condition));
         verify(condition).setItem("DemoNumber");
         verify(condition).setCondition(">");
-        verify(condition).setValue("25");
+        verify(condition).setArgument("25");
     }
 
     @Test
@@ -252,11 +252,11 @@ class UIComponentSitemapProviderTest {
         uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
 
         assertEquals(1, rules.size());
-        verify(rule).setArgument("Set x=10?");
+        verify(rule).setValue("Set x=10?");
         verify(rule).setConditions(List.of(condition));
         verify(condition).setItem("DemoSwitch");
         verify(condition).setCondition("==");
-        verify(condition).setValue("ON");
+        verify(condition).setArgument("ON");
     }
 
     @Test
@@ -270,10 +270,10 @@ class UIComponentSitemapProviderTest {
         uiComponentSitemapProvider.addWidgetRules(rules, component, "valuecolor");
 
         assertEquals(1, rules.size());
-        verify(rule).setArgument("orange");
+        verify(rule).setValue("orange");
         verify(rule).setConditions(List.of(condition));
         verify(condition).setCondition(">");
-        verify(condition).setValue("25");
+        verify(condition).setArgument("25");
     }
 
     @Test
@@ -288,11 +288,11 @@ class UIComponentSitemapProviderTest {
         uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
 
         assertEquals(1, rules.size());
-        verify(rule).setArgument("Try \"this\"?");
+        verify(rule).setValue("Try \"this\"?");
         verify(rule).setConditions(List.of(condition));
         verify(condition).setItem("DemoSwitch");
         verify(condition).setCondition("==");
-        verify(condition).setValue("ON");
+        verify(condition).setArgument("ON");
     }
 
     @Test
@@ -307,10 +307,10 @@ class UIComponentSitemapProviderTest {
         uiComponentSitemapProvider.addWidgetRules(rules, component, "confirmcmdrules");
 
         assertEquals(1, rules.size());
-        verify(rule).setArgument(null);
+        verify(rule).setValue(null);
         verify(rule).setConditions(List.of(condition));
         verify(condition).setItem("DemoString");
         verify(condition).setCondition("==");
-        verify(condition).setValue("a=b");
+        verify(condition).setArgument("a=b");
     }
 }

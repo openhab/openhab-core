@@ -398,7 +398,7 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             EList<ModelCondition> modelConditions = modelRule.getConditions();
             List<Condition> conditions = rule.getConditions();
             setModelConditions(modelConditions, conditions);
-            modelRule.setArg(rule.getArgument());
+            modelRule.setValue(rule.getValue());
             modelRules.add(modelRule);
         });
         return modelRuleList;
@@ -429,7 +429,7 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             EList<ModelCondition> modelConditions = modelRule.getConditions();
             List<Condition> conditions = rule.getConditions();
             setModelConditions(modelConditions, conditions);
-            modelRule.setArg(rule.getArgument());
+            modelRule.setValue(rule.getValue());
             modelRules.add(modelRule);
         });
         return modelRuleList;
@@ -441,7 +441,7 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
         rules.forEach(rule -> {
             ModelConfirmCmdRule modelRule = SitemapFactory.eINSTANCE.createModelConfirmCmdRule();
             setModelConditions(modelRule.getConditions(), rule.getConditions());
-            modelRule.setArg(rule.getArgument());
+            modelRule.setValue(rule.getValue());
             modelRules.add(modelRule);
         });
         return modelRuleList;
@@ -452,12 +452,12 @@ public class DslSitemapConverter implements SitemapSerializer, SitemapParser {
             ModelCondition modelCondition = SitemapFactory.eINSTANCE.createModelCondition();
             modelCondition.setItem(condition.getItem());
             modelCondition.setCondition(condition.getCondition());
-            String value = condition.getValue();
-            if (value.length() > 1 && (value.startsWith("-") || value.startsWith("+"))) {
-                modelCondition.setSign(value.substring(0, 1));
-                value = value.substring(1);
+            String argument = condition.getArgument();
+            if (argument.length() > 1 && (argument.startsWith("-") || argument.startsWith("+"))) {
+                modelCondition.setSign(argument.substring(0, 1));
+                argument = argument.substring(1);
             }
-            modelCondition.setState(value);
+            modelCondition.setState(argument);
             modelConditions.add(modelCondition);
         });
     }

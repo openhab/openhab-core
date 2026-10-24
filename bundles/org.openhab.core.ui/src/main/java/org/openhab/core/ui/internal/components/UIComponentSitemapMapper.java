@@ -202,14 +202,14 @@ public class UIComponentSitemapMapper {
     private static String map(Rule rule) {
         String ruleString = rule.getConditions().stream().map(UIComponentSitemapMapper::map)
                 .collect(Collectors.joining(" AND "));
-        String argument = rule.getArgument();
-        if (argument != null) {
-            ruleString = ruleString + "=\"" + escapeRuleArgument(argument) + "\"";
+        String value = rule.getValue();
+        if (value != null) {
+            ruleString = ruleString + "=\"" + escapeRuleValue(value) + "\"";
         }
         return ruleString;
     }
 
-    private static String escapeRuleArgument(String argument) {
+    private static String escapeRuleValue(String argument) {
         return argument.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
@@ -225,7 +225,7 @@ public class UIComponentSitemapMapper {
         } else if (item != null) {
             builder.append(" ");
         }
-        builder.append("\"").append(condition.getValue()).append("\"");
+        builder.append("\"").append(condition.getArgument()).append("\"");
         return builder.toString();
     }
 

@@ -345,14 +345,14 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
         if (rulesDTO instanceof String value) {
             if (!ignoreValue) {
                 Rule rule = sitemapFactory.createRule();
-                rule.setArgument(value);
+                rule.setValue(value);
                 rules.add(rule);
             }
         } else if (rulesDTO instanceof YamlRuleWithAndConditionsDTO ruleDTO) {
             Rule rule = sitemapFactory.createRule();
             addRuleConditions(rule.getConditions(), ruleDTO.and);
             if (!ignoreValue) {
-                rule.setArgument(ruleDTO.value);
+                rule.setValue(ruleDTO.value);
             }
             rules.add(rule);
         } else if (rulesDTO instanceof YamlRuleWithUniqueConditionDTO ruleDTO) {
@@ -361,7 +361,7 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
                 addRuleConditions(rule.getConditions(), List.of(ruleDTO));
             }
             if (!ignoreValue) {
-                rule.setArgument(ruleDTO.value);
+                rule.setValue(ruleDTO.value);
             }
             rules.add(rule);
         } else if (rulesDTO instanceof List<?> dtos) {
@@ -370,7 +370,7 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
                     Rule rule = sitemapFactory.createRule();
                     addRuleConditions(rule.getConditions(), ruleDTO.and);
                     if (!ignoreValue) {
-                        rule.setArgument(ruleDTO.value);
+                        rule.setValue(ruleDTO.value);
                     }
                     rules.add(rule);
                 } else if (dto instanceof YamlRuleWithUniqueConditionDTO ruleDTO) {
@@ -379,7 +379,7 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
                         addRuleConditions(rule.getConditions(), List.of(ruleDTO));
                     }
                     if (!ignoreValue) {
-                        rule.setArgument(ruleDTO.value);
+                        rule.setValue(ruleDTO.value);
                     }
                     rules.add(rule);
                 }
@@ -396,7 +396,7 @@ public class YamlSitemapProvider extends AbstractProvider<Sitemap>
                 Condition condition = sitemapFactory.createCondition();
                 condition.setItem(dto.item);
                 condition.setCondition(dto.operator);
-                condition.setValue(dto.argument);
+                condition.setArgument(dto.argument);
                 conditions.add(condition);
             });
         }
