@@ -28,7 +28,7 @@ Fragment-Host: org.openhab.core.voice
 	org.osgi.service.component;version='[1.5.1,1.5.2)',\
 	xstream;version='[1.4.21,1.4.22)',\
 	javax.measure.unit-api;version='[2.2.0,2.2.1)',\
-	tech.units.indriya;version='[2.2.3,2.2.4)',\
+	tech.units.indriya;version='[2.2.4,2.2.5)',\
 	uom-lib-common;version='[2.2.0,2.2.1)',\
 	io.methvin.directory-watcher;version='[0.19.1,0.19.2)',\
 	com.sun.xml.bind.jaxb-osgi;version='[2.3.9,2.3.10)',\
