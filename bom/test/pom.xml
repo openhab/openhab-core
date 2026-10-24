@@ -89,11 +89,25 @@
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-rs-client</artifactId>
       <version>${cxf.version}</version>
+      <exclusions>
+        <!-- duplicate of the JAXB implementation in jaxb-osgi -->
+        <exclusion>
+          <groupId>org.glassfish.jaxb</groupId>
+          <artifactId>jaxb-runtime</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-rs-sse</artifactId>
       <version>${cxf.version}</version>
+      <exclusions>
+        <!-- duplicate of the JAXB implementation in jaxb-osgi -->
+        <exclusion>
+          <groupId>org.glassfish.jaxb</groupId>
+          <artifactId>jaxb-runtime</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
