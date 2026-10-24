@@ -38,6 +38,8 @@ import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.internal.json.model.AddonEntryDTO;
+import org.openhab.core.common.Version;
+import org.openhab.core.common.VersionRange;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.EventPublisher;
@@ -199,16 +201,18 @@ public class JsonAddonService extends AbstractRemoteAddonService {
 
         boolean compatible = true;
         try {
-            compatible = coreVersion.inRange(addonEntry.compatibleVersions);
+            compatible = VersionRange.valueOf(addonEntry.compatibleVersions).includes(coreVersion);
         } catch (IllegalArgumentException e) {
             logger.debug("Failed to determine compatibility for addon {}: {}", addonEntry.id, e.getMessage());
         }
 
+        Version v = addonEntry.version == null || addonEntry.version.isBlank() ? null
+                : Version.valueOf(addonEntry.version);
         return Addon.create(uid).withType(addonEntry.type).withId(addonEntry.id).withInstalled(installed)
                 .withDetailedDescription(addonEntry.description).withContentType(addonEntry.contentType)
-                .withAuthor(addonEntry.author).withVersion(addonEntry.version).withLabel(addonEntry.title)
-                .withCompatible(compatible).withMaturity(addonEntry.maturity).withProperties(properties)
-                .withLink(addonEntry.link).withImageLink(addonEntry.imageUrl).withKeywords(addonEntry.keywords)
+                .withAuthor(addonEntry.author).withVersion(v).withLabel(addonEntry.title).withCompatible(compatible)
+                .withMaturity(addonEntry.maturity).withProperties(properties).withLink(addonEntry.link)
+                .withImageLink(addonEntry.imageUrl).withKeywords(addonEntry.keywords)
                 .withConfigDescriptionURI(addonEntry.configDescriptionURI).withLoggerPackages(addonEntry.loggerPackages)
                 .withConnection(addonEntry.connection).withCountries(addonEntry.countries).build();
     }
