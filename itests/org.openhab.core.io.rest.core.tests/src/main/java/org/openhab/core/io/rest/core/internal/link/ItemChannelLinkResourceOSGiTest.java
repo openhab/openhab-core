@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -49,10 +50,12 @@ import org.openhab.core.thing.link.ItemChannelLinkProvider;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * @author Christoph Weitkamp - Initial contribution
@@ -170,8 +173,27 @@ public class ItemChannelLinkResourceOSGiTest extends JavaOSGiTest {
     }
 
     private List<String> readItemNamesFromResponse(Response response) throws IOException {
-        String jsonResponse = toString(response.getEntity());
-        return JsonPath.read(jsonResponse, "$..itemName");
+        return findValues(toString(response.getEntity()), "itemName");
+    }
+
+    /**
+     * Collects the values of all primitive members with the given key at any depth (like JsonPath {@code $..key}).
+     */
+    private static List<String> findValues(String json, String key) {
+        List<String> values = new ArrayList<>();
+        collectValues(JsonParser.parseString(json), key, values);
+        return values;
+    }
+
+    private static void collectValues(JsonElement element, String key, List<String> values) {
+        if (element instanceof JsonObject object) {
+            if (object.get(key) instanceof JsonPrimitive value) {
+                values.add(value.getAsString());
+            }
+            object.entrySet().forEach(entry -> collectValues(entry.getValue(), key, values));
+        } else if (element instanceof JsonArray array) {
+            array.forEach(child -> collectValues(child, key, values));
+        }
     }
 
     public String toString(Object entity) throws IOException {
