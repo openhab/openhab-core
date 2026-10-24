@@ -49,7 +49,7 @@ ModelText:
     ('visibility=' visibility=ModelVisibilityRuleList))*;
 
 ModelGroup:
-    'Group' (('item=' item=GroupItemRef) | ('label=' label=(ID | STRING)) |
+    'Group' (('item=' item=ItemRef) | ('label=' label=(ID | STRING)) |
     ('icon=' icon=Icon) | ('icon=' iconRules=ModelIconRuleList) | ('staticIcon=' staticIcon=Icon) |
     ('labelcolor=' labelColor=ModelColorArrayList) |
     ('valuecolor=' valueColor=ModelColorArrayList) |
@@ -241,23 +241,20 @@ ModelVisibilityRule:
     conditions+=ModelCondition ('AND' conditions+=ModelCondition)*;
 
 ModelCondition:
-    (item=ID)? (condition=('==' | '>' | '<' | '>=' | '<=' | '!='))? (sign=('-' | '+'))? (state=XState);
+    (item=ItemRef)? (condition=('==' | '>' | '<' | '>=' | '<=' | '!='))? (sign=('-' | '+'))? (state=XState);
 
 ItemRef:
     ID;
 
-GroupItemRef:
-    ID;
-
 Icon returns ecore::EString:
-    STRING | (ID ':' (ID ':')?)? IconName;
+    STRING | (IconSegment ':' (IconSegment ':')?)? IconSegment;
 
-// Allow hyphen inside an icon name
-IconName:
-    (ID '-')* ID;
+// Allow hyphen inside an icon segment
+IconSegment:
+    INT | ID;
 
 Period:
-    (ID '-')? ID;
+    STRING | ('-'? ID);
 
 Command returns ecore::EString:
     Number | ID | STRING;
@@ -268,10 +265,10 @@ Number returns ecore::EBigDecimal:
 XState returns ecore::EString:
     INT | ID | STRING | FLOAT;
 
-@Override 
+@Override
 terminal ID:
-    ('^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*) |
-    (('0'..'9')+ ('a'..'z' | 'A'..'Z' | '_') ('0'..'9' | 'a'..'z' | 'A'..'Z' | '_')*);
+    ('^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '-' | '0'..'9')*) |
+    (('0'..'9')+ ('a'..'z' | 'A'..'Z' | '_' | '-') ('a'..'z' | 'A'..'Z' | '_' | '-' | '0'..'9')*);
 
 terminal FLOAT returns ecore::EBigDecimal:
     INT '.' INT;
