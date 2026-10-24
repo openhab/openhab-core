@@ -24,6 +24,12 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- lsp4j needs gson, make sure it gets the pinned version -->
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>${gson.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
